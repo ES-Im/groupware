@@ -1,0 +1,72 @@
+# ========================== root ==========================
+.idea/
+*.iml
+out/
+
+.env
+.env.local
+
+# OS
+.DS_Store
+
+# ========================== compose ==========================
+# keep example files only if you use them
+# .env.example
+
+# ========================== back ==========================
+back/.gradle/
+back/build/
+back/out/
+back/bin/
+
+back/.idea/
+back/.classpath
+back/.factorypath
+back/.project
+back/.settings/
+back/.springBeans
+back/.sts4-cache/
+back/.apt_generated/
+
+back/.vscode/
+
+back/nbproject/private/
+back/nbbuild/
+back/dist/
+back/nbdist/
+back/.nb-gradle/
+
+back/HELP.md
+
+# keep gradle wrapper jar tracked
+!back/gradle/wrapper/gradle-wrapper.jar
+
+# backend local secret config
+back/src/main/resources/env.yml
+
+# ========================== front ==========================
+front/node_modules/
+front/dist/
+front/dist-ssr/
+front/logs/
+
+front/*.log
+front/npm-debug.log*
+front/yarn-debug.log*
+front/yarn-error.log*
+front/pnpm-debug.log*
+front/lerna-debug.log*
+
+front/.env.local
+front/.env.*.local
+
+front/.idea/
+front/.DS_Store
+front/*.suo
+front/*.ntvs*
+front/*.njsproj
+front/*.sln
+front/*.sw?
+
+front/.vscode/*
+!front/.vscode/extensions.json
