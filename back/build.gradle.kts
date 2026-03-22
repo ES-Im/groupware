@@ -78,18 +78,21 @@ dependencies {
     errorprone("com.google.errorprone:error_prone_core:2.48.0")
     errorprone("com.uber.nullaway:nullaway:0.13.1")
 
-    // validation
-    implementation("org.springframework.boot:spring-boot-starter-validation")
 }
 
 nullaway {
     onlyNullMarked.set(true)
 }
 
+tasks.withType<Test> {
+    useJUnitPlatform()
+}
+
 
 tasks.withType<JavaCompile>().configureEach {
     options.errorprone {
         check("NullAway", CheckSeverity.ERROR)
+        disable("UnusedVariable")       // 사용하지 않는 변수 미표시 (나중에 꺼서 확인해야함)
     }
 }
 
