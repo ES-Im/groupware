@@ -11,7 +11,7 @@ class DeptTest {
 
     @Test
     @DisplayName("부서 생성 테스트")
-    void dept_of_success() {
+    void dept_registerDept_success() {
         // when
         Dept dept = getDept();
 
@@ -24,17 +24,17 @@ class DeptTest {
 
     @Test
     @DisplayName("부서 생성 테스트 - 실패")
-    void dept_of_fail() {
+    void dept_registerDept_fail() {
         // given
         String anyString = "00001";
 
         // when then
         assertThatThrownBy(() ->
-                Dept.of(null, anyString)
+                Dept.registerDept(null, anyString)
         ).isInstanceOf(NullPointerException.class);
 
         assertThatThrownBy(() ->
-                Dept.of(anyString, null)
+                Dept.registerDept(anyString, null)
         ).isInstanceOf(NullPointerException.class);
     }
 

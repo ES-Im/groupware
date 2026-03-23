@@ -24,7 +24,7 @@ public class Dept extends AbstractEntity {
     @Column(nullable = false)
     private boolean isActive;
 
-    public static Dept of(String deptCode, String deptName) {
+    public static Dept registerDept(String deptCode, String deptName) {
         Dept dept = new Dept();
 
         dept.deptCode = requireNonNull(deptCode);

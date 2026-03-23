@@ -1,10 +1,10 @@
-package com.haruon.groupware.domain.empInfo.emp.request;
+package com.haruon.groupware.domain.empInfo.emp.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
-public record EmpRegisterRequest(
+public record EmpRegisterParam(
         @Size(min = 11, max = 11, message = "사원번호는 11자리여야 합니다.")
         String empNo,
 
