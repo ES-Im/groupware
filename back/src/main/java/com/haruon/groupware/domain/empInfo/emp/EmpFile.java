@@ -2,10 +2,7 @@ package com.haruon.groupware.domain.empInfo.emp;
 
 import com.haruon.groupware.domain.AbstractEntity;
 import com.haruon.groupware.domain.empInfo.emp.dto.EmpFileParam;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,6 +15,10 @@ import static java.util.Objects.requireNonNull;
 @Getter(AccessLevel.PROTECTED)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class EmpFile extends AbstractEntity {
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="emp_id", nullable=false)
+    private Emp emp;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
@@ -40,18 +41,19 @@ public class EmpFile extends AbstractEntity {
 
     private boolean isActive;
 
-    static EmpFile addFile(EmpFileParam request) {
-        EmpFile significate = new EmpFile();
+    static EmpFile addFile(Emp emp,EmpFileParam request) {
+        EmpFile empFile = new EmpFile();
 
-        significate.storedName = UUID.randomUUID().toString();
-        significate.isActive = true;
+        empFile.storedName = UUID.randomUUID().toString();
+        empFile.isActive = true;
 
-        significate.fileType = requireNonNull(request.fileType());
-        significate.originalName = requireNonNull(request.originalName());
-        significate.extension = requireNonNull(request.extension());
-        significate.fileSize = requireNonNull(request.fileSize());
+        empFile.emp = requireNonNull(emp);
+        empFile.fileType = requireNonNull(request.fileType());
+        empFile.originalName = requireNonNull(request.originalName());
+        empFile.extension = requireNonNull(request.extension());
+        empFile.fileSize = requireNonNull(request.fileSize());
 
-        return significate;
+        return empFile;
     }
 
     void activateFile() {

@@ -3,9 +3,14 @@ package com.haruon.groupware.domain.empInfo.emp.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import lombok.Builder;
 
+import static com.haruon.groupware.domain.shared.RegexpUtil.PASSWORD_PATTERN;
+import static com.haruon.groupware.domain.shared.RegexpUtil.PASSWORD_PATTERN_MESSAGE;
+
+@Builder
 public record EmpRegisterParam(
-        @Size(min = 11, max = 11, message = "사원번호는 11자리여야 합니다.")
+        @Size(min = 9, max = 9, message = "사원번호는 9자리(연+월+3자리번호 조합)여야 합니다.")
         String empNo,
 
         @NotBlank(message = "사원명은 필수 입력값입니다.")
@@ -15,8 +20,8 @@ public record EmpRegisterParam(
         String empId,
 
         @Pattern(
-                regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,}$",
-                message = "비밀번호는 영문+숫자+특수문자 조합을 해야합니다."
+                regexp = PASSWORD_PATTERN,
+                message = PASSWORD_PATTERN_MESSAGE
         )
         String rawPassword
 ) {}

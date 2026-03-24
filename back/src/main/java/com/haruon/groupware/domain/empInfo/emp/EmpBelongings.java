@@ -24,6 +24,10 @@ import static java.util.Objects.requireNonNull;
 public class EmpBelongings extends AbstractEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="emp_id", nullable=false)
+    private Emp emp;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="dept_id", nullable = false)
     private Dept dept;
 
@@ -39,9 +43,11 @@ public class EmpBelongings extends AbstractEntity {
     private LocalDate endAt;
 
     static EmpBelongings registerEmpBelonging(
+            Emp emp,
             EmpBelongingsParam request) {
         EmpBelongings empBelongings = new EmpBelongings();
 
+        empBelongings.emp = requireNonNull(emp);
         empBelongings.dept = requireNonNull(request.dept());
         empBelongings.position = requireNonNull(request.position());
         empBelongings.startAt = requireNonNull(request.startAt());

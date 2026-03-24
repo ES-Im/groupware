@@ -3,7 +3,7 @@ package com.haruon.groupware.domain.empInfo;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static com.haruon.groupware.domain.fixture.EmpFixture.getDept;
+import static com.haruon.groupware.domain.shared.DeptFixture.getDept;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 

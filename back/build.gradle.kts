@@ -17,7 +17,7 @@ description = "groupware"
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(25)
+        languageVersion = JavaLanguageVersion.of(21)
     }
 }
 
@@ -66,8 +66,10 @@ dependencies {
     runtimeOnly("org.springframework.boot:spring-boot-docker-compose")
 
     // lombok
-    implementation("org.projectlombok:lombok")
+    compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
+    testCompileOnly("org.projectlombok:lombok")
+    testAnnotationProcessor("org.projectlombok:lombok")
 
     // spring rest docs
     add("asciidoctorExt", "org.springframework.restdocs:spring-restdocs-asciidoctor")

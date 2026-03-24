@@ -4,9 +4,14 @@ import com.haruon.groupware.domain.empInfo.emp.FileType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
+import lombok.Builder;
 
+import java.util.Locale;
 import java.util.Set;
 
+import static org.springframework.util.Assert.state;
+
+@Builder
 public record EmpFileParam(
 
         @Size(max = 100)
@@ -30,18 +35,13 @@ public record EmpFileParam(
     static final Set<String> allowedMimeType = Set.of("image/jpg", "image/jpeg", "image/png", "image/gif");
 
     public EmpFileParam {
+        state(allowedExtension.contains(extension.toLowerCase(Locale.getDefault())),
+                "허용되지 않는 파일 확장자");
 
-        if(allowedExtension.contains(extension.toLowerCase())) {
-            throw new IllegalArgumentException("허용되지 않는 파일 확장자입니다. 허용된 확장자: " + allowedExtension);
-        }
+        state(allowedMimeType.contains(mimeType.toLowerCase(Locale.getDefault())),
+                "허용되지 않는 MIME 타입");
 
-        if(allowedMimeType.contains(mimeType.toLowerCase())) {
-            throw new IllegalArgumentException("허용되지 않는 MIME 타입입니다. 허용된 MIME 타입: " + allowedMimeType);
-        }
-
-        if(fileSize > fileSizeMax) { // 5MB
-            throw new IllegalArgumentException("파일 크기는 5MB를 초과할 수 없습니다.");
-        }
+        state(fileSize <= fileSizeMax, "파일 크기는 5MB를 초과");
 
     }
 }
