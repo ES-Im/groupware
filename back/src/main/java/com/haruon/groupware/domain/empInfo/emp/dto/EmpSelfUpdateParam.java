@@ -6,7 +6,6 @@ import lombok.Builder;
 import org.jspecify.annotations.Nullable;
 
 import static com.haruon.groupware.domain.shared.RegexpUtil.*;
-import static com.haruon.groupware.domain.shared.RegexpUtil.PASSWORD_PATTERN_MESSAGE;
 import static org.springframework.util.Assert.state;
 
 /*
