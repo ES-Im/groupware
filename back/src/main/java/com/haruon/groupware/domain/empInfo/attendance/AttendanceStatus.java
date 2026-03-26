@@ -1,4 +1,4 @@
-package com.haruon.groupware.domain.empInfo;
+package com.haruon.groupware.domain.empInfo.attendance;
 
 import lombok.Getter;
 

@@ -1,7 +1,7 @@
 package com.haruon.groupware.domain.empInfo.emp.dto;
 
-import com.haruon.groupware.domain.empInfo.emp.EmpStatus;
-import com.haruon.groupware.domain.empInfo.emp.SystemRoleCode;
+import com.haruon.groupware.domain.empInfo.emp.enums.EmpStatus;
+import com.haruon.groupware.domain.empInfo.emp.enums.SystemRoleCode;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -60,11 +60,14 @@ public record EmpAdminUpdateParam (
 
         // 직원 소속 정보
         @Nullable
-        EmpBelongingsParam belongingsParam
+        EmpBelongingsParam belongingsParam,
+
+        String companyDomain
 
 ) {
 
     public EmpAdminUpdateParam {
+        state(companyDomain != null, "회사 도메인은 필수값");
         state(empName != null || empId != null
                 ||  newRawPassword != null ||  extensionNo != null
                 || empStatus != null || systemRoleCode != null

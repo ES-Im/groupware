@@ -2,6 +2,8 @@ package com.haruon.groupware.domain.shared;
 
 import com.haruon.groupware.domain.empInfo.emp.*;
 import com.haruon.groupware.domain.empInfo.emp.dto.*;
+import com.haruon.groupware.domain.empInfo.emp.enums.FileType;
+import com.haruon.groupware.domain.empInfo.emp.enums.PositionCode;
 
 import java.time.LocalDate;
 import java.util.Locale;
@@ -27,6 +29,7 @@ public class EmpFixture {
                 .build();
         emp.changeInfoByAdmin(EmpAdminUpdateParam.builder()
                         .belongingsParam(empBelongingsParam)
+                        .companyDomain("@haruon.com")
                         .build(), null);
     }
 

@@ -1,6 +1,6 @@
 package com.haruon.groupware.domain.empInfo.emp.dto;
 
-import com.haruon.groupware.domain.empInfo.emp.FileType;
+import com.haruon.groupware.domain.empInfo.emp.enums.FileType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;

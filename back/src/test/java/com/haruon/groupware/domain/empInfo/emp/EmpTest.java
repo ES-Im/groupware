@@ -1,6 +1,10 @@
 package com.haruon.groupware.domain.empInfo.emp;
 
 import com.haruon.groupware.domain.empInfo.emp.dto.*;
+import com.haruon.groupware.domain.empInfo.emp.enums.EmpStatus;
+import com.haruon.groupware.domain.empInfo.emp.enums.FileType;
+import com.haruon.groupware.domain.empInfo.emp.enums.PositionCode;
+import com.haruon.groupware.domain.empInfo.emp.enums.SystemRoleCode;
 import com.haruon.groupware.domain.shared.EmpFixture;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -200,12 +204,12 @@ class EmpTest {
 
     private static Stream<Arguments> empUpdateByAdminParams() {
         return Stream.of(
-                Arguments.of("이름을 변경할 수 있다.", EmpAdminUpdateParam.builder().empName("EditedName").build()),
-                Arguments.of("사번을 변경할 수 있다.", EmpAdminUpdateParam.builder().empId("202603999").build()),
-                Arguments.of("비밀번호를 변경할 수 있다.", EmpAdminUpdateParam.builder().newRawPassword(")p9o8i7u6y").build()),
-                Arguments.of("내선번호를 변경할 수 있다.", EmpAdminUpdateParam.builder().extensionNo("999-9999").build()),
-                Arguments.of("입사일자를 변경할 수 있다.", EmpAdminUpdateParam.builder().hireAt(LocalDate.of(2025,1,1)).build()),
-                Arguments.of("직무상태를 변경할 수 있다.", EmpAdminUpdateParam.builder().empStatus(EmpStatus.SUSPENDED).build())
+                Arguments.of("이름을 변경할 수 있다.", EmpAdminUpdateParam.builder().companyDomain("@haruon.com").empName("EditedName").build()),
+                Arguments.of("사번을 변경할 수 있다.", EmpAdminUpdateParam.builder().companyDomain("@haruon.com").empId("202603999").build()),
+                Arguments.of("비밀번호를 변경할 수 있다.", EmpAdminUpdateParam.builder().companyDomain("@haruon.com").newRawPassword(")p9o8i7u6y").build()),
+                Arguments.of("내선번호를 변경할 수 있다.", EmpAdminUpdateParam.builder().companyDomain("@haruon.com").extensionNo("999-9999").build()),
+                Arguments.of("입사일자를 변경할 수 있다.", EmpAdminUpdateParam.builder().companyDomain("@haruon.com").hireAt(LocalDate.of(2025,1,1)).build()),
+                Arguments.of("직무상태를 변경할 수 있다.", EmpAdminUpdateParam.builder().companyDomain("@haruon.com").empStatus(EmpStatus.SUSPENDED).build())
         );
     }
     @ParameterizedTest(name = "{index} => 시스템총괄(ADMIN)은 {0}")
@@ -228,6 +232,7 @@ class EmpTest {
                                 .id(1L)
                                 .targetActive(false)
                                 .build())
+                        .companyDomain("@haruon.com")
                         .build(),
                 null);
 
@@ -249,6 +254,7 @@ class EmpTest {
                                 .id(1L)
                                 .targetActive(true)
                                 .build())
+                        .companyDomain("@haruon.com")
                         .build(),
                 null);
 
@@ -271,6 +277,7 @@ class EmpTest {
         emp.changeInfoByAdmin(
                 EmpAdminUpdateParam.builder()
                         .belongingsParam(empBelongingsParam)
+                        .companyDomain("@haruon.com")
                         .build()
                 , null);
 
@@ -297,6 +304,7 @@ class EmpTest {
                         .belongingsParam(EmpBelongingsParam.builder()
                                 .isPrimary(false)
                                 .build())
+                .companyDomain("@haruon.com")
                 .build()
         ,null);
 
@@ -311,7 +319,10 @@ class EmpTest {
     void validate_Password_success() {
         Emp emp =  getApprovedEmp();
 
-        EmpAdminUpdateParam adminUpdateParam = EmpAdminUpdateParam.builder().newRawPassword("!Q2w3e4r5t_").build();
+        EmpAdminUpdateParam adminUpdateParam = EmpAdminUpdateParam.builder()
+                .newRawPassword("!Q2w3e4r5t_")
+                .companyDomain("@haruon.com")
+                .build();
         emp.changeInfoByAdmin(adminUpdateParam, encoder);
 
         EmpSelfUpdateParam selfUpdateParam = EmpSelfUpdateParam.builder()

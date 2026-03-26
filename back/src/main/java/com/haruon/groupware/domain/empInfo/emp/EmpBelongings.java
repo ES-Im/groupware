@@ -3,6 +3,7 @@ package com.haruon.groupware.domain.empInfo.emp;
 import com.haruon.groupware.domain.AbstractEntity;
 import com.haruon.groupware.domain.empInfo.Dept;
 import com.haruon.groupware.domain.empInfo.emp.dto.EmpBelongingsParam;
+import com.haruon.groupware.domain.empInfo.emp.enums.PositionCode;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;

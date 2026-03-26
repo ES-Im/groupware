@@ -2,6 +2,7 @@ package com.haruon.groupware.domain.empInfo.emp;
 
 import com.haruon.groupware.domain.AbstractEntity;
 import com.haruon.groupware.domain.empInfo.emp.dto.EmpFileParam;
+import com.haruon.groupware.domain.empInfo.emp.enums.FileType;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;

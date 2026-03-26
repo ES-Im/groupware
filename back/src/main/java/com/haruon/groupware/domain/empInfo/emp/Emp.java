@@ -2,11 +2,13 @@ package com.haruon.groupware.domain.empInfo.emp;
 
 import com.haruon.groupware.domain.AbstractEntity;
 import com.haruon.groupware.domain.empInfo.emp.dto.*;
+import com.haruon.groupware.domain.empInfo.emp.enums.EmpStatus;
+import com.haruon.groupware.domain.empInfo.emp.enums.FileType;
+import com.haruon.groupware.domain.empInfo.emp.enums.SystemRoleCode;
 import com.haruon.groupware.domain.shared.Email;
 import jakarta.persistence.*;
 import lombok.Getter;
 import org.jspecify.annotations.Nullable;
-import org.springframework.beans.factory.annotation.Value;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -21,9 +23,6 @@ import static org.springframework.util.Assert.state;
 @Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"emp_no", "emp_id"})})
 @Getter
 public class Emp extends AbstractEntity {
-
-    @Value("${HARUON_EMIAL_DOMAIN}")
-    private String COMPANY_DOMAIN;
 
     @Column(nullable = false)
     private String empNo;
@@ -133,7 +132,7 @@ public class Emp extends AbstractEntity {
 
         if(request.empName() != null) changeEmpName(request.empName());
 
-        if(request.empId() != null) changeEmpIdAndEmail(request.empId());
+        if(request.empId() != null) changeEmpIdAndEmail(request.empId(), request.companyDomain());
 
         if(request.newRawPassword() != null) changePassword(request.newRawPassword(), encoder);
 
@@ -155,9 +154,13 @@ public class Emp extends AbstractEntity {
         this.status = newEmpStatus;
     }
 
-    private void changeEmpIdAndEmail(String newEmpId) {
+    public String companyEmail() {
+        return companyEmail.toString();
+    }
+
+    private void changeEmpIdAndEmail(String newEmpId, String companyDomain) {
         this.empId = newEmpId;
-        this.companyEmail = new Email(newEmpId + COMPANY_DOMAIN);
+        this.companyEmail = new Email(newEmpId + companyDomain);
     }
 
     private void changeEmpName(String newEmpName) {
