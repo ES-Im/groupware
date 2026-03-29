@@ -1,6 +1,7 @@
 package com.haruon.groupware.domain.empInfo.annualLeave;
 
 import com.haruon.groupware.domain.AbstractEntity;
+import com.haruon.groupware.domain.draft_approval.report.LeaveType;
 import com.haruon.groupware.domain.empInfo.emp.Emp;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -27,12 +28,19 @@ public class EmpAnnualLeave extends AbstractEntity {
     @JoinColumn(name="emp_id", nullable = false)
     private Emp emp;
 
+    @Column(nullable = false)
     private Integer grantYear;
 
+    @Column(nullable = false)
     private Double baseGrantDays;
 
-    private Double additionalGrantDays;
+    @Column(nullable = false)
+    @Enumerated
+    private LeaveType leaveType;    // 연차, 대체휴무, 특휴
 
+    private Double additionalGrantDays; // 대휴, 특휴 지급일자
+
+    @Column(nullable = false)
     private Double usedDays;
 
     public static EmpAnnualLeave createEmpAnnualLeave(Emp emp, Integer grantYear) {

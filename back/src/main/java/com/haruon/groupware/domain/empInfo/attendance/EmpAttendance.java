@@ -25,7 +25,7 @@ import static org.springframework.util.Assert.state;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Getter
+@Getter(AccessLevel.PROTECTED)
 public class EmpAttendance extends AbstractEntity {
 
     private static final long WORKING_HOURS = 8L;

@@ -1,5 +1,6 @@
 package com.haruon.groupware.domain.shared;
 
+import com.haruon.groupware.domain.FileParam;
 import com.haruon.groupware.domain.empInfo.emp.*;
 import com.haruon.groupware.domain.empInfo.emp.dto.*;
 import com.haruon.groupware.domain.empInfo.emp.enums.FileType;
@@ -49,17 +50,15 @@ public class EmpFixture {
 
     public static EmpFileParam fileParam(FileType fileType) {
         return EmpFileParam.builder()
-                    .originalName("testOriginFileName")
-                    .mimeType("image/jpg")
+                    .fileParam(FileParam.builder()
+                            .originalName("testOriginFileName")
+                            .mimeType("image/jpg")
+                            .extension("jpeg")
+                            .fileSize((long)(1024 * 1024))
+                            .build())
                     .fileType(fileType)
-                    .extension("jpeg")
-                    .fileSize((long)(1 * 1024 * 1024))
                     .build();
     }
-
-
-
-
 
     public static PasswordEncoder encoder = new PasswordEncoder() {
         @Override

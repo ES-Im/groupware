@@ -1,6 +1,6 @@
 package com.haruon.groupware.domain.empInfo.emp;
 
-import com.haruon.groupware.domain.AbstractEntity;
+import com.haruon.groupware.domain.AbstractFileEntity;
 import com.haruon.groupware.domain.empInfo.emp.dto.EmpFileParam;
 import com.haruon.groupware.domain.empInfo.emp.enums.FileType;
 import jakarta.persistence.*;
@@ -15,7 +15,7 @@ import static java.util.Objects.requireNonNull;
 @Entity
 @Getter(AccessLevel.PROTECTED)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class EmpFile extends AbstractEntity {
+public class EmpFile extends AbstractFileEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="emp_id", nullable=false)
@@ -26,21 +26,8 @@ public class EmpFile extends AbstractEntity {
     private FileType fileType;
 
     @Column(nullable = false)
-    private String mimeType;
+    private Boolean isActive;
 
-    @Column(nullable = false)
-    private String originalName;
-
-    @Column(nullable = false, unique = true)
-    private String storedName;
-
-    @Column(nullable = false)
-    private String extension;
-
-    @Column(nullable = false)
-    private Long fileSize;
-
-    private boolean isActive;
 
     static EmpFile addFile(Emp emp,EmpFileParam request) {
         EmpFile empFile = new EmpFile();
@@ -50,9 +37,9 @@ public class EmpFile extends AbstractEntity {
 
         empFile.emp = requireNonNull(emp);
         empFile.fileType = requireNonNull(request.fileType());
-        empFile.originalName = requireNonNull(request.originalName());
-        empFile.extension = requireNonNull(request.extension());
-        empFile.fileSize = requireNonNull(request.fileSize());
+        empFile.originalName = requireNonNull(request.fileParam().originalName());
+        empFile.extension = requireNonNull(request.fileParam().extension());
+        empFile.fileSize = requireNonNull(request.fileParam().fileSize());
 
         return empFile;
     }

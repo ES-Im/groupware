@@ -136,7 +136,7 @@ class EmpTest {
 
         assertThat(emp.getEmpFiles()).hasSize(1);
         assertThat(emp.getEmpFiles().getFirst().getFileType()).isEqualTo(FileType.PROFILE_PICTURE);
-        assertThat(emp.getEmpFiles().getFirst().isActive()).isTrue();
+        assertThat(emp.getEmpFiles().getFirst().getIsActive()).isTrue();
     }
 
     @Test
@@ -148,7 +148,7 @@ class EmpTest {
         addFileWithType(emp, FileType.PROFILE_PICTURE, currentPassword);
 
         assertThat(emp.getEmpFiles()).hasSize(2);
-        assertThat(emp.getEmpFiles().stream().filter(EmpFile::isActive)).hasSize(1);
+        assertThat(emp.getEmpFiles().stream().filter(EmpFile::getIsActive)).hasSize(1);
     }
 
     @Test
@@ -236,7 +236,7 @@ class EmpTest {
                         .build(),
                 null);
 
-        assertThat(file1.isActive()).isFalse();
+        assertThat(file1.getIsActive()).isFalse();
     }
 
     @Test
@@ -258,8 +258,8 @@ class EmpTest {
                         .build(),
                 null);
 
-        assertThat(file1.isActive()).isTrue();
-        assertThat(file2.isActive()).isFalse();
+        assertThat(file1.getIsActive()).isTrue();
+        assertThat(file2.getIsActive()).isFalse();
     }
 
     @Test

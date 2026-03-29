@@ -7,6 +7,7 @@ import com.haruon.groupware.domain.empInfo.emp.enums.FileType;
 import com.haruon.groupware.domain.empInfo.emp.enums.SystemRoleCode;
 import com.haruon.groupware.domain.shared.Email;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
 import org.jspecify.annotations.Nullable;
 
@@ -21,7 +22,7 @@ import static org.springframework.util.Assert.state;
 
 @Entity
 @Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"emp_no", "emp_id"})})
-@Getter
+@Getter(AccessLevel.PROTECTED)
 public class Emp extends AbstractEntity {
 
     @Column(nullable = false)
@@ -286,7 +287,7 @@ public class Emp extends AbstractEntity {
 
     private void deactivateFilesByType(FileType targetType) {
         this.empFiles.stream()
-                .filter(EmpFile::isActive)
+                .filter(EmpFile::getIsActive)
                 .filter(file -> file.getFileType() == targetType)
                 .forEach(EmpFile::deactivateFile);
     }
@@ -298,7 +299,7 @@ public class Emp extends AbstractEntity {
             FileType targetType = targetFile.getFileType();
 
             this.empFiles.stream()
-                    .filter(EmpFile::isActive)
+                    .filter(EmpFile::getIsActive)
                     .filter(file -> file.getFileType() == targetType)
                     .filter(file -> !file.getId().equals(param.id()))
                     .forEach(EmpFile::deactivateFile);

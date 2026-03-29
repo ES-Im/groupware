@@ -1,8 +1,12 @@
 package com.haruon.groupware.domain.schedule;
 
 import com.haruon.groupware.domain.AbstractEntity;
+import com.haruon.groupware.domain.draft_approval.report.BusinessTripDraft;
+import com.haruon.groupware.domain.draft_approval.report.LeaveDraft;
 import com.haruon.groupware.domain.empInfo.emp.Emp;
+import com.haruon.groupware.domain.meetingroom.Meeting;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
 
 import java.time.LocalDate;
@@ -15,7 +19,7 @@ import static com.haruon.groupware.domain.schedule.ScheduleParticipant.registerS
 import static java.util.Objects.requireNonNull;
 
 @Entity
-@Getter
+@Getter(AccessLevel.PROTECTED)
 @Table(
         uniqueConstraints = @UniqueConstraint(columnNames = {"schedule_type", "source_id"})
 )
@@ -46,13 +50,122 @@ public class Schedule extends AbstractEntity {
 
     private boolean isForDivision;
 
-    public static List<Schedule> createPersonal(RegisterPersonalScheduleParam param) {
-        requireNonNull(param, "등록 정보가 없음");
+    @OneToMany(mappedBy = "schedule", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ScheduleParticipant> scheduleParticipants = new ArrayList<>();
 
+    public static List<Schedule> registerSchedules(ScheduleParam param) {
+
+        LocalTime companyStartTime = param.companyStartTime();
+        LocalTime companyEndTime = param.companyEndTime();
+
+        if(param.leaveDraft() != null) {
+            return registerLeaveSchedules(param.leaveDraft(), companyStartTime, companyEndTime);
+        } else if (param.businessTripDraft() != null) {
+            return registerBusinessTripSchedules(param.businessTripDraft(), companyStartTime, companyEndTime);
+        } else if (param.meeting() != null) {
+            return registerMeetingSchedules(param.meeting(), companyStartTime, companyEndTime);
+        } else if (param.manual() != null) {
+            return registerManualSchedules(param.manual(), companyStartTime, companyEndTime);
+        }
+        
+        throw new IllegalArgumentException("잘못된 일정 타입");
+    }
+
+    private static List<Schedule> registerManualSchedules(ManualScheduleParam manual, LocalTime companyStartTime, LocalTime companyEndTime) {
+        LocalDate startDate = manual.startAt().toLocalDate();
+        LocalDate endDate  =  manual.endAt().toLocalDate();
+        LocalTime startAt =  manual.startAt().toLocalTime();
+        LocalTime endAt =   manual.endAt().toLocalTime();
+
+        String title = manual.title();
+
+        String content = String.format(
+                "날짜: %s - %s%n시각: %s - %s%n내용: %s",
+                startDate, endDate,
+                startAt, endAt,
+                manual.content()
+        );
+
+        return registerSchedulesWithType(startDate, endDate,
+                startAt, endAt, ScheduleType.MANUAL,
+                title, content,
+                manual.owner(),
+                companyStartTime, companyEndTime);
+    }
+
+    private static List<Schedule> registerMeetingSchedules(Meeting meeting, LocalTime companyStartTime, LocalTime companyEndTime) {
+
+        String title = meeting.getTitle();
+        String content = String.format(
+                "날짜: %s%n시각: %s - %s%n장소: %s%n회의건: %s",
+                meeting.getMeetingDate(),
+                meeting.getStartAt(),
+                meeting.getEndAt(),
+                meeting.getMeetingRoom(),
+                meeting.getTitle()
+        );
+
+        return registerSchedulesWithType(meeting.getMeetingDate(), meeting.getMeetingDate(),
+                meeting.getStartAt(), meeting.getEndAt(), ScheduleType.MEETING,
+                title, content,
+                meeting.getEmp(),
+                companyStartTime, companyEndTime);
+    }
+
+    private static List<Schedule> registerBusinessTripSchedules(BusinessTripDraft businessTripDraft, LocalTime companyStartTime, LocalTime companyEndTime) {
+        LocalDate startDate = businessTripDraft.getStartAt().toLocalDate();
+        LocalDate endDate  =  businessTripDraft.getEndAt().toLocalDate();
+        LocalTime startAt =  businessTripDraft.getStartAt().toLocalTime();
+        LocalTime endAt =   businessTripDraft.getEndAt().toLocalTime();
+
+        String title = businessTripDraft.getTitle();
+        String content = String.format(
+                "시작일시: %s%n종료일시: %s%n출장지: %s%n출장목적: %s",
+                businessTripDraft.getStartAt(),
+                businessTripDraft.getEndAt(),
+                businessTripDraft.getDestination(),
+                businessTripDraft.getPurpose()
+        );
+
+        return registerSchedulesWithType(startDate, endDate,
+                startAt, endAt, ScheduleType.BUSINESS_TRIP,
+                title, content,
+                businessTripDraft.getEmp(),
+                companyStartTime, companyEndTime);
+    }
+
+    private static List<Schedule> registerLeaveSchedules(LeaveDraft leaveDraft, LocalTime companyStartTime, LocalTime companyEndTime) {
+        LocalDate startDate = leaveDraft.getStartAt().toLocalDate();
+        LocalDate endDate  =  leaveDraft.getEndAt().toLocalDate();
+        LocalTime startAt =  leaveDraft.getStartAt().toLocalTime();
+        LocalTime endAt =   leaveDraft.getEndAt().toLocalTime();
+        String reason = (leaveDraft.getContent() != null)? leaveDraft.getContent() : leaveDraft.getLeaveType().getDescription();
+
+        String title = leaveDraft.getLeaveType().getDescription();
+        String content = String.format(
+                "연가 종류: %s%n시작일시: %s%n종료일시: %s%n사유: %s",
+                leaveDraft.getLeaveType().getDescription(),
+                leaveDraft.getStartAt(),
+                leaveDraft.getEndAt(),
+                reason
+        );
+
+        return registerSchedulesWithType(startDate, endDate,
+                startAt, endAt, ScheduleType.LEAVE,
+                title, content,
+                leaveDraft.getEmp(),
+                companyStartTime, companyEndTime);
+    }
+
+
+
+    private static List<Schedule> registerSchedulesWithType(LocalDate startDate, LocalDate endDate,
+                                                    LocalTime startAt, LocalTime endAt,
+                                                    ScheduleType type, String title, String content,
+                                                    Emp scheduleOwner,
+                                                    LocalTime companyStartAt, LocalTime companyEndAt
+    ) {
         List<Schedule> schedules = new ArrayList<>();
-
-        LocalDate startDate = param.startedAt().toLocalDate();
-        LocalDate endDate = param.endAt().toLocalDate();
 
         long days = ChronoUnit.DAYS.between(startDate, endDate);
 
@@ -60,57 +173,46 @@ public class Schedule extends AbstractEntity {
             Schedule schedule = new Schedule();
             LocalDate targetDate = startDate.plusDays(i);
 
-// param에 회사 정책(env.yml)값 넣어두고 이 부분 건드는 중임 LocalTime.MIN = companyStartAt 이고 Max = companyEndAt임
-//            if (startDate.equals(endDate)) {
-//                schedule.startAt = param.startedAt().toLocalTime();
-//                schedule.endAt = param.endAt().toLocalTime();
-//            } else if (targetDate.equals(startDate)) {
-//                schedule.startAt = param.startedAt().toLocalTime();
-//                schedule.endAt = LocalTime.MAX;
-//            } else if (targetDate.equals(endDate)) {
-//                schedule.startAt = LocalTime.MIN;
-//                schedule.endAt = param.endAt().toLocalTime();
-//            } else {
-//                schedule.startAt = LocalTime.MIN;
-//                schedule.endAt = LocalTime.MAX;
+            schedule.scheduleType = type;
+            schedule.title = title;
+            schedule.content = content;
+            schedule.emp = scheduleOwner;
+
+            if (startDate.equals(endDate)) {
+                schedule.isAllDay = (isStartAtCompanyStartTime(startAt, companyStartAt) && isEndAtCompanyEndTime(endAt, companyEndAt));
+                schedule.startAt = startAt;
+                schedule.endAt = endAt;
+            } else if (targetDate.equals(startDate)) {
+
+                schedule.isAllDay = isStartAtCompanyStartTime(startAt, companyStartAt);
+                schedule.startAt = startAt;
+                schedule.endAt = companyEndAt;
+
+            } else if (targetDate.equals(endDate)) {
+                schedule.isAllDay = isEndAtCompanyEndTime(endAt, companyEndAt);
+                schedule.startAt = companyStartAt;
+                schedule.endAt = endAt;
+            } else {
+                schedule.isAllDay = true;
+                schedule.startAt = companyStartAt;
+                schedule.endAt = companyEndAt;
             }
 
+            schedule.scheduleParticipants.add(registerScheduleParticipant(schedule, scheduleOwner));
             schedules.add(schedule);
-            registerScheduleParticipant(schedule, param.owner());
         }
-
-
-        schedules.forEach(s -> {
-            s.scheduleType = ScheduleType.MANUAL;
-            s.title = param.title();
-            s.content = param.content();
-            s.emp = param.owner();
-            s.isAllDay = param.isAllDay();
-            s.isForDivision = param.isForDivision();
-        });
 
         return schedules;
     }
 
-//    public static Schedule createFromLeave(Emp owner, Leave leave) {
-//
-//    }
-//
-//    public static Schedule createFromBusinessTrip(Emp owner, BusinessTrip trip) {
-//
-//    }
-//
-//    public static Schedule createFromMeeting(Emp owner, Meeting meeting) {
-//
-//    }
-//
-//    public static Schedule createFromSource() {
-//
-//    }
-//
-//    public void changeBasicInfo() {
-//
-//    }
+    private static boolean isEndAtCompanyEndTime(LocalTime endAt, LocalTime companyEndAt) {
+        return endAt.equals(companyEndAt);
+    }
+
+    private static boolean isStartAtCompanyStartTime(LocalTime startAt, LocalTime companyStartAt) {
+        return startAt.equals(companyStartAt);
+    }
+
 
     private void changeTime(LocalDate editedOn, LocalTime editedStartAt, LocalTime editedEndAt) {
         this.startAt = requireNonNull(editedStartAt);

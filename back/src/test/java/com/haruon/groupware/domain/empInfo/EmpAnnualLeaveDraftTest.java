@@ -19,7 +19,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.util.Assert.state;
 
-class EmpAnnualLeaveTest {
+class EmpAnnualLeaveDraftTest {
 
     private static Stream<Arguments> empServiceCases() {
         LocalDate grantYear = LocalDate.of(2026, 1, 1);
