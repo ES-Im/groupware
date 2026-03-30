@@ -1,8 +1,7 @@
-package com.haruon.groupware.domain.empInfo.annualLeave;
+package com.haruon.groupware.domain.empInfo;
 
 import com.haruon.groupware.domain.AbstractEntity;
 import com.haruon.groupware.domain.draft_approval.report.LeaveType;
-import com.haruon.groupware.domain.empInfo.emp.Emp;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;

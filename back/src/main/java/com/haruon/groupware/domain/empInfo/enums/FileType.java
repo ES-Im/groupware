@@ -1,4 +1,4 @@
-package com.haruon.groupware.domain.empInfo.emp.enums;
+package com.haruon.groupware.domain.empInfo.enums;
 
 import lombok.Getter;
 

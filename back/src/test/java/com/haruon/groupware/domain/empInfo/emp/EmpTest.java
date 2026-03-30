@@ -1,10 +1,13 @@
 package com.haruon.groupware.domain.empInfo.emp;
 
-import com.haruon.groupware.domain.empInfo.emp.dto.*;
-import com.haruon.groupware.domain.empInfo.emp.enums.EmpStatus;
-import com.haruon.groupware.domain.empInfo.emp.enums.FileType;
-import com.haruon.groupware.domain.empInfo.emp.enums.PositionCode;
-import com.haruon.groupware.domain.empInfo.emp.enums.SystemRoleCode;
+import com.haruon.groupware.domain.empInfo.Emp;
+import com.haruon.groupware.domain.empInfo.EmpBelongings;
+import com.haruon.groupware.domain.empInfo.EmpFile;
+import com.haruon.groupware.domain.empInfo.dto.*;
+import com.haruon.groupware.domain.empInfo.enums.EmpStatus;
+import com.haruon.groupware.domain.empInfo.enums.FileType;
+import com.haruon.groupware.domain.empInfo.enums.PositionCode;
+import com.haruon.groupware.domain.empInfo.enums.SystemRoleCode;
 import com.haruon.groupware.domain.shared.EmpFixture;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

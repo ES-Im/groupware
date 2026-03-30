@@ -1,10 +1,10 @@
-package com.haruon.groupware.domain.empInfo.attendance;
+package com.haruon.groupware.domain.empInfo;
 
 import com.haruon.groupware.domain.AbstractEntity;
-import com.haruon.groupware.domain.empInfo.attendance.dto.AttendanceCloseParam;
-import com.haruon.groupware.domain.empInfo.attendance.dto.AttendanceCloseResult;
-import com.haruon.groupware.domain.empInfo.attendance.dto.AttendanceEditParam;
-import com.haruon.groupware.domain.empInfo.emp.Emp;
+import com.haruon.groupware.domain.empInfo.dto.AttendanceCloseParam;
+import com.haruon.groupware.domain.empInfo.dto.AttendanceCloseResult;
+import com.haruon.groupware.domain.empInfo.dto.AttendanceEditParam;
+import com.haruon.groupware.domain.empInfo.enums.AttendanceStatus;
 import com.haruon.groupware.domain.schedule.Schedule;
 import com.haruon.groupware.domain.schedule.ScheduleType;
 import jakarta.persistence.*;
@@ -25,7 +25,7 @@ import static org.springframework.util.Assert.state;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Getter(AccessLevel.PROTECTED)
+@Getter
 public class EmpAttendance extends AbstractEntity {
 
     private static final long WORKING_HOURS = 8L;

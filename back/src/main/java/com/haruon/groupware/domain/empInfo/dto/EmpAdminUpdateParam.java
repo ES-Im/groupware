@@ -1,7 +1,7 @@
-package com.haruon.groupware.domain.empInfo.emp.dto;
+package com.haruon.groupware.domain.empInfo.dto;
 
-import com.haruon.groupware.domain.empInfo.emp.enums.EmpStatus;
-import com.haruon.groupware.domain.empInfo.emp.enums.SystemRoleCode;
+import com.haruon.groupware.domain.empInfo.enums.EmpStatus;
+import com.haruon.groupware.domain.empInfo.enums.SystemRoleCode;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;

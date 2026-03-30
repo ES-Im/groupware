@@ -1,7 +1,7 @@
 package com.haruon.groupware.domain.meetingroom;
 
 import com.haruon.groupware.domain.AbstractEntity;
-import com.haruon.groupware.domain.empInfo.emp.Emp;
+import com.haruon.groupware.domain.empInfo.Emp;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;

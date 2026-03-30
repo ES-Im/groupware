@@ -1,10 +1,10 @@
-package com.haruon.groupware.domain.empInfo.emp;
+package com.haruon.groupware.domain.empInfo;
 
 import com.haruon.groupware.domain.AbstractEntity;
-import com.haruon.groupware.domain.empInfo.emp.dto.*;
-import com.haruon.groupware.domain.empInfo.emp.enums.EmpStatus;
-import com.haruon.groupware.domain.empInfo.emp.enums.FileType;
-import com.haruon.groupware.domain.empInfo.emp.enums.SystemRoleCode;
+import com.haruon.groupware.domain.empInfo.dto.*;
+import com.haruon.groupware.domain.empInfo.enums.EmpStatus;
+import com.haruon.groupware.domain.empInfo.enums.FileType;
+import com.haruon.groupware.domain.empInfo.enums.SystemRoleCode;
 import com.haruon.groupware.domain.shared.Email;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -22,7 +22,7 @@ import static org.springframework.util.Assert.state;
 
 @Entity
 @Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"emp_no", "emp_id"})})
-@Getter(AccessLevel.PROTECTED)
+@Getter
 public class Emp extends AbstractEntity {
 
     @Column(nullable = false)

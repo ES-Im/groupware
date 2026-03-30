@@ -1,7 +1,7 @@
-package com.haruon.groupware.domain.empInfo.emp.dto;
+package com.haruon.groupware.domain.empInfo.dto;
 
 import com.haruon.groupware.domain.FileParam;
-import com.haruon.groupware.domain.empInfo.emp.enums.FileType;
+import com.haruon.groupware.domain.empInfo.enums.FileType;
 import lombok.Builder;
 
 import java.util.Locale;

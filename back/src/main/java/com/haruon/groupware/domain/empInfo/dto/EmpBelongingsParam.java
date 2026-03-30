@@ -1,7 +1,7 @@
-package com.haruon.groupware.domain.empInfo.emp.dto;
+package com.haruon.groupware.domain.empInfo.dto;
 
 import com.haruon.groupware.domain.empInfo.Dept;
-import com.haruon.groupware.domain.empInfo.emp.enums.PositionCode;
+import com.haruon.groupware.domain.empInfo.enums.PositionCode;
 import lombok.Builder;
 import org.jspecify.annotations.Nullable;
 

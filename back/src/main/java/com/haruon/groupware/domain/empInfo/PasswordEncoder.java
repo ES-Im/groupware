@@ -1,4 +1,4 @@
-package com.haruon.groupware.domain.empInfo.emp;
+package com.haruon.groupware.domain.empInfo;
 
 public interface PasswordEncoder {
     String encode(String rawPassword);

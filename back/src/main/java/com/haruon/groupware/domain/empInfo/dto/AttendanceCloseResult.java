@@ -1,6 +1,6 @@
-package com.haruon.groupware.domain.empInfo.attendance.dto;
+package com.haruon.groupware.domain.empInfo.dto;
 
-import com.haruon.groupware.domain.empInfo.attendance.EmpAttendance;
+import com.haruon.groupware.domain.empInfo.EmpAttendance;
 
 import java.util.List;
 

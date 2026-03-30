@@ -1,7 +1,5 @@
 package com.haruon.groupware.domain.empInfo;
 
-import com.haruon.groupware.domain.empInfo.annualLeave.EmpAnnualLeave;
-import com.haruon.groupware.domain.empInfo.emp.Emp;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -13,7 +11,7 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.util.stream.Stream;
 
-import static com.haruon.groupware.domain.empInfo.annualLeave.EmpAnnualLeave.createEmpAnnualLeave;
+import static com.haruon.groupware.domain.empInfo.EmpAnnualLeave.createEmpAnnualLeave;
 import static com.haruon.groupware.domain.shared.EmpFixture.getApprovedEmp;
 import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;

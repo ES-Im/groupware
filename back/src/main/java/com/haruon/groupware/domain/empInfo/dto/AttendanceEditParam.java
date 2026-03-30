@@ -1,7 +1,7 @@
-package com.haruon.groupware.domain.empInfo.attendance.dto;
+package com.haruon.groupware.domain.empInfo.dto;
 
-import com.haruon.groupware.domain.empInfo.attendance.AttendanceStatus;
-import com.haruon.groupware.domain.empInfo.emp.Emp;
+import com.haruon.groupware.domain.empInfo.enums.AttendanceStatus;
+import com.haruon.groupware.domain.empInfo.Emp;
 import org.jspecify.annotations.Nullable;
 
 import java.time.LocalDateTime;

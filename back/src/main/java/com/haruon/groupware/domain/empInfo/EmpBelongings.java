@@ -1,9 +1,8 @@
-package com.haruon.groupware.domain.empInfo.emp;
+package com.haruon.groupware.domain.empInfo;
 
 import com.haruon.groupware.domain.AbstractEntity;
-import com.haruon.groupware.domain.empInfo.Dept;
-import com.haruon.groupware.domain.empInfo.emp.dto.EmpBelongingsParam;
-import com.haruon.groupware.domain.empInfo.emp.enums.PositionCode;
+import com.haruon.groupware.domain.empInfo.dto.EmpBelongingsParam;
+import com.haruon.groupware.domain.empInfo.enums.PositionCode;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -20,7 +19,7 @@ import static java.util.Objects.requireNonNull;
               columnNames = {"emp_id", "dept_id", "startAt"}
       )}
 )
-@Getter(AccessLevel.PROTECTED)
+@Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class EmpBelongings extends AbstractEntity {
 

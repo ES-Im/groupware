@@ -1,8 +1,8 @@
-package com.haruon.groupware.domain.empInfo.emp;
+package com.haruon.groupware.domain.empInfo;
 
 import com.haruon.groupware.domain.AbstractFileEntity;
-import com.haruon.groupware.domain.empInfo.emp.dto.EmpFileParam;
-import com.haruon.groupware.domain.empInfo.emp.enums.FileType;
+import com.haruon.groupware.domain.empInfo.dto.EmpFileParam;
+import com.haruon.groupware.domain.empInfo.enums.FileType;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -13,7 +13,7 @@ import java.util.UUID;
 import static java.util.Objects.requireNonNull;
 
 @Entity
-@Getter(AccessLevel.PROTECTED)
+@Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class EmpFile extends AbstractFileEntity {
 

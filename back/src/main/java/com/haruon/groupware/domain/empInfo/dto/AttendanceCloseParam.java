@@ -1,7 +1,7 @@
-package com.haruon.groupware.domain.empInfo.attendance.dto;
+package com.haruon.groupware.domain.empInfo.dto;
 
-import com.haruon.groupware.domain.empInfo.attendance.EmpAttendance;
-import com.haruon.groupware.domain.empInfo.emp.Emp;
+import com.haruon.groupware.domain.empInfo.EmpAttendance;
+import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.schedule.Schedule;
 import com.haruon.groupware.domain.schedule.ScheduleType;
 import org.jspecify.annotations.Nullable;

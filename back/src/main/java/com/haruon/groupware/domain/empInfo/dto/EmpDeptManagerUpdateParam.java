@@ -1,6 +1,6 @@
-package com.haruon.groupware.domain.empInfo.emp.dto;
+package com.haruon.groupware.domain.empInfo.dto;
 
-import com.haruon.groupware.domain.empInfo.emp.enums.SystemRoleCode;
+import com.haruon.groupware.domain.empInfo.enums.SystemRoleCode;
 import jakarta.validation.constraints.Pattern;
 import lombok.Builder;
 import org.jspecify.annotations.Nullable;

@@ -1,7 +1,6 @@
 package com.haruon.groupware.domain.shared;
 
-import com.haruon.groupware.domain.empInfo.emp.dto.EmpRegisterParam;
-import com.haruon.groupware.domain.empInfo.emp.dto.EmpSelfUpdateParam;
+import com.haruon.groupware.domain.empInfo.dto.EmpSelfUpdateParam;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import org.junit.jupiter.api.DisplayName;
