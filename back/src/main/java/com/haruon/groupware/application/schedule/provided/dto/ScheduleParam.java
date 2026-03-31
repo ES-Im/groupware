@@ -28,16 +28,10 @@ public record ScheduleParam(
         @Nullable
         Meeting meeting,
 
-        boolean isPublic,
-
-        LocalTime companyStartTime,
-
-        LocalTime companyEndTime
+        boolean isPublic
 ) {
 
     public ScheduleParam {
-        state(companyStartTime != null && companyEndTime != null, "회사 정책 값은 필수입력값");
-        state(!companyStartTime.isAfter(companyEndTime), "회사 시작시간은 종료시간보다 늦을 수 없음");
 
         int sourceCount = 0;
 

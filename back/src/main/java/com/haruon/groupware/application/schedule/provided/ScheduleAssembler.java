@@ -1,12 +1,13 @@
 package com.haruon.groupware.application.schedule.provided;
 
+import com.haruon.groupware.application.CompanyPolicyPort;
+import com.haruon.groupware.application.schedule.provided.dto.ManualScheduleParam;
+import com.haruon.groupware.application.schedule.provided.dto.ScheduleParam;
 import com.haruon.groupware.domain.draft_approval.report.BusinessTripDraft;
 import com.haruon.groupware.domain.draft_approval.report.LeaveDraft;
 import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.meetingroom.Meeting;
-import com.haruon.groupware.application.schedule.provided.dto.ManualScheduleParam;
 import com.haruon.groupware.domain.schedule.Schedule;
-import com.haruon.groupware.application.schedule.provided.dto.ScheduleParam;
 import com.haruon.groupware.domain.schedule.ScheduleType;
 import org.jspecify.annotations.Nullable;
 
@@ -20,30 +21,32 @@ import static java.util.Objects.requireNonNull;
 
 public class ScheduleAssembler {
 
-    private ScheduleAssembler() {}
+    private final LocalTime COMPANY_START_AT;
+    private final LocalTime COMPANY_END_AT;
 
-    public static List<Schedule> registerSchedules(ScheduleParam param) {
+    public ScheduleAssembler(CompanyPolicyPort port) {
+        this.COMPANY_START_AT = port.getStartTime();
+        this.COMPANY_END_AT = port.getEndTime();
+    }
+
+    public List<Schedule> registerSchedules(ScheduleParam param) {
         requireNonNull(param);
 
-        LocalTime companyStartTime = param.companyStartTime();
-        LocalTime companyEndTime = param.companyEndTime();
         boolean isPublic = param.isPublic();
 
         if(param.leaveDraft() != null) {
-            return registerLeaveSchedules(param.leaveDraft(), companyStartTime, companyEndTime, isPublic);
+            return registerLeaveSchedules(param.leaveDraft(), isPublic);
         } else if (param.businessTripDraft() != null) {
-            return registerBusinessTripSchedules(param.businessTripDraft(), companyStartTime, companyEndTime, isPublic);
+            return registerBusinessTripSchedules(param.businessTripDraft(), isPublic);
         } else if (param.meeting() != null) {
-            return registerMeetingSchedules(param.meeting(), companyStartTime, companyEndTime, isPublic);
+            return registerMeetingSchedules(param.meeting(), isPublic);
         }
 
-        return registerManualSchedules(requireNonNull(param.manual()), companyStartTime, companyEndTime, isPublic);
+        return registerManualSchedules(requireNonNull(param.manual()), isPublic);
     }
 
-    private static List<Schedule> registerManualSchedules(
+    private List<Schedule> registerManualSchedules(
             ManualScheduleParam manual,
-            LocalTime companyStartTime,
-            LocalTime companyEndTime,
             boolean isPublic
     ) {
 
@@ -67,14 +70,11 @@ public class ScheduleAssembler {
                 ScheduleType.MANUAL,
                 title, content,
                 manual.owner(),
-                companyStartTime, companyEndTime,
                 isPublic, null);
     }
 
-    private static List<Schedule> registerMeetingSchedules(
+    private List<Schedule> registerMeetingSchedules(
             Meeting meeting,
-            LocalTime companyStartTime,
-            LocalTime companyEndTime,
             boolean isPublic
     ) {
 
@@ -94,15 +94,12 @@ public class ScheduleAssembler {
                 ScheduleType.MEETING,
                 title, content,
                 meeting.getEmp(),
-                companyStartTime, companyEndTime,
                 isPublic,
                 meeting.getId());
     }
 
-    private static List<Schedule> registerBusinessTripSchedules(
+    private List<Schedule> registerBusinessTripSchedules(
             BusinessTripDraft businessTripDraft,
-            LocalTime companyStartTime,
-            LocalTime companyEndTime,
             boolean isPublic
     ) {
 
@@ -126,15 +123,12 @@ public class ScheduleAssembler {
                 ScheduleType.BUSINESS_TRIP,
                 title, content,
                 businessTripDraft.getEmp(),
-                companyStartTime, companyEndTime,
                 isPublic,
                 businessTripDraft.getId());
     }
 
-    private static List<Schedule> registerLeaveSchedules(
+    private List<Schedule> registerLeaveSchedules(
             LeaveDraft leaveDraft,
-            LocalTime companyStartTime,
-            LocalTime companyEndTime,
             boolean isPublic
     ) {
 
@@ -159,18 +153,16 @@ public class ScheduleAssembler {
                 ScheduleType.LEAVE,
                 title, content,
                 leaveDraft.getEmp(),
-                companyStartTime, companyEndTime,
                 isPublic,
                 leaveDraft.getId());
     }
 
-    private static List<Schedule> registerSchedulesWithType(
+    private List<Schedule> registerSchedulesWithType(
             LocalDate startDate, LocalDate endDate,
             LocalTime startAt, LocalTime endAt,
             ScheduleType type,
             String title, String content,
             Emp scheduleOwner,
-            LocalTime companyStartAt, LocalTime companyEndAt,
             boolean isPublic,
             @Nullable Long sourceId
     ) {
@@ -183,8 +175,7 @@ public class ScheduleAssembler {
 
             TimeRange timeRange = getTimesPerDay(
                     startDate, endDate, targetDate,
-                    startAt, endAt,
-                    companyStartAt, companyEndAt
+                    startAt, endAt
             );
 
             Schedule schedule = Schedule.registerSchedule(
@@ -205,40 +196,38 @@ public class ScheduleAssembler {
         return schedules;
     }
 
-    private static TimeRange getTimesPerDay(
+    private TimeRange getTimesPerDay(
             LocalDate startDate,
             LocalDate endDate,
             LocalDate targetDate,
             LocalTime startAt,
-            LocalTime endAt,
-            LocalTime companyStartAt,
-            LocalTime companyEndAt
+            LocalTime endAt
     ) {
         if (startDate.equals(endDate)) {
             return new TimeRange(
                     startAt,
                     endAt,
-                    startAt.equals(companyStartAt) && endAt.equals(companyEndAt)
+                    startAt.equals(COMPANY_START_AT) && endAt.equals(COMPANY_END_AT)
             );
         }
 
         if (targetDate.equals(startDate)) {
             return new TimeRange(
                     startAt,
-                    companyEndAt,
-                    startAt.equals(companyStartAt)
+                    COMPANY_END_AT,
+                    startAt.equals(COMPANY_START_AT)
             );
         }
 
         if (targetDate.equals(endDate)) {
             return new TimeRange(
-                    companyStartAt,
+                    COMPANY_START_AT,
                     endAt,
-                    endAt.equals(companyEndAt)
+                    endAt.equals(COMPANY_END_AT)
             );
         }
 
-        return new TimeRange(companyStartAt, companyEndAt, true);
+        return new TimeRange(COMPANY_START_AT, COMPANY_END_AT, true);
     }
 
     private record TimeRange(

@@ -7,7 +7,6 @@ import com.haruon.groupware.domain.empInfo.enums.FileType;
 import com.haruon.groupware.domain.empInfo.enums.SystemRoleCode;
 import com.haruon.groupware.domain.shared.Email;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
 import lombok.Getter;
 import org.jspecify.annotations.Nullable;
 
