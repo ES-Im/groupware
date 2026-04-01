@@ -88,9 +88,13 @@ public class Attendance extends AbstractEntity {
             this.attendanceStatus = status;
         }
 
-        this.editedAt = editAt;
-        this.editReason = editReason;
+        markEditor(emp, editedAt, editReason);
+    }
+
+    public void markEditor(Emp editedBy, LocalDateTime editedAt, String editReason) {
         this.editedBy = editedBy;
+        this.editedAt = editedAt;
+        this.editReason = editReason;
     }
 
     public static void changeAttendanceTime(Attendance attendance, LocalTime startAt, LocalTime endAt) {
@@ -136,7 +140,7 @@ public class Attendance extends AbstractEntity {
     }
 
     // 마감용 객체 생성 메서드
-    public static Attendance registerAttendanceForClose(
+    public static Attendance registerAttendance(
             Emp emp,
             LocalDate date,
             AttendanceStatus status,

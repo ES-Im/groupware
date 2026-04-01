@@ -6,9 +6,6 @@ import org.springframework.data.repository.Repository;
 import java.time.LocalDate;
 import java.util.Optional;
 
-/**
- * 사원 근태조회
- */
 public interface AttendanceRepository extends Repository<Attendance, Long> {
 
     Optional<Attendance> findById(Long id);

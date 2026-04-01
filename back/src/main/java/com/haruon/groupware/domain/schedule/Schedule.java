@@ -70,7 +70,9 @@ public class Schedule extends AbstractEntity {
             boolean isAllDay, boolean isPublic) {
         Schedule schedule = new Schedule();
 
-        state(!endAt.isBefore(startAt), "종료시간은 시작시간보다 이를 수 없음");
+        schedule.startAt = requireNonNull(startAt);
+        schedule.endAt = requireNonNull(endAt);
+        state(!startAt.isAfter(endAt), "종료시간은 시작시간보다 이를 수 없음");
 
         schedule.sourceId = sourceId;
         schedule.scheduleType = requireNonNull(type);
@@ -78,8 +80,6 @@ public class Schedule extends AbstractEntity {
         schedule.title = requireNonNull(title);
         schedule.content = requireNonNull(content);
         schedule.scheduleDate = requireNonNull(scheduleDate);
-        schedule.startAt = requireNonNull(startAt);
-        schedule.endAt = requireNonNull(endAt);
         schedule.isAllDay = isAllDay;
         schedule.isCanceled = false;
         schedule.isPublic = isPublic;
@@ -87,26 +87,58 @@ public class Schedule extends AbstractEntity {
         return schedule;
     }
 
-    public void cancel() {
-        this.isCanceled = true;
+    public int cancel() {
+        if(!this.isCanceled) {
+            this.isCanceled = true;
+
+            return 1;
+        }
+
+        return 0;
     }
 
-    public void addParticipant(Emp emp) {
+    public int addParticipant(Emp emp) {
         requireNonNull(emp);
 
         ScheduleParticipant participant = findParticipant(emp);
-        state(participant == null, "이미 참여 중인 사원");
 
-        this.scheduleParticipants.add(ScheduleParticipant.registerScheduleParticipant(this, emp));
+        if(participant == null) {
+            this.scheduleParticipants.add(ScheduleParticipant.registerScheduleParticipant(this, emp));
+            return 1;
+        }
+
+        return 0;
     }
 
-    public void removeParticipant(Emp emp) {
+    public int removeParticipant(Emp emp) {
         requireNonNull(emp);
 
         ScheduleParticipant participant = findParticipant(emp);
-        state(participant != null, "기존 참여하지 않는 사원");
 
-        this.scheduleParticipants.remove(participant);
+        if(participant != null) {
+            this.scheduleParticipants.remove(participant);
+            return 1;
+        }
+
+        return 0;
+    }
+
+    public int changeManualSchedule(String title, String content, LocalTime startAt, LocalTime endAt) {
+        String newTitle = (title != null) ? title : this.title;
+        String newContent = (content != null) ? content : this.content;
+
+        boolean changed =
+                !newTitle.equals(this.title) ||
+                        !newContent.equals(this.content);
+
+        if (!changed) {
+            return 0;
+        }
+
+        this.title = newTitle;
+        this.content = newContent;
+
+        return 1;
     }
 
     private ScheduleParticipant findParticipant(Emp emp) {
@@ -114,51 +146,4 @@ public class Schedule extends AbstractEntity {
                 .filter(s -> s.getEmp().equals(emp))
                 .findAny().orElse(null);
     }
-
-    // to-do - 얘를 유효성 검증하는 메서드로 만들면 될거 같음. 조립 책임을 서비스로 올리다보니 필요없어졌는데..
-    // 괜히 빠지니까 불안하네 코드 재검토 하고, 리팩토링한거 중에 빠진 부분있는지 검토해볼것
-//    private boolean resolveAttendance(AttendanceCloseParam param) {
-//        Attendance attendance = param.attendanceId();
-//
-//        if(attendance != null) {
-//            state(attendance.getStartAt() != null, "출근기록 없음");
-//            state(attendance.getAttendanceDate() != null, "근태날짜 없음");
-//        }
-//
-//        requireNonNull(schedules, "스케줄없으면, 빈 ArrayList 객체로 넣을 것");
-//
-//        if(!schedules.isEmpty()) {
-//            schedules.forEach(s -> requireNonNull(s, "스케쥴 목록에 null 불가"));
-//
-//            schedules = schedules.stream()  // 취소 안된거
-//                    .filter(s -> s.getScheduleType().equals(ScheduleType.BUSINESS_TRIP)
-//                            || s.getScheduleType().equals(ScheduleType.LEAVE))
-//                    .filter(s -> !s.isCanceled())
-//                    .toList();
-//
-//            List<Schedule> allDaySchedules = schedules.stream() // 종일 일정인거
-//                    .filter(Schedule::isAllDay)
-//                    .toList();
-//
-//            state(allDaySchedules.size() <= 1, "종일 일정은 1개만 허용됨");
-//
-//            if (!allDaySchedules.isEmpty()) {
-//                state(schedules.size() == 1, "종일 일정이 있으면 다른 일정은 함께 들어갈 수 없음");
-//            }
-//
-//            List<Schedule> halfLeaveSchedules = schedules.stream()
-//                    .filter(s -> s.getScheduleType().equals(ScheduleType.LEAVE))
-//                    .toList();
-//            state(halfLeaveSchedules.size() <= 1, "연차는 하루에 1개만 허용됨");
-//
-//            schedules.stream()
-//                    .filter(s -> !s.isAllDay())
-//                    .forEach(s -> {
-//                        state(s.getStartAt() != null, "일정의 시작시각 없음");
-//                        state(s.getEndAt() != null, "일정의 종료시각 없음");
-//                        state(s.getEndAt().isAfter(s.getStartAt()), "일정 종료시각은 시작시각보다 빠를 수 없음");
-//                    });
-//        }
-//    }
-
 }

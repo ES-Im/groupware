@@ -2,7 +2,6 @@ package com.haruon.groupware.application.empInfo.attendanceService;
 
 import com.haruon.groupware.application.CompanyPolicyPort;
 import com.haruon.groupware.application.empInfo.attendanceService.dto.AttendanceCloseParam;
-import com.haruon.groupware.application.empInfo.attendanceService.dto.AttendanceCloseResult;
 import com.haruon.groupware.application.empInfo.provided.AttendanceClosing;
 import com.haruon.groupware.application.empInfo.required.AttendanceRepository;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
@@ -19,13 +18,15 @@ import org.springframework.validation.annotation.Validated;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.List;
 
-import static com.haruon.groupware.application.empInfo.attendanceService.AttendanceUtils.*;
+import static com.haruon.groupware.application.Utils.*;
+import static com.haruon.groupware.application.empInfo.EmpInfoUtils.getStatusByRecognizedHours;
 import static com.haruon.groupware.domain.empInfo.Attendance.*;
+import static com.haruon.groupware.domain.empInfo.enums.AttendanceStatus.*;
+import static com.haruon.groupware.domain.schedule.ScheduleType.BUSINESS_TRIP;
+import static com.haruon.groupware.domain.schedule.ScheduleType.LEAVE;
 import static java.util.Objects.requireNonNull;
-import static org.springframework.util.Assert.state;
 
 @Service
 @Transactional
@@ -39,51 +40,60 @@ public class AttendanceCloseService implements AttendanceClosing {
     private final ScheduleRepository scheduleRepository;
 
     private static final List<ScheduleType> SCHEDULE_FOR_ATTENDANCE_DECISION = List.of(
-            ScheduleType.BUSINESS_TRIP, ScheduleType.LEAVE
+            BUSINESS_TRIP, LEAVE
     );
 
     @Override
     public int closeAttendance(AttendanceCloseParam param) {
         requireNonNull(param);
+        Emp emp = findEmpById(empRepository, param.empId());
+        int attendanceCnt = 0;
 
         List<Schedule> schedules = findSchedules(param.empId(), param.attendanceDate());
 
-        if(schedules.isEmpty()) return confirmWithoutSchedule(param);
+        if(schedules.isEmpty()) {
+            attendanceCnt += confirmWithoutSchedule(emp, param.attendanceDate());
+        } else {
+            Schedule allDaySchedule = schedules.stream()
+                                               .filter(Schedule::isAllDay)
+                                               .findFirst().orElse(null);
 
-        Schedule allDaySchedule = schedules.stream()
-                                           .filter(Schedule::isAllDay)
-                                           .findFirst().orElse(null);
+            if(allDaySchedule != null) {
+                attendanceCnt += closeDayWithAllDaySchedule(emp, param.attendanceDate(), allDaySchedule);
+            } else {
+                attendanceCnt += closeDayPartialSchedule(emp, param.attendanceDate(), schedules);
+            }
 
-        if(allDaySchedule != null) return closeDayWithAllDaySchedule(param);
+        }
 
-        AttendanceCloseResult result = closeDayPartialSchedule(param);
-
-        applyCloseResult(result);
-
-        return 1;
+        return attendanceCnt;
     }
 
-    private int confirmWithoutSchedule(AttendanceCloseParam param) {
+    private int confirmWithoutSchedule(Emp emp, LocalDate date) {
 
-        Attendance attendance = findAttendanceByCloseParam(param);
+        Attendance attendance = findAttendanceByCloseParam(emp, date);
 
         if(attendance == null) {
-            registerAttendanceForClose(
-                    findEmpById(empRepository, param.empId()),
-                    param.attendanceDate(),
-                    AttendanceStatus.ABSENT,
+            attendance = registerAttendance(
+                    findEmpById(empRepository, emp.getId()),
+                    date,
+                    ABSENT,
                     null, null
             );
+
+            attendanceRepository.save(attendance);
+
         } else {
+
             AttendanceStatus status =
                     (attendance.getEndAt() == null) ?
-                    AttendanceStatus.ABSENT :
-                    getStatusByRecognizedHours(
-                        attendance.getStartAt(),
-                        attendance.getEndAt(),
-                        port.getWorkHours(),
-                        false
-                    );
+                            ABSENT :
+                            getStatusByRecognizedHours(
+                                    attendance.getStartAt(),
+                                    attendance.getEndAt(),
+                                    port.getWorkHours(),
+                                    false
+                            );
 
             changeAttendanceStatus(attendance, status);
         }
@@ -91,106 +101,115 @@ public class AttendanceCloseService implements AttendanceClosing {
         return 1;
     }
 
-    private int closeDayWithAllDaySchedule(AttendanceCloseParam param) {
+    private int closeDayWithAllDaySchedule(Emp emp, LocalDate date, Schedule schedule) {
 
-        List<Schedule> schedules = findSchedules(param.empId(), param.attendanceDate());
-        state(schedules.size() == 1, "잘못된 일정포함 관리자 확인 필요");
-
-        Schedule schedule = schedules.getFirst();
-        Attendance mainAttendance = findAttendanceByCloseParam(param);
-        Emp emp = findEmpById(empRepository, param.empId());
+        Attendance mainAttendance = findAttendanceByCloseParam(emp, date);
 
         AttendanceStatus status;
         LocalTime startAt = null;
         LocalTime endAt = null;
 
         switch (schedule.getScheduleType()) {
-            case LEAVE -> status = AttendanceStatus.ALL_DAY_LEAVE;
+            case LEAVE -> status = ALL_DAY_LEAVE;
             case BUSINESS_TRIP -> {
-                startAt = schedule.getStartAt();
-                endAt = schedule.getEndAt();
-                status = AttendanceStatus.NORMAL;
+                startAt = port.getStartTime();
+                endAt = port.getEndTime();
+                status = NORMAL;
             }
             default -> throw new IllegalStateException("지원하지 않는 일정 타입");
         }
 
         if (mainAttendance == null) {
-            registerAttendanceForClose(emp, param.attendanceDate(), status, startAt, endAt);
+            Attendance newAttendance = registerAttendance(emp, date, status, startAt, endAt);
+            attendanceRepository.save(newAttendance);
         } else {
-            if (startAt != null && endAt != null) {
-                changeAttendanceTime(mainAttendance, startAt, endAt);
-            }
+            changeAttendanceTime(mainAttendance, startAt, endAt);
             changeAttendanceStatus(mainAttendance, status);
         }
 
         return 1;
     }
 
-    private AttendanceCloseResult closeDayPartialSchedule(AttendanceCloseParam param) {
+    private int closeDayPartialSchedule(Emp emp, LocalDate date, List<Schedule> schedules) {
+        int result = 1;
 
-        List<Schedule> schedules = findSchedules(param.empId(), param.attendanceDate());
-        Attendance mainAttendance = findAttendanceByCloseParam(param);
-        Emp emp = findEmpById(empRepository, param.empId());
-
-        List<Attendance> subAttendances = new ArrayList<>();
+        Attendance mainAttendance = findAttendanceByCloseParam(emp, date);
+        Attendance subAttendance = null;
 
         LocalTime entireStartAt = mainAttendance != null ? mainAttendance.getStartAt() : null;
         LocalTime entireEndAt = mainAttendance != null ? mainAttendance.getEndAt() : null;
 
         boolean isIncludeLeave = false;
 
-        for(Schedule schedule : schedules) {
+        for (Schedule schedule : schedules) {
             LocalTime scheduleStartAt = schedule.getStartAt();
             LocalTime scheduleEndAt = schedule.getEndAt();
 
-            if (schedule.getScheduleType() == ScheduleType.BUSINESS_TRIP) {
+            if (schedule.getScheduleType() == BUSINESS_TRIP) {
                 entireStartAt = getEarlierTime(entireStartAt, scheduleStartAt);
                 entireEndAt = getLaterTime(entireEndAt, scheduleEndAt);
             }
-            if (schedule.getScheduleType() == ScheduleType.LEAVE) {
-                subAttendances.add(registerAttendanceForClose(
+
+            if (schedule.getScheduleType() == LEAVE) {
+                subAttendance = registerAttendance(
                         emp,
-                        schedule.getScheduleDate(),
-                        AttendanceStatus.HALF_DAY_LEAVE,
+                        date,
+                        HALF_DAY_LEAVE,
                         scheduleStartAt,
                         scheduleEndAt
-                ));
+                );
                 isIncludeLeave = true;
+                result++;
             }
         }
 
-        if (entireStartAt == null || entireEndAt == null) {
-            Attendance absentAttendance = resolveOrRegisterAbsentAttendance(param, mainAttendance, emp);
-            return new AttendanceCloseResult(absentAttendance, subAttendances);
+        boolean isAllTimeRecorded = entireStartAt != null && entireEndAt != null;
+
+        if (!isAllTimeRecorded) {
+            mainAttendance = resolveOrRegisterAbsentAttendance(mainAttendance, emp, date);
+        } else {
+            mainAttendance = resolveMainAttendance(
+                    mainAttendance,
+                    emp,
+                    date,
+                    entireStartAt,
+                    entireEndAt,
+                    isIncludeLeave
+            );
         }
 
-        Attendance resolvedMainAttendance = resolveMainAttendance(param, mainAttendance, emp, entireStartAt, entireEndAt, isIncludeLeave);
-        return new AttendanceCloseResult(resolvedMainAttendance, subAttendances);
+        attendanceRepository.save(mainAttendance);
+
+        if (subAttendance != null) {
+            attendanceRepository.save(subAttendance);
+        }
+
+        return result;
     }
 
     private Attendance resolveOrRegisterAbsentAttendance(
-            AttendanceCloseParam param,
             Attendance mainAttendance,
-            Emp emp
+            Emp emp,
+            LocalDate attendanceDate
     ) {
         if (mainAttendance == null) {
-            return registerAttendanceForClose(
+            return registerAttendance(
                     emp,
-                    param.attendanceDate(),
-                    AttendanceStatus.ABSENT,
+                    attendanceDate,
+                    ABSENT,
                     null,
                     null
             );
         }
 
-        changeAttendanceStatus(mainAttendance, AttendanceStatus.ABSENT);
+        changeAttendanceStatus(mainAttendance, ABSENT);
         return mainAttendance;
     }
 
     private Attendance resolveMainAttendance(
-            AttendanceCloseParam param,
             Attendance mainAttendance,
             Emp emp,
+            LocalDate attendanceDate,
             LocalTime startAt,
             LocalTime endAt,
             boolean isIncludeLeave
@@ -203,9 +222,9 @@ public class AttendanceCloseService implements AttendanceClosing {
         );
 
         if (mainAttendance == null) {
-            return registerAttendanceForClose(
+            return registerAttendance(
                     emp,
-                    param.attendanceDate(),
+                    attendanceDate,
                     status,
                     startAt,
                     endAt
@@ -217,16 +236,6 @@ public class AttendanceCloseService implements AttendanceClosing {
         return mainAttendance;
     }
 
-    private void applyCloseResult(AttendanceCloseResult result) {
-        requireNonNull(result, "마감 결과가 없음");
-
-        attendanceRepository.save(result.mainAttendance());
-
-        if (!result.subAttendances().isEmpty()) {
-            attendanceRepository.saveAll(result.subAttendances());
-        }
-    }
-
     private List<Schedule> findSchedules(Long empId, LocalDate targetDate) {
         List<Schedule> schedules = scheduleRepository.findByEmp_IdAndScheduleDate(empId, targetDate);
 
@@ -236,9 +245,9 @@ public class AttendanceCloseService implements AttendanceClosing {
                 .toList();
     }
 
-    private Attendance findAttendanceByCloseParam(AttendanceCloseParam param) {
+    private Attendance findAttendanceByCloseParam(Emp emp, LocalDate date) {
         return attendanceRepository.findByEmpIdAndAttendanceDate(
-                param.empId(), param.attendanceDate()
+                emp.getId(), date
         ).orElse(null);
     }
 

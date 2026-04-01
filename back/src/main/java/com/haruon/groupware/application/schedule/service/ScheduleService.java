@@ -1,54 +1,159 @@
-package com.haruon.groupware.application.schedule.provided;
+package com.haruon.groupware.application.schedule.service;
 
 import com.haruon.groupware.application.CompanyPolicyPort;
-import com.haruon.groupware.application.schedule.provided.dto.ManualScheduleParam;
-import com.haruon.groupware.application.schedule.provided.dto.ScheduleParam;
+import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.schedule.provided.ScheduleEditor;
+import com.haruon.groupware.application.schedule.provided.ScheduleRegister;
+import com.haruon.groupware.application.schedule.required.ScheduleRepository;
+import com.haruon.groupware.application.schedule.service.dto.ManualScheduleParam;
+import com.haruon.groupware.application.schedule.service.dto.ScheduleParam;
 import com.haruon.groupware.domain.draft_approval.report.BusinessTripDraft;
 import com.haruon.groupware.domain.draft_approval.report.LeaveDraft;
 import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.meetingroom.Meeting;
 import com.haruon.groupware.domain.schedule.Schedule;
 import com.haruon.groupware.domain.schedule.ScheduleType;
-import org.jspecify.annotations.Nullable;
+import jakarta.transaction.Transactional;
+import lombok.AllArgsConstructor;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
+import static com.haruon.groupware.application.Utils.getEmpListById;
 import static java.util.Objects.requireNonNull;
 
-public class ScheduleAssembler {
+@AllArgsConstructor
+@Service
+@Transactional
+public class ScheduleService implements ScheduleRegister, ScheduleEditor {
 
-    private final LocalTime COMPANY_START_AT;
-    private final LocalTime COMPANY_END_AT;
+    private final CompanyPolicyPort port;
+    private final ScheduleRepository scheduleRepository;
+    private final EmpRepository empRepository;
 
-    public ScheduleAssembler(CompanyPolicyPort port) {
-        this.COMPANY_START_AT = port.getStartTime();
-        this.COMPANY_END_AT = port.getEndTime();
-    }
-
-    public List<Schedule> registerSchedules(ScheduleParam param) {
+    public int registerSchedules(ScheduleParam param) {
         requireNonNull(param);
+
+        List<Schedule> schedules = null;
 
         boolean isPublic = param.isPublic();
 
-        if(param.leaveDraft() != null) {
-            return registerLeaveSchedules(param.leaveDraft(), isPublic);
+        if (param.leaveDraft() != null) {
+            schedules = registerLeaveSchedules(param.leaveDraft(), isPublic);
         } else if (param.businessTripDraft() != null) {
-            return registerBusinessTripSchedules(param.businessTripDraft(), isPublic);
+            schedules = registerBusinessTripSchedules(param.businessTripDraft(), isPublic);
         } else if (param.meeting() != null) {
-            return registerMeetingSchedules(param.meeting(), isPublic);
+            schedules = registerMeetingSchedules(param.meeting(), isPublic);
+        } else {
+            schedules = registerManualSchedules(requireNonNull(param.manual()), isPublic);
         }
 
-        return registerManualSchedules(requireNonNull(param.manual()), isPublic);
+        List<Schedule> result = scheduleRepository.saveAll(schedules);
+
+        return result.size();
+    }
+
+    @Override
+    public int addParticipants(Long scheduleId, Set<Long> participantEmpIds, boolean isForBulkEdit) {
+        int result = 0;
+
+        Schedule schedule = getScheduleById(scheduleId);
+
+        List<Emp> empList = getEmpListById(empRepository, participantEmpIds);
+
+        List<Schedule> targetSchedules = isForBulkEdit
+                ? getSameEventSchedules(schedule.getSourceId(), schedule.getScheduleType())
+                : List.of(schedule);
+
+        for (Schedule targetSchedule : targetSchedules) {
+            for (Emp emp : empList) {
+                result += targetSchedule.addParticipant(emp);
+            }
+        }
+
+        return result;
+    }
+
+
+    @Override
+    public int removeParticipants(Long scheduleId, Set<Long> participantEmpIds, boolean isForBulkEdit) {
+        int result = 0;
+
+        List<Schedule> targetSchedules = getSchedules(scheduleId, isForBulkEdit);
+
+        List<Emp> empList = getEmpListById(empRepository, participantEmpIds);
+
+        for (Schedule targetSchedule : targetSchedules) {
+            for (Emp emp : empList) {
+                result += targetSchedule.removeParticipant(emp);
+            }
+        }
+
+        return result;
+    }
+
+    @Override
+    public int cancelSchedule(Long scheduleId, boolean isForBulkEdit) {
+        int result = 0;
+
+        List<Schedule> targetSchedules = getSchedules(scheduleId, isForBulkEdit);
+
+        for (Schedule targetSchedule : targetSchedules) {
+            result += targetSchedule.cancel();
+        }
+
+        return result;
+    }
+
+    @Override
+    public int updateManualSchedule(Long scheduleId, boolean isForBulkEdit, ManualScheduleParam param) {
+        int result = 0;
+
+        List<Schedule> targetSchedules = getSchedules(scheduleId, isForBulkEdit);
+        for (Schedule targetSchedule : targetSchedules) {
+            result += targetSchedule.changeManualSchedule(
+                    param.title(), param.content(), param.startAt().toLocalTime(), param.endAt().toLocalTime()
+            );
+        }
+
+        return result;
+    }
+
+    private List<Schedule> getSchedules(Long scheduleId, boolean isForBulkEdit) {
+        Schedule schedule = getScheduleById(scheduleId);
+        ScheduleType scheduleType = schedule.getScheduleType();
+
+        return isForBulkEdit
+                ? getSameEventSchedules(schedule.getSourceId(), scheduleType)
+                : List.of(schedule);
+
+    }
+
+    private Schedule getScheduleById(Long scheduleId) {
+        return scheduleRepository
+                .findById(scheduleId)
+                .orElseThrow(() ->
+                        new IllegalArgumentException("대상 일정이 없음")      // to-do : 커스텀 예외 처리
+                );
+    }
+
+    private List<Schedule> getSameEventSchedules(Long sourceId, ScheduleType type) {
+        return scheduleRepository
+                .findByScheduleTypeAndSourceId(type, sourceId)
+                .orElse(List.of());
     }
 
     private List<Schedule> registerManualSchedules(
             ManualScheduleParam manual,
             boolean isPublic
     ) {
+        Long lastSourceId = scheduleRepository.findLastManualSourceId();
+        Long nextSourceId = (lastSourceId == null) ? 1L : lastSourceId + 1;
 
         LocalDate startDate = manual.startAt().toLocalDate();
         LocalDate endDate  =  manual.endAt().toLocalDate();
@@ -64,13 +169,13 @@ public class ScheduleAssembler {
                 manual.content()
         );
 
-        return registerSchedulesWithType(
+        return registerSchedule(
                 startDate, endDate,
                 startAt, endAt,
                 ScheduleType.MANUAL,
                 title, content,
                 manual.owner(),
-                isPublic, null);
+                isPublic, nextSourceId);
     }
 
     private List<Schedule> registerMeetingSchedules(
@@ -84,11 +189,11 @@ public class ScheduleAssembler {
                 meeting.getMeetingDate(),
                 meeting.getStartAt(),
                 meeting.getEndAt(),
-                meeting.getMeetingRoom(),
+                meeting.getMeetingRoom().getName(),
                 meeting.getTitle()
         );
 
-        return registerSchedulesWithType(
+        return registerSchedule(
                 meeting.getMeetingDate(), meeting.getMeetingDate(),
                 meeting.getStartAt(), meeting.getEndAt(),
                 ScheduleType.MEETING,
@@ -117,7 +222,7 @@ public class ScheduleAssembler {
                 businessTripDraft.getPurpose()
         );
 
-        return registerSchedulesWithType(
+        return registerSchedule(
                 startDate, endDate,
                 startAt, endAt,
                 ScheduleType.BUSINESS_TRIP,
@@ -147,7 +252,7 @@ public class ScheduleAssembler {
                 reason
         );
 
-        return registerSchedulesWithType(
+        return registerSchedule(
                 startDate, endDate,
                 startAt, endAt,
                 ScheduleType.LEAVE,
@@ -157,14 +262,14 @@ public class ScheduleAssembler {
                 leaveDraft.getId());
     }
 
-    private List<Schedule> registerSchedulesWithType(
+    private List<Schedule> registerSchedule(
             LocalDate startDate, LocalDate endDate,
             LocalTime startAt, LocalTime endAt,
             ScheduleType type,
             String title, String content,
             Emp scheduleOwner,
             boolean isPublic,
-            @Nullable Long sourceId
+            Long sourceId
     ) {
         List<Schedule> schedules = new ArrayList<>();
 
@@ -207,28 +312,29 @@ public class ScheduleAssembler {
             return new TimeRange(
                     startAt,
                     endAt,
-                    startAt.equals(COMPANY_START_AT) && endAt.equals(COMPANY_END_AT)
+                    startAt.equals(port.getStartTime()) && endAt.equals(port.getEndTime())
             );
         }
 
         if (targetDate.equals(startDate)) {
             return new TimeRange(
                     startAt,
-                    COMPANY_END_AT,
-                    startAt.equals(COMPANY_START_AT)
+                    port.getEndTime(),
+                    startAt.equals(port.getStartTime())
             );
         }
 
         if (targetDate.equals(endDate)) {
             return new TimeRange(
-                    COMPANY_START_AT,
+                    port.getStartTime(),
                     endAt,
-                    endAt.equals(COMPANY_END_AT)
+                    endAt.equals(port.getEndTime())
             );
         }
 
-        return new TimeRange(COMPANY_START_AT, COMPANY_END_AT, true);
+        return new TimeRange(port.getStartTime(), port.getEndTime(), true);
     }
+
 
     private record TimeRange(
             LocalTime startAt,

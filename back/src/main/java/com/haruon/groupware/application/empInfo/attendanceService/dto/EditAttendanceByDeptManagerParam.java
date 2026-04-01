@@ -11,34 +11,36 @@ import static java.util.Objects.requireNonNull;
 import static org.springframework.util.Assert.state;
 
 @Builder
-public record EditAttendanceByDeptManagerParam (
+public record EditAttendanceByDeptManagerParam(
 
         Long attendanceId,
 
-        @Nullable
-        LocalTime startAt,
-
-        @Nullable
-        LocalTime endAt,
-
-        @Nullable
-        AttendanceStatus status,
+        @Nullable LocalTime startAt,
+        @Nullable LocalTime endAt,
+        @Nullable AttendanceStatus status,
 
         LocalDateTime editedAt,
-
         String editReason,
-
         Long editorId,
 
-        boolean isIncludeHalfLeaveInDay
+        boolean isIncludeHalfLeaveInDay,
+
+        @Nullable SubAttendanceByDeptManagerParam newSubAttendance
 
 ) {
-
     public EditAttendanceByDeptManagerParam {
         requireNonNull(attendanceId, "수정대상 근태 필수");
         requireNonNull(editedAt, "편집시간 정보 필수");
         requireNonNull(editReason, "편집사유 정보 필수");
         requireNonNull(editorId, "편집자 정보 필수");
-        state(!(startAt == null && endAt == null && status == null), "수정할 근태 정보가 없음");
+
+        boolean hasMainAttendanceEdit = startAt != null || endAt != null || status != null;
+        boolean hasNewSubAttendance = newSubAttendance != null;
+
+        state(hasMainAttendanceEdit || hasNewSubAttendance, "수정할 근태 정보가 없음");
+
+        if (startAt != null && endAt != null) {
+            state(!endAt.isBefore(startAt), "종료시각은 시작시각보다 빠를 수 없음");
+        }
     }
 }
