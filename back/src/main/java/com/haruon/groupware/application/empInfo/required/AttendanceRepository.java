@@ -12,7 +12,7 @@ public interface AttendanceRepository extends Repository<Attendance, Long> {
 
     Optional<Attendance> findByEmpIdAndAttendanceDate(Long empId, LocalDate attendanceDate);
 
-    Optional<Attendance> save(Attendance attendance);
+    Attendance save(Attendance attendance);
 
     int saveAll(Iterable<Attendance> attendances);
 

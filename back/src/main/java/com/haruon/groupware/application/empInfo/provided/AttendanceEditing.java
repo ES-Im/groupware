@@ -5,7 +5,7 @@ import com.haruon.groupware.application.empInfo.attendanceService.dto.EditAttend
 import java.time.LocalDateTime;
 
 /** 근태 마감관련 외 근태 관리 */
-public interface AttendanceManagement {
+public interface AttendanceEditing {
     /** @return 각 사원별 편집된 근태 기록 수*/
     int updateAttendanceByDeptManager(EditAttendanceByDeptManagerParam param);
 

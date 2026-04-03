@@ -1,5 +1,7 @@
-package com.haruon.groupware.domain.empInfo.dto;
+package com.haruon.groupware.application.empInfo.empService.dto;
 
+import com.haruon.groupware.application.empInfo.empService.dto.param.EmpBelongingsParam;
+import com.haruon.groupware.application.empInfo.empService.dto.param.EmpFileStatusChangeParam;
 import com.haruon.groupware.domain.empInfo.enums.EmpStatus;
 import com.haruon.groupware.domain.empInfo.enums.SystemRoleCode;
 import jakarta.validation.constraints.NotBlank;
@@ -11,6 +13,7 @@ import org.jspecify.annotations.Nullable;
 import java.time.LocalDate;
 
 import static com.haruon.groupware.domain.shared.RegexpUtil.*;
+import static java.util.Objects.requireNonNull;
 import static org.springframework.util.Assert.state;
 
 /*
@@ -19,7 +22,9 @@ import static org.springframework.util.Assert.state;
  *   , 입사/퇴직일, 파일 사용여부 수정이 가능하다.
  */
 @Builder
-public record EmpAdminUpdateParam (
+public record EmpAdminUpdateRequest(
+
+        Long id,
 
         // 직원정보
         @Nullable
@@ -29,7 +34,7 @@ public record EmpAdminUpdateParam (
         @Nullable
         @NotBlank
         @Size(min = 5, max = 20)
-        String empId,
+        String loginId,
 
         @Nullable
         @Pattern(
@@ -54,9 +59,12 @@ public record EmpAdminUpdateParam (
         @Nullable
         LocalDate hireAt,
 
+        @Nullable
+        LocalDate resignedAt,
+
         // empFile : 활성화 여부
         @Nullable
-        EmpFileStatusChangeParam changeFileActive,
+        EmpFileStatusChangeParam fileStatusParam,
 
         // 직원 소속 정보
         @Nullable
@@ -66,13 +74,15 @@ public record EmpAdminUpdateParam (
 
 ) {
 
-    public EmpAdminUpdateParam {
+    public EmpAdminUpdateRequest {
+        requireNonNull(id, "사원의 id(PK) 필수");
         state(companyDomain != null, "회사 도메인은 필수값");
-        state(empName != null || empId != null
-                ||  newRawPassword != null ||  extensionNo != null
+        state(empName != null || loginId != null
+                || newRawPassword != null || extensionNo != null
                 || empStatus != null || systemRoleCode != null
                 || hireAt != null
-                ||  changeFileActive != null ||  belongingsParam != null ,"변경된 정보가 없습니다.");
+                || fileStatusParam != null || belongingsParam != null ,"변경된 정보가 없습니다.");
+
     }
 
 }

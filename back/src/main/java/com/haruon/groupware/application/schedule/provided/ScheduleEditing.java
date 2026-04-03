@@ -7,7 +7,7 @@ import java.util.Set;
 /**
  * 일정 취소 및 참여자 변경
  */
-public interface ScheduleManagement {
+public interface ScheduleEditing {
 
     /** return : 일정에 추가된 인원 수 */
     int addParticipants(Long scheduleId, Set<Long> empId, boolean isForBulkEdit);

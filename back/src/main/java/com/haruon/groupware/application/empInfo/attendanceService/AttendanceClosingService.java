@@ -32,11 +32,11 @@ import static java.util.Objects.requireNonNull;
 @Transactional
 @RequiredArgsConstructor
 @Validated
-public class AttendanceCloseService implements AttendanceClosing {
+public class AttendanceClosingService implements AttendanceClosing {
 
     private final AttendanceRepository attendanceRepository;
     private final EmpRepository empRepository;
-    private final CompanyPolicyPort port;
+    private final CompanyPolicyPort companyPolicy;
     private final ScheduleRepository scheduleRepository;
 
     private static final List<ScheduleType> SCHEDULE_FOR_ATTENDANCE_DECISION = List.of(
@@ -47,6 +47,8 @@ public class AttendanceCloseService implements AttendanceClosing {
     public int closeAttendance(AttendanceCloseParam param) {
         requireNonNull(param);
         Emp emp = findEmpById(empRepository, param.empId());
+        emp.ensureActive();
+
         int attendanceCnt = 0;
 
         List<Schedule> schedules = findSchedules(param.empId(), param.attendanceDate());
@@ -91,7 +93,7 @@ public class AttendanceCloseService implements AttendanceClosing {
                             getStatusByRecognizedHours(
                                     attendance.getStartAt(),
                                     attendance.getEndAt(),
-                                    port.getWorkHours(),
+                                    companyPolicy.getWorkHours(),
                                     false
                             );
 
@@ -112,8 +114,8 @@ public class AttendanceCloseService implements AttendanceClosing {
         switch (schedule.getScheduleType()) {
             case LEAVE -> status = ALL_DAY_LEAVE;
             case BUSINESS_TRIP -> {
-                startAt = port.getStartTime();
-                endAt = port.getEndTime();
+                startAt = companyPolicy.getStartTime();
+                endAt = companyPolicy.getEndTime();
                 status = NORMAL;
             }
             default -> throw new IllegalStateException("지원하지 않는 일정 타입");
@@ -217,7 +219,7 @@ public class AttendanceCloseService implements AttendanceClosing {
         AttendanceStatus status = getStatusByRecognizedHours(
                 startAt,
                 endAt,
-                port.getWorkHours(),
+                companyPolicy.getWorkHours(),
                 isIncludeLeave
         );
 

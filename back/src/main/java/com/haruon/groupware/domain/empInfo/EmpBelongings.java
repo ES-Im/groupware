@@ -1,7 +1,6 @@
 package com.haruon.groupware.domain.empInfo;
 
 import com.haruon.groupware.domain.AbstractEntity;
-import com.haruon.groupware.domain.empInfo.dto.EmpBelongingsParam;
 import com.haruon.groupware.domain.empInfo.enums.PositionCode;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -44,14 +43,17 @@ public class EmpBelongings extends AbstractEntity {
 
     static EmpBelongings registerEmpBelonging(
             Emp emp,
-            EmpBelongingsParam request) {
+            Dept dept,
+            PositionCode position,
+            LocalDate startAt,
+            boolean isPrimary) {
         EmpBelongings empBelongings = new EmpBelongings();
 
         empBelongings.emp = requireNonNull(emp);
-        empBelongings.dept = requireNonNull(request.dept());
-        empBelongings.position = requireNonNull(request.position());
-        empBelongings.startAt = requireNonNull(request.startAt());
-        empBelongings.isPrimary = requireNonNull(request.isPrimary());
+        empBelongings.dept = requireNonNull(dept);
+        empBelongings.position = requireNonNull(position);
+        empBelongings.startAt = requireNonNull(startAt);
+        empBelongings.isPrimary = isPrimary;
 
         return empBelongings;
     }

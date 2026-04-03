@@ -21,7 +21,6 @@ import static org.springframework.util.Assert.state;
 )
 public class Schedule extends AbstractEntity {
 
-    @Nullable
     private Long sourceId;
 
     @Enumerated(EnumType.STRING)
@@ -61,7 +60,7 @@ public class Schedule extends AbstractEntity {
 
 
     public static Schedule registerSchedule(
-            @Nullable Long sourceId,
+            Long sourceId,
             ScheduleType type,
             Emp emp,
             String title, String content,
@@ -72,9 +71,9 @@ public class Schedule extends AbstractEntity {
 
         schedule.startAt = requireNonNull(startAt);
         schedule.endAt = requireNonNull(endAt);
-        state(!startAt.isAfter(endAt), "종료시간은 시작시간보다 이를 수 없음");
+        validateTime(startAt, endAt);
 
-        schedule.sourceId = sourceId;
+        schedule.sourceId = requireNonNull(sourceId);
         schedule.scheduleType = requireNonNull(type);
         schedule.emp = requireNonNull(emp);
         schedule.title = requireNonNull(title);
@@ -83,6 +82,8 @@ public class Schedule extends AbstractEntity {
         schedule.isAllDay = isAllDay;
         schedule.isCanceled = false;
         schedule.isPublic = isPublic;
+
+        schedule.addParticipant(requireNonNull(emp));
 
         return schedule;
     }
@@ -123,13 +124,25 @@ public class Schedule extends AbstractEntity {
         return 0;
     }
 
-    public int changeManualSchedule(String title, String content, LocalTime startAt, LocalTime endAt) {
+    public int changeManualSchedule(
+            @Nullable String title,
+            @Nullable String content,
+            @Nullable LocalTime startAt,
+            @Nullable LocalTime endAt
+    ) {
+
         String newTitle = (title != null) ? title : this.title;
         String newContent = (content != null) ? content : this.content;
+        LocalTime newStartAt = (startAt != null) ? startAt : this.startAt;
+        LocalTime newEndAt = (endAt != null) ? endAt : this.endAt;
+
+        validateTime(newStartAt, newEndAt);
 
         boolean changed =
                 !newTitle.equals(this.title) ||
-                        !newContent.equals(this.content);
+                !newContent.equals(this.content) ||
+                !newStartAt.equals(this.startAt) ||
+                !newEndAt.equals(this.endAt);
 
         if (!changed) {
             return 0;
@@ -137,6 +150,8 @@ public class Schedule extends AbstractEntity {
 
         this.title = newTitle;
         this.content = newContent;
+        this.startAt = newStartAt;
+        this.endAt = newEndAt;
 
         return 1;
     }
@@ -145,5 +160,9 @@ public class Schedule extends AbstractEntity {
         return this.scheduleParticipants.stream()
                 .filter(s -> s.getEmp().equals(emp))
                 .findAny().orElse(null);
+    }
+
+    private static void validateTime(LocalTime startAt, LocalTime endAt) {
+        state(!startAt.isAfter(endAt), "종료시간은 시작시간보다 이를 수 없음");
     }
 }

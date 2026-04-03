@@ -3,7 +3,7 @@ package com.haruon.groupware.application.empInfo.attendanceService;
 import com.haruon.groupware.application.CompanyPolicyPort;
 import com.haruon.groupware.application.empInfo.attendanceService.dto.EditAttendanceByDeptManagerParam;
 import com.haruon.groupware.application.empInfo.attendanceService.dto.SubAttendanceByDeptManagerParam;
-import com.haruon.groupware.application.empInfo.provided.AttendanceManagement;
+import com.haruon.groupware.application.empInfo.provided.AttendanceEditing;
 import com.haruon.groupware.application.empInfo.required.AttendanceRepository;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
 import com.haruon.groupware.domain.empInfo.Attendance;
@@ -27,11 +27,11 @@ import static org.springframework.util.Assert.state;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class AttendanceManageService implements AttendanceManagement {
+public class AttendanceEditingService implements AttendanceEditing {
 
     private final AttendanceRepository attendanceRepository;
     private final EmpRepository empRepository;
-    private final CompanyPolicyPort port;
+    private final CompanyPolicyPort companyPolicy;
 
     private static final List<AttendanceStatus> WORKING_STATUS = List.of(
             AttendanceStatus.NORMAL, AttendanceStatus.ABSENT, AttendanceStatus.LATE_EARLY
@@ -41,6 +41,7 @@ public class AttendanceManageService implements AttendanceManagement {
     public int updateApproveAttendance(Long attendanceId, Long approverId, LocalDateTime approvedAt) {
         Attendance attendance = findAttendanceById(attendanceRepository, attendanceId);
         Emp emp = findEmpById(empRepository, approverId);
+        emp.ensureActive();
 
         attendance.approveAttendance(emp, approvedAt);
 
@@ -51,6 +52,7 @@ public class AttendanceManageService implements AttendanceManagement {
     public int updateEndAtByEmp(Long attendanceId, Long empId, LocalDateTime endAt) {
         Attendance attendance = findAttendanceById(attendanceRepository, attendanceId);
         Emp emp = findEmpById(empRepository, empId);
+        emp.ensureActive();
         state(attendance.getEmp().equals(emp), "본인 근태만 퇴근 처리가능");
 
         attendance.recordEndAtByEmp(endAt);
@@ -62,9 +64,11 @@ public class AttendanceManageService implements AttendanceManagement {
     public int updateAttendanceByDeptManager(EditAttendanceByDeptManagerParam param) {
         int result = 1;
         Attendance attendance = findAttendanceById(attendanceRepository, param.attendanceId());
+        attendance.getEmp().ensureActive();
+
         Emp editor = findEmpById(empRepository, param.editorId());
 
-        int requiredWorkHours = port.getWorkHours() - port.getBreakHours();
+        int requiredWorkHours = companyPolicy.getWorkHours() - companyPolicy.getBreakHours();
 
         AttendanceStatus status = param.status();
         boolean shouldRecalculateStatus =

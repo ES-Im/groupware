@@ -1,7 +1,6 @@
 package com.haruon.groupware.domain.empInfo;
 
 import com.haruon.groupware.domain.AbstractFileEntity;
-import com.haruon.groupware.domain.empInfo.dto.EmpFileParam;
 import com.haruon.groupware.domain.empInfo.enums.FileType;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -29,19 +28,31 @@ public class EmpFile extends AbstractFileEntity {
     private Boolean isActive;
 
 
-    static EmpFile addFile(Emp emp,EmpFileParam request) {
+    static EmpFile addFile(
+            Emp emp,
+            FileType fileType,
+            String mimeType,
+            String originalName,
+            String extension,
+            Long fileSize
+    ) {
         EmpFile empFile = new EmpFile();
 
         empFile.storedName = UUID.randomUUID().toString();
         empFile.isActive = true;
 
         empFile.emp = requireNonNull(emp);
-        empFile.fileType = requireNonNull(request.fileType());
-        empFile.originalName = requireNonNull(request.fileParam().originalName());
-        empFile.extension = requireNonNull(request.fileParam().extension());
-        empFile.fileSize = requireNonNull(request.fileParam().fileSize());
+        empFile.fileType = requireNonNull(fileType);
+        empFile.originalName = requireNonNull(originalName);
+        empFile.extension = requireNonNull(extension);
+        empFile.fileSize = requireNonNull(fileSize);
+        empFile.mimeType = requireNonNull(mimeType);
 
         return empFile;
+    }
+
+    void changeFileType(FileType fileType) {
+        this.fileType = requireNonNull(fileType);
     }
 
     void activateFile() {

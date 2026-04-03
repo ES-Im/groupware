@@ -8,4 +8,12 @@ import java.util.Optional;
 public interface EmpRepository extends Repository<Emp, Long>  {
 
     Optional<Emp> findById(Long id);
+
+    Emp save(Emp register);
+
+    boolean existsByLoginId(String loginId);
+
+    boolean existsByEmpNo(String empNo);
+
+
 }

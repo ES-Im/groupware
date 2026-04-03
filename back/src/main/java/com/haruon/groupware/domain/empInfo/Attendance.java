@@ -56,6 +56,29 @@ public class Attendance extends AbstractEntity {
     @Nullable
     private String editReason;
 
+    // 출근찍을때 기록
+    public static Attendance registerAttendanceByEmp(Emp emp, LocalDateTime startAt) {
+        Attendance attendance = new Attendance();
+
+        attendance.emp = requireNonNull(emp);
+        attendance.attendanceDate = requireNonNull(startAt.toLocalDate());
+        attendance.startAt = requireNonNull(startAt.toLocalTime());
+
+        return attendance;
+    }
+
+    // 퇴근찍을때 객체 수정
+    public int recordEndAtByEmp(LocalDateTime endAt) {
+        state(this.startAt!= null ,"당일 출근기록 없음");
+        state(endAt != null, "퇴근시각 미입력");
+        state(endAt.toLocalDate().equals(this.attendanceDate), "같은 일자인 근태 퇴근기록만 가능");
+        state(!endAt.toLocalTime().isBefore(this.startAt), "퇴근시각은 출근시각보다 빠를 수 없음");
+
+        this.endAt = endAt.toLocalTime();
+
+        return 1;
+    }
+
     // 시스템부서담당자가 수정
     public void changeAttendanceByDeptManager(
             @Nullable LocalTime startAt, @Nullable LocalTime endAt,
@@ -112,26 +135,6 @@ public class Attendance extends AbstractEntity {
 
         this.approvedBy = approver;
         this.approvedAt = approvedAt;
-    }
-
-    // 출근찍을때 기록
-    public static Attendance registerAttendanceByEmp(Emp emp, LocalDateTime startAt) {
-        Attendance attendance = new Attendance();
-
-        attendance.emp = requireNonNull(emp);
-        attendance.attendanceDate = requireNonNull(startAt.toLocalDate());
-        attendance.startAt = requireNonNull(startAt.toLocalTime());
-
-        return attendance;
-    }
-
-    // 퇴근찍을때 객체 수정
-    public void recordEndAtByEmp(LocalDateTime endAt) {
-        state(this.startAt!= null ,"당일 출근기록 없음");
-        state(endAt != null, "퇴근시각 미입력");
-        state(!endAt.toLocalTime().isBefore(this.startAt), "퇴근시각은 출근시각보다 빠를 수 없음");
-
-        this.endAt = endAt.toLocalTime();
     }
 
     // 마감용 상태 변경 메서드

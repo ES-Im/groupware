@@ -1,4 +1,4 @@
-package com.haruon.groupware.domain.empInfo.dto;
+package com.haruon.groupware.application.empInfo.empService.dto.param;
 
 import com.haruon.groupware.domain.empInfo.Dept;
 import com.haruon.groupware.domain.empInfo.enums.PositionCode;
@@ -24,6 +24,7 @@ public record EmpBelongingsParam(
 
         @Nullable
         LocalDate endAt
+
 ) {
     public EmpBelongingsParam {
         if(startAt != null && endAt != null && endAt.isAfter(startAt)) {

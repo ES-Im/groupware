@@ -1,4 +1,4 @@
-package com.haruon.groupware.domain.empInfo.dto;
+package com.haruon.groupware.application.empInfo.empService.dto;
 
 import com.haruon.groupware.domain.empInfo.enums.SystemRoleCode;
 import jakarta.validation.constraints.Pattern;
@@ -7,6 +7,7 @@ import org.jspecify.annotations.Nullable;
 
 import static com.haruon.groupware.domain.shared.RegexpUtil.EXTENSION_NO_PATTERN;
 import static com.haruon.groupware.domain.shared.RegexpUtil.EXTENSION_NO_PATTERN_MESSAGE;
+import static java.util.Objects.requireNonNull;
 import static org.springframework.util.Assert.state;
 
 /* 권한 : `Emp.SystemRoleCode` = `DEPT_MANAGER`
@@ -14,7 +15,9 @@ import static org.springframework.util.Assert.state;
  *  제한된 시스템 권한, 내선번호 수정 가능
  */
 @Builder
-public record EmpDeptManagerUpdateParam(
+public record EmpDeptManagerUpdateRequest(
+
+        Long id,
 
         @Nullable
         SystemRoleCode systemRoleCode,
@@ -28,7 +31,8 @@ public record EmpDeptManagerUpdateParam(
 
 ) {
 
-    public EmpDeptManagerUpdateParam {
+    public EmpDeptManagerUpdateRequest {
+        requireNonNull(id, "사원의 id(PK) 필수");
         state(systemRoleCode != null || extensionNo != null, "변경된 정보가 없습니다.");
 
         if (systemRoleCode != null

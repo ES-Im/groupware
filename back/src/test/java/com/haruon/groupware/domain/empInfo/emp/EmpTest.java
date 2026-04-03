@@ -1,14 +1,16 @@
 package com.haruon.groupware.domain.empInfo.emp;
 
+import com.haruon.groupware.domain.empInfo.Dept;
 import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.empInfo.EmpBelongings;
 import com.haruon.groupware.domain.empInfo.EmpFile;
-import com.haruon.groupware.domain.empInfo.dto.*;
 import com.haruon.groupware.domain.empInfo.enums.EmpStatus;
 import com.haruon.groupware.domain.empInfo.enums.FileType;
 import com.haruon.groupware.domain.empInfo.enums.PositionCode;
 import com.haruon.groupware.domain.empInfo.enums.SystemRoleCode;
+import com.haruon.groupware.domain.shared.Email;
 import com.haruon.groupware.domain.shared.EmpFixture;
+import lombok.Builder;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -17,6 +19,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDate;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static com.haruon.groupware.domain.shared.DeptFixture.getDept;
@@ -35,7 +38,7 @@ class EmpTest {
         
         assertThat(pendingEmp.getStatus()).isEqualTo(EmpStatus.PENDING);
         assertThat(pendingEmp.getEmpNo()).isNotNull();
-        assertThat(pendingEmp.getEmpId()).isNotNull();
+        assertThat(pendingEmp.getLoginId()).isNotNull();
         assertThat(pendingEmp.getEmpName()).isNotNull();
         assertThat(pendingEmp.getEmpPassword()).isNotNull();
     }
@@ -71,7 +74,7 @@ class EmpTest {
     @DisplayName("파일 삭제 테스트")
     void removeFile_success() {
         Emp approvedEmp = EmpFixture.getApprovedEmp();
-        EmpFile addedFile = addFileWithType(approvedEmp, FileType.PROFILE_PICTURE, approvedEmp.getEmpPassword());
+        EmpFile addedFile = addFileWithType(approvedEmp, FileType.PROFILE_PICTURE);
         ReflectionTestUtils.setField(addedFile, "id", 1L);
 
         approvedEmp.removeFile(addedFile.getId());
@@ -102,11 +105,10 @@ class EmpTest {
         Emp emp = getApprovedEmp();
 
         emp.changeInfoBySelf(
-                EmpSelfUpdateParam.builder()
-                    .inputPassword(emp.getEmpPassword())
-                    .extensionNo("123-4567")
-                    .build()
-                , encoder);
+                "123-4567",
+                emp.getEmpPassword(),
+                null,
+                encoder);
 
         assertThat(emp.getExtensionNo()).isEqualTo("123-4567");
     }
@@ -118,11 +120,10 @@ class EmpTest {
         String oldPassword = emp.getEmpPassword();
 
         emp.changeInfoBySelf(
-                EmpSelfUpdateParam.builder()
-                    .inputPassword(oldPassword)
-                    .newRawPassword("!Qw123456")
-                    .build()
-                , encoder);
+                null,
+                oldPassword,
+                "!Qw123456",
+                encoder);
 
         assertThat(emp.getEmpPassword()).isNotEqualTo(oldPassword);
     }
@@ -132,10 +133,13 @@ class EmpTest {
     void add_emp_file_by_Self_success() {
         Emp emp = getApprovedEmp();
 
-        emp.changeInfoBySelf(EmpSelfUpdateParam.builder()
-                .inputPassword(currentPassword)
-                .fileRequest(fileParam(FileType.PROFILE_PICTURE))
-                .build(), encoder);
+        emp.changeEmpFile(
+                FileType.PROFILE_PICTURE,
+                "image/png",
+                "원본",
+                "png",
+                ((long) 1024 * 1024)
+        );
 
         assertThat(emp.getEmpFiles()).hasSize(1);
         assertThat(emp.getEmpFiles().getFirst().getFileType()).isEqualTo(FileType.PROFILE_PICTURE);
@@ -147,8 +151,8 @@ class EmpTest {
     void add_emp_file_by_Self_success_and_deactivate_same_type_others() {
         Emp emp = getApprovedEmp();
 
-        addFileWithType(emp, FileType.PROFILE_PICTURE, currentPassword);
-        addFileWithType(emp, FileType.PROFILE_PICTURE, currentPassword);
+        addFileWithType(emp, FileType.PROFILE_PICTURE);
+        addFileWithType(emp, FileType.PROFILE_PICTURE);
 
         assertThat(emp.getEmpFiles()).hasSize(2);
         assertThat(emp.getEmpFiles().stream().filter(EmpFile::getIsActive)).hasSize(1);
@@ -160,10 +164,11 @@ class EmpTest {
         Emp emp = getApprovedEmp();
 
         assertThatThrownBy(() ->
-                emp.changeInfoBySelf(EmpSelfUpdateParam.builder()
-                        .newRawPassword("!Qw123456")
-                        .extensionNo("000-0000")
-                        .build(), encoder)
+                emp.changeInfoBySelf(
+                        "!Qw123456",
+                        null,
+                        "newPassword!Q2",
+                        encoder)
         ).isInstanceOf(NullPointerException.class);
     }
 
@@ -173,9 +178,7 @@ class EmpTest {
         Emp emp = getApprovedEmp();
 
         emp.changeInfoByDeptManager(
-                EmpDeptManagerUpdateParam.builder()
-                        .systemRoleCode(SystemRoleCode.DEPT_MANAGER)
-                        .build()
+                null, SystemRoleCode.DEPT_MANAGER
         );
     }
 
@@ -186,9 +189,7 @@ class EmpTest {
 
         assertThatThrownBy(() ->
                 emp.changeInfoByDeptManager(
-                        EmpDeptManagerUpdateParam.builder()
-                                .systemRoleCode(SystemRoleCode.ADMIN)
-                                .build()
+                        null, SystemRoleCode.ADMIN
                 )
         ).isInstanceOf(IllegalArgumentException.class);
     }
@@ -199,99 +200,196 @@ class EmpTest {
         Emp emp = getApprovedEmp();
 
         emp.changeInfoByDeptManager(
-                EmpDeptManagerUpdateParam.builder()
-                        .extensionNo("111-1111")
-                        .build()
+                "111-1111", null
         );
     }
 
     private static Stream<Arguments> empUpdateByAdminParams() {
         return Stream.of(
-                Arguments.of("이름을 변경할 수 있다.", EmpAdminUpdateParam.builder().companyDomain("@haruon.com").empName("EditedName").build()),
-                Arguments.of("사번을 변경할 수 있다.", EmpAdminUpdateParam.builder().companyDomain("@haruon.com").empId("202603999").build()),
-                Arguments.of("비밀번호를 변경할 수 있다.", EmpAdminUpdateParam.builder().companyDomain("@haruon.com").newRawPassword(")p9o8i7u6y").build()),
-                Arguments.of("내선번호를 변경할 수 있다.", EmpAdminUpdateParam.builder().companyDomain("@haruon.com").extensionNo("999-9999").build()),
-                Arguments.of("입사일자를 변경할 수 있다.", EmpAdminUpdateParam.builder().companyDomain("@haruon.com").hireAt(LocalDate.of(2025,1,1)).build()),
-                Arguments.of("직무상태를 변경할 수 있다.", EmpAdminUpdateParam.builder().companyDomain("@haruon.com").empStatus(EmpStatus.SUSPENDED).build())
+                Arguments.of("이름을 변경할 수 있다.", EmpAdminUpdateTestParam.builder()
+                        .companyDomain("@haruon.com")
+                        .empName("EditedName")
+                        .build()),
+
+                Arguments.of("사번을 변경할 수 있다.", EmpAdminUpdateTestParam.builder()
+                        .companyDomain("@haruon.com")
+                        .empId("202603999")
+                        .build()),
+
+                Arguments.of("비밀번호를 변경할 수 있다.", EmpAdminUpdateTestParam.builder()
+                        .companyDomain("@haruon.com")
+                        .newRawPassword(")p9o8i7u6y")
+                        .build()),
+
+                Arguments.of("내선번호를 변경할 수 있다.", EmpAdminUpdateTestParam.builder()
+                        .companyDomain("@haruon.com")
+                        .extensionNo("999-9999")
+                        .build()),
+
+                Arguments.of("입사일자를 변경할 수 있다.", EmpAdminUpdateTestParam.builder()
+                        .companyDomain("@haruon.com")
+                        .hireAt(LocalDate.of(2025, 1, 1))
+                        .build()),
+
+                Arguments.of("직무상태를 변경할 수 있다.", EmpAdminUpdateTestParam.builder()
+                        .companyDomain("@haruon.com")
+                        .empStatus(EmpStatus.SUSPENDED)
+                        .build()),
+
+                Arguments.of("시스템 권한을 변경할 수 있다.", EmpAdminUpdateTestParam.builder()
+                        .companyDomain("@haruon.com")
+                        .systemRoleCode(SystemRoleCode.ADMIN)
+                        .build())
         );
     }
+
     @ParameterizedTest(name = "{index} => 시스템총괄(ADMIN)은 {0}")
     @DisplayName("시스템 총괄 사원 기본정보 변경 성공 테스트")
     @MethodSource("empUpdateByAdminParams")
-    void change_basic_empInfo_ByAdmin(String description, EmpAdminUpdateParam params) {
-        Emp emp = getApprovedEmp(); 
-        emp.changeInfoByAdmin(params, encoder);
+    void change_basic_empInfo_ByAdmin(String description, EmpAdminUpdateTestParam params) {
+        // given
+        Emp emp = getApprovedEmp();
+
+        String beforeEmpName = emp.getEmpName();
+        String beforeEmpId = emp.getLoginId();
+        Email beforeEmail = emp.getEmail();
+        String beforeExtensionNo = emp.getExtensionNo();
+        EmpStatus beforeEmpStatus = emp.getStatus();
+        Set<SystemRoleCode> beforeSystemRoleCode = emp.getSystemRoles();
+        LocalDate beforeHiredAt = emp.getHiredAt();
+        String beforePassword = emp.getEmpPassword();
+
+        // when
+        emp.changeInfoByAdmin(
+                params.empName(),
+                params.empId(),
+                createEmail(params.empId(), params.companyDomain()),
+                params.newRawPassword(),
+                params.extensionNo(),
+                params.empStatus(),
+                params.systemRoleCode(),
+                params.hireAt(),
+                encoder
+        );
+
+        // then
+        if (params.empName() != null) {
+            assertThat(emp.getEmpName()).isEqualTo(params.empName());
+        } else {
+            assertThat(emp.getEmpName()).isEqualTo(beforeEmpName);
+        }
+
+        if (params.empId() != null) {
+            assertThat(emp.getLoginId()).isEqualTo(params.empId());
+            assertThat(emp.getEmail().email()).isEqualTo(params.empId() + "@" + params.companyDomain());
+        } else {
+            assertThat(emp.getLoginId()).isEqualTo(beforeEmpId);
+            assertThat(emp.getEmail()).isEqualTo(beforeEmail);
+        }
+
+        if (params.newRawPassword() != null) {
+            assertThat(encoder.matches(params.newRawPassword(), emp.getEmpPassword())).isTrue();
+        } else {
+            assertThat(emp.getEmpPassword()).isEqualTo(beforePassword);
+        }
+
+        if (params.extensionNo() != null) {
+            assertThat(emp.getExtensionNo()).isEqualTo(params.extensionNo());
+        } else {
+            assertThat(emp.getExtensionNo()).isEqualTo(beforeExtensionNo);
+        }
+
+        if (params.empStatus() != null) {
+            assertThat(emp.getStatus()).isEqualTo(params.empStatus());
+        } else {
+            assertThat(emp.getStatus()).isEqualTo(beforeEmpStatus);
+        }
+
+        if (params.systemRoleCode() != null) {
+            assertThat(emp.getSystemRoles()).isEqualTo(Set.of(params.systemRoleCode()));
+        } else {
+            assertThat(emp.getSystemRoles()).isEqualTo(beforeSystemRoleCode);
+        }
+
+        if (params.hireAt() != null) {
+            assertThat(emp.getHiredAt()).isEqualTo(params.hireAt());
+        } else {
+            assertThat(emp.getHiredAt()).isEqualTo(beforeHiredAt);
+        }
     }
 
+    private Email createEmail(String empId, String companyDomain) {
+        if (empId == null || companyDomain == null) {
+            return null;
+        }
+        return new Email(empId + "@" +  companyDomain);
+    }
+
+    @Builder
+    private record EmpAdminUpdateTestParam(
+            String empName,
+            String empId,
+            String newRawPassword,
+            String extensionNo,
+            EmpStatus empStatus,
+            SystemRoleCode systemRoleCode,
+            LocalDate hireAt,
+            String companyDomain
+    ) {}
+
     @Test
-    @DisplayName("시스템 총괄은 사원 파일을 비활성화할 수 있다")
+    @DisplayName("파일을 비활성화 성공 테스트")
     void deactivate_emp_file_by_admin() {
         Emp emp = getApprovedEmp();
-        EmpFile file1 = addFileWithType(emp, FileType.PROFILE_PICTURE, currentPassword);
-        ReflectionTestUtils.setField(file1, "id", 1L);
+        EmpFile file = addFileWithType(emp, FileType.PROFILE_PICTURE);
+        ReflectionTestUtils.setField(file, "id", 1L);
 
-        emp.changeInfoByAdmin(EmpAdminUpdateParam.builder()
-                        .changeFileActive(EmpFileStatusChangeParam.builder()
-                                .id(1L)
-                                .targetActive(false)
-                                .build())
-                        .companyDomain("@haruon.com")
-                        .build(),
-                null);
+        emp.changeFileActiveStatus(1L, false);
 
-        assertThat(file1.getIsActive()).isFalse();
+        assertThat(file.getIsActive()).isFalse();
     }
 
     @Test
     @DisplayName("같은 타입 파일을 활성화하면 기존 활성 파일은 비활성화된다")
     void activate_emp_file_by_admin_and_deactivate_same_type_others() {
         Emp emp = getApprovedEmp();
-        EmpFile file1 = addFileWithType(emp, FileType.PROFILE_PICTURE, currentPassword);
-        EmpFile file2 = addFileWithType(emp, FileType.PROFILE_PICTURE, currentPassword);
+        EmpFile file1 = addFileWithType(emp, FileType.PROFILE_PICTURE);
+        EmpFile file2 = addFileWithType(emp, FileType.PROFILE_PICTURE);
 
         ReflectionTestUtils.setField(file1, "id", 1L);
-        ReflectionTestUtils.setField(file2, "id", 2L);
+        assertThat(file1.getIsActive()).isFalse();  // deactivated when file2 added
 
-        emp.changeInfoByAdmin(EmpAdminUpdateParam.builder()
-                        .changeFileActive(EmpFileStatusChangeParam.builder()
-                                .id(1L)
-                                .targetActive(true)
-                                .build())
-                        .companyDomain("@haruon.com")
-                        .build(),
-                null);
+        ReflectionTestUtils.setField(file2, "id", 2L);
+        assertThat(file2.getIsActive()).isTrue();
+
+        emp.changeFileActiveStatus(1L, true);
 
         assertThat(file1.getIsActive()).isTrue();
         assertThat(file2.getIsActive()).isFalse();
     }
 
     @Test
-    @DisplayName("시스템 총괄은 사원의 소속정보를 등록할 수 있다.")
+    @DisplayName("사원의 소속정보를 등록 성공테스트")
     void add_emp_belongs_ByAdmin() {
         Emp emp = getApprovedEmp();
+        Dept dept = getDept();
 
-        EmpBelongingsParam empBelongingsParam = EmpBelongingsParam.builder()
-                .dept(getDept())
-                .position(PositionCode.STAFF)
-                .isPrimary(true)
-                .startAt(LocalDate.of(2026, 1, 1))
-                .build();
-
-        emp.changeInfoByAdmin(
-                EmpAdminUpdateParam.builder()
-                        .belongingsParam(empBelongingsParam)
-                        .companyDomain("@haruon.com")
-                        .build()
-                , null);
+        emp.changeBelongingsByAdmin(
+                dept,
+                PositionCode.STAFF,
+                true,
+                LocalDate.of(2026, 1, 1),
+                null
+        );
 
         assertThat(emp.getEmpBelongings())
                 .singleElement()
                 .satisfies(belongings -> {
-                    assertThat(belongings.getDept()).isEqualTo(empBelongingsParam.dept());
-                    assertThat(belongings.getPosition()).isEqualTo(empBelongingsParam.position());
-                    assertThat(belongings.isPrimary()).isEqualTo(empBelongingsParam.isPrimary());
-                    assertThat(belongings.getStartAt()).isEqualTo(empBelongingsParam.startAt());
-                    assertThat(belongings.getEndAt()).isEqualTo(empBelongingsParam.endAt());
+                    assertThat(belongings.getDept()).isNotNull();
+                    assertThat(belongings.getPosition()).isEqualTo(PositionCode.STAFF);
+                    assertThat(belongings.isPrimary()).isEqualTo(true);
+                    assertThat(belongings.getStartAt()).isEqualTo(LocalDate.of(2026, 1, 1));
+                    assertThat(belongings.getEndAt()).isNull();
                 });
     }
 
@@ -302,14 +400,13 @@ class EmpTest {
 
         addBelongings(emp);
 
-        emp.changeInfoByAdmin(
-                EmpAdminUpdateParam.builder()
-                        .belongingsParam(EmpBelongingsParam.builder()
-                                .isPrimary(false)
-                                .build())
-                .companyDomain("@haruon.com")
-                .build()
-        ,null);
+        emp.changeBelongingsByAdmin(
+                null,
+                null,
+                false,
+                null,
+                null
+        );
 
         assertThat(emp.getEmpBelongings()).singleElement()
                 .satisfies(e -> {
@@ -322,17 +419,24 @@ class EmpTest {
     void validate_Password_success() {
         Emp emp =  getApprovedEmp();
 
-        EmpAdminUpdateParam adminUpdateParam = EmpAdminUpdateParam.builder()
-                .newRawPassword("!Q2w3e4r5t_")
-                .companyDomain("@haruon.com")
-                .build();
-        emp.changeInfoByAdmin(adminUpdateParam, encoder);
+        emp.changeInfoByAdmin(
+                null,
+                null,
+                null,
+                "!Q2w3e4r5t_",
+                null,
+                null,
+                null,
+                null,
+                encoder
+        );
 
-        EmpSelfUpdateParam selfUpdateParam = EmpSelfUpdateParam.builder()
-                .newRawPassword("!Q2w3e4r5t__")
-                .inputPassword("!Q2w3e4r5t_")
-                .build();
-        emp.changeInfoBySelf(selfUpdateParam, encoder);
+        emp.changeInfoBySelf(
+                null,
+                "!Q2w3e4r5t_",
+                "!Q2w3e4r5t__",
+                encoder
+        );
     }
 
     @Test
@@ -341,7 +445,7 @@ class EmpTest {
         Emp emp = getApprovedEmp();
 
         assertThatThrownBy(() ->
-                emp.changeInfoBySelf(EmpSelfUpdateParam.builder().newRawPassword(currentPassword).inputPassword(currentPassword).build(), encoder)
+                emp.changeInfoBySelf(null, currentPassword, currentPassword, encoder)
         ).isInstanceOf(IllegalStateException.class);
     }
 
@@ -353,26 +457,29 @@ class EmpTest {
 
         assertThatThrownBy(() ->
             registeredEmp.changeInfoBySelf(
-                    EmpSelfUpdateParam.builder()
-                        .extensionNo("111-1111")
-                        .build()
-                    , encoder)
+                    "111-1111",
+                    currentPassword,
+                    null,
+                    encoder)
         ).isInstanceOf(IllegalStateException.class);
 
         assertThatThrownBy(() ->
             registeredEmp.changeInfoByDeptManager(
-                    EmpDeptManagerUpdateParam.builder()
-                        .extensionNo("111-1111")
-                        .build()
-            )
+                    "111-1111",
+                    null)
         ).isInstanceOf(IllegalStateException.class);
 
         assertThatThrownBy(() ->
             registeredEmp.changeInfoByAdmin(
-                    EmpAdminUpdateParam.builder()
-                        .extensionNo("111-1111")
-                        .build()
-                    , null)
+                    null,
+                    null,
+                    null,
+                    null,
+                    "111-1111",
+                    null,
+                    null,
+                    null,
+                    null)
         ).isInstanceOf(IllegalStateException.class);
     }
 
@@ -383,23 +490,29 @@ class EmpTest {
 
         assertThatThrownBy(() ->
             approvedEmp.changeInfoBySelf(
-                    EmpSelfUpdateParam.builder()
-                            .build()
-                    , encoder)
+                    null,
+                    currentPassword,
+                    null,
+                    encoder)
         ).isInstanceOf(IllegalStateException.class);
 
         assertThatThrownBy(() ->
             approvedEmp.changeInfoByDeptManager(
-                    EmpDeptManagerUpdateParam.builder()
-                    .build()
-            )
+                    null,
+                    null)
         ).isInstanceOf(IllegalStateException.class);
 
         assertThatThrownBy(() ->
             approvedEmp.changeInfoByAdmin(
-                    EmpAdminUpdateParam.builder()
-                            .build()
-                    , null)
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null)
         ).isInstanceOf(IllegalStateException.class);
     }
 }

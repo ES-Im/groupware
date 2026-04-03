@@ -1,9 +1,9 @@
 package com.haruon.groupware.domain.empInfo;
 
 import com.haruon.groupware.domain.AbstractEntity;
-import com.haruon.groupware.domain.empInfo.dto.*;
 import com.haruon.groupware.domain.empInfo.enums.EmpStatus;
 import com.haruon.groupware.domain.empInfo.enums.FileType;
+import com.haruon.groupware.domain.empInfo.enums.PositionCode;
 import com.haruon.groupware.domain.empInfo.enums.SystemRoleCode;
 import com.haruon.groupware.domain.shared.Email;
 import jakarta.persistence.*;
@@ -31,14 +31,14 @@ public class Emp extends AbstractEntity {
     private String empName;
 
     @Column(nullable = false)
-    private String empId;
+    private String loginId;
 
     @Column(nullable = false)
     private String empPassword;
 
     @Embedded
     @AttributeOverride(name="email", column = @Column(name = "company_email", nullable = false, unique = true))
-    private Email companyEmail;
+    private Email email;
 
     @Nullable
     private String extensionNo;
@@ -65,34 +65,38 @@ public class Emp extends AbstractEntity {
     @OneToMany(mappedBy = "emp", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<EmpBelongings> empBelongings = new ArrayList<>();
 
-    public static Emp register(EmpRegisterParam request, PasswordEncoder passwordEncoder) {
+    public static Emp register(
+            String empNo,
+            String empName,
+            String loginId,
+            String rawPassword,
+            Email email,
+            PasswordEncoder passwordEncoder)
+    {
         Emp emp = new Emp();
 
-        emp.empNo = requireNonNull(request.empNo());
-        emp.empName = requireNonNull(request.empName());
-        emp.empId = requireNonNull(request.empId());
-        emp.empPassword = requireNonNull(passwordEncoder.encode(request.rawPassword()));
+        emp.empNo = requireNonNull(empNo);
+        emp.empName = requireNonNull(empName);
+        emp.loginId = requireNonNull(loginId);
+        emp.empPassword = requireNonNull(passwordEncoder.encode(rawPassword));
+        emp.email = requireNonNull(email);
 
         emp.status = EmpStatus.PENDING;
 
         return emp;
     }
 
-    public void removeFile(Long fileId) {
-        EmpFile targetFile = findEmpFile(fileId);
-
-        this.empFiles.remove(targetFile);
-    }
-
-    public void approveRegister(LocalDate hiredAt) {
+    public int approveRegister(LocalDate hiredAt) {
         state(this.status == EmpStatus.PENDING, "PENDING 상태가 아닙니다.");
 
         this.status = EmpStatus.ACTIVE;
         this.systemRoles.add(SystemRoleCode.EMPLOYEE);
         this.hiredAt = requireNonNull(hiredAt);
+
+        return 1;
     }
 
-    public void changeResignedEmpInfoByAdmin(LocalDate resignedAt) {
+    public int changeResignedEmpInfoByAdmin(LocalDate resignedAt) {
         state(resignedAt != null, "퇴사일이 입력되지 않았습니다");
         state(hiredAt != null && resignedAt.isAfter(this.hiredAt), "퇴사일은 입사일 이후여야 합니다.");
 
@@ -104,63 +108,181 @@ public class Emp extends AbstractEntity {
                 e.markEnd(resignedAt);
             }
         });
+
+        return 1;
     }
 
-    public void changeInfoBySelf(EmpSelfUpdateParam request, PasswordEncoder encoder) {
-        checkActiveEmp();
-        checkPassword(request.inputPassword(), encoder);
+    public int changeEmpFile(
+            FileType fileType,
+            String mimeType,
+            String originalName,
+            String extension,
+            Long fileSize) {
+        ensureActive();
 
-        if(request.extensionNo() != null) changeExtension(request.extensionNo());
+        deactivateFilesByType(fileType);
 
-        if(request.newRawPassword() != null) changePassword(request.newRawPassword(), encoder);
+        this.empFiles.add(EmpFile.addFile(
+                this,
+                fileType,
+                mimeType,
+                originalName,
+                extension,
+                fileSize
+        ));
 
-        if(request.fileRequest() != null) addFile(request.fileRequest());
+        return 1;
+    }
+
+    public int changeFileActiveStatus(Long fileId, boolean active) {
+        ensureActive();
+        
+        EmpFile targetFile = findEmpFile(fileId);
+
+        if (active) {
+            FileType targetType = targetFile.getFileType();
+
+            this.empFiles.stream()
+                    .filter(file -> file.getFileType() == targetType)
+                    .filter(file -> !file.getId().equals(fileId))
+                    .forEach(EmpFile::deactivateFile);
+
+            targetFile.activateFile();
+        } else {
+            targetFile.deactivateFile();
+        }
+
+        return 1;
+    }
+
+    public int changeBelongingsByAdmin (
+            @Nullable Dept dept,
+            @Nullable PositionCode position,
+            @Nullable Boolean isPrimary,
+            @Nullable LocalDate startAt,
+            @Nullable LocalDate endAt
+    ) {
+        ensureActive();
+        
+        boolean registerCase =
+                dept != null
+                        && position != null
+                        && isPrimary != null
+                        && startAt != null;
+
+        boolean updateCase =
+                dept == null
+                        && (position != null
+                        || isPrimary != null
+                        || startAt != null
+                        || endAt != null);
+
+        if (registerCase) {
+            registerEmpBelonging(dept, position, startAt, isPrimary);
+            return 1;
+        }
+
+        if (updateCase) {
+            updateCurrentBelonging(position, isPrimary, startAt, endAt);
+            return 1;
+        }
+
+        throw new IllegalArgumentException("소속 정보 요청 형식이 올바르지 않습니다.");
+    }
+
+    public int removeFile(Long fileId) {
+        EmpFile targetFile = findEmpFile(fileId);
+
+        this.empFiles.remove(targetFile);
+
+        return 1;
     }
 
 
-    public void changeInfoByDeptManager(EmpDeptManagerUpdateParam request) {
-        checkActiveEmp();
 
-        if(request.extensionNo() != null) changeExtension(request.extensionNo());
+// -----------------------------------------------------------------------------------------------------------
+    public int changeInfoBySelf(
+            @Nullable String extensionNo,
+            String currentPassword,
+            @Nullable String newRawPassword,
+            PasswordEncoder encoder
+    ) {
+        ensureActive();
+        checkPassword(currentPassword, encoder);
 
-        if(request.systemRoleCode() != null) changeGrade(request.systemRoleCode());
+        boolean hasChanges = extensionNo != null || newRawPassword != null;
+        state(hasChanges, "변경할 내용이 없습니다.");
 
+        if(extensionNo != null) changeExtension(extensionNo);
+
+        if(newRawPassword != null) changePassword(newRawPassword, encoder);
+
+        return 1;
     }
 
-    public void changeInfoByAdmin(EmpAdminUpdateParam request, @Nullable PasswordEncoder encoder) {
-        checkActiveEmp();
+    public int changeInfoByDeptManager(
+            @Nullable String extensionNo,
+            @Nullable SystemRoleCode systemRoleCode
+    ) {
+        ensureActive();
 
-        if(request.empName() != null) changeEmpName(request.empName());
+        if(systemRoleCode != null && systemRoleCode.getGrade() > SystemRoleCode.DEPT_MANAGER.getGrade()) {
+            throw new IllegalArgumentException("부서시스템담당자는 부서시스템이상의 시스템권한을 부여할 수 없습니다.");
+        }
 
-        if(request.empId() != null) changeEmpIdAndEmail(request.empId(), request.companyDomain());
+        boolean hasChanges = extensionNo != null || systemRoleCode != null;
+        state(hasChanges, "변경할 내용이 없습니다.");
 
-        if(request.newRawPassword() != null) changePassword(request.newRawPassword(), encoder);
+        if(extensionNo != null) changeExtension(extensionNo);
 
-        if(request.extensionNo() != null) changeExtension(request.extensionNo());
+        if(systemRoleCode != null) changeGrade(systemRoleCode);
 
-        if(request.empStatus() != null) changeEmpStatus(request.empStatus());
-
-        if(request.systemRoleCode() != null) changeGrade(request.systemRoleCode());
-
-        if(request.hireAt() != null) this.hiredAt = request.hireAt();
-
-        if(request.changeFileActive() != null) changeFileActiveStatus(request.changeFileActive());
-
-        if(request.belongingsParam() != null) changeBelongingsByAdmin(request.belongingsParam());
-
+        return 1;
     }
+
+    public int changeInfoByAdmin(
+            @Nullable String empName,
+            @Nullable String loginId,
+            @Nullable Email email,
+            @Nullable String newRawPassword,
+            @Nullable String extensionNo,
+            @Nullable EmpStatus empStatus,
+            @Nullable SystemRoleCode systemRoleCode,
+            @Nullable LocalDate hiredAt,
+            @Nullable PasswordEncoder encoder
+    ) {
+        ensureActive();
+
+        boolean hasChanges = empName != null || loginId != null || email != null || newRawPassword != null ||
+                extensionNo != null || empStatus != null || systemRoleCode != null || hiredAt != null;
+        state(hasChanges, "변경할 내용이 없습니다.");
+
+        if(empName != null) changeEmpName(empName);
+
+        if(loginId != null) changeLoginIdAndEmail(loginId, email);
+
+        if(newRawPassword != null) changePassword(newRawPassword, encoder);
+
+        if(extensionNo != null) changeExtension(extensionNo);
+
+        if(empStatus != null) changeEmpStatus(empStatus);
+
+        if(systemRoleCode != null) changeGrade(systemRoleCode);
+
+        if(hiredAt != null) this.hiredAt = hiredAt;
+
+        return 1;
+    }
+// -----------------------------------------------------------------------------------------------------------
+
 
     private void changeEmpStatus(EmpStatus newEmpStatus) {
         this.status = newEmpStatus;
     }
 
-    public String companyEmail() {
-        return companyEmail.toString();
-    }
-
-    private void changeEmpIdAndEmail(String newEmpId, String companyDomain) {
-        this.empId = newEmpId;
-        this.companyEmail = new Email(newEmpId + companyDomain);
+    private void changeLoginIdAndEmail(String newEmpId, Email email) {
+        this.loginId = newEmpId;
+        this.email = email;
     }
 
     private void changeEmpName(String newEmpName) {
@@ -168,13 +290,7 @@ public class Emp extends AbstractEntity {
     }
 
     private void changeGrade(SystemRoleCode newSystemRoleCode) {
-        List<SystemRoleCode> deleteTarget = systemRoles.stream()
-                .filter(r -> !r.isDeptType())
-                .filter(r -> r.getGrade() > newSystemRoleCode.getGrade())
-                .toList();
-
-        deleteTarget.forEach(systemRoles::remove);
-
+        this.systemRoles.clear();
         this.systemRoles.add(newSystemRoleCode);
     }
 
@@ -193,76 +309,10 @@ public class Emp extends AbstractEntity {
         this.extensionNo = newExtensionNo;
     }
 
-    private void checkActiveEmp() {
+    public void ensureActive() {
         state(this.status == EmpStatus.ACTIVE, "ACTIVE 상태가 아닙니다.");
     }
 
-
-    private void changeBelongingsByAdmin(EmpBelongingsParam param) {
-        boolean registerCase =
-                param.dept() != null
-                        && param.position() != null
-                        && param.isPrimary() != null
-                        && param.startAt() != null;
-
-        boolean updateCase =
-                param.dept() == null
-                        && (param.position() != null
-                        || param.isPrimary() != null
-                        || param.startAt() != null
-                        || param.endAt() != null);
-
-        if (registerCase) {
-            registerEmpBelonging(param);
-            return;
-        }
-
-        if (updateCase) {
-            updateCurrentBelonging(param);
-            return;
-        }
-
-        throw new IllegalArgumentException("소속 정보 요청 형식이 올바르지 않습니다.");
-    }
-
-    private void registerEmpBelonging(EmpBelongingsParam param) {
-        if (Boolean.TRUE.equals(param.isPrimary())) {
-            this.empBelongings.forEach(EmpBelongings::unmarkPrimary);
-        }
-
-        EmpBelongings belonging = EmpBelongings.registerEmpBelonging(this, param);
-
-        if (param.endAt() != null) {
-            belonging.changeEndAt(param.endAt());
-        }
-
-        this.empBelongings.add(belonging);
-    }
-
-    private void updateCurrentBelonging(EmpBelongingsParam param) {
-        EmpBelongings currentBelonging = findCurrentPrimaryBelonging();
-
-        if (param.position() != null) {
-            currentBelonging.changePosition(param.position());
-        }
-
-        if (param.isPrimary() != null) {
-            if (param.isPrimary()) {
-                this.empBelongings.forEach(EmpBelongings::unmarkPrimary);
-                currentBelonging.markPrimary();
-            } else {
-                currentBelonging.unmarkPrimary();
-            }
-        }
-
-        if (param.startAt() != null) {
-            currentBelonging.changeStartAt(param.startAt());
-        }
-
-        if (param.endAt() != null) {
-            currentBelonging.changeEndAt(param.endAt());
-        }
-    }
 
     private EmpBelongings findCurrentPrimaryBelonging() {
         return this.empBelongings.stream()
@@ -278,12 +328,6 @@ public class Emp extends AbstractEntity {
                 .orElseThrow(() -> new IllegalArgumentException("대상 파일을 찾을 수 없습니다."));
     }
 
-    private void addFile(EmpFileParam newFile) {
-        deactivateFilesByType(newFile.fileType());
-
-        this.empFiles.add(EmpFile.addFile(this, newFile));
-    }
-
     private void deactivateFilesByType(FileType targetType) {
         this.empFiles.stream()
                 .filter(EmpFile::getIsActive)
@@ -291,21 +335,43 @@ public class Emp extends AbstractEntity {
                 .forEach(EmpFile::deactivateFile);
     }
 
-    private void changeFileActiveStatus(EmpFileStatusChangeParam param) {
-        EmpFile targetFile = findEmpFile(param.id());
+    private void registerEmpBelonging(
+            Dept dept,
+            PositionCode position,
+            LocalDate startAt,
+            Boolean isPrimary
+    ) {
+        if (Boolean.TRUE.equals(isPrimary)) {
+            this.empBelongings.forEach(EmpBelongings::unmarkPrimary);
+        }
 
-        if (param.targetActive()) {
-            FileType targetType = targetFile.getFileType();
+        EmpBelongings belonging = EmpBelongings.registerEmpBelonging(this, dept, position, startAt, isPrimary);
 
-            this.empFiles.stream()
-                    .filter(EmpFile::getIsActive)
-                    .filter(file -> file.getFileType() == targetType)
-                    .filter(file -> !file.getId().equals(param.id()))
-                    .forEach(EmpFile::deactivateFile);
+        this.empBelongings.add(belonging);
+    }
 
-            targetFile.activateFile();
-        } else {
-            targetFile.deactivateFile();
+    private void updateCurrentBelonging(PositionCode position, Boolean isPrimary, LocalDate startAt, LocalDate endAt) {
+        EmpBelongings currentBelonging = findCurrentPrimaryBelonging();
+
+        if (position != null) {
+            currentBelonging.changePosition(position);
+        }
+
+        if (isPrimary != null) {
+            if (isPrimary) {
+                this.empBelongings.forEach(EmpBelongings::unmarkPrimary);
+                currentBelonging.markPrimary();
+            } else {
+                currentBelonging.unmarkPrimary();
+            }
+        }
+
+        if (startAt != null) {
+            currentBelonging.changeStartAt(startAt);
+        }
+
+        if (endAt != null) {
+            currentBelonging.changeEndAt(endAt);
         }
     }
 

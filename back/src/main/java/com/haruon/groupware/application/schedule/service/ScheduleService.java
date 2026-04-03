@@ -2,7 +2,7 @@ package com.haruon.groupware.application.schedule.service;
 
 import com.haruon.groupware.application.CompanyPolicyPort;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
-import com.haruon.groupware.application.schedule.provided.ScheduleEditor;
+import com.haruon.groupware.application.schedule.provided.ScheduleEditing;
 import com.haruon.groupware.application.schedule.provided.ScheduleRegister;
 import com.haruon.groupware.application.schedule.required.ScheduleRepository;
 import com.haruon.groupware.application.schedule.service.dto.ManualScheduleParam;
@@ -30,7 +30,7 @@ import static java.util.Objects.requireNonNull;
 @AllArgsConstructor
 @Service
 @Transactional
-public class ScheduleService implements ScheduleRegister, ScheduleEditor {
+public class ScheduleService implements ScheduleRegister, ScheduleEditing {
 
     private final CompanyPolicyPort port;
     private final ScheduleRepository scheduleRepository;
@@ -72,6 +72,7 @@ public class ScheduleService implements ScheduleRegister, ScheduleEditor {
 
         for (Schedule targetSchedule : targetSchedules) {
             for (Emp emp : empList) {
+                emp.ensureActive();
                 result += targetSchedule.addParticipant(emp);
             }
         }
@@ -152,6 +153,7 @@ public class ScheduleService implements ScheduleRegister, ScheduleEditor {
             ManualScheduleParam manual,
             boolean isPublic
     ) {
+
         Long lastSourceId = scheduleRepository.findLastManualSourceId();
         Long nextSourceId = (lastSourceId == null) ? 1L : lastSourceId + 1;
 
@@ -271,6 +273,7 @@ public class ScheduleService implements ScheduleRegister, ScheduleEditor {
             boolean isPublic,
             Long sourceId
     ) {
+        scheduleOwner.ensureActive();
         List<Schedule> schedules = new ArrayList<>();
 
         long days = ChronoUnit.DAYS.between(startDate, endDate);

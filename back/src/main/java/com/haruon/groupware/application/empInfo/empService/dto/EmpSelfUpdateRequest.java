@@ -1,11 +1,15 @@
-package com.haruon.groupware.domain.empInfo.dto;
+package com.haruon.groupware.application.empInfo.empService.dto;
 
+import com.haruon.groupware.application.empInfo.empService.dto.param.EmpFileReplaceParam;
+import com.haruon.groupware.application.empInfo.empService.dto.param.EmpFileStatusChangeParam;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.Builder;
 import org.jspecify.annotations.Nullable;
 
 import static com.haruon.groupware.domain.shared.RegexpUtil.*;
+import static java.util.Objects.requireNonNull;
 import static org.springframework.util.Assert.state;
 
 /*
@@ -13,9 +17,13 @@ import static org.springframework.util.Assert.state;
  * - 본인의 내선번호, 비밀번호
  */
 @Builder
-public record EmpSelfUpdateParam(
+public record EmpSelfUpdateRequest(
+
+        Long id,
+
+        @NotNull
         @NotBlank
-        String inputPassword,
+        String currentPassword,
 
         @Nullable
         @Pattern(
@@ -32,10 +40,15 @@ public record EmpSelfUpdateParam(
         String newRawPassword,
 
         @Nullable
-        EmpFileParam fileRequest
+        EmpFileReplaceParam fileRequest,
+
+        @Nullable
+        EmpFileStatusChangeParam fileStatusParam
 ) {
 
-    public EmpSelfUpdateParam {
+    public EmpSelfUpdateRequest {
+        requireNonNull(id, "사원의 id(PK) 필수");
+        requireNonNull(currentPassword);
         state(extensionNo != null || newRawPassword != null || fileRequest != null, "변경된 정보가 없습니다.");
     }
 }

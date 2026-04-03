@@ -13,4 +13,10 @@ public record Email(
                 message = EMAIL_PATTERN_MESSAGE
         )
         String email
-) {}
+) {
+
+    public static Email of(String loginId, String companyDomain) {
+        String newEmail = loginId + "@" + companyDomain;
+        return new Email(newEmail);
+    }
+}
