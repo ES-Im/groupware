@@ -138,7 +138,7 @@ class EmpTest {
                 "image/png",
                 "원본",
                 "png",
-                ((long) 1024 * 1024)
+                (1024L * 1024)
         );
 
         assertThat(emp.getEmpFiles()).hasSize(1);

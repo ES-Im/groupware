@@ -68,30 +68,51 @@ public class AttendanceEditingService implements AttendanceEditing {
 
         Emp editor = findEmpById(empRepository, param.editorId());
 
-        int requiredWorkHours = companyPolicy.getWorkHours() - companyPolicy.getBreakHours();
+        boolean hasMainAttendanceEdit =
+                param.startAt() != null || param.endAt() != null || param.status() != null;
 
-        AttendanceStatus status = param.status();
-        boolean shouldRecalculateStatus =
-                param.status() == null || WORKING_STATUS.contains(param.status());
+        if (hasMainAttendanceEdit) {
+            int requiredWorkHours = companyPolicy.getWorkHours() - companyPolicy.getBreakHours();
 
-        if (shouldRecalculateStatus) {
-            status = getStatusByRecognizedHours(
+            LocalTime editedStartAt =
+                    param.startAt() != null ? param.startAt() : attendance.getStartAt();
+            LocalTime editedEndAt =
+                    param.endAt() != null ? param.endAt() : attendance.getEndAt();
+
+            boolean isTimeChanged = param.startAt() != null || param.endAt() != null;
+
+            AttendanceStatus editedStatus = param.status();
+
+            boolean shouldRecalculateStatus =
+                    isTimeChanged && (param.status() == null || WORKING_STATUS.contains(param.status()));
+
+            if (shouldRecalculateStatus) {
+                state(editedStartAt != null && editedEndAt != null,
+                        "정상근무 계산을 하려면 시작시각과 종료시각이 모두 필요함");
+
+                editedStatus = getStatusByRecognizedHours(
+                        editedStartAt,
+                        editedEndAt,
+                        requiredWorkHours,
+                        param.isIncludeHalfLeaveInDay()
+                );
+            }
+
+            if (editedStatus == null) {
+                editedStatus = attendance.getAttendanceStatus();
+            }
+
+            attendance.changeAttendanceByDeptManager(
                     param.startAt(),
                     param.endAt(),
-                    requiredWorkHours,
-                    param.isIncludeHalfLeaveInDay()
+                    editedStatus,
+                    param.editedAt(),
+                    param.editReason(),
+                    editor
             );
-        }
 
-        attendance.changeAttendanceByDeptManager(
-                param.startAt(),
-                param.endAt(),
-                status,
-                param.editedAt(),
-                param.editReason(),
-                editor,
-                requiredWorkHours
-        );
+            result++;
+        }
 
         if (param.newSubAttendance() != null) {
             createSubAttendance(
@@ -101,7 +122,6 @@ public class AttendanceEditingService implements AttendanceEditing {
                     param.editedAt(),
                     param.editReason()
             );
-
             result++;
         }
 
