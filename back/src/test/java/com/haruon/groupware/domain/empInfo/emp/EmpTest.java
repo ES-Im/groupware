@@ -413,6 +413,83 @@ class EmpTest {
                     assertThat(e.isPrimary()).isFalse();
                 });
     }
+    // 부서를 바꿀수있다
+    // 주요소속정보를 바꿀 수 있으며, 다른 소속정보 중 주요소속정보가 있으면 비활성화
+    // 시작일자
+    // 종료일자 변경
+    private static Stream<Arguments> UpdateBelongingTestParams() {
+        return Stream.of(
+                Arguments.of( "직급",
+                        UpdateBelongingTestParam.builder()
+                                .position(PositionCode.STAFF)
+                        .build()
+                ),Arguments.of( "시작일자",
+                        UpdateBelongingTestParam.builder()
+                                .startAt(LocalDate.of(2026, 4, 1))
+                        .build()
+                ),Arguments.of( "종료일자",
+                        UpdateBelongingTestParam.builder()
+                                .startAt(LocalDate.of(2026, 4, 1))
+                                .endAt(LocalDate.of(2026,12,31))
+                        .build()
+                )
+        );
+    }
+    @ParameterizedTest(name = "{index} ==> 사원의 소속정보 중 {0}을(를) 바꿀 수 있다.")
+    @MethodSource("UpdateBelongingTestParams")
+    @DisplayName("사원 소속정보 변경 테스트")
+    void updateCurrentBelonging_test_fail(String description, UpdateBelongingTestParam param) {
+        Emp emp = getApprovedEmp();
+        addBelongings(emp);
+
+        emp.changeBelongingsByAdmin(
+                param.dept(), param.position(), param.isPrimary(), param.startAt(), param.endAt()
+        );
+    }
+
+    @Test
+    @DisplayName("소속정보는 주 소속정보가 없으면 바꿀 수 없다.")
+    void updateCurrentBelonging_test_fail() {
+        Emp emp = getApprovedEmp();
+
+        assertThatThrownBy(() ->
+                emp.changeBelongingsByAdmin(
+                        null, PositionCode.DIRECTOR, true, LocalDate.of(2026, 4, 1), null
+                )
+        ).isInstanceOf(Exception.class);
+    }
+
+    @Test
+    @DisplayName("주 소속정보를 바꾸면 다른 주 소속정보는 비활성화 된다.")
+    void updatePrimaryBelonging_test() {
+        Emp emp = getApprovedEmp();
+        emp.changeBelongingsByAdmin(
+                Dept.registerDept("firstDept", "first"),
+                PositionCode.DIRECTOR, true, LocalDate.of(2026, 4, 1), null
+        );
+
+        emp.changeBelongingsByAdmin(
+                Dept.registerDept("secondDept", "second"),
+                PositionCode.DIRECTOR, true, LocalDate.of(2026, 4, 1), null
+        );
+
+        EmpBelongings first = emp.getEmpBelongings().getFirst();
+        EmpBelongings second = emp.getEmpBelongings().get(1);
+
+        assertThat(first.isPrimary()).isFalse();
+        assertThat(second.isPrimary()).isTrue();
+
+    }
+
+
+    @Builder
+    private record UpdateBelongingTestParam(
+            Dept dept,
+            PositionCode position,
+            Boolean isPrimary,
+            LocalDate startAt,
+            LocalDate endAt
+    ) {}
 
     @Test
     @DisplayName("새로운 비밀번호는 영문 + 숫자 + 특수문자를 포함하며, 이전비밀번호와 달라야한다.")

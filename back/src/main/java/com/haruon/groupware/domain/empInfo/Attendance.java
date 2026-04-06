@@ -76,15 +76,6 @@ public class Attendance extends AbstractEntity {
         return 1;
     }
 
-    public static void changeAttendanceTime(Attendance attendance, LocalTime startAt, LocalTime endAt) {
-        requireNonNull(startAt, "출근시각 정보 없음");
-        requireNonNull(endAt, "퇴근시각 정보 없음");
-        state(!endAt.isBefore(startAt), "퇴근시각은 출근시각보다 빠를 수 없음");
-
-        attendance.startAt = startAt;
-        attendance.endAt = endAt;
-    }
-
     public void approveAttendance(Emp approver, LocalDateTime approvedAt) {
         requireNonNull(approver, "승인자 정보 없음");
         requireNonNull(approvedAt, "승인 일시 정보 없음");
@@ -96,7 +87,6 @@ public class Attendance extends AbstractEntity {
         this.approvedAt = approvedAt;
     }
 
-    // 시스템부서담당자가 수정
     public void changeAttendanceByDeptManager(
             @Nullable LocalTime startAt,
             @Nullable LocalTime endAt,
@@ -121,6 +111,53 @@ public class Attendance extends AbstractEntity {
 
         markEditor(editedBy, editAt, editReason);
     }
+
+    public void markEditor(Emp editedBy, LocalDateTime editedAt, String editReason) {
+        this.editedBy = editedBy;
+        this.editedAt = editedAt;
+        this.editReason = editReason;
+    }
+
+    public static Attendance registerAttendance(
+            Emp emp,
+            LocalDate date,
+            AttendanceStatus status,
+            @Nullable LocalTime startAt,
+            @Nullable LocalTime endAt
+    ) {
+        boolean timeIncluded = startAt != null && endAt != null;
+        if(timeIncluded) state(!endAt.isBefore(startAt), "종료시각은 시작시각보다 빠를 수 없음");
+
+        if(status.equals(AttendanceStatus.NORMAL) ||
+                status.equals(AttendanceStatus.LATE_EARLY) ||
+                status.equals(AttendanceStatus.HALF_DAY_LEAVE)) {
+            state(timeIncluded, "시간 정보가 필요한 근태상태");
+        }
+
+        Attendance attendance = new Attendance();
+
+        attendance.emp = requireNonNull(emp);
+        attendance.attendanceDate = requireNonNull(date);
+        attendance.attendanceStatus = requireNonNull(status);
+        attendance.startAt = startAt;
+        attendance.endAt = endAt;
+
+        return attendance;
+    }
+
+    public static void changeAttendanceTime(Attendance attendance, LocalTime startAt, LocalTime endAt) {
+        requireNonNull(startAt, "출근시각 정보 없음");
+        requireNonNull(endAt, "퇴근시각 정보 없음");
+        state(!endAt.isBefore(startAt), "퇴근시각은 출근시각보다 빠를 수 없음");
+
+        attendance.startAt = startAt;
+        attendance.endAt = endAt;
+    }
+
+    public static void changeAttendanceStatus(Attendance attendance, AttendanceStatus status) {
+        attendance.attendanceStatus = requireNonNull(status);
+    }
+
 
     private void applyAttendanceStatus(AttendanceStatus status) {
         if (status == AttendanceStatus.ALL_DAY_LEAVE
@@ -151,65 +188,4 @@ public class Attendance extends AbstractEntity {
 
         return false;
     }
-
-    public void markEditor(Emp editedBy, LocalDateTime editedAt, String editReason) {
-        this.editedBy = editedBy;
-        this.editedAt = editedAt;
-        this.editReason = editReason;
-    }
-
-    // 마감용 상태 변경 메서드
-    public static void changeAttendanceStatus(Attendance attendance, AttendanceStatus status) {
-        attendance.attendanceStatus = requireNonNull(status);
-    }
-
-    // 마감용 객체 생성 메서드
-    public static Attendance registerAttendance(
-            Emp emp,
-            LocalDate date,
-            AttendanceStatus status,
-            @Nullable LocalTime startAt,
-            @Nullable LocalTime endAt
-    ) {
-        boolean timeIncluded = startAt != null && endAt != null;
-        if(timeIncluded) state(!endAt.isBefore(startAt), "종료시각은 시작시각보다 빠를 수 없음");
-
-        if(status.equals(AttendanceStatus.NORMAL) ||
-                status.equals(AttendanceStatus.LATE_EARLY) ||
-                status.equals(AttendanceStatus.HALF_DAY_LEAVE)) {
-            state(timeIncluded, "시간 정보가 필요한 근태상태");
-        }
-
-        Attendance attendance = new Attendance();
-
-        attendance.emp = requireNonNull(emp);
-        attendance.attendanceDate = requireNonNull(date);
-        attendance.attendanceStatus = requireNonNull(status);
-        attendance.startAt = startAt;
-        attendance.endAt = endAt;
-
-        return attendance;
-    }
-
-//    private AttendanceStatus getStatusByRecognizedHours(
-//            LocalTime startAt,
-//            LocalTime endAt,
-//            long requiredWorkHours
-//    ) {
-//
-//        long recognizedWorkHours = Duration.between(requireNonNull(startAt), endAt).toHours();
-//
-//        if(recognizedWorkHours >= requiredWorkHours) {
-//            return AttendanceStatus.NORMAL;
-//        }
-//
-//        if(recognizedWorkHours * 2 > requiredWorkHours) {
-//            return AttendanceStatus.LATE_EARLY;
-//        }
-//
-//        return AttendanceStatus.ABSENT;
-//    }
-//
-
-
 }

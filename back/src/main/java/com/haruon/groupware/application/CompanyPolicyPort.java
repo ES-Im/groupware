@@ -16,4 +16,11 @@ public interface CompanyPolicyPort {
     Integer getBreakHours();
 
     String getCompanyDomain();
+
+    Double getDefaultAnnualLeaveDays();
+
+    Double getMaxAnnualLeaveDays();
+
+    Double getMaxAnnualLeaveDaysForFirstYearEmp();
+
 }

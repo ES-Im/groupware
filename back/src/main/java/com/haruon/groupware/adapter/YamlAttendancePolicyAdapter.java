@@ -1,18 +1,12 @@
 package com.haruon.groupware.adapter;
 
 import com.haruon.groupware.application.CompanyPolicyPort;
-import lombok.Getter;
-import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalTime;
 
 @Component
-@ConfigurationProperties(prefix = "haruon")
-@Getter
-@Setter
 public class YamlAttendancePolicyAdapter implements CompanyPolicyPort {
 
     @Value("${HARUON_EMAIL_DOMAIN}")
@@ -29,6 +23,15 @@ public class YamlAttendancePolicyAdapter implements CompanyPolicyPort {
 
     @Value("${HARUON_BREAK_HOUR}")
     private String breakHour;
+
+    @Value("${DEFAULT_ANNUAL_LEAVE_DAYS}")
+    private String defaultAnnualLeaveDays;
+
+    @Value("${MAX_ANNUAL_LEAVE_DAYS}")
+    private String maxAnnualLeaveDays;
+
+    @Value("${MAX_ANNUAL_LEAVE_FOR_FIRST_YEAR_EMP}")
+    private String maxAnnualLeaveForFirstYearEmp;
 
     @Override
     public Integer getWorkHours() {
@@ -53,5 +56,20 @@ public class YamlAttendancePolicyAdapter implements CompanyPolicyPort {
     @Override
     public LocalTime getEndTime() {
         return LocalTime.parse(endTime);
+    }
+
+    @Override
+    public Double getDefaultAnnualLeaveDays() {
+        return Double.parseDouble(defaultAnnualLeaveDays);
+    }
+
+    @Override
+    public Double getMaxAnnualLeaveDays() {
+        return Double.parseDouble(maxAnnualLeaveDays);
+    }
+
+    @Override
+    public Double getMaxAnnualLeaveDaysForFirstYearEmp() {
+        return Double.parseDouble(maxAnnualLeaveForFirstYearEmp);
     }
 }

@@ -7,7 +7,9 @@ import com.haruon.groupware.domain.empInfo.enums.PositionCode;
 import com.haruon.groupware.domain.empInfo.enums.SystemRoleCode;
 import com.haruon.groupware.domain.shared.Email;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.jspecify.annotations.Nullable;
 
 import java.time.LocalDate;
@@ -20,8 +22,9 @@ import static java.util.Objects.requireNonNull;
 import static org.springframework.util.Assert.state;
 
 @Entity
-@Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"emp_no", "emp_id"})})
 @Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"emp_no", "emp_id"})})
 public class Emp extends AbstractEntity {
 
     @Column(nullable = false)
@@ -155,6 +158,14 @@ public class Emp extends AbstractEntity {
         return 1;
     }
 
+    public int removeFile(Long fileId) {
+        EmpFile targetFile = findEmpFile(fileId);
+
+        this.empFiles.remove(targetFile);
+
+        return 1;
+    }
+
     public int changeBelongingsByAdmin (
             @Nullable Dept dept,
             @Nullable PositionCode position,
@@ -190,17 +201,6 @@ public class Emp extends AbstractEntity {
         throw new IllegalArgumentException("소속 정보 요청 형식이 올바르지 않습니다.");
     }
 
-    public int removeFile(Long fileId) {
-        EmpFile targetFile = findEmpFile(fileId);
-
-        this.empFiles.remove(targetFile);
-
-        return 1;
-    }
-
-
-
-// -----------------------------------------------------------------------------------------------------------
     public int changeInfoBySelf(
             @Nullable String extensionNo,
             String currentPassword,
@@ -273,8 +273,6 @@ public class Emp extends AbstractEntity {
 
         return 1;
     }
-// -----------------------------------------------------------------------------------------------------------
-
 
     private void changeEmpStatus(EmpStatus newEmpStatus) {
         this.status = newEmpStatus;
@@ -371,6 +369,8 @@ public class Emp extends AbstractEntity {
         }
 
         if (endAt != null) {
+            state(!endAt.isBefore(startAt), "종료시각은 시작시간보다 이를 수 없음");
+
             currentBelonging.changeEndAt(endAt);
         }
     }

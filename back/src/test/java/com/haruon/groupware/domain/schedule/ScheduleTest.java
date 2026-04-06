@@ -2,25 +2,22 @@ package com.haruon.groupware.domain.schedule;
 
 import com.haruon.groupware.domain.empInfo.Emp;
 import lombok.Builder;
-import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
-import java.util.List;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Collection;
+import java.util.List;
 import java.util.stream.Stream;
 
 import static com.haruon.groupware.domain.schedule.Schedule.registerSchedule;
 import static com.haruon.groupware.domain.shared.EmpFixture.getApprovedEmp;
-import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 

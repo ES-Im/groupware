@@ -17,7 +17,8 @@ import static org.springframework.util.Assert.state;
 @Entity
 @Getter
 @Table(
-        uniqueConstraints = @UniqueConstraint(columnNames = {"schedule_type", "source_id", "owner_emp_id", "schedule_date"})
+        uniqueConstraints = @UniqueConstraint(
+                columnNames = {"schedule_type", "source_id", "owner_emp_id", "schedule_date"})
 )
 public class Schedule extends AbstractEntity {
 

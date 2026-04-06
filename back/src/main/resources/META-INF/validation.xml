@@ -1,0 +1,76 @@
+<!--<?xml version="1.0" encoding="UTF-8"?>-->
+<!--<validation-config xmlns="http://xmlns.jcp.org/xml/ns/validation/configuration"-->
+<!--                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"-->
+<!--                   xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/validation/configuration-->
+<!--                   http://xmlns.jcp.org/xml/ns/validation/configuration/validation-configuration-2.0.xsd"-->
+<!--                   version="2.0">-->
+<!--    <constraint-mapping>-->
+<!--        <bean class="com.haruon.groupware.domain.empInfo.Emp" ignore-annotations="true">-->
+<!--            <field name="empNo">-->
+<!--                <constraint annotation="jakarta.validation.constraints.Pattern">-->
+<!--                    <element name="regexp">^[0-9]{9}$</element>-->
+<!--                    <element name="message">사원번호는 9자리[입사연월+3자리번호 조합]여야 합니다.</element>-->
+<!--                </constraint>-->
+<!--            </field>-->
+<!--            <field name="empName">-->
+<!--                <constraint annotation="jakarta.validation.constraints.NotBlank">-->
+<!--                    <element name="message">사원명은 필수 입력값입니다.</element>-->
+<!--                </constraint>-->
+<!--                <constraint annotation="jakarta.validation.constraints.Size">-->
+<!--                    <element name="max">20</element>-->
+<!--                </constraint>-->
+<!--            </field>-->
+<!--            <field name="loginId">-->
+<!--                <constraint annotation="jakarta.validation.constraints.Pattern">-->
+<!--                    <element name="regexp">^[a-zA-Z0-9]{8,20}$</element>-->
+<!--                    <element name="message">아이디는 8자-20자 이하 영어, 특수문자, 숫자만 허용합니다.</element>-->
+<!--                </constraint>-->
+<!--            </field>-->
+<!--            <field name="empPassword">-->
+<!--                <constraint annotation="jakarta.validation.constraints.Pattern">-->
+<!--                    <element name="regexp">^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$</element>-->
+<!--                    <element name="message">비밀번호는 8자이상, 영문+숫자+특수문자 조합을 해야합니다.</element>-->
+<!--                </constraint>-->
+<!--            </field>-->
+<!--            <field name="extensionNo">-->
+<!--                <constraint annotation="jakarta.validation.constraints.Pattern">-->
+<!--                    <element name="regexp">^\d{3}-\d{4}$</element>-->
+<!--                    <element name="message">내선번호는 `3자리 숫자 - 4자리 숫자 형식`이어야 합니다.</element>-->
+<!--                </constraint>-->
+<!--            </field>-->
+<!--        </bean>-->
+<!--        <bean class="com.haruon.groupware.domain.empInfo.EmpFile" ignore-annotations="true">-->
+<!--            <field name="mimeType">-->
+<!--                <constraint annotation="jakarta.validation.constraints.NotBlank"/>-->
+<!--                <constraint annotation="jakarta.validation.constraints.Size">-->
+<!--                    <element name="max">100</element>-->
+<!--                </constraint>-->
+<!--            </field>-->
+<!--            <field name="originalName">-->
+<!--                <constraint annotation="jakarta.validation.constraints.NotBlank"/>-->
+<!--                <constraint annotation="jakarta.validation.constraints.Size">-->
+<!--                    <element name="max">200</element>-->
+<!--                </constraint>-->
+<!--            </field>-->
+<!--            <field name="fileSize">-->
+<!--                <constraint annotation="jakarta.validation.constraints.Positive"/>-->
+<!--            </field>-->
+<!--            <field name="fileType">-->
+<!--                <constraint annotation="jakarta.validation.constraints.NotNull"/>-->
+<!--            </field>-->
+<!--        </bean>-->
+<!--        <bean class="com.haruon.groupware.domain.empInfo.Dept" ignore-annotations="true">-->
+<!--            <field name="deptCode">-->
+<!--                <constraint annotation="jakarta.validation.constraints.Pattern">-->
+<!--                    <element name="regexp">^[0-9]{3}$</element>-->
+<!--                    <element name="message">부서코드는 숫자 3자리여야 합니다.</element>-->
+<!--                </constraint>-->
+<!--            </field>-->
+<!--            <field name="deptName">-->
+<!--                <constraint annotation="jakarta.validation.constraints.Size">-->
+<!--                    <element name="max">20</element>-->
+<!--                </constraint>-->
+<!--            </field>-->
+<!--        </bean>-->
+<!--    </constraint-mapping>-->
+<!--</validation-config>-->

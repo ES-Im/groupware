@@ -12,7 +12,8 @@ import static java.util.Objects.requireNonNull;
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(
-        uniqueConstraints = @UniqueConstraint(columnNames = {"schedule_id", "participant_id"})
+        uniqueConstraints = @UniqueConstraint(
+                columnNames = {"schedule_id", "participant_id"})
 )
 public class ScheduleParticipant extends AbstractEntity {
 

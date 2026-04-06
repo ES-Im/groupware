@@ -51,10 +51,6 @@ public class EmpFile extends AbstractFileEntity {
         return empFile;
     }
 
-    void changeFileType(FileType fileType) {
-        this.fileType = requireNonNull(fileType);
-    }
-
     void activateFile() {
         this.isActive = true;
     }
