@@ -8,7 +8,7 @@ import com.haruon.groupware.application.schedule.required.ScheduleRepository;
 import com.haruon.groupware.application.schedule.service.dto.ManualScheduleParam;
 import com.haruon.groupware.application.schedule.service.dto.ScheduleParam;
 import com.haruon.groupware.domain.draft_approval.report.BusinessTripDraft;
-import com.haruon.groupware.domain.draft_approval.report.LeaveDraft;
+import com.haruon.groupware.domain.draft_approval.report.LeaveRequest;
 import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.meetingroom.Meeting;
 import com.haruon.groupware.domain.schedule.Schedule;
@@ -43,8 +43,8 @@ public class ScheduleService implements ScheduleRegister, ScheduleEditing {
 
         boolean isPublic = param.isPublic();
 
-        if (param.leaveDraft() != null) {
-            schedules = registerLeaveSchedules(param.leaveDraft(), isPublic);
+        if (param.leaveRequest() != null) {
+            schedules = registerLeaveSchedules(param.leaveRequest(), isPublic);
         } else if (param.businessTripDraft() != null) {
             schedules = registerBusinessTripSchedules(param.businessTripDraft(), isPublic);
         } else if (param.meeting() != null) {
@@ -235,22 +235,22 @@ public class ScheduleService implements ScheduleRegister, ScheduleEditing {
     }
 
     private List<Schedule> registerLeaveSchedules(
-            LeaveDraft leaveDraft,
+            LeaveRequest leaveRequest,
             boolean isPublic
     ) {
 
-        LocalDate startDate = leaveDraft.getStartAt().toLocalDate();
-        LocalDate endDate  =  leaveDraft.getEndAt().toLocalDate();
-        LocalTime startAt =  leaveDraft.getStartAt().toLocalTime();
-        LocalTime endAt =   leaveDraft.getEndAt().toLocalTime();
-        String reason = (leaveDraft.getContent() != null)? leaveDraft.getContent() : leaveDraft.getLeaveType().getDescription();
+        LocalDate startDate = leaveRequest.getStartAt().toLocalDate();
+        LocalDate endDate  =  leaveRequest.getEndAt().toLocalDate();
+        LocalTime startAt =  leaveRequest.getStartAt().toLocalTime();
+        LocalTime endAt =   leaveRequest.getEndAt().toLocalTime();
+        String reason = (leaveRequest.getContent() != null)? leaveRequest.getContent() : leaveRequest.getLeaveType().getDescription();
 
-        String title = leaveDraft.getLeaveType().getDescription();
+        String title = leaveRequest.getLeaveType().getDescription();
         String content = String.format(
                 "연가 종류: %s%n시작일시: %s%n종료일시: %s%n사유: %s",
-                leaveDraft.getLeaveType().getDescription(),
-                leaveDraft.getStartAt(),
-                leaveDraft.getEndAt(),
+                leaveRequest.getLeaveType().getDescription(),
+                leaveRequest.getStartAt(),
+                leaveRequest.getEndAt(),
                 reason
         );
 
@@ -259,9 +259,9 @@ public class ScheduleService implements ScheduleRegister, ScheduleEditing {
                 startAt, endAt,
                 ScheduleType.LEAVE,
                 title, content,
-                leaveDraft.getEmp(),
+                leaveRequest.getEmp(),
                 isPublic,
-                leaveDraft.getId());
+                leaveRequest.getId());
     }
 
     private List<Schedule> registerSchedule(

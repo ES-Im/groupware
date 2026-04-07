@@ -40,6 +40,7 @@ class EmpLeaveTest {
                 0.0, 0.0,
                 0.0, 0.0
         );
+
     }
 
     private static Stream<Arguments>  createEmpAnnualFailPrams() {

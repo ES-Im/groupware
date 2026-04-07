@@ -4,6 +4,7 @@ import com.haruon.groupware.domain.empInfo.Emp;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Enumerated;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,10 +15,10 @@ import static io.jsonwebtoken.lang.Assert.state;
 import static java.util.Objects.requireNonNull;
 
 @Entity
+@DiscriminatorValue("LEAVE")
 @Getter
-@DiscriminatorValue("BUSINESS_TRIP")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class BusinessTripDraft extends Draft {
+public class LeaveRequest extends Draft {
 
     @Column(nullable = false)
     private LocalDateTime startAt;
@@ -26,34 +27,32 @@ public class BusinessTripDraft extends Draft {
     private LocalDateTime endAt;
 
     @Column(nullable = false)
-    private String destination;
+    private double usedDay;
 
     @Column(nullable = false)
-    private String purpose;
+    @Enumerated
+    private LeaveType leaveType;
 
-    private BusinessTripDraft (Emp emp, String title, String content, Boolean isTemporary) {
+    private LeaveRequest(Emp emp, String title, String content, Boolean isTemporary) {
         super(emp, title, content, isTemporary);
     }
 
-    public static BusinessTripDraft submitBusinessTripDraft(
-        Emp emp, String title, String content, Boolean isTemporary,
-        LocalDateTime startAt, LocalDateTime endAt,
-        String destination, String purpose
+    public static LeaveRequest submitLeaveRequestDraft(
+            Emp emp, String title, String content, Boolean isTemporary,
+            LocalDateTime startAt, LocalDateTime endAt,
+            Double usedDay, LeaveType leaveType
     ) {
-        BusinessTripDraft draft = new BusinessTripDraft(emp, title, content, isTemporary);
+        LeaveRequest draft = new LeaveRequest(emp, title, content, isTemporary);
 
         state(!endAt.isBefore(startAt), "종료시간은 시작시간보다 이를 수 없음");
-        requireNonNull(destination);
-        requireNonNull(purpose);
-        state(!destination.isBlank(), "목적지는 빈 값이 될 수 없음");
-        state(!purpose.isBlank(), "출장목적은 빈 값이 될 수 없음");
+        requireNonNull(usedDay);
+        requireNonNull(leaveType);
 
         draft.startAt = startAt;
         draft.endAt = endAt;
-        draft.destination = destination;
-        draft.purpose = purpose;
+        draft.usedDay = usedDay;
+        draft.leaveType = leaveType;
 
         return draft;
     }
-
 }

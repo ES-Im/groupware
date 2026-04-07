@@ -7,8 +7,6 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.UUID;
-
 import static java.util.Objects.requireNonNull;
 
 @Entity
@@ -38,15 +36,11 @@ public class EmpFile extends AbstractFileEntity {
     ) {
         EmpFile empFile = new EmpFile();
 
-        empFile.storedName = UUID.randomUUID().toString();
-        empFile.isActive = true;
-
         empFile.emp = requireNonNull(emp);
+        empFile.isActive = true;
         empFile.fileType = requireNonNull(fileType);
-        empFile.originalName = requireNonNull(originalName);
-        empFile.extension = requireNonNull(extension);
-        empFile.fileSize = requireNonNull(fileSize);
-        empFile.mimeType = requireNonNull(mimeType);
+
+        empFile.initFileMetadata(mimeType, originalName, extension, fileSize);
 
         return empFile;
     }
