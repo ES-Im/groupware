@@ -18,7 +18,7 @@ import static org.springframework.util.Assert.state;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Circulation extends AbstractEntity { // 공람
+public class Circulation extends AbstractEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "draft_id", nullable = false)
@@ -39,9 +39,11 @@ public class Circulation extends AbstractEntity { // 공람
         return ref;
     }
 
-    void markReadable(LocalDateTime readAt) {
+    void markRead(LocalDateTime readAt) {
         requireNonNull(readAt);
         state(this.readAt == null, "이미 공람 처리됨");
         this.readAt = requireNonNull(readAt);
     }
+
+
 }

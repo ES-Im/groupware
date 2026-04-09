@@ -15,7 +15,6 @@ import java.util.stream.Stream;
 import static com.haruon.groupware.domain.meetingroom.Meeting.reserve;
 import static com.haruon.groupware.domain.meetingroom.MeetingRoomFixture.getMeetingRoom;
 import static com.haruon.groupware.domain.shared.EmpFixture.getApprovedEmp;
-import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 

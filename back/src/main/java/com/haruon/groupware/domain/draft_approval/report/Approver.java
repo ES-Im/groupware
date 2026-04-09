@@ -25,6 +25,7 @@ public class Approver extends AbstractEntity {
     private Approval approval;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private ApprovalRole role;
 
     @Column(nullable = false)

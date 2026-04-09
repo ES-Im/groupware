@@ -36,6 +36,7 @@ public class ScheduleService implements ScheduleRegister, ScheduleEditing {
     private final ScheduleRepository scheduleRepository;
     private final EmpRepository empRepository;
 
+    @Override
     public int registerSchedules(ScheduleParam param) {
         requireNonNull(param);
 

@@ -20,7 +20,7 @@ import static org.springframework.util.Assert.state;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public abstract class Draft extends AbstractEntity {
-// 일반 기안서 엔티티도 더 만들어야 할듯?
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "drafter_id", nullable = false)
     private Emp emp;
@@ -30,6 +30,8 @@ public abstract class Draft extends AbstractEntity {
 
     @Column(nullable = false)
     private String content;
+
+    private LocalDateTime submittedAt;
 
     @OneToMany(mappedBy = "draft", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DraftFile> draftFiles = new ArrayList<>();
@@ -54,34 +56,47 @@ public abstract class Draft extends AbstractEntity {
 
     }
 
-//    APPROVAL 공통 메서드
-    protected void createDraftApproval(List<ApproversParam> params) {
-        state(this.approval == null, "결재 정보가 이미 있음");
+    public void revertToDraft() {
+        this.approval.revertToDraft();
 
-        Approval.createDraft(this, params);
+        this.submittedAt = null;
     }
 
-    protected void createSubmittedApproval(List<ApproversParam> params) {
-        state(this.approval == null, "결재 정보가 이미 있음");
+//    APPROVAL 공통 메서드
+    public void createDraftApproval(List<ApproversParam> params) {
+        state(!hasApproval(), "결재 정보가 이미 있음");
 
-        Approval.createSubmitted(this, params);
+        this.approval = Approval.createDraft(this, params);
+    }
+
+    public void createSubmittedApproval(List<ApproversParam> params, LocalDateTime submittedAt) {
+        state(!hasApproval(), "결재 정보가 이미 있음");
+        requireNonNull(submittedAt);
+
+        this.approval = Approval.createSubmitted(this, params);
+        this.submittedAt = submittedAt;
     }
 
     public void approve(Emp approver, LocalDateTime approvedAt) {
-        state(this.approval != null, "결재 정보가 없음");
+        state(hasApproval(), "결재 정보가 없음");
         this.approval.approve(approver, approvedAt);
     }
 
     public void reject(Emp rejector, String reason, LocalDateTime rejectedAt) {
-        state(this.approval != null, "결재 정보가 없음");
+        state(hasApproval(), "결재 정보가 없음");
 
         this.approval.reject(rejector, reason, rejectedAt);
     }
 
-    public void submit() {
-        state(this.approval != null, "결재 정보가 없음");
+    public void submit(LocalDateTime submittedAt) {
+        state(hasApproval(), "결재 정보가 없음");
 
         this.approval.submit();
+        this.submittedAt = submittedAt;
+    }
+
+    private boolean hasApproval() {
+        return this.approval != null;
     }
 
 //    Circulation 공통 메서드
@@ -100,28 +115,30 @@ public abstract class Draft extends AbstractEntity {
         this.circulations.remove(circulation);
     }
 
-    public void markReadable(Emp emp, LocalDateTime readAt) {
+    public void markReadByCirculation(Emp emp, LocalDateTime readAt) {
+        state(this.isReadableByCirculation(), "공람가능한 상태가 아님");
         requireNonNull(emp);
         requireNonNull(readAt);
+
         Circulation circulation = getCirculationByEmp(emp);
 
-        circulation.markReadable(readAt);
+        circulation.markRead(readAt);
     }
 
-    public boolean isReadableByCirculation () {
+    public boolean isReadableByCirculation() {
         return this.approval.isApproved();
     }
 
     private Circulation getCirculationByEmp(Emp emp) {
         return this.circulations.stream()
-                .filter(c -> c.getEmp().getId().equals(emp.getId()))
+                .filter(c -> c.getEmp().equals(emp))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("해당 공람자가 없음"));
     }
 
     private boolean hasCirculation(Emp emp) {
         return this.circulations.stream()
-                .anyMatch(c -> c.getEmp().getId().equals(emp.getId()));
+                .anyMatch(c -> c.getEmp().equals(emp));
     }
 
 //    DraftFile 공통 메서드

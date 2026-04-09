@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.jspecify.annotations.Nullable;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -31,15 +32,16 @@ public class Approval extends AbstractEntity {
     @OneToMany(mappedBy = "approval", orphanRemoval = true, cascade = CascadeType.ALL)
     private final List<Approver> approvers = new ArrayList<>();
 
-    static Approval createDraft(Draft draft, List<ApproversParam> params) {
+    static Approval createDraft(Draft draft, @Nullable List<ApproversParam> params) {
         Approval approval = new Approval();
 
         approval.draft = requireNonNull(draft);
         approval.status = ApprovalStatus.UNSUBMITTED;
 
-        state(params != null && !params.isEmpty(), "결재자 정보가 없음");
-        for (ApproversParam param : params) {
-            approval.addApprover(param);
+        if(params != null && !params.isEmpty()) {
+            for (ApproversParam param : params) {
+                approval.addApprover(param);
+            }
         }
 
         return approval;
@@ -49,6 +51,12 @@ public class Approval extends AbstractEntity {
         Approval approval = createDraft(draft, params);
         approval.submit();
         return approval;
+    }
+
+    void revertToDraft() {
+        state(this.status.equals(ApprovalStatus.WAITING), "결재진행 이후 상신 취소 불가");
+
+        this.status = ApprovalStatus.UNSUBMITTED;
     }
 
     void approve(Emp approver, LocalDateTime approvedAt) {
@@ -73,6 +81,10 @@ public class Approval extends AbstractEntity {
 
     void reject(Emp rejector, String reason, LocalDateTime rejectedAt) {
         requireNonNull(rejector);
+
+        state(this.status != ApprovalStatus.REJECTED, "반려된 결재건은 승인할 수 없음");
+        state(this.status != ApprovalStatus.APPROVED, "이미 완료된 결재건은 승인할 수 없음");
+        state(!this.approvers.isEmpty(), "처리할 결재자가 없음");
 
         Approver current = getCurrentPendingMember();
         state(current.getEmp().equals(rejector), "현재 차례의 결재자가 아님");
