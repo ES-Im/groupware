@@ -10,14 +10,15 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 import static java.util.Objects.requireNonNull;
+import static org.springframework.util.Assert.state;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(
-        uniqueConstraints = @UniqueConstraint(columnNames = {"approval_id", "emp_id"})
+        uniqueConstraints = @UniqueConstraint(columnNames = {"approval_id", "approver_id"})
 )
-public class ApprovalMember extends AbstractEntity {   // 협조
+public class Approver extends AbstractEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "approval_id", nullable = false)
@@ -26,10 +27,11 @@ public class ApprovalMember extends AbstractEntity {   // 협조
     @Enumerated(EnumType.STRING)
     private ApprovalRole role;
 
+    @Column(nullable = false)
     private int order;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "emp_id", nullable = false)
+    @JoinColumn(name = "approver_id", nullable = false)
     private Emp emp;
 
     private LocalDateTime approvedAt;
@@ -38,36 +40,14 @@ public class ApprovalMember extends AbstractEntity {   // 협조
 
     private LocalDateTime rejectedAt;
 
-    private boolean isProcessed;
-
-    // 경우의 수
-    /*
-     * - 중간결재 + 협조 + 최종결재
-     * - 중간결재 + 최종결재
-     * - 협조 + 최종결재
-     * - 최종결재
-     *
-     * - 방법 1, 각 롤에 따른 결재자 추가
-     * - role을 중간결재 + 최종결재 쪼개기
-     *
-     * - 방법 2, 연관관계상 oneTomany임 -> 사이즈 별로 order에 따른 결재 순서
-     * 이러면 role을 쪼갤 필욘 없음. order는 최소 1, 최대 3 = members 사이즈와 동일
-     * 근데 role을 쪼개는게........... 맞나........... 중간결재와 최종결재의 순서가 중요.
-     *
-     * [결론]
-     * 우선 여기에 롤, order, emp 생성 팩토리 만들고
-     * + 거절사유 및 시각 팩토리 만들기
-     * + order는 프로덕션코드로 커버 가능
-     *
-     * 모든 접근 제어는 default로 access
-     */
-
-    ApprovalMember(
+    Approver(
             Approval approval,
             ApprovalRole role,
             int order,
             Emp emp
     ) {
+        state(order > 0, "순서는 양수여야함");
+
         this.approval = requireNonNull(approval);
         this.role = requireNonNull(role);
         this.order = order;
@@ -75,7 +55,24 @@ public class ApprovalMember extends AbstractEntity {   // 협조
     }
 
     void approve(LocalDateTime approvedAt) {
+        state(isPending(), "처리된 결재자건");
+
         this.approvedAt = requireNonNull(approvedAt);
+    }
+
+    void reject(String rejectReason, LocalDateTime rejectedAt) {
+        state(isPending(), "처리된 결재자건");
+
+        requireNonNull(rejectReason);
+        state(!rejectReason.isBlank(), "반려사유는 필수 값");
+        requireNonNull(rejectedAt);
+
+        this.rejectedAt = rejectedAt;
+        this.rejectReason = rejectReason;
+    }
+
+    boolean isPending() {
+        return this.approvedAt == null && this.rejectedAt == null;
     }
 
 }

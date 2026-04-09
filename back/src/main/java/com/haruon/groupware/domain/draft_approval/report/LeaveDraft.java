@@ -18,7 +18,7 @@ import static java.util.Objects.requireNonNull;
 @DiscriminatorValue("LEAVE")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class LeaveRequest extends Draft {
+public class LeaveDraft extends Draft {
 
     @Column(nullable = false)
     private LocalDateTime startAt;
@@ -33,16 +33,16 @@ public class LeaveRequest extends Draft {
     @Enumerated
     private LeaveType leaveType;
 
-    private LeaveRequest(Emp emp, String title, String content, Boolean isTemporary) {
+    private LeaveDraft(Emp emp, String title, String content, Boolean isTemporary) {
         super(emp, title, content, isTemporary);
     }
 
-    public static LeaveRequest submitLeaveRequestDraft(
+    public static LeaveDraft submitLeaveRequestDraft(
             Emp emp, String title, String content, Boolean isTemporary,
             LocalDateTime startAt, LocalDateTime endAt,
             Double usedDay, LeaveType leaveType
     ) {
-        LeaveRequest draft = new LeaveRequest(emp, title, content, isTemporary);
+        LeaveDraft draft = new LeaveDraft(emp, title, content, isTemporary);
 
         state(!endAt.isBefore(startAt), "종료시간은 시작시간보다 이를 수 없음");
         requireNonNull(usedDay);

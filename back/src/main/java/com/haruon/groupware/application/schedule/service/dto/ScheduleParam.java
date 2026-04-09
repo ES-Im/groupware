@@ -1,7 +1,7 @@
 package com.haruon.groupware.application.schedule.service.dto;
 
 import com.haruon.groupware.domain.draft_approval.report.BusinessTripDraft;
-import com.haruon.groupware.domain.draft_approval.report.LeaveRequest;
+import com.haruon.groupware.domain.draft_approval.report.LeaveDraft;
 import com.haruon.groupware.domain.meetingroom.Meeting;
 import lombok.Builder;
 import org.jspecify.annotations.Nullable;
@@ -23,7 +23,7 @@ public record ScheduleParam(
         BusinessTripDraft businessTripDraft,
 
         @Nullable
-        LeaveRequest leaveRequest,
+        LeaveDraft leaveDraft,
 
         @Nullable
         Meeting meeting,
@@ -45,10 +45,10 @@ public record ScheduleParam(
 
             validateTime(businessTripDraft.getStartAt(), businessTripDraft.getEndAt());
         }
-        if (leaveRequest != null) {
+        if (leaveDraft != null) {
             sourceCount++;
 
-            validateTime(leaveRequest.getStartAt(),  leaveRequest.getEndAt());
+            validateTime(leaveDraft.getStartAt(),  leaveDraft.getEndAt());
         }
         if (meeting != null) {
             sourceCount++;

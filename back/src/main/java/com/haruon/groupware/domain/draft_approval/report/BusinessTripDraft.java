@@ -31,7 +31,7 @@ public class BusinessTripDraft extends Draft {
     @Column(nullable = false)
     private String purpose;
 
-    private BusinessTripDraft (Emp emp, String title, String content, Boolean isTemporary) {
+    private BusinessTripDraft(Emp emp, String title, String content, Boolean isTemporary) {
         super(emp, title, content, isTemporary);
     }
 

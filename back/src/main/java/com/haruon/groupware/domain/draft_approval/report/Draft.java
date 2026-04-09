@@ -7,6 +7,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,7 +20,7 @@ import static org.springframework.util.Assert.state;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public abstract class Draft extends AbstractEntity {
-
+// 일반 기안서 엔티티도 더 만들어야 할듯?
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "drafter_id", nullable = false)
     private Emp emp;
@@ -30,68 +31,117 @@ public abstract class Draft extends AbstractEntity {
     @Column(nullable = false)
     private String content;
 
-    @Column(nullable = false)
-    private boolean isTemporary;
-
     @OneToMany(mappedBy = "draft", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DraftFile> draftFiles = new ArrayList<>();
 
-    @OneToOne(mappedBy = "draft", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "draft", cascade = CascadeType.ALL, orphanRemoval = true)
     private Approval approval;
 
     @OneToMany(mappedBy = "draft", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ApprovalReference> references = new ArrayList<>();
+    private List<Circulation> circulations = new ArrayList<>();
 
-    protected Draft(
-            Emp emp,
-            String title,
-            String content,
-            boolean isTemporary
-    ) {
-        this.emp = requireNonNull(emp);
-        this.title = requireNonNull(title);
-        this.content = requireNonNull(content);
-        this.isTemporary = isTemporary;
+    protected Draft(String title, String content, Emp emp) {
+        requireNonNull(title);
+        requireNonNull(content);
+        requireNonNull(emp);
+        
+        state(!title.isBlank(), "제목은 빈값이 될 수 없음");
+        state(!content.isBlank(), "내용은 빈값이 될 수 없음");
+        
+        this.title = title;
+        this.content = content;
+        this.emp = emp;
+
     }
 
-    public void submit(List<Emp> approvers, List<Emp> cooperationEmps) {
-        state(this.isTemporary, "이미 상신된 기안서는 다시 상신할 수 없음");
-        state(this.approval == null, "이미 결재 정보가 존재함");
+//    APPROVAL 공통 메서드
+    protected void createDraftApproval(List<ApproversParam> params) {
+        state(this.approval == null, "결재 정보가 이미 있음");
 
-        this.approval = Approval.create(this, approvers, cooperationEmps);
-        this.isTemporary = false;
+        Approval.createDraft(this, params);
     }
 
-    public void addReference(Emp emp) {
+    protected void createSubmittedApproval(List<ApproversParam> params) {
+        state(this.approval == null, "결재 정보가 이미 있음");
+
+        Approval.createSubmitted(this, params);
+    }
+
+    public void approve(Emp approver, LocalDateTime approvedAt) {
+        state(this.approval != null, "결재 정보가 없음");
+        this.approval.approve(approver, approvedAt);
+    }
+
+    public void reject(Emp rejector, String reason, LocalDateTime rejectedAt) {
+        state(this.approval != null, "결재 정보가 없음");
+
+        this.approval.reject(rejector, reason, rejectedAt);
+    }
+
+    public void submit() {
+        state(this.approval != null, "결재 정보가 없음");
+
+        this.approval.submit();
+    }
+
+//    Circulation 공통 메서드
+    public void addCirculation(Emp emp) {
         requireNonNull(emp, "공람자가 없음");
+        state(!hasCirculation(emp), "이미 공람된 사원");
 
-        ApprovalReference reference = ApprovalReference.create(this, emp);
-        this.references.add(reference);
+        Circulation circulation = Circulation.create(this, emp);
+        this.circulations.add(circulation);
     }
 
-    public void removeReference(Long referenceId) {
-        requireNonNull(referenceId, "삭제할 공람자가 없음");
+    public void removeCirculation(Emp emp) {
+        requireNonNull(emp, "삭제할 공람자가 없음");
+        Circulation circulation = getCirculationByEmp(emp);
 
-        ApprovalReference target = this.references.stream()
-                .filter(ref -> ref.getId().equals(referenceId))
+        this.circulations.remove(circulation);
+    }
+
+    public void markReadable(Emp emp, LocalDateTime readAt) {
+        requireNonNull(emp);
+        requireNonNull(readAt);
+        Circulation circulation = getCirculationByEmp(emp);
+
+        circulation.markReadable(readAt);
+    }
+
+    public boolean isReadableByCirculation () {
+        return this.approval.isApproved();
+    }
+
+    private Circulation getCirculationByEmp(Emp emp) {
+        return this.circulations.stream()
+                .filter(c -> c.getEmp().getId().equals(emp.getId()))
                 .findFirst()
-                .orElseThrow(() -> new IllegalStateException("삭제할 공람자가 없음"));
-
-        this.references.remove(target);
+                .orElseThrow(() -> new IllegalArgumentException("해당 공람자가 없음"));
     }
 
+    private boolean hasCirculation(Emp emp) {
+        return this.circulations.stream()
+                .anyMatch(c -> c.getEmp().getId().equals(emp.getId()));
+    }
+
+//    DraftFile 공통 메서드
     public void addFile(
             String mimeType,
             String originalName,
             String extension,
             Long fileSize
     ) {
-        DraftFile file = DraftFile.create(this, mimeType, originalName, extension, fileSize);
+        DraftFile file = DraftFile.create(
+                this, mimeType, originalName, extension, fileSize
+        );
+
         this.draftFiles.add(file);
     }
 
-    public boolean canBeReadByReference() {
-        return this.approval != null && this.approval.isApproved();
-    }
+    public void removeFile(DraftFile file) {
+        requireNonNull(file, "file은 null일 수 없음");
 
+        boolean removed = this.draftFiles.remove(file);
+        state(removed, "해당 파일이 없음");
+    }
 }

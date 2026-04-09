@@ -4,6 +4,7 @@ import lombok.Getter;
 
 @Getter
 public enum ApprovalStatus {
+    UNSUBMITTED,
     WAITING,
     IN_PROGRESS,
     APPROVED,

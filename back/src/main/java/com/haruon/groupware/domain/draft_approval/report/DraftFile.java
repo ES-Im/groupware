@@ -35,4 +35,6 @@ public class DraftFile extends AbstractFileEntity {
         return draftFile;
     }
 
+
+
 }

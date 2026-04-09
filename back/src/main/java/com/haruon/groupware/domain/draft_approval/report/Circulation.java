@@ -18,7 +18,7 @@ import static org.springframework.util.Assert.state;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class ApprovalReference extends AbstractEntity { // 공람
+public class Circulation extends AbstractEntity { // 공람
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "draft_id", nullable = false)
@@ -30,8 +30,8 @@ public class ApprovalReference extends AbstractEntity { // 공람
 
     private LocalDateTime readAt;
 
-    static ApprovalReference create(Draft draft, Emp emp) {
-        ApprovalReference ref = new ApprovalReference();
+    static Circulation create(Draft draft, Emp emp) {
+        Circulation ref = new Circulation();
 
         ref.draft = requireNonNull(draft);
         ref.emp = requireNonNull(emp);
@@ -39,7 +39,7 @@ public class ApprovalReference extends AbstractEntity { // 공람
         return ref;
     }
 
-    void markAsRead(LocalDateTime readAt) {
+    void markReadable(LocalDateTime readAt) {
         requireNonNull(readAt);
         state(this.readAt == null, "이미 공람 처리됨");
         this.readAt = requireNonNull(readAt);
