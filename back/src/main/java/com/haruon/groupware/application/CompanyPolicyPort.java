@@ -13,6 +13,8 @@ public interface CompanyPolicyPort {
 
     Integer getWorkHours();
 
+    LocalTime getBreakStartTime();
+
     Integer getBreakHours();
 
     String getCompanyDomain();

@@ -38,18 +38,37 @@ public class Approval extends AbstractEntity {
         approval.draft = requireNonNull(draft);
         approval.status = ApprovalStatus.UNSUBMITTED;
 
-        if(params != null && !params.isEmpty()) {
-            for (ApproversParam param : params) {
-                approval.addApprover(param);
-            }
+        if (params != null && !params.isEmpty()) {
+            approval.addApprovers(params);
         }
 
         return approval;
     }
 
+    void submit(@Nullable List<ApproversParam> params) {
+        state(this.status == ApprovalStatus.UNSUBMITTED, "상신 가능한 상태가 아님");
+
+        if (params != null && !params.isEmpty()) {
+            this.addApprovers(params);
+        }
+
+        state(!this.approvers.isEmpty(), "결재자 정보가 없음");
+
+        this.status = ApprovalStatus.WAITING;
+    }
+
+
+
     static Approval createSubmitted(Draft draft, List<ApproversParam> params) {
-        Approval approval = createDraft(draft, params);
-        approval.submit();
+        requireNonNull(params, "결재자 정보가 없음");
+        state(!params.isEmpty(), "결재자 정보가 없음");
+
+        Approval approval = new Approval();
+        approval.draft = requireNonNull(draft);
+        approval.status = ApprovalStatus.UNSUBMITTED;
+        approval.addApprovers(params);
+        approval.status = ApprovalStatus.WAITING;
+
         return approval;
     }
 
@@ -93,16 +112,12 @@ public class Approval extends AbstractEntity {
         this.status = ApprovalStatus.REJECTED;
     }
 
-
-    void submit() {
-        state(this.status == ApprovalStatus.UNSUBMITTED, "상신 가능한 상태가 아님");
-        state(!this.approvers.isEmpty(), "결재자 정보가 없음");
-
-        this.status = ApprovalStatus.WAITING;
-    }
-
     boolean isApproved() {
         return this.status != null && this.status.equals(ApprovalStatus.APPROVED);
+    }
+
+    boolean isDraft() {
+        return this.status == ApprovalStatus.UNSUBMITTED;
     }
 
     private void addApprover(ApproversParam param) {
@@ -121,6 +136,12 @@ public class Approval extends AbstractEntity {
         Approver approvers = new Approver(this, param.role(), param.order(), param.approver());
 
         this.approvers.add(approvers);
+    }
+
+    private void addApprovers(List<ApproversParam> params) {
+        for (ApproversParam param : params) {
+            this.addApprover(param);
+        }
     }
 
     private Approver getCurrentPendingMember() {

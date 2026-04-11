@@ -1,0 +1,41 @@
+package com.haruon.groupware.application.draft.dto;
+
+import com.haruon.groupware.domain.draft_approval.report.ApproversParam;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.NotBlank;
+import org.jspecify.annotations.Nullable;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+import static java.util.Objects.requireNonNull;
+import static org.springframework.util.Assert.state;
+
+public record CommonDraftCreateRequest(
+        Long empId,
+
+        @NotBlank
+        @Max(100)
+        String title,
+
+        @NotBlank
+        @Max(500)
+        String content,
+
+        @Nullable List<ApproversParam> approvers,
+
+        @Nullable LocalDateTime submittedAt
+) {
+
+    public CommonDraftCreateRequest {
+        requireNonNull(empId);
+        requireNonNull(title);
+        requireNonNull(content);
+
+        if(submittedAt != null) {
+            state(approvers != null && !approvers.isEmpty(),
+                    "상신시, 결제선 설정 필수");
+        }
+    }
+
+}

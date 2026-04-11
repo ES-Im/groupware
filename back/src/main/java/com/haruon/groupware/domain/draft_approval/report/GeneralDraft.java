@@ -6,6 +6,7 @@ import jakarta.persistence.Entity;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.jspecify.annotations.Nullable;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -24,7 +25,7 @@ public class GeneralDraft extends Draft {
             Emp emp,
             String title,
             String content,
-            List<ApproversParam> approvers
+            @Nullable List<ApproversParam> approvers
     ) {
         GeneralDraft generalDraft = new GeneralDraft(title, content, emp);
 

@@ -5,7 +5,6 @@ import lombok.Getter;
 @Getter
 public enum LeaveType {
     ANNUAL("연차"),
-    HALF_DAY("반차"),
     HOURLY("공휴일"),
     SICK("병가"),
     OFFICIAL("공가"),

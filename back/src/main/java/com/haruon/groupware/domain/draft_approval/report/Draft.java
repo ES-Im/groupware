@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.jspecify.annotations.Nullable;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -23,38 +24,26 @@ public abstract class Draft extends AbstractEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "drafter_id", nullable = false)
-    private Emp emp;
+    protected Emp emp;
 
     @Column(nullable = false)
-    private String title;
+    protected String title;
 
     @Column(nullable = false)
-    private String content;
+    protected String content;
 
-    private LocalDateTime submittedAt;
+    protected LocalDateTime submittedAt;
 
     @OneToMany(mappedBy = "draft", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<DraftFile> draftFiles = new ArrayList<>();
+    protected List<DraftFile> draftFiles = new ArrayList<>();
 
     @OneToOne(mappedBy = "draft", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Approval approval;
+    protected Approval approval;
 
     @OneToMany(mappedBy = "draft", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Circulation> circulations = new ArrayList<>();
+    protected List<Circulation> circulations = new ArrayList<>();
 
-    protected Draft(String title, String content, Emp emp) {
-        requireNonNull(title);
-        requireNonNull(content);
-        requireNonNull(emp);
-        
-        state(!title.isBlank(), "제목은 빈값이 될 수 없음");
-        state(!content.isBlank(), "내용은 빈값이 될 수 없음");
-        
-        this.title = title;
-        this.content = content;
-        this.emp = emp;
-
-    }
+// Draft 기안관련 공통 메서드
 
     public void revertToDraft() {
         this.approval.revertToDraft();
@@ -62,18 +51,47 @@ public abstract class Draft extends AbstractEntity {
         this.submittedAt = null;
     }
 
-//    APPROVAL 공통 메서드
-    public void createDraftApproval(List<ApproversParam> params) {
-        state(!hasApproval(), "결재 정보가 이미 있음");
+    protected Draft(String title, String content, Emp emp) {
+        requireNonNull(emp);
+        validateDraftBase(title, content);
 
-        this.approval = Approval.createDraft(this, params);
+        this.title = title;
+        this.content = content;
+        this.emp = emp;
+
     }
 
-    public void createSubmittedApproval(List<ApproversParam> params, LocalDateTime submittedAt) {
-        state(!hasApproval(), "결재 정보가 이미 있음");
-        requireNonNull(submittedAt);
+    protected void editDraft(
+            @Nullable String title,
+            @Nullable String content
+    ) {
+        state(isDraft(), "미상신 문서만 수정가능");
 
-        this.approval = Approval.createSubmitted(this, params);
+        String editedTitle = title != null ? title : this.title;
+        String editedContent = content != null ? content : this.content;
+
+        validateDraftBase(editedTitle, editedContent);
+
+        this.title = editedTitle;
+        this.content = editedContent;
+    }
+
+    protected static void validateDraftBase(String title, String content) {
+        requireNonNull(title, "제목은 null일 수 없음");
+        requireNonNull(content, "내용은 null일 수 없음");
+
+        state(!title.isBlank(), "제목은 빈값이 될 수 없음");
+        state(!content.isBlank(), "내용은 빈값이 될 수 없음");
+    }
+
+//    APPROVAL 공통 메서드
+
+    public void submit(LocalDateTime submittedAt, @Nullable List<ApproversParam> params) {
+        requireNonNull(submittedAt, "상신일시는 null일 수 없음");
+        state(hasApproval(), "결재 정보가 없음");
+
+        validateBeforeSubmit(params);
+        this.approval.submit(params);
         this.submittedAt = submittedAt;
     }
 
@@ -88,10 +106,17 @@ public abstract class Draft extends AbstractEntity {
         this.approval.reject(rejector, reason, rejectedAt);
     }
 
-    public void submit(LocalDateTime submittedAt) {
-        state(hasApproval(), "결재 정보가 없음");
+    protected void createDraftApproval(@Nullable List<ApproversParam> params) {
+        state(!hasApproval(), "결재 정보가 이미 있음");
+        this.approval = Approval.createDraft(this, params);
+    }
 
-        this.approval.submit();
+    protected void createSubmittedApproval(List<ApproversParam> params, LocalDateTime submittedAt) {
+        requireNonNull(submittedAt, "상신일시는 null일 수 없음");
+        state(!hasApproval(), "결재 정보가 이미 있음");
+
+        validateBeforeSubmit(params);
+        this.approval = Approval.createSubmitted(this, params);
         this.submittedAt = submittedAt;
     }
 
@@ -148,6 +173,8 @@ public abstract class Draft extends AbstractEntity {
             String extension,
             Long fileSize
     ) {
+        state(isDraft(), "첨부파일수정가능 상태(UNSUBMITTED)가 아님");
+
         DraftFile file = DraftFile.create(
                 this, mimeType, originalName, extension, fileSize
         );
@@ -156,9 +183,17 @@ public abstract class Draft extends AbstractEntity {
     }
 
     public void removeFile(DraftFile file) {
+        state(isDraft(), "첨부파일수정가능 상태(UNSUBMITTED)가 아님");
+
         requireNonNull(file, "file은 null일 수 없음");
 
         boolean removed = this.draftFiles.remove(file);
         state(removed, "해당 파일이 없음");
+    }
+
+    protected void validateBeforeSubmit(@Nullable List<ApproversParam> params) {}
+
+    protected boolean isDraft() {
+        return this.approval == null || this.approval.isDraft();
     }
 }

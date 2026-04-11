@@ -33,6 +33,9 @@ public class YamlAttendancePolicyAdapter implements CompanyPolicyPort {
     @Value("${MAX_ANNUAL_LEAVE_FOR_FIRST_YEAR_EMP}")
     private String maxAnnualLeaveForFirstYearEmp;
 
+    @Value("${BREAKHOUR_START_TIME}")
+    private String breakStartTime;
+
     @Override
     public Integer getWorkHours() {
         return Integer.parseInt(workHour);
@@ -71,5 +74,10 @@ public class YamlAttendancePolicyAdapter implements CompanyPolicyPort {
     @Override
     public Double getMaxAnnualLeaveDaysForFirstYearEmp() {
         return Double.parseDouble(maxAnnualLeaveForFirstYearEmp);
+    }
+
+    @Override
+    public LocalTime getBreakStartTime() {
+        return LocalTime.of(Integer.parseInt(breakStartTime), 0, 0);
     }
 }

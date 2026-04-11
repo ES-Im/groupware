@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.jspecify.annotations.Nullable;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -46,11 +47,10 @@ public class BusinessTripDraft extends Draft {
             LocalDateTime endAt,
             String destination,
             String purpose,
-            List<Emp> participants,
-            List<ApproversParam> approvers
+            @Nullable List<Emp> participants,
+            @Nullable List<ApproversParam> approvers
     ) {
         BusinessTripDraft draft = new BusinessTripDraft(title, content, emp);
-
         draft.init(startAt, endAt, destination, purpose, participants);
         draft.createDraftApproval(approvers);
 
@@ -77,7 +77,6 @@ public class BusinessTripDraft extends Draft {
         return draft;
     }
 
-
     private void init(
             LocalDateTime startAt,
             LocalDateTime endAt,
@@ -85,14 +84,7 @@ public class BusinessTripDraft extends Draft {
             String purpose,
             List<Emp> participants
     ) {
-        requireNonNull(startAt, "출장 시작일시는 null일 수 없음");
-        requireNonNull(endAt, "출장 종료일시는 null일 수 없음");
-        requireNonNull(destination, "목적지는 null일 수 없음");
-        requireNonNull(purpose, "출장목적은 null일 수 없음");
-
-        state(!endAt.isBefore(startAt), "종료시간은 시작시간보다 이를 수 없음");
-        state(!destination.isBlank(), "목적지는 빈 값이 될 수 없음");
-        state(!purpose.isBlank(), "출장목적은 빈 값이 될 수 없음");
+        validateBusinessTripInitParam(startAt, endAt, destination, purpose);
 
         this.startAt = startAt;
         this.endAt = endAt;
@@ -104,7 +96,31 @@ public class BusinessTripDraft extends Draft {
         }
     }
 
+    public void editBusinessTripDraft (
+            @Nullable String title,
+            @Nullable String content,
+            @Nullable LocalDateTime startAt,
+            @Nullable LocalDateTime endAt,
+            @Nullable String destination,
+            @Nullable String purpose
+    ) {
+        editDraft(title, content);
+
+        LocalDateTime editedStartAt = startAt != null ? startAt : this.startAt;
+        LocalDateTime editedEndAt = endAt != null ? endAt : this.endAt;
+        String editedDestination = destination != null ? destination : this.destination;
+        String editedPurpose = purpose != null ? purpose : this.purpose;
+
+        validateBusinessTripInitParam(editedStartAt, editedEndAt, editedDestination, editedPurpose);
+
+        this.startAt = editedStartAt;
+        this.endAt = editedEndAt;
+        this.destination = editedDestination;
+        this.purpose = editedPurpose;
+    }
+
     public void addParticipant(Emp emp) {
+        state(isDraft(), "미상신 문서만 수정가능");
         requireNonNull(emp, "참여자는 null일 수 없음");
         state(!hasParticipant(emp), "이미 등록된 참여자");
 
@@ -113,6 +129,7 @@ public class BusinessTripDraft extends Draft {
     }
 
     public void removeParticipant(Emp emp) {
+        state(isDraft(), "미상신 문서만 수정가능");
         requireNonNull(emp, "참여자는 null일 수 없음");
 
         BusinessTripParticipant participant = getBusinessTripParticipant(emp);
@@ -121,14 +138,33 @@ public class BusinessTripDraft extends Draft {
 
     private BusinessTripParticipant getBusinessTripParticipant(Emp emp) {
         return this.participants.stream()
-                .filter(p -> p.getEmp().getId().equals(emp.getId()))
+                .filter(p -> p.getEmp().equals(emp))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("해당 참여자가 없음"));
     }
 
     private boolean hasParticipant(Emp emp) {
         return this.participants.stream()
-                .anyMatch(e -> e.getEmp().getId().equals(emp.getId()));
+                .anyMatch(e -> e.getEmp().equals(emp));
+    }
+
+    @Override
+    protected void validateBeforeSubmit(@Nullable List<ApproversParam> params) {
+        state(!participants.isEmpty(), "참가자가 0명이 될 수 없다.");
+
+        super.validateBeforeSubmit(params);
+    }
+
+    private static void validateBusinessTripInitParam(LocalDateTime startAt, LocalDateTime endAt, String destination, String purpose) {
+        requireNonNull(startAt, "출장 시작일시는 null일 수 없음");
+        requireNonNull(endAt, "출장 종료일시는 null일 수 없음");
+        requireNonNull(destination, "목적지는 null일 수 없음");
+        requireNonNull(purpose, "출장목적은 null일 수 없음");
+
+        state(!endAt.isBefore(startAt), "종료시간은 시작시간보다 이를 수 없음");
+        state(!destination.isBlank(), "목적지는 빈 값이 될 수 없음");
+        state(!purpose.isBlank(), "출장목적은 빈 값이 될 수 없음");
     }
 
 }
+

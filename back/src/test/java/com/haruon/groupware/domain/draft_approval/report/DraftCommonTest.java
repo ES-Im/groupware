@@ -17,7 +17,7 @@ import java.util.stream.Stream;
 import static com.haruon.groupware.domain.shared.EmpFixture.getApprovedEmp;
 import static org.assertj.core.api.Assertions.*;
 
-class DraftTest {
+class DraftCommonTest {
 
     @Test
     @DisplayName("Draft 임시저장 시 Approval, Approver이 같이 초기화된다.")
@@ -71,7 +71,7 @@ class DraftTest {
     @Test
     @DisplayName("임시저장 기안 엔티티 생성시, approval의 상태는 상신전(Unsubmitted)이다")
     void unsubmittedStatus_When_Create_Draft() {
-        GeneralDraft draft = getDraft();
+        GeneralDraft draft = getDraftWithApprovers();
 
         assertThat(draft.getApproval().getStatus()).isEqualTo(ApprovalStatus.UNSUBMITTED);
     }
@@ -454,7 +454,7 @@ class DraftTest {
     @Test
     @DisplayName("기안자는 문서의 결재상태 무관, 공람자를 설정할 수 있다.")
     void addCirculation_success() {
-        GeneralDraft draft = getDraft();
+        GeneralDraft draft = getDraftWithApprovers();
         Emp sharedEmp = getApprovedEmp("202401001", "sharedEmp");
         
         draft.addCirculation(sharedEmp);
@@ -469,7 +469,7 @@ class DraftTest {
     @Test
     @DisplayName("이미 공람된 사원은 공람자에 추가할 수 없다.")
     void addCirculation_when_already_circulated_fail() {
-        GeneralDraft draft = getDraft();
+        GeneralDraft draft = getDraftWithApprovers();
         Emp sharedEmp = getApprovedEmp("202401001", "sharedEmp");
 
         draft.addCirculation(sharedEmp);
@@ -480,9 +480,42 @@ class DraftTest {
     }
 
     @Test
+    @DisplayName("이미 공람된 사원을 공람자에서 제외할 수 있다.")
+    void removeCirculation() {
+        GeneralDraft draft = getDraftWithApprovers();
+        Emp sharedEmp = getApprovedEmp("202401001", "sharedEmp");
+        draft.addCirculation(sharedEmp);
+
+        draft.removeCirculation(sharedEmp);
+
+        assertThat(draft.getCirculations()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("공람되지 않은 사원은 공람자에서 제외할 수 없다.")
+    void removeCirculation_when_emp_not_in_circulation_fail() {
+        GeneralDraft draft = getDraftWithApprovers();
+        Emp sharedEmp = getApprovedEmp("202401001", "sharedEmp");
+
+        assertThatThrownBy(() ->
+                draft.removeCirculation(sharedEmp)
+        ).hasMessage("해당 공람자가 없음");
+    }
+
+    @Test
+    @DisplayName("공람 제외할 사원이 없으면 공람 제외할 수 없다.")
+    void removeCirculation_when_emp_is_null_fail() {
+        GeneralDraft draft = getDraftWithApprovers();
+
+        assertThatThrownBy(() ->
+                draft.removeCirculation(null)
+        ).hasMessage("삭제할 공람자가 없음");
+    }
+
+    @Test
     @DisplayName("공람자 추가 시, 공람대상 사원 정보는 필수 값이다.")
     void addCirculation_without_emp_fail() {
-        GeneralDraft draft = getDraft();
+        GeneralDraft draft = getDraftWithApprovers();
 
         assertThatThrownBy(() ->
                 draft.addCirculation(null)
@@ -514,6 +547,113 @@ class DraftTest {
         );
     }
 
+    @Test
+    @DisplayName("미상신(UNSUBMITTED) 상태일 때는 approvers정보가 있어야 상신(SUBMIT)을 할 수 있다.")
+    void submit_draft() {
+        GeneralDraft draft = getDraftWithApprovers();
+        LocalDateTime submittedAt = LocalDateTime.of(2026,5,5,0,0,0);
+
+        Approval approval = draft.getApproval();
+        draft.submit(submittedAt, null);
+
+        assertThat(approval.getStatus()).isEqualTo(ApprovalStatus.WAITING);
+    }
+
+    @Test
+    @DisplayName("approvers정보가 없으면 상신(SUBMIT)을 할 수 없다")
+    void submit_draft_without_approvers() {
+        GeneralDraft draft = getDraftWithoutApprovers();
+        LocalDateTime submittedAt = LocalDateTime.of(2026,5,5,0,0,0);
+
+        assertThatThrownBy(() ->
+                draft.submit(submittedAt, null)
+        ).hasMessage("결재자 정보가 없음");
+    }
+
+    @Test
+    @DisplayName("상신(SUBMITTED) 상태일 때는 상신(SUBMIT)을 할 수 없다.")
+    void submit_submitted_draft() {
+        GeneralDraft draft = getApprovedDraft();
+        LocalDateTime submittedAt = LocalDateTime.of(2026,5,5,0,0,0);
+
+        assertThatThrownBy(() ->
+                draft.submit(submittedAt, null)
+        ).hasMessage("상신 가능한 상태가 아님");
+    }
+
+    @Test
+    @DisplayName("기안 첨부파일을 추가할 수 있다.")
+    void addFile() {
+        GeneralDraft draft = getDraftWithApprovers();
+        String mimeType = "image/png";
+        String originalName = "originName";
+        String extension = "png";
+        Long fileSize = 1024L;
+
+        draft.addFile(mimeType, originalName, extension, fileSize);
+
+        assertThat(draft.getDraftFiles()).singleElement().extracting(
+                DraftFile::getDraft, DraftFile::getMimeType, DraftFile::getOriginalName, DraftFile::getExtension, DraftFile::getFileSize
+        ).containsExactly(
+                draft, mimeType, originalName, extension, fileSize
+        );
+    }
+
+    @Test
+    @DisplayName("상신했을 경우 기안 첨부파일을 추가할 수 없다.")
+    void addFile_for_submitted_fail() {
+        GeneralDraft submitted = getSubmitted();
+        String mimeType = "image/png";
+        String originalName = "originName";
+        String extension = "png";
+        Long fileSize = 1024L;
+
+        assertThatThrownBy(() ->
+                submitted.addFile(mimeType, originalName, extension, fileSize)
+        ).hasMessage("첨부파일수정가능 상태(UNSUBMITTED)가 아님");
+    }
+
+    @Test
+    @DisplayName("기안정보가 없다면 기안 첨부파일을 추가할 수 없다.")
+    void addFile_not_in_draft_fail() {
+        GeneralDraft submitted = null;
+        String mimeType = "image/png";
+        String originalName = "originName";
+        String extension = "png";
+        Long fileSize = 1024L;
+
+        assertThatThrownBy(() ->
+                submitted.addFile(mimeType, originalName, extension, fileSize)
+        ).isInstanceOf(NullPointerException.class);
+    }
+
+    @Test
+    @DisplayName("기안 첨부파일을 삭제할 수 있다.")
+    void removeFile() {
+        GeneralDraft draft = getDraftWithApprovers();
+        draft.addFile("image/png", "originName", "png", 1024L);
+
+        DraftFile first = draft.getDraftFiles().getFirst();
+        draft.removeFile(first);
+
+        assertThat(draft.getDraftFiles()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("상신했을 경우 기안 첨부파일을 삭제할 수 없다.")
+    void removeFile_for_submitted_fail() {
+        GeneralDraft submitted = getDraftWithApprovers();
+        submitted.addFile("image/png", "originName", "png", 1024L);
+        submitted.approve(submitted.getApproval().getApprovers().getFirst().getEmp(),
+                LocalDateTime.of(2026,5, 5,0,0,0));
+
+        DraftFile first = submitted.getDraftFiles().getFirst();
+
+        assertThatThrownBy(() ->
+                submitted.removeFile(first)
+        ).hasMessage("첨부파일수정가능 상태(UNSUBMITTED)가 아님");
+    }
+
     private GeneralDraft getSubmitted() {
 
         return GeneralDraft.createSubmitted(
@@ -533,7 +673,7 @@ class DraftTest {
         );
     }
 
-    private GeneralDraft getDraft() {
+    private GeneralDraft getDraftWithApprovers() {
 
         return GeneralDraft.createDraft(
                 getApprovedEmp(),
@@ -551,7 +691,16 @@ class DraftTest {
         );
     }
 
-    private GeneralDraft getDraft(String title, String content, Emp drafter, List<ApproversParam> approverParam) {
+    private GeneralDraft getDraftWithoutApprovers() {
+        return GeneralDraft.createDraft(
+                getApprovedEmp(),
+                "test",
+                "test",
+                null
+        );
+    }
+
+    private GeneralDraft getDraftWithApprovers(String title, String content, Emp drafter, List<ApproversParam> approverParam) {
 
         return GeneralDraft.createDraft(
                 drafter, title, content, approverParam
