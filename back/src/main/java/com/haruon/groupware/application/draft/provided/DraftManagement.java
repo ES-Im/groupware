@@ -1,8 +1,7 @@
 package com.haruon.groupware.application.draft.provided;
 
+import com.haruon.groupware.application.draft.dto.ApproversRequest;
 import com.haruon.groupware.application.draft.dto.DraftFileRequest;
-import com.haruon.groupware.domain.draft_approval.report.ApproversParam;
-import com.haruon.groupware.domain.empInfo.Emp;
 import org.jspecify.annotations.Nullable;
 
 import java.time.LocalDateTime;
@@ -14,26 +13,26 @@ import java.util.List;
 public interface DraftManagement {
 
     /** about draft */
-    void revertToDraft(long draftId, long empId);
+    void revertToDraft(long draftId, long drafterId);
 
-    void submit(long draftId, long empId, LocalDateTime submittedAt, @Nullable List<ApproversParam> params);
+    void submit(long draftId, long drafterId, LocalDateTime submittedAt, @Nullable List<ApproversRequest> params);
 
     /** about approve */
-    void approve(long draftId, Emp approver, LocalDateTime approvedAt);
+    void approve(long draftId, long approverId, LocalDateTime approvedAt);
     // -> 모든 승인 끝나면 markReadByCirculation 호출
 
-    void reject(long draftId, Emp approver, LocalDateTime rejectedAt);
+    void reject(long draftId, long rejecterId, String reason, LocalDateTime rejectedAt);
 
     /** about circulation */
-    void addCirculatedEmp(long draftId, long empId, Emp circulatedEmp);
+    void addCirculatedEmp(long draftId, long drafterId, long circulatedEmpId);
 
-    void removeCirculatedEmp(long draftId, long empId, Emp circulatedEmp);
+    void removeCirculatedEmp(long draftId, long drafterId, long circulatedEmpId);
 
     // isReadableByCirculation -> 조회용, 공람자 리스트 출력시 사용할 것
 
     /** about file */
-    void addFile(long draftId, long empId, DraftFileRequest fileParam);
+    void addFile(long draftId, long drafterId, DraftFileRequest fileParam);
 
-    void removeFile(long draftId, long empId, long fileId);
+    void removeFile(long draftId, long drafterId, long fileId);
 
 }

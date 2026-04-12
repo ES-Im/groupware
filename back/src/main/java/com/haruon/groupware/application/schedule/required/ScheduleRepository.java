@@ -9,7 +9,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-public interface ScheduleRepository extends Repository<ScheduleRepository, Long> {
+public interface ScheduleRepository extends Repository<Schedule, Long> {
 
     List<Schedule> findByEmp_IdAndScheduleDate(Long empId, LocalDate scheduleDate);
 
@@ -17,7 +17,7 @@ public interface ScheduleRepository extends Repository<ScheduleRepository, Long>
 
     Optional<List<Schedule>> findByScheduleTypeAndSourceId(ScheduleType scheduleType, Long sourceId);
 
-    List<Schedule> saveAll(List<Schedule> schedules);
+    Schedule save(Schedule schedule);
 
     @Query("""
         select max(s.sourceId)

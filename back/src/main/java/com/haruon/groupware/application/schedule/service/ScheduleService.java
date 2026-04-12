@@ -5,8 +5,6 @@ import com.haruon.groupware.application.empInfo.required.EmpRepository;
 import com.haruon.groupware.application.schedule.provided.ScheduleEditing;
 import com.haruon.groupware.application.schedule.provided.ScheduleRegister;
 import com.haruon.groupware.application.schedule.required.ScheduleRepository;
-import com.haruon.groupware.application.schedule.service.dto.ManualScheduleParam;
-import com.haruon.groupware.application.schedule.service.dto.ScheduleParam;
 import com.haruon.groupware.domain.draft_approval.report.BusinessTripDraft;
 import com.haruon.groupware.domain.draft_approval.report.LeaveDraft;
 import com.haruon.groupware.domain.empInfo.Emp;
@@ -54,9 +52,13 @@ public class ScheduleService implements ScheduleRegister, ScheduleEditing {
             schedules = registerManualSchedules(requireNonNull(param.manual()), isPublic);
         }
 
-        List<Schedule> result = scheduleRepository.saveAll(schedules);
+        int count = 0;
+        for (Schedule schedule : schedules) {
+            scheduleRepository.save(schedule);
+            count++;
+        }
 
-        return result.size();
+        return count;
     }
 
     @Override

@@ -13,8 +13,8 @@ public interface BusinessTripDraftManagement {
 
     void updateDraft(BusinessTripDraftUpdateRequest param);
 
-    void addBusinessTripParticipant(long draftId, long drafter, long participantId);
+    void addParticipant(long draftId, long drafter, long participantId);
 
-    void removeBusinessTripParticipant(long draftId, long drafter, long participantId);
+    void removeParticipant(long draftId, long drafter, long participantId);
 
 }

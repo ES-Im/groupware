@@ -1,13 +1,6 @@
 package com.haruon.groupware.application.empInfo.empService;
 
 import com.haruon.groupware.application.CompanyPolicyPort;
-import com.haruon.groupware.application.empInfo.empService.dto.EmpAdminUpdateRequest;
-import com.haruon.groupware.application.empInfo.empService.dto.EmpDeptManagerUpdateRequest;
-import com.haruon.groupware.application.empInfo.empService.dto.EmpRegisterRequest;
-import com.haruon.groupware.application.empInfo.empService.dto.EmpSelfUpdateRequest;
-import com.haruon.groupware.application.empInfo.empService.dto.param.EmpBelongingsParam;
-import com.haruon.groupware.application.empInfo.empService.dto.param.EmpFileReplaceParam;
-import com.haruon.groupware.application.empInfo.empService.dto.param.EmpFileStatusChangeParam;
 import com.haruon.groupware.application.empInfo.provided.EmpAccountManager;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
 import com.haruon.groupware.domain.empInfo.Emp;
@@ -17,6 +10,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import static com.haruon.groupware.application.Utils.findActiveEmpById;
 import static com.haruon.groupware.application.Utils.findEmpById;
 import static com.haruon.groupware.domain.empInfo.Emp.register;
 import static java.util.Objects.requireNonNull;
@@ -70,7 +64,7 @@ public class EmpService implements EmpAccountManager {
 
     @Override
     public int deleteEmpFile(Long empId, Long fileId) {
-        Emp emp = findEmpById(empRepository, empId);
+        Emp emp = findActiveEmpById(empRepository, empId);
 
         return emp.removeFile(fileId);
     }
@@ -79,7 +73,7 @@ public class EmpService implements EmpAccountManager {
     public int updateEmpFileBySelf(EmpSelfUpdateRequest request) {
         requireNonNull(request);
 
-        Emp emp = findEmpById(empRepository, request.id());
+        Emp emp = findActiveEmpById(empRepository, request.id());
         EmpFileReplaceParam fileParam = request.fileRequest();
 
         return emp.changeEmpFile(
@@ -95,7 +89,7 @@ public class EmpService implements EmpAccountManager {
     public int updateInfoByDeptManager(EmpDeptManagerUpdateRequest deptManagerRequest) {
         requireNonNull(deptManagerRequest);
 
-        Emp emp = findEmpById(empRepository, deptManagerRequest.id());
+        Emp emp = findActiveEmpById(empRepository, deptManagerRequest.id());
 
         return emp.changeInfoByDeptManager(
                 deptManagerRequest.extensionNo(),
@@ -107,7 +101,7 @@ public class EmpService implements EmpAccountManager {
     public int updateInfoByAdmin(EmpAdminUpdateRequest adminRequest) {
         requireNonNull(adminRequest);
 
-        Emp emp = findEmpById(empRepository, adminRequest.id());
+        Emp emp = findActiveEmpById(empRepository, adminRequest.id());
 
         Email newEmail = adminRequest.loginId() != null
                 ? makeEmailByLoginId(adminRequest.loginId())
@@ -129,7 +123,7 @@ public class EmpService implements EmpAccountManager {
     @Override
     public int updateInfoBySelf(EmpSelfUpdateRequest empRequest) {
         requireNonNull(empRequest);
-        Emp emp = findEmpById(empRepository, empRequest.id());
+        Emp emp = findActiveEmpById(empRepository, empRequest.id());
 
         return emp.changeInfoBySelf(
                 empRequest.extensionNo(),
@@ -143,7 +137,7 @@ public class EmpService implements EmpAccountManager {
     public int updateBelongingsByAdmin(EmpAdminUpdateRequest request) {
         requireNonNull(request);
 
-        Emp emp = findEmpById(empRepository, request.id());
+        Emp emp = findActiveEmpById(empRepository, request.id());
         EmpBelongingsParam empBelongingsParam = request.belongingsParam();
 
 
@@ -181,7 +175,7 @@ public class EmpService implements EmpAccountManager {
     private int updateFileStatus(long empId, EmpFileStatusChangeParam request) {
         requireNonNull(request);
 
-        Emp emp = findEmpById(empRepository, empId);
+        Emp emp = findActiveEmpById(empRepository, empId);
 
         return emp.changeFileActiveStatus(
                 request.fileId(),

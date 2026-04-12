@@ -46,7 +46,8 @@ public class Approval extends AbstractEntity {
     }
 
     void submit(@Nullable List<ApproversParam> params) {
-        state(this.status == ApprovalStatus.UNSUBMITTED, "상신 가능한 상태가 아님");
+        state(this.status == ApprovalStatus.UNSUBMITTED
+                , "상신 가능한 상태가 아님");
 
         if (params != null && !params.isEmpty()) {
             this.addApprovers(params);
@@ -100,6 +101,8 @@ public class Approval extends AbstractEntity {
 
     void reject(Emp rejector, String reason, LocalDateTime rejectedAt) {
         requireNonNull(rejector);
+        requireNonNull(reason);
+        state(!reason.isBlank(), "반려사유는 빈칸이 될 수 없음");
 
         state(this.status != ApprovalStatus.REJECTED, "반려된 결재건은 승인할 수 없음");
         state(this.status != ApprovalStatus.APPROVED, "이미 완료된 결재건은 승인할 수 없음");

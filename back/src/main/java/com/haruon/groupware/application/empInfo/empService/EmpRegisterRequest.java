@@ -1,4 +1,4 @@
-package com.haruon.groupware.application.empInfo.empService.dto;
+package com.haruon.groupware.application.empInfo.empService;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;

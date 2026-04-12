@@ -1,6 +1,6 @@
 package com.haruon.groupware.application.schedule.provided;
 
-import com.haruon.groupware.application.schedule.service.dto.ScheduleParam;
+import com.haruon.groupware.application.schedule.service.ScheduleParam;
 
 /**
  * 연차신청 결재, 출장신청 결재, 회의참여로 인한 일정 등록 및 정정

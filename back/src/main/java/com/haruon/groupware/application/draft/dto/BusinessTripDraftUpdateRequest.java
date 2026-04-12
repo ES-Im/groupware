@@ -1,6 +1,7 @@
 package com.haruon.groupware.application.draft.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import org.jspecify.annotations.Nullable;
 
 import java.time.LocalDateTime;
 
@@ -9,15 +10,20 @@ import static java.util.Objects.requireNonNull;
 
 public record BusinessTripDraftUpdateRequest(
 
+        @Nullable
         CommonDraftUpdateRequest param,
 
+        @Nullable
         LocalDateTime startAt,
 
+        @Nullable
         LocalDateTime endAt,
 
+        @Nullable
         @NotBlank
         String destination,
 
+        @Nullable
         @NotBlank
         String purpose
 

@@ -634,7 +634,9 @@ class DraftCommonTest {
         draft.addFile("image/png", "originName", "png", 1024L);
 
         DraftFile first = draft.getDraftFiles().getFirst();
-        draft.removeFile(first);
+        ReflectionTestUtils.setField(first, "id", 1L);
+
+        draft.removeFile(1);
 
         assertThat(draft.getDraftFiles()).isEmpty();
     }
@@ -648,9 +650,10 @@ class DraftCommonTest {
                 LocalDateTime.of(2026,5, 5,0,0,0));
 
         DraftFile first = submitted.getDraftFiles().getFirst();
+        ReflectionTestUtils.setField(first, "id", 1L);
 
         assertThatThrownBy(() ->
-                submitted.removeFile(first)
+                submitted.removeFile(1)
         ).hasMessage("첨부파일수정가능 상태(UNSUBMITTED)가 아님");
     }
 

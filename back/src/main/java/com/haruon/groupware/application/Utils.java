@@ -8,8 +8,6 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Set;
 
-import static org.springframework.util.Assert.state;
-
 public class Utils {
 
     public static LocalTime getEarlierTime(LocalTime targetStartAt, LocalTime baseTime) {
@@ -20,23 +18,26 @@ public class Utils {
         return (targetStartAt == null || targetStartAt.isBefore(baseTime))? baseTime : targetStartAt;
     }
 
+    public static Emp findActiveEmpById(EmpRepository empRepository, Long id) {
+        return empRepository
+                .findById(id)
+                .filter(e -> e.getStatus().equals(EmpStatus.ACTIVE))
+                .orElseThrow(() ->
+                new IllegalArgumentException("해당 활성화된 사원이 존재하지 않음")  // to-do 커스텀 예외처리
+        );
+    }
     public static Emp findEmpById(EmpRepository empRepository, Long id) {
-        return empRepository.findById(id).orElseThrow(() ->
+        return empRepository
+                .findById(id)
+                .orElseThrow(() ->
                 new IllegalArgumentException("해당 사원이 존재하지 않음")  // to-do 커스텀 예외처리
         );
     }
 
     public static List<Emp> getEmpListById(EmpRepository empRepository, Set<Long> participantEmpIds) {
         return participantEmpIds.stream()
-                .map(empId -> findEmpById(empRepository, empId))
+                .map(empId -> findActiveEmpById(empRepository, empId))
                 .toList();
-    }
-
-    public static Emp getActivateEmp(EmpRepository empRepository, Long empId) {
-        Emp emp = findEmpById(empRepository, empId);
-        state(emp.getStatus().equals(EmpStatus.ACTIVE), "활성화된 사원이 아닙니다");
-
-        return emp;
     }
 
 }

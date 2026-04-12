@@ -20,11 +20,13 @@ import static org.springframework.util.Assert.state;
 @Transactional
 public class LeaveDraftService extends CommonDraftService implements LeaveDraftManagement {
 
+    private final EmpRepository empRepository;
     private final LeaveDraftRepository leaveDraftRepository;
 
     public LeaveDraftService(EmpRepository empRepository, LeaveDraftRepository leaveDraftRepository) {
-        super(empRepository);
+        super(empRepository, leaveDraftRepository);
         this.leaveDraftRepository = leaveDraftRepository;
+        this.empRepository = empRepository;
     }
 
     @Override

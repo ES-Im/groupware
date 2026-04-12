@@ -1,7 +1,8 @@
 spring:
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
+    database-platform: org.hibernate.dialect.MySQLDialect
     properties:
       hibernate:
         format_sql: true

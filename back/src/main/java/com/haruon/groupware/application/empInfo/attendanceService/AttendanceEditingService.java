@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
-import static com.haruon.groupware.application.Utils.findEmpById;
+import static com.haruon.groupware.application.Utils.findActiveEmpById;
 import static com.haruon.groupware.application.empInfo.EmpInfoUtils.findAttendanceById;
 import static com.haruon.groupware.application.empInfo.EmpInfoUtils.getStatusByRecognizedHours;
 import static com.haruon.groupware.domain.empInfo.Attendance.registerAttendance;
@@ -40,7 +40,7 @@ public class AttendanceEditingService implements AttendanceEditing {
     @Override
     public int updateApproveAttendance(Long attendanceId, Long approverId, LocalDateTime approvedAt) {
         Attendance attendance = findAttendanceById(attendanceRepository, attendanceId);
-        Emp emp = findEmpById(empRepository, approverId);
+        Emp emp = findActiveEmpById(empRepository, approverId);
         emp.ensureActive();
 
         attendance.approveAttendance(emp, approvedAt);
@@ -51,7 +51,7 @@ public class AttendanceEditingService implements AttendanceEditing {
     @Override
     public int updateEndAtByEmp(Long attendanceId, Long empId, LocalDateTime endAt) {
         Attendance attendance = findAttendanceById(attendanceRepository, attendanceId);
-        Emp emp = findEmpById(empRepository, empId);
+        Emp emp = findActiveEmpById(empRepository, empId);
         emp.ensureActive();
         state(attendance.getEmp().equals(emp), "본인 근태만 퇴근 처리가능");
 
@@ -66,7 +66,7 @@ public class AttendanceEditingService implements AttendanceEditing {
         Attendance attendance = findAttendanceById(attendanceRepository, param.attendanceId());
         attendance.getEmp().ensureActive();
 
-        Emp editor = findEmpById(empRepository, param.editorId());
+        Emp editor = findActiveEmpById(empRepository, param.editorId());
 
         boolean hasMainAttendanceEdit =
                 param.startAt() != null || param.endAt() != null || param.status() != null;

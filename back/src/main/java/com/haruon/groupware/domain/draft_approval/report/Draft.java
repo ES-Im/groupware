@@ -182,13 +182,15 @@ public abstract class Draft extends AbstractEntity {
         this.draftFiles.add(file);
     }
 
-    public void removeFile(DraftFile file) {
+    public void removeFile(long fileId) {
         state(isDraft(), "첨부파일수정가능 상태(UNSUBMITTED)가 아님");
 
-        requireNonNull(file, "file은 null일 수 없음");
+        DraftFile file = this.draftFiles.stream()
+                .filter(f -> f.getId().equals(fileId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("해당 파일이 없음"));
 
-        boolean removed = this.draftFiles.remove(file);
-        state(removed, "해당 파일이 없음");
+        this.draftFiles.remove(file);
     }
 
     protected void validateBeforeSubmit(@Nullable List<ApproversParam> params) {}

@@ -1,6 +1,6 @@
 package com.haruon.groupware.application.empInfo.provided;
 
-import com.haruon.groupware.application.empInfo.deptService.dto.DeptRegisterRequest;
+import com.haruon.groupware.application.empInfo.deptService.DeptRegisterRequest;
 
 /**
  * 부서관련 등록, 활성화설정, 정보 수정

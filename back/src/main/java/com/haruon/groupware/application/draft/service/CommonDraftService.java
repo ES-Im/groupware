@@ -1,62 +1,137 @@
 package com.haruon.groupware.application.draft.service;
 
+import com.haruon.groupware.application.Utils;
+import com.haruon.groupware.application.draft.dto.ApproversRequest;
 import com.haruon.groupware.application.draft.dto.DraftFileRequest;
 import com.haruon.groupware.application.draft.provided.DraftManagement;
+import com.haruon.groupware.application.draft.required.DraftRepository;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
 import com.haruon.groupware.domain.draft_approval.report.ApproversParam;
+import com.haruon.groupware.domain.draft_approval.report.Draft;
 import com.haruon.groupware.domain.empInfo.Emp;
 import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @Transactional
-@RequiredArgsConstructor
 public abstract class CommonDraftService implements DraftManagement {
 
     private final EmpRepository empRepository;
+    private final DraftRepository draftRepository;
 
-    @Override
-    public void revertToDraft(long draftId, long empId) {
-
+    public CommonDraftService(EmpRepository empRepository, DraftRepository draftRepository) {
+        this.empRepository = empRepository;
+        this.draftRepository = draftRepository;
     }
 
     @Override
-    public void submit(long draftId, long empId, LocalDateTime submittedAt, @Nullable List<ApproversParam> params) {
+    public void revertToDraft(long draftId, long drafterId) {
+        Draft draft = findDraftByDraftIdAndEmpId(draftId, drafterId);
 
+        draft.revertToDraft();
     }
 
     @Override
-    public void approve(long draftId, Emp approver, LocalDateTime approvedAt) {
+    public void submit(long draftId, long drafterId, LocalDateTime submittedAt, @Nullable List<ApproversRequest> params) {
+        Draft draft = findDraftByDraftIdAndEmpId(draftId, drafterId);
 
+        if(!hasApprovers(params, draft)) throw new IllegalArgumentException("결재선이 없는 기안건은 상신할 수 없다");   // to-do 커스텀 예외처리
+
+        draft.submit(submittedAt, changeToApproverParams(params));
     }
 
     @Override
-    public void reject(long draftId, Emp approver, LocalDateTime rejectedAt) {
+    public void approve(long draftId, long approverId, LocalDateTime approvedAt) {
+        Draft draft = findDraftByDraftId(draftId);
+        Emp approver = findActiveEmpById(approverId);
 
+        draft.approve(approver, approvedAt);
     }
 
     @Override
-    public void addCirculatedEmp(long draftId, long empId, Emp circulatedEmp) {
+    public void reject(long draftId, long rejecterId, String reason ,LocalDateTime rejectedAt) {
+        Draft draft = findDraftByDraftId(draftId);
+        Emp rejector = findActiveEmpById(rejecterId);
 
+        draft.reject(rejector, reason, rejectedAt);
     }
 
     @Override
-    public void removeCirculatedEmp(long draftId, long empId, Emp circulatedEmp) {
+    public void addCirculatedEmp(long draftId, long drafterId, long circulatedEmpId) {
+        Draft draft = findDraftByDraftId(draftId);
+        Emp circulatedEmp = findActiveEmpById(circulatedEmpId);
 
+        draft.addCirculation(circulatedEmp);
     }
 
     @Override
-    public void addFile(long draftId, long empId, DraftFileRequest fileParam) {
+    public void removeCirculatedEmp(long draftId, long drafterId, long circulatedEmpId) {
+        Draft draft = findDraftByDraftId(draftId);
+        Emp circulatedEmp = findActiveEmpById(circulatedEmpId);
 
+        draft.removeCirculation(circulatedEmp);
     }
 
     @Override
-    public void removeFile(long draftId, long empId, long fileId) {
+    public void addFile(long draftId, long drafterId, DraftFileRequest fileParam) {
+        Draft draft = findDraftByDraftId(draftId);
 
+        draft.addFile(
+                fileParam.mimeType(),
+                fileParam.originalName(),
+                fileParam.extension(),
+                fileParam.fileSize()
+        );
     }
+
+    @Override
+    public void removeFile(long draftId, long drafterId, long fileId) {
+        Draft draft = findDraftByDraftIdAndEmpId(draftId, drafterId);
+
+        draft.removeFile(fileId);
+    }
+
+    private boolean hasApprovers(@Nullable List<ApproversRequest> params, Draft draft) {
+        return !draft.getApproval().getApprovers().isEmpty()
+                || (params != null && !params.isEmpty());
+    }
+
+    protected Emp findActiveEmpById(Long empId) {
+        return Utils.findActiveEmpById(empRepository, empId);
+    }
+
+    protected void hasSubmittedInfo(@Nullable LocalDateTime submittedAt, @Nullable List<ApproversRequest> approvers) {
+        if(submittedAt == null || approvers == null || approvers.isEmpty()) {
+            throw new IllegalArgumentException("상신시, 결제선 설정 필수");   // to-do 커스텀 예외 설계 필요
+        }
+    }
+
+    protected Draft findDraftByDraftIdAndEmpId(long draftId, long empId) {
+        return draftRepository.findByIdAndEmp(draftId, findActiveEmpById(empId))
+                .orElseThrow(() -> new IllegalArgumentException("해당 기안자의 해당 기안서를 찾을 수 없음"));         // to-do 커스텀 예외 설계 필요
+    }
+
+    protected Draft findDraftByDraftId(long draftId) {
+        return draftRepository.findById(draftId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 기안서를 찾을 수 없음"));         // to-do 커스텀 예외 설계 필요
+    }
+
+    protected List<ApproversParam> changeToApproverParams(@Nullable  List<ApproversRequest> approvers) {
+        if(approvers == null) return List.of();
+
+        List<ApproversParam> approversParams = new ArrayList<>();
+
+        for (ApproversRequest approver : approvers) {
+            Emp emp = findActiveEmpById(approver.approverId());
+            approversParams.add(new ApproversParam(approver.role(), approver.order(), emp));
+        }
+
+        return approversParams;
+    }
+
 }

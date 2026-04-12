@@ -1,9 +1,9 @@
 package com.haruon.groupware.application.empInfo.provided;
 
-import com.haruon.groupware.application.empInfo.empService.dto.EmpAdminUpdateRequest;
-import com.haruon.groupware.application.empInfo.empService.dto.EmpDeptManagerUpdateRequest;
-import com.haruon.groupware.application.empInfo.empService.dto.EmpRegisterRequest;
-import com.haruon.groupware.application.empInfo.empService.dto.EmpSelfUpdateRequest;
+import com.haruon.groupware.application.empInfo.empService.EmpAdminUpdateRequest;
+import com.haruon.groupware.application.empInfo.empService.EmpDeptManagerUpdateRequest;
+import com.haruon.groupware.application.empInfo.empService.EmpRegisterRequest;
+import com.haruon.groupware.application.empInfo.empService.EmpSelfUpdateRequest;
 
 /**
  * 사원관련 정보 등록 및 수정, 삭제

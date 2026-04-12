@@ -1,4 +1,4 @@
-package com.haruon.groupware.application.empInfo.deptService.dto;
+package com.haruon.groupware.application.empInfo.deptService;
 
 
 import jakarta.validation.constraints.NotNull;

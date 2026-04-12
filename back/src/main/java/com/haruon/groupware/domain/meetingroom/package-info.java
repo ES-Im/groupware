@@ -1,6 +1,5 @@
 @NullMarked
 
-package com.haruon.groupware.application;
+package com.haruon.groupware.domain.meetingroom;
 
 import org.jspecify.annotations.NullMarked;
-

@@ -1,4 +1,4 @@
-package com.haruon.groupware.application.empInfo.empService.dto.param;
+package com.haruon.groupware.application.empInfo.empService;
 
 import com.haruon.groupware.domain.empInfo.enums.FileType;
 import jakarta.validation.constraints.NotBlank;

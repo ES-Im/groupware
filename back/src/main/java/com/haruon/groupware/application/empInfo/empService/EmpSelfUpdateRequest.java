@@ -1,7 +1,5 @@
-package com.haruon.groupware.application.empInfo.empService.dto;
+package com.haruon.groupware.application.empInfo.empService;
 
-import com.haruon.groupware.application.empInfo.empService.dto.param.EmpFileReplaceParam;
-import com.haruon.groupware.application.empInfo.empService.dto.param.EmpFileStatusChangeParam;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;

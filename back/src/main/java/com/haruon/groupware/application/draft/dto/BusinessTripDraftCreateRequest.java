@@ -1,8 +1,10 @@
 package com.haruon.groupware.application.draft.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import org.jspecify.annotations.Nullable;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static java.util.Objects.requireNonNull;
 import static org.springframework.util.Assert.state;
@@ -19,7 +21,10 @@ public record BusinessTripDraftCreateRequest(
         String destination,
 
         @NotBlank
-        String purpose
+        String purpose,
+
+        @Nullable
+        List<Long> participantsId
 
 ) {
         public BusinessTripDraftCreateRequest {

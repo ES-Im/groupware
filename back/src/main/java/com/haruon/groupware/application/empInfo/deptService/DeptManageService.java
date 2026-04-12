@@ -1,6 +1,5 @@
 package com.haruon.groupware.application.empInfo.deptService;
 
-import com.haruon.groupware.application.empInfo.deptService.dto.DeptRegisterRequest;
 import com.haruon.groupware.application.empInfo.provided.DeptManagement;
 import com.haruon.groupware.application.empInfo.required.DeptRepository;
 import com.haruon.groupware.domain.empInfo.Dept;

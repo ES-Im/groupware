@@ -13,11 +13,13 @@ import org.springframework.stereotype.Service;
 @Transactional
 public class SalesDraftService extends CommonDraftService implements SalesDraftManagement {
 
+    private final EmpRepository empRepository;
     private final SalesDraftRepository salesDraftRepository;
 
     public SalesDraftService(EmpRepository empRepository, SalesDraftRepository salesDraftRepository) {
-        super(empRepository);
+        super(empRepository, salesDraftRepository);
         this.salesDraftRepository = salesDraftRepository;
+        this.empRepository = empRepository;
     }
 
     @Override

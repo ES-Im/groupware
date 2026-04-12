@@ -1,4 +1,4 @@
-package com.haruon.groupware.application.empInfo.empService.dto.param;
+package com.haruon.groupware.application.empInfo.empService;
 
 import lombok.Builder;
 

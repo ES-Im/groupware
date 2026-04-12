@@ -1,7 +1,5 @@
-package com.haruon.groupware.application.empInfo.empService.dto;
+package com.haruon.groupware.application.empInfo.empService;
 
-import com.haruon.groupware.application.empInfo.empService.dto.param.EmpBelongingsParam;
-import com.haruon.groupware.application.empInfo.empService.dto.param.EmpFileStatusChangeParam;
 import com.haruon.groupware.domain.empInfo.enums.EmpStatus;
 import com.haruon.groupware.domain.empInfo.enums.SystemRoleCode;
 import jakarta.validation.constraints.NotBlank;

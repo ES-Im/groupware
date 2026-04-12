@@ -1,6 +1,5 @@
 package com.haruon.groupware.application.draft.dto;
 
-import com.haruon.groupware.domain.draft_approval.report.ApproversParam;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotBlank;
 import org.jspecify.annotations.Nullable;
@@ -22,7 +21,7 @@ public record CommonDraftCreateRequest(
         @Max(500)
         String content,
 
-        @Nullable List<ApproversParam> approvers,
+        @Nullable List<ApproversRequest> approvers,
 
         @Nullable LocalDateTime submittedAt
 ) {

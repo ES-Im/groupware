@@ -46,7 +46,7 @@ public class AttendanceClosingService implements AttendanceClosing {
     @Override
     public int closeAttendance(AttendanceCloseParam param) {
         requireNonNull(param);
-        Emp emp = findEmpById(empRepository, param.empId());
+        Emp emp = findActiveEmpById(empRepository, param.empId());
         emp.ensureActive();
 
         int attendanceCnt = 0;
@@ -77,7 +77,7 @@ public class AttendanceClosingService implements AttendanceClosing {
 
         if(attendance == null) {
             attendance = registerAttendance(
-                    findEmpById(empRepository, emp.getId()),
+                    findActiveEmpById(empRepository, emp.getId()),
                     date,
                     ABSENT,
                     null, null

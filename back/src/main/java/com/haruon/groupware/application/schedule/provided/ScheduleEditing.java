@@ -1,6 +1,6 @@
 package com.haruon.groupware.application.schedule.provided;
 
-import com.haruon.groupware.application.schedule.service.dto.ManualScheduleParam;
+import com.haruon.groupware.application.schedule.service.ManualScheduleParam;
 
 import java.util.Set;
 

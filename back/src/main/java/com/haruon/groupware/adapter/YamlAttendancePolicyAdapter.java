@@ -18,7 +18,7 @@ public class YamlAttendancePolicyAdapter implements CompanyPolicyPort {
     @Value("${HARUON_END_TIME}")
     private String endTime;
 
-    @Value("${HARUON_WORKING_HOUR}")
+    @Value("${HARUON_WORK_HOUR}")
     private String workHour;
 
     @Value("${HARUON_BREAK_HOUR}")

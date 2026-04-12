@@ -39,7 +39,7 @@ public class BusinessTripDraft extends Draft {
         super(title, content, emp);
     }
 
-    public static BusinessTripDraft createDraft(
+    public static BusinessTripDraft createDraft (
             Emp emp,
             String title,
             String content,
@@ -57,7 +57,7 @@ public class BusinessTripDraft extends Draft {
         return draft;
     }
 
-    public static BusinessTripDraft createSubmitted(
+    public static BusinessTripDraft createSubmitted (
             Emp emp,
             String title,
             String content,
@@ -75,25 +75,6 @@ public class BusinessTripDraft extends Draft {
         draft.createSubmittedApproval(approvers, submittedAt);
 
         return draft;
-    }
-
-    private void init(
-            LocalDateTime startAt,
-            LocalDateTime endAt,
-            String destination,
-            String purpose,
-            List<Emp> participants
-    ) {
-        validateBusinessTripInitParam(startAt, endAt, destination, purpose);
-
-        this.startAt = startAt;
-        this.endAt = endAt;
-        this.destination = destination;
-        this.purpose = purpose;
-
-        if (participants != null) {
-            participants.forEach(this::addParticipant);
-        }
     }
 
     public void editBusinessTripDraft (
@@ -136,6 +117,32 @@ public class BusinessTripDraft extends Draft {
         this.participants.remove(participant);
     }
 
+    @Override
+    protected void validateBeforeSubmit(@Nullable List<ApproversParam> params) {
+        state(!participants.isEmpty(), "참가자가 0명이 될 수 없다.");
+
+        super.validateBeforeSubmit(params);
+    }
+
+    private void init (
+            LocalDateTime startAt,
+            LocalDateTime endAt,
+            String destination,
+            String purpose,
+            @Nullable List<Emp> participants
+    ) {
+        validateBusinessTripInitParam(startAt, endAt, destination, purpose);
+
+        this.startAt = startAt;
+        this.endAt = endAt;
+        this.destination = destination;
+        this.purpose = purpose;
+
+        if (participants!= null && !participants.isEmpty()) {
+            participants.forEach(this::addParticipant);
+        }
+    }
+
     private BusinessTripParticipant getBusinessTripParticipant(Emp emp) {
         return this.participants.stream()
                 .filter(p -> p.getEmp().equals(emp))
@@ -146,13 +153,6 @@ public class BusinessTripDraft extends Draft {
     private boolean hasParticipant(Emp emp) {
         return this.participants.stream()
                 .anyMatch(e -> e.getEmp().equals(emp));
-    }
-
-    @Override
-    protected void validateBeforeSubmit(@Nullable List<ApproversParam> params) {
-        state(!participants.isEmpty(), "참가자가 0명이 될 수 없다.");
-
-        super.validateBeforeSubmit(params);
     }
 
     private static void validateBusinessTripInitParam(LocalDateTime startAt, LocalDateTime endAt, String destination, String purpose) {

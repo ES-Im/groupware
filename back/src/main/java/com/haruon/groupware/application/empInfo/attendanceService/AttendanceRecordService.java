@@ -25,7 +25,7 @@ public class AttendanceRecordService implements AttendanceRecord {
 
     @Override
     public int recordCheckIn(Long empId, LocalDateTime checkInAt) {
-        Emp emp = Utils.findEmpById(empRepository, empId);
+        Emp emp = Utils.findActiveEmpById(empRepository, empId);
         emp.ensureActive();
 
         Attendance attendance = registerAttendanceByEmp(emp, checkInAt);
