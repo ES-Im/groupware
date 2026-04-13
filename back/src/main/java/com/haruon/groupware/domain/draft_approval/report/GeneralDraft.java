@@ -48,4 +48,11 @@ public class GeneralDraft extends Draft {
         return generalDraft;
     }
 
+    public void editGeneralDraft(
+            @Nullable String title,
+            @Nullable String content
+    ) {
+        editDraft(title, content);
+    }
+
 }
