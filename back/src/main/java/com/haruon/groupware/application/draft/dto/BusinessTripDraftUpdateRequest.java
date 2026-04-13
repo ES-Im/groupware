@@ -10,7 +10,6 @@ import static java.util.Objects.requireNonNull;
 
 public record BusinessTripDraftUpdateRequest(
 
-        @Nullable
         CommonDraftUpdateRequest param,
 
         @Nullable

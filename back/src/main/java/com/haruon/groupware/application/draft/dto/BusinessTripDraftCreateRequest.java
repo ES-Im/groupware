@@ -24,7 +24,7 @@ public record BusinessTripDraftCreateRequest(
         String purpose,
 
         @Nullable
-        List<Long> participantsId
+        List<Long> participantIds
 
 ) {
         public BusinessTripDraftCreateRequest {

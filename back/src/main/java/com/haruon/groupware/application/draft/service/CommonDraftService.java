@@ -42,7 +42,7 @@ public abstract class CommonDraftService implements DraftManagement {
 
         if(!hasApprovers(params, draft)) throw new IllegalArgumentException("결재선이 없는 기안건은 상신할 수 없다");   // to-do 커스텀 예외처리
 
-        draft.submit(submittedAt, changeToApproverParams(params));
+        draft.submit(submittedAt, toApproverParams(params));
     }
 
     @Override
@@ -63,7 +63,7 @@ public abstract class CommonDraftService implements DraftManagement {
 
     @Override
     public void addCirculatedEmp(long draftId, long drafterId, long circulatedEmpId) {
-        Draft draft = findDraftByDraftId(draftId);
+        Draft draft = findDraftByDraftIdAndEmpId(draftId, drafterId);
         Emp circulatedEmp = findActiveEmpById(circulatedEmpId);
 
         draft.addCirculation(circulatedEmp);
@@ -71,7 +71,7 @@ public abstract class CommonDraftService implements DraftManagement {
 
     @Override
     public void removeCirculatedEmp(long draftId, long drafterId, long circulatedEmpId) {
-        Draft draft = findDraftByDraftId(draftId);
+        Draft draft = findDraftByDraftIdAndEmpId(draftId, drafterId);
         Emp circulatedEmp = findActiveEmpById(circulatedEmpId);
 
         draft.removeCirculation(circulatedEmp);
@@ -79,7 +79,7 @@ public abstract class CommonDraftService implements DraftManagement {
 
     @Override
     public void addFile(long draftId, long drafterId, DraftFileRequest fileParam) {
-        Draft draft = findDraftByDraftId(draftId);
+        Draft draft = findDraftByDraftIdAndEmpId(draftId, drafterId);
 
         draft.addFile(
                 fileParam.mimeType(),
@@ -101,14 +101,22 @@ public abstract class CommonDraftService implements DraftManagement {
                 || (params != null && !params.isEmpty());
     }
 
-    protected Emp findActiveEmpById(Long empId) {
+    protected Emp findActiveEmpById(long empId) {
         return Utils.findActiveEmpById(empRepository, empId);
     }
 
-    protected void hasSubmittedInfo(@Nullable LocalDateTime submittedAt, @Nullable List<ApproversRequest> approvers) {
-        if(submittedAt == null || approvers == null || approvers.isEmpty()) {
-            throw new IllegalArgumentException("상신시, 결제선 설정 필수");   // to-do 커스텀 예외 설계 필요
+    protected LocalDateTime requireSubmittedAt(@Nullable LocalDateTime submittedAt) {
+        if (submittedAt == null) {
+            throw new IllegalArgumentException("상신시 submittedAt 필수");   // to-do 커스텀 예외 설계 필요
         }
+        return submittedAt;
+    }
+
+    protected List<ApproversParam> requireApprovers(@Nullable List<ApproversRequest> approvers) {
+        if (approvers == null || approvers.isEmpty()) {
+            throw new IllegalArgumentException("상신시 결재선 설정 필수");    // to-do 커스텀 예외 설계 필요
+        }
+        return toApproverParams(approvers);
     }
 
     protected Draft findDraftByDraftIdAndEmpId(long draftId, long empId) {
@@ -121,7 +129,7 @@ public abstract class CommonDraftService implements DraftManagement {
                 .orElseThrow(() -> new IllegalArgumentException("해당 기안서를 찾을 수 없음"));         // to-do 커스텀 예외 설계 필요
     }
 
-    protected List<ApproversParam> changeToApproverParams(@Nullable  List<ApproversRequest> approvers) {
+    protected List<ApproversParam> toApproverParams(@Nullable  List<ApproversRequest> approvers) {
         if(approvers == null) return List.of();
 
         List<ApproversParam> approversParams = new ArrayList<>();

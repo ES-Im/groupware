@@ -1,17 +1,25 @@
 package com.haruon.groupware.application.draft.service;
 
+import com.haruon.groupware.application.CompanyPolicyPort;
+import com.haruon.groupware.application.draft.dto.CommonDraftCreateRequest;
+import com.haruon.groupware.application.draft.dto.CommonDraftUpdateRequest;
 import com.haruon.groupware.application.draft.dto.LeaveDraftCreateRequest;
 import com.haruon.groupware.application.draft.dto.LeaveDraftUpdateRequest;
 import com.haruon.groupware.application.draft.provided.LeaveDraftManagement;
 import com.haruon.groupware.application.draft.required.LeaveDraftRepository;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.domain.draft_approval.report.ApproversParam;
+import com.haruon.groupware.domain.draft_approval.report.Draft;
+import com.haruon.groupware.domain.draft_approval.report.LeaveDraft;
 import com.haruon.groupware.domain.draft_approval.report.LeaveType;
+import com.haruon.groupware.domain.empInfo.Emp;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 
 import static java.time.Duration.between;
 import static org.springframework.util.Assert.state;
@@ -20,29 +28,80 @@ import static org.springframework.util.Assert.state;
 @Transactional
 public class LeaveDraftService extends CommonDraftService implements LeaveDraftManagement {
 
-    private final EmpRepository empRepository;
     private final LeaveDraftRepository leaveDraftRepository;
+    private final CompanyPolicyPort port;
 
-    public LeaveDraftService(EmpRepository empRepository, LeaveDraftRepository leaveDraftRepository) {
+    public LeaveDraftService(EmpRepository empRepository, LeaveDraftRepository leaveDraftRepository, CompanyPolicyPort port) {
         super(empRepository, leaveDraftRepository);
         this.leaveDraftRepository = leaveDraftRepository;
-        this.empRepository = empRepository;
+        this.port = port;
     }
 
     @Override
-    public void createDraft(LeaveDraftCreateRequest param) {
+    public void createDraft(LeaveDraftCreateRequest req) {
+        CommonDraftCreateRequest commonReq = req.param();
+        Emp drafter = findActiveEmpById(commonReq.empId());
+        List<ApproversParam> approvers = requireApprovers(commonReq.approvers());
 
+        LeaveDraft draft = LeaveDraft.createDraft(
+                drafter,
+                commonReq.title(),
+                commonReq.content(),
+                req.startAt(),
+                req.endAt(),
+                req.leaveType(),
+                approvers
+        );
+
+        leaveDraftRepository.save(draft);
     }
 
     @Override
-    public void createSubmitted(LeaveDraftCreateRequest param) {
+    public void createSubmitted(LeaveDraftCreateRequest req) {
+        CommonDraftCreateRequest commonReq = req.param();
+        Emp drafter = findActiveEmpById(commonReq.empId());
+        List<ApproversParam> approvers = requireApprovers(commonReq.approvers());
+        LocalDateTime submittedAt = requireSubmittedAt(commonReq.submittedAt());
 
+        LeaveDraft draft = LeaveDraft.createSubmitted(
+                drafter,
+                commonReq.title(),
+                commonReq.content(),
+                req.startAt(),
+                req.endAt(),
+                req.leaveType(),
+                approvers,
+                submittedAt
+        );
+
+        leaveDraftRepository.save(draft);
     }
 
     @Override
-    public void updateDraft(LeaveDraftUpdateRequest param) {
+    public void updateDraft(LeaveDraftUpdateRequest req) {
+        CommonDraftUpdateRequest commonReq = req.param();
+        LeaveDraft leaveDraft = getLeaveDraft(commonReq.draftId(), commonReq.empId());
 
+        leaveDraft.editLeaveDraft(
+                commonReq.title(),
+                commonReq.content(),
+                req.startAt(),
+                req.endAt(),
+                req.leaveType()
+        );
     }
+
+//    여기서 부터 시작/종료시간 validation 적용
+    private LeaveDraft getLeaveDraft(long draftId, long drafterId) {
+        Draft draft = findDraftByDraftIdAndEmpId(draftId, drafterId);
+
+        if(!(draft instanceof LeaveDraft leaveDraft)) {
+            throw new IllegalArgumentException("연가신청기안서가 아님");
+        }
+
+        return leaveDraft;
+    }
+
 
     /*
      * 휴게시간 감안치 않은 계산법임, 정정하고 valdiate private 메서드 및, usedHours 계산메서드 정비할 것
