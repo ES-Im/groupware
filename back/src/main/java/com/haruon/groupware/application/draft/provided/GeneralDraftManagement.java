@@ -1,7 +1,7 @@
 package com.haruon.groupware.application.draft.provided;
 
-import com.haruon.groupware.application.draft.dto.CommonDraftCreateRequest;
-import com.haruon.groupware.application.draft.dto.CommonDraftUpdateRequest;
+import com.haruon.groupware.application.draft.service.dto.CommonDraftCreateRequest;
+import com.haruon.groupware.application.draft.service.dto.CommonDraftUpdateRequest;
 
 /**
  * 일반 기안서의 작성, 수정, 상신을 제공

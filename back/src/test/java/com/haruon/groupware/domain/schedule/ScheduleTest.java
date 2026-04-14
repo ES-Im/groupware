@@ -29,7 +29,7 @@ class ScheduleTest {
         Emp emp = getApprovedEmp();
 
         Schedule schedule = registerSchedule(
-                1L,
+                "random",
                 ScheduleType.MANUAL,
                 emp,
                 "title", "content",
@@ -51,7 +51,7 @@ class ScheduleTest {
 
         assertThatThrownBy(() ->
                 registerSchedule(
-                        1L,
+                        "random",
                         ScheduleType.MANUAL,
                         emp,
                         "title",
@@ -71,7 +71,7 @@ class ScheduleTest {
         return Stream.of(
                 Arguments.of("시작시간이 Null이면 일정을 등록할 수 없다",
                         RegisterTestParam.builder()
-                                .sourceId(1L)
+                                .sourceKey("test")
                                 .type(ScheduleType.MANUAL)
                                 .emp(emp)
                                 .title("TestTitle")
@@ -85,7 +85,7 @@ class ScheduleTest {
                 ),
                 Arguments.of("종료시간이 Null이면 일정을 등록할 수 없다",
                         RegisterTestParam.builder()
-                                .sourceId(1L)
+                                .sourceKey("test")
                                 .type(ScheduleType.MANUAL)
                                 .emp(emp)
                                 .title("TestTitle")
@@ -99,7 +99,7 @@ class ScheduleTest {
                 ),
                 Arguments.of("sourceId가 Null이면 일정을 등록할 수 없다",
                         RegisterTestParam.builder()
-                                .sourceId(null)
+                                .sourceKey(null)
                                 .type(ScheduleType.MANUAL)
                                 .emp(emp)
                                 .title("TestTitle")
@@ -113,7 +113,7 @@ class ScheduleTest {
                 ),
                 Arguments.of("일정타입이 Null이면 일정을 등록할 수 없다",
                         RegisterTestParam.builder()
-                                .sourceId(1L)
+                                .sourceKey("test")
                                 .type(null)
                                 .emp(emp)
                                 .title("TestTitle")
@@ -127,7 +127,7 @@ class ScheduleTest {
                 ),
                 Arguments.of("사원(일정작성자)이 Null이면 일정을 등록할 수 없다",
                         RegisterTestParam.builder()
-                                .sourceId(1L)
+                                .sourceKey("test")
                                 .type(ScheduleType.MANUAL)
                                 .emp(null)
                                 .title("TestTitle")
@@ -141,7 +141,7 @@ class ScheduleTest {
                 ),
                 Arguments.of("제목이 Null이면 일정을 등록할 수 없다",
                         RegisterTestParam.builder()
-                                .sourceId(null)
+                                .sourceKey(null)
                                 .type(ScheduleType.MANUAL)
                                 .emp(emp)
                                 .title(null)
@@ -155,7 +155,7 @@ class ScheduleTest {
                 ),
                 Arguments.of("내용이 Null이면 일정을 등록할 수 없다",
                         RegisterTestParam.builder()
-                                .sourceId(null)
+                                .sourceKey(null)
                                 .type(ScheduleType.MANUAL)
                                 .emp(emp)
                                 .title("TestTitle")
@@ -169,7 +169,7 @@ class ScheduleTest {
                 ),
                 Arguments.of("일정일자가 Null이면 일정을 등록할 수 없다",
                         RegisterTestParam.builder()
-                                .sourceId(null)
+                                .sourceKey(null)
                                 .type(ScheduleType.MANUAL)
                                 .emp(emp)
                                 .title("TestTitle")
@@ -191,7 +191,7 @@ class ScheduleTest {
        
         assertThatThrownBy(() ->
                 registerSchedule(
-                        param.sourceId(),
+                        param.sourceKey(),
                         param.type(),
                         param.emp(),
                         param.title(),
@@ -206,7 +206,7 @@ class ScheduleTest {
 
     @Builder
     private record RegisterTestParam(
-            Long sourceId,
+            String sourceKey,
             ScheduleType type,
             Emp emp,
             String title,
@@ -366,7 +366,7 @@ class ScheduleTest {
         Emp emp = getApprovedEmp();
 
         return registerSchedule(
-                1L,
+                "sourceKey",
                 ScheduleType.MANUAL,
                 emp,
                 "title", "content",

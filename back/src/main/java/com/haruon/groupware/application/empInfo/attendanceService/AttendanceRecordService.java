@@ -1,9 +1,9 @@
 package com.haruon.groupware.application.empInfo.attendanceService;
 
-import com.haruon.groupware.application.Utils;
 import com.haruon.groupware.application.empInfo.provided.AttendanceRecord;
 import com.haruon.groupware.application.empInfo.required.AttendanceRepository;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.utils.Utils;
 import com.haruon.groupware.domain.empInfo.Attendance;
 import com.haruon.groupware.domain.empInfo.Emp;
 import jakarta.transaction.Transactional;

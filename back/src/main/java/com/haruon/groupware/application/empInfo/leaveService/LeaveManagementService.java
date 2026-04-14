@@ -1,8 +1,8 @@
 package com.haruon.groupware.application.empInfo.leaveService;
 
-import com.haruon.groupware.application.CompanyPolicyPort;
 import com.haruon.groupware.application.empInfo.provided.LeaveGrantManagement;
 import com.haruon.groupware.application.empInfo.required.LeaveRepository;
+import com.haruon.groupware.application.utils.CompanyPolicyPort;
 import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.empInfo.EmpLeave;
 import jakarta.transaction.Transactional;

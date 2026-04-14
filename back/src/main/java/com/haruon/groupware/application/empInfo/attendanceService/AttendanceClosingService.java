@@ -1,11 +1,11 @@
 package com.haruon.groupware.application.empInfo.attendanceService;
 
-import com.haruon.groupware.application.CompanyPolicyPort;
 import com.haruon.groupware.application.empInfo.attendanceService.dto.AttendanceCloseParam;
 import com.haruon.groupware.application.empInfo.provided.AttendanceClosing;
 import com.haruon.groupware.application.empInfo.required.AttendanceRepository;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
 import com.haruon.groupware.application.schedule.required.ScheduleRepository;
+import com.haruon.groupware.application.utils.CompanyPolicyPort;
 import com.haruon.groupware.domain.empInfo.Attendance;
 import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.empInfo.enums.AttendanceStatus;
@@ -20,8 +20,8 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
-import static com.haruon.groupware.application.Utils.*;
 import static com.haruon.groupware.application.empInfo.EmpInfoUtils.getStatusByRecognizedHours;
+import static com.haruon.groupware.application.utils.Utils.*;
 import static com.haruon.groupware.domain.empInfo.Attendance.*;
 import static com.haruon.groupware.domain.empInfo.enums.AttendanceStatus.*;
 import static com.haruon.groupware.domain.schedule.ScheduleType.BUSINESS_TRIP;

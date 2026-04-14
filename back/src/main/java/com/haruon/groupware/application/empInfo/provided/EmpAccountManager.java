@@ -11,35 +11,35 @@ import com.haruon.groupware.application.empInfo.empService.EmpSelfUpdateRequest;
 public interface EmpAccountManager {
     
     /** return : 회원가입 성공여부 */
-    int registerEmp(EmpRegisterRequest request);
+    void registerEmp(EmpRegisterRequest request);
 
     /** return : 사원가입 승인 성공여부 */
-    int approveRegisterByAdmin(EmpAdminUpdateRequest adminRequest);
+    void approveRegisterByAdmin(EmpAdminUpdateRequest adminRequest);
 
     /** return : 퇴직한 사원 정보 처리 성공여부 */
-    int updateResignedEmpByAdmin(EmpAdminUpdateRequest adminRequest);
+    void updateResignedEmpByAdmin(EmpAdminUpdateRequest adminRequest);
 
     /** return : 사원정보변경 성공여부 */
-    int updateInfoBySelf(EmpSelfUpdateRequest request);
+    void updateInfoBySelf(EmpSelfUpdateRequest request);
 
     /** return : 사원정보변경 성공여부 */
-    int updateInfoByDeptManager(EmpDeptManagerUpdateRequest request);
+    void updateInfoByDeptManager(EmpDeptManagerUpdateRequest request);
 
     /** return : 사원정보변경 성공여부 */
-    int updateInfoByAdmin(EmpAdminUpdateRequest request);
+    void updateInfoByAdmin(EmpAdminUpdateRequest request);
 
     /** return : 파일 삭제 성공여부 */
-    int deleteEmpFile(Long empId, Long fileId);
+    void deleteEmpFile(Long empId, Long fileId);
 
     /** return : 파일 정보 변경 성공여부 → 파일 비활성화 나눌건지 ?*/
-    int updateEmpFileBySelf(EmpSelfUpdateRequest request);
+    void updateEmpFileBySelf(EmpSelfUpdateRequest request);
 
     /** return : 사원 소속정보 변경 성공여부 */
-    int updateBelongingsByAdmin(EmpAdminUpdateRequest request);
+    void updateBelongingsByAdmin(EmpAdminUpdateRequest request);
 
     /** return : 파일 활성화/비활성화 성공여부 */
-    int updateFileActiveStatus(EmpAdminUpdateRequest request);
+    void updateFileActiveStatus(EmpAdminUpdateRequest request);
 
     /** return : 파일 활성화/비활성화 성공여부 */
-    int updateFileActiveStatus(EmpSelfUpdateRequest request);
+    void updateFileActiveStatus(EmpSelfUpdateRequest request);
 }

@@ -1,8 +1,6 @@
 package com.haruon.groupware.application.schedule.required;
 
 import com.haruon.groupware.domain.schedule.Schedule;
-import com.haruon.groupware.domain.schedule.ScheduleType;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 
 import java.time.LocalDate;
@@ -15,14 +13,8 @@ public interface ScheduleRepository extends Repository<Schedule, Long> {
 
     Optional<Schedule> findById(Long id);
 
-    Optional<List<Schedule>> findByScheduleTypeAndSourceId(ScheduleType scheduleType, Long sourceId);
+    Optional<List<Schedule>> findSchedulesBySourceKey(String sourceKey);
 
     Schedule save(Schedule schedule);
 
-    @Query("""
-        select max(s.sourceId)
-          from Schedule s
-         where s.scheduleType = 'MANUAL'
-    """)
-    Long findLastManualSourceId();
 }

@@ -1,15 +1,15 @@
 package com.haruon.groupware.application.draft.service;
 
-import com.haruon.groupware.application.draft.dto.BusinessTripDraftCreateRequest;
-import com.haruon.groupware.application.draft.dto.BusinessTripDraftUpdateRequest;
-import com.haruon.groupware.application.draft.dto.CommonDraftCreateRequest;
-import com.haruon.groupware.application.draft.dto.CommonDraftUpdateRequest;
 import com.haruon.groupware.application.draft.provided.BusinessTripDraftManagement;
 import com.haruon.groupware.application.draft.required.BusinessTripDraftRepository;
+import com.haruon.groupware.application.draft.service.dto.BusinessTripDraftCreateRequest;
+import com.haruon.groupware.application.draft.service.dto.BusinessTripDraftUpdateRequest;
+import com.haruon.groupware.application.draft.service.dto.CommonDraftCreateRequest;
+import com.haruon.groupware.application.draft.service.dto.CommonDraftUpdateRequest;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
-import com.haruon.groupware.domain.draft_approval.report.ApproversParam;
-import com.haruon.groupware.domain.draft_approval.report.BusinessTripDraft;
-import com.haruon.groupware.domain.draft_approval.report.Draft;
+import com.haruon.groupware.domain.draft.ApproversParam;
+import com.haruon.groupware.domain.draft.BusinessTripDraft;
+import com.haruon.groupware.domain.draft.Draft;
 import com.haruon.groupware.domain.empInfo.Emp;
 import jakarta.transaction.Transactional;
 import org.jspecify.annotations.Nullable;

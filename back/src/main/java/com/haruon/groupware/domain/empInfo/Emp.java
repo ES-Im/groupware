@@ -24,7 +24,7 @@ import static org.springframework.util.Assert.state;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"emp_no", "emp_id"})})
+@Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"emp_no", "id"})})
 public class Emp extends AbstractEntity {
 
     @Column(nullable = false)
@@ -272,6 +272,10 @@ public class Emp extends AbstractEntity {
         if(hiredAt != null) this.hiredAt = hiredAt;
 
         return 1;
+    }
+
+    public boolean isAdmin() {
+        return this.getSystemRoles().contains(SystemRoleCode.ADMIN);
     }
 
     private void changeEmpStatus(EmpStatus newEmpStatus) {

@@ -18,11 +18,12 @@ import static org.springframework.util.Assert.state;
 @Getter
 @Table(
         uniqueConstraints = @UniqueConstraint(
-                columnNames = {"schedule_type", "source_id", "owner_emp_id", "schedule_date"})
+                columnNames = {"schedule_type", "source_key", "owner_emp_id", "schedule_date"})
 )
 public class Schedule extends AbstractEntity {
 
-    private Long sourceId;
+    @Column(unique = true, nullable = false, updatable = false)
+    private String sourceKey;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -39,13 +40,13 @@ public class Schedule extends AbstractEntity {
     private String content;
 
     @Column(nullable = false)
-    LocalDate scheduleDate;
+    private LocalDate scheduleDate;
 
     @Column(nullable = false)
-    LocalTime startAt;
+    private LocalTime startAt;
 
     @Column(nullable = false)
-    LocalTime endAt;
+    private LocalTime endAt;
 
     @Column(nullable = false)
     private boolean isAllDay;
@@ -61,7 +62,7 @@ public class Schedule extends AbstractEntity {
 
 
     public static Schedule registerSchedule(
-            Long sourceId,
+            String sourceKey,
             ScheduleType type,
             Emp emp,
             String title, String content,
@@ -74,7 +75,7 @@ public class Schedule extends AbstractEntity {
         schedule.endAt = requireNonNull(endAt);
         validateTime(startAt, endAt);
 
-        schedule.sourceId = requireNonNull(sourceId);
+        schedule.sourceKey = requireNonNull(sourceKey);
         schedule.scheduleType = requireNonNull(type);
         schedule.emp = requireNonNull(emp);
         schedule.title = requireNonNull(title);
@@ -157,7 +158,7 @@ public class Schedule extends AbstractEntity {
         return 1;
     }
 
-    private ScheduleParticipant findParticipant(Emp emp) {
+    private @Nullable ScheduleParticipant findParticipant(Emp emp) {
         return this.scheduleParticipants.stream()
                 .filter(s -> s.getEmp().equals(emp))
                 .findAny().orElse(null);

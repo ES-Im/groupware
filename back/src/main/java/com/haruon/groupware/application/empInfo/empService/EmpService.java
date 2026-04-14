@@ -1,8 +1,8 @@
 package com.haruon.groupware.application.empInfo.empService;
 
-import com.haruon.groupware.application.CompanyPolicyPort;
 import com.haruon.groupware.application.empInfo.provided.EmpAccountManager;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.utils.CompanyPolicyPort;
 import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.empInfo.PasswordEncoder;
 import com.haruon.groupware.domain.shared.Email;
@@ -10,8 +10,10 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import static com.haruon.groupware.application.Utils.findActiveEmpById;
-import static com.haruon.groupware.application.Utils.findEmpById;
+import java.time.LocalDate;
+
+import static com.haruon.groupware.application.utils.Utils.findActiveEmpById;
+import static com.haruon.groupware.application.utils.Utils.findEmpById;
 import static com.haruon.groupware.domain.empInfo.Emp.register;
 import static java.util.Objects.requireNonNull;
 
@@ -25,7 +27,7 @@ public class EmpService implements EmpAccountManager {
     private final CompanyPolicyPort companyPolicy;
 
     @Override
-    public int registerEmp(EmpRegisterRequest registerRequest) {
+    public void registerEmp(EmpRegisterRequest registerRequest) {
         requireNonNull(registerRequest);
 
         checkDuplicateLoginId(registerRequest.loginId());
@@ -40,65 +42,66 @@ public class EmpService implements EmpAccountManager {
                 encoder
         );
 
-        Emp saved = empRepository.save(register);
-
-        return 1;
+        empRepository.save(register);
     }
 
     @Override
-    public int approveRegisterByAdmin(EmpAdminUpdateRequest adminRequest) {
+    public void approveRegisterByAdmin(EmpAdminUpdateRequest adminRequest) {
+        requireNonNull(adminRequest);
+
+        Emp emp = findEmpById(empRepository, adminRequest.id());
+        LocalDate hire = requireNonNull(adminRequest.hireAt());
+
+        emp.approveRegister(hire);
+    }
+
+    @Override
+    public void updateResignedEmpByAdmin(EmpAdminUpdateRequest adminRequest) {
         requireNonNull(adminRequest);
         Emp emp = findEmpById(empRepository, adminRequest.id());
+        LocalDate resignedAt = requireNonNull(adminRequest.resignedAt());
 
-        return emp.approveRegister(adminRequest.hireAt());
-    }
-
-    @Override
-    public int updateResignedEmpByAdmin(EmpAdminUpdateRequest adminRequest) {
-        requireNonNull(adminRequest);
-        Emp emp = findEmpById(empRepository, adminRequest.id());
-
-        return emp.changeResignedEmpInfoByAdmin(adminRequest.resignedAt());
+        emp.changeResignedEmpInfoByAdmin(resignedAt);
     }
 
 
     @Override
-    public int deleteEmpFile(Long empId, Long fileId) {
+    public void deleteEmpFile(Long empId, Long fileId) {
         Emp emp = findActiveEmpById(empRepository, empId);
 
-        return emp.removeFile(fileId);
+        emp.removeFile(fileId);
     }
 
     @Override
-    public int updateEmpFileBySelf(EmpSelfUpdateRequest request) {
+    public void updateEmpFileBySelf(EmpSelfUpdateRequest request) {
         requireNonNull(request);
-
         Emp emp = findActiveEmpById(empRepository, request.id());
-        EmpFileReplaceParam fileParam = request.fileRequest();
 
-        return emp.changeEmpFile(
+        EmpFileReplaceParam fileParam = requireNonNull(request.fileRequest());
+
+        emp.changeEmpFile(
                 fileParam.fileType(),
-                fileParam.mimeType(),
-                fileParam.getOriginalFileName(),
-                fileParam.getExtension(),
-                fileParam.fileSize()
+                fileParam.file().mimeType(),
+                fileParam.file().originalFileName(),
+                fileParam.file().extension(),
+                fileParam.file().fileSize()
         );
     }
 
     @Override
-    public int updateInfoByDeptManager(EmpDeptManagerUpdateRequest deptManagerRequest) {
+    public void updateInfoByDeptManager(EmpDeptManagerUpdateRequest deptManagerRequest) {
         requireNonNull(deptManagerRequest);
 
         Emp emp = findActiveEmpById(empRepository, deptManagerRequest.id());
 
-        return emp.changeInfoByDeptManager(
+        emp.changeInfoByDeptManager(
                 deptManagerRequest.extensionNo(),
                 deptManagerRequest.systemRoleCode()
         );
     }
 
     @Override
-    public int updateInfoByAdmin(EmpAdminUpdateRequest adminRequest) {
+    public void updateInfoByAdmin(EmpAdminUpdateRequest adminRequest) {
         requireNonNull(adminRequest);
 
         Emp emp = findActiveEmpById(empRepository, adminRequest.id());
@@ -107,7 +110,7 @@ public class EmpService implements EmpAccountManager {
                 ? makeEmailByLoginId(adminRequest.loginId())
                 : null;
 
-        return emp.changeInfoByAdmin(
+        emp.changeInfoByAdmin(
                 adminRequest.empName(),
                 adminRequest.loginId(),
                 newEmail,
@@ -121,11 +124,11 @@ public class EmpService implements EmpAccountManager {
     }
 
     @Override
-    public int updateInfoBySelf(EmpSelfUpdateRequest empRequest) {
+    public void updateInfoBySelf(EmpSelfUpdateRequest empRequest) {
         requireNonNull(empRequest);
         Emp emp = findActiveEmpById(empRepository, empRequest.id());
 
-        return emp.changeInfoBySelf(
+        emp.changeInfoBySelf(
                 empRequest.extensionNo(),
                 empRequest.currentPassword(),
                 empRequest.newRawPassword(),
@@ -134,14 +137,13 @@ public class EmpService implements EmpAccountManager {
     }
 
     @Override
-    public int updateBelongingsByAdmin(EmpAdminUpdateRequest request) {
+    public void updateBelongingsByAdmin(EmpAdminUpdateRequest request) {
         requireNonNull(request);
 
         Emp emp = findActiveEmpById(empRepository, request.id());
-        EmpBelongingsParam empBelongingsParam = request.belongingsParam();
+        EmpBelongingsParam empBelongingsParam = requireNonNull(request.belongingsParam());
 
-
-        return emp.changeBelongingsByAdmin(
+        emp.changeBelongingsByAdmin(
                 empBelongingsParam.dept(),
                 empBelongingsParam.position(),
                 empBelongingsParam.isPrimary(),
@@ -151,13 +153,17 @@ public class EmpService implements EmpAccountManager {
     }
 
     @Override
-    public int updateFileActiveStatus(EmpAdminUpdateRequest request) {    // empSelf, admin
-        return updateFileStatus(request.id(), request.fileStatusParam());
+    public void updateFileActiveStatus(EmpAdminUpdateRequest request) {
+        requireNonNull(request.fileStatusParam());
+
+        updateFileStatus(request.id(), request.fileStatusParam());
     }
 
     @Override
-    public int updateFileActiveStatus(EmpSelfUpdateRequest request) {
-        return updateFileStatus(request.id(), request.fileStatusParam());
+    public void updateFileActiveStatus(EmpSelfUpdateRequest request) {
+        requireNonNull(request.fileStatusParam());
+
+        updateFileStatus(request.id(), request.fileStatusParam());
     }
 
     private Email makeEmailByLoginId(String loginId) {
@@ -172,12 +178,12 @@ public class EmpService implements EmpAccountManager {
         if (empRepository.existsByLoginId(loginId)) { throw new RuntimeException("이미 있는 아이디"); } // to-do : 향후 커스텀 예외 처리
     }
 
-    private int updateFileStatus(long empId, EmpFileStatusChangeParam request) {
+    private void updateFileStatus(long empId, EmpFileStatusChangeParam request) {
         requireNonNull(request);
 
         Emp emp = findActiveEmpById(empRepository, empId);
 
-        return emp.changeFileActiveStatus(
+        emp.changeFileActiveStatus(
                 request.fileId(),
                 request.targetActive()
         );

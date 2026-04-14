@@ -1,6 +1,6 @@
 package com.haruon.groupware.adapter;
 
-import com.haruon.groupware.application.CompanyPolicyPort;
+import com.haruon.groupware.application.utils.CompanyPolicyPort;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 

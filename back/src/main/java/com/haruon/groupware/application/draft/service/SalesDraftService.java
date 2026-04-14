@@ -1,16 +1,16 @@
 package com.haruon.groupware.application.draft.service;
 
 
-import com.haruon.groupware.application.draft.dto.CommonDraftCreateRequest;
-import com.haruon.groupware.application.draft.dto.CommonDraftUpdateRequest;
-import com.haruon.groupware.application.draft.dto.SalesDraftCreateRequest;
-import com.haruon.groupware.application.draft.dto.SalesDraftUpdateRequest;
 import com.haruon.groupware.application.draft.provided.SalesDraftManagement;
 import com.haruon.groupware.application.draft.required.SalesDraftRepository;
+import com.haruon.groupware.application.draft.service.dto.CommonDraftCreateRequest;
+import com.haruon.groupware.application.draft.service.dto.CommonDraftUpdateRequest;
+import com.haruon.groupware.application.draft.service.dto.SalesDraftCreateRequest;
+import com.haruon.groupware.application.draft.service.dto.SalesDraftUpdateRequest;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
-import com.haruon.groupware.domain.draft_approval.report.ApproversParam;
-import com.haruon.groupware.domain.draft_approval.report.Draft;
-import com.haruon.groupware.domain.draft_approval.report.SalesDraft;
+import com.haruon.groupware.domain.draft.ApproversParam;
+import com.haruon.groupware.domain.draft.Draft;
+import com.haruon.groupware.domain.draft.SalesDraft;
 import com.haruon.groupware.domain.empInfo.Emp;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;

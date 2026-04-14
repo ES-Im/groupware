@@ -1,13 +1,13 @@
 package com.haruon.groupware.application.draft.service;
 
-import com.haruon.groupware.application.Utils;
-import com.haruon.groupware.application.draft.dto.ApproversRequest;
-import com.haruon.groupware.application.draft.dto.DraftFileRequest;
 import com.haruon.groupware.application.draft.provided.DraftManagement;
 import com.haruon.groupware.application.draft.required.DraftRepository;
+import com.haruon.groupware.application.draft.service.dto.ApproversRequest;
+import com.haruon.groupware.application.draft.service.dto.DraftFileCreateRequest;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
-import com.haruon.groupware.domain.draft_approval.report.ApproversParam;
-import com.haruon.groupware.domain.draft_approval.report.Draft;
+import com.haruon.groupware.application.utils.Utils;
+import com.haruon.groupware.domain.draft.ApproversParam;
+import com.haruon.groupware.domain.draft.Draft;
 import com.haruon.groupware.domain.empInfo.Emp;
 import jakarta.transaction.Transactional;
 import org.jspecify.annotations.Nullable;
@@ -78,14 +78,14 @@ public abstract class CommonDraftService implements DraftManagement {
     }
 
     @Override
-    public void addFile(long draftId, long drafterId, DraftFileRequest fileParam) {
+    public void addFile(long draftId, long drafterId, DraftFileCreateRequest fileParam) {
         Draft draft = findDraftByDraftIdAndEmpId(draftId, drafterId);
 
         draft.addFile(
-                fileParam.mimeType(),
-                fileParam.originalName(),
-                fileParam.extension(),
-                fileParam.fileSize()
+                fileParam.file().mimeType(),
+                fileParam.file().originalFileName(),
+                fileParam.file().extension(),
+                fileParam.file().fileSize()
         );
     }
 

@@ -1,6 +1,6 @@
 package com.haruon.groupware.application.draft.required;
 
-import com.haruon.groupware.domain.draft_approval.report.Draft;
+import com.haruon.groupware.domain.draft.Draft;
 import com.haruon.groupware.domain.empInfo.Emp;
 import org.springframework.data.repository.Repository;
 

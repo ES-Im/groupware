@@ -1,17 +1,17 @@
 package com.haruon.groupware.application.draft.service;
 
-import com.haruon.groupware.application.CompanyPolicyPort;
-import com.haruon.groupware.application.draft.dto.CommonDraftCreateRequest;
-import com.haruon.groupware.application.draft.dto.CommonDraftUpdateRequest;
-import com.haruon.groupware.application.draft.dto.LeaveDraftCreateRequest;
-import com.haruon.groupware.application.draft.dto.LeaveDraftUpdateRequest;
 import com.haruon.groupware.application.draft.provided.LeaveDraftManagement;
 import com.haruon.groupware.application.draft.required.LeaveDraftRepository;
+import com.haruon.groupware.application.draft.service.dto.CommonDraftCreateRequest;
+import com.haruon.groupware.application.draft.service.dto.CommonDraftUpdateRequest;
+import com.haruon.groupware.application.draft.service.dto.LeaveDraftCreateRequest;
+import com.haruon.groupware.application.draft.service.dto.LeaveDraftUpdateRequest;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
-import com.haruon.groupware.domain.draft_approval.report.ApproversParam;
-import com.haruon.groupware.domain.draft_approval.report.Draft;
-import com.haruon.groupware.domain.draft_approval.report.LeaveDraft;
-import com.haruon.groupware.domain.draft_approval.report.LeaveType;
+import com.haruon.groupware.application.utils.CompanyPolicyPort;
+import com.haruon.groupware.domain.draft.ApproversParam;
+import com.haruon.groupware.domain.draft.Draft;
+import com.haruon.groupware.domain.draft.LeaveDraft;
+import com.haruon.groupware.domain.draft.LeaveType;
 import com.haruon.groupware.domain.empInfo.Emp;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;

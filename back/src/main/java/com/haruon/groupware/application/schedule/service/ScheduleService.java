@@ -1,14 +1,14 @@
 package com.haruon.groupware.application.schedule.service;
 
-import com.haruon.groupware.application.CompanyPolicyPort;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
 import com.haruon.groupware.application.schedule.provided.ScheduleEditing;
 import com.haruon.groupware.application.schedule.provided.ScheduleRegister;
 import com.haruon.groupware.application.schedule.required.ScheduleRepository;
-import com.haruon.groupware.domain.draft_approval.report.BusinessTripDraft;
-import com.haruon.groupware.domain.draft_approval.report.LeaveDraft;
+import com.haruon.groupware.application.utils.CompanyPolicyPort;
+import com.haruon.groupware.domain.draft.BusinessTripDraft;
+import com.haruon.groupware.domain.draft.LeaveDraft;
 import com.haruon.groupware.domain.empInfo.Emp;
-import com.haruon.groupware.domain.meetingroom.Meeting;
+import com.haruon.groupware.domain.meeting.Meeting;
 import com.haruon.groupware.domain.schedule.Schedule;
 import com.haruon.groupware.domain.schedule.ScheduleType;
 import jakarta.transaction.Transactional;
@@ -21,8 +21,9 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
-import static com.haruon.groupware.application.Utils.getEmpListById;
+import static com.haruon.groupware.application.utils.Utils.getEmpListById;
 import static java.util.Objects.requireNonNull;
 
 @AllArgsConstructor
@@ -35,7 +36,7 @@ public class ScheduleService implements ScheduleRegister, ScheduleEditing {
     private final EmpRepository empRepository;
 
     @Override
-    public int registerSchedules(ScheduleParam param) {
+    public int registerSchedules(ScheduleCreateRequest param) {
         requireNonNull(param);
 
         List<Schedule> schedules = null;
@@ -70,7 +71,7 @@ public class ScheduleService implements ScheduleRegister, ScheduleEditing {
         List<Emp> empList = getEmpListById(empRepository, participantEmpIds);
 
         List<Schedule> targetSchedules = isForBulkEdit
-                ? getSameEventSchedules(schedule.getSourceId(), schedule.getScheduleType())
+                ? getSameEventSchedules(schedule.getSourceKey())
                 : List.of(schedule);
 
         for (Schedule targetSchedule : targetSchedules) {
@@ -133,7 +134,7 @@ public class ScheduleService implements ScheduleRegister, ScheduleEditing {
         ScheduleType scheduleType = schedule.getScheduleType();
 
         return isForBulkEdit
-                ? getSameEventSchedules(schedule.getSourceId(), scheduleType)
+                ? getSameEventSchedules(schedule.getSourceKey())
                 : List.of(schedule);
 
     }
@@ -146,10 +147,8 @@ public class ScheduleService implements ScheduleRegister, ScheduleEditing {
                 );
     }
 
-    private List<Schedule> getSameEventSchedules(Long sourceId, ScheduleType type) {
-        return scheduleRepository
-                .findByScheduleTypeAndSourceId(type, sourceId)
-                .orElse(List.of());
+    private List<Schedule> getSameEventSchedules(String sourceKey) {
+        return scheduleRepository.findSchedulesBySourceKey(sourceKey).orElseThrow(() -> new IllegalArgumentException("대상 일정이 없음"));
     }
 
     private List<Schedule> registerManualSchedules(
@@ -157,8 +156,7 @@ public class ScheduleService implements ScheduleRegister, ScheduleEditing {
             boolean isPublic
     ) {
 
-        Long lastSourceId = scheduleRepository.findLastManualSourceId();
-        Long nextSourceId = (lastSourceId == null) ? 1L : lastSourceId + 1;
+        String newSourceKey = UUID.randomUUID().toString();
 
         LocalDate startDate = manual.startAt().toLocalDate();
         LocalDate endDate  =  manual.endAt().toLocalDate();
@@ -180,7 +178,8 @@ public class ScheduleService implements ScheduleRegister, ScheduleEditing {
                 ScheduleType.MANUAL,
                 title, content,
                 manual.owner(),
-                isPublic, nextSourceId);
+                isPublic,
+                newSourceKey);
     }
 
     private List<Schedule> registerMeetingSchedules(
@@ -205,7 +204,7 @@ public class ScheduleService implements ScheduleRegister, ScheduleEditing {
                 title, content,
                 meeting.getEmp(),
                 isPublic,
-                meeting.getId());
+                meeting.getSourceKey());
     }
 
     private List<Schedule> registerBusinessTripSchedules(
@@ -234,7 +233,7 @@ public class ScheduleService implements ScheduleRegister, ScheduleEditing {
                 title, content,
                 businessTripDraft.getEmp(),
                 isPublic,
-                businessTripDraft.getId());
+                businessTripDraft.getSourceKey());
     }
 
     private List<Schedule> registerLeaveSchedules(
@@ -264,7 +263,7 @@ public class ScheduleService implements ScheduleRegister, ScheduleEditing {
                 title, content,
                 leaveDraft.getEmp(),
                 isPublic,
-                leaveDraft.getId());
+                leaveDraft.getSourceKey());
     }
 
     private List<Schedule> registerSchedule(
@@ -274,7 +273,7 @@ public class ScheduleService implements ScheduleRegister, ScheduleEditing {
             String title, String content,
             Emp scheduleOwner,
             boolean isPublic,
-            Long sourceId
+            String sourceKey
     ) {
         scheduleOwner.ensureActive();
         List<Schedule> schedules = new ArrayList<>();
@@ -290,7 +289,7 @@ public class ScheduleService implements ScheduleRegister, ScheduleEditing {
             );
 
             Schedule schedule = Schedule.registerSchedule(
-                    sourceId,
+                    sourceKey,
                     type,
                     scheduleOwner,
                     title, content,
