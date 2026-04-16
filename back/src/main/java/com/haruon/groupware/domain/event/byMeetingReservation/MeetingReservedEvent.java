@@ -1,15 +1,14 @@
 package com.haruon.groupware.domain.event.byMeetingReservation;
 
 import com.haruon.groupware.domain.event.DomainEvent;
-import com.haruon.groupware.domain.schedule.ScheduleType;
 import lombok.Builder;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.List;
+import java.util.Set;
 
 @Builder
-public record AssignEmpToMeetingScheduleEvent(
+public record MeetingReservedEvent(
         String sourceKey,
         Long meetingRoomId,
         Long reserverId,
@@ -17,12 +16,8 @@ public record AssignEmpToMeetingScheduleEvent(
         LocalDate meetingDate,
         LocalTime startAt,
         LocalTime endAt,
-        List<Long> participantsId,
-        ScheduleType scheduleType
+        Set<Long> participantIds
 ) implements DomainEvent {
-    public AssignEmpToMeetingScheduleEvent {
-        scheduleType = ScheduleType.MEETING;
-    }
 }
 
 

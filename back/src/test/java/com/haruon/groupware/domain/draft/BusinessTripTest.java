@@ -1,7 +1,13 @@
 package com.haruon.groupware.domain.draft;
 
+import com.haruon.groupware.domain.draft.sub.ApprovalRole;
+import com.haruon.groupware.domain.draft.sub.ApproversParam;
 import com.haruon.groupware.domain.empInfo.Emp;
+import com.haruon.groupware.domain.event.DomainEvent;
+import com.haruon.groupware.domain.event.byBusinessTripApprove.BusinessTripApprovedEvent;
+import com.haruon.groupware.domain.schedule.ScheduleType;
 import lombok.Builder;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -83,6 +89,7 @@ class BusinessTripTest {
 
         assertThat(participants.size()).isEqualTo(1);
         assertThat(submitted.getParticipants()).singleElement().extracting(BusinessTripParticipant::getEmp).isEqualTo(drafter);
+        Assertions.assertNotNull(submitted.getApproval());
         assertThat(submitted.getApproval().getApprovers()).singleElement().extracting(Approver::getEmp).isEqualTo(approver);
         assertThat(submitted.getSourceKey()).isNotNull();
     }
@@ -98,6 +105,110 @@ class BusinessTripTest {
         assertThatThrownBy(() ->
                 draft.submit(LocalDateTime.of(2026,1,1,0,0,0), approvers)
         ).hasMessage("참가자가 0명이 될 수 없다.");
+    }
+
+    @Test
+    @DisplayName("출장기안서 수정성공 테스트")
+    void edit_businessTrip_draft() {
+        BusinessTripDraft draft = getDraft(List.of(getApprovedEmp("202601001", "참가1")));
+        LocalDateTime startAt = LocalDateTime.of(2026,5,1,0,0,0);
+        LocalDateTime endAt = LocalDateTime.of(2026,5,2,0,0,0);
+        String destination = "editDest";
+        String purpose = "edit";
+        draft.editBusinessTripDraft("title", "contetn", startAt, endAt, destination, purpose);
+
+        assertThat(draft).extracting(
+                BusinessTripDraft::getStartAt, BusinessTripDraft::getEndAt, BusinessTripDraft::getDestination, BusinessTripDraft::getPurpose
+        ).containsExactly(
+                startAt, endAt, destination, purpose
+        );
+    }
+
+    private static Stream<Arguments> editBTArguments() {
+        BusinessTripDraft draft = getDraft(List.of(getApprovedEmp("202601001", "참가1")));
+        BusinessTripDraft submitted = getSubmitted(List.of(getApprovedEmp("202601001", "참가1")));
+
+        LocalDateTime startAt = LocalDateTime.of(2026,5,1,0,0,0);
+        LocalDateTime endAt = LocalDateTime.of(2026,5,2,0,0,0);
+        String destination = "editDest";
+        String purpose = "edit";
+        draft.editBusinessTripDraft("title", "contetn", startAt, endAt, destination, purpose);
+
+        return Stream.of(
+                Arguments.of("종료시간은 시작시간보다 이를 수 없음",
+                        EditBusinessTripDraft.builder()
+                                .draft(draft)
+                                .startAt(startAt)
+                                .endAt(startAt.minusHours(3))
+                        .build()
+                ),Arguments.of("목적지는 빈 값이 될 수 없음",
+                        EditBusinessTripDraft.builder()
+                                .draft(draft)
+                                .destination(" ")
+                        .build()
+                ),Arguments.of("출장목적은 빈 값이 될 수 없음",
+                        EditBusinessTripDraft.builder()
+                                .draft(draft)
+                                .purpose(" ")
+                        .build()
+                ),Arguments.of("미상신 문서만 수정가능",
+                        EditBusinessTripDraft.builder()
+                                .draft(submitted)
+                                .startAt(startAt)
+                                .endAt(endAt)
+                                .destination(destination)
+                                .purpose(purpose)
+                        .build()
+                )
+        );
+    }
+
+    @ParameterizedTest(name = "{index} ==> {0}")
+    @MethodSource("editBTArguments")
+    @DisplayName("출장기안서 수정 실패 케이스")
+    void edit_businessTrip_fails(String description, EditBusinessTripDraft params) {
+        assertThatThrownBy(() ->
+                params.draft.editBusinessTripDraft(
+                        null, null,
+                        params.startAt(), params.endAt(), params.destination(), params.purpose()
+                )
+        ).hasMessage(description);
+    }
+
+    @Builder
+    private record EditBusinessTripDraft(
+            BusinessTripDraft draft,
+            LocalDateTime startAt,
+            LocalDateTime endAt,
+            String destination,
+            String purpose
+    ) {}
+    
+    @Test
+    @DisplayName("참여자 수정 테스트")
+    void changeParticipants() {
+        BusinessTripDraft BusinessTrip = getDraft(List.of(getApprovedEmp("202601001", "participant1"), getApprovedEmp("202601002", "participant2")));
+        Emp existedEmp = BusinessTrip.getParticipants().getFirst().getEmp();
+        Emp newEmp = getApprovedEmp("202601007", "participant3");
+        Emp deleteTargetEmp = BusinessTrip.getParticipants().get(1).getEmp();
+        List<Emp> newParticipants = List.of(existedEmp, newEmp);
+
+        BusinessTrip.changeParticipants(newParticipants);
+
+        List<Emp> existedEmps = BusinessTrip.getParticipants().stream().map(BusinessTripParticipant::getEmp).toList();
+
+        assertThat(existedEmps.containsAll(List.of(existedEmp, newEmp))).isTrue();
+
+        assertThat(existedEmps.contains(deleteTargetEmp)).isFalse();
+    }
+    @Test
+    @DisplayName("상신된 출장신청서는 참여자를 수정 할수 없다")
+    void changeParticipants_when_submitted_fail() {
+        BusinessTripDraft BusinessTrip = getSubmitted(List.of(getApprovedEmp("202601001", "participant1"), getApprovedEmp("202601002", "participant2")));
+
+        assertThatThrownBy(() ->
+                BusinessTrip.changeParticipants(List.of(BusinessTrip.getParticipants().getFirst().getEmp(), getApprovedEmp("202601007", "participant3")))
+        ).isInstanceOf(IllegalStateException.class);
     }
 
     @Test
@@ -119,77 +230,6 @@ class BusinessTripTest {
     }
 
 
-    @Test
-    @DisplayName("미상신상태에서 출장 참여자를 추가 할 수 있다.")
-    void add_participant_with_draft() {
-        List<Emp> emptyList = List.of();
-
-        BusinessTripDraft draft = getDraft(emptyList);
-        Emp approvedEmp = getApprovedEmp();
-
-        draft.addParticipant(approvedEmp);
-
-        assertThat(draft.getParticipants()).singleElement().extracting(
-                BusinessTripParticipant::getBusinessTripDraft, BusinessTripParticipant::getEmp
-        ).containsExactly(
-                draft, approvedEmp
-        );
-    }
-
-    @Test
-    @DisplayName("미상신상태에서 출장 참여자를 제외 할 수 있다.")
-    void remove_participant_with_draft() {
-        Emp emp = getApprovedEmp();
-        BusinessTripDraft draft = getDraft(List.of(emp));
-
-        draft.removeParticipant(emp);
-
-        assertThat(draft.getParticipants()).isEmpty();
-    }
-
-    @Test
-    @DisplayName("상신상태에서 출장 참여자를 추가하거나 제외할 수 없다.")
-    void edit_participant_with_submitted_fail() {
-        Emp emp1 = getApprovedEmp("202501001", "participant1");
-        Emp emp2 = getApprovedEmp("202501002", "participant2");
-
-        BusinessTripDraft submitted = getSubmitted(List.of(emp1));
-
-        assertThatThrownBy(() ->
-            submitted.addParticipant(emp2)
-        ).hasMessage("미상신 문서만 수정가능");
-
-        assertThatThrownBy(() ->
-            submitted.removeParticipant(emp2)
-        ).hasMessage("미상신 문서만 수정가능");
-    }
-
-    @Test
-    @DisplayName("미상신상태에서 출장 참여자 정보없이 추가하거나 제외할 수 없다.")
-    void edit_participant_with_draft_without_participant_fail() {
-        Emp emp = getApprovedEmp();
-        BusinessTripDraft draft = getDraft(List.of());
-
-        assertThatThrownBy(() ->
-                draft.removeParticipant(null)
-        ).hasMessage("참여자는 null일 수 없음");
-
-        assertThatThrownBy(() ->
-                draft.addParticipant(null)
-        ).hasMessage("참여자는 null일 수 없음");
-    }
-
-    @Test
-    @DisplayName("출장 참여자가 아닌 참여자를 참여자에서 제할 수 없다.")
-    void remove_participant_who_is_not_in_participant_fail() {
-        BusinessTripDraft draft = getDraft(null);
-
-        Emp emp = getApprovedEmp();
-
-        assertThatThrownBy(() ->
-                draft.removeParticipant(emp)
-        ).hasMessage("해당 참여자가 없음");
-    }
 
 
     private static Stream<Arguments> initDraftFailsArguments() {
@@ -288,8 +328,6 @@ class BusinessTripTest {
         ).hasMessage(expectedMessage);
     }
 
-
-
     @Builder
     private record DraftParam(
             LocalDateTime startAt,
@@ -299,8 +337,51 @@ class BusinessTripTest {
             List<Emp> participants
     ) {}
 
+    @Test
+    @DisplayName("출장기안서 승인이 마무리되면 출장승인 일정반영 이벤트가 발생한다.")
+    void BusinessTrip_approve_event() {
+        // given
+        Emp drafter = getApprovedEmp("202601001", "drafter");
+        Emp approver1 = getApprovedEmp("202601002", "approver1");
+        Emp approver2 = getApprovedEmp("202601003", "approver2");
+        ApproversParam approverParam1 = new ApproversParam(ApprovalRole.APPROVER, 1, approver1);
+        ApproversParam approverParam2 = new ApproversParam(ApprovalRole.APPROVER, 2, approver2);
+        String title = "title";
+        String content = "content";
+        LocalDateTime startAt = LocalDateTime.of(2026, 4, 20,0,0,0);
+        LocalDateTime endAt = LocalDateTime.of(2026, 4, 21, 0,0,0);
 
-    private BusinessTripDraft getDraft(List<Emp> participants) {
+        String destination = "destination";
+        String purpose = "purpose";
+        List<Emp> participant = List.of(drafter);
+        List<Long> participantIds = participant.stream().map(Emp::getId).toList();
+
+        BusinessTripDraft submitted = BusinessTripDraft.createSubmitted(
+                drafter, title, content, startAt, endAt, destination, purpose, participant, List.of(approverParam1, approverParam2), LocalDateTime.of(2026, 4, 16, 9, 0)
+        );
+
+        submitted.approve(approver1, LocalDateTime.of(2026, 4, 20,0,0,0));
+        submitted.approve(approver2, LocalDateTime.of(2026, 4, 20,0,0,0));
+
+        List<? extends DomainEvent> domainEvents = submitted.domainEvents();
+        DomainEvent domainEvent = domainEvents.getFirst();
+        assertThat(domainEvent).isExactlyInstanceOf(BusinessTripApprovedEvent.class);
+
+        BusinessTripApprovedEvent businessTripApprovedEvent = (BusinessTripApprovedEvent) domainEvent;
+        assertThat(businessTripApprovedEvent).extracting(
+                BusinessTripApprovedEvent::sourceKey, BusinessTripApprovedEvent::drafterEmpId, BusinessTripApprovedEvent::title,
+                BusinessTripApprovedEvent::content, BusinessTripApprovedEvent::startAt, BusinessTripApprovedEvent::endAt,
+                BusinessTripApprovedEvent::destination, BusinessTripApprovedEvent::purpose, BusinessTripApprovedEvent::participantsId,
+                BusinessTripApprovedEvent::scheduleType
+        ).containsExactly(
+                submitted.getSourceKey(), drafter.getId(), title,
+                content, startAt, endAt,
+                destination, purpose, participantIds, ScheduleType.BUSINESS_TRIP
+        );
+    }
+
+
+    private static BusinessTripDraft getDraft(List<Emp> participants) {
         Emp drafter = getApprovedEmp();
 
         String title = "test";
@@ -315,7 +396,7 @@ class BusinessTripTest {
         );
     }
 
-    private BusinessTripDraft getSubmitted(List<Emp> participants) {
+    private static BusinessTripDraft getSubmitted(List<Emp> participants) {
         Emp drafter = getApprovedEmp();
         Emp approver = getApprovedEmp("202601002", "test_Emp");
 

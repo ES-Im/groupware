@@ -16,5 +16,4 @@ public interface ScheduleRegisterEvent {
     LocalTime endAt();
     boolean isAllDay();
     boolean isPublic();
-
 }

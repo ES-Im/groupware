@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
-import java.util.List;
+import java.util.Set;
 
 import static java.util.Objects.requireNonNull;
 import static org.springframework.util.Assert.state;
@@ -16,7 +16,7 @@ public record MeetingReserveRequest(
         LocalDate meetingDate,
         LocalTime startAt,
         LocalTime endAt,
-        List<Long> participantIds
+        Set<Long> participantIds
 ) {
 
     public MeetingReserveRequest {

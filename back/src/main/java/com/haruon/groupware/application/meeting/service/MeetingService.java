@@ -16,9 +16,11 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.Set;
 
 import static com.haruon.groupware.application.meeting.service.MeetingRoomService.findMeetingRoom;
 import static com.haruon.groupware.application.utils.Utils.findActiveEmpById;
+import static com.haruon.groupware.application.utils.Utils.getEmpListById;
 
 /**
  * 모든 메서드 도메인 이벤트 발행 필요, 테스트시 save -> 이벤트 발행 -> empty까지 확인할 것
@@ -37,8 +39,7 @@ public class MeetingService implements MeetingManagement {
     public void reserve(MeetingReserveRequest request) {
         MeetingRoom room = findMeetingRoom(meetingRoomRepository, request.meetingRoomId());
         Emp reserver = findActiveEmpById(empRepository, request.reserverId());
-        List<Emp> participants = request.participantIds().stream()
-                .map(id -> findActiveEmpById(empRepository, id)).toList();
+        List<Emp> participants = getEmpListById(empRepository, request.participantIds());
 
         Meeting reservedMeeting = Meeting.reserve(
                 room, reserver, request.title(), request.meetingDate(), request.startAt(), request.endAt(), participants
@@ -48,19 +49,11 @@ public class MeetingService implements MeetingManagement {
     }
 
     @Override
-    public void addParticipant(long meetingId, long reserverId, long participantId) {
+    public void replaceParticipants(long meetingId, long reserverId, Set<Long> participantIds) {
         Meeting meeting = findMeetingByIdAndReserverId(meetingId, reserverId);
-        Emp participant = findActiveEmpById(empRepository, participantId);
+        List<Emp> participants = getEmpListById(empRepository, participantIds);
 
-        meeting.addParticipant(participant);
-    }
-
-    @Override
-    public void removeParticipant(long meetingId, long reserverId, long participantId) {
-        Meeting meeting = findMeetingByIdAndReserverId(meetingId, reserverId);
-        Emp participant = findActiveEmpById(empRepository, participantId);
-
-        meeting.removeParticipant(participant);
+        meeting.changeParticipants(participants);
     }
 
     @Override
@@ -79,7 +72,7 @@ public class MeetingService implements MeetingManagement {
             meetingRoom = findMeetingRoom(meetingRoomRepository, request.meetingRoomId());
         }
 
-        meeting.changeReservation(
+        meeting.changeReservationInfo(
                 request.meetingDate(),
                 request.startAt(),
                 request.endAt(),
@@ -105,6 +98,7 @@ public class MeetingService implements MeetingManagement {
         return meetingRepository.findByIdAndEmpId(meetingId, reserverId)
                 .orElseThrow(() -> new IllegalArgumentException("조회된 회의가 없음"));
     }
+
 
 
 

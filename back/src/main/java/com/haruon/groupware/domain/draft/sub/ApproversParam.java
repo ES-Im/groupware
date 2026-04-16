@@ -1,4 +1,4 @@
-package com.haruon.groupware.domain.draft;
+package com.haruon.groupware.domain.draft.sub;
 
 import com.haruon.groupware.domain.empInfo.Emp;
 

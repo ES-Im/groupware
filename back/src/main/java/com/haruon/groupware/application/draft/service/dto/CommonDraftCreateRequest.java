@@ -37,4 +37,6 @@ public record CommonDraftCreateRequest(
         }
     }
 
+
+
 }

@@ -1,11 +1,13 @@
 package com.haruon.groupware.domain.draft;
 
 import com.haruon.groupware.domain.AbstractEntity;
+import com.haruon.groupware.domain.draft.sub.ApprovalRole;
 import com.haruon.groupware.domain.empInfo.Emp;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.jspecify.annotations.Nullable;
 
 import java.time.LocalDateTime;
 
@@ -35,10 +37,13 @@ public class Approver extends AbstractEntity {
     @JoinColumn(name = "approver_id", nullable = false)
     private Emp emp;
 
+    @Nullable
     private LocalDateTime approvedAt;
 
+    @Nullable
     private String rejectReason;
 
+    @Nullable
     private LocalDateTime rejectedAt;
 
     Approver(
@@ -73,7 +78,7 @@ public class Approver extends AbstractEntity {
     }
 
     boolean isPending() {
-        return this.approvedAt == null && this.rejectedAt == null;
+        return (this.approvedAt == null && this.rejectedAt == null);
     }
 
 }

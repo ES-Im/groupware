@@ -20,7 +20,7 @@ public class MeetingParticipant extends AbstractEntity {
     private Emp emp;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="revervation_id", nullable = false)
+    @JoinColumn(name="meeting_id", nullable = false)
     private Meeting meeting;
 
     static MeetingParticipant create(Meeting meeting, Emp emp) {
@@ -31,6 +31,8 @@ public class MeetingParticipant extends AbstractEntity {
 
         return meetingParticipant;
     }
+
+
 
 
 }

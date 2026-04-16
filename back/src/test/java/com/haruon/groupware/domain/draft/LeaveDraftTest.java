@@ -1,5 +1,12 @@
 package com.haruon.groupware.domain.draft;
 
+import com.haruon.groupware.domain.draft.sub.ApprovalRole;
+import com.haruon.groupware.domain.draft.sub.ApproversParam;
+import com.haruon.groupware.domain.draft.sub.LeaveType;
+import com.haruon.groupware.domain.empInfo.Emp;
+import com.haruon.groupware.domain.event.DomainEvent;
+import com.haruon.groupware.domain.event.byLeaveApprove.LeaveApprovedEvent;
+import com.haruon.groupware.domain.schedule.ScheduleType;
 import lombok.Builder;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -159,6 +166,70 @@ public class LeaveDraftTest {
     private record LeaveDraftParam(
             LocalDateTime startAt, LocalDateTime endAt, LeaveType leaveType
     ) {}
+
+    @Test
+    @DisplayName("휴가 기안서 승인이 마무리되면 휴가승인 이벤트가 발생한다.")
+    void leave_approve_event() {
+        // given
+        Emp drafter = getApprovedEmp("202601001", "drafter");
+        Emp approver1 = getApprovedEmp("202601002", "approver1");
+        Emp approver2 = getApprovedEmp("202601003", "approver2");
+        ApproversParam approverParam1 = new ApproversParam(ApprovalRole.APPROVER, 1, approver1);
+        ApproversParam approverParam2 = new ApproversParam(ApprovalRole.APPROVER, 2, approver2);
+        String title = "title";
+        String content = "content";
+        LocalDateTime startAt = LocalDateTime.of(2026, 4, 20,0,0,0);
+        LocalDateTime endAt = LocalDateTime.of(2026, 4, 21, 0,0,0);
+        LeaveType type = LeaveType.ANNUAL;
+
+        LeaveDraft submitted = LeaveDraft.createSubmitted(
+                drafter, title, content, startAt, endAt, type, List.of(approverParam1, approverParam2), LocalDateTime.of(2026, 4, 16, 9, 0)
+        );
+
+        submitted.approve(approver1, LocalDateTime.of(2026, 4, 20,0,0,0));
+        submitted.approve(approver2, LocalDateTime.of(2026, 4, 20,0,0,0));
+
+        List<? extends DomainEvent> domainEvents = submitted.domainEvents();
+        DomainEvent domainEvent = domainEvents.getFirst();
+        assertThat(domainEvent).isExactlyInstanceOf(LeaveApprovedEvent.class);
+
+        LeaveApprovedEvent leaveApprovedEvent = (LeaveApprovedEvent) domainEvent;
+        assertThat(leaveApprovedEvent).extracting(
+                LeaveApprovedEvent::sourceKey, LeaveApprovedEvent::drafterEmpId, LeaveApprovedEvent::title,
+                LeaveApprovedEvent::content, LeaveApprovedEvent::leaveStartAt, LeaveApprovedEvent::leaveEndAt,
+                LeaveApprovedEvent::leaveType, LeaveApprovedEvent::scheduleType
+        ).containsExactly(
+                submitted.getSourceKey(), drafter.getId(), title,
+                content, startAt, endAt,
+                type, ScheduleType.LEAVE
+        );
+    }
+
+    @Test
+    @DisplayName("휴가 기안서 승인이 마무리되지않으면 휴가승인 이벤트가 발생하지 않는다.")
+    void leave_not_approved_event() {
+        // given
+        Emp drafter = getApprovedEmp("202601001", "drafter");
+        Emp approver1 = getApprovedEmp("202601002", "approver1");
+        Emp approver2 = getApprovedEmp("202601003", "approver2");
+        ApproversParam approverParam1 = new ApproversParam(ApprovalRole.APPROVER, 1, approver1);
+        ApproversParam approverParam2 = new ApproversParam(ApprovalRole.APPROVER, 2, approver2);
+        String title = "title";
+        String content = "content";
+        LocalDateTime startAt = LocalDateTime.of(2026, 4, 20,0,0,0);
+        LocalDateTime endAt = LocalDateTime.of(2026, 4, 21, 0,0,0);
+        LeaveType type = LeaveType.ANNUAL;
+
+        LeaveDraft submitted = LeaveDraft.createSubmitted(
+                drafter, title, content, startAt, endAt, type, List.of(approverParam1, approverParam2), LocalDateTime.of(2026, 4, 16, 9, 0)
+        );
+
+        submitted.approve(approver1, LocalDateTime.of(2026, 4, 20,0,0,0));
+
+        List<? extends DomainEvent> domainEvents = submitted.domainEvents();
+        assertThat(domainEvents).isEmpty();
+    }
+
 
     private static LeaveDraft getLeaveDraft(LocalDateTime startAt, LocalDateTime endAt, LeaveType leaveType) {
         return LeaveDraft.createDraft(

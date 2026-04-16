@@ -4,7 +4,7 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotBlank;
 import org.jspecify.annotations.Nullable;
 
-import java.util.List;
+import java.util.Set;
 
 import static java.util.Objects.requireNonNull;
 
@@ -24,7 +24,7 @@ public record CommonDraftUpdateRequest(
         String content,
 
         @Nullable
-        List<ApproversRequest> approvers
+        Set<ApproversRequest> approvers
 ) {
 
     public CommonDraftUpdateRequest {

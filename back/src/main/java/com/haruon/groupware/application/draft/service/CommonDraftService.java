@@ -6,8 +6,8 @@ import com.haruon.groupware.application.draft.service.dto.ApproversRequest;
 import com.haruon.groupware.application.draft.service.dto.DraftFileCreateRequest;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
 import com.haruon.groupware.application.utils.Utils;
-import com.haruon.groupware.domain.draft.ApproversParam;
 import com.haruon.groupware.domain.draft.Draft;
+import com.haruon.groupware.domain.draft.sub.ApproversParam;
 import com.haruon.groupware.domain.empInfo.Emp;
 import jakarta.transaction.Transactional;
 import org.jspecify.annotations.Nullable;
@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @Transactional
@@ -97,12 +98,17 @@ public abstract class CommonDraftService implements DraftManagement {
     }
 
     private boolean hasApprovers(@Nullable List<ApproversRequest> params, Draft draft) {
-        return !draft.getApproval().getApprovers().isEmpty()
+
+        return !(draft.getApproval().getApprovers().isEmpty())
                 || (params != null && !params.isEmpty());
     }
 
     protected Emp findActiveEmpById(long empId) {
         return Utils.findActiveEmpById(empRepository, empId);
+    }
+
+    protected List<Emp> getEmpListById(Set<Long> participantId){
+        return Utils.getEmpListById(empRepository ,participantId);
     }
 
     protected LocalDateTime requireSubmittedAt(@Nullable LocalDateTime submittedAt) {

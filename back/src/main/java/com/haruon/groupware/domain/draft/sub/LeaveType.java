@@ -1,4 +1,4 @@
-package com.haruon.groupware.domain.draft;
+package com.haruon.groupware.domain.draft.sub;
 
 import lombok.Getter;
 
@@ -11,7 +11,7 @@ public enum LeaveType {
     COMPENSATORY("대체휴무"),
     SPECIAL("특별휴가");
 
-    private String description;
+    private final String description;
 
     LeaveType(String description) {
         this.description = description;

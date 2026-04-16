@@ -8,10 +8,10 @@ import com.haruon.groupware.application.draft.service.dto.LeaveDraftCreateReques
 import com.haruon.groupware.application.draft.service.dto.LeaveDraftUpdateRequest;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
 import com.haruon.groupware.application.utils.CompanyPolicyPort;
-import com.haruon.groupware.domain.draft.ApproversParam;
 import com.haruon.groupware.domain.draft.Draft;
 import com.haruon.groupware.domain.draft.LeaveDraft;
-import com.haruon.groupware.domain.draft.LeaveType;
+import com.haruon.groupware.domain.draft.sub.ApproversParam;
+import com.haruon.groupware.domain.draft.sub.LeaveType;
 import com.haruon.groupware.domain.empInfo.Emp;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;

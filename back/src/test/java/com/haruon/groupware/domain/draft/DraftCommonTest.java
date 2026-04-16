@@ -1,7 +1,11 @@
 package com.haruon.groupware.domain.draft;
 
+import com.haruon.groupware.domain.draft.sub.ApprovalRole;
+import com.haruon.groupware.domain.draft.sub.ApprovalStatus;
+import com.haruon.groupware.domain.draft.sub.ApproversParam;
 import com.haruon.groupware.domain.empInfo.Emp;
 import lombok.Builder;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -30,6 +34,7 @@ class DraftCommonTest {
                 List.of(new ApproversParam(ApprovalRole.APPROVER, 1, approver1))
         );
         Approval approval = draft.getApproval();
+        Assertions.assertNotNull(approval);
         List<Approver> approvers = approval.getApprovers();
 
         assertThat(approvers.getFirst().getApproval()).isEqualTo(approval);
@@ -527,7 +532,7 @@ class DraftCommonTest {
     void readableByCirculation_when_approved() {
         GeneralDraft approvedDraft = getApprovedDraft();
 
-        assertThat(approvedDraft.isReadableByCirculation()).isTrue();
+        assertThat(approvedDraft.hasAllApproved()).isTrue();
     }
 
     @Test
@@ -657,7 +662,55 @@ class DraftCommonTest {
         ).hasMessage("첨부파일수정가능 상태(UNSUBMITTED)가 아님");
     }
 
-    private GeneralDraft getSubmitted() {
+    @Test
+    @DisplayName("미상신 문서는 제목과 내용을 수정할 수 있다")
+    void editDraft_success() {
+        GeneralDraft draft = getDraftWithApprovers();
+        String title = "edited";
+        String content = "edited";
+
+        draft.editGeneralDraft(title, content);
+
+        assertThat(draft).extracting(
+                GeneralDraft::getTitle, GeneralDraft::getContent
+        ).containsExactly(
+                title, content
+        );
+    }
+
+    private static Stream<Arguments> editDraftFailArguments() {
+        GeneralDraft draft = getDraftWithApprovers();
+        GeneralDraft submitted = getSubmitted();
+        String title = "edited";
+        String content = "edited";
+
+        return Stream.of(
+                Arguments.of("미상신 문서만 수정가능",
+                        EditParam.builder().draft(submitted).title(title).content(content).build()
+                ),Arguments.of("제목은 빈값이 될 수 없음",
+                        EditParam.builder().draft(draft).title(" ").build()
+                ),Arguments.of("내용은 빈값이 될 수 없음",
+                        EditParam.builder().draft(draft).content(" ").build()
+                )
+        );
+    }
+    @ParameterizedTest(name = "{index} ==> {0}")
+    @MethodSource("editDraftFailArguments")
+    @DisplayName("기안서 수정 실패 케이스")
+    void editDraftFailTest(String description, EditParam params) {
+        assertThatThrownBy(() ->
+                params.draft.editGeneralDraft(params.title, params.content)
+        ).hasMessage(description);
+    }
+
+    @Builder
+    private record EditParam(
+            GeneralDraft draft,
+            String title,
+            String content
+    ) {}
+
+    private static GeneralDraft getSubmitted() {
 
         return GeneralDraft.createSubmitted(
                 getApprovedEmp(),
@@ -676,7 +729,7 @@ class DraftCommonTest {
         );
     }
 
-    private GeneralDraft getDraftWithApprovers() {
+    private static GeneralDraft getDraftWithApprovers() {
 
         return GeneralDraft.createDraft(
                 getApprovedEmp(),

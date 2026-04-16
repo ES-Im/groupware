@@ -1,5 +1,6 @@
 package com.haruon.groupware.domain.draft;
 
+import com.haruon.groupware.domain.draft.sub.ApproversParam;
 import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.event.AbstractEventAggregateRoot;
 import jakarta.persistence.*;
@@ -154,7 +155,7 @@ public abstract class Draft extends AbstractEventAggregateRoot {
     }
 
     public void markReadByCirculation(Emp emp, LocalDateTime readAt) {
-        state(this.isReadableByCirculation(), "공람가능한 상태가 아님");
+        state(this.hasAllApproved(), "공람가능한 상태가 아님");
         requireNonNull(emp);
         requireNonNull(readAt);
 
@@ -163,7 +164,7 @@ public abstract class Draft extends AbstractEventAggregateRoot {
         circulation.markRead(readAt);
     }
 
-    public boolean isReadableByCirculation() {
+    protected boolean hasAllApproved() {
         return this.approval!=null && this.approval.isApproved();
     }
 

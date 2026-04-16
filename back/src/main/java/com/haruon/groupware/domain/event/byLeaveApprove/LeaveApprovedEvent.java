@@ -1,6 +1,6 @@
 package com.haruon.groupware.domain.event.byLeaveApprove;
 
-import com.haruon.groupware.domain.draft.LeaveType;
+import com.haruon.groupware.domain.draft.sub.LeaveType;
 import com.haruon.groupware.domain.event.DomainEvent;
 import com.haruon.groupware.domain.schedule.ScheduleType;
 import lombok.Builder;
@@ -21,4 +21,6 @@ public record LeaveApprovedEvent(
     public LeaveApprovedEvent {
         scheduleType = ScheduleType.LEAVE;
     }
+
+
 }

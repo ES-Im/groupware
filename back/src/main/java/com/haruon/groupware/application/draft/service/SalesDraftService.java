@@ -8,9 +8,9 @@ import com.haruon.groupware.application.draft.service.dto.CommonDraftUpdateReque
 import com.haruon.groupware.application.draft.service.dto.SalesDraftCreateRequest;
 import com.haruon.groupware.application.draft.service.dto.SalesDraftUpdateRequest;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
-import com.haruon.groupware.domain.draft.ApproversParam;
 import com.haruon.groupware.domain.draft.Draft;
 import com.haruon.groupware.domain.draft.SalesDraft;
+import com.haruon.groupware.domain.draft.sub.ApproversParam;
 import com.haruon.groupware.domain.empInfo.Emp;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;

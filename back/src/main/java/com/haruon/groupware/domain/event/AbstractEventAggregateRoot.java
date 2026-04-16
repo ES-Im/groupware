@@ -6,7 +6,6 @@ import org.springframework.data.domain.AfterDomainEventPublication;
 import org.springframework.data.domain.DomainEvents;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -25,12 +24,12 @@ public abstract class AbstractEventAggregateRoot extends AbstractEntity {
     }
 
     @DomainEvents
-    protected Collection<? extends DomainEvent> domainEvents() {
+    public List<? extends DomainEvent> domainEvents() {
         return Collections.unmodifiableList(domainEvents);
     }
 
     @AfterDomainEventPublication
-    protected void clearDomainEvents() {
+    public void clearDomainEvents() {
         this.domainEvents.clear();
     }
 

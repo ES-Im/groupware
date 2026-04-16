@@ -1,5 +1,7 @@
 package com.haruon.groupware.domain.draft;
 
+import com.haruon.groupware.domain.draft.sub.ApprovalRole;
+import com.haruon.groupware.domain.draft.sub.ApproversParam;
 import lombok.Builder;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

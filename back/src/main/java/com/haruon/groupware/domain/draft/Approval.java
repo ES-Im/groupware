@@ -1,6 +1,8 @@
 package com.haruon.groupware.domain.draft;
 
 import com.haruon.groupware.domain.AbstractEntity;
+import com.haruon.groupware.domain.draft.sub.ApprovalStatus;
+import com.haruon.groupware.domain.draft.sub.ApproversParam;
 import com.haruon.groupware.domain.empInfo.Emp;
 import jakarta.persistence.*;
 import lombok.AccessLevel;

@@ -17,7 +17,7 @@ public class DeptManageService implements DeptManagement {
     private final DeptRepository  deptRepository;
 
     @Override
-    public int registerDept(DeptRegisterRequest adminRequest) {
+    public void registerDept(DeptRegisterRequest adminRequest) {
         requireNonNull(adminRequest);
         checkDuplicateDeptCode(adminRequest.deptName());
 
@@ -28,29 +28,24 @@ public class DeptManageService implements DeptManagement {
 
         deptRepository.save(dept);
 
-        return 1;
     }
 
     @Override
-    public int activate(Long deptId) {
+    public void activate(Long deptId) {
         Dept dept = getDept(deptId);
 
         dept.activate();
-
-        return 1;
     }
 
     @Override
-    public int deactivate(Long deptId) {
+    public void deactivate(Long deptId) {
         Dept dept = getDept(deptId);
 
         dept.deactivate();
-
-        return 1;
     }
 
     @Override
-    public int updateDeptName(Long deptId, String newDeptName) {
+    public void updateDeptName(Long deptId, String newDeptName) {
         checkDuplicateDeptCode(newDeptName);
 
         Dept dept = getDept(deptId);
@@ -58,8 +53,6 @@ public class DeptManageService implements DeptManagement {
         dept.renameDept(
                 newDeptName
         );
-
-        return 0;
     }
 
     private Dept getDept(Long deptId) {

@@ -1,5 +1,7 @@
 package com.haruon.groupware.domain.draft;
 
+import com.haruon.groupware.domain.draft.sub.ApproversParam;
+import com.haruon.groupware.domain.draft.sub.LeaveType;
 import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.event.byLeaveApprove.LeaveApprovedEvent;
 import jakarta.persistence.*;
@@ -37,6 +39,16 @@ public class LeaveDraft extends Draft {
         super(title, content, emp);
     }
 
+    @Override
+    public void approve(Emp approver, LocalDateTime approvedAt) {
+        super.approve(approver, approvedAt);
+        boolean hasAllApproved = this.hasAllApproved();
+
+        if(hasAllApproved) {
+            LeaveApprovedEventRegister(this);
+        }
+    }
+
     public static LeaveDraft createDraft(
             Emp emp, String title, String content,
             LocalDateTime startAt, LocalDateTime endAt,
@@ -59,8 +71,6 @@ public class LeaveDraft extends Draft {
 
         submitted.init(startAt, endAt, leaveType);
         submitted.createSubmittedApproval(approvers, submittedAt);
-
-        LeaveApprovedEventRegister(submitted);
 
         return submitted;
     }

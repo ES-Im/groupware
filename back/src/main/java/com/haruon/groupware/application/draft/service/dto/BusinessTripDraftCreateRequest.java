@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import org.jspecify.annotations.Nullable;
 
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.Set;
 
 import static java.util.Objects.requireNonNull;
 import static org.springframework.util.Assert.state;
@@ -24,7 +24,7 @@ public record BusinessTripDraftCreateRequest(
         String purpose,
 
         @Nullable
-        List<Long> participantIds
+        Set<Long> participantIds
 
 ) {
         public BusinessTripDraftCreateRequest {

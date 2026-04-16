@@ -1,6 +1,6 @@
 package com.haruon.groupware.application.draft.service.dto;
 
-import com.haruon.groupware.domain.draft.LeaveType;
+import com.haruon.groupware.domain.draft.sub.LeaveType;
 
 import java.time.LocalDateTime;
 
