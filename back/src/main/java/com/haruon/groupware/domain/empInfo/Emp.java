@@ -24,7 +24,7 @@ import static org.springframework.util.Assert.state;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"emp_no", "id"})})
+@Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"emp_no", "targetEmpId"})})
 public class Emp extends AbstractEntity {
 
     @Column(nullable = false)
@@ -89,18 +89,16 @@ public class Emp extends AbstractEntity {
         return emp;
     }
 
-    public int approveRegister(LocalDate hiredAt) {
+    public void approveRegister(LocalDate hiredAt) {
         state(this.status == EmpStatus.PENDING, "PENDING 상태가 아닙니다.");
 
         this.status = EmpStatus.ACTIVE;
         this.systemRoles.add(SystemRoleCode.EMPLOYEE);
         this.hiredAt = requireNonNull(hiredAt);
-
-        return 1;
     }
 
-    public int changeResignedEmpInfoByAdmin(LocalDate resignedAt) {
-        state(resignedAt != null, "퇴사일이 입력되지 않았습니다");
+    public void changeResignedEmpInfoByAdmin(LocalDate resignedAt) {
+        requireNonNull(resignedAt, "퇴사일이 입력되지 않았습니다");
         state(hiredAt != null && resignedAt.isAfter(this.hiredAt), "퇴사일은 입사일 이후여야 합니다.");
 
         this.resignedAt = resignedAt;
@@ -112,10 +110,9 @@ public class Emp extends AbstractEntity {
             }
         });
 
-        return 1;
     }
 
-    public int changeEmpFile(
+    public void changeEmpFile(
             FileType fileType,
             String mimeType,
             String originalName,
@@ -134,10 +131,9 @@ public class Emp extends AbstractEntity {
                 fileSize
         ));
 
-        return 1;
     }
 
-    public int changeFileActiveStatus(Long fileId, boolean active) {
+    public void changeFileActiveStatus(Long fileId, boolean active) {
         ensureActive();
         
         EmpFile targetFile = findEmpFile(fileId);
@@ -155,18 +151,16 @@ public class Emp extends AbstractEntity {
             targetFile.deactivateFile();
         }
 
-        return 1;
     }
 
-    public int removeFile(Long fileId) {
+    public void removeFile(Long fileId) {
         EmpFile targetFile = findEmpFile(fileId);
 
         this.empFiles.remove(targetFile);
 
-        return 1;
     }
 
-    public int changeBelongingsByAdmin (
+    public void changeBelongingsByAdmin (
             @Nullable Dept dept,
             @Nullable PositionCode position,
             @Nullable Boolean isPrimary,
@@ -190,18 +184,18 @@ public class Emp extends AbstractEntity {
 
         if (registerCase) {
             registerEmpBelonging(dept, position, startAt, isPrimary);
-            return 1;
+            return;
         }
 
         if (updateCase) {
             updateCurrentBelonging(position, isPrimary, startAt, endAt);
-            return 1;
+            return;
         }
 
         throw new IllegalArgumentException("소속 정보 요청 형식이 올바르지 않습니다.");
     }
 
-    public int changeInfoBySelf(
+    public void changeInfoBySelf(
             @Nullable String extensionNo,
             String currentPassword,
             @Nullable String newRawPassword,
@@ -217,10 +211,9 @@ public class Emp extends AbstractEntity {
 
         if(newRawPassword != null) changePassword(newRawPassword, encoder);
 
-        return 1;
     }
 
-    public int changeInfoByDeptManager(
+    public void changeInfoByDeptManager(
             @Nullable String extensionNo,
             @Nullable SystemRoleCode systemRoleCode
     ) {
@@ -237,10 +230,9 @@ public class Emp extends AbstractEntity {
 
         if(systemRoleCode != null) changeGrade(systemRoleCode);
 
-        return 1;
     }
 
-    public int changeInfoByAdmin(
+    public void changeInfoByAdmin(
             @Nullable String empName,
             @Nullable String loginId,
             @Nullable Email email,
@@ -271,11 +263,18 @@ public class Emp extends AbstractEntity {
 
         if(hiredAt != null) this.hiredAt = hiredAt;
 
-        return 1;
+    }
+
+    public void activateEmp() {
+        this.status = EmpStatus.ACTIVE;
     }
 
     public boolean isAdmin() {
         return this.getSystemRoles().contains(SystemRoleCode.ADMIN);
+    }
+
+    public boolean isDeptManager() {
+        return this.getSystemRoles().contains(SystemRoleCode.DEPT_MANAGER);
     }
 
     private void changeEmpStatus(EmpStatus newEmpStatus) {
@@ -283,6 +282,9 @@ public class Emp extends AbstractEntity {
     }
 
     private void changeLoginIdAndEmail(String newEmpId, Email email) {
+        requireNonNull(newEmpId);
+        requireNonNull(email);
+
         this.loginId = newEmpId;
         this.email = email;
     }
@@ -297,7 +299,7 @@ public class Emp extends AbstractEntity {
     }
 
     private void changePassword(String newRawPassword, PasswordEncoder encoder) {
-        state(encoder != null, "비밀번호 변경을 위해 encoder가 필요합니다.");
+        requireNonNull(encoder, "비밀번호 변경을 위해 encoder가 필요합니다.");
         state(!encoder.matches(newRawPassword, this.empPassword), "새 비밀번호는 현재 비밀번호와 달라야 합니다.");
 
         this.empPassword = encoder.encode(newRawPassword);
@@ -343,7 +345,7 @@ public class Emp extends AbstractEntity {
             LocalDate startAt,
             Boolean isPrimary
     ) {
-        if (Boolean.TRUE.equals(isPrimary)) {
+        if (isPrimary) {
             this.empBelongings.forEach(EmpBelongings::unmarkPrimary);
         }
 
@@ -352,7 +354,12 @@ public class Emp extends AbstractEntity {
         this.empBelongings.add(belonging);
     }
 
-    private void updateCurrentBelonging(PositionCode position, Boolean isPrimary, LocalDate startAt, LocalDate endAt) {
+    private void updateCurrentBelonging(
+            @Nullable PositionCode position,
+            @Nullable Boolean isPrimary,
+            @Nullable LocalDate startAt,
+            @Nullable LocalDate endAt
+    ) {
         EmpBelongings currentBelonging = findCurrentPrimaryBelonging();
 
         if (position != null) {

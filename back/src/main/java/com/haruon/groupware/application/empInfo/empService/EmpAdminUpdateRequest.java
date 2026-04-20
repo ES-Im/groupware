@@ -22,7 +22,9 @@ import static org.springframework.util.Assert.state;
 @Builder
 public record EmpAdminUpdateRequest(
 
-        Long id,
+        Long adminId,
+
+        Long targetEmpId,
 
         // 직원정보
         @Nullable
@@ -68,18 +70,24 @@ public record EmpAdminUpdateRequest(
         @Nullable
         EmpBelongingsParam belongingsParam,
 
+        @Nullable
         String companyDomain
 
 ) {
 
     public EmpAdminUpdateRequest {
-        requireNonNull(id, "사원의 id(PK) 필수");
-        state(companyDomain != null, "회사 도메인은 필수값");
+        requireNonNull(adminId, "수정하는 사람의 deptManagerId(PK) 필수");
+        requireNonNull(targetEmpId, "사원의 targetEmpId(PK) 필수");
+
+        if(loginId != null) {
+            state(companyDomain != null, "회사 도메인은 필수값");
+        }
         state(empName != null || loginId != null
                 || newRawPassword != null || extensionNo != null
                 || empStatus != null || systemRoleCode != null
-                || hireAt != null
-                || fileStatusParam != null || belongingsParam != null ,"변경된 정보가 없습니다.");
+                || hireAt != null   || resignedAt != null
+                || fileStatusParam != null || belongingsParam != null
+                ,"변경된 정보가 없습니다.");
 
     }
 

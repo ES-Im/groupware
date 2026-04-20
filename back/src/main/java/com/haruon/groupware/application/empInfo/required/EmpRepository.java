@@ -15,5 +15,7 @@ public interface EmpRepository extends Repository<Emp, Long>  {
 
     boolean existsByEmpNo(String empNo);
 
+    void deleteAll();
 
+    Optional<Emp> findByEmpNo(String number);
 }

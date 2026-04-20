@@ -17,7 +17,9 @@ import static org.springframework.util.Assert.state;
 @Builder
 public record EmpDeptManagerUpdateRequest(
 
-        Long id,
+        Long targetEmpId,
+
+        Long deptManagerId,
 
         @Nullable
         SystemRoleCode systemRoleCode,
@@ -32,7 +34,8 @@ public record EmpDeptManagerUpdateRequest(
 ) {
 
     public EmpDeptManagerUpdateRequest {
-        requireNonNull(id, "사원의 id(PK) 필수");
+        requireNonNull(deptManagerId, "부서매니저 사원 ID 필수");
+        requireNonNull(targetEmpId, "수정대상 사원 ID 필수");
         state(systemRoleCode != null || extensionNo != null, "변경된 정보가 없습니다.");
 
         if (systemRoleCode != null

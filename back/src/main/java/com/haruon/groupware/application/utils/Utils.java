@@ -8,6 +8,8 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Set;
 
+import static org.springframework.util.Assert.state;
+
 public class Utils {
 
     public static LocalTime getEarlierTime(LocalTime targetStartAt, LocalTime baseTime) {
@@ -36,7 +38,13 @@ public class Utils {
     public static void checkAdminById(EmpRepository empRepository, Long id) {
         Emp empById = findEmpById(empRepository, id);
 
-        if(empById.isAdmin()) throw new IllegalArgumentException("권한이 없습니다");   // to-do 커스텀 예외처리
+        state(empById.isAdmin(), "권한이 없습니다");
+    }
+
+    public static void checkDeptById(EmpRepository empRepository, Long id) {
+        Emp empById = findEmpById(empRepository, id);
+
+        state(empById.isDeptManager(), "권한이 없습니다");
     }
 
     public static Emp findEmpById(EmpRepository empRepository, Long id) {

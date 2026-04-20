@@ -3,19 +3,26 @@ package com.haruon.groupware.application.empInfo.empService;
 import com.haruon.groupware.application.empInfo.provided.EmpAccountManager;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
 import com.haruon.groupware.application.utils.CompanyPolicyPort;
+import com.haruon.groupware.application.utils.Utils;
+import com.haruon.groupware.domain.empInfo.Dept;
 import com.haruon.groupware.domain.empInfo.Emp;
+import com.haruon.groupware.domain.empInfo.EmpBelongings;
 import com.haruon.groupware.domain.empInfo.PasswordEncoder;
+import com.haruon.groupware.domain.empInfo.enums.EmpStatus;
 import com.haruon.groupware.domain.shared.Email;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.haruon.groupware.application.utils.Utils.findActiveEmpById;
 import static com.haruon.groupware.application.utils.Utils.findEmpById;
 import static com.haruon.groupware.domain.empInfo.Emp.register;
 import static java.util.Objects.requireNonNull;
+import static org.springframework.util.Assert.state;
 
 @RequiredArgsConstructor
 @Service
@@ -48,8 +55,9 @@ public class EmpService implements EmpAccountManager {
     @Override
     public void approveRegisterByAdmin(EmpAdminUpdateRequest adminRequest) {
         requireNonNull(adminRequest);
+        Utils.checkAdminById(empRepository, adminRequest.adminId());
 
-        Emp emp = findEmpById(empRepository, adminRequest.id());
+        Emp emp = findEmpById(empRepository, adminRequest.targetEmpId());
         LocalDate hire = requireNonNull(adminRequest.hireAt());
 
         emp.approveRegister(hire);
@@ -58,10 +66,14 @@ public class EmpService implements EmpAccountManager {
     @Override
     public void updateResignedEmpByAdmin(EmpAdminUpdateRequest adminRequest) {
         requireNonNull(adminRequest);
-        Emp emp = findEmpById(empRepository, adminRequest.id());
+        Utils.checkAdminById(empRepository, adminRequest.adminId());
+
+        Emp targetEmployee = findEmpById(empRepository, adminRequest.targetEmpId());
         LocalDate resignedAt = requireNonNull(adminRequest.resignedAt());
 
-        emp.changeResignedEmpInfoByAdmin(resignedAt);
+        state(resignedAt.isAfter(targetEmployee.getHiredAt()), "퇴직일자가 입사일자보다 이를수 없다");
+
+        targetEmployee.changeResignedEmpInfoByAdmin(resignedAt);
     }
 
 
@@ -75,7 +87,7 @@ public class EmpService implements EmpAccountManager {
     @Override
     public void updateEmpFileBySelf(EmpSelfUpdateRequest request) {
         requireNonNull(request);
-        Emp emp = findActiveEmpById(empRepository, request.id());
+        Emp emp = findActiveEmpById(empRepository, request.empId());
 
         EmpFileReplaceParam fileParam = requireNonNull(request.fileRequest());
 
@@ -91,24 +103,49 @@ public class EmpService implements EmpAccountManager {
     @Override
     public void updateInfoByDeptManager(EmpDeptManagerUpdateRequest deptManagerRequest) {
         requireNonNull(deptManagerRequest);
+        Utils.checkDeptById(empRepository, deptManagerRequest.deptManagerId());
 
-        Emp emp = findActiveEmpById(empRepository, deptManagerRequest.id());
+        Emp deptManager = findActiveEmpById(empRepository, deptManagerRequest.deptManagerId());
+        Set<Dept> managerDept = getCurrentDept(deptManager);
 
-        emp.changeInfoByDeptManager(
+        Emp targetEmp = findActiveEmpById(empRepository, deptManagerRequest.targetEmpId());
+        Set<Dept> targetEmpDept = getCurrentDept(targetEmp);
+
+        validateSameDept(managerDept, targetEmpDept);
+
+        targetEmp.changeInfoByDeptManager(
                 deptManagerRequest.extensionNo(),
                 deptManagerRequest.systemRoleCode()
         );
+    }
+
+    private Set<Dept> getCurrentDept(Emp emp) {
+        return emp.getEmpBelongings().stream()
+                .filter(b -> b.getEndAt() == null)
+                .map(EmpBelongings::getDept)
+                .collect(Collectors.toSet());
+    }
+
+    private void validateSameDept(Set<Dept> managerDept, Set<Dept> targetEmpDept) {
+        boolean isSameDept = false;
+        for (Dept dept : managerDept) {
+            isSameDept = targetEmpDept.contains(dept);
+            break;
+        }
+
+        state(isSameDept, "부서 매니저의 부서가 수정대상 사원과 다른 부서");
     }
 
     @Override
     public void updateInfoByAdmin(EmpAdminUpdateRequest adminRequest) {
         requireNonNull(adminRequest);
 
-        Emp emp = findActiveEmpById(empRepository, adminRequest.id());
+        Emp emp = findActiveEmpById(empRepository, adminRequest.targetEmpId());
 
         Email newEmail = adminRequest.loginId() != null
                 ? makeEmailByLoginId(adminRequest.loginId())
                 : null;
+        if(adminRequest.belongingsParam() != null) updateBelongingsByAdmin(adminRequest);
 
         emp.changeInfoByAdmin(
                 adminRequest.empName(),
@@ -124,9 +161,20 @@ public class EmpService implements EmpAccountManager {
     }
 
     @Override
+    public void activateEmpByAdmin(Long adminId, Long targetId) {
+        requireNonNull(adminId);
+        Utils.checkAdminById(empRepository, adminId);
+
+        Emp emp = findEmpById(empRepository, targetId);
+        state(!emp.getStatus().equals(EmpStatus.ACTIVE), "이미 활성화된 직원입니다.");
+
+        emp.activateEmp();
+    }
+
+    @Override
     public void updateInfoBySelf(EmpSelfUpdateRequest empRequest) {
         requireNonNull(empRequest);
-        Emp emp = findActiveEmpById(empRepository, empRequest.id());
+        Emp emp = findActiveEmpById(empRepository, empRequest.empId());
 
         emp.changeInfoBySelf(
                 empRequest.extensionNo(),
@@ -136,34 +184,19 @@ public class EmpService implements EmpAccountManager {
         );
     }
 
-    @Override
-    public void updateBelongingsByAdmin(EmpAdminUpdateRequest request) {
-        requireNonNull(request);
-
-        Emp emp = findActiveEmpById(empRepository, request.id());
-        EmpBelongingsParam empBelongingsParam = requireNonNull(request.belongingsParam());
-
-        emp.changeBelongingsByAdmin(
-                empBelongingsParam.dept(),
-                empBelongingsParam.position(),
-                empBelongingsParam.isPrimary(),
-                empBelongingsParam.startAt(),
-                empBelongingsParam.endAt()
-        );
-    }
 
     @Override
     public void updateFileActiveStatus(EmpAdminUpdateRequest request) {
         requireNonNull(request.fileStatusParam());
 
-        updateFileStatus(request.id(), request.fileStatusParam());
+        updateFileStatus(request.targetEmpId(), request.fileStatusParam());
     }
 
     @Override
     public void updateFileActiveStatus(EmpSelfUpdateRequest request) {
         requireNonNull(request.fileStatusParam());
 
-        updateFileStatus(request.id(), request.fileStatusParam());
+        updateFileStatus(request.empId(), request.fileStatusParam());
     }
 
     private Email makeEmailByLoginId(String loginId) {
@@ -186,6 +219,21 @@ public class EmpService implements EmpAccountManager {
         emp.changeFileActiveStatus(
                 request.fileId(),
                 request.targetActive()
+        );
+    }
+
+    private void updateBelongingsByAdmin(EmpAdminUpdateRequest request) {
+        requireNonNull(request);
+
+        Emp emp = findActiveEmpById(empRepository, request.targetEmpId());
+        EmpBelongingsParam empBelongingsParam = requireNonNull(request.belongingsParam());
+
+        emp.changeBelongingsByAdmin(
+                empBelongingsParam.dept(),
+                empBelongingsParam.position(),
+                empBelongingsParam.isPrimary(),
+                empBelongingsParam.startAt(),
+                empBelongingsParam.endAt()
         );
     }
 }

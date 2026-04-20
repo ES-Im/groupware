@@ -12,4 +12,8 @@ public class DeptFixture {
         return Dept.registerDept( "00001", setDeptName);
     }
 
+    public static Dept getDept(String deptNo, String deptName) {
+        return Dept.registerDept( deptNo, deptName);
+    }
+
 }

@@ -1,10 +1,50 @@
 spring:
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
     database-platform: org.hibernate.dialect.MySQLDialect
     properties:
       hibernate:
         format_sql: true
         show_sql: true
         use_sql_comments: true
+
+
+
+  # db
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  # jwt
+  jwt:
+    secret: ${JWT_SECRET}
+
+    redirect:
+      base: ${JWT_FRONT_REDIRECT_BASE}
+      landing-path: ${JWT_FRONT_CALLBACK_PATH}
+
+    access-token:
+      expiration-time: ${JWT_ACCESS_TOKEN_EXPIRATION_TIME}
+    refresh-token:
+      expiration-time: ${JWT_REFRESH_TOKEN_EXPIRATION_TIME}
+
+  #redis
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+
+  #docker
+  docker:
+    compose:
+      lifecycle-management: start_only
+
+
+app:
+  frontend:
+    base-url: ${FRONT_BASE_URL}
+  franchise:
+    base-url: ${MOCKOON_API}

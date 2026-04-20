@@ -11,11 +11,11 @@ public interface DeptManagement {
     void registerDept(DeptRegisterRequest request);
 
     /** return 활성화 성공 여부 */
-    void activate(Long deptId);
+    void activate(Long deptId, Long adminId);
 
     /** return 비활성화 성공 여부 */
-    void deactivate(Long deptId);
+    void deactivate(Long deptId, Long adminId);
 
     /** return 정보수정 성공 여부 */
-    void updateDeptName(Long deptId, String newDeptName);
+    void updateDeptName(Long deptId, String newDeptName, Long adminId);
 }

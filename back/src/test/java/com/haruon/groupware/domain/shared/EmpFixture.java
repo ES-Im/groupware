@@ -5,6 +5,7 @@ import com.haruon.groupware.domain.empInfo.EmpFile;
 import com.haruon.groupware.domain.empInfo.PasswordEncoder;
 import com.haruon.groupware.domain.empInfo.enums.FileType;
 import com.haruon.groupware.domain.empInfo.enums.PositionCode;
+import com.haruon.groupware.domain.empInfo.enums.SystemRoleCode;
 
 import java.time.LocalDate;
 import java.util.Locale;
@@ -20,13 +21,19 @@ public class EmpFixture {
         return emp;
     }
 
+    public static Emp getApprovedEmpWithoutDept(String empNo, String loginId) {
+        Emp emp = getRegisteredEmp(empNo, loginId);
+        emp.approveRegister(LocalDate.of(2026, 1, 1));
+        return emp;
+    }
+
     /**
      * 테스트용 사원 픽스처 <br>
      * 1. 부서 : "00001", "testDept" <br>
      * 2. 사원 정보 : [ <br>
      *    - 사번 : "202601001", <br>
      *    - name : "Test", <br>
-     *    - id : "Test", <br>
+     *    - targetEmpId : "Test", <br>
      *    - email : "Test@test.com", <br>
      *    - rawPw : "!1currentPassword" <br>
      * ] <br>
@@ -35,6 +42,37 @@ public class EmpFixture {
         Emp emp = getRegisteredEmp();
 
         emp.approveRegister(LocalDate.of(2026, 1, 1));
+
+        return emp;
+    }
+
+    /**
+     * 테스트용 관리자 픽스처 <br>
+     * 1. 부서 : "00001", "testDept" <br>
+     * 2. 사원 정보 : [ <br>
+     *    - 사번 : "202601999", <br>
+     *    - name : "Test", <br>
+     *    - targetEmpId : "Admin", <br>
+     *    - email : "Admin@test.com", <br>
+     *    - rawPw : "!1currentPassword" <br>
+     * ] <br>
+     */
+    public static Emp getAdmin() {
+        Emp emp = getRegisteredEmp("202601999", "Admin");
+        emp.approveRegister(LocalDate.of(2026, 1, 1));
+
+        emp.changeInfoByAdmin(
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                SystemRoleCode.ADMIN,
+                null,
+                encoder
+        );
+
 
         return emp;
     }
@@ -49,6 +87,7 @@ public class EmpFixture {
         );
     }
 
+
     public static EmpFile addFileWithType(Emp emp, FileType fileType) {
         emp.changeEmpFile(
                 fileType,
@@ -62,12 +101,12 @@ public class EmpFixture {
     }
 
     public static Emp getRegisteredEmp() {
-        Email newEmail = Email.of("Test", "@test.com");
+        Email newEmail = Email.of("Test", "@haruon.com");
         return Emp.register("202601001", "Test", "Test", "!1currentPassword", newEmail, encoder);
     }
 
     public static Emp getRegisteredEmp(String empNo, String loginId) {
-        Email newEmail = Email.of(loginId, "@test.com");
+        Email newEmail = Email.of(loginId, "haruon.com");
         return Emp.register(empNo, "Test", loginId, "!1currentPassword", newEmail, encoder);
     }
 

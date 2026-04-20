@@ -13,4 +13,6 @@ public interface DeptRepository extends Repository<Dept, Long> {
 
     Optional<Dept> findByDeptCode(String deptCode);
 
+    void deleteAll();
+
 }
