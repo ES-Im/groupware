@@ -10,7 +10,10 @@ import lombok.NoArgsConstructor;
 import org.jspecify.annotations.Nullable;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toSet;
@@ -21,9 +24,6 @@ import static org.springframework.util.Assert.state;
 @DiscriminatorValue("BUSINESS_TRIP")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class BusinessTripDraft extends Draft {
-
-    @Column(unique = true, nullable = false, updatable = false)
-    private String sourceKey;
 
     @Column(nullable = false)
     private LocalDateTime startAt;
@@ -57,7 +57,6 @@ public class BusinessTripDraft extends Draft {
         this.endAt = endAt;
         this.destination = destination;
         this.purpose = purpose;
-        this.sourceKey = UUID.randomUUID().toString();
 
         if (participants!= null && !participants.isEmpty()) {
             participants.forEach(this::addParticipant);

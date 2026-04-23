@@ -1,7 +1,6 @@
 package com.haruon.groupware.application.empInfo.attendanceService;
 
 import com.haruon.groupware.application.empInfo.attendanceService.dto.AttendanceCloseParam;
-import com.haruon.groupware.application.empInfo.provided.AttendanceClosing;
 import com.haruon.groupware.application.empInfo.required.AttendanceRepository;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
 import com.haruon.groupware.application.schedule.required.ScheduleRepository;
@@ -13,6 +12,7 @@ import com.haruon.groupware.domain.schedule.Schedule;
 import com.haruon.groupware.domain.schedule.ScheduleType;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
@@ -20,7 +20,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
-import static com.haruon.groupware.application.empInfo.EmpInfoUtils.getStatusByRecognizedHours;
+import static com.haruon.groupware.application.empInfo.attendanceService.AttendanceUtils.getStatusByRecognizedHours;
 import static com.haruon.groupware.application.utils.Utils.*;
 import static com.haruon.groupware.domain.empInfo.Attendance.*;
 import static com.haruon.groupware.domain.empInfo.enums.AttendanceStatus.*;
@@ -32,7 +32,7 @@ import static java.util.Objects.requireNonNull;
 @Transactional
 @RequiredArgsConstructor
 @Validated
-public class AttendanceClosingService implements AttendanceClosing {
+public class AttendanceClosing implements com.haruon.groupware.application.empInfo.provided.AttendanceClosing {
 
     private final AttendanceRepository attendanceRepository;
     private final EmpRepository empRepository;
@@ -112,7 +112,11 @@ public class AttendanceClosingService implements AttendanceClosing {
         LocalTime endAt = null;
 
         switch (schedule.getScheduleType()) {
-            case LEAVE -> status = ALL_DAY_LEAVE;
+            case LEAVE -> {
+                status = ALL_DAY_LEAVE;
+                startAt = companyPolicy.getStartTime();
+                endAt = companyPolicy.getEndTime();
+            }
             case BUSINESS_TRIP -> {
                 startAt = companyPolicy.getStartTime();
                 endAt = companyPolicy.getEndTime();
@@ -125,7 +129,7 @@ public class AttendanceClosingService implements AttendanceClosing {
             Attendance newAttendance = registerAttendance(emp, date, status, startAt, endAt);
             attendanceRepository.save(newAttendance);
         } else {
-            changeAttendanceTime(mainAttendance, startAt, endAt);
+            changeAttendanceTime(mainAttendance, requireNonNull(startAt), requireNonNull(endAt));
             changeAttendanceStatus(mainAttendance, status);
         }
 
@@ -190,7 +194,7 @@ public class AttendanceClosingService implements AttendanceClosing {
     }
 
     private Attendance resolveOrRegisterAbsentAttendance(
-            Attendance mainAttendance,
+            @Nullable  Attendance mainAttendance,
             Emp emp,
             LocalDate attendanceDate
     ) {
@@ -209,7 +213,7 @@ public class AttendanceClosingService implements AttendanceClosing {
     }
 
     private Attendance resolveMainAttendance(
-            Attendance mainAttendance,
+            @Nullable Attendance mainAttendance,
             Emp emp,
             LocalDate attendanceDate,
             LocalTime startAt,
@@ -233,7 +237,7 @@ public class AttendanceClosingService implements AttendanceClosing {
             );
         }
 
-        changeAttendanceTime(mainAttendance, startAt, endAt);
+        changeAttendanceTime(mainAttendance, requireNonNull(startAt), requireNonNull(endAt));
         changeAttendanceStatus(mainAttendance, status);
         return mainAttendance;
     }
@@ -247,10 +251,10 @@ public class AttendanceClosingService implements AttendanceClosing {
                 .toList();
     }
 
-    private Attendance findAttendanceByCloseParam(Emp emp, LocalDate date) {
+    private @Nullable Attendance findAttendanceByCloseParam(Emp emp, LocalDate date) {
         return attendanceRepository.findByEmpIdAndAttendanceDate(
                 emp.getId(), date
-        ).orElse(null);
+        ).stream().findFirst().orElse(null);
     }
 
 }

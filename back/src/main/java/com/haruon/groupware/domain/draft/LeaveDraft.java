@@ -12,7 +12,6 @@ import org.jspecify.annotations.Nullable;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 
 import static java.util.Objects.requireNonNull;
 
@@ -21,9 +20,6 @@ import static java.util.Objects.requireNonNull;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class LeaveDraft extends Draft {
-
-    @Column(unique = true, nullable = false, updatable = false)
-    private String sourceKey;
 
     @Column(nullable = false)
     private LocalDateTime startAt;
@@ -127,7 +123,6 @@ public class LeaveDraft extends Draft {
         this.startAt = startAt;
         this.endAt = endAt;
         this.leaveType = leaveType;
-        this.sourceKey = UUID.randomUUID().toString();
     }
 
 

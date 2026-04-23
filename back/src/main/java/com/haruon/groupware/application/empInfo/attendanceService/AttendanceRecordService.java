@@ -13,7 +13,9 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import static com.haruon.groupware.application.empInfo.attendanceService.AttendanceUtils.findAttendanceById;
 import static com.haruon.groupware.domain.empInfo.Attendance.registerAttendanceByEmp;
+import static org.springframework.util.Assert.state;
 
 @RequiredArgsConstructor
 @Service
@@ -24,27 +26,36 @@ public class AttendanceRecordService implements AttendanceRecord {
     private final AttendanceRepository attendanceRepository;
 
     @Override
-    public int recordCheckIn(Long empId, LocalDateTime checkInAt) {
+    public void recordCheckIn(Long empId, LocalDateTime checkInAt) {
         Emp emp = Utils.findActiveEmpById(empRepository, empId);
         emp.ensureActive();
 
         Attendance attendance = registerAttendanceByEmp(emp, checkInAt);
 
         attendanceRepository.save(attendance);
-
-        return 1;
     }
 
     @Override
-    public int recordCheckOut(Long empId, LocalDateTime checkOutAt) {
+    public void recordCheckOut(Long empId, LocalDateTime checkOutAt) {
         LocalDate attendanceDate = checkOutAt.toLocalDate();
 
         Attendance attendance = attendanceRepository
                 .findByEmpIdAndAttendanceDate(empId, attendanceDate)
+                .stream().findFirst()
                 .orElseThrow(() ->
-                        new RuntimeException("출근기록이 없음")    // to-do : 커스텀 예외 처리 필요
+                        new IllegalStateException("출근기록이 없음")    // to-do : 커스텀 예외 처리 필요
                 );
 
-        return attendance.recordEndAtByEmp(checkOutAt);
+        attendance.recordEndAtByEmp(checkOutAt);
     }
+
+
+    @Override
+    public void rerecordEndAtByEmp(Long attendanceId, LocalDateTime checkOutAt) {
+        Attendance attendance = findAttendanceById(attendanceRepository, attendanceId);
+        state(attendance.getAttendanceStatus() == null, "마감된 근태는 사원이 근태시간을 수정할 수 없음");
+
+        attendance.recordEndAtByEmp(checkOutAt);
+    }
+
 }

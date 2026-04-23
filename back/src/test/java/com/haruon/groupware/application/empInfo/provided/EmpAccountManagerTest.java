@@ -311,7 +311,7 @@ record EmpAccountManagerTest(
                                 .extensionNo("999-9999")
                                 .build()
                 )
-        ).isInstanceOf(Exception.class);
+        ).isInstanceOf(IllegalStateException.class);
     }
 
     @Test

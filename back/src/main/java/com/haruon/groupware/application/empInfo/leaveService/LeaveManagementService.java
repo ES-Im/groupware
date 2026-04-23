@@ -10,16 +10,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.Period;
 import java.util.List;
 
 import static com.haruon.groupware.domain.empInfo.EmpLeave.createEmpLeave;
-import static org.springframework.util.Assert.state;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class LeaveManagementService implements LeaveGrantManagement {
+public class LeaveManagementService extends LeaveCalculator implements LeaveGrantManagement {
 
     private final CompanyPolicyPort port;
     private final LeaveRepository leaveRepository;
@@ -55,36 +53,7 @@ public class LeaveManagementService implements LeaveGrantManagement {
         return result;
     }
 
-    private double calculateTotalLeaveDays(Emp emp, LocalDate grantedDate) {
-        LocalDate hiredAt = emp.getHiredAt();
 
-        state(hiredAt != null, "입사일자 값 없음");
-        state(!grantedDate.isBefore(hiredAt), "연차 부여일이 입사일보다 빠를 수 없음");
-
-        Period diff =  Period.between(hiredAt, grantedDate);
-        int yearsOfService = diff.getYears();
-
-        if (yearsOfService < 1) {
-            int completedMonths = calculateCompletedMonths(hiredAt, grantedDate);
-            return Math.min(completedMonths, 11);
-        }
-
-        return Math.min(
-                port.getDefaultAnnualLeaveDays() + Math.max(0, (yearsOfService - 1) / 2),
-                25
-        );
-    }
-
-    private int calculateCompletedMonths(LocalDate hiredAt, LocalDate grantedDate) {
-        int months = (grantedDate.getYear() - hiredAt.getYear()) * 12
-                + (grantedDate.getMonthValue() - hiredAt.getMonthValue());
-
-        if (grantedDate.getDayOfMonth() < hiredAt.getDayOfMonth()) {
-            months--;
-        }
-
-        return Math.max(months, 0);
-    }
 
 
     private EmpLeave getEmpLeave(long empId) {

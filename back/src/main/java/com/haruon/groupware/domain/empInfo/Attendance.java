@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.jspecify.annotations.Nullable;
 
 import java.time.LocalDate;
@@ -18,6 +19,7 @@ import static org.springframework.util.Assert.state;
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
+@ToString
 public class Attendance extends AbstractEntity {
 
     @ManyToOne
@@ -160,12 +162,9 @@ public class Attendance extends AbstractEntity {
 
 
     private void applyAttendanceStatus(AttendanceStatus status) {
-        if (status == AttendanceStatus.ALL_DAY_LEAVE
+        if (!(status == AttendanceStatus.ALL_DAY_LEAVE
                 || status == AttendanceStatus.SICK_LEAVE
-                || status == AttendanceStatus.ABSENT) {
-            this.startAt = null;
-            this.endAt = null;
-        } else {
+                || status == AttendanceStatus.ABSENT)) {
             state(this.startAt != null && this.endAt != null,
                     "정상근무 또는 시간기반 상태는 시작시각과 종료시각이 모두 필요함");
         }

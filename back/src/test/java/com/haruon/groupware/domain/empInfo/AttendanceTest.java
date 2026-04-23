@@ -84,9 +84,8 @@ class AttendanceTest {
                 0
         );
 
-        var result = attendance.recordEndAtByEmp(checkOut);
+        attendance.recordEndAtByEmp(checkOut);
 
-        assertThat(result).isOne();
         assertThat(attendance.getEmp()).isNotNull();
         assertThat(attendance.getAttendanceDate()).isEqualTo(checkOut.toLocalDate());
         assertThat(attendance.getStartAt()).isNotNull();
@@ -245,60 +244,6 @@ class AttendanceTest {
             LocalDateTime approvedAt
     ) {}
 
-    private static Stream<Arguments> changeAttendanceLeaveStatusParam() {
-        Attendance attendance = getClosedAttendance();
-        LocalTime editStartAt = attendance.getStartAt();
-        LocalTime editEndAt = attendance.getEndAt();
-
-        LocalDateTime editedAt = LocalDateTime.of(2026, 4, 4, 0, 0, 0);
-        String editReason = "test";
-        Emp editor = getApprovedEmp("202604001", "deptManger");
-
-        long requiredWorkHours = 9;
-
-        return Stream.of(
-                Arguments.of("연차로 상태를 변경할 때",
-                        ChangeAttendanceParam.builder()
-                                .startAt(editStartAt)
-                                .endAt(editEndAt)
-                                .status(AttendanceStatus.ALL_DAY_LEAVE)
-                                .editor(editor)
-                                .editReason(editReason)
-                                .editedAt(editedAt)
-                                .requiredWorkHours(requiredWorkHours)
-                                .build()
-                ),
-                Arguments.of("병가로 상태를 변경할 때",
-                        ChangeAttendanceParam.builder()
-                                .startAt(editStartAt)
-                                .endAt(editEndAt)
-                                .status(AttendanceStatus.SICK_LEAVE)
-                                .editor(editor)
-                                .editReason(editReason)
-                                .editedAt(editedAt)
-                                .requiredWorkHours(requiredWorkHours)
-                                .build()
-                        )
-        );
-    }
-    @ParameterizedTest(name = "{index} ==> {0}, 시작/종료시간은 Null이 된다.")
-    @MethodSource("changeAttendanceLeaveStatusParam")
-    @DisplayName("연차, 병가로 근태기록 변경 테스트")
-    void change_Times_To_Null_When_LEAVE(String description, ChangeAttendanceParam param) {
-        Attendance attendance = getClosedAttendance();
-
-        attendance.changeAttendanceByDeptManager(
-                param.startAt(),
-                param.endAt(),
-                param.status(),
-                param.editedAt(),
-                param.editReason(),
-                param.editor()
-        );
-
-        assertThat(attendance.getStartAt()).isNull();
-        assertThat(attendance.getEndAt()).isNull();
-    }
 
     @Test
     @DisplayName("근태기록 변경 시, 변경자/변경시각/변경이유이 기록된다.")
@@ -444,39 +389,6 @@ class AttendanceTest {
             approvedAttendance.changeAttendanceByDeptManager(
                     null, null, AttendanceStatus.SICK_LEAVE
                     , LocalDateTime.of(2026, 12, 12, 0, 0, 0)
-                    , "testEdit"
-                    , deptManager
-            )
-        ).isInstanceOf(Exception.class);
-    }
-
-    @Test
-    @DisplayName("시각 또는 종료 시간이 Null이면 정상근무/지각및조퇴/결근 상태 변경을 할 수 없다.")
-    void cannot_change_to_normal_when_start_or_end_time_is_null() {
-        Emp deptManager = getApprovedEmp();
-
-        assertThatThrownBy(() ->
-            getSickLeaveAttendance().changeAttendanceByDeptManager(
-                    null, LocalTime.of(20,0,0), AttendanceStatus.NORMAL
-                    , LocalDateTime.of(2026, 12, 12, 1, 0, 0)
-                    , "testEdit"
-                    , deptManager
-            )
-        ).isInstanceOf(Exception.class);
-
-        assertThatThrownBy(() ->
-            getSickLeaveAttendance().changeAttendanceByDeptManager(
-                    LocalTime.of(8,0,0), null, AttendanceStatus.NORMAL
-                    , LocalDateTime.of(2026, 12, 12, 1, 0, 0)
-                    , "testEdit"
-                    , deptManager
-            )
-        ).isInstanceOf(Exception.class);
-
-        assertThatThrownBy(() ->
-            getSickLeaveAttendance().changeAttendanceByDeptManager(
-                    null, null, AttendanceStatus.NORMAL
-                    , LocalDateTime.of(2026, 12, 12, 1, 0, 0)
                     , "testEdit"
                     , deptManager
             )

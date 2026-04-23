@@ -22,8 +22,8 @@ import static org.springframework.util.Assert.state;
 )
 public class Schedule extends AbstractEntity {
 
-    @Column(unique = true, nullable = false, updatable = false)
-    private String sourceKey;
+    @Column(nullable = false, updatable = false)
+    String sourceKey;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

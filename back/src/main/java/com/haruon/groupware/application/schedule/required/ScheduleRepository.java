@@ -9,12 +9,17 @@ import java.util.Optional;
 
 public interface ScheduleRepository extends Repository<Schedule, Long> {
 
+    Schedule save(Schedule schedule);
+
     List<Schedule> findByEmp_IdAndScheduleDate(Long empId, LocalDate scheduleDate);
 
     Optional<Schedule> findById(Long id);
 
-    Optional<List<Schedule>> findSchedulesBySourceKey(String sourceKey);
+    List<Schedule> findSchedulesBySourceKey(String sourceKey);
 
-    Schedule save(Schedule schedule);
+    void deleteAll();
 
+    Optional<Schedule> findBySourceKey(String sourceKey);
+
+    List<Schedule> saveAll(Iterable<Schedule> schedules);
 }

@@ -1,12 +1,11 @@
 package com.haruon.groupware.application.empInfo.empService;
 
+import com.haruon.groupware.application.empInfo.leaveService.LeaveCalculator;
 import com.haruon.groupware.application.empInfo.provided.EmpAccountManager;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
 import com.haruon.groupware.application.utils.CompanyPolicyPort;
 import com.haruon.groupware.application.utils.Utils;
-import com.haruon.groupware.domain.empInfo.Dept;
 import com.haruon.groupware.domain.empInfo.Emp;
-import com.haruon.groupware.domain.empInfo.EmpBelongings;
 import com.haruon.groupware.domain.empInfo.PasswordEncoder;
 import com.haruon.groupware.domain.empInfo.enums.EmpStatus;
 import com.haruon.groupware.domain.shared.Email;
@@ -15,11 +14,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.Map;
 
-import static com.haruon.groupware.application.utils.Utils.findActiveEmpById;
-import static com.haruon.groupware.application.utils.Utils.findEmpById;
+import static com.haruon.groupware.application.utils.Utils.*;
 import static com.haruon.groupware.domain.empInfo.Emp.register;
 import static java.util.Objects.requireNonNull;
 import static org.springframework.util.Assert.state;
@@ -27,7 +24,7 @@ import static org.springframework.util.Assert.state;
 @RequiredArgsConstructor
 @Service
 @Transactional
-public class EmpService implements EmpAccountManager {
+public class EmpService extends LeaveCalculator implements EmpAccountManager {
 
     private final PasswordEncoder encoder;
     private final EmpRepository empRepository;
@@ -61,6 +58,10 @@ public class EmpService implements EmpAccountManager {
         LocalDate hire = requireNonNull(adminRequest.hireAt());
 
         emp.approveRegister(hire);
+    }
+
+    private void grantAnnualLeaveForNewEmp(Emp emp, int grantedYear) {
+
     }
 
     @Override
@@ -103,37 +104,13 @@ public class EmpService implements EmpAccountManager {
     @Override
     public void updateInfoByDeptManager(EmpDeptManagerUpdateRequest deptManagerRequest) {
         requireNonNull(deptManagerRequest);
-        Utils.checkDeptById(empRepository, deptManagerRequest.deptManagerId());
+        Map<String, Emp> empMap = checkDeptManagerById(empRepository, deptManagerRequest.deptManagerId(), deptManagerRequest.targetEmpId());
 
-        Emp deptManager = findActiveEmpById(empRepository, deptManagerRequest.deptManagerId());
-        Set<Dept> managerDept = getCurrentDept(deptManager);
-
-        Emp targetEmp = findActiveEmpById(empRepository, deptManagerRequest.targetEmpId());
-        Set<Dept> targetEmpDept = getCurrentDept(targetEmp);
-
-        validateSameDept(managerDept, targetEmpDept);
-
+        Emp targetEmp = empMap.get("targetEmp");
         targetEmp.changeInfoByDeptManager(
                 deptManagerRequest.extensionNo(),
                 deptManagerRequest.systemRoleCode()
         );
-    }
-
-    private Set<Dept> getCurrentDept(Emp emp) {
-        return emp.getEmpBelongings().stream()
-                .filter(b -> b.getEndAt() == null)
-                .map(EmpBelongings::getDept)
-                .collect(Collectors.toSet());
-    }
-
-    private void validateSameDept(Set<Dept> managerDept, Set<Dept> targetEmpDept) {
-        boolean isSameDept = false;
-        for (Dept dept : managerDept) {
-            isSameDept = targetEmpDept.contains(dept);
-            break;
-        }
-
-        state(isSameDept, "부서 매니저의 부서가 수정대상 사원과 다른 부서");
     }
 
     @Override

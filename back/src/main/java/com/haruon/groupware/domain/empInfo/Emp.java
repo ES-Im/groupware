@@ -274,7 +274,7 @@ public class Emp extends AbstractEntity {
     }
 
     public boolean isDeptManager() {
-        return this.getSystemRoles().contains(SystemRoleCode.DEPT_MANAGER);
+        return this.getSystemRoles().contains(SystemRoleCode.DEPT_MANAGER) || this.isAdmin();
     }
 
     private void changeEmpStatus(EmpStatus newEmpStatus) {

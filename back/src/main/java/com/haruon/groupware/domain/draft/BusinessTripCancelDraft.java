@@ -3,7 +3,6 @@ package com.haruon.groupware.domain.draft;
 import com.haruon.groupware.domain.draft.sub.ApproversParam;
 import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.event.byBusinessTripApprove.BusinessTripCancelledEvent;
-import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import lombok.AccessLevel;
@@ -20,9 +19,6 @@ import static java.util.Objects.requireNonNull;
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class BusinessTripCancelDraft extends Draft {
-
-    @Column(updatable = false, nullable = false)
-    private String sourceKey;
 
     private BusinessTripCancelDraft(String title, String content, Emp emp) {
         super(title, content, emp);

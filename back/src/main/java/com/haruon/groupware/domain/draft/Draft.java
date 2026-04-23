@@ -12,6 +12,7 @@ import org.jspecify.annotations.Nullable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import static java.util.Objects.requireNonNull;
 import static org.springframework.util.Assert.state;
@@ -22,6 +23,9 @@ import static org.springframework.util.Assert.state;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public abstract class Draft extends AbstractEventAggregateRoot {
+
+    @Column(unique = true, nullable = false, updatable = false)
+    protected String sourceKey;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "drafter_id", nullable = false)
@@ -62,6 +66,7 @@ public abstract class Draft extends AbstractEventAggregateRoot {
         this.title = title;
         this.content = content;
         this.emp = emp;
+        this.sourceKey = UUID.randomUUID().toString();
 
     }
 
