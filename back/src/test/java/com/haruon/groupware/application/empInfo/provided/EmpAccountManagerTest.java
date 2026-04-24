@@ -3,6 +3,7 @@ package com.haruon.groupware.application.empInfo.provided;
 import com.haruon.groupware.application.empInfo.TestIntegrationConfig;
 import com.haruon.groupware.application.empInfo.empService.*;
 import com.haruon.groupware.application.empInfo.required.DeptRepository;
+import com.haruon.groupware.application.empInfo.required.EmpLeaveRepository;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
 import com.haruon.groupware.application.utils.FileDto;
 import com.haruon.groupware.domain.empInfo.*;
@@ -26,6 +27,7 @@ record EmpAccountManagerTest(
         EmpAccountManager empAccountManager,
         EmpRepository empRepository,
         DeptRepository deptRepository,
+        EmpLeaveRepository empLeaveRepository,
         EntityManager entityManager,
         PasswordEncoder encoder
 ) {
@@ -33,6 +35,7 @@ record EmpAccountManagerTest(
     @AfterEach
     void tearDown() {
         System.out.println("===== deleteAll =====");
+        empLeaveRepository.deleteAll();
         empRepository.deleteAll();
         deptRepository.deleteAll();
     }
@@ -102,6 +105,30 @@ record EmpAccountManagerTest(
             assertThat(emp.getStatus()).isEqualTo(EmpStatus.ACTIVE);
 
         });
+    }
+
+    @Test
+    @DisplayName("Admin이 사원의 회원가입을 승인 시, 해당 사원의 연가정보가 월할계산 되어 저장된다.")
+    void createAnnualLeaveAfterApproveRegisterByAdmin() {
+        Emp admin = saveAdmin(empRepository);
+
+        Emp registered = saveRegisteredEmp(empRepository);
+
+        empAccountManager.approveRegisterByAdmin(
+                EmpAdminUpdateRequest.builder()
+                        .adminId(admin.getId())
+                        .targetEmpId(registered.getId())
+                        .hireAt(LocalDate.of(2026,4,1))
+                        .build()
+        );
+
+        Emp emp = empRepository.findByEmpNo(registered.getEmpNo()).orElseThrow();
+        EmpLeave empLeave = empLeaveRepository.findByEmpIdAndGrantYear(
+                emp.getId(),
+                emp.getHiredAt().getYear()
+        ).orElseThrow();
+
+        assertThat(empLeave.getAnnualBaseGrantDays()).isEqualTo(9);
     }
 
     @Test

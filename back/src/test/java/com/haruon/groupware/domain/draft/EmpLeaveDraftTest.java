@@ -22,7 +22,7 @@ import static com.haruon.groupware.domain.shared.EmpFixture.getApprovedEmp;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-public class LeaveDraftTest {
+public class EmpLeaveDraftTest {
 
     @Test
     @DisplayName("연가 미상신 기안서 생성 테스트")

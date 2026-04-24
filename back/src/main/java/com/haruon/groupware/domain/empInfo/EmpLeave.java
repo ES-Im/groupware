@@ -49,58 +49,48 @@ public class EmpLeave extends AbstractEntity {
     ) {
         state(grantedAnnualLeaveDate >= 0, "부여 연차는 마이너스가 될 수 없다.");
 
-        EmpLeave annualLeave = new EmpLeave();
+        EmpLeave annualEmpLeave = new EmpLeave();
 
-        annualLeave.emp = requireNonNull(emp);
-        annualLeave.grantYear = requireNonNull(grantYear);
-        annualLeave.annualBaseGrantDays = grantedAnnualLeaveDate;
-        annualLeave.annualUsedDays = 0.0;
-        annualLeave.specialGrantDays = 0.0;
-        annualLeave.specialUsedDays = 0.0;
-        annualLeave.compensatoryGrantDays = 0.0;
-        annualLeave.compensatoryUsedDays = 0.0;
+        annualEmpLeave.emp = requireNonNull(emp);
+        annualEmpLeave.grantYear = requireNonNull(grantYear);
+        annualEmpLeave.annualBaseGrantDays = grantedAnnualLeaveDate;
+        annualEmpLeave.annualUsedDays = 0.0;
+        annualEmpLeave.specialGrantDays = 0.0;
+        annualEmpLeave.specialUsedDays = 0.0;
+        annualEmpLeave.compensatoryGrantDays = 0.0;
+        annualEmpLeave.compensatoryUsedDays = 0.0;
 
-        return annualLeave;
+        return annualEmpLeave;
     }
 
-    public int adjustSpecialGrantDays(double plusMinusDays) {
+    public void adjustSpecialGrantDays(double plusMinusDays) {
         validateDaysAfterAdjust(this.specialGrantDays, plusMinusDays);
 
         this.specialGrantDays += plusMinusDays;
-
-        return 1;
     }
 
-    public int adjustCompensatoryGrantDays(double plusMinusDays) {
+    public void adjustCompensatoryGrantDays(double plusMinusDays) {
         validateDaysAfterAdjust(this.compensatoryGrantDays, plusMinusDays);
 
         this.compensatoryGrantDays += plusMinusDays;
-
-        return 1;
     }
 
-    public int useAnnualDays(double usedDays) {
+    public void useAnnualDays(double usedDays) {
         validateDaysAfterUse(this.annualBaseGrantDays, this.annualUsedDays, usedDays);
 
         this.annualUsedDays += usedDays;
-
-        return 1;
     }
 
-    public int useSpecialDays(double usedDays) {
+    public void useSpecialDays(double usedDays) {
         validateDaysAfterUse(this.specialGrantDays, this.specialUsedDays, usedDays);
 
         this.specialUsedDays += usedDays;
-
-        return 1;
     }
 
-    public int useCompensatoryDays(double usedDays) {
+    public void useCompensatoryDays(double usedDays) {
         validateDaysAfterUse(this.compensatoryGrantDays, this.compensatoryUsedDays, usedDays);
 
         this.compensatoryUsedDays += usedDays;
-
-        return 1;
     }
 
     private void validateDaysAfterUse(double grantedDays, double usedDays, double willBeUsedDays) {

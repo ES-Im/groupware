@@ -12,4 +12,9 @@ public interface DraftRepository extends Repository<Draft, Long> {
     Optional<Draft> findByIdAndEmp(long draftId, Emp emp);
 
     Optional<Draft> findBySourceKey(String sourceKey);
+
+    Optional<Draft> findByEmp(Emp emp);
+
+
+    void deleteAll();
 }

@@ -6,7 +6,7 @@ import com.haruon.groupware.application.draft.service.dto.CommonDraftUpdateReque
 /**
  * 일반 기안서의 작성, 수정, 상신을 제공
  */
-public interface GeneralDraftManagement {
+public interface GeneralDraftManagement extends DraftManagement {
 
     void createDraft(CommonDraftCreateRequest param);
 

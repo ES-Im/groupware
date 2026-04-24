@@ -2,10 +2,12 @@ package com.haruon.groupware.application.empInfo.empService;
 
 import com.haruon.groupware.application.empInfo.leaveService.LeaveCalculator;
 import com.haruon.groupware.application.empInfo.provided.EmpAccountManager;
+import com.haruon.groupware.application.empInfo.required.EmpLeaveRepository;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
 import com.haruon.groupware.application.utils.CompanyPolicyPort;
 import com.haruon.groupware.application.utils.Utils;
 import com.haruon.groupware.domain.empInfo.Emp;
+import com.haruon.groupware.domain.empInfo.EmpLeave;
 import com.haruon.groupware.domain.empInfo.PasswordEncoder;
 import com.haruon.groupware.domain.empInfo.enums.EmpStatus;
 import com.haruon.groupware.domain.shared.Email;
@@ -18,6 +20,7 @@ import java.util.Map;
 
 import static com.haruon.groupware.application.utils.Utils.*;
 import static com.haruon.groupware.domain.empInfo.Emp.register;
+import static com.haruon.groupware.domain.empInfo.EmpLeave.createEmpLeave;
 import static java.util.Objects.requireNonNull;
 import static org.springframework.util.Assert.state;
 
@@ -28,6 +31,7 @@ public class EmpService extends LeaveCalculator implements EmpAccountManager {
 
     private final PasswordEncoder encoder;
     private final EmpRepository empRepository;
+    private final EmpLeaveRepository empLeaveRepository;
     private final CompanyPolicyPort companyPolicy;
 
     @Override
@@ -58,10 +62,14 @@ public class EmpService extends LeaveCalculator implements EmpAccountManager {
         LocalDate hire = requireNonNull(adminRequest.hireAt());
 
         emp.approveRegister(hire);
-    }
 
-    private void grantAnnualLeaveForNewEmp(Emp emp, int grantedYear) {
+        EmpLeave empLeave = createEmpLeave(
+                emp,
+                hire.getYear(),
+                calculateTotalLeaveDays(companyPolicy, emp, hire)
+        );
 
+        empLeaveRepository.save(empLeave);
     }
 
     @Override

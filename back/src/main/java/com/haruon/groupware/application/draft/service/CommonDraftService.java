@@ -20,7 +20,7 @@ import java.util.Set;
 
 @Service
 @Transactional
-public abstract class CommonDraftService implements DraftManagement {
+abstract class CommonDraftService implements DraftManagement {
 
     private final EmpRepository empRepository;
     private final DraftRepository draftRepository;
@@ -65,6 +65,7 @@ public abstract class CommonDraftService implements DraftManagement {
     @Override
     public void addCirculatedEmp(long draftId, long drafterId, long circulatedEmpId) {
         Draft draft = findDraftByDraftIdAndEmpId(draftId, drafterId);
+
         Emp circulatedEmp = findActiveEmpById(circulatedEmpId);
 
         draft.addCirculation(circulatedEmp);

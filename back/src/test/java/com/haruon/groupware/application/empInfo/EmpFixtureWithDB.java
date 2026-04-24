@@ -64,15 +64,17 @@ public class EmpFixtureWithDB {
                                       SystemRoleCode systemRoleCode) {
         System.out.println("===== 테스트 준비 saveEmpWithRoleAndDept 시작 =====");
         Emp emp = getApprovedEmpWithoutDept(empNo, empId);
-        setDept(emp, dept, systemRoleCode);
+        setDept(emp, dept, deptRepository, systemRoleCode);
 
         return empRepository.save(emp);
     }
 
     private static void setDept(
-            Emp emp, Dept dept,
+            Emp emp, Dept dept,  DeptRepository deptRepository,
             SystemRoleCode systemRoleCode
     ) {
+
+        deptRepository.save(dept);
         emp.changeBelongingsByAdmin(
                 dept,
                 PositionCode.STAFF,

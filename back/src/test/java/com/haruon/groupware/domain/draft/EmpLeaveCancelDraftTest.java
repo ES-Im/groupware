@@ -15,7 +15,7 @@ import java.util.List;
 import static com.haruon.groupware.domain.shared.EmpFixture.getApprovedEmp;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class LeaveCancelDraftTest {
+class EmpLeaveCancelDraftTest {
 
     @Test
     @DisplayName("연가취소 미상신 기안서 생성 테스트")

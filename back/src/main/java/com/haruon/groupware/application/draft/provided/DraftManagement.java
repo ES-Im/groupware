@@ -34,5 +34,4 @@ public interface DraftManagement {
     void addFile(long draftId, long drafterId, DraftFileCreateRequest fileParam);
 
     void removeFile(long draftId, long drafterId, long fileId);
-
 }

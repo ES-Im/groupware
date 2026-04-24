@@ -43,7 +43,6 @@ public abstract class Draft extends AbstractEventAggregateRoot {
     @OneToMany(mappedBy = "draft", cascade = CascadeType.ALL, orphanRemoval = true)
     protected List<DraftFile> draftFiles = new ArrayList<>();
 
-    @Nullable
     @OneToOne(mappedBy = "draft", cascade = CascadeType.ALL, orphanRemoval = true)
     protected Approval approval;
 
