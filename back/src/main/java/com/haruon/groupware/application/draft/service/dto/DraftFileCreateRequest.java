@@ -12,12 +12,8 @@ import static java.util.Objects.requireNonNull;
 
 @Builder
 public record DraftFileCreateRequest(
-
-        Long draftId,
-
         @Valid
-       FileDto file
-
+        FileDto file
 ) {
     private static final long FILE_SIZE_MAX = 20 * 1024 * 1024L;
 
@@ -35,7 +31,6 @@ public record DraftFileCreateRequest(
     );
 
     public DraftFileCreateRequest {
-        requireNonNull(draftId, "기안서 ID 필수");
         requireNonNull(file, "파일 정보 필수");
 
         FileValidator.validate(file, ALLOWED_EXTENSIONS, ALLOWED_MIME_TYPES, FILE_SIZE_MAX);

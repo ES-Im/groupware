@@ -1,5 +1,6 @@
 package com.haruon.groupware.domain.draft;
 
+import com.haruon.groupware.domain.draft.sub.ApprovalStatus;
 import com.haruon.groupware.domain.draft.sub.ApproversParam;
 import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.event.AbstractEventAggregateRoot;
@@ -109,12 +110,35 @@ public abstract class Draft extends AbstractEventAggregateRoot {
         state(hasApproval(), "결재 정보가 없음");
 
         validateBeforeSubmit(params);
+
+        if (this.approval.getStatus() == ApprovalStatus.REJECTED) {
+            resubmit(submittedAt, params);
+            return;
+        }
+
         this.approval.submit(params);
         this.submittedAt = submittedAt;
     }
 
+    private void resubmit(
+            LocalDateTime submittedAt,
+            List<ApproversParam> approverParams
+    ) {
+        requireNonNull(submittedAt, "상신일시는 필수");
+        requireNonNull(approverParams, "결재선은 필수");
+
+        state(this.approval.getStatus() == ApprovalStatus.REJECTED,
+                "반려 상태에서만 재상신 가능");
+        state(!approverParams.isEmpty(),
+                "재상신 시 결재선은 필수");
+
+        this.submittedAt = submittedAt;
+        this.approval = Approval.createWaiting(this, approverParams);
+    }
+
     public void approve(Emp approver, LocalDateTime approvedAt) {
         state(hasApproval(), "결재 정보가 없음");
+
         this.approval.approve(approver, approvedAt);
     }
 
@@ -134,6 +158,7 @@ public abstract class Draft extends AbstractEventAggregateRoot {
         state(!hasApproval(), "결재 정보가 이미 있음");
 
         validateBeforeSubmit(params);
+
         this.approval = Approval.createSubmitted(this, params);
         this.submittedAt = submittedAt;
     }

@@ -60,7 +60,25 @@ public class Approval extends AbstractEntity {
         this.status = ApprovalStatus.WAITING;
     }
 
+    static Approval createWaiting(
+            Draft draft,
+            List<ApproversParam> approverParams
+    ) {
+        requireNonNull(draft, "기안서는 필수");
+        requireNonNull(approverParams, "결재선은 필수");
 
+        state(!approverParams.isEmpty(), "결재선은 필수");
+
+        Approval approval = new Approval();
+        approval.draft = draft;
+        approval.status = ApprovalStatus.WAITING;
+
+        for (ApproversParam param : approverParams) {
+            approval.addApprover(param);
+        }
+
+        return approval;
+    }
 
     static Approval createSubmitted(Draft draft, List<ApproversParam> params) {
         requireNonNull(params, "결재자 정보가 없음");

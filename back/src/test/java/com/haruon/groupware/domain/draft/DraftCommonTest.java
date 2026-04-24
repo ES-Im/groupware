@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static com.haruon.groupware.domain.shared.EmpFixture.getApprovedEmp;
+import static com.haruon.groupware.domain.shared.EmpFixture.getApprovedEmpWithoutDept;
 import static org.assertj.core.api.Assertions.*;
 
 class DraftCommonTest {
@@ -709,6 +710,45 @@ class DraftCommonTest {
             String title,
             String content
     ) {}
+
+    @Test
+    @DisplayName("반려 후 재상신시, 결재선을 다시 지정해야 한다.")
+    void resubmit_with_approval_success() {
+        GeneralDraft submitted = getSubmitted();
+
+        Approver firstApprover = submitted.getApproval().getApprovers().getFirst();
+        Emp firstApprover_emp = firstApprover.getEmp();
+        LocalDateTime rejectedAt = LocalDateTime.of(2026, 5, 1, 0,0,0);
+        String reason = "reson";
+
+        submitted.reject(firstApprover_emp, reason, rejectedAt);
+
+        submitted.submit(LocalDateTime.of(2026,5, 5,0,0,0)
+                , List.of(new ApproversParam(ApprovalRole.APPROVER, 1, getApprovedEmpWithoutDept("20260410", "approver1")))
+        );
+
+        assertThat(submitted.getApproval().getStatus()).isEqualTo(ApprovalStatus.WAITING);
+    }
+
+    @Test
+    @DisplayName("반려 후 재상신시, 결재선을 다시 지정하지 않으면 실패한다.")
+    void resubmit_without_approval_fail() {
+        GeneralDraft submitted = getSubmitted();
+
+        Approver firstApprover = submitted.getApproval().getApprovers().getFirst();
+        Emp firstApproverEmp = firstApprover.getEmp();
+
+        LocalDateTime rejectedAt = LocalDateTime.of(2026, 5, 1, 0, 0, 0);
+        String reason = "reason";
+
+        submitted.reject(firstApproverEmp, reason, rejectedAt);
+
+        LocalDateTime resubmittedAt = LocalDateTime.of(2026, 5, 5, 0, 0, 0);
+
+        assertThatThrownBy(() ->
+                submitted.submit(resubmittedAt, List.of())
+        ).isInstanceOf(IllegalStateException.class);
+    }
 
     private static GeneralDraft getSubmitted() {
 

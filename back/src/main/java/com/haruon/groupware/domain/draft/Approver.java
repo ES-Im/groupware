@@ -46,6 +46,7 @@ public class Approver extends AbstractEntity {
     @Nullable
     private LocalDateTime rejectedAt;
 
+
     Approver(
             Approval approval,
             ApprovalRole role,

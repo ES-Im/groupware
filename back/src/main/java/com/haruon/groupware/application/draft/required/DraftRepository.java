@@ -15,6 +15,5 @@ public interface DraftRepository extends Repository<Draft, Long> {
 
     Optional<Draft> findByEmp(Emp emp);
 
-
     void deleteAll();
 }
