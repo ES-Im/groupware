@@ -70,7 +70,7 @@ public class SalesDraftService extends CommonDraftService implements SalesDraftM
     @Override
     public void updateDraft(SalesDraftUpdateRequest req) {
         CommonDraftUpdateRequest commonReq = req.param();
-        SalesDraft salesDraft = getSalesDraft(commonReq.draftId(), commonReq.empId());
+        SalesDraft salesDraft = getSalesDraft(commonReq.draftId(), commonReq.drafterId());
 
         salesDraft.editSalesDraft(
                 commonReq.title(),

@@ -4,6 +4,7 @@ import com.haruon.groupware.domain.draft.Draft;
 import com.haruon.groupware.domain.empInfo.Emp;
 import org.springframework.data.repository.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface DraftRepository extends Repository<Draft, Long> {
@@ -13,7 +14,7 @@ public interface DraftRepository extends Repository<Draft, Long> {
 
     Optional<Draft> findBySourceKey(String sourceKey);
 
-    Optional<Draft> findByEmp(Emp emp);
+    List<Draft> findByEmp(Emp emp);
 
     void deleteAll();
 }

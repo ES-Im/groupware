@@ -66,7 +66,11 @@ class EmpLeaveCancelDraftTest {
         LeaveType type = LeaveType.ANNUAL;
 
         LeaveDraft submitted = LeaveDraft.createSubmitted(
-                drafter, "title", "content", startAt, endAt, type, List.of(approverParam1, approverParam2), LocalDateTime.of(2026, 4, 16, 9, 0)
+                drafter, "title", "content",
+                startAt, endAt, type,
+                List.of(approverParam1, approverParam2),
+                LocalDateTime.of(2026, 4, 16, 9, 0),
+                1L
         );
 
         submitted.approve(approver1, LocalDateTime.of(2026, 4, 20,0,0,0));

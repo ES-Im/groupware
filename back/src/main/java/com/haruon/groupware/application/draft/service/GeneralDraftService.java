@@ -15,6 +15,8 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static org.springframework.util.Assert.state;
+
 @Service
 @Transactional
 public class GeneralDraftService extends CommonDraftService implements GeneralDraftManagement {
@@ -54,7 +56,9 @@ public class GeneralDraftService extends CommonDraftService implements GeneralDr
 
     @Override
     public void updateDraft(CommonDraftUpdateRequest req) {
-        GeneralDraft generalDraft = getGeneralDraft(req.draftId(), req.empId());
+        state(req.isChangeCommonField(), "수정할 사항이 없음");
+
+        GeneralDraft generalDraft = getGeneralDraft(req.draftId(), req.drafterId());
 
         generalDraft.editGeneralDraft (req.title(), req.content());
     }
@@ -64,7 +68,7 @@ public class GeneralDraftService extends CommonDraftService implements GeneralDr
         Draft draft = findDraftByDraftIdAndEmpId(draftId, drafterId);
 
         if(!(draft instanceof GeneralDraft generalDraft)) {
-            throw new IllegalArgumentException("일반기안서가 아님");
+            throw new IllegalStateException("일반기안서가 아님");   // to-do 커스텀 예외 필요
         }
 
         return generalDraft;

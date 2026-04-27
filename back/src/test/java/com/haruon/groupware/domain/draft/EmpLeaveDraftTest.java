@@ -123,10 +123,11 @@ public class EmpLeaveDraftTest {
                 null, null,
                 param.startAt(),
                 param.endAt(),
-                param.leaveType()
+                param.leaveType(),
+                1L
         );
-
     }
+
     private static Stream<Arguments> editFailArguments() {
         LocalDateTime earlyEndTime = LocalDateTime.of(2025, 2, 5, 18, 0, 0);
         LocalDateTime halfTime = LocalDateTime.of(2026, 3, 5, 18, 1, 0);
@@ -156,7 +157,8 @@ public class EmpLeaveDraftTest {
                         null, null,
                         param.startAt(),
                         param.endAt(),
-                        param.leaveType()
+                        param.leaveType(),
+                        1L
                 )
         ).hasMessage(expectedMessage);
 
@@ -183,7 +185,11 @@ public class EmpLeaveDraftTest {
         LeaveType type = LeaveType.ANNUAL;
 
         LeaveDraft submitted = LeaveDraft.createSubmitted(
-                drafter, title, content, startAt, endAt, type, List.of(approverParam1, approverParam2), LocalDateTime.of(2026, 4, 16, 9, 0)
+                drafter, title, content,
+                startAt, endAt, type,
+                List.of(approverParam1, approverParam2),
+                LocalDateTime.of(2026, 4, 16, 9, 0),
+                1L
         );
 
         submitted.approve(approver1, LocalDateTime.of(2026, 4, 20,0,0,0));
@@ -221,7 +227,11 @@ public class EmpLeaveDraftTest {
         LeaveType type = LeaveType.ANNUAL;
 
         LeaveDraft submitted = LeaveDraft.createSubmitted(
-                drafter, title, content, startAt, endAt, type, List.of(approverParam1, approverParam2), LocalDateTime.of(2026, 4, 16, 9, 0)
+                drafter, title, content,
+                startAt, endAt, type,
+                List.of(approverParam1, approverParam2),
+                LocalDateTime.of(2026, 4, 16, 9, 0),
+                1L
         );
 
         submitted.approve(approver1, LocalDateTime.of(2026, 4, 20,0,0,0));
@@ -235,7 +245,8 @@ public class EmpLeaveDraftTest {
         return LeaveDraft.createDraft(
                 getApprovedEmp(), "title", "content",
                 startAt, endAt, leaveType,
-                List.of(new ApproversParam(ApprovalRole.APPROVER, 1, getApprovedEmp("202601101", "approver")))
+                List.of(new ApproversParam(ApprovalRole.APPROVER, 1, getApprovedEmp("202601101", "approver"))),
+                1L
         );
     }
 
@@ -244,7 +255,8 @@ public class EmpLeaveDraftTest {
                 getApprovedEmp(), "title", "content",
                 startAt, endAt, leaveType,
                 List.of(new ApproversParam(ApprovalRole.APPROVER, 1, getApprovedEmp("202601101", "approver"))),
-                LocalDateTime.of(2026,4,1,0,0,0)
+                LocalDateTime.of(2026,4,1,0,0,0),
+                1L
         );
     }
 }

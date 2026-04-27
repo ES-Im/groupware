@@ -13,4 +13,6 @@ public class Franchise extends AbstractEntity {
     @Column(nullable = false)
     private String businessNumber;
 
+
+
 }

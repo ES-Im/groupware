@@ -12,7 +12,6 @@ import com.haruon.groupware.domain.draft.Draft;
 import com.haruon.groupware.domain.draft.sub.ApproversParam;
 import com.haruon.groupware.domain.empInfo.Emp;
 import jakarta.transaction.Transactional;
-import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -20,10 +19,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import static java.util.Objects.requireNonNull;
+
 @Service
 @Transactional
 public class BusinessDraftService extends CommonDraftService implements BusinessTripDraftManagement {
-
 
     private final BusinessTripDraftRepository businessTripDraftRepository;
 
@@ -37,7 +37,12 @@ public class BusinessDraftService extends CommonDraftService implements Business
         CommonDraftCreateRequest commonReq = req.param();
 
         Emp drafter = findActiveEmpById(commonReq.empId());
-        List<Emp> participants = toEmpList(req.participantIds());
+
+        List<Emp> participants = new ArrayList<>();
+        if(req.participantIds() != null) {
+            participants = getEmpListById(req.participantIds());
+        }
+
         List<ApproversParam> approvers = toApproverParams(commonReq.approvers());
 
         BusinessTripDraft draft = BusinessTripDraft.createDraft(
@@ -62,7 +67,7 @@ public class BusinessDraftService extends CommonDraftService implements Business
 
         LocalDateTime submittedAt = requireSubmittedAt(commonReq.submittedAt());
         List<ApproversParam> approvers = requireApprovers(commonReq.approvers());
-        List<Emp> participants = toEmpList(req.participantIds());
+        List<Emp> participants = getEmpListById(requireNonNull(req.participantIds()));
         Emp drafter = findActiveEmpById(commonReq.empId());
 
         BusinessTripDraft draft = BusinessTripDraft.createSubmitted(
@@ -83,7 +88,7 @@ public class BusinessDraftService extends CommonDraftService implements Business
     @Override
     public void updateDraft(BusinessTripDraftUpdateRequest req) {
         CommonDraftUpdateRequest commonReq = req.param();
-        BusinessTripDraft businessTripDraft = getBusinessTripDraft(commonReq.draftId(), commonReq.empId());
+        BusinessTripDraft businessTripDraft = getBusinessTripDraft(commonReq.draftId(), commonReq.drafterId());
 
         businessTripDraft.editBusinessTripDraft(
                 commonReq.title(), commonReq.content(), req.startAt(), req.endAt(), req.destination(), req.purpose()
@@ -93,24 +98,10 @@ public class BusinessDraftService extends CommonDraftService implements Business
     @Override
     public void updateParticipants(long draftId, long drafter, Set<Long> participantId) {
         BusinessTripDraft businessTripDraft = getBusinessTripDraft(draftId, drafter);
+        List<Emp> empListById = getEmpListById(participantId);
 
-        getEmpListById(participantId);
+        businessTripDraft.changeParticipants(empListById);
     }
-
-
-    private List<Emp> toEmpList(@Nullable Set<Long> participantIds) {
-        if(participantIds == null) return List.of();
-
-        List<Emp> empList = new ArrayList<>();
-
-        for (Long participantId : participantIds) {
-            Emp emp = findActiveEmpById(participantId);
-            empList.add(emp);
-        }
-
-        return empList;
-    }
-
 
     private BusinessTripDraft getBusinessTripDraft(long draftId, long drafterId) {
         Draft draft = findDraftByDraftIdAndEmpId(draftId, drafterId);

@@ -30,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @TestIntegrationConfig
-record commonDraftTest(
+record CommonDraftTest(
         DraftRepository draftRepository,
         DeptRepository deptRepository,
         GeneralDraftManagement generalDraftManagement,
@@ -43,7 +43,6 @@ record commonDraftTest(
         draftRepository.deleteAll();
         empRepository.deleteAll();
         deptRepository.deleteAll();
-
     }
 
     @Test
@@ -176,7 +175,7 @@ record commonDraftTest(
 
     @Test
     @Transactional
-    @DisplayName("전자결재 공통 사항 테스트 - 기안서 상신 시, 결재선, 상신일시를 같이 기재해야한다.")
+    @DisplayName("전자결재 공통 사항 테스트 - 기안서 상신 시, 결재선, 상신일시를 같이 기재하지 않으면 실패한다.")
     void createSubmitted_without_approval_info_fail() {
         Emp drafter = saveApprovedEmp(empRepository, "202601001", "drafter");
         Emp approverEmp1 = saveApprovedEmp(empRepository, "202601002", "approver1");
@@ -187,7 +186,6 @@ record commonDraftTest(
 
         LocalDateTime submittedAt = LocalDateTime.of(2026, 1, 1, 0, 0, 0);
 
-
         assertThatThrownBy(() ->
                 createSubmitted(drafter, title, content, List.of(), submittedAt)
         ).isInstanceOf(IllegalStateException.class);
@@ -195,10 +193,14 @@ record commonDraftTest(
         assertThatThrownBy(() ->
                 createSubmitted(drafter, title, content, List.of(approverEmp1, approverEmp2), null)
         ).isInstanceOf(IllegalStateException.class);
+
+        assertThatThrownBy(() ->
+                createSubmitted(drafter, title, content, List.of(), null)
+        ).isInstanceOf(IllegalStateException.class);
     }
 
     @Test
-    @DisplayName("결재 대기 상태라면 상신을 취소할 수 있다.")
+    @DisplayName("전자결재 공통 사항 테스트 - 결재 대기 상태라면 상신을 취소할 수 있다.")
     void reverToDraft_when_approval_status_is_waiting() {
         Emp drafter = saveApprovedEmp(empRepository, "202601001", "drafter");
         Draft draft = getSubmitted(drafter);
@@ -210,7 +212,7 @@ record commonDraftTest(
     }
 
     @Test
-    @DisplayName("기안자가 아닌 사원이 상신을 취소할 수 없다.")
+    @DisplayName("전자결재 공통 사항 테스트 - 기안자가 아닌 사원이 상신을 취소할 수 없다.")
     void reverToDraft_by_not_drafter_fail() {
         Emp drafter = saveApprovedEmp(empRepository, "202601001", "drafter");
         Emp notDrafter = saveApprovedEmp(empRepository, "202601002", "notDrafter");
@@ -221,7 +223,7 @@ record commonDraftTest(
     }
 
     @Test
-    @DisplayName("결재 대기 상태가 아니라면 상신을 취소할 수 없다.")
+    @DisplayName("전자결재 공통 사항 테스트 - 결재 대기 상태가 아니라면 상신을 취소할 수 없다.")
     void reverToDraft_after_approve_fail() {
         Emp drafter = saveApprovedEmp(empRepository, "202601001", "drafter");
         Emp approverEmp1 = saveApprovedEmp(empRepository, "202601002", "approver1");
@@ -238,7 +240,7 @@ record commonDraftTest(
 
     @Transactional
     @Test
-    @DisplayName("결재선 순서에 따라 결재자가 기안을 결재할 수 있다.")
+    @DisplayName("전자결재 공통 사항 테스트 - 결재선 순서에 따라 결재자가 기안을 결재할 수 있다.")
     void approve_draft_by_order_approver() {
         Emp drafter = saveApprovedEmp(empRepository, "202601001", "drafter");
         Emp approverEmp1 = saveApprovedEmp(empRepository, "202601002", "approver1");
@@ -265,7 +267,7 @@ record commonDraftTest(
 
     @Transactional
     @Test
-    @DisplayName("결재선 순서에 따라 결재하지 않으면 결재할 수 없다.")
+    @DisplayName("전자결재 공통 사항 테스트 - 결재선 순서에 따라 결재하지 않으면 결재할 수 없다.")
     void approve_draft_by_not_order_approver() {
         Emp drafter = saveApprovedEmp(empRepository, "202601001", "drafter");
         Emp approverEmp1 = saveApprovedEmp(empRepository, "202601002", "approver1");
@@ -286,7 +288,7 @@ record commonDraftTest(
 
     @Transactional
     @Test
-    @DisplayName("결재선 순서에 따라 결재자가 기안을 반려할 수 있다.")
+    @DisplayName("전자결재 공통 사항 테스트 - 결재선 순서에 따라 결재자가 기안을 반려할 수 있다.")
     void reject_draft_by_order_approver() {
         Emp drafter = saveApprovedEmp(empRepository, "202601001", "drafter");
         Emp approverEmp1 = saveApprovedEmp(empRepository, "202601002", "approver1");
@@ -309,7 +311,7 @@ record commonDraftTest(
 
     @Transactional
     @Test
-    @DisplayName("결재선 순서에 따라 결재하지 않으면 반려할 수 없다.")
+    @DisplayName("전자결재 공통 사항 테스트 - 결재선 순서에 따라 결재하지 않으면 반려할 수 없다.")
     void reject_draft_by_not_order_approver() {
         Emp drafter = saveApprovedEmp(empRepository, "202601001", "drafter");
         Emp approverEmp1 = saveApprovedEmp(empRepository, "202601002", "approver1");
@@ -330,7 +332,7 @@ record commonDraftTest(
 
     @Transactional
     @TestFactory
-    @DisplayName("공람은 결재 상태와 무관하게 언제든 지정할 수 있다.")
+    @DisplayName("전자결재 공통 사항 테스트 - 공람은 결재 상태와 무관하게 언제든 지정할 수 있다.")
     Collection<DynamicTest> circuit_success() {
         Emp drafter = saveApprovedEmp(empRepository, "202601001", "drafter");
         Emp approverEmp1 = saveApprovedEmp(empRepository, "202601002", "approver1");
@@ -378,7 +380,7 @@ record commonDraftTest(
     
     @Test
     @Transactional
-    @DisplayName("기안서 파일 첨부는 상신전에 할 수 있다.")
+    @DisplayName("전자결재 공통 사항 테스트 - 기안서 파일 첨부는 상신전에 할 수 있다.")
     void add_file_when_unsubmitted_success() {
         Emp drafter = saveApprovedEmp(empRepository, "202601001", "drafter");
         Draft draft = createDraft(drafter, "test", "test", List.of());
@@ -404,7 +406,7 @@ record commonDraftTest(
 
     @Test
     @Transactional
-    @DisplayName("상신 전 첨부된 파일을 삭제할 수 있다.")
+    @DisplayName("전자결재 공통 사항 테스트 - 상신 전 첨부된 파일을 삭제할 수 있다.")
     void remove_file_when_unsubmitted_success() {
         Emp drafter = saveApprovedEmp(empRepository, "202601001", "drafter");
         Draft draft = createDraft(drafter, "test", "test", List.of());
@@ -431,7 +433,7 @@ record commonDraftTest(
 
     @Test
     @Transactional
-    @DisplayName("기안서 파일 첨부는 상신 후에는 할 수 없다.")
+    @DisplayName("전자결재 공통 사항 테스트 - 기안서 파일 첨부는 상신 후에는 할 수 없다.")
     void add_file_when_submitted_fail() {
         Emp drafter = saveApprovedEmp(empRepository, "202601001", "drafter");
         Draft draft = createSubmitted(
@@ -461,7 +463,7 @@ record commonDraftTest(
 
     @Test
     @Transactional
-    @DisplayName("상신 후 첨부된 파일을 삭제할 수 있다.")
+    @DisplayName("전자결재 공통 사항 테스트 - 상신 후 첨부된 파일을 삭제할 수 있다.")
     void remove_file_when_submitted_fail() {
         Emp drafter = saveApprovedEmp(empRepository, "202601001", "drafter");
         Emp approver = saveApprovedEmp(empRepository, "202601002", "approver");
@@ -505,7 +507,7 @@ record commonDraftTest(
                         .build()
         );
 
-        return draftRepository.findByEmp(drafter).orElseThrow();
+        return draftRepository.findByEmp(drafter).stream().findFirst().orElseThrow();
     }
 
     private Draft createSubmitted(
@@ -531,7 +533,7 @@ record commonDraftTest(
                         .build()
         );
 
-        return draftRepository.findByEmp(drafter).orElseThrow();
+        return draftRepository.findByEmp(drafter).stream().findFirst().orElseThrow();
     }
 
 

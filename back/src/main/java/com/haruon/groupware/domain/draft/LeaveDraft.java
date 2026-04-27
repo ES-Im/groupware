@@ -31,6 +31,9 @@ public class LeaveDraft extends Draft {
     @Enumerated(EnumType.STRING)
     private LeaveType leaveType;
 
+    @Column(nullable = false)
+    private long reservedHours;
+
     private LeaveDraft(String title, String content, Emp emp) {
         super(title, content, emp);
     }
@@ -48,11 +51,12 @@ public class LeaveDraft extends Draft {
     public static LeaveDraft createDraft(
             Emp emp, String title, String content,
             LocalDateTime startAt, LocalDateTime endAt,
-            LeaveType leaveType, List<ApproversParam> approvers
+            LeaveType leaveType, List<ApproversParam> approvers,
+            Long reservedHours
     ) {
         LeaveDraft draft = new LeaveDraft(title, content, emp);
 
-        draft.init(startAt, endAt, leaveType);
+        draft.init(startAt, endAt, leaveType, reservedHours);
         draft.createDraftApproval(approvers);
 
         return draft;
@@ -61,11 +65,12 @@ public class LeaveDraft extends Draft {
     public static LeaveDraft createSubmitted(
             Emp emp, String title, String content,
             LocalDateTime startAt, LocalDateTime endAt,
-            LeaveType leaveType, List<ApproversParam> approvers, LocalDateTime submittedAt
+            LeaveType leaveType, List<ApproversParam> approvers, LocalDateTime submittedAt,
+            Long reservedHours
     ) {
         LeaveDraft submitted = new LeaveDraft(title, content, emp);
 
-        submitted.init(startAt, endAt, leaveType);
+        submitted.init(startAt, endAt, leaveType, reservedHours);
         submitted.createSubmittedApproval(approvers, submittedAt);
 
         return submitted;
@@ -90,39 +95,45 @@ public class LeaveDraft extends Draft {
             @Nullable String content,
             @Nullable LocalDateTime startAt,
             @Nullable LocalDateTime endAt,
-            @Nullable LeaveType leaveType
+            @Nullable LeaveType leaveType,
+            @Nullable Long reservedHours
     ) {
         editDraft(title, content);
 
         LocalDateTime editedStartAt = startAt != null ? startAt : this.startAt;
         LocalDateTime editedEndAt = endAt != null ? endAt : this.endAt;
         LeaveType editedLeaveType = leaveType != null ? leaveType : this.leaveType;
+        Long editedReservedHours = reservedHours != null ? reservedHours : this.reservedHours;
 
-        validateLeaveInitParam(editedStartAt, editedEndAt, editedLeaveType);
+        validateLeaveInitParam(editedStartAt, editedEndAt, editedLeaveType, editedReservedHours);
 
         this.startAt = editedStartAt;
         this.endAt = editedEndAt;
         this.leaveType = editedLeaveType;
+        this.reservedHours = editedReservedHours;
     }
 
-    private static void validateLeaveInitParam(LocalDateTime startAt, LocalDateTime endAt, LeaveType leaveType) {
+    private static void validateLeaveInitParam(LocalDateTime startAt, LocalDateTime endAt, LeaveType leaveType, Long reservedHours) {
         requireNonNull(leaveType, "휴가 타입은 null일 수 없음");
         requireNonNull(startAt, "휴가 시작일시는 null일 수 없음");
         requireNonNull(endAt, "휴가 종료일시는 null일 수 없음");
+        requireNonNull(reservedHours, "휴가 사용시간은 null일 수 없음");
         validateTime(startAt, endAt);
     }
 
     private void init(
             LocalDateTime startAt,
             LocalDateTime endAt,
-            LeaveType leaveType
+            LeaveType leaveType,
+            Long reservedHours
     ) {
 
-        validateLeaveInitParam(startAt, endAt, leaveType);
+        validateLeaveInitParam(startAt, endAt, leaveType, reservedHours);
 
         this.startAt = startAt;
         this.endAt = endAt;
         this.leaveType = leaveType;
+        this.reservedHours = reservedHours;
     }
 
 
