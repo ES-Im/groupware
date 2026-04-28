@@ -1,16 +1,13 @@
-package com.haruon.groupware.application.empInfo.empService;
+package com.haruon.groupware.application.empInfo.empService.dto;
 
+import com.haruon.groupware.application.utils.RegexpValidator;
 import com.haruon.groupware.domain.empInfo.enums.EmpStatus;
 import com.haruon.groupware.domain.empInfo.enums.SystemRoleCode;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import org.jspecify.annotations.Nullable;
 
 import java.time.LocalDate;
 
-import static com.haruon.groupware.domain.shared.RegexpUtil.*;
 import static java.util.Objects.requireNonNull;
 import static org.springframework.util.Assert.state;
 
@@ -28,26 +25,15 @@ public record EmpAdminUpdateRequest(
 
         // 직원정보
         @Nullable
-        @Size(min = 1, max = 20)
         String empName,
 
         @Nullable
-        @NotBlank
-        @Size(min = 5, max = 20)
         String loginId,
 
         @Nullable
-        @Pattern(
-                regexp = PASSWORD_PATTERN,
-                message = PASSWORD_PATTERN_MESSAGE
-        )
         String newRawPassword,
 
         @Nullable
-        @Pattern(
-                regexp=EXTENSION_NO_PATTERN,
-                message = EXTENSION_NO_PATTERN_MESSAGE
-        )
         String extensionNo,
 
         @Nullable
@@ -89,6 +75,15 @@ public record EmpAdminUpdateRequest(
                 || fileStatusParam != null || belongingsParam != null
                 ,"변경된 정보가 없습니다.");
 
+        if(empName != null) state(!empName.isBlank(), "사원이름은 공백이 올 수 없음");
+
+        if(loginId != null) state(!loginId.isBlank(), "사원아이디는 공백이 올 수 없음");
+
+        if(empName != null) state(!empName.isBlank(), "사원이름은 공백이 올 수 없음");
+
+        if(newRawPassword != null) RegexpValidator.passwordCheck(newRawPassword);
+
+        if(extensionNo != null) RegexpValidator.extensionNoCheck(extensionNo);
     }
 
 }

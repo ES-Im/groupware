@@ -26,11 +26,7 @@ public record LeaveDraftCreateRequest(
                 requireNonNull(startAt);
                 requireNonNull(endAt);
                 requireNonNull(leaveType);
-                validateLeaveTimes(startAt, endAt);
-
+                LeaveDraft.validateTime(startAt, endAt);
         }
 
-        private void validateLeaveTimes(LocalDateTime startAt, LocalDateTime endAt) {
-            LeaveDraft.validateTime(startAt, endAt);
-        }
 }

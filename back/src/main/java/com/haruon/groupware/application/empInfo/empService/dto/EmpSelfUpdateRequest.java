@@ -1,11 +1,9 @@
-package com.haruon.groupware.application.empInfo.empService;
+package com.haruon.groupware.application.empInfo.empService.dto;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
+import com.haruon.groupware.application.utils.RegexpValidator;
 import lombok.Builder;
 import org.jspecify.annotations.Nullable;
 
-import static com.haruon.groupware.domain.shared.RegexpUtil.*;
 import static java.util.Objects.requireNonNull;
 import static org.springframework.util.Assert.state;
 
@@ -18,21 +16,12 @@ public record EmpSelfUpdateRequest(
 
         Long empId,
 
-        @NotBlank
         String currentPassword,
 
         @Nullable
-        @Pattern(
-                regexp=EXTENSION_NO_PATTERN,
-                message = EXTENSION_NO_PATTERN_MESSAGE
-        )
         String extensionNo,
 
         @Nullable
-        @Pattern(
-                regexp = PASSWORD_PATTERN,
-                message = PASSWORD_PATTERN_MESSAGE
-        )
         String newRawPassword,
 
         @Nullable
@@ -45,10 +34,15 @@ public record EmpSelfUpdateRequest(
     public EmpSelfUpdateRequest {
         requireNonNull(empId, "사원의 targetEmpId(PK) 필수");
         requireNonNull(currentPassword);
+        state(!currentPassword.isBlank(), "현재 비밀번호는 공백이 될 수 없음");
+
         state(extensionNo != null
                 || newRawPassword != null
                 || fileRequest != null
                 || fileStatusParam != null
                 , "변경된 정보가 없습니다.");
+
+        if(extensionNo != null) RegexpValidator.extensionNoCheck(extensionNo);
+        if(newRawPassword != null) RegexpValidator.passwordCheck(newRawPassword);
     }
 }

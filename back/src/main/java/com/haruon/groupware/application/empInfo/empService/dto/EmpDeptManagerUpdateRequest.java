@@ -1,12 +1,10 @@
-package com.haruon.groupware.application.empInfo.empService;
+package com.haruon.groupware.application.empInfo.empService.dto;
 
+import com.haruon.groupware.application.utils.RegexpValidator;
 import com.haruon.groupware.domain.empInfo.enums.SystemRoleCode;
-import jakarta.validation.constraints.Pattern;
 import lombok.Builder;
 import org.jspecify.annotations.Nullable;
 
-import static com.haruon.groupware.domain.shared.RegexpUtil.EXTENSION_NO_PATTERN;
-import static com.haruon.groupware.domain.shared.RegexpUtil.EXTENSION_NO_PATTERN_MESSAGE;
 import static java.util.Objects.requireNonNull;
 import static org.springframework.util.Assert.state;
 
@@ -25,10 +23,6 @@ public record EmpDeptManagerUpdateRequest(
         SystemRoleCode systemRoleCode,
 
         @Nullable
-        @Pattern(
-                regexp=EXTENSION_NO_PATTERN,
-                message = EXTENSION_NO_PATTERN_MESSAGE
-        )
         String extensionNo
 
 ) {
@@ -42,5 +36,7 @@ public record EmpDeptManagerUpdateRequest(
                 && systemRoleCode.getGrade() > SystemRoleCode.DEPT_MANAGER.getGrade()) {
             throw new IllegalArgumentException("부서관리자 기준 상위 권한으로 변경할 수 없습니다.");
         }
+
+        if(extensionNo != null) RegexpValidator.extensionNoCheck(extensionNo);
     }
 }

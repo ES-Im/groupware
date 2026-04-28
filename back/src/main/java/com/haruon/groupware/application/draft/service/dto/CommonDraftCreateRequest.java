@@ -1,7 +1,5 @@
 package com.haruon.groupware.application.draft.service.dto;
 
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import org.jspecify.annotations.Nullable;
 
@@ -15,12 +13,8 @@ import static org.springframework.util.Assert.state;
 public record CommonDraftCreateRequest(
         Long empId,
 
-        @NotBlank
-        @Max(100)
         String title,
 
-        @NotBlank
-        @Max(500)
         String content,
 
         @Nullable List<ApproversRequest> approvers,
@@ -37,6 +31,9 @@ public record CommonDraftCreateRequest(
             state(approvers != null && !approvers.isEmpty(),
                     "상신시, 결제선 설정 필수");
         }
+
+       state(!title.isBlank(), "제목은 공백이 될 수 없음");
+       state(!content.isBlank(), "내용은 공백이 될 수 없음");
     }
 
 

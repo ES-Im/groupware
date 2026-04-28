@@ -16,9 +16,13 @@ import static com.haruon.groupware.domain.shared.EmpFixture.*;
  * saveAdmin - 어드민 사원
  * saveRegisteredEmp - 막 회원가입한 사원
  * saveApprovedEmp - 회원가입 승인난 사원
+ * saveEmpWithSystemRole - 시스템 롤을 지정한 사원
  */
 public class EmpFixtureWithDB {
 
+    /**
+     * saveAdmin - 어드민 사원
+     */
     public static Emp saveAdmin(EmpRepository empRepository) {
         System.out.println("===== 테스트 준비 saveAdmin 시작 =====");
         Emp emp = getAdmin();
@@ -26,6 +30,10 @@ public class EmpFixtureWithDB {
         return empRepository.save(emp);
     }
 
+
+    /**
+     * saveRegisteredEmp - 막 회원가입한 사원
+     */
     public static Emp saveRegisteredEmp(EmpRepository empRepository) {
         System.out.println("===== 테스트 준비 register Emp 시작 =====");
         Emp emp = getRegisteredEmp("202601001", "registeredEmp1");
@@ -33,6 +41,10 @@ public class EmpFixtureWithDB {
         return empRepository.save(emp);
     }
 
+
+    /**
+     * saveApprovedEmp - 회원가입 승인난 사원
+     */
     public static Emp saveApprovedEmp(EmpRepository empRepository) {
         System.out.println("===== 테스트 준비 approve Emp 시작 =====");
         Emp emp = getApprovedEmpWithoutDept("202601002", "approvedEmp2");
@@ -47,6 +59,10 @@ public class EmpFixtureWithDB {
         return empRepository.save(emp);
     }
 
+
+    /**
+     * saveEmpWithDept - 부서를 지정한 사원
+     */
     public static Emp saveEmpWithDept(EmpRepository empRepository,
                                       DeptRepository deptRepository,
                                       String empNo, String empId,
@@ -57,6 +73,9 @@ public class EmpFixtureWithDB {
         return empRepository.save(emp);
     }
 
+    /**
+     * saveEmpWithRoleAndDept - 부서 & 시스템 롤을 지정한 사원
+     */
     public static Emp saveEmpWithRoleAndDept(EmpRepository empRepository,
                                       DeptRepository deptRepository,
                                       String empNo, String empId,
@@ -68,6 +87,14 @@ public class EmpFixtureWithDB {
 
         return empRepository.save(emp);
     }
+
+
+
+
+
+
+
+
 
     private static void setDept(
             Emp emp, Dept dept,  DeptRepository deptRepository,

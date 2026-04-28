@@ -1,6 +1,5 @@
 package com.haruon.groupware.application.draft.service.dto;
 
-import jakarta.validation.constraints.Positive;
 import org.jspecify.annotations.Nullable;
 
 import java.time.YearMonth;
@@ -19,7 +18,6 @@ public record SalesDraftUpdateRequest(
         YearMonth reportMonth,
 
         @Nullable
-        @Positive
         Long salesAmount
 
 ) {
@@ -30,5 +28,7 @@ public record SalesDraftUpdateRequest(
                         reportMonth != null ||
                         salesAmount != null,
                         "변경내용이 없음");
+
+                if(salesAmount != null) state(salesAmount >= 0, "매출총액은 0또는 양수여야 함");
         }
 }

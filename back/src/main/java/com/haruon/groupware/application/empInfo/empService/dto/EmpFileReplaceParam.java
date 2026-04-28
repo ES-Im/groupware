@@ -1,9 +1,8 @@
-package com.haruon.groupware.application.empInfo.empService;
+package com.haruon.groupware.application.empInfo.empService.dto;
 
 import com.haruon.groupware.application.utils.FileDto;
 import com.haruon.groupware.application.utils.FileValidator;
 import com.haruon.groupware.domain.empInfo.enums.FileType;
-import jakarta.validation.Valid;
 import lombok.Builder;
 
 import java.util.Set;
@@ -13,7 +12,6 @@ import static java.util.Objects.requireNonNull;
 @Builder
 public record EmpFileReplaceParam(
 
-        @Valid
         FileDto file,
 
         FileType fileType

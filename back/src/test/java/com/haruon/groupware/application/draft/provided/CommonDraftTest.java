@@ -43,6 +43,7 @@ record CommonDraftTest(
         draftRepository.deleteAll();
         empRepository.deleteAll();
         deptRepository.deleteAll();
+
     }
 
     @Test

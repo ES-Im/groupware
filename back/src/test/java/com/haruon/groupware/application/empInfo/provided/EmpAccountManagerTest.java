@@ -1,7 +1,7 @@
 package com.haruon.groupware.application.empInfo.provided;
 
 import com.haruon.groupware.application.empInfo.TestIntegrationConfig;
-import com.haruon.groupware.application.empInfo.empService.*;
+import com.haruon.groupware.application.empInfo.empService.dto.*;
 import com.haruon.groupware.application.empInfo.required.DeptRepository;
 import com.haruon.groupware.application.empInfo.required.EmpLeaveRepository;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;

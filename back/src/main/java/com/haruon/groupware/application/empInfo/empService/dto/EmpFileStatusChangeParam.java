@@ -1,4 +1,4 @@
-package com.haruon.groupware.application.empInfo.empService;
+package com.haruon.groupware.application.empInfo.empService.dto;
 
 import lombok.Builder;
 
@@ -7,6 +7,7 @@ import static java.util.Objects.requireNonNull;
 @Builder
 public record EmpFileStatusChangeParam (
         Long fileId,
+
         Boolean targetActive
 ) {
 

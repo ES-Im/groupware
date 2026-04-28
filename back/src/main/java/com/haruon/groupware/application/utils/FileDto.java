@@ -1,9 +1,5 @@
 package com.haruon.groupware.application.utils;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.Size;
 import lombok.Builder;
 
 import java.util.Locale;
@@ -11,21 +7,19 @@ import java.util.Locale;
 import static java.util.Objects.requireNonNull;
 import static org.springframework.util.Assert.state;
 
+/**
+ * 파일 관련 Application DTO 공통 필드
+ * @param mimeType
+ * @param originalFileFullName
+ * @param fileSize
+ */
 @Builder
 public record FileDto(
 
-        @NotNull
-        @NotBlank
-        @Size(max = 100)
         String mimeType,
 
-        @NotNull
-        @NotBlank
-        @Size(max = 200)
         String originalFileFullName,
 
-        @NotNull
-        @Positive
         Long fileSize
 
 ) {
@@ -33,6 +27,11 @@ public record FileDto(
         requireNonNull(mimeType, "MIME 타입 필수");
         requireNonNull(originalFileFullName, "원본 파일명 필수");
         requireNonNull(fileSize, "파일 크기 필수");
+
+        state(!mimeType.isBlank(), "mimeType은 공백이 될 수 없음");
+        state(!originalFileFullName.isBlank(), "originalFileFullName은 공백이 될 수 없음");
+        state(fileSize>0, "파일크기는 양수여야 함");
+
     }
 
     public String extension() {

@@ -9,8 +9,11 @@ import static java.util.Objects.requireNonNull;
 @Builder
 public record ApproveAttendanceByDeptManagerParam(
         Long approverId,
+
         Long targetEmpId,
+
         Long attendanceId,
+
         LocalDateTime approvedAt
 ) {
 

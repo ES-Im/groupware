@@ -31,5 +31,6 @@ public record LeaveDraftUpdateRequest(
                                 endAt != null ||
                                 leaveType != null,
                         "변경내용이 없음");
+
         }
 }

@@ -1,6 +1,5 @@
 package com.haruon.groupware.application.draft.service.dto;
 
-import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import org.jspecify.annotations.Nullable;
 
@@ -19,10 +18,8 @@ public record BusinessTripDraftCreateRequest(
 
         LocalDateTime endAt,
 
-        @NotBlank
         String destination,
 
-        @NotBlank
         String purpose,
 
         @Nullable
@@ -35,6 +32,9 @@ public record BusinessTripDraftCreateRequest(
                 requireNonNull(endAt);
                 requireNonNull(destination);
                 requireNonNull(purpose);
+
                 state(!endAt.isBefore(startAt), "종료시간은 시작시간보다 이를 수 없음");
+                state(!destination.isBlank(), "목적지는 공백이 될 수 없음");
+                state(!purpose.isBlank(), "목적은 공백이 될 수 없음");
         }
 }

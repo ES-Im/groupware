@@ -1,11 +1,13 @@
 package com.haruon.groupware.domain.shared;
 
+import jakarta.persistence.Embeddable;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 import static com.haruon.groupware.domain.shared.RegexpUtil.EMAIL_PATTERN;
 import static com.haruon.groupware.domain.shared.RegexpUtil.EMAIL_PATTERN_MESSAGE;
 
+@Embeddable
 public record Email(
         @Size(max = 150)
         @Pattern(

@@ -1,8 +1,8 @@
 package com.haruon.groupware.application.draft.service.dto;
 
-import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import org.jspecify.annotations.Nullable;
+import org.springframework.util.Assert;
 
 import java.time.LocalDateTime;
 
@@ -21,11 +21,9 @@ public record BusinessTripDraftUpdateRequest(
         LocalDateTime endAt,
 
         @Nullable
-        @NotBlank
         String destination,
 
         @Nullable
-        @NotBlank
         String purpose
 
 ) {
@@ -37,5 +35,9 @@ public record BusinessTripDraftUpdateRequest(
                                 destination != null ||
                                 purpose != null,
                         "변경내용이 없음");
+
+                if(destination != null) state(!destination.isBlank(), "목적지는 공백이 될 수 없음");
+                if(purpose != null) Assert.state(!purpose.isBlank(), "목적은 공백이 될 수 없음");
+
         }
 }

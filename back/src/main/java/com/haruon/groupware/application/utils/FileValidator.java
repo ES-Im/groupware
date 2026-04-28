@@ -6,6 +6,9 @@ import java.util.Set;
 import static java.util.Objects.requireNonNull;
 import static org.springframework.util.Assert.state;
 
+/**
+ * Application DTO 공통 파일 validation
+ */
 public final class FileValidator {
 
     private FileValidator() {

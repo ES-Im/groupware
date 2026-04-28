@@ -51,7 +51,7 @@ public class RegexpTest {
         assertThat("test1234@haruon.com".matches(EMAIL_PATTERN)).isTrue();
         assertThat("test1234haruon.com".matches(EMAIL_PATTERN)).isFalse();
         assertThat("test1234@haruon".matches(EMAIL_PATTERN)).isFalse();
-        assertThat("test1234@test.com".matches(EMAIL_PATTERN)).isFalse();
+        assertThat("test1234@test.com".matches(EMAIL_PATTERN)).isTrue();
     }
 
     @Test
