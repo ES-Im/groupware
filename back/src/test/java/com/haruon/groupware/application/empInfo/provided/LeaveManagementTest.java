@@ -1,6 +1,7 @@
-package com.haruon.groupware.application.empInfo.leaveService;
+package com.haruon.groupware.application.empInfo.provided;
 
-import com.haruon.groupware.application.empInfo.TestIntegrationConfig;
+import com.haruon.groupware.application.TestIntegrationConfig;
+import com.haruon.groupware.application.empInfo.leaveService.LeaveManagementService;
 import com.haruon.groupware.application.empInfo.required.EmpLeaveRepository;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
 import com.haruon.groupware.domain.empInfo.Emp;
@@ -11,14 +12,14 @@ import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 
-import static com.haruon.groupware.application.empInfo.EmpFixtureWithDB.saveAdmin;
-import static com.haruon.groupware.application.empInfo.EmpFixtureWithDB.saveApprovedEmp;
+import static com.haruon.groupware.application.dbFixture.EmpFixture.saveAdmin;
+import static com.haruon.groupware.application.dbFixture.EmpFixture.saveApprovedEmp;
 import static com.haruon.groupware.domain.empInfo.EmpLeave.createEmpLeave;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @TestIntegrationConfig
-record LeaveManagementServiceTest(
+record LeaveManagementTest(
         EmpLeaveRepository empLeaveRepository,
         LeaveManagementService leaveManagementService,
         EmpRepository empRepository

@@ -1,10 +1,10 @@
 package com.haruon.groupware.application.draft.provided;
 
+import com.haruon.groupware.application.TestIntegrationConfig;
 import com.haruon.groupware.application.draft.required.DraftRepository;
 import com.haruon.groupware.application.draft.service.dto.ApproversRequest;
 import com.haruon.groupware.application.draft.service.dto.CommonDraftCreateRequest;
 import com.haruon.groupware.application.draft.service.dto.DraftFileCreateRequest;
-import com.haruon.groupware.application.empInfo.TestIntegrationConfig;
 import com.haruon.groupware.application.empInfo.required.DeptRepository;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
 import com.haruon.groupware.application.utils.FileDto;
@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static com.haruon.groupware.application.empInfo.EmpFixtureWithDB.saveApprovedEmp;
+import static com.haruon.groupware.application.dbFixture.EmpFixture.saveApprovedEmp;
 import static com.haruon.groupware.domain.draft.sub.ApprovalStatus.UNSUBMITTED;
 import static com.haruon.groupware.domain.draft.sub.ApprovalStatus.WAITING;
 import static org.assertj.core.api.Assertions.assertThat;

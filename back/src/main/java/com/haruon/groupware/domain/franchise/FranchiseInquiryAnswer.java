@@ -27,7 +27,7 @@ public class FranchiseInquiryAnswer extends AbstractEntity {
     @Nullable
     private LocalDateTime answeredAt;
 
-    public static FranchiseInquiryAnswer createDraft(
+    static FranchiseInquiryAnswer createDraft(
             FranchiseInquiry inquiry,
             String content
     ) {
@@ -39,13 +39,13 @@ public class FranchiseInquiryAnswer extends AbstractEntity {
         return answer;
     }
 
-    public void updateDraft(String content) {
+    void updateDraft(String content) {
         state(this.answeredAt == null, "제출 상태에서는 답변을 수정할 수 없음");
 
         this.content = requireNonNull(content);
     }
 
-    public void submit(LocalDateTime answerAt) {
+    void submit(LocalDateTime answerAt) {
         state(this.answeredAt == null, "이미 제출된 답변");
 
         this.answeredAt = requireNonNull(answerAt);

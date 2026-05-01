@@ -1,4 +1,4 @@
-package com.haruon.groupware.application.empInfo;
+package com.haruon.groupware.application;
 
 import com.haruon.groupware.application.utils.CompanyPolicyPort;
 import com.haruon.groupware.domain.empInfo.PasswordEncoder;

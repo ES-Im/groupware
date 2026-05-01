@@ -9,7 +9,7 @@ import com.haruon.groupware.application.franchise.service.dto.EducationUpdateReq
  */
 public interface EducationManagement {
 
-    void createEducation(long managerId, EducationCreateRequest request);
+    long createEducation(long managerId, EducationCreateRequest request);
 
     void updateEducation(long educationId, long managerId, EducationUpdateRequest request);
 

@@ -7,7 +7,6 @@ import com.haruon.groupware.application.franchise.service.dto.InquiryRequest;
  */
 public interface InquiryImporter {
 
-    //create + replace
-    void importInquiry(long franchiseId, InquiryRequest request);
+    long importInquiry(long franchiseId, InquiryRequest request);
 
 }

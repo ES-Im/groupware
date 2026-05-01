@@ -1,4 +1,4 @@
-package com.haruon.groupware.application.empInfo;
+package com.haruon.groupware.application;
 
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;

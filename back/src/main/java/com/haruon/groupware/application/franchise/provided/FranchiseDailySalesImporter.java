@@ -7,7 +7,6 @@ import com.haruon.groupware.application.franchise.service.dto.DailySalesRequest;
  */
 public interface FranchiseDailySalesImporter {
 
-    // 생성 또는 교체 둘다 (request.externalId 참조)
-    void importDailySales(long franchiseId, DailySalesRequest request);
+    long importDailySales(long franchiseId, DailySalesRequest request);
 
 }

@@ -1,6 +1,6 @@
 package com.haruon.groupware.application.empInfo.provided;
 
-import com.haruon.groupware.application.empInfo.TestIntegrationConfig;
+import com.haruon.groupware.application.TestIntegrationConfig;
 import com.haruon.groupware.application.empInfo.empService.dto.*;
 import com.haruon.groupware.application.empInfo.required.DeptRepository;
 import com.haruon.groupware.application.empInfo.required.EmpLeaveRepository;
@@ -18,7 +18,7 @@ import org.junit.jupiter.api.*;
 import java.time.LocalDate;
 import java.util.*;
 
-import static com.haruon.groupware.application.empInfo.EmpFixtureWithDB.*;
+import static com.haruon.groupware.application.dbFixture.EmpFixture.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 

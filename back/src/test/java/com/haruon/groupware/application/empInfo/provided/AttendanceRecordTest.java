@@ -1,6 +1,6 @@
 package com.haruon.groupware.application.empInfo.provided;
 
-import com.haruon.groupware.application.empInfo.TestIntegrationConfig;
+import com.haruon.groupware.application.TestIntegrationConfig;
 import com.haruon.groupware.application.empInfo.required.AttendanceRepository;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
 import com.haruon.groupware.domain.empInfo.Emp;
@@ -13,7 +13,7 @@ import java.time.LocalTime;
 import java.util.Collection;
 import java.util.List;
 
-import static com.haruon.groupware.application.empInfo.EmpFixtureWithDB.saveApprovedEmp;
+import static com.haruon.groupware.application.dbFixture.EmpFixture.saveApprovedEmp;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 

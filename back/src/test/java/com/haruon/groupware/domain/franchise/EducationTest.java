@@ -1,8 +1,10 @@
 package com.haruon.groupware.domain.franchise;
 
 import com.haruon.groupware.domain.empInfo.Emp;
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
 
@@ -186,9 +188,10 @@ class EducationTest {
         education.activate();
 
         String externalId = "ex";
-        education.applyByFranchise(externalId, getFranchise(), 10L, LocalDateTime.of(2026, 4, 6, 0, 0, 0));
+        Franchise franchise = getFranchise();
+        education.applyByFranchise(externalId, franchise, 10L, LocalDateTime.of(2026, 4, 6, 0, 0, 0));
 
-        education.cancelApplication(externalId);
+        education.cancelApplication(externalId, franchise);
 
         assertThat(education.getEducationApplications()).isEmpty();
     }
@@ -202,10 +205,11 @@ class EducationTest {
         education.activate();
 
         String externalId = "ex";
-        education.applyByFranchise(externalId, getFranchise(), 10L, LocalDateTime.of(2026, 4, 6, 0, 0, 0));
+        Franchise franchise = getFranchise();
+        education.applyByFranchise(externalId, franchise, 10L, LocalDateTime.of(2026, 4, 6, 0, 0, 0));
 
         assertThatThrownBy(() ->
-                education.cancelApplication("otherId")
+                education.cancelApplication("otherId", franchise)
         ).hasMessage("해당 신청정보가 없음");
     }
 
@@ -260,7 +264,7 @@ class EducationTest {
 
         education.applyByFranchise(externalId, franchise, 10L, LocalDateTime.of(2026, 4, 6, 0, 0, 0));
 
-        education.replaceApplication(externalId, newAppliedCount, newAppliedAt);
+        education.replaceApplication(externalId, franchise, newAppliedCount, newAppliedAt);
 
         assertThat(education.getEducationApplications()).singleElement().satisfies(a -> {
             assertThat(a).extracting(
@@ -285,15 +289,16 @@ class EducationTest {
         );
         education.activate();
 
-        education.applyByFranchise("ex1", getFranchise(), previousAppliedCount, LocalDateTime.of(2026, 4, 6, 0, 0, 0));
+        Franchise franchise = getFranchise();
+        education.applyByFranchise("ex1", franchise, previousAppliedCount, LocalDateTime.of(2026, 4, 6, 0, 0, 0));
 
         LocalDateTime newAppliedAt = LocalDateTime.of(2026, 4, 7, 0, 0, 0);
 
-        education.applyByFranchise("ex2", getFranchise(), 1L, LocalDateTime.of(2026, 4, 6, 0, 0, 0));
+        education.applyByFranchise("ex2", franchise, 1L, LocalDateTime.of(2026, 4, 6, 0, 0, 0));
 
 
         assertThatThrownBy(() ->
-                education.replaceApplication("ex2", appliedCount, newAppliedAt)
+                education.replaceApplication("ex2", franchise, appliedCount, newAppliedAt)
         ).hasMessage("수용인원을 초과하여 신청 불가");
     }
 
@@ -334,6 +339,7 @@ class EducationTest {
     }
 
     @Test
+    @Transactional
     @DisplayName("교육 첨부파일은 교육 활성화/비활성화 상관없이 삭제 가능하다.")
     void removeEducationFile_success() {
         Education education = Education.create(
@@ -341,16 +347,20 @@ class EducationTest {
         );
 
         education.addEducationFile("image/png", "originName", "png", 1024L);
+        EducationFile targetFile = education.getEducationFiles().getFirst();
+        ReflectionTestUtils.setField(targetFile, "id", 1L);
 
-        education.removeEducationFile(education.getEducationFiles().getFirst());
+        education.removeEducationFile(targetFile.getId());
         assertThat(education.getEducationFiles())
                 .as("비활성화 상태에서 파일을 삭제할 수 있다.")
                 .isEmpty();
 
         education.addEducationFile("image/png", "originName", "png", 1024L);
+        EducationFile targetFile2 = education.getEducationFiles().getFirst();
+        ReflectionTestUtils.setField(targetFile2, "id", 1L);
         education.activate();
 
-        education.removeEducationFile(education.getEducationFiles().getFirst());
+        education.removeEducationFile(targetFile2.getId());
         assertThat(education.getEducationFiles())
                 .as("활성화 상태에서 파일을 삭제할 수 있다.")
                 .isEmpty();

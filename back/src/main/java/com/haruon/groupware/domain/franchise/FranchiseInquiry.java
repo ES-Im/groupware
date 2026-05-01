@@ -12,6 +12,7 @@ import org.jspecify.annotations.Nullable;
 
 import java.time.LocalDateTime;
 
+import static com.haruon.groupware.domain.franchise.FranchiseInquiryAnswer.createDraft;
 import static java.util.Objects.requireNonNull;
 import static org.springframework.util.Assert.state;
 
@@ -44,8 +45,12 @@ public class FranchiseInquiry extends AbstractEntity {
     @JoinColumn(name = "assigned_emp_id", nullable = true)
     private Emp emp;
 
+    @Nullable
+    @OneToOne(mappedBy = "inquiry", cascade = CascadeType.ALL, orphanRemoval = true)
+    private FranchiseInquiryAnswer answer;
 
-    public static FranchiseInquiry create(
+
+    public static FranchiseInquiry createInquiry(
             String externalId,
             Franchise franchise,
             String inquirerContact,
@@ -66,7 +71,7 @@ public class FranchiseInquiry extends AbstractEntity {
         return inquiry;
     }
 
-    public void replace(
+    public void replaceInquiry(
             String inquirerContact,
             LocalDateTime inquiryAt,
             String inquiryTitle,
@@ -83,6 +88,53 @@ public class FranchiseInquiry extends AbstractEntity {
         state(emp.getSystemRoles().contains(SystemRoleCode.FRANCHISE), "가맹점 권한이 없음");
 
         this.emp = requireNonNull(emp);
+    }
+
+    public void createAnswerDraft(String content, Emp emp) {
+        validateAnswerContent(content);
+        assignIfUnassigned(emp);
+        validateAssignedEmp(emp);
+
+        state(this.answer == null, "이미 답변 초안이 존재함");
+
+        this.answer = createDraft(this, content);
+    }
+
+    public void updateAnswerDraft(String content, Emp emp) {
+        validateAnswerContent(content);
+        validateAssignedEmp(emp);
+
+        state(this.answer != null, "답변 초안이 없음");
+
+        this.answer.updateDraft(content);
+    }
+
+    public void submitAnswer(LocalDateTime answerAt, Emp emp) {
+        requireNonNull(answerAt);
+        validateAssignedEmp(emp);
+
+        state(this.answer != null, "답변 초안이 없음");
+
+        this.answer.submit(answerAt);
+    }
+
+    private void assignIfUnassigned(Emp emp) {
+        requireNonNull(emp, "담당 사원은 필수");
+
+        if (this.emp == null) {
+            assign(emp);
+        }
+    }
+
+    private void validateAssignedEmp(Emp emp) {
+        requireNonNull(emp, "담당 사원은 필수");
+        state(this.emp != null, "담당자가 배정되지 않음");
+        state(this.emp.equals(emp), "담당자만 답변을 처리할 수 있음");
+    }
+
+    private static void validateAnswerContent(String content) {
+        requireNonNull(content, "답변은 필수");
+        state(!content.isBlank(), "답변은 공백이 될 수 없음");
     }
 
 }

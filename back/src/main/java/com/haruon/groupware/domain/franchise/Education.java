@@ -123,6 +123,7 @@ public class Education extends AbstractEntity {
 
     public void replaceApplication (
             String externalId,
+            Franchise franchise,
             Long appliedCount,
             LocalDateTime appliedAt
     ) {
@@ -135,18 +136,20 @@ public class Education extends AbstractEntity {
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("해당 신청정보가 없음"));
 
+        state(targetApplication.getFranchise().equals(franchise), "신청정보가 잘못됨(같은 가맹점이 아님)");
         validateAppliedCount(appliedCount, targetApplication.getAppliedCount());
 
         targetApplication.replace( appliedCount, appliedAt);
     }
 
-    public void cancelApplication(String externalId) {
+    public void cancelApplication(String externalId, Franchise franchise) {
         requireNonNull(externalId);
 
         EducationApplication targetApplication = this.educationApplications.stream()
                 .filter(application -> application.getExternalId().equals(externalId))
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("해당 신청정보가 없음"));
+        state(targetApplication.getFranchise().equals(franchise), "신청정보가 잘못됨(같은 가맹점이 아님)");
 
         this.educationApplications.remove(targetApplication);
     }
@@ -164,8 +167,10 @@ public class Education extends AbstractEntity {
         this.educationFiles.add(educationFile);
     }
 
-    public void removeEducationFile(EducationFile educationFile) {
-        this.educationFiles.remove(educationFile);
+    public void removeEducationFile(Long fileId) {
+        EducationFile targetFile = findEducationFileById(fileId);
+
+        this.educationFiles.remove(targetFile);
     }
 
     private long getAppliedCount() {
@@ -195,6 +200,12 @@ public class Education extends AbstractEntity {
             @Nullable Long capacity
     ) {
         return educationDate != null || place != null || title != null || content != null || capacity != null;
+    }
+
+    private EducationFile findEducationFileById(Long fileId) {
+        return this.getEducationFiles().stream()
+                .filter(f -> f.getId().equals(fileId))
+                .findFirst().orElseThrow(() -> new IllegalStateException("조회된 파일이 없음"));
     }
 
 }

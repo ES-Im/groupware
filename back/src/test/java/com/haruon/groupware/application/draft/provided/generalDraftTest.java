@@ -1,11 +1,11 @@
 package com.haruon.groupware.application.draft.provided;
 
+import com.haruon.groupware.application.TestIntegrationConfig;
 import com.haruon.groupware.application.draft.required.DraftRepository;
 import com.haruon.groupware.application.draft.service.dto.ApproversRequest;
 import com.haruon.groupware.application.draft.service.dto.BusinessTripDraftCreateRequest;
 import com.haruon.groupware.application.draft.service.dto.CommonDraftCreateRequest;
 import com.haruon.groupware.application.draft.service.dto.CommonDraftUpdateRequest;
-import com.haruon.groupware.application.empInfo.TestIntegrationConfig;
 import com.haruon.groupware.application.empInfo.required.DeptRepository;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
 import com.haruon.groupware.domain.draft.Draft;
@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import static com.haruon.groupware.application.empInfo.EmpFixtureWithDB.saveApprovedEmp;
+import static com.haruon.groupware.application.dbFixture.EmpFixture.saveApprovedEmp;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

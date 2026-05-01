@@ -1,4 +1,4 @@
-package com.haruon.groupware.application.empInfo;
+package com.haruon.groupware.application.dbFixture;
 
 import com.haruon.groupware.application.empInfo.required.DeptRepository;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
@@ -18,7 +18,7 @@ import static com.haruon.groupware.domain.shared.EmpFixture.*;
  * saveApprovedEmp - 회원가입 승인난 사원
  * saveEmpWithSystemRole - 시스템 롤을 지정한 사원
  */
-public class EmpFixtureWithDB {
+public class EmpFixture {
 
     /**
      * saveAdmin - 어드민 사원
@@ -100,10 +100,12 @@ public class EmpFixtureWithDB {
             Emp emp, Dept dept,  DeptRepository deptRepository,
             SystemRoleCode systemRoleCode
     ) {
+        Dept foundDept = deptRepository.findByDeptCode(dept.getDeptCode()).orElseGet(() ->
+                deptRepository.save(dept)
+        );
 
-        deptRepository.save(dept);
         emp.changeBelongingsByAdmin(
-                dept,
+                foundDept,
                 PositionCode.STAFF,
                 true,
                 LocalDate.of(2026, 1, 1),

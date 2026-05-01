@@ -1,6 +1,6 @@
 package com.haruon.groupware.application.empInfo.provided;
 
-import com.haruon.groupware.application.empInfo.TestIntegrationConfig;
+import com.haruon.groupware.application.TestIntegrationConfig;
 import com.haruon.groupware.application.empInfo.attendanceService.AttendanceClosing;
 import com.haruon.groupware.application.empInfo.attendanceService.dto.AttendanceCloseParam;
 import com.haruon.groupware.application.empInfo.required.AttendanceRepository;
@@ -28,7 +28,7 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static com.haruon.groupware.application.empInfo.EmpFixtureWithDB.saveApprovedEmp;
+import static com.haruon.groupware.application.dbFixture.EmpFixture.saveApprovedEmp;
 import static com.haruon.groupware.domain.schedule.Schedule.registerSchedule;
 import static org.assertj.core.api.Assertions.assertThat;
 

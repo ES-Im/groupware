@@ -1,8 +1,8 @@
 package com.haruon.groupware.application.draft.provided;
 
+import com.haruon.groupware.application.TestIntegrationConfig;
 import com.haruon.groupware.application.draft.required.DraftRepository;
 import com.haruon.groupware.application.draft.service.dto.*;
-import com.haruon.groupware.application.empInfo.TestIntegrationConfig;
 import com.haruon.groupware.application.empInfo.required.DeptRepository;
 import com.haruon.groupware.application.empInfo.required.EmpLeaveRepository;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import static com.haruon.groupware.application.empInfo.EmpFixtureWithDB.saveApprovedEmp;
+import static com.haruon.groupware.application.dbFixture.EmpFixture.saveApprovedEmp;
 import static com.haruon.groupware.domain.empInfo.EmpLeave.createEmpLeave;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

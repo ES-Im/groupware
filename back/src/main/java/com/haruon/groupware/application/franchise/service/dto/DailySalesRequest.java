@@ -26,7 +26,7 @@ public record DailySalesRequest(
         requireNonNull(orderCount);
 
         state(!externalId.isBlank(), "외부식별자는 공백이 될 수 없음");
-        state(salesAmount >= 0, "신청 인원은 양수여야 함");
-        state(orderCount >= 0, "신청 인원은 양수여야 함");
+        state(salesAmount >= 0, "매출 액은 양수여야 함");
+        state(orderCount >= 0, "매출 건수은 양수여야 함");
     }
 }

@@ -7,8 +7,7 @@ import com.haruon.groupware.application.franchise.service.dto.ApplicationRequest
  */
 public interface EducationApplicationImporter {
 
-    // applyByFranchise 또는 replaceApplication 둘다
-    void importEducationApplication(long franchiseId, ApplicationRequest request);
+    void importEducationApplication(long educationId, ApplicationRequest request);
 
-    void cancelEducationApplication(long franchiseId, String externalId);
+    void cancelEducationApplication(long educationId, long franchiseId, String externalId);
 }

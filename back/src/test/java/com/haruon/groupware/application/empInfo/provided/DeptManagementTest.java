@@ -1,6 +1,6 @@
 package com.haruon.groupware.application.empInfo.provided;
 
-import com.haruon.groupware.application.empInfo.TestIntegrationConfig;
+import com.haruon.groupware.application.TestIntegrationConfig;
 import com.haruon.groupware.application.empInfo.deptService.DeptRegisterRequest;
 import com.haruon.groupware.application.empInfo.required.DeptRepository;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
@@ -14,8 +14,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import java.util.Collection;
 import java.util.List;
 
-import static com.haruon.groupware.application.empInfo.EmpFixtureWithDB.saveAdmin;
-import static com.haruon.groupware.application.empInfo.EmpFixtureWithDB.saveApprovedEmp;
+import static com.haruon.groupware.application.dbFixture.EmpFixture.saveAdmin;
+import static com.haruon.groupware.application.dbFixture.EmpFixture.saveApprovedEmp;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 

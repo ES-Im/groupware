@@ -19,7 +19,7 @@ class FranchiseInquiryTest {
 
     @Test
     @DisplayName("질의 생성 테스트")
-    void create_inquiry_success() {
+    void create_Inquiry_inquiry_success() {
         String externalId = "external";
         Franchise franchise = getFranchise();
         String inquirerContact = "010-1234-5678";
@@ -27,7 +27,7 @@ class FranchiseInquiryTest {
         String inquiryTitle = "testTitle";
         String inquiryContent = "testContent";
 
-        FranchiseInquiry inquiry = FranchiseInquiry.create(externalId, franchise, inquirerContact, inquiryAt, inquiryTitle, inquiryContent);
+        FranchiseInquiry inquiry = FranchiseInquiry.createInquiry(externalId, franchise, inquirerContact, inquiryAt, inquiryTitle, inquiryContent);
 
         assertThat(inquiry).extracting(
                 FranchiseInquiry::getExternalId,
@@ -43,7 +43,7 @@ class FranchiseInquiryTest {
 
     @Test
     @DisplayName("질의 생성 테스트 - 해당 가맹점에 담당자가 있을 경우")
-    void create_inquiry_check_assigned_emp1() {
+    void create_Inquiry_inquiry_check_assigned_emp1() {
         Franchise franchise = getFranchise();
         Emp assignedEmp = getApprovedEmp();
         assignedEmp.getSystemRoles().add(SystemRoleCode.FRANCHISE);
@@ -59,7 +59,7 @@ class FranchiseInquiryTest {
 
     @Test
     @DisplayName("질의 생성 테스트 - 해당 가맹점에 담당자가 없을 경우")
-    void create_inquiry_check_assigned_emp2() {
+    void create_Inquiry_inquiry_check_assigned_emp2() {
         Franchise franchise = getFranchise();
 
         FranchiseInquiry inquiry = getFranchiseInquiry(franchise);
@@ -115,7 +115,7 @@ class FranchiseInquiryTest {
 
     @Test
     @DisplayName("질의 건 변경 테스트")
-    void replace_inquiry_success() {
+    void replace_Inquiry_inquiry_success() {
         FranchiseInquiry inquiry = getFranchiseInquiry(getFranchise());
 
         String newInquirerContact = "010-1234-5679";
@@ -123,7 +123,7 @@ class FranchiseInquiryTest {
         String newTitle = "newTitle";
         String newContent = "newContent";
 
-        inquiry.replace(newInquirerContact, newInquiryAt, newTitle, newContent);
+        inquiry.replaceInquiry(newInquirerContact, newInquiryAt, newTitle, newContent);
 
         assertThat(inquiry).extracting(
                 FranchiseInquiry::getInquirerContact,
@@ -137,19 +137,19 @@ class FranchiseInquiryTest {
 
     @Test
     @DisplayName("질의 건 변경시 변경 사항 중 하나라도 값이 없으면 실패")
-    void replace_inquiry_fail() {
+    void replace_Inquiry_inquiry_fail() {
         FranchiseInquiry inquiry = getFranchiseInquiry(getFranchise());
         LocalDateTime newInquiryAt = LocalDateTime.of(2026,5,2,0,0,0);
         String newTitle = "newTitle";
         String newContent = "newContent";
 
         assertThrows(NullPointerException.class, () ->
-            inquiry.replace(null, newInquiryAt, newTitle, newContent)
+            inquiry.replaceInquiry(null, newInquiryAt, newTitle, newContent)
         );
     }
 
     static FranchiseInquiry getFranchiseInquiry(Franchise franchise) {
-        return FranchiseInquiry.create(
+        return FranchiseInquiry.createInquiry(
                 "external", franchise, "010-1234-5678",
                 LocalDateTime.of(2026,5,1,0,0,0),
                 "testTitle", "testContent");

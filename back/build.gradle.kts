@@ -81,6 +81,12 @@ dependencies {
     errorprone("com.google.errorprone:error_prone_core:2.48.0")
     errorprone("com.uber.nullaway:nullaway:0.13.1")
 
+    // openFeign queryDSL(7.x)
+    implementation("io.github.openfeign.querydsl:querydsl-jpa:7.1")
+    // Q-class generation
+    annotationProcessor("io.github.openfeign.querydsl:querydsl-apt:7.1:jakarta")
+    annotationProcessor("jakarta.persistence:jakarta.persistence-api")
+
 }
 
 nullaway {
