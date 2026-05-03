@@ -82,37 +82,39 @@ public class EmpFixture {
                                       Dept dept,
                                       SystemRoleCode systemRoleCode) {
         System.out.println("===== 테스트 준비 saveEmpWithRoleAndDept 시작 =====");
-        Emp emp = getApprovedEmpWithoutDept(empNo, empId);
+
+        Emp emp = empRepository.findByEmpNo(empNo)
+                .orElseGet(() -> getApprovedEmpWithoutDept(empNo, empId));
+
         setDept(emp, dept, deptRepository, systemRoleCode);
 
         return empRepository.save(emp);
     }
 
-
-
-
-
-
-
-
-
     private static void setDept(
             Emp emp, Dept dept,  DeptRepository deptRepository,
             SystemRoleCode systemRoleCode
     ) {
-        Dept foundDept = deptRepository.findByDeptCode(dept.getDeptCode()).orElseGet(() ->
-                deptRepository.save(dept)
-        );
+        Dept foundDept = deptRepository.findByDeptCode(dept.getDeptCode())
+                .orElseGet(() -> deptRepository.save(dept));
 
-        emp.changeBelongingsByAdmin(
-                foundDept,
-                PositionCode.STAFF,
-                true,
-                LocalDate.of(2026, 1, 1),
-                null
-        );
+        boolean alreadyHasBelonging = emp.getEmpBelongings().stream()
+                .anyMatch(b ->
+                        b.getDept().equals(foundDept)
+                                && b.getStartAt().equals(LocalDate.of(2026, 1, 1))
+                );
 
-        emp.changeInfoByAdmin(
+        if (!alreadyHasBelonging) {
+            emp.changeBelongingsByHR(
+                    foundDept,
+                    PositionCode.STAFF,
+                    true,
+                    LocalDate.of(2026, 1, 1),
+                    null
+            );
+        }
+
+        emp.changeInfoByHR(
                 null, null,
                 null, null,
                 null, null,
@@ -123,8 +125,13 @@ public class EmpFixture {
 
     public static Dept saveDept(DeptRepository deptRepository, String deptName, String deptNo) {
         System.out.println("===== 테스트 준비 save dept =====");
-        Dept dept = DeptFixture.getDept(deptNo, deptName);
-        return deptRepository.save(dept);
+
+        return deptRepository.findByDeptCode(deptNo).orElseGet(() -> {
+            Dept dept1 = DeptFixture.getDept(deptNo, deptName);
+            deptRepository.save(dept1);
+                    return dept1;
+
+        });
     }
 
 

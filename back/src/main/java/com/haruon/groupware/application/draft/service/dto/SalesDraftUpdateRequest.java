@@ -1,5 +1,6 @@
 package com.haruon.groupware.application.draft.service.dto;
 
+import lombok.Builder;
 import org.jspecify.annotations.Nullable;
 
 import java.time.YearMonth;
@@ -7,6 +8,7 @@ import java.time.YearMonth;
 import static io.jsonwebtoken.lang.Assert.state;
 import static java.util.Objects.requireNonNull;
 
+@Builder
 public record SalesDraftUpdateRequest(
 
         CommonDraftUpdateRequest param,

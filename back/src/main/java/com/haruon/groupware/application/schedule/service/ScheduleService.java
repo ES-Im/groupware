@@ -42,7 +42,7 @@ public class ScheduleService implements ScheduleRegister, ScheduleEditing {
     private final MeetingRepository meetingRepository;
 
     @Override
-    public void registerSchedules(ScheduleCreateRequest param) {
+    public String registerSchedules(ScheduleCreateRequest param) {
         requireNonNull(param);
 
         boolean isPublic = param.isPublic();
@@ -54,20 +54,21 @@ public class ScheduleService implements ScheduleRegister, ScheduleEditing {
                     param.manualScheduleParam(), isPublic
             );
 
-            scheduleRepository.saveAll(schedules);
-            return;
+            return scheduleRepository.saveAll(schedules).getFirst().getSourceKey();
         }
+
 
         Meeting meeting = meetingRepository.findBySourceKey(param.sourceKey()).orElse(null);
         if (meeting != null) {
             schedules = registerMeetingSchedules(meeting, isPublic);
 
-            scheduleRepository.saveAll(schedules);
-            return;
+            return scheduleRepository.saveAll(schedules).getFirst().getSourceKey();
         }
 
-        Draft draft = draftRepository.findBySourceKey(param.sourceKey())
-                .orElseThrow();
+
+        Draft draft = draftRepository.findBySourceKey(param.sourceKey()).orElseThrow(
+                () -> new IllegalArgumentException("지원하지 않는 일정 타입")
+        );
 
         if (draft instanceof LeaveDraft leaveDraft) {
             schedules = registerLeaveSchedules(leaveDraft, isPublic);
@@ -77,35 +78,33 @@ public class ScheduleService implements ScheduleRegister, ScheduleEditing {
             throw new IllegalArgumentException("지원하지 않는 일정 타입");    // to-do 커스텀 예외처리
         }
 
-        scheduleRepository.saveAll(schedules);
+        return scheduleRepository.saveAll(schedules).getFirst().getSourceKey();
     }
 
     @Override
-    public int addParticipants(Long scheduleId, Set<Long> participantEmpIds, boolean isForBulkEdit) {
-        int result = 0;
-
+    public void addParticipants(Long scheduleId, Set<Long> participantEmpIds, boolean isForBulkEdit) {
         Schedule schedule = getScheduleById(scheduleId);
 
         List<Emp> empList = getEmpListById(empRepository, participantEmpIds);
+
+        empList.forEach(Emp::ensureActive);
 
         List<Schedule> targetSchedules = isForBulkEdit
                 ? getSameEventSchedules(schedule.getSourceKey())
                 : List.of(schedule);
 
-        for (Schedule targetSchedule : targetSchedules) {
-            for (Emp emp : empList) {
-                emp.ensureActive();
-                result += targetSchedule.addParticipant(emp);
-            }
+        if(isForBulkEdit) {
+            targetSchedules.forEach(targetSchedule ->
+                    empList.forEach(targetSchedule::addParticipant)
+            );
+        } else {
+            empList.forEach(schedule::addParticipant);
         }
-
-        return result;
     }
 
 
     @Override
-    public int removeParticipants(Long scheduleId, Set<Long> participantEmpIds, boolean isForBulkEdit) {
-        int result = 0;
+    public void removeParticipants(Long scheduleId, Set<Long> participantEmpIds, boolean isForBulkEdit) {
 
         List<Schedule> targetSchedules = getSchedules(scheduleId, isForBulkEdit);
 
@@ -113,38 +112,28 @@ public class ScheduleService implements ScheduleRegister, ScheduleEditing {
 
         for (Schedule targetSchedule : targetSchedules) {
             for (Emp emp : empList) {
-                result += targetSchedule.removeParticipant(emp);
+                targetSchedule.removeParticipant(emp);
             }
         }
 
-        return result;
     }
 
     @Override
-    public int cancelSchedule(Long scheduleId, boolean isForBulkEdit) {
-        int result = 0;
-
+    public void cancelSchedule(Long scheduleId, boolean isForBulkEdit) {
         List<Schedule> targetSchedules = getSchedules(scheduleId, isForBulkEdit);
 
-        for (Schedule targetSchedule : targetSchedules) {
-            result += targetSchedule.cancel();
-        }
-
-        return result;
+        targetSchedules.forEach(Schedule::cancel);
     }
 
     @Override
-    public int updateManualSchedule(Long scheduleId, boolean isForBulkEdit, ManualScheduleParam param) {
-        int result = 0;
-
+    public void updateManualSchedule(Long scheduleId, boolean isForBulkEdit, ManualScheduleParam param) {
         List<Schedule> targetSchedules = getSchedules(scheduleId, isForBulkEdit);
+
         for (Schedule targetSchedule : targetSchedules) {
-            result += targetSchedule.changeManualSchedule(
+            targetSchedule.changeManualSchedule(
                     param.title(), param.content(), param.startAt().toLocalTime(), param.endAt().toLocalTime()
             );
         }
-
-        return result;
     }
 
     private List<Schedule> getSchedules(Long scheduleId, boolean isForBulkEdit) {

@@ -63,11 +63,11 @@ record LeaveManagementTest(
 
         assertThatThrownBy(() ->
                 leaveManagementService.adjustSpecialGrantDays(notAdmin.getId(), targetEmp.getId(), 1.0)
-        ).isInstanceOf(IllegalStateException.class);
+        ).hasMessage("권한이 없습니다.");
 
         assertThatThrownBy(() ->
                 leaveManagementService.adjustCompensatoryGrantDays(notAdmin.getId(), targetEmp.getId(), 1.0)
-        ).isInstanceOf(IllegalStateException.class);
+        ).hasMessage("권한이 없습니다.");
 
     }
 

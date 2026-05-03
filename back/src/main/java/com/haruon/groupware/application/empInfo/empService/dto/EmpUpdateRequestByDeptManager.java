@@ -13,7 +13,7 @@ import static org.springframework.util.Assert.state;
  *  제한된 시스템 권한, 내선번호 수정 가능
  */
 @Builder
-public record EmpDeptManagerUpdateRequest(
+public record EmpUpdateRequestByDeptManager (
 
         Long targetEmpId,
 
@@ -27,7 +27,7 @@ public record EmpDeptManagerUpdateRequest(
 
 ) {
 
-    public EmpDeptManagerUpdateRequest {
+    public EmpUpdateRequestByDeptManager {
         requireNonNull(deptManagerId, "부서매니저 사원 ID 필수");
         requireNonNull(targetEmpId, "수정대상 사원 ID 필수");
         state(systemRoleCode != null || extensionNo != null, "변경된 정보가 없습니다.");

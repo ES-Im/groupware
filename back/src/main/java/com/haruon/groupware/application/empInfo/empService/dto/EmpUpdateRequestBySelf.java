@@ -12,7 +12,7 @@ import static org.springframework.util.Assert.state;
  * - 본인의 내선번호, 비밀번호
  */
 @Builder
-public record EmpSelfUpdateRequest(
+public record EmpUpdateRequestBySelf (
 
         Long empId,
 
@@ -31,7 +31,7 @@ public record EmpSelfUpdateRequest(
         EmpFileStatusChangeParam fileStatusParam
 ) {
 
-    public EmpSelfUpdateRequest {
+    public EmpUpdateRequestBySelf {
         requireNonNull(empId, "사원의 targetEmpId(PK) 필수");
         requireNonNull(currentPassword);
         state(!currentPassword.isBlank(), "현재 비밀번호는 공백이 될 수 없음");

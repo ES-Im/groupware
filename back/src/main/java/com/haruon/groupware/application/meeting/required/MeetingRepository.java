@@ -19,4 +19,7 @@ public interface MeetingRepository extends Repository<Meeting, Long> {
     List<Meeting> findMeetingByMeetingDateAfterAndMeetingRoom(LocalDate date, MeetingRoom room);
 
     Optional<Meeting> findBySourceKey(String sourceKey);
+
+    void deleteAll();
+
 }

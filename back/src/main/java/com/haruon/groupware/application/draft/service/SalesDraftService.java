@@ -8,10 +8,12 @@ import com.haruon.groupware.application.draft.service.dto.CommonDraftUpdateReque
 import com.haruon.groupware.application.draft.service.dto.SalesDraftCreateRequest;
 import com.haruon.groupware.application.draft.service.dto.SalesDraftUpdateRequest;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.franchise.required.FranchiseRepository;
 import com.haruon.groupware.domain.draft.Draft;
 import com.haruon.groupware.domain.draft.SalesDraft;
 import com.haruon.groupware.domain.draft.sub.ApproversParam;
 import com.haruon.groupware.domain.empInfo.Emp;
+import com.haruon.groupware.domain.franchise.Franchise;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -23,20 +25,29 @@ import java.util.List;
 public class SalesDraftService extends CommonDraftService implements SalesDraftManagement {
 
     private final SalesDraftRepository salesDraftRepository;
+    private final FranchiseRepository franchiseRepository;
 
-    public SalesDraftService(EmpRepository empRepository, SalesDraftRepository salesDraftRepository) {
+    public SalesDraftService(
+            EmpRepository empRepository,
+            SalesDraftRepository salesDraftRepository,
+            FranchiseRepository franchiseRepository
+    ) {
         super(empRepository, salesDraftRepository);
         this.salesDraftRepository = salesDraftRepository;
+        this.franchiseRepository = franchiseRepository;
     }
 
     @Override
     public void createDraft(SalesDraftCreateRequest req) {
         CommonDraftCreateRequest commonReq = req.param();
         Emp drafter = findActiveEmpById(commonReq.empId());
-        List<ApproversParam> approvers = requireApprovers(commonReq.approvers());
+        List<ApproversParam> approvers = toApproverParams(commonReq.approvers());
+        Franchise franchise = franchiseRepository.findById(req.franchiseId())
+                .orElseThrow(() -> new IllegalArgumentException("가맹점을 찾을 수 없습니다."));
 
         SalesDraft draft = SalesDraft.createDraft(
                 drafter,
+                franchise,
                 commonReq.title(),
                 commonReq.content(),
                 req.reportMonth(),
@@ -53,9 +64,12 @@ public class SalesDraftService extends CommonDraftService implements SalesDraftM
         Emp drafter = findActiveEmpById(commonReq.empId());
         List<ApproversParam> approvers = requireApprovers(commonReq.approvers());
         LocalDateTime submittedAt = requireSubmittedAt(commonReq.submittedAt());
+        Franchise franchise = franchiseRepository.findById(req.franchiseId())
+                .orElseThrow(() -> new IllegalArgumentException("가맹점을 찾을 수 없습니다."));
 
         SalesDraft draft = SalesDraft.createSubmitted(
                 drafter,
+                franchise,
                 commonReq.title(),
                 commonReq.content(),
                 req.reportMonth(),

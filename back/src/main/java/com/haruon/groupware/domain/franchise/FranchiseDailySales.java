@@ -23,7 +23,7 @@ public class FranchiseDailySales extends AbstractEntity {
     private LocalDate salesDate;
 
     @Column(nullable = false)
-    private double salesAmount;
+    private long salesAmount;
 
     @Column(nullable = false)
     private long orderCount;
@@ -33,7 +33,7 @@ public class FranchiseDailySales extends AbstractEntity {
     private Franchise franchise;
 
     public static FranchiseDailySales create(
-            String externalId, LocalDate salesDate, Double salesAmount, Long orderCount, Franchise franchise
+            String externalId, LocalDate salesDate, Long salesAmount, Long orderCount, Franchise franchise
     ) {
         FranchiseDailySales franchiseDailySales = new FranchiseDailySales();
         state(salesAmount >= 0, "매출액은 0이거나 양수여야한다.");
@@ -51,7 +51,7 @@ public class FranchiseDailySales extends AbstractEntity {
 
     public void replace(
             LocalDate salesDate,
-            Double salesAmount,
+            Long salesAmount,
             Long orderCount
     ) {
         state(salesAmount >= 0, "매출액은 0이거나 양수여야한다.");

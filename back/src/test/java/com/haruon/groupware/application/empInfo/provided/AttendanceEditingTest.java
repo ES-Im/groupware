@@ -249,7 +249,7 @@ record AttendanceEditingTest(
                                 .approvedAt(of(2026, 1, 31, 9, 0, 0))
                                 .build()
                 )
-        ).isInstanceOf(IllegalStateException.class);
+        ).hasMessage("권한이 없습니다.");
     }
 
     @Test
@@ -262,7 +262,7 @@ record AttendanceEditingTest(
         Emp inactiveManager = saveEmpWithRoleAndDept(
                 empRepository, deptRepository, "202601003", "employee3", dept, SystemRoleCode.DEPT_MANAGER
         );
-        inactiveManager.changeResignedEmpInfoByAdmin(LocalDate.of(2026, 1, 20));
+        inactiveManager.changeResignedEmpInfoByHR(LocalDate.of(2026, 1, 20));
 
         empRepository.save(inactiveManager);
         Attendance attendance = saveClosedAttendance(
@@ -616,7 +616,7 @@ record AttendanceEditingTest(
                         , companyPolicy.getEndTime()
                         , notManager
                 )
-        ).isInstanceOf(IllegalStateException.class);
+        ).hasMessage("권한이 없습니다.");
     }
 
     @Test
@@ -629,7 +629,7 @@ record AttendanceEditingTest(
         Emp inactiveManager = saveEmpWithRoleAndDept(
                 empRepository, deptRepository, "202601003", "employee3", dept, SystemRoleCode.DEPT_MANAGER
         );
-        inactiveManager.changeResignedEmpInfoByAdmin(LocalDate.of(2026, 1, 20));
+        inactiveManager.changeResignedEmpInfoByHR(LocalDate.of(2026, 1, 20));
 
         empRepository.save(inactiveManager);
         Attendance attendance = saveClosedAttendance(

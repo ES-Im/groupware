@@ -14,7 +14,7 @@ public record DailySalesRequest(
 
         LocalDate salesDate,
 
-        Double salesAmount,
+        Long salesAmount,
 
         Long orderCount
 ) {

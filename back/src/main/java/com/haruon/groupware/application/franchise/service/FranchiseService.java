@@ -2,7 +2,7 @@ package com.haruon.groupware.application.franchise.service;
 
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
 import com.haruon.groupware.application.franchise.provided.FranchiseManagement;
-import com.haruon.groupware.application.franchise.requried.FranchiseRepository;
+import com.haruon.groupware.application.franchise.required.FranchiseRepository;
 import com.haruon.groupware.application.franchise.service.dto.FranchiseCreateRequest;
 import com.haruon.groupware.application.franchise.service.dto.FranchiseUpdateRequest;
 import com.haruon.groupware.domain.empInfo.Emp;
@@ -13,7 +13,9 @@ import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
 
-import static com.haruon.groupware.application.franchise.service.FranchiseUtils.*;
+import static com.haruon.groupware.application.franchise.service.FranchiseUtils.findFranchiseById;
+import static com.haruon.groupware.application.franchise.service.FranchiseUtils.getFranchiseRoleAssignedEmp;
+import static com.haruon.groupware.application.utils.AuthorizationChecker.checkFranchiseRoleEmp;
 
 @Service
 @Transactional
@@ -42,7 +44,7 @@ public class FranchiseService implements FranchiseManagement {
 
     @Override
     public void updateFranchise(long franchiseId, long updaterId, FranchiseUpdateRequest request) {
-        isFranchiseRoleAssignedEmp(empRepository, updaterId);
+        checkFranchiseRoleEmp(empRepository, updaterId);
         Franchise franchise = findFranchiseById(franchiseRepository, franchiseId);
 
         franchise.changeFranchiseInfo(
@@ -59,7 +61,7 @@ public class FranchiseService implements FranchiseManagement {
 
     @Override
     public void changeFranchiseStatus(long franchiseId, long updaterId, BusinessStatus status) {
-        isFranchiseRoleAssignedEmp(empRepository, updaterId);
+        checkFranchiseRoleEmp(empRepository, updaterId);
         Franchise franchise = findFranchiseById(franchiseRepository, franchiseId);
 
         franchise.changeBusinessStatus(status);
@@ -67,7 +69,7 @@ public class FranchiseService implements FranchiseManagement {
 
     @Override
     public void changeManager(long franchiseId, long updaterId, long newManagerId) {
-        isFranchiseRoleAssignedEmp(empRepository, updaterId);
+        checkFranchiseRoleEmp(empRepository, updaterId);
         Franchise franchise = findFranchiseById(franchiseRepository, franchiseId);
 
         Emp newManager = getFranchiseRoleAssignedEmp(empRepository, newManagerId);
@@ -77,7 +79,7 @@ public class FranchiseService implements FranchiseManagement {
 
     @Override
     public void changeMemo(long franchiseId, long updaterId, String memo) {
-        isFranchiseRoleAssignedEmp(empRepository, updaterId);
+        checkFranchiseRoleEmp(empRepository, updaterId);
         Franchise franchise = findFranchiseById(franchiseRepository, franchiseId);
 
         franchise.changeMemo(memo);
@@ -85,7 +87,7 @@ public class FranchiseService implements FranchiseManagement {
 
     @Override
     public void clearMemo(long franchiseId, long updaterId) {
-        isFranchiseRoleAssignedEmp(empRepository, updaterId);
+        checkFranchiseRoleEmp(empRepository, updaterId);
         Franchise franchise = findFranchiseById(franchiseRepository, franchiseId);
 
         franchise.clearMemo();
@@ -107,7 +109,7 @@ public class FranchiseService implements FranchiseManagement {
         }
 
         if(managerId == null) {
-            isFranchiseRoleAssignedEmp(empRepository, franchiseRegisterId);
+            checkFranchiseRoleEmp(empRepository, franchiseRegisterId);
         }
 
         return manager;

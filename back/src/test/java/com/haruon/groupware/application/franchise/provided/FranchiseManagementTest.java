@@ -3,7 +3,7 @@ package com.haruon.groupware.application.franchise.provided;
 import com.haruon.groupware.application.TestIntegrationConfig;
 import com.haruon.groupware.application.empInfo.required.DeptRepository;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
-import com.haruon.groupware.application.franchise.requried.FranchiseRepository;
+import com.haruon.groupware.application.franchise.required.FranchiseRepository;
 import com.haruon.groupware.application.franchise.service.dto.FranchiseCreateRequest;
 import com.haruon.groupware.application.franchise.service.dto.FranchiseUpdateRequest;
 import com.haruon.groupware.domain.empInfo.Emp;

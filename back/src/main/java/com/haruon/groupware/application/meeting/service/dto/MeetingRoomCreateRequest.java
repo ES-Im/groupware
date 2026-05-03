@@ -7,7 +7,7 @@ import static org.springframework.util.Assert.state;
 
 @Builder
 public record MeetingRoomCreateRequest(
-        Long editor,
+        Long editorId,
         String name,
         String description,
         Integer capacity
@@ -16,7 +16,7 @@ public record MeetingRoomCreateRequest(
         requireNonNull(name);
         requireNonNull(description);
         requireNonNull(capacity);
-        requireNonNull(editor);
+        requireNonNull(editorId);
 
         state(!name.isBlank(), "회의방 이름은 빈칸이 될 수 없음");
         state(!description.isBlank(), "회의 설명은 빈칸이 될 수 없음");

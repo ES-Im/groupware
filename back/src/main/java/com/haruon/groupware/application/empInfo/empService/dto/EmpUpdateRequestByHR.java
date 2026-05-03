@@ -12,14 +12,14 @@ import static java.util.Objects.requireNonNull;
 import static org.springframework.util.Assert.state;
 
 /*
- * 권한 : `Emp.SystemRoleCode` = `ADMIN`
+ * 권한 : `Emp.SystemRoleCode` = `ADMIN` or `HR`
  *   모든 부서 내 사원의 이름, 아이디, 비밀번호, 사무실 직통번호, 재직상태, 시스템 권한
  *   , 입사/퇴직일, 파일 사용여부 수정이 가능하다.
  */
 @Builder
-public record EmpAdminUpdateRequest(
+public record EmpUpdateRequestByHR(
 
-        Long adminId,
+        Long editorId,
 
         Long targetEmpId,
 
@@ -61,8 +61,8 @@ public record EmpAdminUpdateRequest(
 
 ) {
 
-    public EmpAdminUpdateRequest {
-        requireNonNull(adminId, "수정하는 사람의 deptManagerId(PK) 필수");
+    public EmpUpdateRequestByHR {
+        requireNonNull(editorId, "수정하는 사람의 deptManagerId(PK) 필수");
         requireNonNull(targetEmpId, "사원의 targetEmpId(PK) 필수");
 
         if(loginId != null) {

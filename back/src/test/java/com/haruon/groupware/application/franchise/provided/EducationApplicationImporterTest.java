@@ -3,8 +3,8 @@ package com.haruon.groupware.application.franchise.provided;
 import com.haruon.groupware.application.TestIntegrationConfig;
 import com.haruon.groupware.application.empInfo.required.DeptRepository;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
-import com.haruon.groupware.application.franchise.requried.EducationRepository;
-import com.haruon.groupware.application.franchise.requried.FranchiseRepository;
+import com.haruon.groupware.application.franchise.required.EducationRepository;
+import com.haruon.groupware.application.franchise.required.FranchiseRepository;
 import com.haruon.groupware.application.franchise.service.dto.ApplicationRequest;
 import com.haruon.groupware.application.franchise.service.dto.EducationCreateRequest;
 import com.haruon.groupware.domain.empInfo.Emp;
@@ -167,8 +167,6 @@ record EducationApplicationImporterTest(
                         .appliedAt(appliedAt)
                         .build()
         );
-
-        educationRepository.findById(educationId).orElseThrow();
     }
 
 

@@ -9,7 +9,7 @@ import java.util.Set;
  * 회의 예약/취소/정보수정을 담당하는 포트
  */
 public interface MeetingManagement {
-    void reserve(MeetingReserveRequest request);
+    long reserve(MeetingReserveRequest request);
 
     void replaceParticipants(long meetingId, long reserverId, Set<Long> participantIds);
 

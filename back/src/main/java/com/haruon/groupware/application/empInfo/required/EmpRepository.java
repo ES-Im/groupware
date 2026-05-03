@@ -18,4 +18,5 @@ public interface EmpRepository extends Repository<Emp, Long>  {
     void deleteAll();
 
     Optional<Emp> findByEmpNo(String number);
+
 }

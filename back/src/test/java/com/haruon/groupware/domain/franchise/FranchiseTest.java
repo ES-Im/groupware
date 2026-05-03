@@ -127,7 +127,7 @@ class FranchiseTest {
         ).hasMessage("가맹점 권한이 없음");
 
         approvedEmp.getSystemRoles().add(SystemRoleCode.FRANCHISE);
-        approvedEmp.changeResignedEmpInfoByAdmin(LocalDate.of(2026, 5, 1));
+        approvedEmp.changeResignedEmpInfoByHR(LocalDate.of(2026, 5, 1));
 
         assertThatThrownBy(() ->
                 franchise.changeManager(approvedEmp)

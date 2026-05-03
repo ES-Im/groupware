@@ -131,15 +131,15 @@ record DeptManagementTest(
         assertThatThrownBy(() -> {
             String newDeptName = "IT2";
             deptManagement.updateDeptName(foundDept.getId(), newDeptName, foundEmp.getId());
-        }).isInstanceOf(IllegalStateException.class);
+        }).hasMessage("권한이 없습니다.");
 
         assertThatThrownBy(() -> {
             deptManagement.deactivate(foundDept.getId(), foundEmp.getId());
-        }).isInstanceOf(IllegalStateException.class);
+        }).hasMessage("권한이 없습니다.");
 
         assertThatThrownBy(() -> {
             deptManagement.activate(foundDept.getId(), foundEmp.getId());
-        }).isInstanceOf(IllegalStateException.class);
+        }).hasMessage("권한이 없습니다.");
     }
 
 }

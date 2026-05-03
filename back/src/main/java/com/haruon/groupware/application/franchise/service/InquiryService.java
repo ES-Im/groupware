@@ -1,8 +1,8 @@
 package com.haruon.groupware.application.franchise.service;
 
 import com.haruon.groupware.application.franchise.provided.InquiryImporter;
-import com.haruon.groupware.application.franchise.requried.FranchiseInquiryRepository;
-import com.haruon.groupware.application.franchise.requried.FranchiseRepository;
+import com.haruon.groupware.application.franchise.required.FranchiseInquiryRepository;
+import com.haruon.groupware.application.franchise.required.FranchiseRepository;
 import com.haruon.groupware.application.franchise.service.dto.InquiryRequest;
 import com.haruon.groupware.domain.franchise.Franchise;
 import com.haruon.groupware.domain.franchise.FranchiseInquiry;

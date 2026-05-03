@@ -35,7 +35,7 @@ class MeetingTest {
         MeetingRoom room = getMeetingRoom();
         Emp emp  = getApprovedEmp();
         String title = "testTitle";
-        LocalDate date = LocalDate.of(2026,3,3);
+        LocalDate date = LocalDate.now().plusDays(2);
         LocalTime startTime = LocalTime.of(13,0,0);
         LocalTime endTime = LocalTime.of(14,0,0);
         List<Emp> participants = List.of(getApprovedEmp("202601005", "participant1"), getApprovedEmp("202601006", "participant2"));
@@ -405,7 +405,7 @@ class MeetingTest {
         MeetingRoom room = getMeetingRoom();
         Emp emp  = getApprovedEmp();
         String title = "testTitle";
-        LocalDate date = LocalDate.of(2026,3,3);
+        LocalDate date = LocalDate.now().plusDays(2);
         LocalTime startTime = LocalTime.of(13,0,0);
         LocalTime endTime = LocalTime.of(14,0,0);
         List<Emp> participants = List.of(getApprovedEmp("202601005", "participant1"), getApprovedEmp("202601006", "participant2"));
@@ -418,7 +418,7 @@ class MeetingTest {
         MeetingRoom room = getMeetingRoom();
         Emp emp  = getApprovedEmp();
         String title = "testTitle";
-        LocalDate date = LocalDate.of(2026,3,3);
+        LocalDate date = LocalDate.now().plusDays(2);
         LocalTime startTime = LocalTime.of(13,0,0);
         LocalTime endTime = LocalTime.of(14,0,0);
         List<Emp> participants = List.of(participant);

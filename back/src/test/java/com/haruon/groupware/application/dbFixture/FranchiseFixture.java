@@ -3,7 +3,7 @@ package com.haruon.groupware.application.dbFixture;
 import com.haruon.groupware.application.empInfo.required.DeptRepository;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
 import com.haruon.groupware.application.franchise.provided.FranchiseManagement;
-import com.haruon.groupware.application.franchise.requried.FranchiseRepository;
+import com.haruon.groupware.application.franchise.required.FranchiseRepository;
 import com.haruon.groupware.application.franchise.service.dto.FranchiseCreateRequest;
 import com.haruon.groupware.domain.empInfo.Dept;
 import com.haruon.groupware.domain.empInfo.Emp;
@@ -54,7 +54,7 @@ public class FranchiseFixture {
                 SystemRoleCode.FRANCHISE
         );
 
-        approvedEmp.changeBelongingsByAdmin(
+        approvedEmp.changeBelongingsByHR(
                 dept, null, true, null, null
         );
 
@@ -72,7 +72,7 @@ public class FranchiseFixture {
             FranchiseManagement franchiseManagement
     ) {
 
-        Emp franchiseEmp = getSavedFranchiseEmp(deptRepository, empRepository,"202601001", "franchise1");
+        Emp franchiseEmp = getSavedFranchiseEmp(deptRepository, empRepository,"202601000", "franchise1111");
 
         long franchiseId = franchiseManagement.createFranchise(
                 franchiseEmp.getId(),

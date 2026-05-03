@@ -1,4 +1,4 @@
-package com.haruon.groupware.application.franchise.requried;
+package com.haruon.groupware.application.franchise.required;
 
 import com.haruon.groupware.domain.franchise.FranchiseDailySales;
 import org.springframework.data.repository.Repository;

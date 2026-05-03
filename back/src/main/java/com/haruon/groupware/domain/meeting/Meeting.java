@@ -94,6 +94,8 @@ public class Meeting extends AbstractEventAggregateRoot {
     }
 
     public void cancel() {
+        isEditableDate();
+
         state(!this.isCancel, "이미 취소된 예약임");
         this.isCancel = true;
 
@@ -108,6 +110,8 @@ public class Meeting extends AbstractEventAggregateRoot {
             @Nullable MeetingRoom meetingRoom,
             @Nullable String title
     ) {
+        isEditableDate();
+
         state(!this.isCancel, "취소된 회의 정보를 수정할 수 없음");
         state(meetingDate != null || startAt != null || endAt != null || meetingRoom != null || title != null, "수정된 정보가 없음");
 
@@ -128,6 +132,8 @@ public class Meeting extends AbstractEventAggregateRoot {
     }
 
     public void changeParticipants(List<Emp> newParticipants) {
+        isEditableDate();
+
         requireNonNull(newParticipants, "참여자 목록은 null일 수 없음");
         state(!newParticipants.isEmpty(), "참여자 목록은 비어 있을 수 없음");
         state(!this.isCancel, "취소된 회의 정보를 수정할 수 없음");
@@ -156,7 +162,13 @@ public class Meeting extends AbstractEventAggregateRoot {
         }
     }
 
+    private void isEditableDate() {
+        state(this.meetingDate.isAfter(LocalDate.now()), "익일 이후의 회의건만 수정가능");
+    }
+
     private void addParticipant(Emp emp) {
+        isEditableDate();
+
         requireNonNull(emp, "참여자는 null일 수 없음");
         state(!this.isCancel, "취소된 회의 정보를 수정할 수 없음");
 

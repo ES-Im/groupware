@@ -1,34 +1,34 @@
 package com.haruon.groupware.application.empInfo.provided;
 
-import com.haruon.groupware.application.empInfo.empService.dto.EmpAdminUpdateRequest;
-import com.haruon.groupware.application.empInfo.empService.dto.EmpDeptManagerUpdateRequest;
-import com.haruon.groupware.application.empInfo.empService.dto.EmpRegisterRequest;
-import com.haruon.groupware.application.empInfo.empService.dto.EmpSelfUpdateRequest;
+import com.haruon.groupware.application.empInfo.empService.dto.EmpRegisterRequestBySelf;
+import com.haruon.groupware.application.empInfo.empService.dto.EmpUpdateRequestByDeptManager;
+import com.haruon.groupware.application.empInfo.empService.dto.EmpUpdateRequestByHR;
+import com.haruon.groupware.application.empInfo.empService.dto.EmpUpdateRequestBySelf;
 
 /**
  * 사원관련 정보 등록 및 수정, 삭제
  */
 public interface EmpAccountManager {
     
-    void registerEmp(EmpRegisterRequest request);
+    void registerEmp(EmpRegisterRequestBySelf request);
 
-    void approveRegisterByAdmin(EmpAdminUpdateRequest adminRequest);
+    void approveRegisterByHR(EmpUpdateRequestByHR request);
 
-    void updateResignedEmpByAdmin(EmpAdminUpdateRequest adminRequest);
+    void updateResignedEmpByHR(EmpUpdateRequestByHR request);
 
-    void updateInfoBySelf(EmpSelfUpdateRequest request);
+    void updateInfoBySelf(EmpUpdateRequestBySelf request);
 
-    void updateInfoByDeptManager(EmpDeptManagerUpdateRequest request);
+    void updateInfoByDeptManager(EmpUpdateRequestByDeptManager request);
 
-    void updateInfoByAdmin(EmpAdminUpdateRequest request);
+    void updateInfoByHR(EmpUpdateRequestByHR request);
 
-    void activateEmpByAdmin(Long adminId, Long targetId);
+    void activateEmpByHR(Long editorId, Long targetId);
 
-    void deleteEmpFile(Long empId, Long fileId);
+    void deleteEmpFileBySelf(Long empId, Long fileId);
 
-    void updateEmpFileBySelf(EmpSelfUpdateRequest request);
+    void updateEmpFileBySelf(EmpUpdateRequestBySelf request);
 
-    void updateFileActiveStatus(EmpAdminUpdateRequest request);
+    void updateFileActiveStatusByHR(EmpUpdateRequestByHR request);
 
-    void updateFileActiveStatus(EmpSelfUpdateRequest request);
+    void updateFileActiveStatusBySelf(EmpUpdateRequestBySelf request);
 }

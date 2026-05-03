@@ -10,4 +10,7 @@ public interface MeetingRoomRepository extends Repository<MeetingRoom, Long>  {
     Optional<MeetingRoom> findById(long roomId);
 
     MeetingRoom save(MeetingRoom room);
+
+    void deleteAll();
+
 }

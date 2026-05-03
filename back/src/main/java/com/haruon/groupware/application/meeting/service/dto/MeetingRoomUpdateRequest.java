@@ -8,7 +8,7 @@ import static org.springframework.util.Assert.state;
 @Builder
 public record MeetingRoomUpdateRequest (
         Long roomId,
-        Long adminId,
+        Long editorId,
 
         @Nullable String name,
         @Nullable String description,

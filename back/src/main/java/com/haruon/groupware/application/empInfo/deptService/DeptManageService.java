@@ -3,7 +3,7 @@ package com.haruon.groupware.application.empInfo.deptService;
 import com.haruon.groupware.application.empInfo.provided.DeptManagement;
 import com.haruon.groupware.application.empInfo.required.DeptRepository;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
-import com.haruon.groupware.application.utils.Utils;
+import com.haruon.groupware.application.utils.AuthorizationChecker;
 import com.haruon.groupware.domain.empInfo.Dept;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +21,7 @@ public class DeptManageService implements DeptManagement {
 
     @Override
     public void registerDept(DeptRegisterRequest adminRequest) {
-        Utils.checkAdminById(empRepository, adminRequest.adminId());
+        AuthorizationChecker.checkAdminById(empRepository, adminRequest.adminId());
         requireNonNull(adminRequest);
         checkDuplicateDeptCode(adminRequest.deptName());
 
@@ -36,7 +36,7 @@ public class DeptManageService implements DeptManagement {
 
     @Override
     public void activate(Long deptId, Long adminId) {
-        Utils.checkAdminById(empRepository, adminId);
+        AuthorizationChecker.checkAdminById(empRepository, adminId);
         Dept dept = getDept(deptId);
 
         dept.activate();
@@ -44,7 +44,7 @@ public class DeptManageService implements DeptManagement {
 
     @Override
     public void deactivate(Long deptId, Long adminId) {
-        Utils.checkAdminById(empRepository, adminId);
+        AuthorizationChecker.checkAdminById(empRepository, adminId);
         Dept dept = getDept(deptId);
 
         dept.deactivate();
@@ -52,7 +52,7 @@ public class DeptManageService implements DeptManagement {
 
     @Override
     public void updateDeptName(Long deptId, String newDeptName, Long adminId) {
-        Utils.checkAdminById(empRepository, adminId);
+        AuthorizationChecker.checkAdminById(empRepository, adminId);
         checkDuplicateDeptCode(newDeptName);
 
         Dept dept = getDept(deptId);

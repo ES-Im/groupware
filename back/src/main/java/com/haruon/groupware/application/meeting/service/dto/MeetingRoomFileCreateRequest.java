@@ -2,17 +2,17 @@ package com.haruon.groupware.application.meeting.service.dto;
 
 import com.haruon.groupware.application.utils.FileDto;
 import com.haruon.groupware.application.utils.FileValidator;
-import jakarta.validation.Valid;
+import lombok.Builder;
 
 import java.util.Set;
 
 import static java.util.Objects.requireNonNull;
 
+@Builder
 public record MeetingRoomFileCreateRequest(
         Long meetingRoomId,
         Long editorId,
 
-        @Valid
         FileDto file
 
 ) {

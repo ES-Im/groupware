@@ -2,6 +2,9 @@ package com.haruon.groupware.domain.draft;
 
 import com.haruon.groupware.domain.draft.sub.ApprovalRole;
 import com.haruon.groupware.domain.draft.sub.ApproversParam;
+import com.haruon.groupware.domain.empInfo.Emp;
+import com.haruon.groupware.domain.empInfo.enums.PositionCode;
+import com.haruon.groupware.domain.empInfo.enums.SystemRoleCode;
 import lombok.Builder;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -9,11 +12,14 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static com.haruon.groupware.domain.franchise.franchiseFixture.getFranchise;
+import static com.haruon.groupware.domain.shared.DeptFixture.getDept;
 import static com.haruon.groupware.domain.shared.EmpFixture.getApprovedEmp;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -122,7 +128,7 @@ class SalesDraftTest {
 
     private static SalesDraft getSalesDraft(YearMonth reportMonth, Long salesAmount) {
         return SalesDraft.createDraft(
-                getApprovedEmp(), "title", "content",
+                getFranchiseEmp(), getFranchise(), "title", "content",
                 reportMonth, salesAmount,
                 List.of(new ApproversParam(ApprovalRole.APPROVER, 1, getApprovedEmp("202601101", "approver")))
         );
@@ -130,11 +136,33 @@ class SalesDraftTest {
 
     private static SalesDraft getSalesSubmitted(YearMonth reportMonth, Long salesAmount) {
         return SalesDraft.createSubmitted(
-                getApprovedEmp(), "title", "content",
+                getFranchiseEmp(), getFranchise(), "title", "content",
                 reportMonth, salesAmount,
                 List.of(new ApproversParam(ApprovalRole.APPROVER, 1, getApprovedEmp("202601101", "approver"))),
                 LocalDateTime.of(2026,4,1,0,0,0)
         );
+    }
+
+    private static Emp getFranchiseEmp() {
+        Emp approvedEmp = getApprovedEmp();
+
+        approvedEmp.changeBelongingsByHR(
+                getDept(),
+                PositionCode.STAFF,
+                true,
+                LocalDate.of(2026, 1, 1),
+                null
+        );
+
+        approvedEmp.changeInfoByHR(
+                null, null,
+                null, null,
+                null, null,
+                SystemRoleCode.FRANCHISE,
+                null, null
+        );
+
+        return approvedEmp;
     }
 
 }

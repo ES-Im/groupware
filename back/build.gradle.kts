@@ -15,6 +15,8 @@ group = "com.haruon"
 version = "0.0.1-SNAPSHOT"
 description = "groupware"
 
+val querydslVersion = "7.1"
+
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
@@ -82,10 +84,12 @@ dependencies {
     errorprone("com.uber.nullaway:nullaway:0.13.1")
 
     // openFeign queryDSL(7.x)
-    implementation("io.github.openfeign.querydsl:querydsl-jpa:7.1")
+    implementation("io.github.openfeign.querydsl:querydsl-jpa:${querydslVersion}")
     // Q-class generation
-    annotationProcessor("io.github.openfeign.querydsl:querydsl-apt:7.1:jakarta")
+    annotationProcessor("io.github.openfeign.querydsl:querydsl-apt:${querydslVersion}:jakarta")
     annotationProcessor("jakarta.persistence:jakarta.persistence-api")
+    annotationProcessor("jakarta.annotation:jakarta.annotation-api")
+
 
 }
 

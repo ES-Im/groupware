@@ -8,6 +8,6 @@ import com.haruon.groupware.application.schedule.service.ScheduleCreateRequest;
 public interface ScheduleRegister {
 
     /** return : 등록된 일정 건수 */
-    void registerSchedules(ScheduleCreateRequest param);
+    String registerSchedules(ScheduleCreateRequest param);
 
 }

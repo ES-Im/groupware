@@ -1,5 +1,6 @@
 package com.haruon.groupware.application.meeting.service.dto;
 
+import lombok.Builder;
 import org.jspecify.annotations.Nullable;
 
 import java.time.LocalDate;
@@ -8,6 +9,7 @@ import java.time.LocalTime;
 import static java.util.Objects.requireNonNull;
 import static org.springframework.util.Assert.state;
 
+@Builder
 public record MeetingUpdateRequest(
 
         Long meetingId,

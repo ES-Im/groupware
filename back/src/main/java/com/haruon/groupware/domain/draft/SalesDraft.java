@@ -2,6 +2,8 @@ package com.haruon.groupware.domain.draft;
 
 import com.haruon.groupware.domain.draft.sub.ApproversParam;
 import com.haruon.groupware.domain.empInfo.Emp;
+import com.haruon.groupware.domain.empInfo.enums.EmpStatus;
+import com.haruon.groupware.domain.empInfo.enums.SystemRoleCode;
 import com.haruon.groupware.domain.franchise.Franchise;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -34,19 +36,22 @@ public class SalesDraft extends Draft {
 
     private SalesDraft(String title, String content, Emp emp) {
         super(title, content, emp);
+        state(emp.getStatus().equals(EmpStatus.ACTIVE), "활성화된 사원이 아님");
+        state(emp.getSystemRoles().contains(SystemRoleCode.FRANCHISE), "가맹점 권한이 없음");
     }
 
     public static SalesDraft createDraft(
             Emp emp,
+            Franchise franchise,
             String title,
             String content,
             YearMonth reportMonth,
             Long salesAmount,
-            List<ApproversParam> approvers
+            @Nullable List<ApproversParam> approvers
     ) {
         SalesDraft salesDraft = new SalesDraft(title, content, emp);
 
-        salesDraft.init(reportMonth, salesAmount);
+        salesDraft.init(reportMonth, salesAmount, franchise);
         salesDraft.createDraftApproval(approvers);
 
         return salesDraft;
@@ -54,6 +59,7 @@ public class SalesDraft extends Draft {
 
     public static SalesDraft createSubmitted(
             Emp emp,
+            Franchise franchise,
             String title,
             String content,
             YearMonth reportMonth,
@@ -63,7 +69,7 @@ public class SalesDraft extends Draft {
     ) {
         SalesDraft salesDraft = new SalesDraft(title, content, emp);
 
-        salesDraft.init(reportMonth, salesAmount);
+        salesDraft.init(reportMonth, salesAmount, franchise);
         salesDraft.createSubmittedApproval(approvers, submittedAt);
 
         return salesDraft;
@@ -87,12 +93,13 @@ public class SalesDraft extends Draft {
     }
 
     private void init(
-            YearMonth reportMonth, Long salesAmount
+            YearMonth reportMonth, Long salesAmount, Franchise franchise
     ) {
         validateSalesInitParam(reportMonth, salesAmount);
 
         this.reportMonth = reportMonth;
         this.salesAmount = salesAmount;
+        this.franchise = franchise;
     }
 
     private static void validateSalesInitParam(YearMonth reportMonth, Long salesAmount) {

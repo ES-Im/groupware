@@ -18,8 +18,8 @@ import java.time.ZoneId;
 import java.util.List;
 import java.util.Set;
 
-import static com.haruon.groupware.application.meeting.service.MeetingRoomService.findMeetingRoom;
-import static com.haruon.groupware.application.utils.Utils.findActiveEmpById;
+import static com.haruon.groupware.application.meeting.service.MeetingRoomService.findActiveMeetingRoom;
+import static com.haruon.groupware.application.utils.AuthorizationChecker.findActiveEmpById;
 import static com.haruon.groupware.application.utils.Utils.getEmpListById;
 
 /**
@@ -36,8 +36,8 @@ public class MeetingService implements MeetingManagement {
     private final MeetingRoomRepository meetingRoomRepository;
 
     @Override
-    public void reserve(MeetingReserveRequest request) {
-        MeetingRoom room = findMeetingRoom(meetingRoomRepository, request.meetingRoomId());
+    public long reserve(MeetingReserveRequest request) {
+        MeetingRoom room = findActiveMeetingRoom(meetingRoomRepository, request.meetingRoomId());
         Emp reserver = findActiveEmpById(empRepository, request.reserverId());
         List<Emp> participants = getEmpListById(empRepository, request.participantIds());
 
@@ -45,7 +45,7 @@ public class MeetingService implements MeetingManagement {
                 room, reserver, request.title(), request.meetingDate(), request.startAt(), request.endAt(), participants
         );
 
-        meetingRepository.save(reservedMeeting);
+        return meetingRepository.save(reservedMeeting).getId();
     }
 
     @Override
@@ -69,7 +69,7 @@ public class MeetingService implements MeetingManagement {
         MeetingRoom meetingRoom = null;
 
         if(request.meetingRoomId() != null) {
-            meetingRoom = findMeetingRoom(meetingRoomRepository, request.meetingRoomId());
+            meetingRoom = findActiveMeetingRoom(meetingRoomRepository, request.meetingRoomId());
         }
 
         meeting.changeReservationInfo(
@@ -98,9 +98,6 @@ public class MeetingService implements MeetingManagement {
         return meetingRepository.findByIdAndEmpId(meetingId, reserverId)
                 .orElseThrow(() -> new IllegalArgumentException("조회된 회의가 없음"));
     }
-
-
-
 
 
 }

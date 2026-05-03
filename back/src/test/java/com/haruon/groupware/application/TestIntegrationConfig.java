@@ -17,4 +17,5 @@ import java.lang.annotation.Target;
 @TestConstructor(autowireMode = TestConstructor.AutowireMode.ALL)
 @Import(TestBeanConfig.class)
 public @interface TestIntegrationConfig {
+
 }

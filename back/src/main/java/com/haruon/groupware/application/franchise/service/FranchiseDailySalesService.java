@@ -1,8 +1,8 @@
 package com.haruon.groupware.application.franchise.service;
 
 import com.haruon.groupware.application.franchise.provided.FranchiseDailySalesImporter;
-import com.haruon.groupware.application.franchise.requried.FranchiseDailySalesRepository;
-import com.haruon.groupware.application.franchise.requried.FranchiseRepository;
+import com.haruon.groupware.application.franchise.required.FranchiseDailySalesRepository;
+import com.haruon.groupware.application.franchise.required.FranchiseRepository;
 import com.haruon.groupware.application.franchise.service.dto.DailySalesRequest;
 import com.haruon.groupware.domain.franchise.Franchise;
 import com.haruon.groupware.domain.franchise.FranchiseDailySales;

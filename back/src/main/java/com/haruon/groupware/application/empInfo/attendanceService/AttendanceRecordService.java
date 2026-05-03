@@ -3,7 +3,7 @@ package com.haruon.groupware.application.empInfo.attendanceService;
 import com.haruon.groupware.application.empInfo.provided.AttendanceRecord;
 import com.haruon.groupware.application.empInfo.required.AttendanceRepository;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
-import com.haruon.groupware.application.utils.Utils;
+import com.haruon.groupware.application.utils.AuthorizationChecker;
 import com.haruon.groupware.domain.empInfo.Attendance;
 import com.haruon.groupware.domain.empInfo.Emp;
 import jakarta.transaction.Transactional;
@@ -27,7 +27,7 @@ public class AttendanceRecordService implements AttendanceRecord {
 
     @Override
     public void recordCheckIn(Long empId, LocalDateTime checkInAt) {
-        Emp emp = Utils.findActiveEmpById(empRepository, empId);
+        Emp emp = AuthorizationChecker.findActiveEmpById(empRepository, empId);
         emp.ensureActive();
 
         Attendance attendance = registerAttendanceByEmp(emp, checkInAt);

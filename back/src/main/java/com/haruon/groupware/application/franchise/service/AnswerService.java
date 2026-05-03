@@ -2,7 +2,7 @@ package com.haruon.groupware.application.franchise.service;
 
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
 import com.haruon.groupware.application.franchise.provided.AnswerManagement;
-import com.haruon.groupware.application.franchise.requried.FranchiseInquiryRepository;
+import com.haruon.groupware.application.franchise.required.FranchiseInquiryRepository;
 import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.franchise.FranchiseInquiry;
 import jakarta.transaction.Transactional;

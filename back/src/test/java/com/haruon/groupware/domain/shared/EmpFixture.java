@@ -61,7 +61,7 @@ public class EmpFixture {
         Emp emp = getRegisteredEmp("202601999", "Admin");
         emp.approveRegister(LocalDate.of(2026, 1, 1));
 
-        emp.changeInfoByAdmin(
+        emp.changeInfoByHR(
                 null,
                 null,
                 null,
@@ -78,7 +78,7 @@ public class EmpFixture {
     }
 
     public static void addBelongings(Emp emp) {
-        emp.changeBelongingsByAdmin(
+        emp.changeBelongingsByHR(
                 getDept(),
                 PositionCode.STAFF,
                 true,

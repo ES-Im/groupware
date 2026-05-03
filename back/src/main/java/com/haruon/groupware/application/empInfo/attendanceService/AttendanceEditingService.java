@@ -6,6 +6,7 @@ import com.haruon.groupware.application.empInfo.provided.AttendanceEditing;
 import com.haruon.groupware.application.empInfo.required.AttendanceRepository;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
 import com.haruon.groupware.application.schedule.provided.ScheduleRegister;
+import com.haruon.groupware.application.utils.AuthorizationChecker.DeptManagerInfo;
 import com.haruon.groupware.application.utils.CompanyPolicyPort;
 import com.haruon.groupware.domain.empInfo.Attendance;
 import com.haruon.groupware.domain.empInfo.Emp;
@@ -15,11 +16,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalTime;
-import java.util.Map;
 
 import static com.haruon.groupware.application.empInfo.attendanceService.AttendanceUtils.findAttendanceById;
 import static com.haruon.groupware.application.empInfo.attendanceService.AttendanceUtils.getStatusByRecognizedHours;
-import static com.haruon.groupware.application.utils.Utils.checkDeptManagerById;
+import static com.haruon.groupware.application.utils.AuthorizationChecker.checkDeptManagerById;
 import static org.springframework.util.Assert.state;
 
 @Service
@@ -35,12 +35,12 @@ public class AttendanceEditingService implements AttendanceEditing {
 
     @Override
     public void updateApproveAttendance(ApproveAttendanceByDeptManagerParam param) {
-        Map<String, Emp> empMap = checkDeptManagerById(empRepository, param.approverId(), param.targetEmpId());
+        DeptManagerInfo deptManagerInfo = checkDeptManagerById(empRepository, param.approverId(), param.targetEmpId());
 
         Attendance attendance = findAttendanceById(attendanceRepository, param.attendanceId());
 
-        Emp manager = empMap.get("manager");
-        Emp targetEmp = empMap.get("targetEmp");
+        Emp manager = deptManagerInfo.manager();
+        Emp targetEmp = deptManagerInfo.targetEmp();
 
         state(targetEmp.getId().equals(attendance.getEmp().getId()),
                 "해당 사원의 근태가 아님");
@@ -50,10 +50,10 @@ public class AttendanceEditingService implements AttendanceEditing {
 
     @Override
     public void updateAttendanceByDeptManager(EditAttendanceByDeptManagerParam param) {
-        Map<String, Emp> empMap = checkDeptManagerById(empRepository, param.editorId(), param.targetEmpId());
+        DeptManagerInfo deptManagerInfo = checkDeptManagerById(empRepository, param.editorId(), param.targetEmpId());
         Attendance attendance = findAttendanceById(attendanceRepository, param.attendanceId());
-        Emp editor = empMap.get("manager");
-        Emp targetEmp = empMap.get("targetEmp");
+        Emp manager = deptManagerInfo.manager();
+        Emp targetEmp = deptManagerInfo.targetEmp();
 
         state(targetEmp.getId().equals(attendance.getEmp().getId()),
                 "해당 사원의 근태가 아님");
@@ -86,7 +86,7 @@ public class AttendanceEditingService implements AttendanceEditing {
                 editedStatus,
                 param.editedAt(),
                 param.editReason(),
-                editor
+                manager
         );
 
     }

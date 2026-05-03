@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 
-import static com.haruon.groupware.application.utils.Utils.checkAdminById;
+import static com.haruon.groupware.application.utils.AuthorizationChecker.checkAdminById;
 
 @Service
 @Transactional

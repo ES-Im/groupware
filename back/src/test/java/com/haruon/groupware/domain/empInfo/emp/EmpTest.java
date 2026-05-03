@@ -90,7 +90,7 @@ class EmpTest {
         Emp resignedEmp = getApprovedEmp();
         addBelongings(resignedEmp);
 
-        resignedEmp.changeResignedEmpInfoByAdmin(resignedAt);
+        resignedEmp.changeResignedEmpInfoByHR(resignedAt);
 
         assertThat(resignedEmp.getResignedAt()).isEqualTo(resignedAt);
         assertThat(resignedEmp.getStatus()).isEqualTo(EmpStatus.RESIGNED);
@@ -260,7 +260,7 @@ class EmpTest {
         String beforePassword = emp.getEmpPassword();
 
         // when
-        emp.changeInfoByAdmin(
+        emp.changeInfoByHR(
                 params.empName(),
                 params.empId(),
                 createEmail(params.empId(), params.companyDomain()),
@@ -374,7 +374,7 @@ class EmpTest {
         Emp emp = getApprovedEmp();
         Dept dept = getDept();
 
-        emp.changeBelongingsByAdmin(
+        emp.changeBelongingsByHR(
                 dept,
                 PositionCode.STAFF,
                 true,
@@ -400,7 +400,7 @@ class EmpTest {
 
         addBelongings(emp);
 
-        emp.changeBelongingsByAdmin(
+        emp.changeBelongingsByHR(
                 null,
                 null,
                 false,
@@ -442,7 +442,7 @@ class EmpTest {
         Emp emp = getApprovedEmp();
         addBelongings(emp);
 
-        emp.changeBelongingsByAdmin(
+        emp.changeBelongingsByHR(
                 param.dept(), param.position(), param.isPrimary(), param.startAt(), param.endAt()
         );
     }
@@ -453,7 +453,7 @@ class EmpTest {
         Emp emp = getApprovedEmp();
 
         assertThatThrownBy(() ->
-                emp.changeBelongingsByAdmin(
+                emp.changeBelongingsByHR(
                         null, PositionCode.DIRECTOR, true, LocalDate.of(2026, 4, 1), null
                 )
         ).isInstanceOf(Exception.class);
@@ -463,12 +463,12 @@ class EmpTest {
     @DisplayName("주 소속정보를 바꾸면 다른 주 소속정보는 비활성화 된다.")
     void updatePrimaryBelonging_test() {
         Emp emp = getApprovedEmp();
-        emp.changeBelongingsByAdmin(
+        emp.changeBelongingsByHR(
                 Dept.registerDept("firstDept", "first"),
                 PositionCode.DIRECTOR, true, LocalDate.of(2026, 4, 1), null
         );
 
-        emp.changeBelongingsByAdmin(
+        emp.changeBelongingsByHR(
                 Dept.registerDept("secondDept", "second"),
                 PositionCode.DIRECTOR, true, LocalDate.of(2026, 4, 1), null
         );
@@ -496,7 +496,7 @@ class EmpTest {
     void validate_Password_success() {
         Emp emp =  getApprovedEmp();
 
-        emp.changeInfoByAdmin(
+        emp.changeInfoByHR(
                 null,
                 null,
                 null,
@@ -547,7 +547,7 @@ class EmpTest {
         ).isInstanceOf(IllegalStateException.class);
 
         assertThatThrownBy(() ->
-            registeredEmp.changeInfoByAdmin(
+            registeredEmp.changeInfoByHR(
                     null,
                     null,
                     null,
@@ -580,7 +580,7 @@ class EmpTest {
         ).isInstanceOf(IllegalStateException.class);
 
         assertThatThrownBy(() ->
-            approvedEmp.changeInfoByAdmin(
+            approvedEmp.changeInfoByHR(
                     null,
                     null,
                     null,

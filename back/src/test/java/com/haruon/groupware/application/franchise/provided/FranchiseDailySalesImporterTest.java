@@ -3,8 +3,8 @@ package com.haruon.groupware.application.franchise.provided;
 import com.haruon.groupware.application.TestIntegrationConfig;
 import com.haruon.groupware.application.empInfo.required.DeptRepository;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
-import com.haruon.groupware.application.franchise.requried.FranchiseDailySalesRepository;
-import com.haruon.groupware.application.franchise.requried.FranchiseRepository;
+import com.haruon.groupware.application.franchise.required.FranchiseDailySalesRepository;
+import com.haruon.groupware.application.franchise.required.FranchiseRepository;
 import com.haruon.groupware.application.franchise.service.dto.DailySalesRequest;
 import com.haruon.groupware.domain.franchise.Franchise;
 import com.haruon.groupware.domain.franchise.FranchiseDailySales;
@@ -48,7 +48,7 @@ record FranchiseDailySalesImporterTest(
 
         String externalId = "external";
         LocalDate salesDate = LocalDate.of(2026,4,1);
-        Double salesAmount = 1000000.0;
+        Long salesAmount = 1000000L;
         Long orderCount = 100L;
 
         long salesId = importer.importDailySales(
@@ -87,13 +87,13 @@ record FranchiseDailySalesImporterTest(
                 DailySalesRequest.builder()
                         .externalId(externalId)
                         .salesDate(LocalDate.of(2026,4,1))
-                        .salesAmount(1000000.0)
+                        .salesAmount(1000000L)
                         .orderCount(100L)
                         .build()
         );
 
         LocalDate newSalesDate = LocalDate.of(2026,4,1);
-        Double newSalesAmount = 0.0;
+        Long newSalesAmount = 0L;
         Long newOrderCount = 0L;
 
         importer.importDailySales(
@@ -136,13 +136,13 @@ record FranchiseDailySalesImporterTest(
                 DailySalesRequest.builder()
                         .externalId(externalId)
                         .salesDate(LocalDate.of(2026,4,1))
-                        .salesAmount(1000000.0)
+                        .salesAmount(1000000L)
                         .orderCount(100L)
                         .build()
         );
 
         LocalDate newSalesDate = LocalDate.of(2026,4,1);
-        Double newSalesAmount = 0.0;
+        Long newSalesAmount = 0L;
 
         assertThrows(NullPointerException.class, () ->
             importer.importDailySales(

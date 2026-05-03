@@ -78,5 +78,10 @@ public class TestBeanConfig {
             }
         };
     }
-
+//
+//    @Bean
+//    @Primary
+//    public JPAQueryFactory jpaQueryFactory(EntityManager em) {
+//        return new JPAQueryFactory(em);
+//    }
 }

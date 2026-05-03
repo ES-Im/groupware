@@ -7,7 +7,7 @@ import static java.util.Objects.requireNonNull;
 import static org.springframework.util.Assert.state;
 
 @Builder
-public record EmpRegisterRequest(
+public record EmpRegisterRequestBySelf (
 
         String empNo,
 
@@ -17,7 +17,7 @@ public record EmpRegisterRequest(
 
         String rawPassword
 ) {
-        public EmpRegisterRequest {
+        public EmpRegisterRequestBySelf {
                 requireNonNull(empNo);
                 requireNonNull(empName);
                 requireNonNull(loginId);

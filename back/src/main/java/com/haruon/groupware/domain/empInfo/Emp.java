@@ -97,7 +97,7 @@ public class Emp extends AbstractEntity {
         this.hiredAt = requireNonNull(hiredAt);
     }
 
-    public void changeResignedEmpInfoByAdmin(LocalDate resignedAt) {
+    public void changeResignedEmpInfoByHR(LocalDate resignedAt) {
         requireNonNull(resignedAt, "퇴사일이 입력되지 않았습니다");
         state(hiredAt != null && resignedAt.isAfter(this.hiredAt), "퇴사일은 입사일 이후여야 합니다.");
 
@@ -160,7 +160,7 @@ public class Emp extends AbstractEntity {
 
     }
 
-    public void changeBelongingsByAdmin (
+    public void changeBelongingsByHR (
             @Nullable Dept dept,
             @Nullable PositionCode position,
             @Nullable Boolean isPrimary,
@@ -232,7 +232,7 @@ public class Emp extends AbstractEntity {
 
     }
 
-    public void changeInfoByAdmin(
+    public void changeInfoByHR(
             @Nullable String empName,
             @Nullable String loginId,
             @Nullable Email email,
@@ -269,12 +269,8 @@ public class Emp extends AbstractEntity {
         this.status = EmpStatus.ACTIVE;
     }
 
-    public boolean isAdmin() {
-        return this.getSystemRoles().contains(SystemRoleCode.ADMIN);
-    }
-
-    public boolean isDeptManager() {
-        return this.getSystemRoles().contains(SystemRoleCode.DEPT_MANAGER) || this.isAdmin();
+    public boolean isHR() {
+        return this.getSystemRoles().contains(SystemRoleCode.HR);
     }
 
     private void changeEmpStatus(EmpStatus newEmpStatus) {

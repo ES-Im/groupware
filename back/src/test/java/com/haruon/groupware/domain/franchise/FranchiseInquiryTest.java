@@ -106,7 +106,7 @@ class FranchiseInquiryTest {
         FranchiseInquiry inquiry = getFranchiseInquiry(franchise);
         Emp assignedEmp = getApprovedEmp();
         assignedEmp.getSystemRoles().add(SystemRoleCode.FRANCHISE);
-        assignedEmp.changeResignedEmpInfoByAdmin(LocalDate.now());
+        assignedEmp.changeResignedEmpInfoByHR(LocalDate.now());
 
         assertThatThrownBy(() ->
                 inquiry.assign(assignedEmp)
