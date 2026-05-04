@@ -331,18 +331,18 @@ record AttendanceEditingTest(
         long requiredHalfWorkMinutes = requiredWorkMinutes / 2;
 
         return Stream.of(
-//                Arguments.of(
-//                        "반차 포함 근태시간 변경 시, 필요 근로시간의 100%를 만족하면 정상근무",
-//                        companyStartTime, companyStartTime.plusMinutes(requiredHalfWorkMinutes),
-//                        leaveStartAt, leaveEndAt,
-//                        AttendanceStatus.NORMAL
-//                ),
-//                Arguments.of(
-//                        "반차 포함 근태시간 변경 시, 필요 근로시간의 50%이상 100%미만이면 지각 및 조퇴",
-//                        companyStartTime, companyStartTime.plusMinutes(requiredHalfWorkMinutes / 2),
-//                        leaveStartAt, leaveEndAt,
-//                        AttendanceStatus.LATE_EARLY
-//                ),
+                Arguments.of(
+                        "반차 포함 근태시간 변경 시, 필요 근로시간의 100%를 만족하면 정상근무",
+                        companyStartTime, companyStartTime.plusMinutes(requiredHalfWorkMinutes),
+                        leaveStartAt, leaveEndAt,
+                        AttendanceStatus.NORMAL
+                ),
+                Arguments.of(
+                        "반차 포함 근태시간 변경 시, 필요 근로시간의 50%이상 100%미만이면 지각 및 조퇴",
+                        companyStartTime, companyStartTime.plusMinutes(requiredHalfWorkMinutes / 2),
+                        leaveStartAt, leaveEndAt,
+                        AttendanceStatus.LATE_EARLY
+                ),
                 Arguments.of(
                         "반차 포함 근태시간 변경 시, 필요 근로시간의 50%미만이면 결근",
                         companyStartTime, companyStartTime.plusMinutes((requiredHalfWorkMinutes / 2) - 1),
@@ -379,7 +379,7 @@ record AttendanceEditingTest(
                 "any", ScheduleType.LEAVE,
                 targetEmp, "반차", "내용",
                 date, leaveStartTime, leaveEndTime,
-                false, false
+                false
         );
 
         scheduleRepository.save(schedule);

@@ -43,11 +43,9 @@ public class QSchedule extends EntityPathBase<Schedule> {
 
     public final BooleanPath isCanceled = createBoolean("isCanceled");
 
-    public final BooleanPath isPublic = createBoolean("isPublic");
-
     public final DatePath<java.time.LocalDate> scheduleDate = createDate("scheduleDate", java.time.LocalDate.class);
 
-    public final ListPath<ScheduleParticipant, QScheduleParticipant> scheduleParticipants = this.<ScheduleParticipant, QScheduleParticipant>createList("scheduleParticipants", ScheduleParticipant.class, QScheduleParticipant.class, PathInits.DIRECT2);
+    public final SetPath<ScheduleParticipant, QScheduleParticipant> scheduleParticipants = this.<ScheduleParticipant, QScheduleParticipant>createSet("scheduleParticipants", ScheduleParticipant.class, QScheduleParticipant.class, PathInits.DIRECT2);
 
     public final EnumPath<ScheduleType> scheduleType = createEnum("scheduleType", ScheduleType.class);
 

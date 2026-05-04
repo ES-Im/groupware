@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 
 import static java.util.Objects.requireNonNull;
 
+@Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(
@@ -21,7 +22,6 @@ public class ScheduleParticipant extends AbstractEntity {
     @JoinColumn(name="schedule_id", nullable=false)
     private Schedule schedule;
 
-    @Getter(AccessLevel.PACKAGE)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "participant_id", nullable = false)
     private Emp emp;

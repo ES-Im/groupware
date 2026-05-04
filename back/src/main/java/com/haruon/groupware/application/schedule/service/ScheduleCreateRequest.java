@@ -3,6 +3,8 @@ package com.haruon.groupware.application.schedule.service;
 import lombok.Builder;
 import org.jspecify.annotations.Nullable;
 
+import java.util.UUID;
+
 import static java.util.Objects.requireNonNull;
 
 // 일정 공통 파라미터
@@ -13,15 +15,15 @@ public record ScheduleCreateRequest(
         String sourceKey,
 
         @Nullable
-        ManualScheduleParam manualScheduleParam,
-
-        Boolean isPublic
-
+        ManualScheduleParam manualScheduleParam
 ) {
 
     public ScheduleCreateRequest {
-        requireNonNull(isPublic, "공식 여부는 필수 값");
         if(sourceKey == null) requireNonNull(manualScheduleParam);
         if(manualScheduleParam == null) requireNonNull(sourceKey);
+
+        if(manualScheduleParam != null) {
+            sourceKey = UUID.randomUUID().toString();
+        }
     }
 }

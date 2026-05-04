@@ -168,7 +168,7 @@ record AttendanceClosingTest(
                 "any", ScheduleType.BUSINESS_TRIP,
                 emp, "출장", "내용",
                 date, tripStartAt, tripEndAt,
-                false, false
+                false
         );
         scheduleRepository.save(schedule);
 
@@ -276,7 +276,7 @@ record AttendanceClosingTest(
                 "any", ScheduleType.LEAVE,
                 emp, "반차", "내용",
                 date, param.leaveStartAt, param.leaveEndAt,
-                false, false
+                false
         );
         scheduleRepository.save(schedule);
 
@@ -318,7 +318,7 @@ record AttendanceClosingTest(
                 "any", ScheduleType.BUSINESS_TRIP,
                 emp, "출장", "내용",
                 date, startTime, endTime,
-                true, false
+                true
         );
         scheduleRepository.save(schedule);
 
@@ -348,7 +348,7 @@ record AttendanceClosingTest(
                 "any", ScheduleType.LEAVE,
                 emp, "연가", "내용",
                 date, startTime, endTime,
-                true, false
+                true
         );
         scheduleRepository.save(schedule);
 
@@ -382,7 +382,7 @@ record AttendanceClosingTest(
                 "any", ScheduleType.BUSINESS_TRIP,
                 emp, "취소된 출장", "내용",
                 date, halfEndTime, companyEndTime,
-                false, false
+                false
         );
 
         schedule.cancel();
@@ -412,7 +412,7 @@ record AttendanceClosingTest(
                 "any", ScheduleType.BUSINESS_TRIP,
                 emp, "취소된 출장", "내용",
                 date, companyStartTime, companyEndTime,
-                true, false
+                true
         );
 
         schedule.cancel();
@@ -447,7 +447,7 @@ record AttendanceClosingTest(
                 "any", ScheduleType.LEAVE,
                 emp, "취소된 연차", "내용",
                 date, halfEndTime, companyEndTime,
-                false, false
+                false
         );
 
         schedule.cancel();
@@ -477,7 +477,7 @@ record AttendanceClosingTest(
                 "any", ScheduleType.LEAVE,
                 emp, "취소된 연차", "내용",
                 date, companyPolicy.getStartTime(), companyPolicy.getEndTime(),
-                true, false
+                true
         );
 
         schedule.cancel();

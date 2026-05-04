@@ -3,7 +3,6 @@ package com.haruon.groupware.application.empInfo.leaveService;
 import com.haruon.groupware.application.empInfo.provided.LeaveGrantManagement;
 import com.haruon.groupware.application.empInfo.required.EmpLeaveRepository;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
-import com.haruon.groupware.application.utils.CompanyPolicyPort;
 import com.haruon.groupware.domain.empInfo.EmpLeave;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +19,6 @@ public class LeaveManagementService extends LeaveCalculator implements LeaveGran
 
     private final EmpLeaveRepository empLeaveRepository;
     private final EmpRepository empRepository;
-    private final CompanyPolicyPort companyPolicyPort;
 
     @Override
     public void adjustSpecialGrantDays(long adminId, long empId, double plusMinusDays) {

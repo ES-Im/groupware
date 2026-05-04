@@ -19,7 +19,7 @@ public interface ScheduleRepository extends Repository<Schedule, Long> {
 
     void deleteAll();
 
-    Optional<Schedule> findBySourceKey(String sourceKey);
+    List<Schedule> findBySourceKey(String sourceKey);
 
     List<Schedule> saveAll(Iterable<Schedule> schedules);
 }

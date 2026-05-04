@@ -36,12 +36,12 @@ class ScheduleTest {
                 LocalDate.of(2026, 01, 01),
                 LocalTime.of(15, 0),
                 LocalTime.of(15, 0),
-                false, false
+                false
         );
 
         assertThat(schedule).isNotNull();
         assertThat(schedule.isCanceled()).isFalse();
-        assertThat(schedule.getScheduleParticipants().getFirst().getEmp().equals(emp)).isTrue();
+        assertThat(schedule.getScheduleParticipants().stream().findFirst().get().getEmp().equals(emp)).isTrue();
     }
 
     @Test
@@ -59,7 +59,6 @@ class ScheduleTest {
                         LocalDate.of(2026, 1, 1),
                         LocalTime.of(15, 0),
                         LocalTime.of(13, 0),
-                        false,
                         false
                 )
         ).isInstanceOf(IllegalStateException.class);
@@ -80,7 +79,6 @@ class ScheduleTest {
                                 .startAt(null)
                                 .endAt(LocalTime.of(13, 0))
                                 .isAllDay(false)
-                                .isPublic(false)
                         .build()
                 ),
                 Arguments.of("종료시간이 Null이면 일정을 등록할 수 없다",
@@ -94,7 +92,6 @@ class ScheduleTest {
                                 .startAt(LocalTime.of(15, 0))
                                 .endAt(null)
                                 .isAllDay(false)
-                                .isPublic(false)
                         .build()
                 ),
                 Arguments.of("sourceId가 Null이면 일정을 등록할 수 없다",
@@ -108,7 +105,6 @@ class ScheduleTest {
                                 .startAt(LocalTime.of(15, 0))
                                 .endAt(LocalTime.of(16, 0))
                                 .isAllDay(false)
-                                .isPublic(false)
                         .build()
                 ),
                 Arguments.of("일정타입이 Null이면 일정을 등록할 수 없다",
@@ -122,7 +118,6 @@ class ScheduleTest {
                                 .startAt(LocalTime.of(15, 0))
                                 .endAt(LocalTime.of(16, 0))
                                 .isAllDay(false)
-                                .isPublic(false)
                         .build()
                 ),
                 Arguments.of("사원(일정작성자)이 Null이면 일정을 등록할 수 없다",
@@ -136,7 +131,6 @@ class ScheduleTest {
                                 .startAt(LocalTime.of(15, 0))
                                 .endAt(LocalTime.of(16, 0))
                                 .isAllDay(false)
-                                .isPublic(false)
                         .build()
                 ),
                 Arguments.of("제목이 Null이면 일정을 등록할 수 없다",
@@ -150,7 +144,6 @@ class ScheduleTest {
                                 .startAt(LocalTime.of(15, 0))
                                 .endAt(LocalTime.of(16, 0))
                                 .isAllDay(false)
-                                .isPublic(false)
                         .build()
                 ),
                 Arguments.of("내용이 Null이면 일정을 등록할 수 없다",
@@ -164,7 +157,6 @@ class ScheduleTest {
                                 .startAt(LocalTime.of(15, 0))
                                 .endAt(LocalTime.of(16, 0))
                                 .isAllDay(false)
-                                .isPublic(false)
                         .build()
                 ),
                 Arguments.of("일정일자가 Null이면 일정을 등록할 수 없다",
@@ -178,7 +170,6 @@ class ScheduleTest {
                                 .startAt(LocalTime.of(15, 0))
                                 .endAt(LocalTime.of(16, 0))
                                 .isAllDay(false)
-                                .isPublic(false)
                         .build()
                 )
         );
@@ -198,7 +189,7 @@ class ScheduleTest {
                         param.content(),
                         param.scheduleDate(),
                         param.startAt(), param.endAt(),
-                        param.isAllDay(), param.isPublic()
+                        param.isAllDay()
                 )
         ).isInstanceOf(NullPointerException.class);
 
@@ -214,8 +205,7 @@ class ScheduleTest {
             LocalDate scheduleDate,
             LocalTime startAt,
             LocalTime endAt,
-            boolean isAllDay,
-            boolean isPublic
+            boolean isAllDay
     ) {}
 
     @Test
@@ -373,7 +363,7 @@ class ScheduleTest {
                 LocalDate.of(2026, 1, 1),
                 LocalTime.of(15, 0),
                 LocalTime.of(15, 0),
-                false, false
+                false
         );
     }
 }

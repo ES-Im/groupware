@@ -3,6 +3,10 @@ package com.haruon.groupware.application.schedule.service;
 import com.haruon.groupware.application.draft.required.DraftRepository;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
 import com.haruon.groupware.application.meeting.required.MeetingRepository;
+import com.haruon.groupware.application.schedule.contentFormatter.BusinessTripScheduleContentDto;
+import com.haruon.groupware.application.schedule.contentFormatter.LeaveScheduleContentDto;
+import com.haruon.groupware.application.schedule.contentFormatter.MeetingScheduleContentDto;
+import com.haruon.groupware.application.schedule.contentFormatter.ScheduleContentFormatter;
 import com.haruon.groupware.application.schedule.provided.ScheduleEditing;
 import com.haruon.groupware.application.schedule.provided.ScheduleRegister;
 import com.haruon.groupware.application.schedule.required.ScheduleRepository;
@@ -26,6 +30,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import static com.haruon.groupware.application.utils.AuthorizationChecker.findActiveEmpById;
 import static com.haruon.groupware.application.utils.Utils.getEmpListById;
 import static java.util.Objects.requireNonNull;
 import static org.springframework.util.Assert.state;
@@ -45,13 +50,11 @@ public class ScheduleService implements ScheduleRegister, ScheduleEditing {
     public String registerSchedules(ScheduleCreateRequest param) {
         requireNonNull(param);
 
-        boolean isPublic = param.isPublic();
-
         List<Schedule> schedules;
 
         if(param.manualScheduleParam() != null) {
             schedules = registerManualSchedules(
-                    param.manualScheduleParam(), isPublic
+                    param.manualScheduleParam()
             );
 
             return scheduleRepository.saveAll(schedules).getFirst().getSourceKey();
@@ -60,20 +63,19 @@ public class ScheduleService implements ScheduleRegister, ScheduleEditing {
 
         Meeting meeting = meetingRepository.findBySourceKey(param.sourceKey()).orElse(null);
         if (meeting != null) {
-            schedules = registerMeetingSchedules(meeting, isPublic);
+            schedules = registerMeetingSchedules(meeting);
 
             return scheduleRepository.saveAll(schedules).getFirst().getSourceKey();
         }
-
 
         Draft draft = draftRepository.findBySourceKey(param.sourceKey()).orElseThrow(
                 () -> new IllegalArgumentException("지원하지 않는 일정 타입")
         );
 
         if (draft instanceof LeaveDraft leaveDraft) {
-            schedules = registerLeaveSchedules(leaveDraft, isPublic);
+            schedules = registerLeaveSchedules(leaveDraft);
         } else if (draft instanceof BusinessTripDraft businessTripDraft) {
-            schedules = registerBusinessTripSchedules(businessTripDraft, isPublic);
+            schedules = registerBusinessTripSchedules(businessTripDraft);
         } else {
             throw new IllegalArgumentException("지원하지 않는 일정 타입");    // to-do 커스텀 예외처리
         }
@@ -83,23 +85,14 @@ public class ScheduleService implements ScheduleRegister, ScheduleEditing {
 
     @Override
     public void addParticipants(Long scheduleId, Set<Long> participantEmpIds, boolean isForBulkEdit) {
-        Schedule schedule = getScheduleById(scheduleId);
+        List<Schedule> targetSchedules = getSchedules(scheduleId, isForBulkEdit);
 
         List<Emp> empList = getEmpListById(empRepository, participantEmpIds);
 
-        empList.forEach(Emp::ensureActive);
+        targetSchedules.forEach(targetSchedule ->
+                empList.forEach(targetSchedule::addParticipant)
+        );
 
-        List<Schedule> targetSchedules = isForBulkEdit
-                ? getSameEventSchedules(schedule.getSourceKey())
-                : List.of(schedule);
-
-        if(isForBulkEdit) {
-            targetSchedules.forEach(targetSchedule ->
-                    empList.forEach(targetSchedule::addParticipant)
-            );
-        } else {
-            empList.forEach(schedule::addParticipant);
-        }
     }
 
 
@@ -110,11 +103,10 @@ public class ScheduleService implements ScheduleRegister, ScheduleEditing {
 
         List<Emp> empList = getEmpListById(empRepository, participantEmpIds);
 
-        for (Schedule targetSchedule : targetSchedules) {
-            for (Emp emp : empList) {
-                targetSchedule.removeParticipant(emp);
-            }
-        }
+        targetSchedules.forEach(targetSchedule ->
+                empList.forEach(targetSchedule::removeParticipant)
+        );
+
 
     }
 
@@ -161,10 +153,9 @@ public class ScheduleService implements ScheduleRegister, ScheduleEditing {
     }
 
     private List<Schedule> registerManualSchedules(
-            ManualScheduleParam manual,
-            boolean isPublic
+            ManualScheduleParam manual
     ) {
-
+        Emp scheduleOwner = findActiveEmpById(empRepository, manual.ownerId());
         String newSourceKey = UUID.randomUUID().toString();
 
         LocalDate startDate = manual.startAt().toLocalDate();
@@ -172,38 +163,22 @@ public class ScheduleService implements ScheduleRegister, ScheduleEditing {
         LocalTime startAt =  manual.startAt().toLocalTime();
         LocalTime endAt =   manual.endAt().toLocalTime();
 
-        String title = manual.title();
-
-        String content = String.format(
-                "날짜: %s - %s%n시각: %s - %s%n내용: %s",
-                startDate, endDate,
-                startAt, endAt,
-                manual.content()
-        );
-
         return registerSchedule(
                 startDate, endDate,
                 startAt, endAt,
                 ScheduleType.MANUAL,
-                title, content,
-                manual.owner(),
-                isPublic,
+                manual.title(), manual.content(),
+                scheduleOwner,
                 newSourceKey);
     }
 
     private List<Schedule> registerMeetingSchedules(
-            Meeting meeting,
-            boolean isPublic
+            Meeting meeting
     ) {
-
         String title = meeting.getTitle();
-        String content = String.format(
-                "날짜: %s%n시각: %s - %s%n장소: %s%n회의건: %s",
-                meeting.getMeetingDate(),
-                meeting.getStartAt(),
-                meeting.getEndAt(),
-                meeting.getMeetingRoom().getName(),
-                meeting.getTitle()
+
+        String content = ScheduleContentFormatter.format(
+                new MeetingScheduleContentDto(meeting.getMeetingRoom().getName(), title)
         );
 
         return registerSchedule(
@@ -212,42 +187,36 @@ public class ScheduleService implements ScheduleRegister, ScheduleEditing {
                 ScheduleType.MEETING,
                 title, content,
                 meeting.getEmp(),
-                isPublic,
                 meeting.getSourceKey());
     }
 
     private List<Schedule> registerBusinessTripSchedules(
-            BusinessTripDraft businessTripDraft,
-            boolean isPublic
+            BusinessTripDraft businessTripDraft
     ) {
-
         LocalDate startDate = businessTripDraft.getStartAt().toLocalDate();
         LocalDate endDate  =  businessTripDraft.getEndAt().toLocalDate();
         LocalTime startAt =  businessTripDraft.getStartAt().toLocalTime();
         LocalTime endAt =   businessTripDraft.getEndAt().toLocalTime();
 
-        String title = businessTripDraft.getTitle();
-        String content = String.format(
-                "시작일시: %s%n종료일시: %s%n출장지: %s%n출장목적: %s",
-                businessTripDraft.getStartAt(),
-                businessTripDraft.getEndAt(),
-                businessTripDraft.getDestination(),
-                businessTripDraft.getPurpose()
+
+        String content = ScheduleContentFormatter.format(
+                new BusinessTripScheduleContentDto(
+                    businessTripDraft.getDestination(),
+                    businessTripDraft.getPurpose()
+                )
         );
 
         return registerSchedule(
                 startDate, endDate,
                 startAt, endAt,
                 ScheduleType.BUSINESS_TRIP,
-                title, content,
+                content, content,
                 businessTripDraft.getEmp(),
-                isPublic,
                 businessTripDraft.getSourceKey());
     }
 
     private List<Schedule> registerLeaveSchedules(
-            LeaveDraft leaveDraft,
-            boolean isPublic
+            LeaveDraft leaveDraft
     ) {
 
         LocalDate startDate = leaveDraft.getStartAt().toLocalDate();
@@ -256,12 +225,8 @@ public class ScheduleService implements ScheduleRegister, ScheduleEditing {
         LocalTime endAt =   leaveDraft.getEndAt().toLocalTime();
 
         String title = leaveDraft.getLeaveType().getDescription();
-        String content = String.format(
-                "연가 종류: %s%n시작일시: %s%n종료일시: %s%n사유: %s",
-                leaveDraft.getLeaveType().getDescription(),
-                leaveDraft.getStartAt(),
-                leaveDraft.getEndAt(),
-                leaveDraft.getTitle()
+        String content = ScheduleContentFormatter.format(
+                new LeaveScheduleContentDto(leaveDraft.getLeaveType().getDescription())
         );
 
         return registerSchedule(
@@ -270,7 +235,6 @@ public class ScheduleService implements ScheduleRegister, ScheduleEditing {
                 ScheduleType.LEAVE,
                 title, content,
                 leaveDraft.getEmp(),
-                isPublic,
                 leaveDraft.getSourceKey());
     }
 
@@ -280,7 +244,6 @@ public class ScheduleService implements ScheduleRegister, ScheduleEditing {
             ScheduleType type,
             String title, String content,
             Emp scheduleOwner,
-            boolean isPublic,
             String sourceKey
     ) {
         scheduleOwner.ensureActive();
@@ -303,11 +266,9 @@ public class ScheduleService implements ScheduleRegister, ScheduleEditing {
                     title, content,
                     targetDate,
                     timeRange.startAt(), timeRange.endAt(),
-                    timeRange.isAllDay(),
-                    isPublic
+                    timeRange.isAllDay()
             );
 
-            schedule.addParticipant(scheduleOwner);
             schedules.add(schedule);
         }
 

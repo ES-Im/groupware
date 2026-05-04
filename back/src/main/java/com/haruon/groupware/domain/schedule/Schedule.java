@@ -8,8 +8,8 @@ import org.jspecify.annotations.Nullable;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import static java.util.Objects.requireNonNull;
 import static org.springframework.util.Assert.state;
@@ -18,7 +18,7 @@ import static org.springframework.util.Assert.state;
 @Getter
 @Table(
         uniqueConstraints = @UniqueConstraint(
-                columnNames = {"schedule_type", "source_key", "owner_emp_id", "schedule_date", "is_canceled"})
+                columnNames = {"schedule_type", "source_key", "owner_emp_id", "schedule_date"})
 )
 public class Schedule extends AbstractEntity {
 
@@ -54,11 +54,8 @@ public class Schedule extends AbstractEntity {
     @Column(nullable = false)
     private boolean isCanceled;
 
-    @Column(nullable = false)
-    private boolean isPublic;
-
     @OneToMany(mappedBy = "schedule", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ScheduleParticipant> scheduleParticipants = new ArrayList<>();
+    private Set<ScheduleParticipant> scheduleParticipants = new HashSet<>();
 
 
     public static Schedule registerSchedule(
@@ -68,7 +65,7 @@ public class Schedule extends AbstractEntity {
             String title, String content,
             LocalDate scheduleDate,
             LocalTime startAt, LocalTime endAt,
-            boolean isAllDay, boolean isPublic) {
+            boolean isAllDay) {
         Schedule schedule = new Schedule();
 
         schedule.startAt = requireNonNull(startAt);
@@ -83,7 +80,6 @@ public class Schedule extends AbstractEntity {
         schedule.scheduleDate = requireNonNull(scheduleDate);
         schedule.isAllDay = isAllDay;
         schedule.isCanceled = false;
-        schedule.isPublic = isPublic;
 
         schedule.addParticipant(requireNonNull(emp));
 
