@@ -35,7 +35,7 @@ public class BoardLike extends AbstractEntity {
         return boardLike;
     }
 
-    private static void valida  teMarkable(Board board, Emp emp) {
+    private static void validateMarkable(Board board, Emp emp) {
         requireNonNull(board);
         requireNonNull(emp);
 
