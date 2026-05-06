@@ -17,7 +17,7 @@ import static java.util.Objects.requireNonNull;
 public class DraftFile extends AbstractFileEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="dreft_id", nullable = false)
+    @JoinColumn(name="draft_id", nullable = false)
     private Draft draft;
 
     static DraftFile create(

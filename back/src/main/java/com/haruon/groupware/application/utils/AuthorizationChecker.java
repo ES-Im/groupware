@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 
 import static org.springframework.util.Assert.state;
 
+//todo :  커스텀 예외처리 필요
 public class AuthorizationChecker {
     /**
      * ACTIVE 사원 검증
@@ -21,7 +22,7 @@ public class AuthorizationChecker {
                 .findById(id)
                 .filter(e -> e.getStatus().equals(EmpStatus.ACTIVE))
                 .orElseThrow(() ->
-                new IllegalArgumentException("해당 활성화된 사원이 존재하지 않음")  // to-do 커스텀 예외처리
+                new IllegalArgumentException("해당 활성화된 사원이 존재하지 않음")
         );
     }
 
@@ -113,7 +114,7 @@ public class AuthorizationChecker {
         boolean hasRequiredRole = emp.getSystemRoles().contains(role);
 
         if(!hasRequiredRole && !hasAdminRole) {
-            throw new IllegalArgumentException("권한이 없습니다.");    // to-do 커스텀 예외처리 필요
+            throw new IllegalArgumentException("권한이 없습니다.");
         }
     }
 

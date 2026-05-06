@@ -168,7 +168,7 @@ record FranchiseManagementTest(
                         .build()
         );
 
-        franchiseManagement.changeFranchiseStatus(franchiseId, franchiseEmp.getId(), BusinessStatus.OPEN);
+        franchiseManagement.updateFranchiseStatus(franchiseId, franchiseEmp.getId(), BusinessStatus.OPEN);
 
         Franchise franchise = franchiseRepository.findById(franchiseId).orElseThrow();
         assertThat(franchise.getBusinessStatus()).isEqualTo(BusinessStatus.OPEN);
@@ -192,7 +192,7 @@ record FranchiseManagementTest(
                         .build()
         );
 
-        franchiseManagement.changeManager(franchiseId, register.getId(), manager.getId());
+        franchiseManagement.updateManager(franchiseId, register.getId(), manager.getId());
 
         Franchise franchise = franchiseRepository.findById(franchiseId).orElseThrow();
 
@@ -217,7 +217,7 @@ record FranchiseManagementTest(
         );
 
         String memo = "test";
-        franchiseManagement.changeMemo(franchiseId, register.getId(), memo);
+        franchiseManagement.updateMemo(franchiseId, register.getId(), memo);
 
         Franchise franchise = franchiseRepository.findById(franchiseId).orElseThrow();
 
@@ -242,7 +242,7 @@ record FranchiseManagementTest(
         );
 
         String memo = "test";
-        franchiseManagement.changeMemo(franchiseId, register.getId(), memo);
+        franchiseManagement.updateMemo(franchiseId, register.getId(), memo);
         franchiseManagement.clearMemo(franchiseId, register.getId());
 
         Franchise franchise = franchiseRepository.findById(franchiseId).orElseThrow();

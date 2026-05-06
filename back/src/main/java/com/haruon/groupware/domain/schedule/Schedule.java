@@ -161,6 +161,11 @@ public class Schedule extends AbstractEntity {
     }
 
     private static void validateTime(LocalTime startAt, LocalTime endAt) {
+        System.out.println("startAt = " + startAt + ", endAt = " + endAt);
+
+        requireNonNull(startAt, "시작시간 필수");
+        requireNonNull(endAt, "종료시간 필수");
+
         state(!startAt.isAfter(endAt), "종료시간은 시작시간보다 이를 수 없음");
     }
 }

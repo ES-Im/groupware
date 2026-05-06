@@ -61,7 +61,6 @@ import java.util.stream.Stream;
 
 import static com.haruon.groupware.application.dbFixture.EmpFixture.*;
 import static com.haruon.groupware.domain.empInfo.EmpLeave.createEmpLeave;
-import static java.time.LocalDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -88,6 +87,10 @@ record ScheduleManagementTest(
     EntityManager entityManager
 ) {
 
+    private static final LocalDate BASE_DATE = LocalDate.of(2100, 5, 1);
+    private static final LocalTime START_TIME = LocalTime.of(9, 0);
+    private static final LocalTime END_TIME = LocalTime.of(18, 0);
+
     @AfterEach
     void tearDown() {
         scheduleRepository.deleteAll();
@@ -108,8 +111,8 @@ record ScheduleManagementTest(
         Long ownerId = emp.getId();
         String title = "title";
         String content = "content";
-        LocalDateTime startAt = now().plusDays(1);
-        LocalDateTime endAt = now().plusDays(3);
+        LocalDateTime startAt = LocalDateTime.of(BASE_DATE, START_TIME);
+        LocalDateTime endAt = LocalDateTime.of(BASE_DATE, END_TIME).plusDays(2);
 
         String getSourceKey = scheduleRegister.registerSchedules(
                 ScheduleCreateRequest.builder()
@@ -159,7 +162,7 @@ record ScheduleManagementTest(
         Emp otherEmp = saveApprovedEmp(empRepository, "202601101", "otherEmp");
 
         String title = "testTitle";
-        LocalDate meetingDate = LocalDate.now().plusDays(1);
+        LocalDate meetingDate = BASE_DATE;
         LocalTime startAt = LocalTime.of(10,0);
         LocalTime endAt = LocalTime.of(11,0);
         Set<Long> participantIds = Set.of(reserverEmp.getId(), otherEmp.getId());
@@ -268,8 +271,8 @@ record ScheduleManagementTest(
         Emp drafter = saveApprovedEmp(empRepository);
 
         LeaveType annual = LeaveType.ANNUAL;
-        LocalDateTime startAt = LocalDateTime.of(LocalDate.now(), LocalTime.of(9, 0)).plusDays(1);
-        LocalDateTime endAt = LocalDateTime.of(LocalDate.now(), LocalTime.of(18, 0)).plusDays(2);
+        LocalDateTime startAt = LocalDateTime.of(BASE_DATE, START_TIME);
+        LocalDateTime endAt = LocalDateTime.of(BASE_DATE, END_TIME).plusDays(2);
         Draft getApprovedLeaveDraft = createAndApproveLeaveDraft(drafter, annual, startAt, endAt);
 
         scheduleRegister.registerSchedules(
@@ -329,8 +332,8 @@ record ScheduleManagementTest(
         Emp drafter = saveApprovedEmp(empRepository);
         Emp participant = saveApprovedEmp(empRepository, "202601091", "participant91");
 
-        LocalDateTime startAt = LocalDateTime.of(LocalDate.now(), LocalTime.of(9, 0)).plusDays(1);
-        LocalDateTime endAt = LocalDateTime.of(LocalDate.now(), LocalTime.of(18, 0)).plusDays(3);
+        LocalDateTime startAt = LocalDateTime.of(BASE_DATE, START_TIME);
+        LocalDateTime endAt = LocalDateTime.of(BASE_DATE, END_TIME).plusDays(2);
 
         String destination = "destination";
         String purpose = "purpose";
@@ -416,8 +419,8 @@ record ScheduleManagementTest(
         assertThatThrownBy(() ->
                 getManualSchedules(
                         inactiveEmp,
-                        now().plusDays(1),
-                        now().plusDays(2)
+                        LocalDateTime.of(BASE_DATE, START_TIME),
+                        LocalDateTime.of(BASE_DATE, END_TIME).plusDays(2)
                 )
         ).hasMessage("해당 활성화된 사원이 존재하지 않음");
     }
@@ -430,8 +433,8 @@ record ScheduleManagementTest(
 
         List<Schedule> manualSchedules = getManualSchedules(
                 saveApprovedEmp(empRepository, "202601101", "emp111"),
-                now().plusDays(1),
-                now().plusDays(2)
+                LocalDateTime.of(BASE_DATE, START_TIME),
+                LocalDateTime.of(BASE_DATE, END_TIME).plusDays(2)
         );
 
         assertThatThrownBy(() ->
@@ -449,8 +452,8 @@ record ScheduleManagementTest(
 
         List<Schedule> manualSchedules = getManualSchedules(
                 register,
-                now().plusDays(1),
-                now().plusDays(2)
+                LocalDateTime.of(BASE_DATE, START_TIME),
+                LocalDateTime.of(BASE_DATE, END_TIME).plusDays(2)
         );
 
         Schedule firstDayOfSchedule = manualSchedules.getFirst();
@@ -485,8 +488,8 @@ record ScheduleManagementTest(
 
         List<Schedule> manualSchedules = getManualSchedules(
                 register,
-                now().plusDays(1),
-                now().plusDays(2)
+                LocalDateTime.of(BASE_DATE, START_TIME),
+                LocalDateTime.of(BASE_DATE, END_TIME).plusDays(2)
         );
 
         Schedule firstDayOfSchedule = manualSchedules.getFirst();
@@ -513,8 +516,8 @@ record ScheduleManagementTest(
         Emp otherEmp = saveApprovedEmp(empRepository, "202601102", "emp222");
         List<Schedule> manualSchedules = getManualSchedules(
                 register,
-                now().plusDays(1),
-                now().plusDays(2)
+                LocalDateTime.of(BASE_DATE, START_TIME),
+                LocalDateTime.of(BASE_DATE, END_TIME).plusDays(2)
         );
 
         Schedule firstDayOfSchedule = manualSchedules.getFirst();
@@ -558,8 +561,8 @@ record ScheduleManagementTest(
         Emp otherEmp = saveApprovedEmp(empRepository, "202601102", "emp222");
         List<Schedule> manualSchedules = getManualSchedules(
                 register,
-                now().plusDays(1),
-                now().plusDays(2)
+                LocalDateTime.of(BASE_DATE, START_TIME),
+                LocalDateTime.of(BASE_DATE, END_TIME).plusDays(2)
         );
 
         Schedule firstDayOfSchedule = manualSchedules.getFirst();
@@ -626,8 +629,8 @@ record ScheduleManagementTest(
         Emp register = saveApprovedEmp(empRepository, "202601101", "emp111");
         List<Schedule> manualSchedules = getManualSchedules(
                 register,
-                now().plusDays(1),
-                now().plusDays(2)
+                LocalDateTime.of(BASE_DATE, START_TIME),
+                LocalDateTime.of(BASE_DATE, END_TIME).plusDays(2)
         );
 
         Schedule firstDayOfSchedule = manualSchedules.getFirst();
@@ -664,8 +667,8 @@ record ScheduleManagementTest(
         Emp register = saveApprovedEmp(empRepository, "202601101", "emp111");
         List<Schedule> manualSchedules = getManualSchedules(
                 register,
-                now().plusDays(1),
-                now().plusDays(2)
+                LocalDateTime.of(BASE_DATE, START_TIME),
+                LocalDateTime.of(BASE_DATE, END_TIME).plusDays(2)
         );
 
         Schedule firstDayOfSchedule = manualSchedules.getFirst();
@@ -695,8 +698,8 @@ record ScheduleManagementTest(
         Emp register = saveApprovedEmp(empRepository, "202601101", "emp111");
         List<Schedule> manualSchedules = getManualSchedules(
                 register,
-                now().plusDays(1),
-                now().plusDays(2)
+                LocalDateTime.of(BASE_DATE, START_TIME),
+                LocalDateTime.of(BASE_DATE, END_TIME).plusDays(2)
         );
 
         Schedule firstDayOfSchedule = manualSchedules.getFirst();
@@ -746,8 +749,8 @@ record ScheduleManagementTest(
         Emp register = saveApprovedEmp(empRepository, "202601101", "emp111");
         List<Schedule> manualSchedules = getManualSchedules(
                 register,
-                now().plusDays(1),
-                now().plusDays(2)
+                LocalDateTime.of(BASE_DATE, START_TIME),
+                LocalDateTime.of(BASE_DATE, END_TIME).plusDays(2)
         );
 
         Schedule firstDayOfSchedule = manualSchedules.getFirst();
@@ -783,7 +786,7 @@ record ScheduleManagementTest(
     }
 
     private static Stream<Arguments> variousScheduleTimes() {
-        LocalDate baseDate = LocalDate.now().plusDays(1);
+        LocalDate baseDate = BASE_DATE;
 
         return Stream.of(
                 Arguments.of(
@@ -982,7 +985,8 @@ record ScheduleManagementTest(
             LocalDateTime startAt,
             LocalDateTime endAt
     ) {
-        EmpLeave empLeave = createEmpLeave(drafter, 2026, 15);
+        int year = BASE_DATE.getYear();
+        EmpLeave empLeave = createEmpLeave(drafter, year, 15);
         empLeaveRepository.save(empLeave);
         empLeave.adjustCompensatoryGrantDays(3.0);
         empLeave.adjustSpecialGrantDays(3.0);
@@ -1001,7 +1005,7 @@ record ScheduleManagementTest(
                                                 new ApproversRequest(approver1.getId(), ApprovalRole.APPROVER, 1),
                                                 new ApproversRequest(approver2.getId(), ApprovalRole.APPROVER, 2)
                                         ))
-                                        .submittedAt(LocalDateTime.of(2026, 4, 1, 0, 0))
+                                        .submittedAt(LocalDateTime.of(year, 4, 1, 0, 0))
                                         .build()
                         )
                         .startAt(startAt)
@@ -1020,13 +1024,13 @@ record ScheduleManagementTest(
         leaveDraftManagement.approve(
                 draft.getId(),
                 approver1.getId(),
-                LocalDateTime.of(2026, 4, 1, 0, 0)
+                LocalDateTime.of(year, 4, 1, 0, 0)
         );
 
         leaveDraftManagement.approve(
                 draft.getId(),
                 approver2.getId(),
-                LocalDateTime.of(2026, 4, 1, 5, 0)
+                LocalDateTime.of(year, 4, 1, 5, 0)
         );
 
         return draftRepository.findById(draft.getId()).orElseThrow();
@@ -1038,20 +1042,20 @@ record ScheduleManagementTest(
         Emp approverEmp1 = saveApprovedEmp(empRepository, "202601002", "approver1");
         List<ApproversRequest> approversRequests = new ArrayList<>();
         approversRequests.add(new ApproversRequest(approverEmp1.getId(), ApprovalRole.APPROVER, 1));
-
+        int year = BASE_DATE.getYear();
         generalDraftManagement.createSubmitted(
                 CommonDraftCreateRequest.builder()
                         .empId(drafter.getId())
                         .title("title")
                         .content("content")
                         .approvers(approversRequests)
-                        .submittedAt(LocalDateTime.of(2026, 1, 1, 0, 0, 0))
+                        .submittedAt(LocalDateTime.of(year, 1, 1, 0, 0, 0))
                         .build()
         );
         Draft draft = draftRepository.findByEmp(drafter).stream().findFirst().orElseThrow();
 
         generalDraftManagement.approve(
-                draft.getId(), approverEmp1.getId(), LocalDateTime.of(2026, 1, 1, 0, 0, 5)
+                draft.getId(), approverEmp1.getId(), LocalDateTime.of(year, 1, 1, 0, 0, 5)
         );
 
         return draft;

@@ -60,7 +60,7 @@ public class FranchiseService implements FranchiseManagement {
 
 
     @Override
-    public void changeFranchiseStatus(long franchiseId, long updaterId, BusinessStatus status) {
+    public void updateFranchiseStatus(long franchiseId, long updaterId, BusinessStatus status) {
         checkFranchiseRoleEmp(empRepository, updaterId);
         Franchise franchise = findFranchiseById(franchiseRepository, franchiseId);
 
@@ -68,7 +68,7 @@ public class FranchiseService implements FranchiseManagement {
     }
 
     @Override
-    public void changeManager(long franchiseId, long updaterId, long newManagerId) {
+    public void updateManager(long franchiseId, long updaterId, long newManagerId) {
         checkFranchiseRoleEmp(empRepository, updaterId);
         Franchise franchise = findFranchiseById(franchiseRepository, franchiseId);
 
@@ -78,7 +78,7 @@ public class FranchiseService implements FranchiseManagement {
     }
 
     @Override
-    public void changeMemo(long franchiseId, long updaterId, String memo) {
+    public void updateMemo(long franchiseId, long updaterId, String memo) {
         checkFranchiseRoleEmp(empRepository, updaterId);
         Franchise franchise = findFranchiseById(franchiseRepository, franchiseId);
 

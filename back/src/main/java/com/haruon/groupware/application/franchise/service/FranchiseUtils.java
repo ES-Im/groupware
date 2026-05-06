@@ -9,7 +9,7 @@ import com.haruon.groupware.domain.franchise.Franchise;
 
 import static com.haruon.groupware.application.utils.AuthorizationChecker.checkFranchiseRoleEmp;
 import static com.haruon.groupware.application.utils.AuthorizationChecker.findActiveEmpById;
-
+//todo - 커스텀 예외처리 필요
 public class FranchiseUtils {
 
     static Emp getFranchiseRoleAssignedEmp(EmpRepository empRepository, long empID) {
@@ -21,13 +21,13 @@ public class FranchiseUtils {
 
     static Franchise findFranchiseById(FranchiseRepository franchiseRepository, long franchiseId) {
         return franchiseRepository.findById(franchiseId)
-                .orElseThrow(() -> new IllegalStateException("조회된 가맹점 정보가 없음")); // to-do 커스텀 예외 처리 필요
+                .orElseThrow(() -> new IllegalStateException("조회된 가맹점 정보가 없음"));
     }
 
 
     static Education findEducation(EducationRepository educationRepository, long educationId) {
         return educationRepository.findById(educationId)
-                .orElseThrow(() -> new IllegalStateException("조회된 교육정보가 없음"));  // to-do 커스텀 예외처리
+                .orElseThrow(() -> new IllegalStateException("조회된 교육정보가 없음"));
     }
 
 

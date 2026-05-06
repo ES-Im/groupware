@@ -13,11 +13,11 @@ public interface FranchiseManagement {
 
     void updateFranchise(long franchiseId, long updaterId, FranchiseUpdateRequest request);
 
-    void changeFranchiseStatus(long franchiseId, long updaterId, BusinessStatus status);
+    void updateFranchiseStatus(long franchiseId, long updaterId, BusinessStatus status);
 
-    void changeManager(long franchiseId, long updaterId, long newManagerId);
+    void updateManager(long franchiseId, long updaterId, long newManagerId);
 
-    void changeMemo(long franchiseId, long updaterId, String memo);
+    void updateMemo(long franchiseId, long updaterId, String memo);
 
     void clearMemo(long franchiseId, long updaterId);
 
