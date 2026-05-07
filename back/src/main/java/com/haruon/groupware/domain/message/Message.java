@@ -71,6 +71,24 @@ public class Message extends AbstractEntity {
         return message;
     }
 
+    public void sendMessage(
+            Emp sender,
+            LocalDateTime sentAt
+    ) {
+        validateSender(sender);
+        validateDraft();
+        validateHasReceiving();
+
+        this.sentAt = requireNonNull(sentAt);
+    }
+
+    public void validateForDeleteDraft(Emp sender) {
+        validateDraft();
+        validateSender(sender);
+
+        //todo application 쪽에서 물리 삭제 구현
+    }
+
     public void changeMessage(
         Emp sender,
         @Nullable String title,
@@ -94,35 +112,6 @@ public class Message extends AbstractEntity {
         for(Emp receiver : receivers) {
             this.receivings.add(MessageReceiving.create(this, receiver));
         }
-    }
-
-    public void sendMessage(
-            Emp sender,
-            LocalDateTime sentAt
-    ) {
-        validateSender(sender);
-        validateDraft();
-        validateHasReceiving();
-
-        this.sentAt = requireNonNull(sentAt);
-    }
-
-    public void markAsRead(
-            Emp receiver,
-            LocalDateTime readAt
-    ) {
-        validateReadAt(readAt);
-
-        MessageReceiving messageReceiving = getReceivingForReceiver(receiver);
-
-        messageReceiving.markRead(readAt);
-    }
-
-    public void validateForDeleteDraft(Emp sender) {
-        validateDraft();
-        validateSender(sender);
-
-        //todo application 쪽에서 물리 삭제 구현
     }
 
     public void addFile(
@@ -150,6 +139,18 @@ public class Message extends AbstractEntity {
         MessageFile messageFile = findMessageFile(fileId);
 
         this.messageFiles.remove(messageFile);
+    }
+
+
+    public void markAsRead(
+            Emp receiver,
+            LocalDateTime readAt
+    ) {
+        validateReadAt(readAt);
+
+        MessageReceiving messageReceiving = getReceivingForReceiver(receiver);
+
+        messageReceiving.markRead(readAt);
     }
 
     public void moveSenderToTrash(
