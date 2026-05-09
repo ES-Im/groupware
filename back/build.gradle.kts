@@ -15,6 +15,8 @@ group = "com.haruon"
 version = "0.0.1-SNAPSHOT"
 description = "groupware"
 
+val querydslVersion = "7.1"
+
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
@@ -61,13 +63,16 @@ dependencies {
 
     // mysql
     runtimeOnly("com.mysql:mysql-connector-j")
+    testRuntimeOnly("com.mysql:mysql-connector-j")
 
     // docker
     runtimeOnly("org.springframework.boot:spring-boot-docker-compose")
 
     // lombok
-    implementation("org.projectlombok:lombok")
+    compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
+    testCompileOnly("org.projectlombok:lombok")
+    testAnnotationProcessor("org.projectlombok:lombok")
 
     // spring rest docs
     add("asciidoctorExt", "org.springframework.restdocs:spring-restdocs-asciidoctor")
@@ -78,18 +83,29 @@ dependencies {
     errorprone("com.google.errorprone:error_prone_core:2.48.0")
     errorprone("com.uber.nullaway:nullaway:0.13.1")
 
-    // validation
-    implementation("org.springframework.boot:spring-boot-starter-validation")
+    // openFeign queryDSL(7.x)
+    implementation("io.github.openfeign.querydsl:querydsl-jpa:${querydslVersion}")
+    // Q-class generation
+    annotationProcessor("io.github.openfeign.querydsl:querydsl-apt:${querydslVersion}:jakarta")
+    annotationProcessor("jakarta.persistence:jakarta.persistence-api")
+    annotationProcessor("jakarta.annotation:jakarta.annotation-api")
+
+
 }
 
 nullaway {
     onlyNullMarked.set(true)
 }
 
+tasks.withType<Test> {
+    useJUnitPlatform()
+}
+
 
 tasks.withType<JavaCompile>().configureEach {
     options.errorprone {
         check("NullAway", CheckSeverity.ERROR)
+        disable("UnusedVariable")       // 사용하지 않는 변수 미표시 (나중에 꺼서 확인해야함)
     }
 }
 
