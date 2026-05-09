@@ -50,12 +50,14 @@ public class MessageReceiving extends AbstractEntity {
 
     void markTrashed(LocalDateTime trashedAt) {
         validateNotDeleted();
+        if(isTrashed()) return;
 
         this.trashedAt = requireNonNull(trashedAt);
     }
 
     void revertTrashed() {
         validateNotDeleted();
+        if(!isTrashed()) return;
 
         this.trashedAt = null;
     }

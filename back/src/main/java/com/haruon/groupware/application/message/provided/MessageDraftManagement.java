@@ -9,19 +9,19 @@ import java.util.Set;
 
 public interface MessageDraftManagement {
 
-    long saveDraft(Long senderId, MessageCreateRequest request);
+    long saveMessageBeforeSend(Long senderId, MessageCreateRequest request);
 
     long sendMessage(Long senderId, MessageCreateRequest request);
 
     void sendDraft(Long senderId, Long messageDraftId, LocalDateTime sentAt);
 
-    void deleteDraft(Long draftId, Long messageDraftId);
+    void deleteDraft(Long writerId, Long messageDraftId);
 
-    void changeDraft(Long draftId, Long messageDraftId, MessageUpdateRequest request);
+    void changeDraft(Long writerId, Long messageDraftId, MessageUpdateRequest request);
 
-    void changeReceivers(Long draftId, Long messageDraftId, Set<Long> receiverIds);
+    void changeReceivers(Long writerId, Long messageDraftId, Set<Long> receiverIds);
 
-    void addFile(Long senderId, Long messageDraftId, MessageFileRequest request);
+    void addFile(Long writerId, Long messageDraftId, MessageFileRequest request);
 
-    void removeFile(Long senderId, Long messageDraftId, Long fileId);
+    void removeFile(Long writerId, Long messageDraftId, Long fileId);
 }

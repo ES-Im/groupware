@@ -10,7 +10,6 @@ import org.jspecify.annotations.Nullable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import static com.haruon.groupware.domain.chat.ChatMessage.createMessage;
 import static java.util.Objects.requireNonNull;
@@ -40,20 +39,23 @@ public class ChatRoom extends AbstractEntity {
 
     public static ChatRoom createRoom(
             Emp roomOwner,
-            Set<Emp> members,
+            List<Emp> members,
             LocalDateTime createAt
     ) {
         requireNonNull(roomOwner);
         requireNonNull(members);
-        state(members.size() >= 2, "채팅 참가자는 최소 2명 이상 필요");
-        state(members.contains(roomOwner), "참가자목록에 방장이 있어야함");
+
+        List<Emp> participants = new ArrayList<>(members);
+        participants.add(roomOwner);
+
+        state(participants.size() >= 2, "채팅 참가자는 최소 2명 이상 필요");
 
         ChatRoom room = new ChatRoom();
 
         room.emp = roomOwner;
-        room.isGroup = members.size() > 2;
+        room.isGroup = participants.size() > 2;
 
-        room.members = ChatMember.joinAtCreateRoom(room, members, createAt);
+        room.members = ChatMember.joinAtCreateRoom(room, participants, createAt);
 
         return room;
     }
@@ -110,12 +112,6 @@ public class ChatRoom extends AbstractEntity {
         }
     }
 
-    private void updateGroupStatus() {
-        this.isGroup = this.members.stream()
-                .filter(ChatMember::isParticipating)
-                .count() > 2;
-    }
-
     public void markAsBookMarkedByMember(Emp editor) {
         validateRoomOpen();
         ChatMember chatMember = getActiveMemberByEmp(editor);
@@ -153,7 +149,7 @@ public class ChatRoom extends AbstractEntity {
                 .anyMatch(ChatMember::isParticipating);
     }
 
-    public ChatMessage sendMessage(
+    public ChatMessage sendChat(
             Emp sender,
             String content,
             LocalDateTime sentAt
@@ -177,6 +173,12 @@ public class ChatRoom extends AbstractEntity {
         this.lastMessageAt = sentAt;
 
         return createMessage(this, sender, content, sentAt);
+    }
+
+    private void updateGroupStatus() {
+        this.isGroup = this.members.stream()
+                .filter(ChatMember::isParticipating)
+                .count() > 2;
     }
 
     private ChatMember getActiveMemberByEmp(Emp editor) {

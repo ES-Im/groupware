@@ -85,8 +85,6 @@ public class Message extends AbstractEntity {
     public void validateForDeleteDraft(Emp sender) {
         validateDraft();
         validateSender(sender);
-
-        //todo application 쪽에서 물리 삭제 구현
     }
 
     public void changeMessage(
@@ -153,7 +151,7 @@ public class Message extends AbstractEntity {
         messageReceiving.markRead(readAt);
     }
 
-    public void moveSenderToTrash(
+    public void moveToTrashBySender(
             Emp sender,
             LocalDateTime movedAt
     ) {
@@ -165,17 +163,16 @@ public class Message extends AbstractEntity {
         this.sending.markTrashed(movedAt);
     }
 
-    public void restoreSenderFromTrash(
+    public void restoreFromTrashBySender(
             Emp sender
     ) {
         validateSender(sender);
         validateSent();
 
-        if(!this.sending.isTrashed()) return;
         this.sending.revertTrashed();
     }
 
-    public void deleteSenderPermanently(
+    public void deleteFromBoxBySender(
             Emp sender,
             LocalDateTime deletedAt
     ) {
@@ -185,7 +182,7 @@ public class Message extends AbstractEntity {
         this.sending.markDeleted(deletedAt);
     }
 
-    public void moveReceiversToTrash(
+    public void moveToTrashByReceivers(
             Emp receiver,
             LocalDateTime trashedAt
     ) {
@@ -195,7 +192,7 @@ public class Message extends AbstractEntity {
         getReceivingForReceiver(receiver).markTrashed(trashedAt);
     }
 
-    public void restoreReceiversFromTrash(
+    public void restoreFromTrashByReceivers(
             Emp receiver
     ) {
         validateReceiver(receiver);
@@ -204,7 +201,7 @@ public class Message extends AbstractEntity {
         getReceivingForReceiver(receiver).revertTrashed();
     }
 
-    public void deleteReceiversPermanently(
+    public void deleteFromBoxByReceivers(
             Emp receiver,
             LocalDateTime deletedAt
     ) {
@@ -259,7 +256,7 @@ public class Message extends AbstractEntity {
         return this.receivings.stream()
                 .filter(receiving -> receiving.isReceiver(receiver))
                 .findFirst()
-                .orElseThrow();
+                .orElseThrow(() -> new IllegalArgumentException("해당 수신자를 찾을 수 없음"));
     }
 
 

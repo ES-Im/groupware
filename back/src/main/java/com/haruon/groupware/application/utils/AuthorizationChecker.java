@@ -10,6 +10,7 @@ import com.haruon.groupware.domain.empInfo.enums.SystemRoleCode;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.requireNonNull;
 import static org.springframework.util.Assert.state;
 
 //todo :  커스텀 예외처리 필요
@@ -18,6 +19,8 @@ public class AuthorizationChecker {
      * ACTIVE 사원 검증
      */
     public static Emp findActiveEmpById(EmpRepository empRepository, Long id) {
+        requireNonNull(id, "사원 정보가 입력되지 않음");
+
         return empRepository
                 .findById(id)
                 .filter(e -> e.getStatus().equals(EmpStatus.ACTIVE))

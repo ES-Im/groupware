@@ -226,64 +226,64 @@ class MessageTest {
 
     @Test
     @DisplayName("발송자는 발송 후 쪽지를 휴지통으로 이동할 수 있다.")
-    void moveSenderToTrash_success() {
+    void moveToTrash_BySender_success() {
         Emp sender = getApprovedEmp();
         Emp receiver = getApprovedEmp("202601002", "receiver");
         Message message = getSentMessage(sender, receiver);
 
         LocalDateTime trashedAt = LocalDateTime.of(2026, 5, 2, 0, 0, 0);
-        message.moveSenderToTrash(sender, trashedAt);
+        message.moveToTrashBySender(sender, trashedAt);
 
         assertThat(message.getSending().getTrashedAt()).isEqualTo(trashedAt);
     }
 
     @Test
     @DisplayName("발송자는 휴지통으로 이동한 쪽지를 복원할 수 있다.")
-    void restoreSenderFromTrash_success() {
+    void restoreFromTrash_BySender_success() {
         Emp sender = getApprovedEmp();
         Emp receiver = getApprovedEmp("202601002", "receiver");
         Message message = getSentMessage(sender, receiver);
 
-        message.moveSenderToTrash(sender, LocalDateTime.of(2026, 5, 2, 0, 0, 0));
-        message.restoreSenderFromTrash(sender);
+        message.moveToTrashBySender(sender, LocalDateTime.of(2026, 5, 2, 0, 0, 0));
+        message.restoreFromTrashBySender(sender);
 
         assertThat(message.getSending().getTrashedAt()).isNull();
     }
 
     @Test
     @DisplayName("수신자는 발송 후 쪽지를 휴지통으로 이동할 수 있다.")
-    void moveReceiversToTrash_success() {
+    void moveToTrash_ByReceivers_success() {
         Emp sender = getApprovedEmp();
         Emp receiver = getApprovedEmp("202601002", "receiver");
         Message message = getSentMessage(sender, receiver);
 
         LocalDateTime trashedAt = LocalDateTime.of(2026, 5, 2, 0, 0, 0);
-        message.moveReceiversToTrash(receiver, trashedAt);
+        message.moveToTrashByReceivers(receiver, trashedAt);
 
         assertThat(message.getReceivings().getFirst().getTrashedAt()).isEqualTo(trashedAt);
     }
 
     @Test
     @DisplayName("수신자는 휴지통으로 이동한 쪽지를 복원할 수 있다.")
-    void restoreReceiversFromTrash_success() {
+    void restoreFromTrash_ByReceivers_success() {
         Emp sender = getApprovedEmp();
         Emp receiver = getApprovedEmp("202601002", "receiver");
         Message message = getSentMessage(sender, receiver);
 
-        message.moveReceiversToTrash(receiver, LocalDateTime.of(2026, 5, 2, 0, 0, 0));
-        message.restoreReceiversFromTrash(receiver);
+        message.moveToTrashByReceivers(receiver, LocalDateTime.of(2026, 5, 2, 0, 0, 0));
+        message.restoreFromTrashByReceivers(receiver);
 
         assertThat(message.getReceivings().getFirst().getTrashedAt()).isNull();
     }
 
     @Test
     @DisplayName("발송자는 발송 후 쪽지를 삭제(논리삭제)할 수 있다")
-    void deleteSenderPermanently_success() {
+    void deleteFromBoxBySender_success() {
         Emp sender = getApprovedEmp();
         Emp receiver = getApprovedEmp("202601002", "receiver");
         Message message = getSentMessage(sender, receiver);
 
-        message.deleteSenderPermanently(sender, LocalDateTime.of(2026, 5, 2, 0, 0, 0));
+        message.deleteFromBoxBySender(sender, LocalDateTime.of(2026, 5, 2, 0, 0, 0));
 
         assertThat(message.getSending().getDeletedAt()).isNotNull();
         assertThat(message.getSending().isDeleted()).isTrue();
@@ -291,12 +291,12 @@ class MessageTest {
 
     @Test
     @DisplayName("수신자는 발송 후 쪽지를 삭제(논리삭제)할 수 있다")
-    void deleteReceiversPermanently_success() {
+    void deleteFromBoxByReceivers_success() {
         Emp sender = getApprovedEmp();
         Emp receiver = getApprovedEmp("202601002", "receiver");
         Message message = getSentMessage(sender, receiver);
 
-        message.deleteReceiversPermanently(receiver, LocalDateTime.of(2026, 5, 2, 0, 0, 0));
+        message.deleteFromBoxByReceivers(receiver, LocalDateTime.of(2026, 5, 2, 0, 0, 0));
 
 
         assertThat(message.getReceivings().getFirst().getDeletedAt()).isNotNull();

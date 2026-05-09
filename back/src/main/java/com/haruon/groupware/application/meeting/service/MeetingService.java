@@ -20,7 +20,7 @@ import java.util.Set;
 
 import static com.haruon.groupware.application.meeting.service.MeetingRoomService.findActiveMeetingRoom;
 import static com.haruon.groupware.application.utils.AuthorizationChecker.findActiveEmpById;
-import static com.haruon.groupware.application.utils.Utils.getEmpListById;
+import static com.haruon.groupware.application.utils.Utils.findEmpListById;
 
 /**
  * 모든 메서드 도메인 이벤트 발행 필요, 테스트시 save -> 이벤트 발행 -> empty까지 확인할 것
@@ -39,7 +39,7 @@ public class MeetingService implements MeetingManagement {
     public long reserve(MeetingReserveRequest request) {
         MeetingRoom room = findActiveMeetingRoom(meetingRoomRepository, request.meetingRoomId());
         Emp reserver = findActiveEmpById(empRepository, request.reserverId());
-        List<Emp> participants = getEmpListById(empRepository, request.participantIds());
+        List<Emp> participants = findEmpListById(empRepository, request.participantIds());
 
         Meeting reservedMeeting = Meeting.reserve(
                 room, reserver, request.title(), request.meetingDate(), request.startAt(), request.endAt(), participants
@@ -51,7 +51,7 @@ public class MeetingService implements MeetingManagement {
     @Override
     public void replaceParticipants(long meetingId, long reserverId, Set<Long> participantIds) {
         Meeting meeting = findMeetingByIdAndReserverId(meetingId, reserverId);
-        List<Emp> participants = getEmpListById(empRepository, participantIds);
+        List<Emp> participants = findEmpListById(empRepository, participantIds);
 
         meeting.changeParticipants(participants);
     }

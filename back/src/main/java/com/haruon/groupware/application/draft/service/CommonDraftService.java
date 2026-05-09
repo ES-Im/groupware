@@ -101,7 +101,7 @@ abstract class CommonDraftService {
     }
 
     protected List<Emp> getEmpListById(Set<Long> participantId){
-        return Utils.getEmpListById(empRepository ,participantId);
+        return Utils.findEmpListById(empRepository ,participantId);
     }
 
     protected LocalDateTime requireSubmittedAt(@Nullable LocalDateTime submittedAt) {

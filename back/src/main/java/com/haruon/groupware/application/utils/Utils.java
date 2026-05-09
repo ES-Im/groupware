@@ -28,8 +28,10 @@ public class Utils {
                 );
     }
 
-    public static List<Emp> getEmpListById(EmpRepository empRepository, Set<Long> participantEmpIds) {
-        return participantEmpIds.stream()
+    public static List<Emp> findEmpListById(EmpRepository empRepository, Set<Long> empIds) {
+        if(empIds.isEmpty()) throw new IllegalArgumentException("사원 정보가 입력되지 않음");
+
+        return empIds.stream()
                 .map(empId -> findActiveEmpById(empRepository, empId))
                 .toList();
     }

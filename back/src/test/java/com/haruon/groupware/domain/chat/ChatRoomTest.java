@@ -1,7 +1,6 @@
 package com.haruon.groupware.domain.chat;
 
 import com.haruon.groupware.domain.empInfo.Emp;
-import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -9,10 +8,9 @@ import java.time.LocalDateTime;
 import java.util.Set;
 
 import static com.haruon.groupware.domain.shared.EmpFixture.getApprovedEmp;
-import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ChatRoomTest {
 
@@ -24,7 +22,7 @@ class ChatRoomTest {
         Emp owner = getApprovedEmp("202601001","owner001");
         Emp member = getApprovedEmp("202601002","member001");
 
-        ChatRoom chatRoom = createRoom(owner, Set.of(owner, member));
+        ChatRoom chatRoom = createRoom(owner, Set.of(member));
 
         assertThat(chatRoom.getIsGroup())
                 .as("참여자가 2명 이하라면 isGroup = false")
@@ -41,7 +39,7 @@ class ChatRoomTest {
         Emp member1 = getApprovedEmp("202601002","member001");
         Emp member2 = getApprovedEmp("202601003","member002");
 
-        ChatRoom chatRoom = createRoom(owner, Set.of(owner, member1, member2));
+        ChatRoom chatRoom = createRoom(owner, Set.of(member1, member2));
 
         assertThat(chatRoom.getIsGroup())
                 .as("참여자가 2명 초과라면 isGroup = true")
@@ -60,23 +58,8 @@ class ChatRoomTest {
         Emp owner = getApprovedEmp("202601001","owner001");
 
         assertThatThrownBy(() ->
-                createRoom(owner, Set.of(owner))
+                createRoom(owner, Set.of())
         ).hasMessage(errorMsg);
-    }
-
-    @Test
-    @DisplayName("채팅방 생성 테스트 - 참가자목록에 방장이 있어야함")
-    void createRoom_with_no_room_owner_fail() {
-        String errorMsg = "참가자목록에 방장이 있어야함";
-
-        Emp owner = getApprovedEmp("202601001","owner001");
-        Emp member1 = getApprovedEmp("202601002","member001");
-        Emp member2 = getApprovedEmp("202601003","member002");
-
-        assertThatThrownBy(() ->
-                createRoom(owner, Set.of(member1, member2))
-        ).hasMessage(errorMsg);
-
     }
 
     @Test
@@ -86,7 +69,7 @@ class ChatRoomTest {
         Emp member1 = getApprovedEmp("202601002","member001");
         Emp member2 = getApprovedEmp("202601003","member002");
 
-        ChatRoom chatRoom = createRoom(owner, Set.of(owner, member1, member2));
+        ChatRoom chatRoom = createRoom(owner, Set.of(member1, member2));
 
         LocalDateTime leaveAt = LocalDateTime.of(2026, 1, 1, 9, 0);
         chatRoom.leaveRoomByMember(member2, leaveAt);
@@ -108,7 +91,7 @@ class ChatRoomTest {
         Emp member1 = getApprovedEmp("202601002","member001");
         Emp member2 = getApprovedEmp("202601003","member002");
 
-        ChatRoom chatRoom = createRoom(owner, Set.of(owner, member1));
+        ChatRoom chatRoom = createRoom(owner, Set.of(member1));
 
         LocalDateTime joinedAt = LocalDateTime.of(2026, 1, 1, 9, 0);
         chatRoom.inviteMember(member1, member2, joinedAt);
@@ -128,7 +111,7 @@ class ChatRoomTest {
         Emp member1 = getApprovedEmp("202601002","member001");
         Emp member2 = getApprovedEmp("202601003","member002");
 
-        ChatRoom chatRoom = createRoom(owner, Set.of(owner, member1));
+        ChatRoom chatRoom = createRoom(owner, Set.of(member1));
 
         LocalDateTime joinedAt = LocalDateTime.of(2026, 1, 1, 9, 0);
         chatRoom.inviteMember(member1, member2, joinedAt);
@@ -142,7 +125,7 @@ class ChatRoomTest {
         Emp owner = getApprovedEmp("202601001","owner001");
         Emp member1 = getApprovedEmp("202601002","member001");
 
-        ChatRoom chatRoom = createRoom(owner, Set.of(owner, member1));
+        ChatRoom chatRoom = createRoom(owner, Set.of(member1));
         chatRoom.leaveRoomByMember(member1, LocalDateTime.of(2026, 1, 1, 8, 18));
 
         LocalDateTime joinedAt = LocalDateTime.of(2026, 1, 1, 9, 0);
@@ -159,7 +142,7 @@ class ChatRoomTest {
         Emp owner = getApprovedEmp("202601001","owner001");
         Emp member1 = getApprovedEmp("202601002","member001");
 
-        ChatRoom chatRoom = createRoom(owner, Set.of(owner, member1));
+        ChatRoom chatRoom = createRoom(owner, Set.of(member1));
 
         assertThatThrownBy(() ->
             chatRoom.inviteMember(owner, member1, LocalDateTime.of(2026,1,9,0,0,0))
@@ -174,7 +157,7 @@ class ChatRoomTest {
         Emp owner = getApprovedEmp("202601001","owner001");
         Emp member1 = getApprovedEmp("202601002","member001");
 
-        ChatRoom chatRoom = createRoom(owner, Set.of(owner, member1));
+        ChatRoom chatRoom = createRoom(owner, Set.of(member1));
 
         String name = "test";
         chatRoom.updateDisplayNameByMember(member1, name);
@@ -198,7 +181,7 @@ class ChatRoomTest {
         Emp member1 = getApprovedEmp("202601002","member001");
         Emp member2 = getApprovedEmp("202601003","member002");
 
-        ChatRoom chatRoom = createRoom(owner, Set.of(owner, member1, member2));
+        ChatRoom chatRoom = createRoom(owner, Set.of(member1, member2));
         chatRoom.leaveRoomByMember(member1, LocalDateTime.of(2026, 1, 1, 8, 18));
 
         assertThat(chatRoom.getIsGroup()).isFalse();
@@ -210,7 +193,7 @@ class ChatRoomTest {
         Emp owner = getApprovedEmp("202601001","owner001");
         Emp member1 = getApprovedEmp("202601002","member001");
 
-        ChatRoom chatRoom = createRoom(owner, Set.of(owner, member1));
+        ChatRoom chatRoom = createRoom(owner, Set.of(member1));
         chatRoom.leaveRoomByMember(member1, LocalDateTime.of(2026, 1, 1, 8, 18));
         chatRoom.leaveRoomByMember(owner, LocalDateTime.of(2026, 1, 1, 8, 18));
 
@@ -223,7 +206,7 @@ class ChatRoomTest {
         Emp owner = getApprovedEmp("202601001","owner001");
         Emp member1 = getApprovedEmp("202601002","member001");
 
-        ChatRoom chatRoom = createRoom(owner, Set.of(owner, member1));
+        ChatRoom chatRoom = createRoom(owner, Set.of(member1));
         chatRoom.markAsBookMarkedByMember(member1);
         ChatMember chatMember = getChatMember(chatRoom, member1);
         ChatMember chatOwner = getChatMember(chatRoom, owner);
@@ -238,7 +221,7 @@ class ChatRoomTest {
         Emp owner = getApprovedEmp("202601001","owner001");
         Emp member1 = getApprovedEmp("202601002","member001");
 
-        ChatRoom chatRoom = createRoom(owner, Set.of(owner, member1));
+        ChatRoom chatRoom = createRoom(owner, Set.of(member1));
         chatRoom.markAsBookMarkedByMember(member1);
         chatRoom.unmarkAsBookMarkedByMember(member1);
 
@@ -253,7 +236,7 @@ class ChatRoomTest {
         Emp owner = getApprovedEmp("202601001","owner001");
         Emp member1 = getApprovedEmp("202601002","member001");
 
-        ChatRoom chatRoom = createRoom(owner, Set.of(owner, member1));
+        ChatRoom chatRoom = createRoom(owner, Set.of(member1));
         LocalDateTime closeAt = LocalDateTime.of(2026, 1, 1, 8, 19);
         chatRoom.leaveRoomByMember(member1, LocalDateTime.of(2026, 1, 1, 8, 18));
         chatRoom.leaveRoomByMember(owner, closeAt);
@@ -268,7 +251,7 @@ class ChatRoomTest {
         Emp owner = getApprovedEmp("202601001","owner001");
         Emp member1 = getApprovedEmp("202601002","member001");
 
-        ChatRoom chatRoom = createRoom(owner, Set.of(owner, member1));
+        ChatRoom chatRoom = createRoom(owner, Set.of(member1));
         LocalDateTime closeAt = LocalDateTime.of(2026, 1, 1, 8, 19);
         chatRoom.leaveRoomByMember(member1, LocalDateTime.of(2026, 1, 1, 8, 18));
         chatRoom.leaveRoomByMember(owner, closeAt);
@@ -279,13 +262,13 @@ class ChatRoomTest {
 
     @Test
     @DisplayName("채팅보내기 테스트 - 채팅을 보내면, 마지막 메세지 시각이 변한다.")
-    void sendMessage_success() {
+    void sendChat_success() {
         Emp owner = getApprovedEmp("202601001","owner001");
         Emp member1 = getApprovedEmp("202601002","member001");
 
-        ChatRoom chatRoom = createRoom(owner, Set.of(owner, member1));
+        ChatRoom chatRoom = createRoom(owner, Set.of(member1));
         LocalDateTime sentAt = LocalDateTime.of(2026, 1, 1, 8, 18);
-        chatRoom.sendMessage(member1, "test", sentAt);
+        chatRoom.sendChat(member1, "test", sentAt);
 
         assertThat(chatRoom.getLastMessageAt()).isEqualTo(sentAt);
     }
@@ -298,33 +281,33 @@ class ChatRoomTest {
         Emp owner = getApprovedEmp("202601001","owner001");
         Emp member1 = getApprovedEmp("202601002","member001");
 
-        ChatRoom chatRoom = createRoom(owner, Set.of(owner, member1));
+        ChatRoom chatRoom = createRoom(owner, Set.of(member1));
         ChatMember chatMember = getChatMember(chatRoom, member1);
 
         LocalDateTime sentAt = chatMember.getJoinedAt().minusMinutes(1);
 
         assertThatThrownBy(() ->
-                chatRoom.sendMessage(member1, "test", sentAt)
+                chatRoom.sendChat(member1, "test", sentAt)
         ).hasMessage(errorMsg);
     }
 
     @Test
     @DisplayName("채팅보내기 테스트 - 채팅보낸 시각은 가장 최근의 채팅 생성 시각보다 이를 수 없음")
-    void sendMessage_send_before_last_message_fail() {
+    void sendMessage_send_before_last_chat_fail() {
         String errorMsg = "채팅보낸 시각은 가장 최근의 채팅 생성 시각보다 이를 수 없음";
 
         Emp owner = getApprovedEmp("202601001","owner001");
         Emp member1 = getApprovedEmp("202601002","member001");
 
-        ChatRoom chatRoom = createRoom(owner, Set.of(owner, member1));
+        ChatRoom chatRoom = createRoom(owner, Set.of(member1));
         ChatMember chatMember = getChatMember(chatRoom, member1);
 
         LocalDateTime sentAt = chatMember.getJoinedAt().plusHours(1);
         LocalDateTime sentSecondAt = sentAt.minusMinutes(1);
-        chatRoom.sendMessage(member1, "test", sentAt);
+        chatRoom.sendChat(member1, "test", sentAt);
 
         assertThatThrownBy(() ->
-                chatRoom.sendMessage(member1, "test2", sentSecondAt)
+                chatRoom.sendChat(member1, "test2", sentSecondAt)
         ).hasMessage(errorMsg);
     }
 
@@ -334,11 +317,11 @@ class ChatRoomTest {
         Emp owner = getApprovedEmp("202601001","owner001");
         Emp member1 = getApprovedEmp("202601002","member001");
 
-        ChatRoom chatRoom = createRoom(owner, Set.of(owner, member1));
+        ChatRoom chatRoom = createRoom(owner, Set.of(member1));
         ChatMember chatMember = getChatMember(chatRoom, member1);
 
         LocalDateTime sentAt = chatMember.getJoinedAt().plusHours(1);
-        ChatMessage message = chatRoom.sendMessage(member1, "test", sentAt);
+        ChatMessage message = chatRoom.sendChat(member1, "test", sentAt);
 
         chatRoom.changeLastReadMessageByMember(owner, message);
         ChatMember chatOwner = getChatMember(chatRoom, owner);
@@ -356,7 +339,7 @@ class ChatRoomTest {
         Emp notMember = getApprovedEmp("202601003","not_member001");
         Emp notMember2 = getApprovedEmp("202601004","not_member002");
 
-        ChatRoom chatRoom = createRoom(owner, Set.of(owner, member1));
+        ChatRoom chatRoom = createRoom(owner, Set.of(member1));
 
         assertThatThrownBy(() ->
             chatRoom.inviteMember(notMember, notMember2, LocalDateTime.of(2026,2,1,0,0,0))
@@ -375,19 +358,19 @@ class ChatRoomTest {
         ).as("참가자가 아니면 즐겨찾기를 할 수 없다").hasMessage(errorMsg);
 
         assertThatThrownBy(() -> {
-            ChatMessage message = chatRoom.sendMessage(owner, "test", LocalDateTime.of(2026, 2, 1, 0, 0, 0));
+            ChatMessage message = chatRoom.sendChat(owner, "test", LocalDateTime.of(2026, 2, 1, 0, 0, 0));
             chatRoom.changeLastReadMessageByMember(notMember, message);
         }).as("참가자가 아니면 채팅 읽음 처리를 할 수 없다.").hasMessage(errorMsg);
 
         assertThatThrownBy(() ->
-                chatRoom.sendMessage(notMember, "test", LocalDateTime.of(2026, 2, 1, 0, 0, 0))
+                chatRoom.sendChat(notMember, "test", LocalDateTime.of(2026, 2, 1, 0, 0, 0))
         ).as("참가자가 아니면 채팅을 보낼 수 없다.").hasMessage(errorMsg);
     }
 
     private ChatRoom createRoom(Emp owner, Set<Emp> members) {
         return ChatRoom.createRoom(
                 owner,
-                members,
+                members.stream().toList(),
                 LocalDateTime.of(2026, 1, 1, 8, 0)
         );
     }

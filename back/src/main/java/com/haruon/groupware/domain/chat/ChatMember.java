@@ -10,7 +10,6 @@ import org.jspecify.annotations.Nullable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import static java.util.Objects.requireNonNull;
 import static org.springframework.util.Assert.state;
@@ -46,7 +45,7 @@ public class ChatMember extends AbstractEntity {
 
     static List<ChatMember> joinAtCreateRoom(
             ChatRoom room,
-            Set<Emp> members,
+            List<Emp> members,
             LocalDateTime joinedAt
     ) {
         List<ChatMember> chatMembers = new ArrayList<>();
@@ -124,9 +123,12 @@ public class ChatMember extends AbstractEntity {
         this.lastReadMessage = message;
     }
 
-    boolean isParticipating() {
+    //todo - ChatRoom으로 올리기 아래 메서드들
+    public boolean isParticipating() {
         return this.leftAt == null;
     }
 
-
+    public ChatMessage getLatestReadChats() {
+        return this.lastReadMessage;
+    }
 }

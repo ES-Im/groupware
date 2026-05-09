@@ -31,7 +31,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import static com.haruon.groupware.application.utils.AuthorizationChecker.findActiveEmpById;
-import static com.haruon.groupware.application.utils.Utils.getEmpListById;
+import static com.haruon.groupware.application.utils.Utils.findEmpListById;
 import static java.util.Objects.requireNonNull;
 import static org.springframework.util.Assert.state;
 
@@ -87,7 +87,7 @@ public class ScheduleService implements ScheduleRegister, ScheduleEditing {
     public void addParticipants(Long scheduleId, Set<Long> participantEmpIds, boolean isForBulkEdit) {
         List<Schedule> targetSchedules = getSchedules(scheduleId, isForBulkEdit);
 
-        List<Emp> empList = getEmpListById(empRepository, participantEmpIds);
+        List<Emp> empList = findEmpListById(empRepository, participantEmpIds);
 
         targetSchedules.forEach(targetSchedule ->
                 empList.forEach(targetSchedule::addParticipant)
@@ -101,7 +101,7 @@ public class ScheduleService implements ScheduleRegister, ScheduleEditing {
 
         List<Schedule> targetSchedules = getSchedules(scheduleId, isForBulkEdit);
 
-        List<Emp> empList = getEmpListById(empRepository, participantEmpIds);
+        List<Emp> empList = findEmpListById(empRepository, participantEmpIds);
 
         targetSchedules.forEach(targetSchedule ->
                 empList.forEach(targetSchedule::removeParticipant)
