@@ -23,13 +23,15 @@ public class QDraft extends EntityPathBase<Draft> {
 
     private static final PathInits INITS = PathInits.DIRECT2;
 
-    public static final QDraft draft = new QDraft("draft");
+    public static final QDraft draft1 = new QDraft("draft1");
 
     public final QApproval approval;
 
     public final ListPath<Circulation, QCirculation> circulations = this.<Circulation, QCirculation>createList("circulations", Circulation.class, QCirculation.class, PathInits.DIRECT2);
 
     public final StringPath content = createString("content");
+
+    public final BooleanPath draft = createBoolean("draft");
 
     public final ListPath<DraftFile, QDraftFile> draftFiles = this.<DraftFile, QDraftFile>createList("draftFiles", DraftFile.class, QDraftFile.class, PathInits.DIRECT2);
 

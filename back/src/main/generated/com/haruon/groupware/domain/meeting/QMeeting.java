@@ -25,6 +25,10 @@ public class QMeeting extends EntityPathBase<Meeting> {
 
     public static final QMeeting meeting = new QMeeting("meeting");
 
+    public final BooleanPath cancel = createBoolean("cancel");
+
+    public final SimplePath<Object> editableDate = createSimple("editableDate", Object.class);
+
     public final com.haruon.groupware.domain.empInfo.QEmp emp;
 
     public final TimePath<java.time.LocalTime> endAt = createTime("endAt", java.time.LocalTime.class);

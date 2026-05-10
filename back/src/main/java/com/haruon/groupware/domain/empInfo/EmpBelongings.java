@@ -2,7 +2,7 @@ package com.haruon.groupware.domain.empInfo;
 
 import com.haruon.groupware.domain.AbstractEntity;
 import com.haruon.groupware.domain.empInfo.enums.PositionCode;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,33 +13,21 @@ import java.time.LocalDate;
 import static java.util.Objects.requireNonNull;
 
 @Entity
-@Table(
-      uniqueConstraints = {@UniqueConstraint(
-              columnNames = {"emp_id", "dept_id", "startAt"}
-      )}
-)
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class EmpBelongings extends AbstractEntity {
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="emp_id", nullable=false)
     private Emp emp;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="dept_id", nullable = false)
     private Dept dept;
 
-    @Enumerated(EnumType.STRING)
     private PositionCode position;
 
     private boolean isPrimary;
 
-    @Column(nullable = false)
     private LocalDate startAt;
 
-    @Nullable
-    private LocalDate endAt;
+    @Nullable private LocalDate endAt;
 
     static EmpBelongings registerEmpBelonging(
             Emp emp,

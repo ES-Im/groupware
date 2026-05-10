@@ -1,27 +1,25 @@
 package com.haruon.groupware.domain.empInfo;
 
 import com.haruon.groupware.domain.AbstractEntity;
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import static java.util.Objects.requireNonNull;
 import static org.springframework.util.Assert.state;
 
 @Entity
 @Getter
+@ToString(callSuper = true)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Dept extends AbstractEntity {
 
-    @Column(nullable = false, unique = true)
     private String deptCode;
 
-    @Column(nullable = false)
     private String deptName;
 
-    @Column(nullable = false)
     private boolean isActive;
 
     public static Dept registerDept(String deptCode, String deptName) {

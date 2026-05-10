@@ -2,7 +2,7 @@ package com.haruon.groupware.domain.chat;
 
 import com.haruon.groupware.domain.AbstractEntity;
 import com.haruon.groupware.domain.empInfo.Emp;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.jspecify.annotations.Nullable;
@@ -17,31 +17,21 @@ import static org.springframework.util.Assert.state;
 @Getter
 @Entity
 @NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"room_id", "member_id"}))
 public class ChatMember extends AbstractEntity {
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="room_id", nullable = false)
     private ChatRoom room;
 
-    @Nullable
-    private String roomName;
+    @Nullable private String roomName;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="member_id", nullable = false)
     private Emp emp;
 
-    @Nullable
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="last_message_id", nullable = true)
-    private ChatMessage lastReadMessage;
+    @Nullable private ChatMessage lastReadMessage;
 
     private boolean isBookMarked;
 
     private LocalDateTime joinedAt;
 
-    @Nullable
-    private LocalDateTime leftAt;
+    @Nullable private LocalDateTime leftAt;
 
     static List<ChatMember> joinAtCreateRoom(
             ChatRoom room,
@@ -123,7 +113,6 @@ public class ChatMember extends AbstractEntity {
         this.lastReadMessage = message;
     }
 
-    //todo - ChatRoom으로 올리기 아래 메서드들
     public boolean isParticipating() {
         return this.leftAt == null;
     }

@@ -303,7 +303,7 @@ record MeetingRoomManagementTest(
     }
 
     private Emp getFacilityRoleEmp(String empNo, String loginId) {
-        Dept dept = saveDept(deptRepository, "001", "facility");
+        Dept dept = saveDept(deptRepository, "facility", "001");
 
         return saveEmpWithRoleAndDept(
                 empRepository, deptRepository, empNo, loginId, dept, SystemRoleCode.FACILITY

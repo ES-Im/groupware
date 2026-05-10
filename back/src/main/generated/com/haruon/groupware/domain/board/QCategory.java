@@ -37,6 +37,8 @@ public class QCategory extends EntityPathBase<Category> {
     //inherited
     public final DateTimePath<java.time.Instant> updatedAt = _super.updatedAt;
 
+    public final BooleanPath visible = createBoolean("visible");
+
     public QCategory(String variable) {
         super(Category.class, forVariable(variable));
     }

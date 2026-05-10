@@ -200,7 +200,7 @@ class DraftCommonTest {
                 .extracting(
                         Approver::getRole,
                         Approver::getOrder,
-                        Approver::getEmp
+                        Approver::getApprover
                 )
                 .containsExactly(
                         tuple(ApprovalRole.APPROVER, 1, approver1),
@@ -281,14 +281,14 @@ class DraftCommonTest {
         GeneralDraft submitted = getSubmitted();
 
         Approver firstApprover = submitted.getApproval().getApprovers().getFirst();
-        Emp firstApprover_emp = firstApprover.getEmp();
+        Emp firstApprover_emp = firstApprover.getApprover();
         LocalDateTime approvedAt = LocalDateTime.of(2026, 5, 1, 0,0,0);
 
         submitted.approve(firstApprover_emp, approvedAt);
 
         assertThat(submitted.getApproval().getStatus()).isEqualTo(ApprovalStatus.IN_PROGRESS);
         assertThat(firstApprover).extracting(
-                Approver::getEmp, Approver::getApprovedAt
+                Approver::getApprover, Approver::getApprovedAt
         ).containsExactly(
                 firstApprover_emp, approvedAt
         );
@@ -300,7 +300,7 @@ class DraftCommonTest {
         GeneralDraft submitted = getSubmitted();
 
         Approver firstApprover = submitted.getApproval().getApprovers().getFirst();
-        Emp firstApprover_emp = firstApprover.getEmp();
+        Emp firstApprover_emp = firstApprover.getApprover();
         LocalDateTime rejectedAt = LocalDateTime.of(2026, 5, 1, 0,0,0);
         String reason = "reson";
 
@@ -308,7 +308,7 @@ class DraftCommonTest {
 
         assertThat(submitted.getApproval().getStatus()).isEqualTo(ApprovalStatus.REJECTED);
         assertThat(firstApprover).extracting(
-                Approver::getEmp, Approver::getRejectedAt, Approver::getRejectReason
+                Approver::getApprover, Approver::getRejectedAt, Approver::getRejectReason
         ).containsExactly(
                 firstApprover_emp,rejectedAt, reason
         );
@@ -323,7 +323,7 @@ class DraftCommonTest {
 
         ReflectionTestUtils.setField(approval, "status", ApprovalStatus.APPROVED);
 
-        Emp emp = approval.getApprovers().getFirst().getEmp();
+        Emp emp = approval.getApprovers().getFirst().getApprover();
 
         assertThatThrownBy(() ->
                 submitted.approve(emp, LocalDateTime.of(2026, 5, 1, 0,0,0))
@@ -337,7 +337,7 @@ class DraftCommonTest {
 
         ReflectionTestUtils.setField(approval, "status", ApprovalStatus.APPROVED);
 
-        Emp emp = approval.getApprovers().getFirst().getEmp();
+        Emp emp = approval.getApprovers().getFirst().getApprover();
 
         assertThatThrownBy(() ->
                 submitted.reject(emp, "test", LocalDateTime.of(2026, 5, 1, 0,0,0))
@@ -352,7 +352,7 @@ class DraftCommonTest {
 
         ReflectionTestUtils.setField(approval, "status", ApprovalStatus.REJECTED);
 
-        Emp emp = approval.getApprovers().getFirst().getEmp();
+        Emp emp = approval.getApprovers().getFirst().getApprover();
 
         assertThatThrownBy(() ->
                 submitted.approve(emp, LocalDateTime.of(2026, 5, 1, 0,0,0))
@@ -366,7 +366,7 @@ class DraftCommonTest {
 
         ReflectionTestUtils.setField(approval, "status", ApprovalStatus.REJECTED);
 
-        Emp emp = approval.getApprovers().getFirst().getEmp();
+        Emp emp = approval.getApprovers().getFirst().getApprover();
 
         assertThatThrownBy(() ->
                 submitted.reject(emp, "test", LocalDateTime.of(2026, 5, 1, 0,0,0))
@@ -385,12 +385,12 @@ class DraftCommonTest {
                         .orElseThrow();
 
         LocalDateTime approvedAt = LocalDateTime.of(2026, 5, 1, 0, 0, 0);
-        submitted.approve(approverInOrder.getEmp(), approvedAt);
+        submitted.approve(approverInOrder.getApprover(), approvedAt);
 
         assertThat(approverInOrder).extracting(
-                Approver::getApproval, Approver::getRole, Approver::getOrder, Approver::getEmp, Approver::getApprovedAt
+                Approver::getApproval, Approver::getRole, Approver::getOrder, Approver::getApprover, Approver::getApprovedAt
         ).containsExactly(
-                approval, approverInOrder.getRole(), approverInOrder.getOrder(), approverInOrder.getEmp(), approvedAt
+                approval, approverInOrder.getRole(), approverInOrder.getOrder(), approverInOrder.getApprover(), approvedAt
         );
 
         assertThat(approval.getStatus()).isEqualTo(ApprovalStatus.IN_PROGRESS);
@@ -405,7 +405,7 @@ class DraftCommonTest {
         LocalDateTime approvedAt = LocalDateTime.of(2026, 3, 3, 10, 0, 0);
 
         approval.getApprovers().forEach(a-> {
-                approval.approve(a.getEmp(), approvedAt);
+                approval.approve(a.getApprover(), approvedAt);
             }
         );
 
@@ -418,7 +418,7 @@ class DraftCommonTest {
         GeneralDraft submitted = getSubmitted();
         Approval approval = submitted.getApproval();
 
-        Emp empNotInOrder = approval.getApprovers().getLast().getEmp();
+        Emp empNotInOrder = approval.getApprovers().getLast().getApprover();
 
         assertThatThrownBy(() ->
                 submitted.approve(empNotInOrder, LocalDateTime.of(2026, 5, 1, 0,0,0))
@@ -430,7 +430,7 @@ class DraftCommonTest {
         GeneralDraft submitted = getSubmitted();
         Approval approval = submitted.getApproval();
 
-        Emp empNotInOrder = approval.getApprovers().getLast().getEmp();
+        Emp empNotInOrder = approval.getApprovers().getLast().getApprover();
 
         assertThatThrownBy(() ->
                 submitted.reject(empNotInOrder, "test", LocalDateTime.of(2026, 5, 1, 0,0,0))
@@ -452,7 +452,7 @@ class DraftCommonTest {
         GeneralDraft submitted = getSubmitted();
         Approver first = submitted.getApproval().getApprovers().getFirst();
 
-        submitted.approve(first.getEmp(), LocalDateTime.of(2026, 4, 9, 0, 0, 0));
+        submitted.approve(first.getApprover(), LocalDateTime.of(2026, 4, 9, 0, 0, 0));
 
         assertThatThrownBy(submitted::revertToDraft).hasMessage("결재진행 이후 상신 취소 불가");
     }
@@ -466,7 +466,7 @@ class DraftCommonTest {
         draft.addCirculation(sharedEmp);
         
         assertThat(draft.getCirculations()).extracting(
-                Circulation::getDraft, Circulation::getEmp, Circulation::getReadAt
+                Circulation::getDraft, Circulation::getViewer, Circulation::getReadAt
         ).containsExactly(
                 tuple(draft, sharedEmp, null)
         );
@@ -547,7 +547,7 @@ class DraftCommonTest {
         approvedDraft.markReadByCirculation(sharedEmp, readAt);
 
         assertThat(approvedDraft.getCirculations()).extracting(
-                Circulation::getDraft, Circulation::getEmp, Circulation::getReadAt
+                Circulation::getDraft, Circulation::getViewer, Circulation::getReadAt
         ).containsExactly(
                 tuple(approvedDraft, sharedEmp, readAt)
         );
@@ -652,7 +652,7 @@ class DraftCommonTest {
     void removeFile_for_submitted_fail() {
         GeneralDraft submitted = getDraftWithApprovers();
         submitted.addFile("image/png", "originName", "png", 1024L);
-        submitted.approve(submitted.getApproval().getApprovers().getFirst().getEmp(),
+        submitted.approve(submitted.getApproval().getApprovers().getFirst().getApprover(),
                 LocalDateTime.of(2026,5, 5,0,0,0));
 
         DraftFile first = submitted.getDraftFiles().getFirst();
@@ -717,7 +717,7 @@ class DraftCommonTest {
         GeneralDraft submitted = getSubmitted();
 
         Approver firstApprover = submitted.getApproval().getApprovers().getFirst();
-        Emp firstApprover_emp = firstApprover.getEmp();
+        Emp firstApprover_emp = firstApprover.getApprover();
         LocalDateTime rejectedAt = LocalDateTime.of(2026, 5, 1, 0,0,0);
         String reason = "reson";
 
@@ -736,7 +736,7 @@ class DraftCommonTest {
         GeneralDraft submitted = getSubmitted();
 
         Approver firstApprover = submitted.getApproval().getApprovers().getFirst();
-        Emp firstApproverEmp = firstApprover.getEmp();
+        Emp firstApproverEmp = firstApprover.getApprover();
 
         LocalDateTime rejectedAt = LocalDateTime.of(2026, 5, 1, 0, 0, 0);
         String reason = "reason";
@@ -818,7 +818,7 @@ class DraftCommonTest {
         LocalDateTime signedAt = LocalDateTime.of(2026, 5, 1, 0,0,0);
 
         approvers.forEach( a -> {
-            submitted.approve(a.getEmp(), signedAt);
+            submitted.approve(a.getApprover(), signedAt);
         });
 
         return submitted;

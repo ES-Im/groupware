@@ -43,6 +43,8 @@ public class QEmpBelongings extends EntityPathBase<EmpBelongings> {
 
     public final EnumPath<com.haruon.groupware.domain.empInfo.enums.PositionCode> position = createEnum("position", com.haruon.groupware.domain.empInfo.enums.PositionCode.class);
 
+    public final BooleanPath primary = createBoolean("primary");
+
     public final DatePath<java.time.LocalDate> startAt = createDate("startAt", java.time.LocalDate.class);
 
     //inherited

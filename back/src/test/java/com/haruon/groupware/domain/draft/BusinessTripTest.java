@@ -90,7 +90,7 @@ class BusinessTripTest {
         assertThat(participants.size()).isEqualTo(1);
         assertThat(submitted.getParticipants()).singleElement().extracting(BusinessTripParticipant::getEmp).isEqualTo(drafter);
         Assertions.assertNotNull(submitted.getApproval());
-        assertThat(submitted.getApproval().getApprovers()).singleElement().extracting(Approver::getEmp).isEqualTo(approver);
+        assertThat(submitted.getApproval().getApprovers()).singleElement().extracting(Approver::getApprover).isEqualTo(approver);
         assertThat(submitted.getSourceKey()).isNotNull();
     }
 

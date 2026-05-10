@@ -2,7 +2,7 @@ package com.haruon.groupware.domain.chat;
 
 import com.haruon.groupware.domain.AbstractEntity;
 import com.haruon.groupware.domain.empInfo.Emp;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -15,18 +15,12 @@ import static java.util.Objects.requireNonNull;
 @NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
 public class ChatMessage extends AbstractEntity {
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="room_id", nullable = false, updatable=false)
     private ChatRoom chatRoom;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="sender_id", nullable = false, updatable=false)
     private Emp emp;
 
-    @Column(nullable = false, updatable = false)
     private String content;
 
-    @Column(nullable = false, updatable = false)
     private LocalDateTime sentAt;
 
     static ChatMessage createMessage (

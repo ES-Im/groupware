@@ -143,7 +143,7 @@ class EmpTest {
 
         assertThat(emp.getEmpFiles()).hasSize(1);
         assertThat(emp.getEmpFiles().getFirst().getFileType()).isEqualTo(FileType.PROFILE_PICTURE);
-        assertThat(emp.getEmpFiles().getFirst().getIsActive()).isTrue();
+        assertThat(emp.getEmpFiles().getFirst().isActive()).isTrue();
     }
 
     @Test
@@ -155,7 +155,7 @@ class EmpTest {
         addFileWithType(emp, FileType.PROFILE_PICTURE);
 
         assertThat(emp.getEmpFiles()).hasSize(2);
-        assertThat(emp.getEmpFiles().stream().filter(EmpFile::getIsActive)).hasSize(1);
+        assertThat(emp.getEmpFiles().stream().filter(EmpFile::isActive)).hasSize(1);
     }
 
     @Test
@@ -346,7 +346,7 @@ class EmpTest {
 
         emp.changeFileActiveStatus(1L, false);
 
-        assertThat(file.getIsActive()).isFalse();
+        assertThat(file.isActive()).isFalse();
     }
 
     @Test
@@ -357,15 +357,15 @@ class EmpTest {
         EmpFile file2 = addFileWithType(emp, FileType.PROFILE_PICTURE);
 
         ReflectionTestUtils.setField(file1, "id", 1L);
-        assertThat(file1.getIsActive()).isFalse();  // deactivated when file2 added
+        assertThat(file1.isActive()).isFalse();  // deactivated when file2 added
 
         ReflectionTestUtils.setField(file2, "id", 2L);
-        assertThat(file2.getIsActive()).isTrue();
+        assertThat(file2.isActive()).isTrue();
 
         emp.changeFileActiveStatus(1L, true);
 
-        assertThat(file1.getIsActive()).isTrue();
-        assertThat(file2.getIsActive()).isFalse();
+        assertThat(file1.isActive()).isTrue();
+        assertThat(file2.isActive()).isFalse();
     }
 
     @Test
@@ -409,9 +409,7 @@ class EmpTest {
         );
 
         assertThat(emp.getEmpBelongings()).singleElement()
-                .satisfies(e -> {
-                    assertThat(e.isPrimary()).isFalse();
-                });
+                .satisfies(e -> assertThat(e.isPrimary()).isFalse());
     }
     // 부서를 바꿀수있다
     // 주요소속정보를 바꿀 수 있으며, 다른 소속정보 중 주요소속정보가 있으면 비활성화

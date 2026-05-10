@@ -2,21 +2,17 @@ package com.haruon.groupware.domain.franchise;
 
 import com.haruon.groupware.domain.AbstractFileEntity;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import static java.util.Objects.requireNonNull;
 
-@Getter( lombok.AccessLevel.PROTECTED )
+@Getter
 @Entity
-@NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class EducationFile extends AbstractFileEntity {
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="education_id", nullable = false)
     private Education education;
 
     static EducationFile create(

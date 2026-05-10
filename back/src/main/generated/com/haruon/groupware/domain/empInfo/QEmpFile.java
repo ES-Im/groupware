@@ -27,6 +27,8 @@ public class QEmpFile extends EntityPathBase<EmpFile> {
 
     public final com.haruon.groupware.domain.QAbstractFileEntity _super = new com.haruon.groupware.domain.QAbstractFileEntity(this);
 
+    public final BooleanPath active = createBoolean("active");
+
     //inherited
     public final DateTimePath<java.time.Instant> createdAt = _super.createdAt;
 

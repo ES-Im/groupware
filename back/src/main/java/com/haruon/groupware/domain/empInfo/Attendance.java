@@ -2,7 +2,7 @@ package com.haruon.groupware.domain.empInfo;
 
 import com.haruon.groupware.domain.AbstractEntity;
 import com.haruon.groupware.domain.empInfo.enums.AttendanceStatus;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,43 +19,28 @@ import static org.springframework.util.Assert.state;
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-@ToString
+@ToString(callSuper = true, exclude = {"emp", "approvedBy", "editedBy"})
 public class Attendance extends AbstractEntity {
 
-    @ManyToOne
-    @JoinColumn(name="emp_id", nullable = false)
     private Emp emp;
 
-    @Enumerated(EnumType.STRING)
-    @Nullable
     private AttendanceStatus attendanceStatus;
 
     private LocalDate attendanceDate;
 
-    @Nullable
-    private LocalTime startAt;
+    @Nullable private LocalTime startAt;
 
-    @Nullable
-    private LocalTime endAt;
+    @Nullable private LocalTime endAt;
 
-    @Nullable
-    private LocalDateTime approvedAt;
+    @Nullable private LocalDateTime approvedAt;
 
-    @Nullable
-    @ManyToOne
-    @JoinColumn(name="approved_emp_id")
-    private Emp approvedBy;
+    @Nullable private Emp approvedBy;
 
-    @Nullable
-    @ManyToOne
-    @JoinColumn(name="edited_emp_id")
-    private Emp editedBy;
+    @Nullable private Emp editedBy;
 
-    @Nullable
-    private LocalDateTime editedAt;
+    @Nullable private LocalDateTime editedAt;
 
-    @Nullable
-    private String editReason;
+    @Nullable private String editReason;
 
     public static Attendance registerAttendanceByEmp(Emp emp, LocalDateTime startAt) {
         Attendance attendance = new Attendance();

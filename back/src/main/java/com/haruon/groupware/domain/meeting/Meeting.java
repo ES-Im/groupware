@@ -6,10 +6,11 @@ import com.haruon.groupware.domain.event.byMeetingReservation.MeetingCanceledEve
 import com.haruon.groupware.domain.event.byMeetingReservation.MeetingChangedEvent;
 import com.haruon.groupware.domain.event.byMeetingReservation.MeetingParticipantReplaceEvent;
 import com.haruon.groupware.domain.event.byMeetingReservation.MeetingReservedEvent;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.jspecify.annotations.Nullable;
 
 import java.time.LocalDate;
@@ -23,34 +24,25 @@ import static org.springframework.util.Assert.state;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@ToString(callSuper = true, exclude = {"meetingRoom", "emp", "meetingParticipants"})
 public class Meeting extends AbstractEventAggregateRoot {
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "room_id", nullable = false)
     private MeetingRoom meetingRoom;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="reserver_id",  nullable = false)
     private Emp emp;
 
-    @Column(unique = true, nullable = false, updatable = false)
     private String sourceKey;
 
-    @Column(nullable = false)
     private String title;
 
-    @Column(nullable = false)
     private LocalDate meetingDate;
 
-    @Column(nullable = false)
     private LocalTime startAt;
 
-    @Column(nullable = false)
     private LocalTime endAt;
 
     private boolean isCancel;
 
-    @OneToMany(mappedBy = "meeting", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MeetingParticipant> meetingParticipants = new ArrayList<>();
 
     public static Meeting reserve(

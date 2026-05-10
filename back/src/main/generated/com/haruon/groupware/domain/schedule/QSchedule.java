@@ -27,6 +27,10 @@ public class QSchedule extends EntityPathBase<Schedule> {
 
     public final com.haruon.groupware.domain.QAbstractEntity _super = new com.haruon.groupware.domain.QAbstractEntity(this);
 
+    public final BooleanPath allDay = createBoolean("allDay");
+
+    public final BooleanPath canceled = createBoolean("canceled");
+
     public final StringPath content = createString("content");
 
     //inherited

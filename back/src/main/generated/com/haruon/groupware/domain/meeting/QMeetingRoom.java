@@ -25,6 +25,8 @@ public class QMeetingRoom extends EntityPathBase<MeetingRoom> {
 
     public final com.haruon.groupware.domain.QAbstractEntity _super = new com.haruon.groupware.domain.QAbstractEntity(this);
 
+    public final BooleanPath available = createBoolean("available");
+
     public final NumberPath<Integer> capacity = createNumber("capacity", Integer.class);
 
     //inherited

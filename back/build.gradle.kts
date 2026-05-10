@@ -15,6 +15,7 @@ group = "com.haruon"
 version = "0.0.1-SNAPSHOT"
 description = "groupware"
 
+val mockitoAgent: Configuration = configurations.create("mockitoAgent")
 val querydslVersion = "7.1"
 
 java {
@@ -90,6 +91,8 @@ dependencies {
     annotationProcessor("jakarta.persistence:jakarta.persistence-api")
     annotationProcessor("jakarta.annotation:jakarta.annotation-api")
 
+    // mock
+
 
 }
 
@@ -99,6 +102,7 @@ nullaway {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+    jvmArgs("-javaagent:${mockitoAgent.asPath}")
 }
 
 

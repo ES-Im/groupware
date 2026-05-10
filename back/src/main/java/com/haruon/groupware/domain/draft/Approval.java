@@ -4,7 +4,7 @@ import com.haruon.groupware.domain.AbstractEntity;
 import com.haruon.groupware.domain.draft.sub.ApprovalStatus;
 import com.haruon.groupware.domain.draft.sub.ApproversParam;
 import com.haruon.groupware.domain.empInfo.Emp;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,15 +23,10 @@ import static org.springframework.util.Assert.state;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Approval extends AbstractEntity {
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="draft_id", nullable = false, unique = true)
     private Draft draft;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private ApprovalStatus status;
 
-    @OneToMany(mappedBy = "approval", orphanRemoval = true, cascade = CascadeType.ALL)
     private final List<Approver> approvers = new ArrayList<>();
 
     static Approval createDraft(Draft draft, @Nullable List<ApproversParam> params) {
@@ -109,7 +104,7 @@ public class Approval extends AbstractEntity {
 
         Approver current = getCurrentPendingMember();
 
-        state(current.getEmp().equals(approver), "현재 차례의 결재자가 아님");
+        state(current.getApprover().equals(approver), "현재 차례의 결재자가 아님");
 
         current.approve(approvedAt);
 
@@ -129,7 +124,7 @@ public class Approval extends AbstractEntity {
         state(!this.approvers.isEmpty(), "처리할 결재자가 없음");
 
         Approver current = getCurrentPendingMember();
-        state(current.getEmp().equals(rejector), "현재 차례의 결재자가 아님");
+        state(current.getApprover().equals(rejector), "현재 차례의 결재자가 아님");
 
         current.reject(reason, rejectedAt);
         this.status = ApprovalStatus.REJECTED;
@@ -149,7 +144,7 @@ public class Approval extends AbstractEntity {
         requireNonNull(param.approver());
 
         boolean exists = approvers.stream()
-                .anyMatch(member -> member.getEmp().equals(param.approver()));
+                .anyMatch(member -> member.getApprover().equals(param.approver()));
         boolean occupiedOrder = approvers.stream()
                 .anyMatch(m -> m.getOrder() == param.order());
 

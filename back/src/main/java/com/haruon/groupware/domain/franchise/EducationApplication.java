@@ -1,7 +1,7 @@
 package com.haruon.groupware.domain.franchise;
 
 import com.haruon.groupware.domain.AbstractEntity;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -15,21 +15,14 @@ import static org.springframework.util.Assert.state;
 @NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
 public class EducationApplication extends AbstractEntity {
 
-    @Column(nullable = false, updatable = false, unique = true)
     private String externalId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="education_id", nullable = false)
     private Education education;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="franchise_id", nullable = false)
     private Franchise franchise;
 
-    @Column(nullable = false)
     private long appliedCount;
 
-    @Column(nullable = false)
     private LocalDateTime appliedAt;
 
 

@@ -37,6 +37,9 @@ public class QSalesDraft extends EntityPathBase<SalesDraft> {
     public final StringPath content;
 
     //inherited
+    public final BooleanPath draft;
+
+    //inherited
     public final ListPath<DraftFile, QDraftFile> draftFiles;
 
     // inherited
@@ -79,6 +82,7 @@ public class QSalesDraft extends EntityPathBase<SalesDraft> {
         this.approval = _super.approval;
         this.circulations = _super.circulations;
         this.content = _super.content;
+        this.draft = _super.draft;
         this.draftFiles = _super.draftFiles;
         this.emp = _super.emp;
         this.franchise = inits.isInitialized("franchise") ? new com.haruon.groupware.domain.franchise.QFranchise(forProperty("franchise"), inits.get("franchise")) : null;

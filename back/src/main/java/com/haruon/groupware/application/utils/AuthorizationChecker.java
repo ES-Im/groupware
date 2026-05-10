@@ -14,7 +14,6 @@ import com.haruon.groupware.domain.empInfo.enums.SystemRoleCode;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-//todo :  커스텀 예외처리 필요
 public class AuthorizationChecker {
     /**
      * ACTIVE 사원 검증

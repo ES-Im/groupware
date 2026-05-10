@@ -2,10 +2,11 @@ package com.haruon.groupware.domain.message;
 
 import com.haruon.groupware.domain.AbstractEntity;
 import com.haruon.groupware.domain.empInfo.Emp;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.jspecify.annotations.Nullable;
 
 import java.time.LocalDateTime;
@@ -18,24 +19,19 @@ import static org.springframework.util.Assert.state;
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
+@ToString(callSuper = true, exclude = {"sending", "receivings", "messageFiles"})
 public class Message extends AbstractEntity {
 
-    @Column(nullable = false)
     private String title;
 
-    @Column(nullable = false)
     private String content;
 
-    @Nullable
-    private LocalDateTime sentAt;
+    @Nullable private LocalDateTime sentAt;
 
-    @OneToOne(mappedBy = "message", orphanRemoval = true, cascade = CascadeType.ALL)
     private MessageSending sending;
 
-    @OneToMany(mappedBy = "message", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<MessageReceiving> receivings = new ArrayList<>();
 
-    @OneToMany(mappedBy = "message", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<MessageFile> messageFiles = new ArrayList<>();
 
 

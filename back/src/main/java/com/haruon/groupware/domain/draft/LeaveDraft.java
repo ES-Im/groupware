@@ -4,10 +4,11 @@ import com.haruon.groupware.domain.draft.sub.ApproversParam;
 import com.haruon.groupware.domain.draft.sub.LeaveType;
 import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.event.byLeaveApprove.LeaveApprovedEvent;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.jspecify.annotations.Nullable;
 
 import java.time.LocalDateTime;
@@ -16,23 +17,19 @@ import java.util.List;
 import static java.util.Objects.requireNonNull;
 
 @Entity
-@DiscriminatorValue("LEAVE")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@ToString(callSuper = true)
 public class LeaveDraft extends Draft {
 
-    @Column(nullable = false)
     private LocalDateTime startAt;
 
-    @Column(nullable = false)
     private LocalDateTime endAt;
 
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
     private LeaveType leaveType;
 
-    @Column(nullable = false)
     private long reservedHours;
+
 
     private LeaveDraft(String title, String content, Emp emp) {
         super(title, content, emp);

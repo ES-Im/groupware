@@ -24,9 +24,9 @@ public class FranchiseFixture {
             String empNo,
             String loginId
     ) {
-        Dept franchise = deptRepository.findByDeptCode("00001")
+        Dept franchise = deptRepository.findByDeptCode("001")
                 .orElseGet(() -> deptRepository.save(
-                        Dept.registerDept("00001", "Franchise")
+                        Dept.registerDept("001", "Franchise")
                 ));
 
         return empRepository.findByEmpNo(empNo).orElseGet(() ->

@@ -1,7 +1,7 @@
 package com.haruon.groupware.domain.franchise;
 
 import com.haruon.groupware.domain.AbstractEntity;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,15 +17,11 @@ import static org.springframework.util.Assert.state;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class FranchiseInquiryAnswer extends AbstractEntity {
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="inquiry_id", nullable = false)
     private FranchiseInquiry inquiry;
 
-    @Column(nullable = false)
     private String content;
 
-    @Nullable
-    private LocalDateTime answeredAt;
+    @Nullable private LocalDateTime answeredAt;
 
     static FranchiseInquiryAnswer createDraft(
             FranchiseInquiry inquiry,

@@ -24,6 +24,8 @@ public class QDept extends EntityPathBase<Dept> {
 
     public final com.haruon.groupware.domain.QAbstractEntity _super = new com.haruon.groupware.domain.QAbstractEntity(this);
 
+    public final BooleanPath active = createBoolean("active");
+
     //inherited
     public final DateTimePath<java.time.Instant> createdAt = _super.createdAt;
 

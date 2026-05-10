@@ -5,10 +5,11 @@ import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.empInfo.enums.EmpStatus;
 import com.haruon.groupware.domain.empInfo.enums.SystemRoleCode;
 import com.haruon.groupware.domain.franchise.Franchise;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.jspecify.annotations.Nullable;
 
 import java.time.LocalDateTime;
@@ -20,18 +21,14 @@ import static org.springframework.util.Assert.state;
 
 @Getter
 @Entity
-@DiscriminatorValue("SALES")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@ToString(callSuper = true, exclude = "franchise")
 public class SalesDraft extends Draft {
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "franchise_id", nullable = false)
     private Franchise franchise;
 
-    @Column(nullable = false)
     private YearMonth reportMonth;
 
-    @Column(nullable = false)
     private long salesAmount;
 
     private SalesDraft(String title, String content, Emp emp) {

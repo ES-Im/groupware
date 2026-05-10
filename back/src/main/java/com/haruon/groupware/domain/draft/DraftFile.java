@@ -2,9 +2,6 @@ package com.haruon.groupware.domain.draft;
 
 import com.haruon.groupware.domain.AbstractFileEntity;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,8 +13,6 @@ import static java.util.Objects.requireNonNull;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class DraftFile extends AbstractFileEntity {
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="draft_id", nullable = false)
     private Draft draft;
 
     static DraftFile create(

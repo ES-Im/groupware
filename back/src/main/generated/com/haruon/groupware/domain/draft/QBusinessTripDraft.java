@@ -39,6 +39,9 @@ public class QBusinessTripDraft extends EntityPathBase<BusinessTripDraft> {
     public final StringPath destination = createString("destination");
 
     //inherited
+    public final BooleanPath draft;
+
+    //inherited
     public final ListPath<DraftFile, QDraftFile> draftFiles;
 
     // inherited
@@ -83,6 +86,7 @@ public class QBusinessTripDraft extends EntityPathBase<BusinessTripDraft> {
         this.approval = _super.approval;
         this.circulations = _super.circulations;
         this.content = _super.content;
+        this.draft = _super.draft;
         this.draftFiles = _super.draftFiles;
         this.emp = _super.emp;
         this.sourceKey = _super.sourceKey;

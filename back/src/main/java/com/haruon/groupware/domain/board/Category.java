@@ -1,22 +1,21 @@
 package com.haruon.groupware.domain.board;
 
 import com.haruon.groupware.domain.AbstractEntity;
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import static java.util.Objects.requireNonNull;
 
 @Getter
 @Entity
 @NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
+@ToString(callSuper = true)
 public class Category extends AbstractEntity {
 
-    @Column(nullable = false, unique = true)
     private String name;
 
-    @Column(nullable = false)
     private boolean isVisible;
 
 
