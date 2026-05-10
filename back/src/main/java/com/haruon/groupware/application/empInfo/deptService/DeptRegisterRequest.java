@@ -1,11 +1,10 @@
 package com.haruon.groupware.application.empInfo.deptService;
 
 
+import com.haruon.groupware.application.exception.common.BlankValueNotAllowedException;
+import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import com.haruon.groupware.application.utils.RegexpValidator;
 import lombok.Builder;
-
-import static java.util.Objects.requireNonNull;
-import static org.springframework.util.Assert.state;
 
 @Builder
 public record DeptRegisterRequest(
@@ -18,11 +17,11 @@ public record DeptRegisterRequest(
 
 ) {
     public DeptRegisterRequest {
-        requireNonNull(adminId, "수정사원번호는 필수값");
-        requireNonNull(deptCode, "부서코드는 필수값");
-        requireNonNull(deptName, "부서이름은 필수값");
+        if(adminId == null || deptCode == null || deptName == null) {
+            throw new RequiredValueMissingException();
+        }
 
-        state(!deptName.isBlank(), "부서명은 공백이 될 수 없음");
+        if(deptCode.isBlank()) throw new BlankValueNotAllowedException();
 
         RegexpValidator.deptCodeCheck(deptCode);
     }

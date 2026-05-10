@@ -5,7 +5,8 @@ import com.haruon.groupware.application.empInfo.attendanceService.dto.EditAttend
 import com.haruon.groupware.application.empInfo.provided.AttendanceEditing;
 import com.haruon.groupware.application.empInfo.required.AttendanceRepository;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
-import com.haruon.groupware.application.schedule.provided.ScheduleRegister;
+import com.haruon.groupware.application.exception.empInfo.AttendanceEmpMismatchException;
+import com.haruon.groupware.application.exception.empInfo.WorkTimeRangeRequiredException;
 import com.haruon.groupware.application.utils.AuthorizationChecker.DeptManagerInfo;
 import com.haruon.groupware.application.utils.CompanyPolicyPort;
 import com.haruon.groupware.domain.empInfo.Attendance;
@@ -20,7 +21,6 @@ import java.time.LocalTime;
 import static com.haruon.groupware.application.empInfo.attendanceService.AttendanceUtils.findAttendanceById;
 import static com.haruon.groupware.application.empInfo.attendanceService.AttendanceUtils.getStatusByRecognizedHours;
 import static com.haruon.groupware.application.utils.AuthorizationChecker.checkDeptManagerById;
-import static org.springframework.util.Assert.state;
 
 @Service
 @Transactional
@@ -28,7 +28,6 @@ import static org.springframework.util.Assert.state;
 public class AttendanceEditingService implements AttendanceEditing {
 
     private final AttendanceRepository attendanceRepository;
-    private final ScheduleRegister scheduleRegister;
     private final EmpRepository empRepository;
     private final CompanyPolicyPort companyPolicy;
 
@@ -42,8 +41,7 @@ public class AttendanceEditingService implements AttendanceEditing {
         Emp manager = deptManagerInfo.manager();
         Emp targetEmp = deptManagerInfo.targetEmp();
 
-        state(targetEmp.getId().equals(attendance.getEmp().getId()),
-                "해당 사원의 근태가 아님");
+        if(!targetEmp.equals(attendance.getEmp())) throw new AttendanceEmpMismatchException();
 
         attendance.approveAttendance(manager, param.approvedAt());
     }
@@ -55,8 +53,7 @@ public class AttendanceEditingService implements AttendanceEditing {
         Emp manager = deptManagerInfo.manager();
         Emp targetEmp = deptManagerInfo.targetEmp();
 
-        state(targetEmp.getId().equals(attendance.getEmp().getId()),
-                "해당 사원의 근태가 아님");
+        if(!targetEmp.equals(attendance.getEmp())) throw new AttendanceEmpMismatchException();
 
         int requiredWorkHours = companyPolicy.getWorkHours() - companyPolicy.getBreakHours();
 
@@ -65,13 +62,12 @@ public class AttendanceEditingService implements AttendanceEditing {
         LocalTime editedEndAt =
                 param.endAt() != null ? param.endAt() : attendance.getEndAt();
 
-        if(attendance.getStartAt().equals(editedStartAt)
-                && attendance.getEndAt().equals(editedEndAt)) {
+        if(attendance.getStartAt() != null && attendance.getEndAt() != null &&
+                attendance.getStartAt().equals(editedStartAt) && attendance.getEndAt().equals(editedEndAt)) {
             return;
         }
 
-        state(editedStartAt != null && editedEndAt != null,
-                "정상근무 계산을 하려면 시작시각과 종료시각이 모두 필요함");
+        if(editedStartAt == null || editedEndAt == null) throw new WorkTimeRangeRequiredException();
 
         AttendanceStatus editedStatus = getStatusByRecognizedHours(
                 editedStartAt,

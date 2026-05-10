@@ -2,6 +2,8 @@ package com.haruon.groupware.application.schedule.service;
 
 import com.haruon.groupware.application.draft.required.DraftRepository;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.exception.schedule.ScheduleNotFoundException;
+import com.haruon.groupware.application.exception.schedule.UnsupportedScheduleTypeException;
 import com.haruon.groupware.application.meeting.required.MeetingRepository;
 import com.haruon.groupware.application.schedule.contentFormatter.BusinessTripScheduleContentDto;
 import com.haruon.groupware.application.schedule.contentFormatter.LeaveScheduleContentDto;
@@ -33,7 +35,6 @@ import java.util.UUID;
 import static com.haruon.groupware.application.utils.AuthorizationChecker.findActiveEmpById;
 import static com.haruon.groupware.application.utils.Utils.findEmpListById;
 import static java.util.Objects.requireNonNull;
-import static org.springframework.util.Assert.state;
 
 @AllArgsConstructor
 @Service
@@ -68,16 +69,15 @@ public class ScheduleService implements ScheduleRegister, ScheduleEditing {
             return scheduleRepository.saveAll(schedules).getFirst().getSourceKey();
         }
 
-        Draft draft = draftRepository.findBySourceKey(param.sourceKey()).orElseThrow(
-                () -> new IllegalArgumentException("지원하지 않는 일정 타입")
-        );
+        Draft draft = draftRepository.findBySourceKey(param.sourceKey())
+                .orElseThrow(UnsupportedScheduleTypeException::new);
 
         if (draft instanceof LeaveDraft leaveDraft) {
             schedules = registerLeaveSchedules(leaveDraft);
         } else if (draft instanceof BusinessTripDraft businessTripDraft) {
             schedules = registerBusinessTripSchedules(businessTripDraft);
         } else {
-            throw new IllegalArgumentException("지원하지 않는 일정 타입");    // to-do 커스텀 예외처리
+            throw new UnsupportedScheduleTypeException();
         }
 
         return scheduleRepository.saveAll(schedules).getFirst().getSourceKey();
@@ -139,15 +139,13 @@ public class ScheduleService implements ScheduleRegister, ScheduleEditing {
     private Schedule getScheduleById(Long scheduleId) {
         return scheduleRepository
                 .findById(scheduleId)
-                .orElseThrow(() ->
-                        new IllegalArgumentException("대상 일정이 없음")      // to-do : 커스텀 예외 처리
-                );
+                .orElseThrow(ScheduleNotFoundException::new);
     }
 
     private List<Schedule> getSameEventSchedules(String sourceKey) {
         List<Schedule> schedules = scheduleRepository.findSchedulesBySourceKey(sourceKey);
 
-        state(!schedules.isEmpty(), "검색된 일정이 없음");
+        if(schedules.isEmpty()) throw new ScheduleNotFoundException();
 
         return schedules;
     }

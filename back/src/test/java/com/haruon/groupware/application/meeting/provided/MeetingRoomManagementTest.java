@@ -3,6 +3,12 @@ package com.haruon.groupware.application.meeting.provided;
 import com.haruon.groupware.application.TestIntegrationConfig;
 import com.haruon.groupware.application.empInfo.required.DeptRepository;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.exception.ApplicationException;
+import com.haruon.groupware.application.exception.common.role.PermissionDeniedException;
+import com.haruon.groupware.application.exception.file.FileSizeLimitExceededException;
+import com.haruon.groupware.application.exception.file.UnsupportedFileExtensionException;
+import com.haruon.groupware.application.exception.file.UnsupportedMimeTypeException;
+import com.haruon.groupware.application.exception.meeting.ReservedMeetingExistException;
 import com.haruon.groupware.application.meeting.required.MeetingRepository;
 import com.haruon.groupware.application.meeting.required.MeetingRoomRepository;
 import com.haruon.groupware.application.meeting.service.dto.MeetingReserveRequest;
@@ -117,7 +123,7 @@ record MeetingRoomManagementTest(
 
         assertThatThrownBy(() ->
                 saveMeetingRoom(notHavingRoleEmp)
-        ).hasMessage("권한이 없습니다.");
+        ).isInstanceOf(PermissionDeniedException.class);
     }
 
     @Test
@@ -159,28 +165,28 @@ record MeetingRoomManagementTest(
                                 .originalFileFullName("orginName.exe")
                                 .fileSize(fileSize)
                                 .build(),
-                        "허용되지 않는 파일 확장자"
+                        UnsupportedFileExtensionException.class
                 ), Arguments.of("mimeType은 'image/jpeg', 'image/jpg', 'image/png' 가능하며 그 이외에는 추가할 수 없다.",
                         FileDto.builder()
                                 .mimeType("application/octet-stream")
                                 .originalFileFullName(originalFileFullName)
                                 .fileSize(fileSize)
                                 .build(),
-                        "허용되지 않는 MIME 타입"
+                        UnsupportedMimeTypeException.class
                 ), Arguments.of("파일 크기는 10 * 1024 * 1024L 까지 가능",
                         FileDto.builder()
                                 .mimeType(mimeType)
                                 .originalFileFullName(originalFileFullName)
                                 .fileSize(fileSize+1L)
                                 .build(),
-                        "파일 크기 제한 초과"
+                        FileSizeLimitExceededException.class
                 )
         );
     }
     @ParameterizedTest(name = "{index} ==> {0}")
     @MethodSource("RoomFileFailArguments")
     @DisplayName("회의실 파일 등록 실패 테스트")
-    void addRoomFile_fail(String description, FileDto fileDto, String expectedMessage) {
+    void addRoomFile_fail(String description, FileDto fileDto, Class<? extends ApplicationException> expectedException) {
         Emp emp = getFacilityRoleEmp("202601001", "facility1");
         long roomId = saveMeetingRoom(emp);
         
@@ -192,7 +198,7 @@ record MeetingRoomManagementTest(
                                 .file(fileDto)
                                 .build()
                 )
-        ).hasMessage(expectedMessage);
+        ).isInstanceOf(expectedException);
     }
 
     @Transactional
@@ -273,11 +279,11 @@ record MeetingRoomManagementTest(
                                 .name("name")
                                 .build()
                 )
-        ).hasMessage("미래에 예약된 회의가 있어 회의실 정보 수정 불가");
+        ).isInstanceOf(ReservedMeetingExistException.class);
 
         assertThatThrownBy(() ->
                 meetingRoomManagement.deactivate(roomId, emp.getId())
-        ).hasMessage("미래에 예약된 회의가 있어 회의실 정보 수정 불가");
+        ).isInstanceOf(ReservedMeetingExistException.class);
     }
 
 

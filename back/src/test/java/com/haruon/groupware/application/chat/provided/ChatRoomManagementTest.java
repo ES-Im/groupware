@@ -4,6 +4,7 @@ import com.haruon.groupware.application.TestIntegrationConfig;
 import com.haruon.groupware.application.chat.required.ChatRepository;
 import com.haruon.groupware.application.chat.required.ChatRoomRepository;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.exception.common.role.ActiveEmployeeNotFoundException;
 import com.haruon.groupware.domain.chat.ChatMember;
 import com.haruon.groupware.domain.chat.ChatRoom;
 import com.haruon.groupware.domain.empInfo.Emp;
@@ -73,7 +74,7 @@ record ChatRoomManagementTest(
                         Set.of(member.getId()),
                         of(2026, 5, 9, 10, 0)
                 )
-        ).hasMessage("해당 활성화된 사원이 존재하지 않음");
+        ).isInstanceOf(ActiveEmployeeNotFoundException.class);
     }
 
     @Test

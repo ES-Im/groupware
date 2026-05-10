@@ -1,12 +1,11 @@
 package com.haruon.groupware.application.draft.service.dto;
 
+import com.haruon.groupware.application.exception.common.BlankValueNotAllowedException;
+import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import lombok.Builder;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Set;
-
-import static java.util.Objects.requireNonNull;
-import static org.springframework.util.Assert.state;
 
 @Builder
 public record CommonDraftUpdateRequest(
@@ -25,14 +24,13 @@ public record CommonDraftUpdateRequest(
 ) {
 
     public CommonDraftUpdateRequest {
-        requireNonNull(drafterId, "수정하는 사원 정보 필수");
-        requireNonNull(draftId, "수정하는 기안서 정보 필수");
+        if(drafterId == null || draftId == null) throw new RequiredValueMissingException();
 
-        if(title != null) state(!title.isBlank(), "제목은 공백이 될 수 없음");
-        if(content != null) state(!content.isBlank(), "내용은 공백이 될 수 없음");
+        if(title != null && title.isBlank()) throw new BlankValueNotAllowedException();
+        if(content != null && content.isBlank()) throw new BlankValueNotAllowedException();
     }
 
-    public boolean isChangeCommonField() {
-        return title != null || content != null || approvers != null;
+    public boolean isNotChangeCommonField() {
+        return title == null && content == null && approvers == null;
     }
 }

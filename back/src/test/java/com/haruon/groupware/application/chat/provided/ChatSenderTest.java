@@ -4,6 +4,8 @@ import com.haruon.groupware.application.TestIntegrationConfig;
 import com.haruon.groupware.application.chat.required.ChatRepository;
 import com.haruon.groupware.application.chat.required.ChatRoomRepository;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.exception.chat.ChatRoomNotFoundException;
+import com.haruon.groupware.application.exception.common.role.ActiveEmployeeNotFoundException;
 import com.haruon.groupware.domain.chat.ChatMessage;
 import com.haruon.groupware.domain.empInfo.Emp;
 import jakarta.persistence.EntityManager;
@@ -81,7 +83,7 @@ record ChatSenderTest(
                         "안녕하세요",
                         of(2026, 5, 9, 10, 10)
                 )
-        ).hasMessage("조회된 채팅방이 없음");
+        ).isInstanceOf(ChatRoomNotFoundException.class);
     }
 
     @Test
@@ -103,7 +105,7 @@ record ChatSenderTest(
                         "안녕하세요",
                         of(2026, 5, 9, 10, 10)
                 )
-        ).hasMessage("해당 활성화된 사원이 존재하지 않음");
+        ).isInstanceOf(ActiveEmployeeNotFoundException.class);
     }
 
     @Test

@@ -1,5 +1,9 @@
 package com.haruon.groupware.application.meeting.service.dto;
 
+import com.haruon.groupware.application.exception.common.BlankValueNotAllowedException;
+import com.haruon.groupware.application.exception.common.EndTimeBeforeStartTimeException;
+import com.haruon.groupware.application.exception.common.PastTimeNotAllowedException;
+import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import lombok.Builder;
 
 import java.time.LocalDate;
@@ -7,9 +11,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.Set;
-
-import static java.util.Objects.requireNonNull;
-import static org.springframework.util.Assert.state;
 
 @Builder
 public record MeetingReserveRequest(
@@ -23,17 +24,13 @@ public record MeetingReserveRequest(
 ) {
 
     public MeetingReserveRequest {
-        requireNonNull(meetingRoomId);
-        requireNonNull(reserverId);
-        requireNonNull(title);
-        requireNonNull(meetingDate);
-        requireNonNull(startAt);
-        requireNonNull(endAt);
-        requireNonNull(participantIds);
+        if(meetingRoomId == null || reserverId == null || title == null || meetingDate == null || startAt == null || endAt == null || participantIds == null) {
+            throw new RequiredValueMissingException();
+        }
 
-        state(LocalDateTime.of(meetingDate, startAt).isAfter(LocalDateTime.now(ZoneId.systemDefault())), "과거일시를 회의일로 지정할 수 없음");
-        state(endAt.isAfter(startAt), "종료시각은 시작시각보다 늦어야 함");
-        state(!participantIds.isEmpty(), "회의참가자는 누락될 수 없음");
-        state(!title.isBlank(), "회의 제목을 빈값이 될 수없음");
+        if(LocalDateTime.of(meetingDate, startAt).isBefore(LocalDateTime.now(ZoneId.systemDefault()))) throw new PastTimeNotAllowedException();
+        if(endAt.isBefore(startAt)) throw new EndTimeBeforeStartTimeException();
+        if(participantIds.isEmpty()) throw new RequiredValueMissingException();
+        if(title.isBlank()) throw new BlankValueNotAllowedException();
     }
 }

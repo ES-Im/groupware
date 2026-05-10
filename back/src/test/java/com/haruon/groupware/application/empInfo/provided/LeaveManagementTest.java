@@ -4,6 +4,8 @@ import com.haruon.groupware.application.TestIntegrationConfig;
 import com.haruon.groupware.application.empInfo.leaveService.LeaveManagementService;
 import com.haruon.groupware.application.empInfo.required.EmpLeaveRepository;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.exception.common.role.PermissionDeniedException;
+import com.haruon.groupware.application.exception.empInfo.EmpAnnualLeaveNotFoundException;
 import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.empInfo.EmpLeave;
 import org.junit.jupiter.api.AfterEach;
@@ -63,11 +65,11 @@ record LeaveManagementTest(
 
         assertThatThrownBy(() ->
                 leaveManagementService.adjustSpecialGrantDays(notAdmin.getId(), targetEmp.getId(), 1.0)
-        ).hasMessage("권한이 없습니다.");
+        ).isInstanceOf(PermissionDeniedException.class);
 
         assertThatThrownBy(() ->
                 leaveManagementService.adjustCompensatoryGrantDays(notAdmin.getId(), targetEmp.getId(), 1.0)
-        ).hasMessage("권한이 없습니다.");
+        ).isInstanceOf(PermissionDeniedException.class);
 
     }
 
@@ -100,11 +102,11 @@ record LeaveManagementTest(
 
         assertThatThrownBy(() ->
                 leaveManagementService.adjustSpecialGrantDays(admin.getId(), targetEmp.getId(), 1.0)
-        ).isInstanceOf(IllegalStateException.class);
+        ).isInstanceOf(EmpAnnualLeaveNotFoundException.class);
 
         assertThatThrownBy(() ->
                 leaveManagementService.adjustCompensatoryGrantDays(admin.getId(), targetEmp.getId(), 1.0)
-        ).isInstanceOf(IllegalStateException.class);
+        ).isInstanceOf(EmpAnnualLeaveNotFoundException.class);
     }
 
 

@@ -1,13 +1,11 @@
 package com.haruon.groupware.application.draft.service.dto;
 
+import com.haruon.groupware.application.exception.common.BlankValueNotAllowedException;
+import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import lombok.Builder;
 import org.jspecify.annotations.Nullable;
-import org.springframework.util.Assert;
 
 import java.time.LocalDateTime;
-
-import static io.jsonwebtoken.lang.Assert.state;
-import static java.util.Objects.requireNonNull;
 
 @Builder
 public record BusinessTripDraftUpdateRequest(
@@ -28,16 +26,14 @@ public record BusinessTripDraftUpdateRequest(
 
 ) {
         public BusinessTripDraftUpdateRequest {
-                requireNonNull(param, "기안서 기본 정보 필수");
-                state(param.isChangeCommonField() ||
-                                startAt != null ||
-                                endAt != null ||
-                                destination != null ||
-                                purpose != null,
-                        "변경내용이 없음");
+                if(param == null || (
+                        startAt == null && endAt == null && destination == null && purpose == null
+                )) throw new RequiredValueMissingException();
 
-                if(destination != null) state(!destination.isBlank(), "목적지는 공백이 될 수 없음");
-                if(purpose != null) Assert.state(!purpose.isBlank(), "목적은 공백이 될 수 없음");
+
+                if(destination != null && destination.isBlank()) throw new BlankValueNotAllowedException();
+
+                if(purpose != null && purpose.isBlank()) throw new BlankValueNotAllowedException();
 
         }
 }

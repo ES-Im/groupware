@@ -7,6 +7,11 @@ import com.haruon.groupware.application.draft.service.dto.LeaveDraftCreateReques
 import com.haruon.groupware.application.draft.service.dto.LeaveDraftUpdateRequest;
 import com.haruon.groupware.application.empInfo.required.EmpLeaveRepository;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.exception.common.EndTimeBeforeStartTimeException;
+import com.haruon.groupware.application.exception.common.PositiveValueRequiredException;
+import com.haruon.groupware.application.exception.draft.*;
+import com.haruon.groupware.application.exception.empInfo.EmpAnnualLeaveNotFoundException;
+import com.haruon.groupware.application.exception.empInfo.UnsupportedLeaveTypeException;
 import com.haruon.groupware.application.utils.CompanyPolicyPort;
 import com.haruon.groupware.domain.draft.Draft;
 import com.haruon.groupware.domain.draft.LeaveDraft;
@@ -27,7 +32,6 @@ import java.util.List;
 import java.util.Set;
 
 import static java.time.Duration.between;
-import static org.springframework.util.Assert.state;
 
 @Service
 @Transactional
@@ -163,12 +167,14 @@ public class LeaveDraftService extends CommonDraftService implements LeaveDraftM
 
         if(DEDUCTIBLE_LEAVE_TYPES.contains(leaveType)) {
             EmpLeave empLeave = empLeaveRepository.findByEmpIdAndGrantYear(drafterId, draft.getStartAt().getYear())
-                    .orElseThrow(() -> new IllegalStateException("해당 사원의 연차 정보가 없음"));  // to-do 커스텀 예외
+                    .orElseThrow(EmpAnnualLeaveNotFoundException::new);
 
             switch (leaveType) {
                 case ANNUAL -> empLeave.useAnnualDays(reservedDays);
                 case SPECIAL -> empLeave.useSpecialDays(reservedDays);
                 case COMPENSATORY -> empLeave.useCompensatoryDays(reservedDays);
+                case HOURLY, SICK, OFFICIAL -> throw new UnsupportedLeaveTypeException();
+
             }
         }
     }
@@ -177,7 +183,7 @@ public class LeaveDraftService extends CommonDraftService implements LeaveDraftM
         Draft draft = findDraftByDraftIdAndEmpId(draftId, drafterId);
 
         if(!(draft instanceof LeaveDraft leaveDraft)) {
-            throw new IllegalArgumentException("연가신청기안서가 아님");
+            throw new DraftTypeMismatchException();
         }
 
         return leaveDraft;
@@ -196,17 +202,19 @@ public class LeaveDraftService extends CommonDraftService implements LeaveDraftM
             return usedHours;
         }
 
-        state(usedHours > 0, "휴가 사용 시간은 0보다 커야 함");
-        state(usedHours % 4 == 0, "휴가는 4시간 단위로만 사용할 수 있음");
+        if(usedHours <= 0) throw new PositiveValueRequiredException();
+        if(usedHours % 4 != 0) throw new InvalidLeaveHourUnitException();
 
         EmpLeave empLeave = empLeaveRepository.findByEmpIdAndGrantYear(empId, startAt.getYear())
-                .orElseThrow(() -> new IllegalStateException("조회된 연차정보가 없음"));
+                .orElseThrow(EmpAnnualLeaveNotFoundException::new);
 
         validateUsageLeave(usedHours, leaveType, empLeave, currentDraftId);
 
         return usedHours;
     }
 
+
+    // leave만 커스텀 예외로 처리하면 다음으로 내려가면 됌
     private void validateUsageLeave(
             Long usedHours,
             LeaveType leaveType,
@@ -223,7 +231,7 @@ public class LeaveDraftService extends CommonDraftService implements LeaveDraftM
             default -> false;
         };
 
-        if(!isAvailable) throw new IllegalStateException("사용 휴가 일수가 잔여 휴가 일수를 초과"); // to-do 커스텀 예외 처리 필요
+        if(!isAvailable) throw new InsufficientLeaveBalanceException();
     }
 
     private double getReservedDays(LeaveType leaveType, EmpLeave empLeave, @Nullable Long currentDraftId) {
@@ -252,7 +260,7 @@ public class LeaveDraftService extends CommonDraftService implements LeaveDraftM
             LocalDateTime startAt, LocalDateTime endAt, LeaveType leaveType
     ) {
 
-        if(!REQUESTABLE_LEAVE_TYPES.contains(leaveType)) throw new IllegalStateException("신청할 수 없는 휴가 타입");
+        if(!REQUESTABLE_LEAVE_TYPES.contains(leaveType)) throw new UnrequestableLeaveTypeException();
 
         validateLeaveTimes(startAt, endAt);
 
@@ -279,19 +287,15 @@ public class LeaveDraftService extends CommonDraftService implements LeaveDraftM
     }
 
     private void validateLeaveTimes(LocalDateTime startAt, LocalDateTime endAt) {
-        state(startAt.getMinute() == 0 && startAt.getSecond() == 0 && startAt.getNano() == 0,
-                "휴가 시작시각은 정각이어야 한다.");
-        state(endAt.getMinute() == 0 && endAt.getSecond() == 0 && endAt.getNano() == 0,
-                "휴가 종료시각은 정각이어야 한다.");
+        if(!(startAt.getMinute() == 0 && startAt.getSecond() == 0 && startAt.getNano() == 0))  throw new LeaveTimeNotOnTheHourException();
     }
 
     private long calculateDailyUsedHours(
             LocalTime leaveStartAt, LocalTime leaveEndAt,
             LocalTime companyStartAt, LocalTime companyEndAt
     ) {
-        state(!leaveEndAt.isBefore(leaveStartAt), "휴가 종료시각은 시작시각보다 이를 수 없음");
-        state(!leaveStartAt.isBefore(companyStartAt), "휴가 시작시각은 회사 시작시각보다 이를 수 없음");
-        state(!leaveEndAt.isAfter(companyEndAt), "휴가 종료시각은 회사 종료시각보다 늦을 수 없음");
+        if(leaveEndAt.isBefore(leaveStartAt)) throw new EndTimeBeforeStartTimeException();
+        if(leaveStartAt.isBefore(companyStartAt) || leaveEndAt.isAfter(companyEndAt)) throw new LeaveTimeOutsideCompanyHoursException();
 
         long calculatedHour = between(leaveStartAt, leaveEndAt).toHours();
 

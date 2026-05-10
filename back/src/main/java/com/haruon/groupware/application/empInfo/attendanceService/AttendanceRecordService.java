@@ -3,6 +3,8 @@ package com.haruon.groupware.application.empInfo.attendanceService;
 import com.haruon.groupware.application.empInfo.provided.AttendanceRecord;
 import com.haruon.groupware.application.empInfo.required.AttendanceRepository;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.exception.empInfo.CheckInRecordNotFoundException;
+import com.haruon.groupware.application.exception.empInfo.ClosedAttendanceEditForbiddenException;
 import com.haruon.groupware.application.utils.AuthorizationChecker;
 import com.haruon.groupware.domain.empInfo.Attendance;
 import com.haruon.groupware.domain.empInfo.Emp;
@@ -15,7 +17,6 @@ import java.time.LocalDateTime;
 
 import static com.haruon.groupware.application.empInfo.attendanceService.AttendanceUtils.findAttendanceById;
 import static com.haruon.groupware.domain.empInfo.Attendance.registerAttendanceByEmp;
-import static org.springframework.util.Assert.state;
 
 @RequiredArgsConstructor
 @Service
@@ -42,9 +43,7 @@ public class AttendanceRecordService implements AttendanceRecord {
         Attendance attendance = attendanceRepository
                 .findByEmpIdAndAttendanceDate(empId, attendanceDate)
                 .stream().findFirst()
-                .orElseThrow(() ->
-                        new IllegalStateException("출근기록이 없음")    // to-do : 커스텀 예외 처리 필요
-                );
+                .orElseThrow(CheckInRecordNotFoundException::new);
 
         attendance.recordEndAtByEmp(checkOutAt);
     }
@@ -53,7 +52,7 @@ public class AttendanceRecordService implements AttendanceRecord {
     @Override
     public void rerecordEndAtByEmp(Long attendanceId, LocalDateTime checkOutAt) {
         Attendance attendance = findAttendanceById(attendanceRepository, attendanceId);
-        state(attendance.getAttendanceStatus() == null, "마감된 근태는 사원이 근태시간을 수정할 수 없음");
+        if(attendance.getAttendanceStatus() != null) throw new ClosedAttendanceEditForbiddenException();
 
         attendance.recordEndAtByEmp(checkOutAt);
     }

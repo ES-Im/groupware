@@ -1,8 +1,7 @@
 package com.haruon.groupware.application.empInfo.empService.dto;
 
+import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import lombok.Builder;
-
-import static java.util.Objects.requireNonNull;
 
 @Builder
 public record EmpFileStatusChangeParam (
@@ -12,7 +11,6 @@ public record EmpFileStatusChangeParam (
 ) {
 
     public EmpFileStatusChangeParam {
-        requireNonNull(fileId, "파일 지정되지 않음");
-        requireNonNull(targetActive, "활성화 여부 미체크");
+        if(fileId == null || targetActive == null) throw new RequiredValueMissingException();
     }
 }

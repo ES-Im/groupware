@@ -1,13 +1,14 @@
 package com.haruon.groupware.application.draft.service.dto;
 
 
+import com.haruon.groupware.application.exception.common.EndTimeBeforeStartTimeException;
+import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
+import com.haruon.groupware.application.exception.draft.LeaveTimeNotOnTheHourException;
 import com.haruon.groupware.domain.draft.LeaveDraft;
 import com.haruon.groupware.domain.draft.sub.LeaveType;
 import lombok.Builder;
 
 import java.time.LocalDateTime;
-
-import static java.util.Objects.requireNonNull;
 
 @Builder
 public record LeaveDraftCreateRequest(
@@ -22,11 +23,17 @@ public record LeaveDraftCreateRequest(
 
 ) {
         public LeaveDraftCreateRequest {
-                requireNonNull(param);
-                requireNonNull(startAt);
-                requireNonNull(endAt);
-                requireNonNull(leaveType);
-                LeaveDraft.validateTime(startAt, endAt);
+                if(param == null || startAt == null || endAt == null || leaveType == null) {
+                        throw new RequiredValueMissingException();
+                }
+
+                if(endAt.isBefore(startAt)) throw new EndTimeBeforeStartTimeException();
+
+                try {
+                        LeaveDraft.validateTime(startAt, endAt);
+                } catch (IllegalStateException e) {
+                        throw new LeaveTimeNotOnTheHourException();
+                }
         }
 
 }

@@ -1,10 +1,9 @@
 package com.haruon.groupware.application.empInfo.attendanceService.dto;
 
+import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import lombok.Builder;
 
 import java.time.LocalDateTime;
-
-import static java.util.Objects.requireNonNull;
 
 @Builder
 public record ApproveAttendanceByDeptManagerParam(
@@ -18,10 +17,9 @@ public record ApproveAttendanceByDeptManagerParam(
 ) {
 
     public ApproveAttendanceByDeptManagerParam {
-        requireNonNull(targetEmpId, "수정대상 사원번호 필수");
-        requireNonNull(approvedAt, "승인시각 필수");
-        requireNonNull(attendanceId, "승인자 필수");
-        requireNonNull(attendanceId, "승인대상 근태 번호 필수");
+        if(approverId == null || targetEmpId == null || attendanceId == null || approvedAt == null) {
+            throw new RequiredValueMissingException();
+        }
     }
 
 }

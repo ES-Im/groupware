@@ -1,13 +1,12 @@
 package com.haruon.groupware.application.message.service.dto;
 
+import com.haruon.groupware.application.exception.common.BlankValueNotAllowedException;
+import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import lombok.Builder;
 import org.jspecify.annotations.Nullable;
 
 import java.time.LocalDateTime;
 import java.util.Set;
-
-import static java.util.Objects.requireNonNull;
-import static org.springframework.util.Assert.state;
 
 @Builder
 public record MessageCreateRequest(
@@ -23,13 +22,12 @@ public record MessageCreateRequest(
 ) {
 
     public MessageCreateRequest {
-        requireNonNull(title);
-        requireNonNull(content);
+        if(title == null || content == null) throw new RequiredValueMissingException();
 
-        state(!title.isBlank(), "제목은 공백이 될 수 없음");
-        state(!content.isBlank(), "내용은 공백이 될 수 없음");
+        if(title.isBlank() || content.isBlank()) throw new BlankValueNotAllowedException();
 
-        if(sentAt != null) requireNonNull(receiverIds);
+        if(sentAt != null && receiverIds == null) throw new RequiredValueMissingException();
+
     }
 
 }

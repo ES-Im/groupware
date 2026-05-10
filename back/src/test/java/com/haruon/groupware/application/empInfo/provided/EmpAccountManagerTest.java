@@ -5,6 +5,13 @@ import com.haruon.groupware.application.empInfo.empService.dto.*;
 import com.haruon.groupware.application.empInfo.required.DeptRepository;
 import com.haruon.groupware.application.empInfo.required.EmpLeaveRepository;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
+import com.haruon.groupware.application.exception.common.role.ActiveEmployeeNotFoundException;
+import com.haruon.groupware.application.exception.common.role.PermissionDeniedException;
+import com.haruon.groupware.application.exception.empInfo.DuplicateEmpNoException;
+import com.haruon.groupware.application.exception.empInfo.DuplicateLoginIdException;
+import com.haruon.groupware.application.exception.empInfo.EmpAlreadyActiveException;
+import com.haruon.groupware.application.exception.empInfo.InvalidResignDateException;
 import com.haruon.groupware.application.utils.FileDto;
 import com.haruon.groupware.domain.empInfo.*;
 import com.haruon.groupware.domain.empInfo.enums.EmpStatus;
@@ -67,7 +74,7 @@ record EmpAccountManagerTest(
                                     .rawPassword("Test!1234")
                                     .build()
                             )
-                    ).hasMessage("이미 있는 사원번호");
+                    ).isInstanceOf(DuplicateEmpNoException.class);
                 }), DynamicTest.dynamicTest("이미 존재하는 아이디 입력시 회원이 등록되지 않는다.", () -> {
                     assertThatThrownBy(() ->
                             empAccountManager.registerEmp(EmpRegisterRequestBySelf.builder()
@@ -77,7 +84,7 @@ record EmpAccountManagerTest(
                                     .rawPassword("Test!1234")
                                     .build()
                             )
-                    ).hasMessage("이미 있는 아이디");
+                    ).isInstanceOf(DuplicateLoginIdException.class);
                 })
         );
     }
@@ -151,7 +158,7 @@ record EmpAccountManagerTest(
                                  .hireAt(LocalDate.of(2026,4,1))
                                  .build()
                  )
-         ).hasMessage("권한이 없습니다.");
+         ).isInstanceOf(PermissionDeniedException.class);
     }
 
     @Test
@@ -171,7 +178,7 @@ record EmpAccountManagerTest(
                                  .hireAt(null)
                                  .build()
                  )
-         ).isInstanceOf(IllegalStateException.class);
+         ).isInstanceOf(RequiredValueMissingException.class);
     }
 
     @Test
@@ -216,7 +223,7 @@ record EmpAccountManagerTest(
                             .resignedAt(targetEmp.getHiredAt().plusMonths(1))
                     .build()
             )
-        ).hasMessage("권한이 없습니다.");
+        ).isInstanceOf(PermissionDeniedException.class);
     }
 
     @Test
@@ -236,7 +243,7 @@ record EmpAccountManagerTest(
                             .resignedAt(null)
                     .build()
             )
-        ).isInstanceOf(IllegalStateException.class);
+        ).isInstanceOf(RequiredValueMissingException.class);
     }
 
     @Test
@@ -256,7 +263,7 @@ record EmpAccountManagerTest(
                             .resignedAt(target.getHiredAt().minusMonths(1))
                     .build()
             )
-        ).isInstanceOf(IllegalStateException.class);
+        ).isInstanceOf(InvalidResignDateException.class);
     }
 
     @Test
@@ -349,7 +356,7 @@ record EmpAccountManagerTest(
                                 .extensionNo("999-9999")
                                 .build()
                 )
-        ).hasMessage("권한이 없습니다.");
+        ).isInstanceOf(PermissionDeniedException.class);
     }
 
     @Test
@@ -371,7 +378,7 @@ record EmpAccountManagerTest(
                                 .extensionNo("999-9999")
                                 .build()
                 )
-        ).hasMessage("부서관리자 기준 상위 권한으로 변경할 수 없습니다.");
+        ).isInstanceOf(PermissionDeniedException.class);
     }
 
     @Test
@@ -478,7 +485,7 @@ record EmpAccountManagerTest(
                                 .empName("newName")
                                 .build()
                 )
-        ).isInstanceOf(IllegalArgumentException.class);
+        ).isInstanceOf(ActiveEmployeeNotFoundException.class);
     }
 
     @Test
@@ -506,7 +513,7 @@ record EmpAccountManagerTest(
     }
 
     @Test
-    @DisplayName("HR 권한을 가진 사원은 사원 상태를 활성화 시킬 수 있다.")
+    @DisplayName("이미 활성화 상태인 사원 상태를 활성화 시킬 수 없다.")
     void activate_already_active_EmpByHR_fail() {
         Dept dept = saveDept(deptRepository, "001", "HR");
         Emp targetEmp = saveEmpWithDept(empRepository, deptRepository, "202601001", "login1234", dept);
@@ -516,7 +523,7 @@ record EmpAccountManagerTest(
 
         assertThatThrownBy(() ->
                 empAccountManager.activateEmpByHR(hrEmp.getId(), targetEmp.getId())
-        ).isInstanceOf(IllegalStateException.class);
+        ).isInstanceOf(EmpAlreadyActiveException.class);
     }
 
     @Transactional

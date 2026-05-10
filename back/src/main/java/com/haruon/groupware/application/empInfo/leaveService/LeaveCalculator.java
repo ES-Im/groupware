@@ -1,14 +1,14 @@
 package com.haruon.groupware.application.empInfo.leaveService;
 
 
+import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
+import com.haruon.groupware.application.exception.empInfo.GrantedDateBeforeHiredDateException;
+import com.haruon.groupware.application.exception.empInfo.InvalidAnnualLeaveGrantedDateException;
 import com.haruon.groupware.application.utils.CompanyPolicyPort;
 import com.haruon.groupware.domain.empInfo.Emp;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-
-import static java.util.Objects.requireNonNull;
-import static org.springframework.util.Assert.state;
 
 public class LeaveCalculator {
 
@@ -19,14 +19,15 @@ public class LeaveCalculator {
     ) {
         LocalDate hiredAt = emp.getHiredAt();
 
-        state(hiredAt != null, "입사일자 값 없음");
-        requireNonNull(grantedDate, "연차 부여일자 값 없음");
-        state(!grantedDate.isBefore(hiredAt), "연차 부여일이 입사일보다 빠를 수 없음");
+        if(hiredAt == null || grantedDate == null) throw new RequiredValueMissingException();
+        if(grantedDate.isBefore(hiredAt)) throw new GrantedDateBeforeHiredDateException();
 
         int grantYear = grantedDate.getYear(), hireYear = hiredAt.getYear();
 
         if (grantYear != hireYear) {
-            state(isFirstDayOfYear(grantedDate), "신입 연차 부여 외, 연차 부여일은 매년 1월 1일이어야 함");
+            if(grantedDate.getMonthValue() != 1 || grantedDate.getDayOfMonth() != 1) {
+                throw new InvalidAnnualLeaveGrantedDateException();
+            }
 
             return calculateLeaveDaysForNewYear(port, grantYear, hireYear);
         }
@@ -52,7 +53,4 @@ public class LeaveCalculator {
         );
     }
 
-    private static boolean isFirstDayOfYear(LocalDate date) {
-        return date.getMonthValue() == 1 && date.getDayOfMonth() == 1;
-    }
 }

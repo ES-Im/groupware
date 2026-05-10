@@ -1,6 +1,8 @@
 package com.haruon.groupware.application.franchise.service;
 
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.exception.franchise.EducationNotFoundException;
+import com.haruon.groupware.application.exception.franchise.FranchiseNotFoundException;
 import com.haruon.groupware.application.franchise.required.EducationRepository;
 import com.haruon.groupware.application.franchise.required.FranchiseRepository;
 import com.haruon.groupware.domain.empInfo.Emp;
@@ -21,13 +23,13 @@ public class FranchiseUtils {
 
     static Franchise findFranchiseById(FranchiseRepository franchiseRepository, long franchiseId) {
         return franchiseRepository.findById(franchiseId)
-                .orElseThrow(() -> new IllegalStateException("조회된 가맹점 정보가 없음"));
+                .orElseThrow(FranchiseNotFoundException::new);
     }
 
 
     static Education findEducation(EducationRepository educationRepository, long educationId) {
         return educationRepository.findById(educationId)
-                .orElseThrow(() -> new IllegalStateException("조회된 교육정보가 없음"));
+                .orElseThrow(EducationNotFoundException::new);
     }
 
 

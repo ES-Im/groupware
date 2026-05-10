@@ -1,6 +1,8 @@
 package com.haruon.groupware.application.message.service;
 
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
+import com.haruon.groupware.application.exception.message.MessageReceiverRequiredException;
 import com.haruon.groupware.application.message.provided.MessageDraftManagement;
 import com.haruon.groupware.application.message.required.MessageRepository;
 import com.haruon.groupware.application.message.service.dto.MessageCreateRequest;
@@ -49,8 +51,8 @@ public class MessageDraftService implements MessageDraftManagement {
 
     @Override
     public long sendMessage(Long senderId, MessageCreateRequest request) {
-        if(request.sentAt() == null) throw new IllegalArgumentException("발송시각이 없음");
-        if(request.receiverIds() == null || request.receiverIds().isEmpty()) throw new IllegalArgumentException("수신자가 없음");
+        if(request.sentAt() == null) throw new RequiredValueMissingException();
+        if(request.receiverIds() == null || request.receiverIds().isEmpty()) throw new MessageReceiverRequiredException();
 
         Emp writer = findActiveEmpById(empRepository, senderId);
         List<Emp> recipientList = findEmpListById(empRepository, request.receiverIds());

@@ -3,10 +3,12 @@ package com.haruon.groupware.application.board.provided;
 import com.haruon.groupware.application.TestIntegrationConfig;
 import com.haruon.groupware.application.board.required.BoardRepository;
 import com.haruon.groupware.application.board.required.CategoryRepository;
-import com.haruon.groupware.application.board.service.BoardUpdateRequest;
 import com.haruon.groupware.application.board.service.dto.BoardCreateRequest;
 import com.haruon.groupware.application.board.service.dto.BoardFileRequest;
+import com.haruon.groupware.application.board.service.dto.BoardUpdateRequest;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
+import com.haruon.groupware.application.exception.common.role.PermissionDeniedException;
 import com.haruon.groupware.application.utils.FileDto;
 import com.haruon.groupware.domain.board.Board;
 import com.haruon.groupware.domain.board.BoardFile;
@@ -164,7 +166,7 @@ record BoardManagementTest(
         Emp otherEmp = saveApprovedEmp(empRepository, "202601102", "otherEmp");
         assertThatThrownBy(() ->
                 boardManagement.publishBoard(otherEmp.getId(), unPublishedBoard, of(2026, 3, 1, 0, 0, 0))
-        ).hasMessage("권한이 없습니다.");
+        ).isInstanceOf(PermissionDeniedException.class);
     }
 
     @Test
@@ -261,7 +263,7 @@ record BoardManagementTest(
                                 .modifiedAt(LocalDateTime.of(2026,3,3,0,0,0))
                                 .build()
                 )
-        ).hasMessage("권한이 없습니다.");
+        ).isInstanceOf(PermissionDeniedException.class);
     }
 
     @Test
@@ -281,7 +283,7 @@ record BoardManagementTest(
                                 .modifiedAt(null)
                                 .build()
                 )
-        ).isInstanceOf(NullPointerException.class);
+        ).isInstanceOf(RequiredValueMissingException.class);
     }
 
     @Test
@@ -356,7 +358,7 @@ record BoardManagementTest(
                                 .modifiedAt(of(2026, 3, 2, 0, 0, 0))
                                 .build()
                 )
-        ).hasMessage("권한이 없습니다.");
+        ).isInstanceOf(PermissionDeniedException.class);
     }
 
     @Test
@@ -381,10 +383,9 @@ record BoardManagementTest(
                                         .fileSize(20 * 1024 * 1024L)
                                         .build()
                                 )
-                                .modifiedAt(null)
                                 .build()
                 )
-        ).isInstanceOf(NullPointerException.class);
+        ).isInstanceOf(RequiredValueMissingException.class);
     }
 
     @Test
@@ -427,7 +428,7 @@ record BoardManagementTest(
                 boardManagement.removeFile(
                         otherEmp.getId(), hasFileBoard.getId(), hasFileBoard.getBoardFiles().getFirst().getId(), LocalDateTime.of(2026,3,3,0,0,0) // 0
                 )
-        ).hasMessage("권한이 없습니다.");
+        ).isInstanceOf(PermissionDeniedException.class);
     }
 
     @Test

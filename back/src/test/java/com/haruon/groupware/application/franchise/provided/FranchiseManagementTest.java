@@ -3,6 +3,7 @@ package com.haruon.groupware.application.franchise.provided;
 import com.haruon.groupware.application.TestIntegrationConfig;
 import com.haruon.groupware.application.empInfo.required.DeptRepository;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.exception.common.role.PermissionDeniedException;
 import com.haruon.groupware.application.franchise.required.FranchiseRepository;
 import com.haruon.groupware.application.franchise.service.dto.FranchiseCreateRequest;
 import com.haruon.groupware.application.franchise.service.dto.FranchiseUpdateRequest;
@@ -96,7 +97,7 @@ record FranchiseManagementTest(
                                 .contactEmail("hong123@gmail.com")
                                 .build()
                 )
-        ).hasMessage("권한이 없습니다.");
+        ).isInstanceOf(PermissionDeniedException.class);
     }
 
     @Test

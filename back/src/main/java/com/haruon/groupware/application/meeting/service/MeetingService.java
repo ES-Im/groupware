@@ -1,6 +1,8 @@
 package com.haruon.groupware.application.meeting.service;
 
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.exception.meeting.MeetingNotFoundException;
+import com.haruon.groupware.application.exception.meeting.MeetingRoomNotFoundException;
 import com.haruon.groupware.application.meeting.provided.MeetingManagement;
 import com.haruon.groupware.application.meeting.required.MeetingRepository;
 import com.haruon.groupware.application.meeting.required.MeetingRoomRepository;
@@ -89,14 +91,14 @@ public class MeetingService implements MeetingManagement {
         LocalDate now = LocalDate.now(ZoneId.systemDefault());
 
         MeetingRoom room = meetingRoomRepository.findById(roomId)
-                .orElseThrow(() -> new IllegalArgumentException("조회된 회의실이 없음"));
+                .orElseThrow(MeetingRoomNotFoundException::new);
 
         return meetingRepository.findMeetingByMeetingDateAfterAndMeetingRoom(now, room);
     }
 
     private Meeting findMeetingByIdAndReserverId(long meetingId, long reserverId) {
         return meetingRepository.findByIdAndEmpId(meetingId, reserverId)
-                .orElseThrow(() -> new IllegalArgumentException("조회된 회의가 없음"));
+                .orElseThrow(MeetingNotFoundException::new);
     }
 
 

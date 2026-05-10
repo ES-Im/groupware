@@ -1,6 +1,7 @@
 package com.haruon.groupware.application.franchise.service;
 
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.exception.franchise.EducationRegisterMismatchException;
 import com.haruon.groupware.application.franchise.provided.EducationManagement;
 import com.haruon.groupware.application.franchise.required.EducationRepository;
 import com.haruon.groupware.application.franchise.service.dto.EducationCreateRequest;
@@ -94,6 +95,6 @@ public class EducationService implements EducationManagement {
         Emp assignedEmp = getFranchiseRoleAssignedEmp(empRepository, managerId);
 
         if(!education.getEmp().equals(assignedEmp))
-            throw new IllegalStateException("교육 등록자와 불일치"); // to-do 커스텀 예외처리
+            throw new EducationRegisterMismatchException();
     }
 }

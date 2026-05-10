@@ -7,6 +7,7 @@ import com.haruon.groupware.application.draft.service.dto.BusinessTripDraftUpdat
 import com.haruon.groupware.application.draft.service.dto.CommonDraftCreateRequest;
 import com.haruon.groupware.application.draft.service.dto.CommonDraftUpdateRequest;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.exception.draft.DraftTypeMismatchException;
 import com.haruon.groupware.domain.draft.BusinessTripDraft;
 import com.haruon.groupware.domain.draft.Draft;
 import com.haruon.groupware.domain.draft.sub.ApproversParam;
@@ -107,7 +108,7 @@ public class BusinessDraftService extends CommonDraftService implements Business
         Draft draft = findDraftByDraftIdAndEmpId(draftId, drafterId);
 
         if(!(draft instanceof BusinessTripDraft businessTripDraft)) {
-            throw new IllegalArgumentException("출장기안서가 아님");
+            throw new DraftTypeMismatchException();
         }
 
         return businessTripDraft;

@@ -3,6 +3,7 @@ package com.haruon.groupware.application.empInfo.attendanceService;
 import com.haruon.groupware.application.empInfo.attendanceService.dto.AttendanceCloseParam;
 import com.haruon.groupware.application.empInfo.required.AttendanceRepository;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.exception.schedule.UnsupportedScheduleTypeException;
 import com.haruon.groupware.application.schedule.required.ScheduleRepository;
 import com.haruon.groupware.application.utils.CompanyPolicyPort;
 import com.haruon.groupware.domain.empInfo.Attendance;
@@ -110,8 +111,8 @@ public class AttendanceClosing implements com.haruon.groupware.application.empIn
         Attendance mainAttendance = findAttendanceByCloseParam(emp, date);
 
         AttendanceStatus status;
-        LocalTime startAt = null;
-        LocalTime endAt = null;
+        LocalTime startAt;
+        LocalTime endAt;
 
         switch (schedule.getScheduleType()) {
             case LEAVE -> {
@@ -124,7 +125,7 @@ public class AttendanceClosing implements com.haruon.groupware.application.empIn
                 endAt = companyPolicy.getEndTime();
                 status = NORMAL;
             }
-            default -> throw new IllegalStateException("지원하지 않는 일정 타입");
+            default -> throw new UnsupportedScheduleTypeException();
         }
 
         if (mainAttendance == null) {

@@ -6,6 +6,13 @@ import com.haruon.groupware.application.draft.service.dto.*;
 import com.haruon.groupware.application.empInfo.required.DeptRepository;
 import com.haruon.groupware.application.empInfo.required.EmpLeaveRepository;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.exception.ApplicationException;
+import com.haruon.groupware.application.exception.common.EndTimeBeforeStartTimeException;
+import com.haruon.groupware.application.exception.draft.DraftTypeMismatchException;
+import com.haruon.groupware.application.exception.draft.InsufficientLeaveBalanceException;
+import com.haruon.groupware.application.exception.draft.InvalidLeaveHourUnitException;
+import com.haruon.groupware.application.exception.draft.UnrequestableLeaveTypeException;
+import com.haruon.groupware.application.exception.empInfo.EmpAnnualLeaveNotFoundException;
 import com.haruon.groupware.application.utils.CompanyPolicyPort;
 import com.haruon.groupware.domain.draft.Draft;
 import com.haruon.groupware.domain.draft.LeaveDraft;
@@ -97,11 +104,11 @@ record LeaveDraftManagementTest(
 
         return Stream.of(
                 Arguments.of("휴무 신청 단위가 4시간(반차) 단위가 아니면 실패한다.",
-                        startAt, endAt.minusHours(1), "휴가는 4시간 단위로만 사용할 수 있음"
+                        startAt, endAt.minusHours(1), InvalidLeaveHourUnitException.class
                 ), Arguments.of("휴무 시작일이 종료일보다 늦으면 실패한다.",
-                        startAt, startAt.minusDays(1), "종료시간은 시작시간보다 이를 수 없음"
+                        startAt, startAt.minusDays(1), EndTimeBeforeStartTimeException.class
                 ), Arguments.of("잔여 연가보다 사용연차가 더 많으면 실패한다",
-                        startAt, startAt.plusMonths(2), "사용 휴가 일수가 잔여 휴가 일수를 초과"
+                        startAt, startAt.plusMonths(2), InsufficientLeaveBalanceException.class
                 )
         );
     }
@@ -109,7 +116,7 @@ record LeaveDraftManagementTest(
     @MethodSource("createDraftFailsArguments")
     @Transactional
     @DisplayName("연가신청 기안서 테스트 - 미상신 기안서 생성 테스트")
-    void create_leave_Draft_fail_cases(String description, LocalDateTime startAt, LocalDateTime endAt, String expectedMessage) {
+    void create_leave_Draft_fail_cases(String description, LocalDateTime startAt, LocalDateTime endAt, Class<? extends ApplicationException> expectedException) {
         Emp drafter = saveApprovedEmp(empRepository);
 
         EmpLeave empLeave = createEmpLeave(
@@ -122,7 +129,7 @@ record LeaveDraftManagementTest(
 
         assertThatThrownBy(() ->
                 createDraft(drafter, startAt, endAt, LeaveType.ANNUAL)
-        ).hasMessage(expectedMessage);
+        ).isInstanceOf(expectedException);
     }
 
     @Test
@@ -172,7 +179,7 @@ record LeaveDraftManagementTest(
                         startAt, endAt,
                         LeaveType.HOURLY
                 )
-        ).hasMessage("신청할 수 없는 휴가 타입");
+        ).isInstanceOf(UnrequestableLeaveTypeException.class);
     }
 
     @Test
@@ -186,7 +193,7 @@ record LeaveDraftManagementTest(
 
         assertThatThrownBy(() ->
                 createDraft(drafter, startAt, threeDaysAfterStartAt, leaveType)
-        ).hasMessage("조회된 연차정보가 없음");
+        ).isInstanceOf(EmpAnnualLeaveNotFoundException.class);
     }
 
     @Test
@@ -214,7 +221,7 @@ record LeaveDraftManagementTest(
 
         assertThatThrownBy(() ->
                 createDraft(drafter, startAt, oneDaysAfterStartAt, LeaveType.ANNUAL)
-        ).hasMessage("사용 휴가 일수가 잔여 휴가 일수를 초과");
+        ).isInstanceOf(InsufficientLeaveBalanceException.class);
     }
 
     @Test
@@ -353,7 +360,7 @@ record LeaveDraftManagementTest(
                                 .leaveType(LeaveType.ANNUAL)
                                 .build()
                 )
-        ).hasMessage("사용 휴가 일수가 잔여 휴가 일수를 초과");
+        ).isInstanceOf(InsufficientLeaveBalanceException.class);
     }
 
     @Test
@@ -393,7 +400,7 @@ record LeaveDraftManagementTest(
                                 .leaveType(LeaveType.ANNUAL)
                                 .build()
                 )
-        ).hasMessage("연가신청기안서가 아님");
+        ).isInstanceOf(DraftTypeMismatchException.class);
     }
 
     private Draft createDraft(

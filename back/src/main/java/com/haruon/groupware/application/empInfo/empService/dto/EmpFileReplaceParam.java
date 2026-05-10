@@ -1,13 +1,12 @@
 package com.haruon.groupware.application.empInfo.empService.dto;
 
+import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import com.haruon.groupware.application.utils.FileDto;
 import com.haruon.groupware.application.utils.FileValidator;
 import com.haruon.groupware.domain.empInfo.enums.FileType;
 import lombok.Builder;
 
 import java.util.Set;
-
-import static java.util.Objects.requireNonNull;
 
 @Builder
 public record EmpFileReplaceParam(
@@ -27,8 +26,7 @@ public record EmpFileReplaceParam(
     );
 
     public EmpFileReplaceParam {
-        requireNonNull(file, "파일 정보 필수");
-        requireNonNull(fileType, "파일 타입 지정 필수");
+        if(fileType == null || file == null) throw new RequiredValueMissingException();
 
         FileValidator.validate(file, ALLOWED_EXTENSIONS, ALLOWED_MIME_TYPES, FILE_SIZE_MAX);
     }

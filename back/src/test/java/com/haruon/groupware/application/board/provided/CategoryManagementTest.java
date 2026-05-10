@@ -3,6 +3,7 @@ package com.haruon.groupware.application.board.provided;
 import com.haruon.groupware.application.TestIntegrationConfig;
 import com.haruon.groupware.application.board.required.CategoryRepository;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.exception.common.role.PermissionDeniedException;
 import com.haruon.groupware.domain.board.Category;
 import com.haruon.groupware.domain.empInfo.Emp;
 import org.junit.jupiter.api.AfterEach;
@@ -54,7 +55,7 @@ record CategoryManagementTest(
 
         assertThatThrownBy(() ->
                 categoryManagement.registerCategory(emp.getId(), "test")
-        ).hasMessage("권한이 없습니다.");
+        ).isInstanceOf(PermissionDeniedException.class);
     }
 
     @Test
@@ -81,7 +82,7 @@ record CategoryManagementTest(
 
         assertThatThrownBy(() ->
                 categoryManagement.changeCategoryName(normalEmp.getId(), categoryId, "editedName")
-        ).hasMessage("권한이 없습니다.");
+        ).isInstanceOf(PermissionDeniedException.class);
     }
 
     @Test

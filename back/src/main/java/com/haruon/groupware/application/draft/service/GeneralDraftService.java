@@ -5,6 +5,8 @@ import com.haruon.groupware.application.draft.required.GeneralDraftRepository;
 import com.haruon.groupware.application.draft.service.dto.CommonDraftCreateRequest;
 import com.haruon.groupware.application.draft.service.dto.CommonDraftUpdateRequest;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
+import com.haruon.groupware.application.exception.draft.DraftTypeMismatchException;
 import com.haruon.groupware.domain.draft.Draft;
 import com.haruon.groupware.domain.draft.GeneralDraft;
 import com.haruon.groupware.domain.draft.sub.ApproversParam;
@@ -14,8 +16,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-
-import static org.springframework.util.Assert.state;
 
 @Service
 @Transactional
@@ -56,7 +56,7 @@ public class GeneralDraftService extends CommonDraftService implements GeneralDr
 
     @Override
     public void updateDraft(CommonDraftUpdateRequest req) {
-        state(req.isChangeCommonField(), "수정할 사항이 없음");
+        if(req.isNotChangeCommonField()) throw new RequiredValueMissingException();
 
         GeneralDraft generalDraft = getGeneralDraft(req.draftId(), req.drafterId());
 
@@ -68,7 +68,7 @@ public class GeneralDraftService extends CommonDraftService implements GeneralDr
         Draft draft = findDraftByDraftIdAndEmpId(draftId, drafterId);
 
         if(!(draft instanceof GeneralDraft generalDraft)) {
-            throw new IllegalStateException("일반기안서가 아님");   // to-do 커스텀 예외 필요
+            throw new DraftTypeMismatchException();
         }
 
         return generalDraft;
