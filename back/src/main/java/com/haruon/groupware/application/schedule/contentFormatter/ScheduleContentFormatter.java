@@ -1,6 +1,8 @@
 package com.haruon.groupware.application.schedule.contentFormatter;
 
 
+import com.haruon.groupware.application.exception.schedule.UnsupportedScheduleTypeException;
+
 public class ScheduleContentFormatter {
 
     public static String format(ScheduleContentDto dto) {
@@ -9,7 +11,7 @@ public class ScheduleContentFormatter {
             case MeetingScheduleContentDto meeting -> formatMeeting(meeting);
             case BusinessTripScheduleContentDto trip -> formatBusinessTrip(trip);
             case LeaveScheduleContentDto leave -> formatLeave(leave);
-            default -> throw new IllegalStateException("지원하지 않는 DTO");
+            default -> throw new UnsupportedScheduleTypeException();
         };
     }
 

@@ -3,6 +3,13 @@ package com.haruon.groupware.application.meeting.provided;
 import com.haruon.groupware.application.TestIntegrationConfig;
 import com.haruon.groupware.application.empInfo.required.DeptRepository;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.exception.ApplicationException;
+import com.haruon.groupware.application.exception.common.BlankValueNotAllowedException;
+import com.haruon.groupware.application.exception.common.EndTimeBeforeStartTimeException;
+import com.haruon.groupware.application.exception.common.PastTimeNotAllowedException;
+import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
+import com.haruon.groupware.application.exception.meeting.InactivatedMeetingRoomException;
+import com.haruon.groupware.application.exception.meeting.MeetingNotFoundException;
 import com.haruon.groupware.application.meeting.required.MeetingRepository;
 import com.haruon.groupware.application.meeting.required.MeetingRoomRepository;
 import com.haruon.groupware.application.meeting.service.dto.MeetingReserveRequest;
@@ -114,7 +121,7 @@ record MeetingManagementTest(
 
         assertThatThrownBy(() ->
                 getSavedTomorrowReservation(emp, meetingRoomRepository.findById(meetingRoomId).orElseThrow())
-        ).hasMessage("조회된 활성화 회의실이 없음");
+        ).isInstanceOf(InactivatedMeetingRoomException.class);
     }
 
     private Stream<Arguments> reserveFailArguments() {
@@ -125,11 +132,14 @@ record MeetingManagementTest(
 
         return Stream.of(
                 Arguments.of("종료시각은 시작시각보다 늦어야 함",
-                        title, meetingDate, startAt, startAt.minusHours(1)
+                        title, meetingDate, startAt, startAt.minusHours(1),
+                        EndTimeBeforeStartTimeException.class
                 ),Arguments.of("회의 제목을 빈값이 될 수없음",
-                        "     ", meetingDate, startAt, endAt
+                        "     ", meetingDate, startAt, endAt,
+                        BlankValueNotAllowedException.class
                 ), Arguments.of("과거일시를 회의일로 지정할 수 없음",
-                        title, LocalDate.now().minusDays(1), startAt, endAt
+                        title, LocalDate.now().minusDays(1), startAt, endAt,
+                        PastTimeNotAllowedException.class
                 )
         );
     }
@@ -138,7 +148,7 @@ record MeetingManagementTest(
     @DisplayName("예약 실패 케이스")
     void reserve_fails_cases(
             String description, String title, LocalDate meetingDate,
-            LocalTime startAt, LocalTime endAt
+            LocalTime startAt, LocalTime endAt, Class<? extends ApplicationException> exceptedException
     ) {
         Emp emp = saveApprovedEmp(empRepository, "202601011", "approvedEmp11");
         long meetingRoomId = saveMeetingRoom();
@@ -156,7 +166,7 @@ record MeetingManagementTest(
                             .participantIds(participantIds)
                             .build()
             )
-        ).hasMessage(description);
+        ).isInstanceOf(exceptedException);
     }
 
     @Test
@@ -182,7 +192,7 @@ record MeetingManagementTest(
                                 .participantIds(participantIds)
                                 .build()
                 )
-        ).hasMessage("회의참가자는 누락될 수 없음");
+        ).isInstanceOf(RequiredValueMissingException.class);
     }
 
     @Transactional
@@ -205,7 +215,7 @@ record MeetingManagementTest(
                                 .endAt(LocalTime.of(11,0))
                                 .participantIds(Set.of(saveApprovedEmp(empRepository, "202601003", "approvedEmp3").getId()))
                                 .build())
-        ).hasMessage("조회된 활성화 회의실이 없음");
+        ).isInstanceOf(InactivatedMeetingRoomException.class);
 
     }
 
@@ -307,7 +317,7 @@ record MeetingManagementTest(
                                 .reserverId(emp.getId())
                                 .build()
                 )
-        ).hasMessage("변경내용이 없음");
+        ).isInstanceOf(RequiredValueMissingException.class);
     }
 
     @Transactional
@@ -331,7 +341,7 @@ record MeetingManagementTest(
                                 .title("editedTitle")
                                 .build()
                 )
-        ).hasMessage("조회된 회의가 없음");
+        ).isInstanceOf(MeetingNotFoundException.class);
     }
 
     @Transactional
@@ -355,7 +365,7 @@ record MeetingManagementTest(
                                 .meetingRoomId(notExistRoomId)
                                 .build()
                 )
-        ).hasMessage("조회된 활성화 회의실이 없음");
+        ).isInstanceOf(InactivatedMeetingRoomException.class);
     }
 
     private long getSavedTomorrowReservation(Emp reserverEmp, MeetingRoom room) {

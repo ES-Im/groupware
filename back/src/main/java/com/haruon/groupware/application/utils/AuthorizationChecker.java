@@ -1,6 +1,10 @@
 package com.haruon.groupware.application.utils;
 
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
+import com.haruon.groupware.application.exception.common.role.ActiveEmployeeNotFoundException;
+import com.haruon.groupware.application.exception.common.role.DepartmentMismatchException;
+import com.haruon.groupware.application.exception.common.role.PermissionDeniedException;
 import com.haruon.groupware.domain.empInfo.Dept;
 import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.empInfo.EmpBelongings;
@@ -10,23 +14,18 @@ import com.haruon.groupware.domain.empInfo.enums.SystemRoleCode;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static java.util.Objects.requireNonNull;
-import static org.springframework.util.Assert.state;
-
 //todo :  커스텀 예외처리 필요
 public class AuthorizationChecker {
     /**
      * ACTIVE 사원 검증
      */
     public static Emp findActiveEmpById(EmpRepository empRepository, Long id) {
-        requireNonNull(id, "사원 정보가 입력되지 않음");
+        if(id == null) throw new RequiredValueMissingException();
 
         return empRepository
                 .findById(id)
                 .filter(e -> e.getStatus().equals(EmpStatus.ACTIVE))
-                .orElseThrow(() ->
-                new IllegalArgumentException("해당 활성화된 사원이 존재하지 않음")
-        );
+                .orElseThrow(ActiveEmployeeNotFoundException::new);
     }
 
     /**
@@ -109,7 +108,7 @@ public class AuthorizationChecker {
         boolean isSameDept = managerDept.stream()
                 .anyMatch(targetEmpDept::contains);
 
-        state(isSameDept, "부서 매니저의 부서가 수정대상 사원과 다른 부서");
+        if(!isSameDept) throw new DepartmentMismatchException();
     }
 
     private static void notExistRoleThrowException(Emp emp, SystemRoleCode role) {
@@ -117,7 +116,7 @@ public class AuthorizationChecker {
         boolean hasRequiredRole = emp.getSystemRoles().contains(role);
 
         if(!hasRequiredRole && !hasAdminRole) {
-            throw new IllegalArgumentException("권한이 없습니다.");
+            throw new PermissionDeniedException();
         }
     }
 

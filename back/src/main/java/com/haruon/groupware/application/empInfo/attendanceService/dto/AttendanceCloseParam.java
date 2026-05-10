@@ -1,8 +1,8 @@
 package com.haruon.groupware.application.empInfo.attendanceService.dto;
 
-import java.time.LocalDate;
+import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 
-import static java.util.Objects.requireNonNull;
+import java.time.LocalDate;
 
 public record AttendanceCloseParam(
 
@@ -12,7 +12,8 @@ public record AttendanceCloseParam(
 
 ) {
     public AttendanceCloseParam {
-        requireNonNull(attendanceDate, "근태 기준 날짜는 null일 수 없음");
-        requireNonNull(empId, "사원정보가 없음");
+        if(attendanceDate == null || empId == null) {
+            throw new RequiredValueMissingException();
+        }
     }
 }

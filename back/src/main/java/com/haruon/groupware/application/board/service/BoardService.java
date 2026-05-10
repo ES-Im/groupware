@@ -5,7 +5,9 @@ import com.haruon.groupware.application.board.required.BoardRepository;
 import com.haruon.groupware.application.board.required.CategoryRepository;
 import com.haruon.groupware.application.board.service.dto.BoardCreateRequest;
 import com.haruon.groupware.application.board.service.dto.BoardFileRequest;
+import com.haruon.groupware.application.board.service.dto.BoardUpdateRequest;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.exception.common.role.PermissionDeniedException;
 import com.haruon.groupware.application.utils.FileDto;
 import com.haruon.groupware.domain.board.Board;
 import com.haruon.groupware.domain.board.Category;
@@ -90,6 +92,6 @@ public class BoardService implements BoardManagement {
     private void validateAuthor(Emp author, Board board) {
         if(!author.equals(board.getEmp()) &&
                 !author.getSystemRoles().contains(SystemRoleCode.ADMIN)
-        ) throw new IllegalStateException("권한이 없습니다.");
+        ) throw new PermissionDeniedException();
     }
 }

@@ -1,5 +1,7 @@
 package com.haruon.groupware.application.franchise.service;
 
+import com.haruon.groupware.application.exception.franchise.FranchiseDailySalesNotFoundException;
+import com.haruon.groupware.application.exception.franchise.FranchiseNotFoundException;
 import com.haruon.groupware.application.franchise.provided.FranchiseDailySalesImporter;
 import com.haruon.groupware.application.franchise.required.FranchiseDailySalesRepository;
 import com.haruon.groupware.application.franchise.required.FranchiseRepository;
@@ -21,7 +23,7 @@ public class FranchiseDailySalesService implements FranchiseDailySalesImporter {
     @Override
     public long importDailySales(long franchiseId, DailySalesRequest request) {
         Franchise franchise = franchiseRepository.findById(franchiseId)
-                .orElseThrow(() -> new IllegalStateException("조회된 가맹점이 없음"));
+                .orElseThrow(FranchiseNotFoundException::new);
 
         String externalId = request.externalId();
         boolean isForReplace = franchiseDailySalesRepository.existsByExternalId(externalId);
@@ -45,7 +47,7 @@ public class FranchiseDailySalesService implements FranchiseDailySalesImporter {
 
     private long replaceSales(String externalId, DailySalesRequest request) {
         FranchiseDailySales previousSales = franchiseDailySalesRepository.findByExternalId(externalId)
-                .orElseThrow(() -> new IllegalStateException("조회된 일매출 기록이 없음"));
+                .orElseThrow(FranchiseDailySalesNotFoundException::new);
 
         previousSales.replace(
                 request.salesDate(),

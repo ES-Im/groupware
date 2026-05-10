@@ -5,6 +5,10 @@ import com.haruon.groupware.application.empInfo.leaveService.LeaveCalculator;
 import com.haruon.groupware.application.empInfo.provided.EmpAccountManager;
 import com.haruon.groupware.application.empInfo.required.EmpLeaveRepository;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.exception.empInfo.DuplicateEmpNoException;
+import com.haruon.groupware.application.exception.empInfo.DuplicateLoginIdException;
+import com.haruon.groupware.application.exception.empInfo.EmpAlreadyActiveException;
+import com.haruon.groupware.application.exception.empInfo.InvalidResignDateException;
 import com.haruon.groupware.application.utils.AuthorizationChecker;
 import com.haruon.groupware.application.utils.CompanyPolicyPort;
 import com.haruon.groupware.domain.empInfo.Emp;
@@ -23,7 +27,6 @@ import static com.haruon.groupware.application.utils.Utils.findEmpById;
 import static com.haruon.groupware.domain.empInfo.Emp.register;
 import static com.haruon.groupware.domain.empInfo.EmpLeave.createEmpLeave;
 import static java.util.Objects.requireNonNull;
-import static org.springframework.util.Assert.state;
 
 @RequiredArgsConstructor
 @Service
@@ -81,7 +84,7 @@ public class EmpService extends LeaveCalculator implements EmpAccountManager {
         Emp targetEmployee = findEmpById(empRepository, request.targetEmpId());
         LocalDate resignedAt = requireNonNull(request.resignedAt());
 
-        state(resignedAt.isAfter(targetEmployee.getHiredAt()), "퇴직일자가 입사일자보다 이를수 없다");
+        if(resignedAt.isBefore(targetEmployee.getHiredAt())) throw new InvalidResignDateException();
 
         targetEmployee.changeResignedEmpInfoByHR(resignedAt);
     }
@@ -153,7 +156,7 @@ public class EmpService extends LeaveCalculator implements EmpAccountManager {
         AuthorizationChecker.checkHRRoleEmp(empRepository, editorId);
 
         Emp emp = findEmpById(empRepository, targetId);
-        state(!emp.getStatus().equals(EmpStatus.ACTIVE), "이미 활성화된 직원입니다.");
+        if(emp.getStatus().equals(EmpStatus.ACTIVE)) throw new EmpAlreadyActiveException();
 
         emp.activateEmp();
     }
@@ -191,11 +194,11 @@ public class EmpService extends LeaveCalculator implements EmpAccountManager {
     }
 
     private void checkDuplicateEmpNo(String empNo) {
-        if (empRepository.existsByEmpNo(empNo)) { throw new RuntimeException("이미 있는 사원번호"); } // to-do : 향후 커스텀 예외 처리
+        if (empRepository.existsByEmpNo(empNo)) { throw new DuplicateEmpNoException(); }
     }
 
     private void checkDuplicateLoginId(String loginId) {
-        if (empRepository.existsByLoginId(loginId)) { throw new RuntimeException("이미 있는 아이디"); } // to-do : 향후 커스텀 예외 처리
+        if (empRepository.existsByLoginId(loginId)) { throw new DuplicateLoginIdException(); }
     }
 
     private void updateFileStatus(long empId, EmpFileStatusChangeParam request) {

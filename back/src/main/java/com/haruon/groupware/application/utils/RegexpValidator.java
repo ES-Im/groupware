@@ -1,7 +1,9 @@
 package com.haruon.groupware.application.utils;
 
+import com.haruon.groupware.application.exception.common.InvalidFormatException;
 import com.haruon.groupware.domain.shared.RegexpUtil;
 
+import static com.haruon.groupware.application.exception.ErrorCode.INVALID_FORMAT_EXCEPTION;
 import static org.springframework.util.Assert.state;
 
 /**
@@ -10,27 +12,27 @@ import static org.springframework.util.Assert.state;
 public class RegexpValidator {
 
     public static void passwordCheck(String password) {
-        state(password.matches(RegexpUtil.PASSWORD_PATTERN), RegexpUtil.PASSWORD_PATTERN_MESSAGE);
+        if(!password.matches(RegexpUtil.PASSWORD_PATTERN)) throw new InvalidFormatException(INVALID_FORMAT_EXCEPTION, RegexpUtil.PASSWORD_PATTERN_MESSAGE);
     }
 
     public static void emailCheck(String email) {
-        state(email.matches(RegexpUtil.EMAIL_PATTERN), RegexpUtil.EMAIL_PATTERN_MESSAGE);
+        if(!email.matches(RegexpUtil.EMAIL_PATTERN)) throw new InvalidFormatException(INVALID_FORMAT_EXCEPTION, RegexpUtil.PASSWORD_PATTERN_MESSAGE);
     }
 
     public static void extensionNoCheck(String extensionNo) {
-        state(extensionNo.matches(RegexpUtil.EXTENSION_NO_PATTERN), RegexpUtil.EXTENSION_NO_PATTERN_MESSAGE);
+        if(!extensionNo.matches(RegexpUtil.EXTENSION_NO_PATTERN)) throw new InvalidFormatException(INVALID_FORMAT_EXCEPTION, RegexpUtil.PASSWORD_PATTERN_MESSAGE);
     }
 
     public static void empNoCheck(String empNo) {
-        state(empNo.matches(RegexpUtil.EMP_NO_PATTERN), RegexpUtil.EMP_NO_PATTERN_MESSAGE);
+        if(!empNo.matches(RegexpUtil.EMP_NO_PATTERN)) throw new InvalidFormatException(INVALID_FORMAT_EXCEPTION, RegexpUtil.PASSWORD_PATTERN_MESSAGE);
     }
 
     public static void empIdCheck(String empId) {
-        state(empId.matches(RegexpUtil.EMP_ID_PATTERN), RegexpUtil.EMP_ID_PATTERN_MESSAGE);
+        if(!empId.matches(RegexpUtil.EMP_ID_PATTERN)) throw new InvalidFormatException(INVALID_FORMAT_EXCEPTION, RegexpUtil.PASSWORD_PATTERN_MESSAGE);
     }
 
     public static void deptCodeCheck(String deptCode) {
-        state(deptCode.matches(RegexpUtil.DEPT_CODE_PATTERN), RegexpUtil.DEPT_CODE_PATTERN_MESSAGE);
+        if(!deptCode.matches(RegexpUtil.DEPT_CODE_PATTERN)) throw new InvalidFormatException(INVALID_FORMAT_EXCEPTION, RegexpUtil.PASSWORD_PATTERN_MESSAGE);
     }
 
     public static void businessNumberCheck(String businessNumber) {

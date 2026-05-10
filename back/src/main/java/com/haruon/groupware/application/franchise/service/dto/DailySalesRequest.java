@@ -1,11 +1,11 @@
 package com.haruon.groupware.application.franchise.service.dto;
 
+import com.haruon.groupware.application.exception.common.BlankValueNotAllowedException;
+import com.haruon.groupware.application.exception.common.PositiveValueRequiredException;
+import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import lombok.Builder;
 
 import java.time.LocalDate;
-
-import static java.util.Objects.requireNonNull;
-import static org.springframework.util.Assert.state;
 
 @Builder
 public record DailySalesRequest(
@@ -20,13 +20,10 @@ public record DailySalesRequest(
 ) {
 
     public DailySalesRequest {
-        requireNonNull(externalId);
-        requireNonNull(salesDate);
-        requireNonNull(salesAmount);
-        requireNonNull(orderCount);
+        if(externalId == null || salesDate == null || salesAmount == null || orderCount == null) throw new RequiredValueMissingException();
 
-        state(!externalId.isBlank(), "외부식별자는 공백이 될 수 없음");
-        state(salesAmount >= 0, "매출 액은 양수여야 함");
-        state(orderCount >= 0, "매출 건수은 양수여야 함");
+        if(externalId.isBlank()) throw new BlankValueNotAllowedException();
+
+        if(salesAmount < 0 || orderCount < 0) throw new PositiveValueRequiredException();
     }
 }

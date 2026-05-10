@@ -12,6 +12,7 @@ import com.haruon.groupware.application.draft.service.dto.LeaveDraftCreateReques
 import com.haruon.groupware.application.empInfo.required.DeptRepository;
 import com.haruon.groupware.application.empInfo.required.EmpLeaveRepository;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.exception.common.role.ActiveEmployeeNotFoundException;
 import com.haruon.groupware.application.meeting.provided.MeetingManagement;
 import com.haruon.groupware.application.meeting.provided.MeetingRoomManagement;
 import com.haruon.groupware.application.meeting.required.MeetingRepository;
@@ -422,7 +423,7 @@ record ScheduleManagementTest(
                         LocalDateTime.of(BASE_DATE, START_TIME),
                         LocalDateTime.of(BASE_DATE, END_TIME).plusDays(2)
                 )
-        ).hasMessage("해당 활성화된 사원이 존재하지 않음");
+        ).isInstanceOf(ActiveEmployeeNotFoundException.class);
     }
 
     @Transactional
@@ -439,7 +440,7 @@ record ScheduleManagementTest(
 
         assertThatThrownBy(() ->
                 scheduleEditing.addParticipants(manualSchedules.getFirst().getId(), Set.of(inactiveEmp.getId()), false)
-        ).hasMessage("해당 활성화된 사원이 존재하지 않음");
+        ).isInstanceOf(ActiveEmployeeNotFoundException.class);
 
     }
 

@@ -1,14 +1,15 @@
 package com.haruon.groupware.application.empInfo.attendanceService;
 
 import com.haruon.groupware.application.empInfo.required.AttendanceRepository;
+import com.haruon.groupware.application.exception.common.EndTimeBeforeStartTimeException;
+import com.haruon.groupware.application.exception.common.PositiveValueRequiredException;
+import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
+import com.haruon.groupware.application.exception.empInfo.AttendanceNotFoundException;
 import com.haruon.groupware.domain.empInfo.Attendance;
 import com.haruon.groupware.domain.empInfo.enums.AttendanceStatus;
 
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
-
-import static java.util.Objects.requireNonNull;
-import static org.springframework.util.Assert.state;
 
 public class AttendanceUtils {
 
@@ -18,11 +19,11 @@ public class AttendanceUtils {
             long requiredWorkHours,
             boolean includeHalfLeave
     ) {
-        requireNonNull(startAt, "근태 시작시각 필수");
-        requireNonNull(endAt, "근태 종료시각 필수");
+        if(startAt == null || endAt == null) throw new RequiredValueMissingException();
 
-        state(!endAt.isBefore(startAt), "근태 종료시각은 시작시각보다 빠를 수 없음");
-        state(requiredWorkHours > 0, "소정근로시간은 0보다 커야 함");
+        if(endAt.isBefore(startAt)) throw new EndTimeBeforeStartTimeException();
+
+        if(requiredWorkHours <= 0) throw new PositiveValueRequiredException();
 
         long requiredWorkMinutes = requiredWorkHours * 60;
 
@@ -44,9 +45,7 @@ public class AttendanceUtils {
     }
 
     public static Attendance findAttendanceById(AttendanceRepository repository, Long id) {
-        return repository.findById(id).orElseThrow(() ->
-                new IllegalArgumentException("해당 근태가 존재하지 않음")  // to-do 커스텀 예외처리
-        );
+        return repository.findById(id).orElseThrow(AttendanceNotFoundException::new);
     }
 
 }

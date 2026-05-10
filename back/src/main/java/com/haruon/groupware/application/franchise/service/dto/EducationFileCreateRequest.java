@@ -1,12 +1,11 @@
 package com.haruon.groupware.application.franchise.service.dto;
 
+import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import com.haruon.groupware.application.utils.FileDto;
 import com.haruon.groupware.application.utils.FileValidator;
 import lombok.Builder;
 
 import java.util.Set;
-
-import static java.util.Objects.requireNonNull;
 
 @Builder
 public record EducationFileCreateRequest(
@@ -28,7 +27,7 @@ public record EducationFileCreateRequest(
     );
 
     public EducationFileCreateRequest {
-        requireNonNull(file, "파일 정보 필수");
+        if(file == null) throw new RequiredValueMissingException();
 
         FileValidator.validate(file, ALLOWED_EXTENSIONS, ALLOWED_MIME_TYPES, FILE_SIZE_MAX);
     }

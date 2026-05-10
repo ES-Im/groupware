@@ -3,6 +3,7 @@ package com.haruon.groupware.application.empInfo.provided;
 import com.haruon.groupware.application.TestIntegrationConfig;
 import com.haruon.groupware.application.empInfo.required.AttendanceRepository;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.exception.empInfo.CheckInRecordNotFoundException;
 import com.haruon.groupware.domain.empInfo.Emp;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.*;
@@ -87,7 +88,7 @@ record AttendanceRecordTest(
 
         assertThatThrownBy(() ->
                 attendanceRecord.recordCheckOut(emp.getId(), LocalDateTime.of(2026,4,5, 19,0,0))
-        ).isInstanceOf(IllegalStateException.class);
+        ).isInstanceOf(CheckInRecordNotFoundException.class);
     }
 
     @Test

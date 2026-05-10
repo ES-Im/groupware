@@ -1,11 +1,10 @@
 package com.haruon.groupware.application.draft.service.dto;
 
+import com.haruon.groupware.application.exception.common.PositiveValueRequiredException;
+import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import lombok.Builder;
 
 import java.time.YearMonth;
-
-import static java.util.Objects.requireNonNull;
-import static org.springframework.util.Assert.state;
 
 @Builder
 public record SalesDraftCreateRequest(
@@ -20,11 +19,10 @@ public record SalesDraftCreateRequest(
 
 ) {
         public SalesDraftCreateRequest {
-                requireNonNull(param);
-                requireNonNull(franchiseId);
-                requireNonNull(reportMonth);
-                requireNonNull(salesAmount);
+                if(param == null || franchiseId == null || reportMonth == null || salesAmount == null) {
+                        throw new RequiredValueMissingException();
+                }
 
-                state(salesAmount >= 0, "매출총액은 0또는 양수여야함");
+                if(salesAmount < 0) throw new PositiveValueRequiredException();
         }
 }

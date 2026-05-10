@@ -1,6 +1,10 @@
 package com.haruon.groupware.application.meeting.service;
 
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.exception.file.FileNotFoundException;
+import com.haruon.groupware.application.exception.meeting.InactivatedMeetingRoomException;
+import com.haruon.groupware.application.exception.meeting.MeetingRoomNotFoundException;
+import com.haruon.groupware.application.exception.meeting.ReservedMeetingExistException;
 import com.haruon.groupware.application.meeting.provided.MeetingRoomManagement;
 import com.haruon.groupware.application.meeting.required.MeetingRepository;
 import com.haruon.groupware.application.meeting.required.MeetingRoomRepository;
@@ -97,25 +101,25 @@ public class MeetingRoomService implements MeetingRoomManagement {
 
     static MeetingRoom findActiveMeetingRoom(MeetingRoomRepository repository, Long roomId) {
         return repository.findById(roomId).filter(MeetingRoom::isAvailable)
-                .orElseThrow(() -> new IllegalArgumentException("조회된 활성화 회의실이 없음"));    // to-do 커스텀 예외처리
+                .orElseThrow(InactivatedMeetingRoomException::new);
     }
 
     private MeetingRoom findMeetingRoom(Long roomId) {
         return meetingRoomRepository.findById(roomId)
-                .orElseThrow(() -> new IllegalStateException("조회된 회의실이 없음"));   // to-do 커스텀 예외처리
+                .orElseThrow(MeetingRoomNotFoundException::new);
     }
 
     private MeetingRoomFile findRoomFile(Long fileId, MeetingRoom room) {
         return room.getRoomFiles().stream()
                 .filter(f -> f.getId().equals(fileId)).findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("해당 파일이 없음"));  // to-do 커스텀 예외처리
+                .orElseThrow(FileNotFoundException::new);
     }
 
     private void isEditable(long roomId) {
         List<Meeting> reserved = findReservedMeeting(meetingRepository, meetingRoomRepository, roomId);
 
         if(!reserved.isEmpty())
-            throw new IllegalStateException("미래에 예약된 회의가 있어 회의실 정보 수정 불가"); // to-do 커스텀 예외처리
+            throw new ReservedMeetingExistException();
     }
 
 }

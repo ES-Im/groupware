@@ -1,13 +1,12 @@
 package com.haruon.groupware.application.board.service.dto;
 
+import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import com.haruon.groupware.application.utils.FileDto;
 import com.haruon.groupware.application.utils.FileValidator;
 import lombok.Builder;
 
 import java.time.LocalDateTime;
 import java.util.Set;
-
-import static java.util.Objects.requireNonNull;
 
 @Builder
 public record BoardFileRequest(
@@ -31,8 +30,7 @@ public record BoardFileRequest(
     );
 
     public BoardFileRequest {
-        requireNonNull(file, "파일 정보 필수");
-        requireNonNull(modifiedAt, "수정일시 필수");
+        if(file == null || modifiedAt == null) throw new RequiredValueMissingException();
 
         FileValidator.validate(file, ALLOWED_EXTENSIONS, ALLOWED_MIME_TYPES, FILE_SIZE_MAX);
     }

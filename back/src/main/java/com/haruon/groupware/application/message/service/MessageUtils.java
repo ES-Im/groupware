@@ -1,5 +1,6 @@
 package com.haruon.groupware.application.message.service;
 
+import com.haruon.groupware.application.exception.message.MessageNotFoundException;
 import com.haruon.groupware.application.message.required.MessageRepository;
 import com.haruon.groupware.domain.message.Message;
 
@@ -10,8 +11,6 @@ public class MessageUtils {
     static Message findMessage(MessageRepository messageRepository, Long messageDraftId) {
         requireNonNull(messageDraftId);
 
-        return messageRepository.findById(messageDraftId).orElseThrow(() ->
-                new IllegalArgumentException("해당 메시지를 찾을 수 없음")
-        );
+        return messageRepository.findById(messageDraftId).orElseThrow(MessageNotFoundException::new);
     }
 }

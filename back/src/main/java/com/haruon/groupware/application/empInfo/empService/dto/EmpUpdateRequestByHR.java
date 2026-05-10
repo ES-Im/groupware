@@ -1,5 +1,7 @@
 package com.haruon.groupware.application.empInfo.empService.dto;
 
+import com.haruon.groupware.application.exception.common.BlankValueNotAllowedException;
+import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import com.haruon.groupware.application.utils.RegexpValidator;
 import com.haruon.groupware.domain.empInfo.enums.EmpStatus;
 import com.haruon.groupware.domain.empInfo.enums.SystemRoleCode;
@@ -7,9 +9,6 @@ import lombok.Builder;
 import org.jspecify.annotations.Nullable;
 
 import java.time.LocalDate;
-
-import static java.util.Objects.requireNonNull;
-import static org.springframework.util.Assert.state;
 
 /*
  * 권한 : `Emp.SystemRoleCode` = `ADMIN` or `HR`
@@ -62,24 +61,25 @@ public record EmpUpdateRequestByHR(
 ) {
 
     public EmpUpdateRequestByHR {
-        requireNonNull(editorId, "수정하는 사람의 deptManagerId(PK) 필수");
-        requireNonNull(targetEmpId, "사원의 targetEmpId(PK) 필수");
+        if(editorId == null || targetEmpId == null) throw new RequiredValueMissingException();
 
-        if(loginId != null) {
-            state(companyDomain != null, "회사 도메인은 필수값");
+        if(loginId != null && companyDomain == null) {
+            throw new RequiredValueMissingException();
         }
-        state(empName != null || loginId != null
-                || newRawPassword != null || extensionNo != null
-                || empStatus != null || systemRoleCode != null
-                || hireAt != null   || resignedAt != null
-                || fileStatusParam != null || belongingsParam != null
-                ,"변경된 정보가 없습니다.");
 
-        if(empName != null) state(!empName.isBlank(), "사원이름은 공백이 올 수 없음");
+        if(empName == null && loginId == null
+                && newRawPassword == null && extensionNo == null
+                && empStatus == null && systemRoleCode == null
+                && hireAt == null && resignedAt == null
+                && fileStatusParam == null && belongingsParam == null
+        ) {
+            throw new RequiredValueMissingException();
+        }
 
-        if(loginId != null) state(!loginId.isBlank(), "사원아이디는 공백이 올 수 없음");
 
-        if(empName != null) state(!empName.isBlank(), "사원이름은 공백이 올 수 없음");
+        if(empName != null && empName.isBlank()) throw new BlankValueNotAllowedException();
+
+        if(loginId != null && loginId.isBlank()) throw new BlankValueNotAllowedException();
 
         if(newRawPassword != null) RegexpValidator.passwordCheck(newRawPassword);
 

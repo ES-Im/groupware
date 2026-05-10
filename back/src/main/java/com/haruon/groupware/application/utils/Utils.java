@@ -1,6 +1,8 @@
 package com.haruon.groupware.application.utils;
 
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.exception.common.EmployeeNotFoundException;
+import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import com.haruon.groupware.domain.empInfo.Emp;
 import org.jspecify.annotations.Nullable;
 
@@ -23,13 +25,11 @@ public class Utils {
     public static Emp findEmpById(EmpRepository empRepository, Long id) {
         return empRepository
                 .findById(id)
-                .orElseThrow(() ->
-                        new IllegalArgumentException("해당 사원이 존재하지 않음")  // to-do 커스텀 예외처리
-                );
+                .orElseThrow(EmployeeNotFoundException::new);
     }
 
     public static List<Emp> findEmpListById(EmpRepository empRepository, Set<Long> empIds) {
-        if(empIds.isEmpty()) throw new IllegalArgumentException("사원 정보가 입력되지 않음");
+        if(empIds.isEmpty()) throw new RequiredValueMissingException();
 
         return empIds.stream()
                 .map(empId -> findActiveEmpById(empRepository, empId))

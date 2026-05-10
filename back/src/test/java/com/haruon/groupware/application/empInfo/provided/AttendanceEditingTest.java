@@ -8,6 +8,12 @@ import com.haruon.groupware.application.empInfo.attendanceService.dto.EditAttend
 import com.haruon.groupware.application.empInfo.required.AttendanceRepository;
 import com.haruon.groupware.application.empInfo.required.DeptRepository;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.exception.common.EndTimeBeforeStartTimeException;
+import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
+import com.haruon.groupware.application.exception.common.role.ActiveEmployeeNotFoundException;
+import com.haruon.groupware.application.exception.common.role.DepartmentMismatchException;
+import com.haruon.groupware.application.exception.common.role.PermissionDeniedException;
+import com.haruon.groupware.application.exception.empInfo.AttendanceEmpMismatchException;
 import com.haruon.groupware.application.schedule.required.ScheduleRepository;
 import com.haruon.groupware.application.utils.CompanyPolicyPort;
 import com.haruon.groupware.domain.empInfo.Attendance;
@@ -180,7 +186,7 @@ record AttendanceEditingTest(
                         .attendanceId(attendance.getId())
                         .approvedAt(approvedAt)
                         .build()
-        )).isInstanceOf(IllegalStateException.class);
+        )).isInstanceOf(AttendanceEmpMismatchException.class);
 
     }
 
@@ -220,7 +226,7 @@ record AttendanceEditingTest(
                         .editorId(deptManager.getId())
                         .isIncludeHalfLeaveInDay(false)
                         .build()
-        )).isInstanceOf(IllegalStateException.class);
+        )).isInstanceOf(AttendanceEmpMismatchException.class);
 
     }
 
@@ -249,7 +255,7 @@ record AttendanceEditingTest(
                                 .approvedAt(of(2026, 1, 31, 9, 0, 0))
                                 .build()
                 )
-        ).hasMessage("권한이 없습니다.");
+        ).isInstanceOf(PermissionDeniedException.class);
     }
 
     @Test
@@ -279,7 +285,7 @@ record AttendanceEditingTest(
                                 .approvedAt(of(2026, 1, 31, 9, 0, 0))
                                 .build()
                 )
-        ).isInstanceOf(IllegalArgumentException.class);
+        ).isInstanceOf(ActiveEmployeeNotFoundException.class);
 
     }
 
@@ -309,7 +315,7 @@ record AttendanceEditingTest(
                                 .approvedAt(of(2026, 1, 31, 9, 0, 0))
                                 .build()
                 )
-        ).isInstanceOf(IllegalStateException.class);
+        ).isInstanceOf(DepartmentMismatchException.class);
 
     }
 
@@ -565,7 +571,7 @@ record AttendanceEditingTest(
                         , companyPolicy.getStartTime().minusHours(1)
                         , deptManager
                 )
-        ).isInstanceOf(IllegalStateException.class);
+        ).isInstanceOf(EndTimeBeforeStartTimeException.class);
     }
 
     @Test
@@ -588,7 +594,7 @@ record AttendanceEditingTest(
                         , null
                         , deptManager
                 )
-        ).isInstanceOf(IllegalStateException.class);
+        ).isInstanceOf(RequiredValueMissingException.class);
     }
 
 
@@ -616,7 +622,7 @@ record AttendanceEditingTest(
                         , companyPolicy.getEndTime()
                         , notManager
                 )
-        ).hasMessage("권한이 없습니다.");
+        ).isInstanceOf(PermissionDeniedException.class);
     }
 
     @Test
@@ -645,7 +651,7 @@ record AttendanceEditingTest(
                         , companyPolicy.getEndTime()
                         , inactiveManager
                 )
-        ).isInstanceOf(IllegalArgumentException.class);
+        ).isInstanceOf(ActiveEmployeeNotFoundException.class);
 
     }
 
@@ -674,7 +680,7 @@ record AttendanceEditingTest(
                         , companyPolicy.getEndTime()
                         , otherDeptManager
                 )
-        ).isInstanceOf(IllegalStateException.class);
+        ).isInstanceOf(DepartmentMismatchException.class);
 
     }
 

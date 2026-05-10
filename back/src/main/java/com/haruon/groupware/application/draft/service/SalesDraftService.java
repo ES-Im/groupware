@@ -8,6 +8,8 @@ import com.haruon.groupware.application.draft.service.dto.CommonDraftUpdateReque
 import com.haruon.groupware.application.draft.service.dto.SalesDraftCreateRequest;
 import com.haruon.groupware.application.draft.service.dto.SalesDraftUpdateRequest;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.exception.draft.DraftTypeMismatchException;
+import com.haruon.groupware.application.exception.franchise.FranchiseNotFoundException;
 import com.haruon.groupware.application.franchise.required.FranchiseRepository;
 import com.haruon.groupware.domain.draft.Draft;
 import com.haruon.groupware.domain.draft.SalesDraft;
@@ -42,8 +44,7 @@ public class SalesDraftService extends CommonDraftService implements SalesDraftM
         CommonDraftCreateRequest commonReq = req.param();
         Emp drafter = findActiveEmpById(commonReq.empId());
         List<ApproversParam> approvers = toApproverParams(commonReq.approvers());
-        Franchise franchise = franchiseRepository.findById(req.franchiseId())
-                .orElseThrow(() -> new IllegalArgumentException("가맹점을 찾을 수 없습니다."));
+        Franchise franchise = findFranchise(req);
 
         SalesDraft draft = SalesDraft.createDraft(
                 drafter,
@@ -64,8 +65,7 @@ public class SalesDraftService extends CommonDraftService implements SalesDraftM
         Emp drafter = findActiveEmpById(commonReq.empId());
         List<ApproversParam> approvers = requireApprovers(commonReq.approvers());
         LocalDateTime submittedAt = requireSubmittedAt(commonReq.submittedAt());
-        Franchise franchise = franchiseRepository.findById(req.franchiseId())
-                .orElseThrow(() -> new IllegalArgumentException("가맹점을 찾을 수 없습니다."));
+        Franchise franchise = findFranchise(req);
 
         SalesDraft draft = SalesDraft.createSubmitted(
                 drafter,
@@ -98,9 +98,15 @@ public class SalesDraftService extends CommonDraftService implements SalesDraftM
         Draft draft = findDraftByDraftIdAndEmpId(draftId, drafterId);
 
         if(!(draft instanceof SalesDraft salesDraft)) {
-            throw new IllegalArgumentException("일반기안서가 아님");
+            throw new DraftTypeMismatchException();
         }
 
         return salesDraft;
+    }
+
+
+    private Franchise findFranchise(SalesDraftCreateRequest req) {
+        return franchiseRepository.findById(req.franchiseId())
+                .orElseThrow(FranchiseNotFoundException::new);
     }
 }

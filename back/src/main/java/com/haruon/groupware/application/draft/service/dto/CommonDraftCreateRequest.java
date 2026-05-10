@@ -1,13 +1,13 @@
 package com.haruon.groupware.application.draft.service.dto;
 
+import com.haruon.groupware.application.exception.common.BlankValueNotAllowedException;
+import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
+import com.haruon.groupware.application.exception.draft.ApprovalLineRequiredException;
 import lombok.Builder;
 import org.jspecify.annotations.Nullable;
 
 import java.time.LocalDateTime;
 import java.util.List;
-
-import static java.util.Objects.requireNonNull;
-import static org.springframework.util.Assert.state;
 
 @Builder
 public record CommonDraftCreateRequest(
@@ -23,17 +23,14 @@ public record CommonDraftCreateRequest(
 ) {
 
     public CommonDraftCreateRequest {
-        requireNonNull(empId);
-        requireNonNull(title);
-        requireNonNull(content);
+        if(empId == null || title == null || content == null) throw new RequiredValueMissingException();
 
-        if(submittedAt != null) {
-            state(approvers != null && !approvers.isEmpty(),
-                    "상신시, 결제선 설정 필수");
+        if(submittedAt != null && !(approvers != null && !approvers.isEmpty())) {
+            throw new ApprovalLineRequiredException();
         }
 
-       state(!title.isBlank(), "제목은 공백이 될 수 없음");
-       state(!content.isBlank(), "내용은 공백이 될 수 없음");
+        if(title.isBlank()) throw new BlankValueNotAllowedException();
+        if(content.isBlank()) throw new BlankValueNotAllowedException();
     }
 
 

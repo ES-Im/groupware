@@ -1,11 +1,11 @@
 package com.haruon.groupware.application.franchise.service.dto;
 
+import com.haruon.groupware.application.exception.common.BlankValueNotAllowedException;
+import com.haruon.groupware.application.exception.common.PositiveValueRequiredException;
+import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import lombok.Builder;
 
 import java.time.LocalDateTime;
-
-import static java.util.Objects.requireNonNull;
-import static org.springframework.util.Assert.state;
 
 @Builder
 public record EducationCreateRequest(
@@ -22,16 +22,11 @@ public record EducationCreateRequest(
 ) {
 
     public EducationCreateRequest {
-        requireNonNull(educationDate);
-        requireNonNull(place);
-        requireNonNull(title);
-        requireNonNull(content);
-        requireNonNull(capacity);
+        if(educationDate == null || place == null || title == null || content == null || capacity == null) throw new RequiredValueMissingException();
 
-        state(!place.isBlank(), "교육 장소는 비어 있을 수 없음");
-        state(!title.isBlank(), "교육 제목은 비어 있을 수 없음");
-        state(!content.isBlank(), "교육 내용은 비어 있을 수 없음");
-        state(capacity > 0, "수용인원은 0보다 커야 함");
+        if(place.isBlank() || title.isBlank() || content.isBlank()) throw new BlankValueNotAllowedException();
+
+        if(capacity <= 0) throw new PositiveValueRequiredException();
 
     }
 }

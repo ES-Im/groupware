@@ -1,10 +1,9 @@
 package com.haruon.groupware.application.empInfo.empService.dto;
 
+import com.haruon.groupware.application.exception.common.BlankValueNotAllowedException;
+import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import com.haruon.groupware.application.utils.RegexpValidator;
 import lombok.Builder;
-
-import static java.util.Objects.requireNonNull;
-import static org.springframework.util.Assert.state;
 
 @Builder
 public record EmpRegisterRequestBySelf (
@@ -18,14 +17,14 @@ public record EmpRegisterRequestBySelf (
         String rawPassword
 ) {
         public EmpRegisterRequestBySelf {
-                requireNonNull(empNo);
-                requireNonNull(empName);
-                requireNonNull(loginId);
-                requireNonNull(rawPassword);
+                if(empNo == null || empName == null || loginId == null || rawPassword == null) {
+                        throw new RequiredValueMissingException();
+                }
+
+                if(empName.isBlank()) throw new BlankValueNotAllowedException();
 
                 RegexpValidator.empNoCheck(empNo);
                 RegexpValidator.empIdCheck(loginId);
                 RegexpValidator.passwordCheck(rawPassword);
-                state(!empName.isBlank(), "사원명은 공백이 될 수 없음");
         }
 }

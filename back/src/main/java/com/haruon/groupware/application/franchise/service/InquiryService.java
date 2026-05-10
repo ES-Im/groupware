@@ -1,5 +1,6 @@
 package com.haruon.groupware.application.franchise.service;
 
+import com.haruon.groupware.application.exception.franchise.FranchiseInquiryNotFoundException;
 import com.haruon.groupware.application.franchise.provided.InquiryImporter;
 import com.haruon.groupware.application.franchise.required.FranchiseInquiryRepository;
 import com.haruon.groupware.application.franchise.required.FranchiseRepository;
@@ -48,7 +49,7 @@ public class InquiryService implements InquiryImporter {
 
     private long replaceInquiry(InquiryRequest request) {
         FranchiseInquiry previousInquiry = franchiseInquiryRepository.findByExternalId(request.externalId())
-                .orElseThrow(() -> new IllegalStateException("조회된 질의가 없음"));    // to-do 커스텀 예외처리 필요
+                .orElseThrow(FranchiseInquiryNotFoundException::new);
 
         previousInquiry.replaceInquiry(
                 request.inquirerContact(),

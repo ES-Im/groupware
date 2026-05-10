@@ -3,6 +3,8 @@ package com.haruon.groupware.application.empInfo.deptService;
 import com.haruon.groupware.application.empInfo.provided.DeptManagement;
 import com.haruon.groupware.application.empInfo.required.DeptRepository;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.exception.empInfo.DeptNotFoundException;
+import com.haruon.groupware.application.exception.empInfo.DuplicateDeptException;
 import com.haruon.groupware.application.utils.AuthorizationChecker;
 import com.haruon.groupware.domain.empInfo.Dept;
 import jakarta.transaction.Transactional;
@@ -65,16 +67,14 @@ public class DeptManageService implements DeptManagement {
     private Dept getDept(Long deptId) {
         requireNonNull(deptId);
 
-        return deptRepository.findById(deptId).orElseThrow(() ->
-                new RuntimeException("조회된 부서가 없음")  // to-do 커스텀 예외처리 필요
-        );
+        return deptRepository.findById(deptId).orElseThrow(DeptNotFoundException::new);
     }
 
     private void checkDuplicateDeptCode(String deptCode) {
         requireNonNull(deptCode);
 
         if (deptRepository.findByDeptCode(deptCode).isPresent()) {
-            throw new IllegalArgumentException("이미 존재하는 부서 코드");
+            throw new DuplicateDeptException();
         }
     }
 }

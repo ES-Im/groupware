@@ -1,12 +1,11 @@
 package com.haruon.groupware.application.meeting.service.dto;
 
+import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import com.haruon.groupware.application.utils.FileDto;
 import com.haruon.groupware.application.utils.FileValidator;
 import lombok.Builder;
 
 import java.util.Set;
-
-import static java.util.Objects.requireNonNull;
 
 @Builder
 public record MeetingRoomFileCreateRequest(
@@ -27,8 +26,7 @@ public record MeetingRoomFileCreateRequest(
     );
 
     public MeetingRoomFileCreateRequest {
-        requireNonNull(meetingRoomId, "회의명 ID 필수");
-        requireNonNull(file, "파일 정보 필수");
+        if(meetingRoomId == null || file == null) throw new RequiredValueMissingException();
 
         FileValidator.validate(file, ALLOWED_EXTENSIONS, ALLOWED_MIME_TYPES, FILE_SIZE_MAX);
     }

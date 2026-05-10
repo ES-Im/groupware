@@ -67,15 +67,13 @@ public class Attendance extends AbstractEntity {
         return attendance;
     }
 
-    public int recordEndAtByEmp(LocalDateTime endAt) {
+    public void recordEndAtByEmp(LocalDateTime endAt) {
         state(this.startAt!= null ,"당일 출근기록 없음");
         state(endAt != null, "퇴근시각 미입력");
         state(endAt.toLocalDate().equals(this.attendanceDate), "같은 일자인 근태 퇴근기록만 가능");
         state(!endAt.toLocalTime().isBefore(this.startAt), "퇴근시각은 출근시각보다 빠를 수 없음");
 
         this.endAt = endAt.toLocalTime();
-
-        return 1;
     }
 
     public void approveAttendance(Emp approver, LocalDateTime approvedAt) {

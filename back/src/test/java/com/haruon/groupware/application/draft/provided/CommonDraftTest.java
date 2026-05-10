@@ -7,6 +7,9 @@ import com.haruon.groupware.application.draft.service.dto.CommonDraftCreateReque
 import com.haruon.groupware.application.draft.service.dto.DraftFileCreateRequest;
 import com.haruon.groupware.application.empInfo.required.DeptRepository;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
+import com.haruon.groupware.application.exception.draft.ApprovalLineRequiredException;
+import com.haruon.groupware.application.exception.draft.DraftNotFoundException;
 import com.haruon.groupware.application.utils.FileDto;
 import com.haruon.groupware.domain.draft.Approver;
 import com.haruon.groupware.domain.draft.Draft;
@@ -102,7 +105,7 @@ record CommonDraftTest(
                         LocalDateTime.of(2026, 1, 1, 0, 0, 0),
                         List.of()
                 )
-        ).isInstanceOf(IllegalStateException.class);
+        ).isInstanceOf(ApprovalLineRequiredException.class);
 
         assertThatThrownBy(() ->
                 generalDraftManagement.submit(
@@ -189,15 +192,12 @@ record CommonDraftTest(
 
         assertThatThrownBy(() ->
                 createSubmitted(drafter, title, content, List.of(), submittedAt)
-        ).isInstanceOf(IllegalStateException.class);
+        ).isInstanceOf(ApprovalLineRequiredException.class);
 
         assertThatThrownBy(() ->
                 createSubmitted(drafter, title, content, List.of(approverEmp1, approverEmp2), null)
-        ).isInstanceOf(IllegalStateException.class);
+        ).isInstanceOf(RequiredValueMissingException.class);
 
-        assertThatThrownBy(() ->
-                createSubmitted(drafter, title, content, List.of(), null)
-        ).isInstanceOf(IllegalStateException.class);
     }
 
     @Test
@@ -220,7 +220,7 @@ record CommonDraftTest(
         Draft draft = getSubmitted(drafter);
         assertThatThrownBy(() ->
                 generalDraftManagement.revertToDraft(draft.getId(), notDrafter.getId())
-        ).isInstanceOf(IllegalStateException.class);
+        ).isInstanceOf(DraftNotFoundException.class);
     }
 
     @Test

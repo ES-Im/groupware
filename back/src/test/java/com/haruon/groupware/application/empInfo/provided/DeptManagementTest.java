@@ -4,6 +4,7 @@ import com.haruon.groupware.application.TestIntegrationConfig;
 import com.haruon.groupware.application.empInfo.deptService.DeptRegisterRequest;
 import com.haruon.groupware.application.empInfo.required.DeptRepository;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.exception.common.role.PermissionDeniedException;
 import com.haruon.groupware.domain.empInfo.Dept;
 import com.haruon.groupware.domain.empInfo.Emp;
 import jakarta.persistence.EntityManager;
@@ -131,15 +132,15 @@ record DeptManagementTest(
         assertThatThrownBy(() -> {
             String newDeptName = "IT2";
             deptManagement.updateDeptName(foundDept.getId(), newDeptName, foundEmp.getId());
-        }).hasMessage("권한이 없습니다.");
+        }).isInstanceOf(PermissionDeniedException.class);
 
         assertThatThrownBy(() -> {
             deptManagement.deactivate(foundDept.getId(), foundEmp.getId());
-        }).hasMessage("권한이 없습니다.");
+        }).isInstanceOf(PermissionDeniedException.class);
 
         assertThatThrownBy(() -> {
             deptManagement.activate(foundDept.getId(), foundEmp.getId());
-        }).hasMessage("권한이 없습니다.");
+        }).isInstanceOf(PermissionDeniedException.class);
     }
 
 }

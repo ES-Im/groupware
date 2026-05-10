@@ -2,6 +2,7 @@ package com.haruon.groupware.application.message.provided;
 
 import com.haruon.groupware.application.TestIntegrationConfig;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.exception.message.MessageNotFoundException;
 import com.haruon.groupware.application.message.required.MessageRepository;
 import com.haruon.groupware.application.message.service.dto.MessageCreateRequest;
 import com.haruon.groupware.domain.empInfo.Emp;
@@ -69,7 +70,7 @@ record ReceivedMessageManagementTest(
                         999L,
                         LocalDateTime.of(2026, 1, 1, 10, 0)
                 )
-        ).hasMessage("해당 메시지를 찾을 수 없음");
+        ).isInstanceOf(MessageNotFoundException.class);
     }
 
     @Test
@@ -181,7 +182,7 @@ record ReceivedMessageManagementTest(
                         999L,
                         LocalDateTime.of(2026, 1, 1, 10, 0)
                 )
-        ).hasMessage("해당 메시지를 찾을 수 없음");
+        ).isInstanceOf(MessageNotFoundException.class);
     }
 
     @Test
@@ -326,7 +327,7 @@ record ReceivedMessageManagementTest(
 
         assertThatThrownBy(() ->
                 receivedMessageManagement.restoreFromTrashByReceiver(receiver.getId(), 999L)
-        ).hasMessage("해당 메시지를 찾을 수 없음");
+        ).isInstanceOf(MessageNotFoundException.class);
     }
 
     @Test
@@ -446,7 +447,7 @@ record ReceivedMessageManagementTest(
                         999L,
                         LocalDateTime.of(2026, 1, 1, 10, 0)
                 )
-        ).hasMessage("해당 메시지를 찾을 수 없음");
+        ).isInstanceOf(MessageNotFoundException.class);
     }
 
     @Test

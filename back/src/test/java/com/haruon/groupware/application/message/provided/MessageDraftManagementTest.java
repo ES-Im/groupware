@@ -2,6 +2,10 @@ package com.haruon.groupware.application.message.provided;
 
 import com.haruon.groupware.application.TestIntegrationConfig;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
+import com.haruon.groupware.application.exception.common.role.ActiveEmployeeNotFoundException;
+import com.haruon.groupware.application.exception.message.MessageNotFoundException;
+import com.haruon.groupware.application.exception.message.MessageReceiverRequiredException;
 import com.haruon.groupware.application.message.required.MessageRepository;
 import com.haruon.groupware.application.message.service.dto.MessageCreateRequest;
 import com.haruon.groupware.application.message.service.dto.MessageFileRequest;
@@ -116,7 +120,7 @@ record MessageDraftManagementTest(
 
         assertThatThrownBy(() ->
                 messageDraftManagement.saveMessageBeforeSend(null, request)
-        ).hasMessage("사원 정보가 입력되지 않음");
+        ).isInstanceOf(RequiredValueMissingException.class);
     }
 
 
@@ -133,7 +137,7 @@ record MessageDraftManagementTest(
 
         assertThatThrownBy(() ->
                 messageDraftManagement.saveMessageBeforeSend(sender.getId(), request)
-        ).hasMessage("해당 활성화된 사원이 존재하지 않음");
+        ).isInstanceOf(ActiveEmployeeNotFoundException.class);
     }
 
     @Transactional
@@ -192,7 +196,7 @@ record MessageDraftManagementTest(
                         .content("test content")
                         .receiverIds(Set.of(receiver.getId()))
                         .build())
-        ).hasMessage("발송시각이 없음");
+        ).isInstanceOf(RequiredValueMissingException.class);
     }
 
     @Test
@@ -207,7 +211,7 @@ record MessageDraftManagementTest(
                         .receiverIds(Set.of())
                         .sentAt(LocalDateTime.of(2026, 1, 1, 10, 0))
                         .build())
-        ).hasMessage("수신자가 없음");
+        ).isInstanceOf(MessageReceiverRequiredException.class);
     }
 
     @Test
@@ -334,7 +338,7 @@ record MessageDraftManagementTest(
                     draftId,
                     LocalDateTime.of(2026, 1, 1, 10, 0)
             );
-        }).hasMessage("사원 정보가 입력되지 않음");
+        }).isInstanceOf(RequiredValueMissingException.class);
     }
 
     @Test
@@ -363,7 +367,7 @@ record MessageDraftManagementTest(
 
         assertThatThrownBy(() ->
                 messageDraftManagement.deleteDraft(sender.getId(), 999L)
-        ).hasMessage("해당 메시지를 찾을 수 없음");
+        ).isInstanceOf(MessageNotFoundException.class);
     }
 
     @Test
@@ -445,7 +449,7 @@ record MessageDraftManagementTest(
 
         assertThatThrownBy(() ->
                 messageDraftManagement.changeDraft(sender.getId(), 999L, request)
-        ).hasMessage("해당 메시지를 찾을 수 없음");
+        ).isInstanceOf(MessageNotFoundException.class);
     }
 
     @Test
@@ -517,7 +521,7 @@ record MessageDraftManagementTest(
                         null,
                         null
                 ))
-        ).hasMessage("수정할 내용이 없음");
+        ).isInstanceOf(RequiredValueMissingException.class);
     }
 
     @Transactional
@@ -563,7 +567,7 @@ record MessageDraftManagementTest(
                         999L,
                         Set.of(receiver.getId())
                 )
-        ).hasMessage("해당 메시지를 찾을 수 없음");
+        ).isInstanceOf(MessageNotFoundException.class);
     }
 
     @Test
@@ -636,7 +640,7 @@ record MessageDraftManagementTest(
                         draftId,
                         Set.of()
                 )
-        ).hasMessage("사원 정보가 입력되지 않음");
+        ).isInstanceOf(RequiredValueMissingException.class);
     }
 
     @Test
@@ -659,7 +663,7 @@ record MessageDraftManagementTest(
                         draftId,
                         Set.of(999L)
                 )
-        ).hasMessage("해당 활성화된 사원이 존재하지 않음");
+        ).isInstanceOf(ActiveEmployeeNotFoundException.class);
     }
 
     @Test
@@ -740,7 +744,7 @@ record MessageDraftManagementTest(
 
         assertThatThrownBy(() ->
                 messageDraftManagement.addFile(sender.getId(), 999L, fileRequest)
-        ).hasMessage("해당 메시지를 찾을 수 없음");
+        ).isInstanceOf(MessageNotFoundException.class);
     }
 
     @Test

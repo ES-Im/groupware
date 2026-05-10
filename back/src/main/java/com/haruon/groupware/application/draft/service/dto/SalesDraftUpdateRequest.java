@@ -1,12 +1,11 @@
 package com.haruon.groupware.application.draft.service.dto;
 
+import com.haruon.groupware.application.exception.common.PositiveValueRequiredException;
+import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import lombok.Builder;
 import org.jspecify.annotations.Nullable;
 
 import java.time.YearMonth;
-
-import static io.jsonwebtoken.lang.Assert.state;
-import static java.util.Objects.requireNonNull;
 
 @Builder
 public record SalesDraftUpdateRequest(
@@ -24,13 +23,12 @@ public record SalesDraftUpdateRequest(
 
 ) {
         public SalesDraftUpdateRequest {
-                requireNonNull(param, "기안서 기본 정보 필수");
-                state(param.isChangeCommonField() ||
-                        franchiseId != null ||
-                        reportMonth != null ||
-                        salesAmount != null,
-                        "변경내용이 없음");
+                if(param == null || (
+                        franchiseId == null && reportMonth == null && salesAmount == null
+                )) {
+                        throw new RequiredValueMissingException();
+                }
 
-                if(salesAmount != null) state(salesAmount >= 0, "매출총액은 0또는 양수여야 함");
+                if(salesAmount != null && salesAmount < 0) throw new PositiveValueRequiredException();
         }
 }

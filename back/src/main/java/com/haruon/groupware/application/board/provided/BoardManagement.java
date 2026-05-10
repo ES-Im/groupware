@@ -1,8 +1,8 @@
 package com.haruon.groupware.application.board.provided;
 
-import com.haruon.groupware.application.board.service.BoardUpdateRequest;
 import com.haruon.groupware.application.board.service.dto.BoardCreateRequest;
 import com.haruon.groupware.application.board.service.dto.BoardFileRequest;
+import com.haruon.groupware.application.board.service.dto.BoardUpdateRequest;
 
 import java.time.LocalDateTime;
 

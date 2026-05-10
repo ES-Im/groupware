@@ -3,6 +3,11 @@ package com.haruon.groupware.application.franchise.provided;
 import com.haruon.groupware.application.TestIntegrationConfig;
 import com.haruon.groupware.application.empInfo.required.DeptRepository;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.exception.ApplicationException;
+import com.haruon.groupware.application.exception.file.FileSizeLimitExceededException;
+import com.haruon.groupware.application.exception.file.UnsupportedFileExtensionException;
+import com.haruon.groupware.application.exception.file.UnsupportedMimeTypeException;
+import com.haruon.groupware.application.exception.franchise.EducationRegisterMismatchException;
 import com.haruon.groupware.application.franchise.required.EducationRepository;
 import com.haruon.groupware.application.franchise.required.FranchiseRepository;
 import com.haruon.groupware.application.franchise.service.dto.EducationCreateRequest;
@@ -142,7 +147,7 @@ record EducationManagementTest(
                                 .capacity(30L)
                                 .build()
                 )
-        ).hasMessage("교육 등록자와 불일치");
+        ).isInstanceOf(EducationRegisterMismatchException.class);
 
     }
 
@@ -216,7 +221,8 @@ record EducationManagementTest(
                                 .mimeType(mimeType)
                                 .originalFileFullName("originalFile.exe")
                                 .fileSize(fileSize)
-                                .build()
+                                .build(),
+                        UnsupportedFileExtensionException.class
                 ),
                 Arguments.of(
                         "허용되지 않는 MIME 타입",
@@ -224,7 +230,8 @@ record EducationManagementTest(
                                 .mimeType("application/octet-stream")
                                 .originalFileFullName(originalFileFullName)
                                 .fileSize(fileSize)
-                                .build()
+                                .build(),
+                        UnsupportedMimeTypeException.class
                 ),
                 Arguments.of(
                         "파일 크기 제한 초과",
@@ -232,7 +239,8 @@ record EducationManagementTest(
                                 .mimeType(mimeType)
                                 .originalFileFullName(originalFileFullName)
                                 .fileSize(20 * 1024 * 1024L + 1)
-                                .build()
+                                .build(),
+                        FileSizeLimitExceededException.class
                 )
         );
     }
@@ -240,7 +248,7 @@ record EducationManagementTest(
     @ParameterizedTest(name = "{index} ==> {0}")
     @MethodSource("notAllowedFiles")
     @DisplayName("허용치 않는 파일은 첨부할 수 없다")
-    void addEducationFile_when_attach_not_allowed_file_fail(String description, FileDto param) {
+    void addEducationFile_when_attach_not_allowed_file_fail(String description, FileDto param, Class<? extends ApplicationException> expectedException) {
         Emp franchiseEmp = getFranchiseEmp("202601001", "franchise1");
         long education = getEducation(franchiseEmp);
         entityManager.flush();
@@ -253,7 +261,7 @@ record EducationManagementTest(
                                 .file(param)
                                 .build()
                 )
-        ).hasMessage(description);
+        ).isInstanceOf(expectedException);
     }
 
     @Test

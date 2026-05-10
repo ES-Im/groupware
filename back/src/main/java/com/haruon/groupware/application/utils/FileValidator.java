@@ -1,10 +1,13 @@
 package com.haruon.groupware.application.utils;
 
+import com.haruon.groupware.application.exception.common.PositiveValueRequiredException;
+import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
+import com.haruon.groupware.application.exception.file.FileSizeLimitExceededException;
+import com.haruon.groupware.application.exception.file.UnsupportedFileExtensionException;
+import com.haruon.groupware.application.exception.file.UnsupportedMimeTypeException;
+
 import java.util.Locale;
 import java.util.Set;
-
-import static java.util.Objects.requireNonNull;
-import static org.springframework.util.Assert.state;
 
 /**
  * Application DTO 공통 파일 validation
@@ -20,19 +23,15 @@ public final class FileValidator {
             Set<String> allowedMimeTypes,
             long maxFileSize
     ) {
-        requireNonNull(file, "파일 정보 필수");
-        requireNonNull(allowedExtensions, "허용 확장자 정보 필수");
-        requireNonNull(allowedMimeTypes, "허용 MIME 타입 정보 필수");
+        if(file == null || allowedExtensions == null || allowedMimeTypes == null)  throw new RequiredValueMissingException();
 
-        state(file.fileSize() > 0, "파일 크기는 0보다 커야 함");
+        if(file.fileSize() <= 0) throw new PositiveValueRequiredException();
 
-        state(allowedMimeTypes.contains(file.mimeType().toLowerCase(Locale.ROOT)),
-                "허용되지 않는 MIME 타입");
+        if(!allowedMimeTypes.contains(file.mimeType().toLowerCase(Locale.ROOT))) throw new UnsupportedMimeTypeException();
 
-        state(file.fileSize() <= maxFileSize,
-                "파일 크기 제한 초과");
 
-        state(allowedExtensions.contains(file.extension()),
-                "허용되지 않는 파일 확장자");
+        if(file.fileSize() > maxFileSize) throw new FileSizeLimitExceededException();
+
+        if(!allowedExtensions.contains(file.extension())) throw new UnsupportedFileExtensionException();
     }
 }
