@@ -249,7 +249,7 @@ record ScheduleManagementTest(
     }
 
     private long saveMeetingRoom() {
-        Dept dept = saveDept(deptRepository, "202601100", "facility");
+        Dept dept = saveDept(deptRepository, "facility", "001");
 
         Emp emp = saveEmpWithRoleAndDept(
                 empRepository, deptRepository, "202601001", "facility1", dept, SystemRoleCode.FACILITY

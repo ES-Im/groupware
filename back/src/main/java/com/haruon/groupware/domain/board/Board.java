@@ -2,10 +2,11 @@ package com.haruon.groupware.domain.board;
 
 import com.haruon.groupware.domain.AbstractEntity;
 import com.haruon.groupware.domain.empInfo.Emp;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.jspecify.annotations.Nullable;
 
 import java.time.LocalDateTime;
@@ -15,44 +16,32 @@ import java.util.List;
 import static io.jsonwebtoken.lang.Assert.state;
 import static java.util.Objects.requireNonNull;
 
+@Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Getter
+@ToString(callSuper = true, exclude = {"emp", "category", "boardFiles"})
 public class Board extends AbstractEntity {
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "author_id", nullable = false)
     private Emp emp;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
-    @Column(nullable = false)
     private String title;
 
-    @Column(nullable = false)
     private String content;
 
-    @Column(nullable = false)
     private boolean isDraft;
 
-    @Nullable
-    private LocalDateTime publishedAt;
+    @Nullable private LocalDateTime publishedAt;
 
-    @Nullable
-    private LocalDateTime modifiedAt;
+    @Nullable private LocalDateTime modifiedAt;
 
-    @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BoardFile> boardFiles = new ArrayList<>();
 
-    @Column(nullable = false)
     private long viewCount;
 
-    @Column(nullable = false)
     private long likeCount;
 
-    @Column(nullable = false)
     private long commentCount;
 
     public static Board create(

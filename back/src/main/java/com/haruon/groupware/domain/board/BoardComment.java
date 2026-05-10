@@ -2,10 +2,11 @@ package com.haruon.groupware.domain.board;
 
 import com.haruon.groupware.domain.AbstractEntity;
 import com.haruon.groupware.domain.empInfo.Emp;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.jspecify.annotations.Nullable;
 
 import java.time.LocalDateTime;
@@ -16,31 +17,21 @@ import static org.springframework.util.Assert.state;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@ToString(callSuper = true, exclude = {"emp", "board", "parentComment"})
 public class BoardComment extends AbstractEntity {
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "board_id", nullable = false)
     private Board board;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "author_id", nullable = false)
     private Emp emp;
 
-    @Nullable
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parent_comment_id", nullable = true)
-    private BoardComment parentComment;
+    @Nullable private BoardComment parentComment;
 
-    @Column(nullable = false)
     private String content;
 
-    @Column(nullable = false)
     private LocalDateTime registerAt;
 
-    @Nullable
-    private LocalDateTime editedAt;
+    @Nullable private LocalDateTime editedAt;
 
-    @Column(nullable = false)
     private boolean isDeleted;
 
     public static BoardComment createComment(

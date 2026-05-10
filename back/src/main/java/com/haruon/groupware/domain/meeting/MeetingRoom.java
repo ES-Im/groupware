@@ -1,10 +1,7 @@
 package com.haruon.groupware.domain.meeting;
 
 import com.haruon.groupware.domain.AbstractEntity;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.OneToMany;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,19 +18,14 @@ import static org.springframework.util.Assert.state;
 @NoArgsConstructor(access= AccessLevel.PROTECTED)
 public class MeetingRoom extends AbstractEntity {
 
-    @Column(nullable = false, unique = true)
     private String name;
 
-    @Column(nullable = false)
     private int capacity;
 
-    @Column(nullable = false)
     private String description;
 
-    @Column(nullable = false)
     private boolean isAvailable;
 
-    @OneToMany(mappedBy = "meetingRoom", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<MeetingRoomFile> roomFiles = new ArrayList<>();
 
     public static MeetingRoom createMeetingRoom(String name, String description, int capacity) {

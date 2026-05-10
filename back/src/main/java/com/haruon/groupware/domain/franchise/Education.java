@@ -2,9 +2,11 @@ package com.haruon.groupware.domain.franchise;
 
 import com.haruon.groupware.domain.AbstractEntity;
 import com.haruon.groupware.domain.empInfo.Emp;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.jspecify.annotations.Nullable;
 
 import java.time.LocalDateTime;
@@ -16,35 +18,26 @@ import static java.util.Objects.requireNonNull;
 
 @Entity
 @Getter
-@NoArgsConstructor( access = lombok.AccessLevel.PROTECTED)
+@NoArgsConstructor( access = AccessLevel.PROTECTED)
+@ToString(callSuper = true, exclude = {"emp", "educationFiles", "educationApplications"})
 public class Education extends AbstractEntity {
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "register_id", nullable = false)
     private Emp emp;
 
-    @Column(nullable = false)
     private LocalDateTime educationDate;
 
-    @Column(nullable = false)
     private String place;
 
-    @Column(nullable = false)
     private String title;
 
-    @Column(nullable = false)
     private String content;
 
-    @Column(nullable = false)
     private long capacity;
 
-    @Column(nullable = false)
     private boolean isActive;
 
-    @OneToMany(mappedBy = "education", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<EducationFile> educationFiles = new ArrayList<>();
 
-    @OneToMany(mappedBy = "education", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<EducationApplication> educationApplications = new ArrayList<>();
 
     public static Education create(

@@ -1,6 +1,8 @@
 package com.haruon.groupware.domain;
 
-import jakarta.persistence.*;
+import jakarta.persistence.EntityListeners;
+import jakarta.persistence.Id;
+import jakarta.persistence.MappedSuperclass;
 import lombok.Getter;
 import org.hibernate.proxy.HibernateProxy;
 import org.jspecify.annotations.NullMarked;
@@ -18,11 +20,9 @@ import java.util.Objects;
 public abstract class AbstractEntity {
     @Id
     @Getter(onMethod_ = {@NullMarked})
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @CreatedDate
-    @Column(nullable = false, updatable = false)
     private Instant createdAt;
 
     @LastModifiedDate

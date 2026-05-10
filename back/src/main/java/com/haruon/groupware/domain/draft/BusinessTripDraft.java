@@ -3,10 +3,11 @@ package com.haruon.groupware.domain.draft;
 import com.haruon.groupware.domain.draft.sub.ApproversParam;
 import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.event.byBusinessTripApprove.BusinessTripApprovedEvent;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.jspecify.annotations.Nullable;
 
 import java.time.LocalDateTime;
@@ -21,24 +22,20 @@ import static org.springframework.util.Assert.state;
 
 @Entity
 @Getter
-@DiscriminatorValue("BUSINESS_TRIP")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@ToString(callSuper = true, exclude = "participants")
 public class BusinessTripDraft extends Draft {
 
-    @Column(nullable = false)
     private LocalDateTime startAt;
 
-    @Column(nullable = false)
     private LocalDateTime endAt;
 
-    @Column(nullable = false)
     private String destination;
 
-    @Column(nullable = false)
     private String purpose;
 
-    @OneToMany(mappedBy = "businessTripDraft", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BusinessTripParticipant> participants = new ArrayList<>();
+
 
     private BusinessTripDraft(String title, String content, Emp emp) {
         super(title, content, emp);

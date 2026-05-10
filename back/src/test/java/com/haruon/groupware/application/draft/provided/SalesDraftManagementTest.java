@@ -58,6 +58,8 @@ record SalesDraftManagementTest(
         Franchise franchise = getFranchise();
 
         YearMonth reportMonth = YearMonth.of(2026, 4);
+        log.info("=====================reportMonth: {}", reportMonth);
+
         long salesAmount = 10000L;
         salesDraftManagement.createDraft(
                 SalesDraftCreateRequest.builder()

@@ -2,9 +2,10 @@ package com.haruon.groupware.domain.chat;
 
 import com.haruon.groupware.domain.AbstractEntity;
 import com.haruon.groupware.domain.empInfo.Emp;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.jspecify.annotations.Nullable;
 
 import java.time.LocalDateTime;
@@ -18,22 +19,17 @@ import static org.springframework.util.Assert.state;
 @Getter
 @Entity
 @NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
+@ToString(callSuper = true, exclude = "members")
 public class ChatRoom extends AbstractEntity {
 
-    @Column(nullable = false)
     private Boolean isGroup;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "room_owner_id", nullable = false)
     private Emp emp;
 
-    @Nullable
-    private LocalDateTime lastMessageAt;
+    @Nullable private LocalDateTime lastMessageAt;
 
-    @Nullable
-    private LocalDateTime closedAt;
+    @Nullable private LocalDateTime closedAt;
 
-    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL)
     private List<ChatMember> members = new ArrayList<>();
 
 

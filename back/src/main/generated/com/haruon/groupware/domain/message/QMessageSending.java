@@ -30,6 +30,8 @@ public class QMessageSending extends EntityPathBase<MessageSending> {
     //inherited
     public final DateTimePath<java.time.Instant> createdAt = _super.createdAt;
 
+    public final BooleanPath deleted = createBoolean("deleted");
+
     public final DateTimePath<java.time.LocalDateTime> deletedAt = createDateTime("deletedAt", java.time.LocalDateTime.class);
 
     public final com.haruon.groupware.domain.empInfo.QEmp emp;
@@ -38,6 +40,8 @@ public class QMessageSending extends EntityPathBase<MessageSending> {
     public final NumberPath<Long> id = _super.id;
 
     public final QMessage message;
+
+    public final BooleanPath trashed = createBoolean("trashed");
 
     public final DateTimePath<java.time.LocalDateTime> trashedAt = createDateTime("trashedAt", java.time.LocalDateTime.class);
 

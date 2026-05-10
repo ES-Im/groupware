@@ -3,10 +3,9 @@ package com.haruon.groupware.domain.message;
 import com.haruon.groupware.domain.AbstractEntity;
 import com.haruon.groupware.domain.empInfo.Emp;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.jspecify.annotations.Nullable;
 
 import java.time.LocalDateTime;
@@ -16,21 +15,16 @@ import static org.springframework.util.Assert.state;
 
 @Getter
 @Entity
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class MessageSending extends AbstractEntity {
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "message_id", nullable = false, updatable=false)
     private Message message;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "sender_id", nullable = false, updatable=false)
     private Emp emp;
 
-    @Nullable
-    private LocalDateTime deletedAt;
+    @Nullable private LocalDateTime deletedAt;
 
-    @Nullable
-    private LocalDateTime trashedAt;
+    @Nullable private LocalDateTime trashedAt;
 
     static MessageSending create(Message message, Emp emp) {
         MessageSending sending = new MessageSending();

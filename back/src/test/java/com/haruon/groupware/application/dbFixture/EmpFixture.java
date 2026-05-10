@@ -36,7 +36,7 @@ public class EmpFixture {
      */
     public static Emp saveRegisteredEmp(EmpRepository empRepository) {
         System.out.println("===== 테스트 준비 register Emp 시작 =====");
-        Emp emp = getRegisteredEmp("202601001", "registeredEmp1");
+        Emp emp = getRegisteredEmp("202601011", "registeredEmp1");
 
         return empRepository.save(emp);
     }
@@ -47,7 +47,7 @@ public class EmpFixture {
      */
     public static Emp saveApprovedEmp(EmpRepository empRepository) {
         System.out.println("===== 테스트 준비 approve Emp 시작 =====");
-        Emp emp = getApprovedEmpWithoutDept("202601002", "approvedEmp2");
+        Emp emp = getApprovedEmpWithoutDept("202601001", "approvedEmp2");
 
         return empRepository.save(emp);
     }

@@ -46,6 +46,8 @@ public class QEmp extends EntityPathBase<Emp> {
 
     public final DatePath<java.time.LocalDate> hiredAt = createDate("hiredAt", java.time.LocalDate.class);
 
+    public final BooleanPath HR = createBoolean("HR");
+
     //inherited
     public final NumberPath<Long> id = _super.id;
 

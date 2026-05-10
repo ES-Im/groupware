@@ -32,8 +32,6 @@ public class QCirculation extends EntityPathBase<Circulation> {
 
     public final QDraft draft;
 
-    public final com.haruon.groupware.domain.empInfo.QEmp emp;
-
     //inherited
     public final NumberPath<Long> id = _super.id;
 
@@ -41,6 +39,8 @@ public class QCirculation extends EntityPathBase<Circulation> {
 
     //inherited
     public final DateTimePath<java.time.Instant> updatedAt = _super.updatedAt;
+
+    public final com.haruon.groupware.domain.empInfo.QEmp viewer;
 
     public QCirculation(String variable) {
         this(Circulation.class, forVariable(variable), INITS);
@@ -61,7 +61,7 @@ public class QCirculation extends EntityPathBase<Circulation> {
     public QCirculation(Class<? extends Circulation> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.draft = inits.isInitialized("draft") ? new QDraft(forProperty("draft"), inits.get("draft")) : null;
-        this.emp = inits.isInitialized("emp") ? new com.haruon.groupware.domain.empInfo.QEmp(forProperty("emp"), inits.get("emp")) : null;
+        this.viewer = inits.isInitialized("viewer") ? new com.haruon.groupware.domain.empInfo.QEmp(forProperty("viewer"), inits.get("viewer")) : null;
     }
 
 }

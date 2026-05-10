@@ -11,7 +11,7 @@ import com.haruon.groupware.domain.franchise.Franchise;
 
 import static com.haruon.groupware.application.utils.AuthorizationChecker.checkFranchiseRoleEmp;
 import static com.haruon.groupware.application.utils.AuthorizationChecker.findActiveEmpById;
-//todo - 커스텀 예외처리 필요
+
 public class FranchiseUtils {
 
     static Emp getFranchiseRoleAssignedEmp(EmpRepository empRepository, long empID) {

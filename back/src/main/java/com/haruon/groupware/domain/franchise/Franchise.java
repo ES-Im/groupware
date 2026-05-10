@@ -5,10 +5,11 @@ import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.empInfo.enums.EmpStatus;
 import com.haruon.groupware.domain.empInfo.enums.SystemRoleCode;
 import com.haruon.groupware.domain.shared.Email;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.jspecify.annotations.Nullable;
 
 import static java.util.Objects.requireNonNull;
@@ -17,37 +18,25 @@ import static org.springframework.util.Assert.state;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@ToString(callSuper = true, exclude = {"emp"})
 public class Franchise extends AbstractEntity {
 
-    @Column(nullable = false)
     private String businessNumber;
 
-    @Column(nullable = false)
     private String franchiseName;
 
-    @Column(nullable = false)
     private String address;
 
-    @Column(nullable = false)
     private String ownerName;
 
-    @Column(nullable = false)
     private String contactNumber;
 
-    @Embedded
-    @AttributeOverride(name="email", column = @Column(name = "contact_email", nullable = false, unique = true))
     private Email contactEmail;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private BusinessStatus businessStatus;
 
-    @Nullable
     private String memo;
 
-    @Nullable
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "manager_id")
     private Emp emp;
 
 

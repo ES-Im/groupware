@@ -2,7 +2,7 @@ package com.haruon.groupware.domain.schedule;
 
 import com.haruon.groupware.domain.AbstractEntity;
 import com.haruon.groupware.domain.empInfo.Emp;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,18 +12,10 @@ import static java.util.Objects.requireNonNull;
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(
-        uniqueConstraints = @UniqueConstraint(
-                columnNames = {"schedule_id", "participant_id"})
-)
 public class ScheduleParticipant extends AbstractEntity {
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="schedule_id", nullable=false)
     private Schedule schedule;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "participant_id", nullable = false)
     private Emp emp;
 
     static ScheduleParticipant registerScheduleParticipant(Schedule schedule, Emp emp) {

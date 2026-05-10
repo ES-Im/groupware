@@ -46,7 +46,6 @@ record CommonDraftTest(
         draftRepository.deleteAll();
         empRepository.deleteAll();
         deptRepository.deleteAll();
-
     }
 
     @Test
@@ -140,7 +139,7 @@ record CommonDraftTest(
 
         List<Emp> list = draft.getApproval()
                 .getApprovers().stream()
-                .map(Approver::getEmp)
+                .map(Approver::getApprover)
                 .toList();
         assertThat(list.size()).isEqualTo(2);
         assertThat(list).containsExactlyInAnyOrder(approverEmp1, approverEmp2);
@@ -171,7 +170,7 @@ record CommonDraftTest(
 
         List<Emp> list = draft.getApproval()
                 .getApprovers().stream()
-                .map(Approver::getEmp)
+                .map(Approver::getApprover)
                 .toList();
         assertThat(list.size()).isEqualTo(2);
         assertThat(list).containsExactlyInAnyOrder(approverEmp1, approverEmp2);
@@ -254,7 +253,7 @@ record CommonDraftTest(
                 .findFirst().orElseThrow();
 
         generalDraftManagement.approve(
-                draft.getId(), firstApprover.getEmp().getId(), LocalDateTime.of(2026, 1, 1, 0, 0, 5)
+                draft.getId(), firstApprover.getApprover().getId(), LocalDateTime.of(2026, 1, 1, 0, 0, 5)
         );
 
         assertThat(draft.getApproval().getStatus()).isEqualTo(ApprovalStatus.IN_PROGRESS);
@@ -282,7 +281,7 @@ record CommonDraftTest(
 
         assertThatThrownBy(() ->
                 generalDraftManagement.approve(
-                        draft.getId(), secondApprover.getEmp().getId(), LocalDateTime.of(2026, 1, 1, 0, 0, 5)
+                        draft.getId(), secondApprover.getApprover().getId(), LocalDateTime.of(2026, 1, 1, 0, 0, 5)
                 )
         ).isInstanceOf(IllegalStateException.class);
     }
@@ -302,7 +301,7 @@ record CommonDraftTest(
                 .findFirst().orElseThrow();
 
         generalDraftManagement.reject(
-                draft.getId(), firstApprover.getEmp().getId(), "test", LocalDateTime.of(2026, 1, 1, 0, 0, 5)
+                draft.getId(), firstApprover.getApprover().getId(), "test", LocalDateTime.of(2026, 1, 1, 0, 0, 5)
         );
 
         assertThat(draft.getApproval().getStatus()).isEqualTo(ApprovalStatus.REJECTED);
@@ -326,7 +325,7 @@ record CommonDraftTest(
 
         assertThatThrownBy(() ->
                 generalDraftManagement.reject(
-                        draft.getId(), secondApprover.getEmp().getId(), "test", LocalDateTime.of(2026, 1, 1, 0, 0, 5)
+                        draft.getId(), secondApprover.getApprover().getId(), "test", LocalDateTime.of(2026, 1, 1, 0, 0, 5)
                 )
         ).isInstanceOf(IllegalStateException.class);
     }
@@ -539,7 +538,7 @@ record CommonDraftTest(
 
 
     private Draft getSubmitted(Emp drafter) {
-        Emp approverEmp1 = saveApprovedEmp(empRepository, "202601002", "approver1");
+        Emp approverEmp1 = saveApprovedEmp(empRepository, "202601009", "approver1");
         Emp approverEmp2 = saveApprovedEmp(empRepository, "202601003", "approver2");
         LocalDateTime submittedAt = LocalDateTime.of(2026, 1, 1, 0, 0, 0);
         String title = "test";

@@ -27,10 +27,14 @@ public class QApproval extends EntityPathBase<Approval> {
 
     public final com.haruon.groupware.domain.QAbstractEntity _super = new com.haruon.groupware.domain.QAbstractEntity(this);
 
+    public final BooleanPath approved = createBoolean("approved");
+
     public final ListPath<Approver, QApprover> approvers = this.<Approver, QApprover>createList("approvers", Approver.class, QApprover.class, PathInits.DIRECT2);
 
     //inherited
     public final DateTimePath<java.time.Instant> createdAt = _super.createdAt;
+
+    public final QApprover currentPendingMember;
 
     public final QDraft draft;
 
@@ -60,6 +64,7 @@ public class QApproval extends EntityPathBase<Approval> {
 
     public QApproval(Class<? extends Approval> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
+        this.currentPendingMember = inits.isInitialized("currentPendingMember") ? new QApprover(forProperty("currentPendingMember"), inits.get("currentPendingMember")) : null;
         this.draft = inits.isInitialized("draft") ? new QDraft(forProperty("draft"), inits.get("draft")) : null;
     }
 

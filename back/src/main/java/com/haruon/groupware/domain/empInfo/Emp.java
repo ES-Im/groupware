@@ -6,10 +6,11 @@ import com.haruon.groupware.domain.empInfo.enums.FileType;
 import com.haruon.groupware.domain.empInfo.enums.PositionCode;
 import com.haruon.groupware.domain.empInfo.enums.SystemRoleCode;
 import com.haruon.groupware.domain.shared.Email;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.jspecify.annotations.Nullable;
 
 import java.time.LocalDate;
@@ -23,49 +24,32 @@ import static org.springframework.util.Assert.state;
 
 @Entity
 @Getter
+@ToString(callSuper = true, exclude = {"empFiles", "empBelongings", "systemRoles", "empPassword"})
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"emp_no", "targetEmpId"})})
 public class Emp extends AbstractEntity {
 
-    @Column(nullable = false)
     private String empNo;
 
-    @Column(nullable = false)
     private String empName;
 
-    @Column(nullable = false)
     private String loginId;
 
-    @Column(nullable = false)
     private String empPassword;
 
-    @Embedded
-    @AttributeOverride(name="email", column = @Column(name = "company_email", nullable = false, unique = true))
     private Email email;
 
-    @Nullable
-    private String extensionNo;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private EmpStatus status;
 
-    @ElementCollection(targetClass = SystemRoleCode.class)
-    @JoinTable(name = "system_roles", joinColumns = @JoinColumn(name = "emp_id"))
-    @Column(name="role", nullable = false)
-    @Enumerated(EnumType.STRING)
+    @Nullable private String extensionNo;
+
+    @Nullable private LocalDate hiredAt;
+
+    @Nullable private LocalDate resignedAt;
+
     private Set<SystemRoleCode> systemRoles = new HashSet<>();
 
-    @Nullable
-    private LocalDate hiredAt;
-
-    @Nullable
-    private LocalDate resignedAt;
-
-    @OneToMany(mappedBy = "emp", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<EmpFile> empFiles = new ArrayList<>();
 
-    @OneToMany(mappedBy = "emp", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<EmpBelongings> empBelongings = new ArrayList<>();
 
     public static Emp register(
@@ -330,7 +314,7 @@ public class Emp extends AbstractEntity {
 
     private void deactivateFilesByType(FileType targetType) {
         this.empFiles.stream()
-                .filter(EmpFile::getIsActive)
+                .filter(EmpFile::isActive)
                 .filter(file -> file.getFileType() == targetType)
                 .forEach(EmpFile::deactivateFile);
     }

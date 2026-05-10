@@ -74,9 +74,7 @@ record BusinessTripDraftManagementTest(
 
         assertNotNull(draft.getSourceKey());
 
-        (foundDraft).getParticipants().forEach(participant -> {
-            assertThat(participant.getEmp()).isIn(participants);
-        });
+        (foundDraft).getParticipants().forEach(participant -> assertThat(participant.getEmp()).isIn(participants));
     }
     
     @Test
@@ -110,11 +108,9 @@ record BusinessTripDraftManagementTest(
         assertNotNull(draft.getSourceKey());
         assertNotNull(draft.getApproval());
         assertNotNull(draft.getSubmittedAt());
-        assertThat(approver).isIn(draft.getApproval().getApprovers().stream().map(Approver::getEmp).toList());
+        assertThat(approver).isIn(draft.getApproval().getApprovers().stream().map(Approver::getApprover).toList());
 
-        (foundDraft).getParticipants().forEach(participant -> {
-            assertThat(participant.getEmp()).isIn(participants);
-        });
+        (foundDraft).getParticipants().forEach(participant -> assertThat(participant.getEmp()).isIn(participants));
     }
 
     @Test

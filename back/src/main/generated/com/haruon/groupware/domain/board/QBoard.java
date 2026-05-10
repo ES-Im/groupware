@@ -38,6 +38,8 @@ public class QBoard extends EntityPathBase<Board> {
     //inherited
     public final DateTimePath<java.time.Instant> createdAt = _super.createdAt;
 
+    public final BooleanPath draft = createBoolean("draft");
+
     public final com.haruon.groupware.domain.empInfo.QEmp emp;
 
     //inherited

@@ -5,14 +5,13 @@ import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.util.ReflectionUtils;
 
 import java.time.LocalDateTime;
 
 import static com.haruon.groupware.domain.shared.EmpFixture.getApprovedEmp;
-import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 class BoardTest {
 

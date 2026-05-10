@@ -1,0 +1,1020 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings xmlns="https://jakarta.ee/xml/ns/persistence/orm"
+                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                 xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence/orm https://jakarta.ee/xml/ns/persistence/orm/orm_3_1.xsd"
+                 version="3.1">
+    <description>
+        Domain entity mapping overrides. Java entity mappings are authoritative; string lengths are supplemented from docs/도메인모델.md where the entity class does not provide a stricter value.
+    </description>
+    <package>com.haruon.groupware.domain</package>
+    <access>FIELD</access>
+
+    <mapped-superclass class="com.haruon.groupware.domain.AbstractEntity" access="FIELD">
+        <entity-listeners>
+            <entity-listener class="org.springframework.data.jpa.domain.support.AuditingEntityListener"/>
+        </entity-listeners>
+        <attributes>
+            <id name="id">
+                <generated-value strategy="IDENTITY"/>
+            </id>
+            <basic name="createdAt">
+                <column name="created_at" nullable="false" updatable="false"/>
+            </basic>
+            <basic name="updatedAt">
+                <column name="updated_at"/>
+            </basic>
+        </attributes>
+    </mapped-superclass>
+
+    <mapped-superclass class="com.haruon.groupware.domain.AbstractFileEntity" access="FIELD">
+        <attributes>
+            <basic name="originalName">
+                <column name="original_name" nullable="false" length="200"/>
+            </basic>
+            <basic name="storedName">
+                <column name="stored_name" nullable="false" unique="true" length="200"/>
+            </basic>
+            <basic name="mimeType">
+                <column name="mime_type" nullable="false" length="100"/>
+            </basic>
+            <basic name="extension">
+                <column name="extension" nullable="false" length="20"/>
+            </basic>
+            <basic name="fileSize">
+                <column name="file_size" nullable="false"/>
+            </basic>
+        </attributes>
+    </mapped-superclass>
+
+
+<!-- ============================================= EMP - EMP INFO ============================================= -->
+    <entity class="com.haruon.groupware.domain.empInfo.Dept" access="FIELD">
+        <attributes>
+            <basic name="deptCode">
+                <column name="dept_code" nullable="false" unique="true" length="3"/>
+            </basic>
+            <basic name="deptName">
+                <column name="dept_name" nullable="false" length="20"/>
+            </basic>
+            <basic name="isActive">
+                <column name="is_active" nullable="false"/>
+            </basic>
+        </attributes>
+    </entity>
+
+    <entity class="com.haruon.groupware.domain.empInfo.Emp" access="FIELD">
+        <table/>
+        <attributes>
+            <basic name="empNo">
+                <column name="emp_no" nullable="false" unique="true" length="9"/>
+            </basic>
+            <basic name="empName">
+                <column name="emp_name" nullable="false" length="20"/>
+            </basic>
+            <basic name="loginId">
+                <column name="login_id" nullable="false" unique="true" length="20"/>
+            </basic>
+            <basic name="empPassword">
+                <column name="emp_password" nullable="false" length="100"/>
+            </basic>
+            <basic name="extensionNo">
+                <column name="extension_no" length="8"/>
+            </basic>
+            <basic name="status">
+                <column name="status" nullable="false" length="20"/>
+                <enumerated>STRING</enumerated>
+            </basic>
+            <basic name="hiredAt">
+                <column name="hired_at"/>
+            </basic>
+            <basic name="resignedAt">
+                <column name="resigned_at"/>
+            </basic>
+            <one-to-many name="empFiles" mapped-by="emp" orphan-removal="true">
+                <cascade>
+                    <cascade-all/>
+                </cascade>
+            </one-to-many>
+            <one-to-many name="empBelongings" mapped-by="emp" orphan-removal="true">
+                <cascade>
+                    <cascade-all/>
+                </cascade>
+            </one-to-many>
+            <element-collection name="systemRoles" target-class="com.haruon.groupware.domain.empInfo.enums.SystemRoleCode">
+                <column name="role" nullable="false" length="20"/>
+                <enumerated>STRING</enumerated>
+                <collection-table name="system_roles">
+                    <join-column name="emp_id"/>
+                </collection-table>
+            </element-collection>
+            <embedded name="email">
+                <attribute-override name="email">
+                    <column name="company_email" nullable="false" unique="true" length="150"/>
+                </attribute-override>
+            </embedded>
+        </attributes>
+    </entity>
+
+    <entity class="com.haruon.groupware.domain.empInfo.EmpFile" access="FIELD">
+        <attributes>
+            <basic name="fileType">
+                <column name="file_type" nullable="false" length="20"/>
+                <enumerated>STRING</enumerated>
+            </basic>
+            <basic name="isActive">
+                <column name="is_active" nullable="false"/>
+            </basic>
+            <many-to-one name="emp" fetch="LAZY">
+                <join-column name="emp_id" nullable="false"/>
+            </many-to-one>
+        </attributes>
+    </entity>
+
+    <entity class="com.haruon.groupware.domain.empInfo.EmpBelongings" access="FIELD">
+        <table>
+            <unique-constraint>
+                <column-name>emp_id</column-name>
+                <column-name>dept_id</column-name>
+                <column-name>start_at</column-name>
+            </unique-constraint>
+        </table>
+        <attributes>
+            <basic name="position">
+                <column name="position" nullable="false" length="20"/>
+                <enumerated>STRING</enumerated>
+            </basic>
+            <basic name="isPrimary">
+                <column name="is_primary" nullable="false"/>
+            </basic>
+            <basic name="startAt">
+                <column name="start_at" nullable="false"/>
+            </basic>
+            <basic name="endAt">
+                <column name="end_at"/>
+            </basic>
+            <many-to-one name="emp" fetch="LAZY">
+                <join-column name="emp_id" nullable="false"/>
+            </many-to-one>
+            <many-to-one name="dept" fetch="LAZY">
+                <join-column name="dept_id" nullable="false"/>
+            </many-to-one>
+        </attributes>
+    </entity>
+
+    <entity class="com.haruon.groupware.domain.empInfo.Attendance" access="FIELD">
+        <attributes>
+            <basic name="attendanceStatus">
+                <column name="attendance_status" length="20"/>
+                <enumerated>STRING</enumerated>
+            </basic>
+            <basic name="attendanceDate">
+                <column name="attendance_date" nullable="false"/>
+            </basic>
+            <basic name="startAt">
+                <column name="start_at"/>
+            </basic>
+            <basic name="endAt">
+                <column name="end_at"/>
+            </basic>
+            <basic name="approvedAt">
+                <column name="approved_at"/>
+            </basic>
+            <basic name="editedAt">
+                <column name="edited_at"/>
+            </basic>
+            <basic name="editReason">
+                <column name="edit_reason" length="100"/>
+            </basic>
+            <many-to-one name="emp">
+                <join-column name="emp_id" nullable="false"/>
+            </many-to-one>
+            <many-to-one name="approvedBy">
+                <join-column name="approved_emp_id"/>
+            </many-to-one>
+            <many-to-one name="editedBy">
+                <join-column name="edited_emp_id"/>
+            </many-to-one>
+        </attributes>
+    </entity>
+
+    <entity class="com.haruon.groupware.domain.empInfo.EmpLeave" access="FIELD">
+        <table>
+            <unique-constraint>
+                <column-name>emp_id</column-name>
+                <column-name>grant_year</column-name>
+            </unique-constraint>
+        </table>
+        <attributes>
+            <basic name="grantYear">
+                <column name="grant_year" nullable="false"/>
+            </basic>
+            <basic name="annualBaseGrantDays">
+                <column name="annual_base_grant_days" nullable="false"/>
+            </basic>
+            <basic name="annualUsedDays">
+                <column name="annual_used_days" nullable="false"/>
+            </basic>
+            <basic name="specialGrantDays">
+                <column name="special_grant_days" nullable="false"/>
+            </basic>
+            <basic name="specialUsedDays">
+                <column name="special_used_days" nullable="false"/>
+            </basic>
+            <basic name="compensatoryGrantDays">
+                <column name="compensatory_grant_days" nullable="false"/>
+            </basic>
+            <basic name="compensatoryUsedDays">
+                <column name="compensatory_used_days" nullable="false"/>
+            </basic>
+            <many-to-one name="emp" fetch="LAZY">
+                <join-column name="emp_id" nullable="false"/>
+            </many-to-one>
+        </attributes>
+    </entity>
+
+<!-- ============================================= Schedule ============================================= -->
+
+    <entity class="com.haruon.groupware.domain.schedule.Schedule" access="FIELD">
+        <table>
+            <unique-constraint>
+                <column-name>schedule_type</column-name>
+                <column-name>source_key</column-name>
+                <column-name>owner_emp_id</column-name>
+                <column-name>schedule_date</column-name>
+            </unique-constraint>
+        </table>
+        <attributes>
+            <basic name="sourceKey">
+                <column name="source_key" nullable="false" updatable="false" length="36"/>
+            </basic>
+            <basic name="scheduleType">
+                <column name="schedule_type" nullable="false" length="20"/>
+                <enumerated>STRING</enumerated>
+            </basic>
+            <basic name="title">
+                <column name="title" nullable="false" length="100"/>
+            </basic>
+            <basic name="content">
+                <column name="content" nullable="false" length="65535"/>
+            </basic>
+            <basic name="scheduleDate">
+                <column name="schedule_date" nullable="false"/>
+            </basic>
+            <basic name="startAt">
+                <column name="start_at" nullable="false"/>
+            </basic>
+            <basic name="endAt">
+                <column name="end_at" nullable="false"/>
+            </basic>
+            <basic name="isAllDay">
+                <column name="is_all_day" nullable="false"/>
+            </basic>
+            <basic name="isCanceled">
+                <column name="is_canceled" nullable="false"/>
+            </basic>
+            <many-to-one name="emp">
+                <join-column name="owner_emp_id" nullable="false"/>
+            </many-to-one>
+            <one-to-many name="scheduleParticipants" mapped-by="schedule" orphan-removal="true">
+                <cascade>
+                    <cascade-all/>
+                </cascade>
+            </one-to-many>
+        </attributes>
+    </entity>
+
+    <entity class="com.haruon.groupware.domain.schedule.ScheduleParticipant" access="FIELD">
+        <table>
+            <unique-constraint>
+                <column-name>schedule_id</column-name>
+                <column-name>participant_id</column-name>
+            </unique-constraint>
+        </table>
+        <attributes>
+            <many-to-one name="schedule" fetch="LAZY">
+                <join-column name="schedule_id" nullable="false"/>
+            </many-to-one>
+            <many-to-one name="emp" fetch="LAZY">
+                <join-column name="participant_id" nullable="false"/>
+            </many-to-one>
+        </attributes>
+    </entity>
+
+<!-- ============================================= DRAFT ============================================= -->
+
+    <entity class="com.haruon.groupware.domain.draft.Draft" access="FIELD">
+        <inheritance strategy="JOINED"/>
+        <discriminator-column name="draft_type"/>
+        <attributes>
+            <basic name="sourceKey">
+                <column name="source_key" nullable="false" unique="true" updatable="false" length="36"/>
+            </basic>
+            <basic name="title">
+                <column name="title" nullable="false" length="100"/>
+            </basic>
+            <basic name="content">
+                <column name="content" nullable="false" length="65535"/>
+            </basic>
+            <basic name="submittedAt">
+                <column name="submitted_at"/>
+            </basic>
+            <many-to-one name="emp" fetch="LAZY">
+                <join-column name="drafter_id" nullable="false"/>
+            </many-to-one>
+            <one-to-many name="draftFiles" mapped-by="draft" orphan-removal="true">
+                <cascade>
+                    <cascade-all/>
+                </cascade>
+            </one-to-many>
+            <one-to-many name="circulations" mapped-by="draft" orphan-removal="true">
+                <cascade>
+                    <cascade-all/>
+                </cascade>
+            </one-to-many>
+            <one-to-one name="approval" mapped-by="draft" orphan-removal="true">
+                <cascade>
+                    <cascade-all/>
+                </cascade>
+            </one-to-one>
+        </attributes>
+    </entity>
+
+    <entity class="com.haruon.groupware.domain.draft.GeneralDraft" access="FIELD">
+        <discriminator-value>GENERAL</discriminator-value>
+    </entity>
+
+    <entity class="com.haruon.groupware.domain.draft.LeaveDraft" access="FIELD">
+        <discriminator-value>LEAVE</discriminator-value>
+        <attributes>
+            <basic name="startAt">
+                <column name="start_at" nullable="false"/>
+            </basic>
+            <basic name="endAt">
+                <column name="end_at" nullable="false"/>
+            </basic>
+            <basic name="leaveType">
+                <column name="leave_type" nullable="false" length="20"/>
+                <enumerated>STRING</enumerated>
+            </basic>
+            <basic name="reservedHours">
+                <column name="reserved_hours" nullable="false"/>
+            </basic>
+        </attributes>
+    </entity>
+
+    <entity class="com.haruon.groupware.domain.draft.SalesDraft" access="FIELD">
+        <discriminator-value>SALES</discriminator-value>
+        <attributes>
+            <basic name="reportMonth">
+                <column name="report_month" nullable="false" length="7"/>
+            </basic>
+            <basic name="salesAmount">
+                <column name="sales_amount" nullable="false"/>
+            </basic>
+            <many-to-one name="franchise" fetch="LAZY">
+                <join-column name="franchise_id" nullable="false"/>
+            </many-to-one>
+        </attributes>
+    </entity>
+
+    <entity class="com.haruon.groupware.domain.draft.BusinessTripDraft" access="FIELD">
+        <discriminator-value>BUSINESS_TRIP</discriminator-value>
+        <attributes>
+            <basic name="startAt">
+                <column name="start_at" nullable="false"/>
+            </basic>
+            <basic name="endAt">
+                <column name="end_at" nullable="false"/>
+            </basic>
+            <basic name="destination">
+                <column name="destination" nullable="false" length="200"/>
+            </basic>
+            <basic name="purpose">
+                <column name="purpose" nullable="false" length="200"/>
+            </basic>
+            <one-to-many name="participants" mapped-by="businessTripDraft" orphan-removal="true">
+                <cascade>
+                    <cascade-all/>
+                </cascade>
+            </one-to-many>
+        </attributes>
+    </entity>
+
+    <entity class="com.haruon.groupware.domain.draft.BusinessTripParticipant" access="FIELD">
+        <table>
+            <unique-constraint>
+                <column-name>business_trip_draft_id</column-name>
+                <column-name>emp_id</column-name>
+            </unique-constraint>
+        </table>
+        <attributes>
+            <many-to-one name="businessTripDraft" fetch="LAZY">
+                <join-column name="business_trip_draft_id" nullable="false"/>
+            </many-to-one>
+            <many-to-one name="emp" fetch="LAZY">
+                <join-column name="emp_id" nullable="false"/>
+            </many-to-one>
+        </attributes>
+    </entity>
+
+    <entity class="com.haruon.groupware.domain.draft.LeaveCancelDraft" access="FIELD">
+        <discriminator-value>LEAVE_CANCEL</discriminator-value>
+    </entity>
+
+    <entity class="com.haruon.groupware.domain.draft.BusinessTripCancelDraft" access="FIELD">
+        <discriminator-value>BUSINESS_TRIP_CANCEL</discriminator-value>
+    </entity>
+
+    <entity class="com.haruon.groupware.domain.draft.DraftFile" access="FIELD">
+        <attributes>
+            <many-to-one name="draft" fetch="LAZY">
+                <join-column name="draft_id" nullable="false"/>
+            </many-to-one>
+        </attributes>
+    </entity>
+
+    <entity class="com.haruon.groupware.domain.draft.Approval" access="FIELD">
+        <attributes>
+            <basic name="status">
+                <column name="status" nullable="false" length="20"/>
+                <enumerated>STRING</enumerated>
+            </basic>
+            <one-to-many name="approvers" mapped-by="approval" orphan-removal="true">
+                <cascade>
+                    <cascade-all/>
+                </cascade>
+            </one-to-many>
+            <one-to-one name="draft" fetch="LAZY">
+                <join-column name="draft_id" nullable="false" unique="true"/>
+            </one-to-one>
+        </attributes>
+    </entity>
+
+    <entity class="com.haruon.groupware.domain.draft.Approver" access="FIELD">
+        <table>
+            <unique-constraint>
+                <column-name>approval_id</column-name>
+                <column-name>approver_id</column-name>
+            </unique-constraint>
+            <unique-constraint>
+                <column-name>approval_id</column-name>
+                <column-name>approval_order</column-name>
+            </unique-constraint>
+        </table>
+        <attributes>
+            <basic name="role">
+                <column name="role" nullable="false" length="10"/>
+                <enumerated>STRING</enumerated>
+            </basic>
+            <basic name="order">
+                <column name="approval_order" nullable="false"/>
+            </basic>
+            <basic name="approvedAt">
+                <column name="approved_at"/>
+            </basic>
+            <basic name="rejectReason">
+                <column name="reject_reason" length="65535"/>
+            </basic>
+            <basic name="rejectedAt">
+                <column name="rejected_at"/>
+            </basic>
+            <many-to-one name="approval" fetch="LAZY">
+                <join-column name="approval_id" nullable="false"/>
+            </many-to-one>
+            <many-to-one name="approver" fetch="LAZY">
+                <join-column name="approver_id" nullable="false"/>
+            </many-to-one>
+        </attributes>
+    </entity>
+
+    <entity class="com.haruon.groupware.domain.draft.Circulation" access="FIELD">
+        <attributes>
+            <basic name="readAt">
+                <column name="read_at"/>
+            </basic>
+            <many-to-one name="draft" fetch="LAZY">
+                <join-column name="draft_id" nullable="false"/>
+            </many-to-one>
+            <many-to-one name="viewer" fetch="LAZY">
+                <join-column name="emp_id" nullable="false"/>
+            </many-to-one>
+        </attributes>
+    </entity>
+
+<!-- ============================================= Meeting ============================================= -->
+
+    <entity class="com.haruon.groupware.domain.meeting.Meeting" access="FIELD">
+        <attributes>
+            <basic name="sourceKey">
+                <column name="source_key" nullable="false" unique="true" updatable="false" length="36"/>
+            </basic>
+            <basic name="title">
+                <column name="title" nullable="false" length="100"/>
+            </basic>
+            <basic name="meetingDate">
+                <column name="meeting_date" nullable="false"/>
+            </basic>
+            <basic name="startAt">
+                <column name="start_at" nullable="false"/>
+            </basic>
+            <basic name="endAt">
+                <column name="end_at" nullable="false"/>
+            </basic>
+            <basic name="isCancel">
+                <column name="is_cancel" nullable="false"/>
+            </basic>
+            <many-to-one name="meetingRoom" fetch="LAZY">
+                <join-column name="room_id" nullable="false"/>
+            </many-to-one>
+            <many-to-one name="emp" fetch="LAZY">
+                <join-column name="reserver_id" nullable="false"/>
+            </many-to-one>
+            <one-to-many name="meetingParticipants" mapped-by="meeting" orphan-removal="true">
+                <cascade>
+                    <cascade-all/>
+                </cascade>
+            </one-to-many>
+        </attributes>
+    </entity>
+
+    <entity class="com.haruon.groupware.domain.meeting.MeetingParticipant" access="FIELD">
+        <attributes>
+            <many-to-one name="emp" fetch="LAZY">
+                <join-column name="participant_id" nullable="false"/>
+            </many-to-one>
+            <many-to-one name="meeting" fetch="LAZY">
+                <join-column name="meeting_id" nullable="false"/>
+            </many-to-one>
+        </attributes>
+    </entity>
+
+    <entity class="com.haruon.groupware.domain.meeting.MeetingRoom" access="FIELD">
+        <attributes>
+            <basic name="name">
+                <column name="name" nullable="false" unique="true" length="50"/>
+            </basic>
+            <basic name="capacity">
+                <column name="capacity" nullable="false"/>
+            </basic>
+            <basic name="description">
+                <column name="description" nullable="false" length="65535"/>
+            </basic>
+            <basic name="isAvailable">
+                <column name="is_available" nullable="false"/>
+            </basic>
+            <one-to-many name="roomFiles" mapped-by="meetingRoom" orphan-removal="true">
+                <cascade>
+                    <cascade-all/>
+                </cascade>
+            </one-to-many>
+        </attributes>
+    </entity>
+
+    <entity class="com.haruon.groupware.domain.meeting.MeetingRoomFile" access="FIELD">
+        <attributes>
+            <many-to-one name="meetingRoom" fetch="LAZY">
+                <join-column name="room_id" nullable="false"/>
+            </many-to-one>
+        </attributes>
+    </entity>
+
+<!-- ============================================= Franchise ============================================= -->
+
+    <entity class="com.haruon.groupware.domain.franchise.Franchise" access="FIELD">
+        <attributes>
+            <basic name="businessNumber">
+                <column name="business_number" nullable="false" length="12"/>
+            </basic>
+            <basic name="franchiseName">
+                <column name="franchise_name" nullable="false" length="50"/>
+            </basic>
+            <basic name="address">
+                <column name="address" nullable="false" length="200"/>
+            </basic>
+            <basic name="ownerName">
+                <column name="owner_name" nullable="false" length="50"/>
+            </basic>
+            <basic name="contactNumber">
+                <column name="contact_number" nullable="false" length="50"/>
+            </basic>
+            <basic name="businessStatus">
+                <column name="business_status" nullable="false" length="20"/>
+                <enumerated>STRING</enumerated>
+            </basic>
+            <basic name="memo">
+                <column name="memo" length="65535"/>
+            </basic>
+            <many-to-one name="emp" fetch="LAZY">
+                <join-column name="manager_id"/>
+            </many-to-one>
+            <embedded name="contactEmail">
+                <attribute-override name="email">
+                    <column name="contact_email" nullable="false" unique="true" length="150"/>
+                </attribute-override>
+            </embedded>
+        </attributes>
+    </entity>
+
+    <entity class="com.haruon.groupware.domain.franchise.FranchiseDailySales" access="FIELD">
+        <table>
+            <unique-constraint>
+                <column-name>sales_date</column-name>
+                <column-name>franchise_id</column-name>
+            </unique-constraint>
+        </table>
+        <attributes>
+            <basic name="externalId">
+                <column name="external_id" nullable="false" unique="true" updatable="false" length="100"/>
+            </basic>
+            <basic name="salesDate">
+                <column name="sales_date" nullable="false"/>
+            </basic>
+            <basic name="salesAmount">
+                <column name="sales_amount" nullable="false"/>
+            </basic>
+            <basic name="orderCount">
+                <column name="order_count" nullable="false"/>
+            </basic>
+            <many-to-one name="franchise" fetch="LAZY">
+                <join-column name="franchise_id" nullable="false"/>
+            </many-to-one>
+        </attributes>
+    </entity>
+
+    <entity class="com.haruon.groupware.domain.franchise.Education" access="FIELD">
+        <attributes>
+            <basic name="educationDate">
+                <column name="education_date" nullable="false"/>
+            </basic>
+            <basic name="place">
+                <column name="place" nullable="false" length="50"/>
+            </basic>
+            <basic name="title">
+                <column name="title" nullable="false" length="50"/>
+            </basic>
+            <basic name="content">
+                <column name="content" nullable="false" length="16777215"/>
+            </basic>
+            <basic name="capacity">
+                <column name="capacity" nullable="false"/>
+            </basic>
+            <basic name="isActive">
+                <column name="is_active" nullable="false"/>
+            </basic>
+            <many-to-one name="emp" fetch="LAZY">
+                <join-column name="register_id" nullable="false"/>
+            </many-to-one>
+            <one-to-many name="educationFiles" mapped-by="education" orphan-removal="true">
+                <cascade>
+                    <cascade-all/>
+                </cascade>
+            </one-to-many>
+            <one-to-many name="educationApplications" mapped-by="education" orphan-removal="true">
+                <cascade>
+                    <cascade-all/>
+                </cascade>
+            </one-to-many>
+        </attributes>
+    </entity>
+
+    <entity class="com.haruon.groupware.domain.franchise.EducationFile" access="FIELD">
+        <attributes>
+            <many-to-one name="education" fetch="LAZY">
+                <join-column name="education_id" nullable="false"/>
+            </many-to-one>
+        </attributes>
+    </entity>
+
+    <entity class="com.haruon.groupware.domain.franchise.EducationApplication" access="FIELD">
+        <attributes>
+            <basic name="externalId">
+                <column name="external_id" nullable="false" unique="true" updatable="false" length="100"/>
+            </basic>
+            <basic name="appliedCount">
+                <column name="applied_count" nullable="false"/>
+            </basic>
+            <basic name="appliedAt">
+                <column name="applied_at" nullable="false"/>
+            </basic>
+            <many-to-one name="education" fetch="LAZY">
+                <join-column name="education_id" nullable="false"/>
+            </many-to-one>
+            <many-to-one name="franchise" fetch="LAZY">
+                <join-column name="franchise_id" nullable="false"/>
+            </many-to-one>
+        </attributes>
+    </entity>
+
+    <entity class="com.haruon.groupware.domain.franchise.FranchiseInquiry" access="FIELD">
+        <attributes>
+            <basic name="externalId">
+                <column name="external_id" nullable="false" unique="true" updatable="false" length="100"/>
+            </basic>
+            <basic name="inquirerContact">
+                <column name="inquirer_contact" nullable="false" length="50"/>
+            </basic>
+            <basic name="inquiryAt">
+                <column name="inquiry_at" nullable="false"/>
+            </basic>
+            <basic name="inquiryTitle">
+                <column name="inquiry_title" nullable="false" length="50"/>
+            </basic>
+            <basic name="inquiryContent">
+                <column name="inquiry_content" nullable="false" length="16777215"/>
+            </basic>
+            <many-to-one name="franchise" fetch="LAZY">
+                <join-column name="franchise_id" nullable="false"/>
+            </many-to-one>
+            <many-to-one name="emp" fetch="LAZY">
+                <join-column name="assigned_emp_id"/>
+            </many-to-one>
+            <one-to-one name="answer" mapped-by="inquiry" orphan-removal="true">
+                <cascade>
+                    <cascade-all/>
+                </cascade>
+            </one-to-one>
+        </attributes>
+    </entity>
+
+    <entity class="com.haruon.groupware.domain.franchise.FranchiseInquiryAnswer" access="FIELD">
+        <attributes>
+            <basic name="content">
+                <column name="content" nullable="false" length="16777215"/>
+            </basic>
+            <basic name="answeredAt">
+                <column name="answered_at"/>
+            </basic>
+            <one-to-one name="inquiry" fetch="LAZY">
+                <join-column name="inquiry_id" nullable="false"/>
+            </one-to-one>
+        </attributes>
+    </entity>
+
+<!-- ============================================= Board ============================================= -->
+
+    <entity class="com.haruon.groupware.domain.board.Board" access="FIELD">
+        <attributes>
+            <basic name="title">
+                <column name="title" nullable="false" length="50"/>
+            </basic>
+            <basic name="content">
+                <column name="content" nullable="false" length="16777215"/>
+            </basic>
+            <basic name="isDraft">
+                <column name="is_draft" nullable="false"/>
+            </basic>
+            <basic name="publishedAt">
+                <column name="published_at"/>
+            </basic>
+            <basic name="modifiedAt">
+                <column name="modified_at"/>
+            </basic>
+            <basic name="viewCount">
+                <column name="view_count" nullable="false"/>
+            </basic>
+            <basic name="likeCount">
+                <column name="like_count" nullable="false"/>
+            </basic>
+            <basic name="commentCount">
+                <column name="comment_count" nullable="false"/>
+            </basic>
+            <many-to-one name="emp" fetch="LAZY">
+                <join-column name="author_id" nullable="false"/>
+            </many-to-one>
+            <many-to-one name="category" fetch="LAZY">
+                <join-column name="category_id" nullable="false"/>
+            </many-to-one>
+            <one-to-many name="boardFiles" mapped-by="board" orphan-removal="true">
+                <cascade>
+                    <cascade-all/>
+                </cascade>
+            </one-to-many>
+        </attributes>
+    </entity>
+
+    <entity class="com.haruon.groupware.domain.board.BoardFile" access="FIELD">
+        <attributes>
+            <many-to-one name="board" fetch="LAZY">
+                <join-column name="board_id" nullable="false"/>
+            </many-to-one>
+        </attributes>
+    </entity>
+
+    <entity class="com.haruon.groupware.domain.board.BoardComment" access="FIELD">
+        <attributes>
+            <basic name="content">
+                <column name="content" nullable="false" length="300"/>
+            </basic>
+            <basic name="registerAt">
+                <column name="register_at" nullable="false"/>
+            </basic>
+            <basic name="editedAt">
+                <column name="edited_at"/>
+            </basic>
+            <basic name="isDeleted">
+                <column name="is_deleted" nullable="false"/>
+            </basic>
+            <many-to-one name="board" fetch="LAZY">
+                <join-column name="board_id" nullable="false"/>
+            </many-to-one>
+            <many-to-one name="emp" fetch="LAZY">
+                <join-column name="author_id" nullable="false"/>
+            </many-to-one>
+            <many-to-one name="parentComment" fetch="LAZY">
+                <join-column name="parent_comment_id"/>
+            </many-to-one>
+        </attributes>
+    </entity>
+
+    <entity class="com.haruon.groupware.domain.board.BoardLike" access="FIELD">
+        <table>
+            <unique-constraint>
+                <column-name>board_id</column-name>
+                <column-name>emp_id</column-name>
+            </unique-constraint>
+        </table>
+        <attributes>
+            <many-to-one name="board" fetch="LAZY">
+                <join-column name="board_id" nullable="false"/>
+            </many-to-one>
+            <many-to-one name="emp" fetch="LAZY">
+                <join-column name="emp_id" nullable="false"/>
+            </many-to-one>
+        </attributes>
+    </entity>
+
+    <entity class="com.haruon.groupware.domain.board.Category" access="FIELD">
+        <attributes>
+            <basic name="name">
+                <column name="name" nullable="false" unique="true" length="30"/>
+            </basic>
+            <basic name="isVisible">
+                <column name="is_visible" nullable="false"/>
+            </basic>
+        </attributes>
+    </entity>
+
+<!-- ============================================= Message ============================================= -->
+
+    <entity class="com.haruon.groupware.domain.message.Message" access="FIELD">
+        <attributes>
+            <basic name="title">
+                <column name="title" nullable="false" length="50"/>
+            </basic>
+            <basic name="content">
+                <column name="content" nullable="false" length="16777215"/>
+            </basic>
+            <basic name="sentAt">
+                <column name="sent_at"/>
+            </basic>
+            <one-to-many name="receivings" mapped-by="message" orphan-removal="true">
+                <cascade>
+                    <cascade-all/>
+                </cascade>
+            </one-to-many>
+            <one-to-many name="messageFiles" mapped-by="message" orphan-removal="true">
+                <cascade>
+                    <cascade-all/>
+                </cascade>
+            </one-to-many>
+            <one-to-one name="sending" mapped-by="message" orphan-removal="true">
+                <cascade>
+                    <cascade-all/>
+                </cascade>
+            </one-to-one>
+        </attributes>
+    </entity>
+
+    <entity class="com.haruon.groupware.domain.message.MessageSending" access="FIELD">
+        <attributes>
+            <basic name="deletedAt">
+                <column name="deleted_at"/>
+            </basic>
+            <basic name="trashedAt">
+                <column name="trashed_at"/>
+            </basic>
+            <one-to-one name="message" fetch="LAZY">
+                <join-column name="message_id" nullable="false" updatable="false"/>
+            </one-to-one>
+            <one-to-one name="emp" fetch="LAZY">
+                <join-column name="sender_id" nullable="false" updatable="false"/>
+            </one-to-one>
+        </attributes>
+    </entity>
+
+    <entity class="com.haruon.groupware.domain.message.MessageReceiving" access="FIELD">
+        <table>
+            <unique-constraint>
+                <column-name>message_id</column-name>
+                <column-name>receiver_id</column-name>
+            </unique-constraint>
+        </table>
+        <attributes>
+            <basic name="readAt">
+                <column name="read_at"/>
+            </basic>
+            <basic name="deletedAt">
+                <column name="deleted_at"/>
+            </basic>
+            <basic name="trashedAt">
+                <column name="trashed_at"/>
+            </basic>
+            <many-to-one name="message" fetch="LAZY">
+                <join-column name="message_id" nullable="false" updatable="false"/>
+            </many-to-one>
+            <one-to-one name="emp" fetch="LAZY">
+                <join-column name="receiver_id" nullable="false" updatable="false"/>
+            </one-to-one>
+        </attributes>
+    </entity>
+
+    <entity class="com.haruon.groupware.domain.message.MessageFile" access="FIELD">
+        <attributes>
+            <many-to-one name="message" fetch="LAZY">
+                <join-column name="message_id" nullable="false" updatable="false"/>
+            </many-to-one>
+        </attributes>
+    </entity>
+
+<!-- ============================================= ChatRoom ============================================= -->
+
+    <entity class="com.haruon.groupware.domain.chat.ChatRoom" access="FIELD">
+        <attributes>
+            <basic name="isGroup">
+                <column name="is_group" nullable="false"/>
+            </basic>
+            <basic name="lastMessageAt">
+                <column name="last_message_at"/>
+            </basic>
+            <basic name="closedAt">
+                <column name="closed_at"/>
+            </basic>
+            <many-to-one name="emp" fetch="LAZY">
+                <join-column name="room_owner_id" nullable="false"/>
+            </many-to-one>
+            <one-to-many name="members" mapped-by="room">
+                <cascade>
+                    <cascade-all/>
+                </cascade>
+            </one-to-many>
+        </attributes>
+    </entity>
+
+    <entity class="com.haruon.groupware.domain.chat.ChatMember" access="FIELD">
+        <table>
+            <unique-constraint>
+                <column-name>room_id</column-name>
+                <column-name>member_id</column-name>
+            </unique-constraint>
+        </table>
+        <attributes>
+            <basic name="roomName">
+                <column name="room_name" length="20"/>
+            </basic>
+            <basic name="isBookMarked">
+                <column name="is_book_marked" nullable="false"/>
+            </basic>
+            <basic name="joinedAt">
+                <column name="joined_at" nullable="false"/>
+            </basic>
+            <basic name="leftAt">
+                <column name="left_at"/>
+            </basic>
+            <many-to-one name="room" fetch="LAZY">
+                <join-column name="room_id" nullable="false"/>
+            </many-to-one>
+            <many-to-one name="emp" fetch="LAZY">
+                <join-column name="member_id" nullable="false"/>
+            </many-to-one>
+            <many-to-one name="lastReadMessage" fetch="LAZY">
+                <join-column name="last_message_id"/>
+            </many-to-one>
+        </attributes>
+    </entity>
+
+    <entity class="com.haruon.groupware.domain.chat.ChatMessage" access="FIELD">
+        <attributes>
+            <basic name="content">
+                <column name="content" nullable="false" updatable="false" length="16777215"/>
+            </basic>
+            <basic name="sentAt">
+                <column name="sent_at" nullable="false" updatable="false"/>
+            </basic>
+            <many-to-one name="chatRoom" fetch="LAZY">
+                <join-column name="room_id" nullable="false" updatable="false"/>
+            </many-to-one>
+            <many-to-one name="emp" fetch="LAZY">
+                <join-column name="sender_id" nullable="false" updatable="false"/>
+            </many-to-one>
+        </attributes>
+    </entity>
+
+    <embeddable class="com.haruon.groupware.domain.shared.Email" access="FIELD">
+        <attributes>
+            <basic name="email">
+                <column name="email" length="150"/>
+            </basic>
+        </attributes>
+    </embeddable>
+</entity-mappings>
+

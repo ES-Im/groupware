@@ -4,10 +4,11 @@ import com.haruon.groupware.domain.draft.sub.ApprovalStatus;
 import com.haruon.groupware.domain.draft.sub.ApproversParam;
 import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.event.AbstractEventAggregateRoot;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.jspecify.annotations.Nullable;
 
 import java.time.LocalDateTime;
@@ -19,35 +20,25 @@ import static java.util.Objects.requireNonNull;
 import static org.springframework.util.Assert.state;
 
 @Entity
-@Inheritance(strategy = InheritanceType.JOINED)
-@DiscriminatorColumn(name = "draft_type")
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@ToString(callSuper = true, exclude = {"emp", "approval", "circulations", "draftFiles"})
 public abstract class Draft extends AbstractEventAggregateRoot {
 
-    @Column(unique = true, nullable = false, updatable = false)
     protected String sourceKey;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "drafter_id", nullable = false)
     protected Emp emp;
 
-    @Column(nullable = false)
     protected String title;
 
-    @Column(nullable = false)
     protected String content;
 
-    @Nullable
-    protected LocalDateTime submittedAt;
+    @Nullable protected LocalDateTime submittedAt;
 
-    @OneToMany(mappedBy = "draft", cascade = CascadeType.ALL, orphanRemoval = true)
     protected List<DraftFile> draftFiles = new ArrayList<>();
 
-    @OneToOne(mappedBy = "draft", cascade = CascadeType.ALL, orphanRemoval = true)
     protected Approval approval;
 
-    @OneToMany(mappedBy = "draft", cascade = CascadeType.ALL, orphanRemoval = true)
     protected List<Circulation> circulations = new ArrayList<>();
 
 // Draft 기안관련 공통 메서드
@@ -199,14 +190,14 @@ public abstract class Draft extends AbstractEventAggregateRoot {
 
     private Circulation getCirculationByEmp(Emp emp) {
         return this.circulations.stream()
-                .filter(c -> c.getEmp().equals(emp))
+                .filter(c -> c.getViewer().equals(emp))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("해당 공람자가 없음"));
     }
 
     private boolean hasCirculation(Emp emp) {
         return this.circulations.stream()
-                .anyMatch(c -> c.getEmp().equals(emp));
+                .anyMatch(c -> c.getViewer().equals(emp));
     }
 
 //    DraftFile 공통 메서드

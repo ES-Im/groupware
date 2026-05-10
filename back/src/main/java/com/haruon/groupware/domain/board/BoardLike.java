@@ -2,10 +2,11 @@ package com.haruon.groupware.domain.board;
 
 import com.haruon.groupware.domain.AbstractEntity;
 import com.haruon.groupware.domain.empInfo.Emp;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import static java.util.Objects.requireNonNull;
 import static org.springframework.util.Assert.state;
@@ -13,15 +14,11 @@ import static org.springframework.util.Assert.state;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"board_id", "emp_id"}))
+@ToString(callSuper = true, exclude = "emp")
 public class BoardLike extends AbstractEntity {
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="board_id", nullable = false)
     private Board board;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="emp_id", nullable = false)
     private Emp emp;
 
     public static BoardLike create(Board board, Emp emp) {

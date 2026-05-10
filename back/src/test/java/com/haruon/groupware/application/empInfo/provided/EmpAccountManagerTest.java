@@ -563,7 +563,7 @@ record EmpAccountManagerTest(
 
 
         assertThat(empFiles).singleElement().extracting(
-                EmpFile::getEmp, EmpFile::getFileType, EmpFile::getIsActive,
+                EmpFile::getEmp, EmpFile::getFileType, EmpFile::isActive,
                 EmpFile::getOriginalName, EmpFile::getFileSize,
                 EmpFile::getMimeType, EmpFile::getExtension
         ).containsExactly(
@@ -628,7 +628,7 @@ record EmpAccountManagerTest(
                 .findFirst()
                 .orElseThrow();
 
-        assertThat(foundFile.getIsActive()).isFalse();
+        assertThat(foundFile.isActive()).isFalse();
     }
 
 
@@ -661,7 +661,7 @@ record EmpAccountManagerTest(
                 .findFirst()
                 .orElseThrow();
 
-        assertThat(foundFile.getIsActive()).isFalse();
+        assertThat(foundFile.isActive()).isFalse();
     }
 
     private String findEmpNoHasFile() {

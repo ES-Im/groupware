@@ -2,7 +2,7 @@ package com.haruon.groupware.domain.empInfo;
 
 import com.haruon.groupware.domain.AbstractFileEntity;
 import com.haruon.groupware.domain.empInfo.enums.FileType;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,17 +14,11 @@ import static java.util.Objects.requireNonNull;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class EmpFile extends AbstractFileEntity {
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="emp_id", nullable=false)
     private Emp emp;
 
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
     private FileType fileType;
 
-    @Column(nullable = false)
-    private Boolean isActive;
-
+    private boolean isActive;
 
     static EmpFile addFile(
             Emp emp,

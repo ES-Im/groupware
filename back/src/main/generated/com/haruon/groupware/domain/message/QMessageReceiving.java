@@ -30,6 +30,8 @@ public class QMessageReceiving extends EntityPathBase<MessageReceiving> {
     //inherited
     public final DateTimePath<java.time.Instant> createdAt = _super.createdAt;
 
+    public final BooleanPath deleted = createBoolean("deleted");
+
     public final DateTimePath<java.time.LocalDateTime> deletedAt = createDateTime("deletedAt", java.time.LocalDateTime.class);
 
     public final com.haruon.groupware.domain.empInfo.QEmp emp;
@@ -39,7 +41,11 @@ public class QMessageReceiving extends EntityPathBase<MessageReceiving> {
 
     public final QMessage message;
 
+    public final BooleanPath read = createBoolean("read");
+
     public final DateTimePath<java.time.LocalDateTime> readAt = createDateTime("readAt", java.time.LocalDateTime.class);
+
+    public final BooleanPath trashed = createBoolean("trashed");
 
     public final DateTimePath<java.time.LocalDateTime> trashedAt = createDateTime("trashedAt", java.time.LocalDateTime.class);
 

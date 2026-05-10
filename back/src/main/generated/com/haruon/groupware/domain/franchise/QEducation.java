@@ -27,6 +27,10 @@ public class QEducation extends EntityPathBase<Education> {
 
     public final com.haruon.groupware.domain.QAbstractEntity _super = new com.haruon.groupware.domain.QAbstractEntity(this);
 
+    public final BooleanPath active = createBoolean("active");
+
+    public final NumberPath<Long> appliedCount = createNumber("appliedCount", Long.class);
+
     public final NumberPath<Long> capacity = createNumber("capacity", Long.class);
 
     public final StringPath content = createString("content");

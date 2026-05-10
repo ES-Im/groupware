@@ -1,7 +1,7 @@
 package com.haruon.groupware.domain.franchise;
 
 import com.haruon.groupware.domain.AbstractEntity;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -13,23 +13,16 @@ import static org.springframework.util.Assert.state;
 @Entity
 @NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
 @Getter
-@Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"sales_date", "franchise_id"})})
 public class FranchiseDailySales extends AbstractEntity {
 
-    @Column(nullable = false, unique = true, updatable = false)
     private String externalId;
 
-    @Column(nullable = false)
     private LocalDate salesDate;
 
-    @Column(nullable = false)
     private long salesAmount;
 
-    @Column(nullable = false)
     private long orderCount;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "franchise_id", nullable = false)
     private Franchise franchise;
 
     public static FranchiseDailySales create(

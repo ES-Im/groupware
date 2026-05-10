@@ -4,10 +4,11 @@ import com.haruon.groupware.domain.AbstractEntity;
 import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.empInfo.enums.EmpStatus;
 import com.haruon.groupware.domain.empInfo.enums.SystemRoleCode;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.jspecify.annotations.Nullable;
 
 import java.time.LocalDateTime;
@@ -19,35 +20,24 @@ import static org.springframework.util.Assert.state;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@ToString(callSuper = true, exclude = {"franchise", "emp", "answer"})
 public class FranchiseInquiry extends AbstractEntity {
 
-    @Column(nullable = false, updatable = false, unique = true)
     private String externalId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "franchise_id", nullable = false)
     private Franchise franchise;
 
-    @Column(nullable = false)
     private String inquirerContact;
 
-    @Column(nullable = false)
     private LocalDateTime inquiryAt;
 
-    @Column(nullable = false)
     private String inquiryTitle;
 
-    @Column(nullable = false)
     private String inquiryContent;
 
-    @Nullable
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "assigned_emp_id", nullable = true)
-    private Emp emp;
+    @Nullable private Emp emp;
 
-    @Nullable
-    @OneToOne(mappedBy = "inquiry", cascade = CascadeType.ALL, orphanRemoval = true)
-    private FranchiseInquiryAnswer answer;
+    @Nullable private FranchiseInquiryAnswer answer;
 
 
     public static FranchiseInquiry createInquiry(

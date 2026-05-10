@@ -34,6 +34,8 @@ public class QBoardComment extends EntityPathBase<BoardComment> {
     //inherited
     public final DateTimePath<java.time.Instant> createdAt = _super.createdAt;
 
+    public final BooleanPath deleted = createBoolean("deleted");
+
     public final DateTimePath<java.time.LocalDateTime> editedAt = createDateTime("editedAt", java.time.LocalDateTime.class);
 
     public final com.haruon.groupware.domain.empInfo.QEmp emp;
@@ -46,6 +48,8 @@ public class QBoardComment extends EntityPathBase<BoardComment> {
     public final QBoardComment parentComment;
 
     public final DateTimePath<java.time.LocalDateTime> registerAt = createDateTime("registerAt", java.time.LocalDateTime.class);
+
+    public final BooleanPath reply = createBoolean("reply");
 
     //inherited
     public final DateTimePath<java.time.Instant> updatedAt = _super.updatedAt;

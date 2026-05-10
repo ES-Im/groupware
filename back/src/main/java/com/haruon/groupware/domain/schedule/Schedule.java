@@ -2,8 +2,9 @@ package com.haruon.groupware.domain.schedule;
 
 import com.haruon.groupware.domain.AbstractEntity;
 import com.haruon.groupware.domain.empInfo.Emp;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
 import lombok.Getter;
+import lombok.ToString;
 import org.jspecify.annotations.Nullable;
 
 import java.time.LocalDate;
@@ -16,45 +17,29 @@ import static org.springframework.util.Assert.state;
 
 @Entity
 @Getter
-@Table(
-        uniqueConstraints = @UniqueConstraint(
-                columnNames = {"schedule_type", "source_key", "owner_emp_id", "schedule_date"})
-)
+@ToString(callSuper = true, exclude = "scheduleParticipants")
 public class Schedule extends AbstractEntity {
 
-    @Column(nullable = false, updatable = false)
     String sourceKey;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private ScheduleType scheduleType;
 
-    @ManyToOne
-    @JoinColumn(name = "owner_emp_id",  nullable = false)
     private Emp emp;
 
-    @Column(nullable = false)
     private String title;
 
-    @Column(nullable = false)
     private String content;
 
-    @Column(nullable = false)
     private LocalDate scheduleDate;
 
-    @Column(nullable = false)
     private LocalTime startAt;
 
-    @Column(nullable = false)
     private LocalTime endAt;
 
-    @Column(nullable = false)
     private boolean isAllDay;
 
-    @Column(nullable = false)
     private boolean isCanceled;
 
-    @OneToMany(mappedBy = "schedule", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<ScheduleParticipant> scheduleParticipants = new HashSet<>();
 
 

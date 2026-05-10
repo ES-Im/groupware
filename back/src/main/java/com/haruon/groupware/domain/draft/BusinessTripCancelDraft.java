@@ -3,7 +3,6 @@ package com.haruon.groupware.domain.draft;
 import com.haruon.groupware.domain.draft.sub.ApproversParam;
 import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.event.byBusinessTripApprove.BusinessTripCancelledEvent;
-import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -15,7 +14,6 @@ import java.util.List;
 import static java.util.Objects.requireNonNull;
 
 @Getter
-@DiscriminatorValue("BUSINESS_TRIP_CANCEL")
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class BusinessTripCancelDraft extends Draft {

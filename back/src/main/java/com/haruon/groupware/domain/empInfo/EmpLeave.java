@@ -1,45 +1,35 @@
 package com.haruon.groupware.domain.empInfo;
 
 import com.haruon.groupware.domain.AbstractEntity;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import static java.util.Objects.requireNonNull;
 import static org.springframework.util.Assert.state;
 
 @Entity
-@Table(
-        uniqueConstraints = @UniqueConstraint(columnNames = {"emp_id", "grant_year"})
-)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@ToString(callSuper = true, exclude = "emp")
 @Getter
 public class EmpLeave extends AbstractEntity {
 
-    @ManyToOne(fetch= FetchType.LAZY)
-    @JoinColumn(name="emp_id", nullable = false)
     private Emp emp;
 
-    @Column(nullable = false)
     private Integer grantYear;
 
-    @Column(nullable = false)
     private Double annualBaseGrantDays;
 
-    @Column(nullable = false)
     private Double annualUsedDays;
 
-    @Column(nullable = false)
     private Double specialGrantDays;
 
-    @Column(nullable = false)
     private Double specialUsedDays;
 
-    @Column(nullable = false)
     private Double compensatoryGrantDays;
 
-    @Column(nullable = false)
     private Double compensatoryUsedDays;
 
     public static EmpLeave createEmpLeave(
