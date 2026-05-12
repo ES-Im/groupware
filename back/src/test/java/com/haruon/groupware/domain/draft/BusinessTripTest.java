@@ -4,8 +4,7 @@ import com.haruon.groupware.domain.draft.sub.ApprovalRole;
 import com.haruon.groupware.domain.draft.sub.ApproversParam;
 import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.event.DomainEvent;
-import com.haruon.groupware.domain.event.byBusinessTripApprove.BusinessTripApprovedEvent;
-import com.haruon.groupware.domain.schedule.ScheduleType;
+import com.haruon.groupware.domain.event.schedule.ScheduleCreationEvent;
 import lombok.Builder;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -365,19 +364,10 @@ class BusinessTripTest {
 
         List<? extends DomainEvent> domainEvents = submitted.domainEvents();
         DomainEvent domainEvent = domainEvents.getFirst();
-        assertThat(domainEvent).isExactlyInstanceOf(BusinessTripApprovedEvent.class);
+        assertThat(domainEvent).isExactlyInstanceOf(ScheduleCreationEvent.class);
 
-        BusinessTripApprovedEvent businessTripApprovedEvent = (BusinessTripApprovedEvent) domainEvent;
-        assertThat(businessTripApprovedEvent).extracting(
-                BusinessTripApprovedEvent::sourceKey, BusinessTripApprovedEvent::drafterEmpId, BusinessTripApprovedEvent::title,
-                BusinessTripApprovedEvent::content, BusinessTripApprovedEvent::startAt, BusinessTripApprovedEvent::endAt,
-                BusinessTripApprovedEvent::destination, BusinessTripApprovedEvent::purpose, BusinessTripApprovedEvent::participantsId,
-                BusinessTripApprovedEvent::scheduleType
-        ).containsExactly(
-                submitted.getSourceKey(), drafter.getId(), title,
-                content, startAt, endAt,
-                destination, purpose, participantIds, ScheduleType.BUSINESS_TRIP
-        );
+        ScheduleCreationEvent scheduleCreationEvent = (ScheduleCreationEvent) domainEvent;
+        assertThat(scheduleCreationEvent.sourceKey()).isEqualTo(submitted.getSourceKey());
     }
 
 

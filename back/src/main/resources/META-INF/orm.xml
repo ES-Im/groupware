@@ -307,7 +307,7 @@
         <discriminator-column name="draft_type"/>
         <attributes>
             <basic name="sourceKey">
-                <column name="source_key" nullable="false" unique="true" updatable="false" length="36"/>
+                <column name="source_key" nullable="false" updatable="false" length="36"/>
             </basic>
             <basic name="title">
                 <column name="title" nullable="false" length="100"/>

@@ -20,7 +20,7 @@ import static org.springframework.util.Assert.state;
 @ToString(callSuper = true, exclude = "scheduleParticipants")
 public class Schedule extends AbstractEntity {
 
-    String sourceKey;
+    private String sourceKey;
 
     private ScheduleType scheduleType;
 
@@ -46,7 +46,7 @@ public class Schedule extends AbstractEntity {
     public static Schedule registerSchedule(
             String sourceKey,
             ScheduleType type,
-            Emp emp,
+            Emp reserver,
             String title, String content,
             LocalDate scheduleDate,
             LocalTime startAt, LocalTime endAt,
@@ -59,14 +59,14 @@ public class Schedule extends AbstractEntity {
 
         schedule.sourceKey = requireNonNull(sourceKey);
         schedule.scheduleType = requireNonNull(type);
-        schedule.emp = requireNonNull(emp);
+        schedule.emp = requireNonNull(reserver);
         schedule.title = requireNonNull(title);
         schedule.content = requireNonNull(content);
         schedule.scheduleDate = requireNonNull(scheduleDate);
         schedule.isAllDay = isAllDay;
         schedule.isCanceled = false;
 
-        schedule.addParticipant(requireNonNull(emp));
+        schedule.addParticipant(reserver);
 
         return schedule;
     }
@@ -84,9 +84,9 @@ public class Schedule extends AbstractEntity {
     public int addParticipant(Emp emp) {
         requireNonNull(emp);
 
-        ScheduleParticipant participant = findParticipant(emp);
+        ScheduleParticipant existingParticipant = findParticipant(emp);
 
-        if(participant == null) {
+        if(existingParticipant == null) {
             this.scheduleParticipants.add(ScheduleParticipant.registerScheduleParticipant(this, emp));
             return 1;
         }

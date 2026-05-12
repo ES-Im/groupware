@@ -6,6 +6,7 @@ import com.haruon.groupware.application.empInfo.required.EmpLeaveRepository;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
 import com.haruon.groupware.application.exception.common.role.PermissionDeniedException;
 import com.haruon.groupware.application.exception.empInfo.EmpAnnualLeaveNotFoundException;
+import com.haruon.groupware.application.schedule.required.ScheduleRepository;
 import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.empInfo.EmpLeave;
 import org.junit.jupiter.api.AfterEach;
@@ -24,11 +25,13 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 record LeaveManagementTest(
         EmpLeaveRepository empLeaveRepository,
         LeaveManagementService leaveManagementService,
-        EmpRepository empRepository
+        EmpRepository empRepository,
+        ScheduleRepository scheduleRepository
 ) {
 
     @AfterEach
     void tearDown() {
+        scheduleRepository.deleteAll();
         empLeaveRepository.deleteAll();
         empRepository.deleteAll();
     }

@@ -71,10 +71,22 @@ public class EmpLeave extends AbstractEntity {
         this.annualUsedDays += usedDays;
     }
 
+    public void restoreAnnualDays(double usedDays) {
+        validateDaysAfterRestore(this.annualUsedDays, -usedDays);
+
+        this.annualUsedDays -= usedDays;
+    }
+
     public void useSpecialDays(double usedDays) {
         validateDaysAfterUse(this.specialGrantDays, this.specialUsedDays, usedDays);
 
         this.specialUsedDays += usedDays;
+    }
+
+    public void restoreSpecialDays(double usedDays) {
+        validateDaysAfterRestore(this.annualUsedDays, -usedDays);
+
+        this.specialUsedDays -= usedDays;
     }
 
     public void useCompensatoryDays(double usedDays) {
@@ -83,11 +95,23 @@ public class EmpLeave extends AbstractEntity {
         this.compensatoryUsedDays += usedDays;
     }
 
+    public void restoreCompensatoryDays(double usedDays) {
+        validateDaysAfterRestore(this.annualUsedDays, -usedDays);
+
+        this.compensatoryUsedDays -= usedDays;
+    }
+
     private void validateDaysAfterUse(double grantedDays, double usedDays, double willBeUsedDays) {
         state(willBeUsedDays > 0, "사용일수는 음수일 수 없음");
         state(( grantedDays - usedDays - willBeUsedDays) >= 0,
                 "사용 후 남은 연차/휴가 일 수는 마이너스가 될 수 없음");
     }
+
+    private void validateDaysAfterRestore(double usedDays, double willBeRestoreDays) {
+        state(usedDays - willBeRestoreDays >= 0, "복원한 사용일수는 0보다 커야함");
+    }
+
+
 
     private void validateDaysAfterAdjust(double grantedDays, double willBalancedDays) {
         state(grantedDays + willBalancedDays >= 0, "조정 후의 일수는 음수일 수 없음");

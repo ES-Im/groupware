@@ -1,5 +1,5 @@
 @NullMarked
 
-package com.haruon.groupware.domain.event.byLeaveApprove;
+package com.haruon.groupware.domain.event.schedule;
 
 import org.jspecify.annotations.NullMarked;

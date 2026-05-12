@@ -1,44 +1,14 @@
 package com.haruon.groupware.application.schedule.provided;
 
 import com.haruon.groupware.application.TestIntegrationConfig;
-import com.haruon.groupware.application.draft.provided.BusinessTripDraftManagement;
-import com.haruon.groupware.application.draft.provided.GeneralDraftManagement;
-import com.haruon.groupware.application.draft.provided.LeaveDraftManagement;
-import com.haruon.groupware.application.draft.required.DraftRepository;
-import com.haruon.groupware.application.draft.service.dto.ApproversRequest;
-import com.haruon.groupware.application.draft.service.dto.BusinessTripDraftCreateRequest;
-import com.haruon.groupware.application.draft.service.dto.CommonDraftCreateRequest;
-import com.haruon.groupware.application.draft.service.dto.LeaveDraftCreateRequest;
 import com.haruon.groupware.application.empInfo.required.DeptRepository;
-import com.haruon.groupware.application.empInfo.required.EmpLeaveRepository;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
 import com.haruon.groupware.application.exception.common.role.ActiveEmployeeNotFoundException;
-import com.haruon.groupware.application.meeting.provided.MeetingManagement;
-import com.haruon.groupware.application.meeting.provided.MeetingRoomManagement;
-import com.haruon.groupware.application.meeting.required.MeetingRepository;
-import com.haruon.groupware.application.meeting.required.MeetingRoomRepository;
-import com.haruon.groupware.application.meeting.service.dto.MeetingReserveRequest;
-import com.haruon.groupware.application.meeting.service.dto.MeetingRoomCreateRequest;
-import com.haruon.groupware.application.schedule.contentFormatter.BusinessTripScheduleContentDto;
-import com.haruon.groupware.application.schedule.contentFormatter.LeaveScheduleContentDto;
-import com.haruon.groupware.application.schedule.contentFormatter.MeetingScheduleContentDto;
-import com.haruon.groupware.application.schedule.contentFormatter.ScheduleContentFormatter;
 import com.haruon.groupware.application.schedule.required.ScheduleRepository;
 import com.haruon.groupware.application.schedule.service.ManualScheduleParam;
-import com.haruon.groupware.application.schedule.service.ScheduleCreateRequest;
-import com.haruon.groupware.domain.AbstractEntity;
-import com.haruon.groupware.domain.draft.Draft;
-import com.haruon.groupware.domain.draft.sub.ApprovalRole;
-import com.haruon.groupware.domain.draft.sub.LeaveType;
-import com.haruon.groupware.domain.empInfo.Dept;
 import com.haruon.groupware.domain.empInfo.Emp;
-import com.haruon.groupware.domain.empInfo.EmpLeave;
-import com.haruon.groupware.domain.empInfo.enums.SystemRoleCode;
-import com.haruon.groupware.domain.meeting.Meeting;
-import com.haruon.groupware.domain.meeting.MeetingRoom;
 import com.haruon.groupware.domain.schedule.Schedule;
 import com.haruon.groupware.domain.schedule.ScheduleParticipant;
-import com.haruon.groupware.domain.schedule.ScheduleType;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
@@ -49,19 +19,17 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.haruon.groupware.application.dbFixture.EmpFixture.*;
-import static com.haruon.groupware.domain.empInfo.EmpLeave.createEmpLeave;
+import static com.haruon.groupware.application.dbFixture.EmpFixture.saveApprovedEmp;
+import static com.haruon.groupware.application.dbFixture.EmpFixture.saveRegisteredEmp;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -72,18 +40,8 @@ record ScheduleManagementTest(
     ScheduleRepository scheduleRepository,
     EmpRepository empRepository,
     DeptRepository deptRepository,
-    DraftRepository draftRepository,
-    MeetingRepository meetingRepository,
-    MeetingRoomRepository meetingRoomRepository,
-    EmpLeaveRepository empLeaveRepository,
 
-    ScheduleRegister scheduleRegister,
-    ScheduleEditing scheduleEditing,
-    MeetingManagement meetingManagement,
-    MeetingRoomManagement meetingRoomManagement,
-    GeneralDraftManagement generalDraftManagement,
-    BusinessTripDraftManagement businessTripDraftManagement,
-    LeaveDraftManagement leaveDraftManagement,
+    ScheduleManagement scheduleRegister,
 
     EntityManager entityManager
 ) {
@@ -95,10 +53,6 @@ record ScheduleManagementTest(
     @AfterEach
     void tearDown() {
         scheduleRepository.deleteAll();
-        meetingRepository.deleteAll();
-        meetingRoomRepository.deleteAll();
-        draftRepository.deleteAll();
-        empLeaveRepository.deleteAll();
         empRepository.deleteAll();
         deptRepository.deleteAll();
     }
@@ -116,17 +70,13 @@ record ScheduleManagementTest(
         LocalDateTime endAt = LocalDateTime.of(BASE_DATE, END_TIME).plusDays(2);
 
         String getSourceKey = scheduleRegister.registerSchedules(
-                ScheduleCreateRequest.builder()
-                        .manualScheduleParam(
-                                ManualScheduleParam.builder()
-                                        .ownerId(ownerId)
-                                        .title(title)
-                                        .content(content)
-                                        .startAt(startAt)
-                                        .endAt(endAt)
-                                        .build()
-                        )
-                        .build()
+                            ManualScheduleParam.builder()
+                                    .ownerId(ownerId)
+                                    .title(title)
+                                    .content(content)
+                                    .startAt(startAt)
+                                    .endAt(endAt)
+                                    .build()
         );
 
         entityManager.flush();
@@ -152,265 +102,9 @@ record ScheduleManagementTest(
                 .hasSize(3);
     }
 
-    @Transactional
-    @Test
-    @DisplayName("회의일정 등록시, 회의 일정이 등록된다.")
-    void register_meeting_schedule_by_source_key_success() {
-        long roomId = saveMeetingRoom();
-        Emp reserverEmp = saveApprovedEmp(empRepository, "202601100", "reserverEmp");
-        MeetingRoom room = meetingRoomRepository.findById(roomId).orElseThrow();
-
-        Emp otherEmp = saveApprovedEmp(empRepository, "202601101", "otherEmp");
-
-        String title = "testTitle";
-        LocalDate meetingDate = BASE_DATE;
-        LocalTime startAt = LocalTime.of(10,0);
-        LocalTime endAt = LocalTime.of(11,0);
-        Set<Long> participantIds = Set.of(reserverEmp.getId(), otherEmp.getId());
-        long reservationId = getSavedTomorrowReservation(
-                reserverEmp,
-                room,
-                title,
-                meetingDate,
-                startAt, endAt,
-                participantIds
-        );
-
-        Meeting meeting = meetingRepository.findByIdAndEmpId(reservationId, reserverEmp.getId()).orElseThrow();
-
-        scheduleRegister.registerSchedules(
-                ScheduleCreateRequest.builder()
-                        .sourceKey(meeting.getSourceKey())
-                .build()
-        );
-
-        entityManager.flush();
-        entityManager.clear();
-
-        List<Schedule> schedule = scheduleRepository.findBySourceKey(meeting.getSourceKey());
-
-        String format = ScheduleContentFormatter.format(
-                new MeetingScheduleContentDto(meeting.getMeetingRoom().getName(), meeting.getTitle())
-        );
-
-        assertThat(schedule)
-                .singleElement()
-                .satisfies(s -> {
-                    assertThat(s).extracting(
-                            Schedule::getEmp,
-                            Schedule::getTitle, Schedule::getScheduleDate, Schedule::getStartAt,
-                            Schedule::getEndAt, Schedule::isCanceled
-                    ).containsExactly(
-                            reserverEmp, title, meetingDate, startAt, endAt, false
-                    );
-
-                    assertThat(s.getScheduleType())
-                            .as("회의 일정 반영시, scheduleType은 Meeting이다.")
-                            .isEqualTo(ScheduleType.MEETING);
-
-                    assertThat(s.getSourceKey())
-                            .as("일정 sourceKey는 회의 sourceKey와 동일하다")
-                            .isEqualTo(meeting.getSourceKey());
-
-                    assertThat(s.getScheduleParticipants().stream().map(e -> e.getEmp().getId()).collect(Collectors.toSet()))
-                            .as("회의 참가자 그대로 일정 참가자로 반영된다.")
-                            .containsAnyElementsOf(participantIds);
-
-                    assertThat(s.getContent())
-                            .as("일정 내용은 포맷팅한 내용으로 들어간다. [회의실: / 회의주제: ]형식 = %s", s.getContent())
-                            .isEqualTo(format);
-        });
-    }
 
 
-    private long getSavedTomorrowReservation(
-            Emp reserverEmp,
-            MeetingRoom room,
-            String title,
-            LocalDate meetingDate,
-            LocalTime startAt,
-            LocalTime endAt,
-            Set<Long> participantIds
-    ) {
-        long meetingRoomId = room.getId();
-        Long reserverId = reserverEmp.getId();
 
-        return meetingManagement.reserve(
-                MeetingReserveRequest.builder()
-                        .meetingRoomId(meetingRoomId)
-                        .reserverId(reserverId)
-                        .title(title)
-                        .meetingDate(meetingDate)
-                        .startAt(startAt)
-                        .endAt(endAt)
-                        .participantIds(participantIds)
-                        .build()
-        );
-    }
-
-    private long saveMeetingRoom() {
-        Dept dept = saveDept(deptRepository, "facility", "001");
-
-        Emp emp = saveEmpWithRoleAndDept(
-                empRepository, deptRepository, "202601001", "facility1", dept, SystemRoleCode.FACILITY
-        );
-
-        return meetingRoomManagement.createMeetingRoom(
-                MeetingRoomCreateRequest.builder()
-                        .editorId(emp.getId())
-                        .name("testRoom")
-                        .description("testDescription")
-                        .capacity(10)
-                        .build()
-        );
-    }
-
-    @Transactional
-    @Test
-    @DisplayName("휴가 기안 결재완료 시, 휴가 일정이 등록된다.")
-    void register_leave_schedule_by_approved_leave_draft_success(){
-        Emp drafter = saveApprovedEmp(empRepository);
-
-        LeaveType annual = LeaveType.ANNUAL;
-        LocalDateTime startAt = LocalDateTime.of(BASE_DATE, START_TIME);
-        LocalDateTime endAt = LocalDateTime.of(BASE_DATE, END_TIME).plusDays(2);
-        Draft getApprovedLeaveDraft = createAndApproveLeaveDraft(drafter, annual, startAt, endAt);
-
-        scheduleRegister.registerSchedules(
-                ScheduleCreateRequest.builder()
-                        .sourceKey(getApprovedLeaveDraft.getSourceKey())
-                        .build()
-        );
-
-        List<Schedule> schedules = scheduleRepository.findBySourceKey(getApprovedLeaveDraft.getSourceKey());
-
-        String format = ScheduleContentFormatter.format(
-                new LeaveScheduleContentDto(annual.getDescription())
-        );
-
-        int days = (int) Duration.between(startAt, endAt).toDays() + 1;
-
-        assertThat(schedules)
-                .as("연차 일수만큼 일정이 생성된다.")
-                .hasSize(days);
-
-        assertThat(schedules).satisfies(s -> {
-                    Schedule first = s.getFirst();
-
-                    assertThat(first).extracting(
-                            Schedule::getEmp,
-                            Schedule::isCanceled
-                    ).containsExactly(
-                            drafter, false
-                    );
-
-                    assertThat(first.getTitle())
-                            .as("휴가신청의 일정 제목은 휴가타입명이다")
-                            .isEqualTo(annual.getDescription());
-
-                    assertThat(first.getScheduleType())
-                            .as("휴가 일정 반영시, scheduleType은 LEAVE이다.")
-                            .isEqualTo(ScheduleType.LEAVE);
-
-                    assertThat(first.getSourceKey())
-                            .as("일정 sourceKey는 휴가 sourceKey와 동일하다")
-                            .isEqualTo(getApprovedLeaveDraft.getSourceKey());
-
-                    assertThat(first.getScheduleParticipants().stream().findFirst().get().getEmp())
-                            .as("휴가 신청자 그대로 일정 참가자로 반영된다.")
-                            .isEqualTo(drafter);
-
-                    assertThat(first.getContent())
-                            .as("일정 내용은 포맷팅한 내용으로 들어간다. [휴가타입: ]형식 = %s", first.getContent())
-                            .isEqualTo(format);
-        });
-    }
-
-    @Transactional
-    @Test
-    @DisplayName("출장 기안 결재완료 시, 출장 일정이 등록된다.")
-    void register_business_trip_schedule_by_approved_business_trip_draft_success() {
-        Emp drafter = saveApprovedEmp(empRepository);
-        Emp participant = saveApprovedEmp(empRepository, "202601091", "participant91");
-
-        LocalDateTime startAt = LocalDateTime.of(BASE_DATE, START_TIME);
-        LocalDateTime endAt = LocalDateTime.of(BASE_DATE, END_TIME).plusDays(2);
-
-        String destination = "destination";
-        String purpose = "purpose";
-        Set<Emp> participants = Set.of(drafter, participant);
-        Draft businessTrip = createAndApproveBTDraft(drafter, startAt, endAt, destination, purpose, participants);
-
-        entityManager.flush();
-        entityManager.clear();
-
-        scheduleRegister.registerSchedules(
-                ScheduleCreateRequest.builder()
-                        .sourceKey(businessTrip.getSourceKey())
-                        .build()
-        );
-
-        entityManager.flush();
-        entityManager.clear();
-
-        List<Schedule> schedules = scheduleRepository.findBySourceKey(businessTrip.getSourceKey());
-
-        String format = ScheduleContentFormatter.format(
-                new BusinessTripScheduleContentDto(destination, purpose)
-        );
-
-        int days = (int) Duration.between(startAt, endAt).toDays() + 1;
-
-        assertThat(schedules)
-                .as("출장 일수만큼 일정이 생성된다.")
-                .hasSize(days);
-
-        assertThat(schedules).satisfies(s -> {
-            Schedule first = s.getFirst();
-
-            assertThat(first).extracting(
-                    Schedule::getEmp,
-                    Schedule::isCanceled
-            ).containsExactly(
-                    drafter, false
-            );
-
-            assertThat(first.getScheduleType())
-                    .as("휴가 일정 반영시, scheduleType은 BUSINESS_TRIP이다.")
-                    .isEqualTo(ScheduleType.BUSINESS_TRIP);
-
-            assertThat(first.getSourceKey())
-                    .as("일정 sourceKey는 출장기안서 sourceKey와 동일하다")
-                    .isEqualTo(businessTrip.getSourceKey());
-
-            assertThat(first.getContent())
-                    .as("일정 내용은 포맷팅한 내용이다 [출장] 목적지-목적, first.getContent()")
-                    .isEqualTo(format);
-
-            assertThat(first.getTitle())
-                    .as("일정 제목은 포맷팅한 내용이다 [출장] 목적지-목적, first.getContent()")
-                    .isEqualTo(format);
-
-            assertThat(first.getScheduleParticipants().stream().map(ScheduleParticipant::getEmp).collect(Collectors.toSet()))
-                    .as("출장 참여자가 일정 참여자로 반영된다.")
-                    .containsAnyElementsOf(participants);
-        });
-    }
-
-    @Test
-    @DisplayName("수기/회의/출장/휴가 타입이 아니면 일정 등록 실패")
-    void register_schedule_by_unsupported_source_key_fail() {
-        Draft draft = getApprovedGeneralDraft();
-
-        assertThatThrownBy(() ->
-                scheduleRegister.registerSchedules(
-                        ScheduleCreateRequest.builder()
-                                .sourceKey(draft.getSourceKey())
-                                .build()
-                )
-        ).hasMessage("지원하지 않는 일정 타입");
-
-    }
 
     @Test
     @DisplayName("비활성 사원은 일정을 등록할 수 없다")
@@ -439,7 +133,7 @@ record ScheduleManagementTest(
         );
 
         assertThatThrownBy(() ->
-                scheduleEditing.addParticipants(manualSchedules.getFirst().getId(), Set.of(inactiveEmp.getId()), false)
+                scheduleRegister.addParticipants(manualSchedules.getFirst().getId(), Set.of(inactiveEmp.getId()), false)
         ).isInstanceOf(ActiveEmployeeNotFoundException.class);
 
     }
@@ -458,7 +152,7 @@ record ScheduleManagementTest(
         );
 
         Schedule firstDayOfSchedule = manualSchedules.getFirst();
-        scheduleEditing.addParticipants(firstDayOfSchedule.getId(), Set.of(otherEmp.getId()), false);
+        scheduleRegister.addParticipants(firstDayOfSchedule.getId(), Set.of(otherEmp.getId()), false);
 
         Schedule updatedSchedule = scheduleRepository.findById(firstDayOfSchedule.getId()).orElseThrow();
 
@@ -494,7 +188,7 @@ record ScheduleManagementTest(
         );
 
         Schedule firstDayOfSchedule = manualSchedules.getFirst();
-        scheduleEditing.addParticipants(firstDayOfSchedule.getId(), Set.of(otherEmp.getId()), true);
+        scheduleRegister.addParticipants(firstDayOfSchedule.getId(), Set.of(otherEmp.getId()), true);
 
         List<Schedule> allDaysOfSchedule = scheduleRepository.findBySourceKey(firstDayOfSchedule.getSourceKey());
 
@@ -522,8 +216,8 @@ record ScheduleManagementTest(
         );
 
         Schedule firstDayOfSchedule = manualSchedules.getFirst();
-        scheduleEditing.addParticipants(firstDayOfSchedule.getId(), Set.of(otherEmp.getId()), true);
-        scheduleEditing.removeParticipants(firstDayOfSchedule.getId(), Set.of(otherEmp.getId()), false);
+        scheduleRegister.addParticipants(firstDayOfSchedule.getId(), Set.of(otherEmp.getId()), true);
+        scheduleRegister.removeParticipants(firstDayOfSchedule.getId(), Set.of(otherEmp.getId()), false);
         String sourceKey = firstDayOfSchedule.getSourceKey();
 
         entityManager.flush();
@@ -569,7 +263,7 @@ record ScheduleManagementTest(
         Schedule firstDayOfSchedule = manualSchedules.getFirst();
         String sourceKey = firstDayOfSchedule.getSourceKey();
 
-        scheduleEditing.addParticipants(firstDayOfSchedule.getId(), Set.of(otherEmp.getId()), true);
+        scheduleRegister.addParticipants(firstDayOfSchedule.getId(), Set.of(otherEmp.getId()), true);
 
         entityManager.flush();
         entityManager.clear();
@@ -579,7 +273,7 @@ record ScheduleManagementTest(
 //        log.info("before remove = {}", firstDayOfSchedule.getScheduleParticipants()
 //                .stream().map(p -> p.getEmp().getId()).toList());
 
-        scheduleEditing.removeParticipants(reloadedFirstDay.getId(), Set.of(otherEmp.getId()), true);
+        scheduleRegister.removeParticipants(reloadedFirstDay.getId(), Set.of(otherEmp.getId()), true);
 
         entityManager.flush();
         entityManager.clear();
@@ -639,7 +333,7 @@ record ScheduleManagementTest(
         entityManager.flush();
         entityManager.clear();
 
-        scheduleEditing.cancelSchedule(firstDayOfSchedule.getId(), false);
+        scheduleRegister.cancelSchedule(firstDayOfSchedule.getId(), false);
 
         entityManager.flush();
         entityManager.clear();
@@ -677,7 +371,7 @@ record ScheduleManagementTest(
         entityManager.flush();
         entityManager.clear();
 
-        scheduleEditing.cancelSchedule(firstDayOfSchedule.getId(), true);
+        scheduleRegister.cancelSchedule(firstDayOfSchedule.getId(), true);
 
         entityManager.flush();
         entityManager.clear();
@@ -713,7 +407,7 @@ record ScheduleManagementTest(
         String editedContent = "editedContent9";
         LocalDateTime editedStartAt = LocalDateTime.of(firstDayOfSchedule.getScheduleDate(), LocalTime.of(13, 0));
         LocalDateTime editedEndAt = LocalDateTime.of(firstDayOfSchedule.getScheduleDate(), LocalTime.of(14, 0));
-        scheduleEditing.updateManualSchedule(
+        scheduleRegister.updateManualSchedule(
                 firstDayOfSchedule.getId(), false, 
                 ManualScheduleParam.builder()
                         .ownerId(register.getId()).title(editedTitle).content(editedContent).startAt(editedStartAt).endAt(editedEndAt)
@@ -765,7 +459,7 @@ record ScheduleManagementTest(
         LocalDateTime editedStartAt = LocalDateTime.of(firstDayOfSchedule.getScheduleDate(), LocalTime.of(13, 0));
         LocalDateTime editedEndAt = LocalDateTime.of(firstDayOfSchedule.getScheduleDate(), LocalTime.of(14, 0));
 
-        scheduleEditing.updateManualSchedule(
+        scheduleRegister.updateManualSchedule(
                 firstDayOfSchedule.getId(), true,
                 ManualScheduleParam.builder()
                         .ownerId(register.getId()).title(editedTitle).content(editedContent).startAt(editedStartAt).endAt(editedEndAt)
@@ -921,17 +615,13 @@ record ScheduleManagementTest(
         String content = "content";
 
         String getSourceKey = scheduleRegister.registerSchedules(
-                ScheduleCreateRequest.builder()
-                        .manualScheduleParam(
-                                ManualScheduleParam.builder()
-                                        .ownerId(ownerId)
-                                        .title(title)
-                                        .content(content)
-                                        .startAt(startAt)
-                                        .endAt(endAt)
-                                        .build()
-                        )
-                        .build()
+                        ManualScheduleParam.builder()
+                                .ownerId(ownerId)
+                                .title(title)
+                                .content(content)
+                                .startAt(startAt)
+                                .endAt(endAt)
+                                .build()
         );
 
         entityManager.flush();
@@ -940,125 +630,5 @@ record ScheduleManagementTest(
         return scheduleRepository.findBySourceKey(getSourceKey);
     }
 
-    private Draft createAndApproveBTDraft(
-            Emp drafter,
-            LocalDateTime startAt,
-            LocalDateTime endAt,
-            String destination,
-            String purpose,
-            Set<Emp> participants
-    ) {
 
-        Emp approver1 = saveApprovedEmp(empRepository, "202601002", "approver1");
-        businessTripDraftManagement.createSubmitted(
-                BusinessTripDraftCreateRequest.builder()
-                        .param(CommonDraftCreateRequest.builder()
-                                .empId(drafter.getId())
-                                .title("test")
-                                .content("test")
-                                .approvers(List.of(
-                                        new ApproversRequest(approver1.getId(), ApprovalRole.APPROVER, 1)
-                                ))
-                                .submittedAt(LocalDateTime.of(2026,3,1,0,0,0))
-                                .build()
-                        )
-                        .startAt(startAt)
-                        .endAt(endAt)
-                        .destination(destination)
-                        .purpose(purpose)
-                        .participantIds(participants.stream()
-                                .map(AbstractEntity::getId)
-                                .collect(Collectors.toSet())
-                        )
-                        .build()
-        );
-
-        Draft draft = draftRepository.findByEmp(drafter).stream().findFirst().orElseThrow();
-        businessTripDraftManagement.approve(draft.getId(), approver1.getId(), LocalDateTime.of(2026,3,1,0,0,0));
-
-        return draftRepository.findById(draft.getId()).orElseThrow();
-    }
-
-
-    private Draft createAndApproveLeaveDraft(
-            Emp drafter,
-            LeaveType leaveType,
-            LocalDateTime startAt,
-            LocalDateTime endAt
-    ) {
-        int year = BASE_DATE.getYear();
-        EmpLeave empLeave = createEmpLeave(drafter, year, 15);
-        empLeaveRepository.save(empLeave);
-        empLeave.adjustCompensatoryGrantDays(3.0);
-        empLeave.adjustSpecialGrantDays(3.0);
-
-        Emp approver1 = saveApprovedEmp(empRepository, "202601002", "approver1");
-        Emp approver2 = saveApprovedEmp(empRepository, "202601003", "approver2");
-
-        leaveDraftManagement.createSubmitted(
-                LeaveDraftCreateRequest.builder()
-                        .param(
-                                CommonDraftCreateRequest.builder()
-                                        .empId(drafter.getId())
-                                        .title("test")
-                                        .content("test")
-                                        .approvers(List.of(
-                                                new ApproversRequest(approver1.getId(), ApprovalRole.APPROVER, 1),
-                                                new ApproversRequest(approver2.getId(), ApprovalRole.APPROVER, 2)
-                                        ))
-                                        .submittedAt(LocalDateTime.of(year, 4, 1, 0, 0))
-                                        .build()
-                        )
-                        .startAt(startAt)
-                        .endAt(endAt)
-                        .leaveType(leaveType)
-                        .build()
-        );
-
-        entityManager.flush();
-        entityManager.clear();
-
-        Draft draft = draftRepository.findByEmp(drafter).stream()
-                .max(Comparator.comparing(Draft::getCreatedAt))
-                .orElseThrow();
-
-        leaveDraftManagement.approve(
-                draft.getId(),
-                approver1.getId(),
-                LocalDateTime.of(year, 4, 1, 0, 0)
-        );
-
-        leaveDraftManagement.approve(
-                draft.getId(),
-                approver2.getId(),
-                LocalDateTime.of(year, 4, 1, 5, 0)
-        );
-
-        return draftRepository.findById(draft.getId()).orElseThrow();
-    }
-
-
-    private Draft getApprovedGeneralDraft() {
-        Emp drafter = saveApprovedEmp(empRepository, "202601001", "drafter");
-        Emp approverEmp1 = saveApprovedEmp(empRepository, "202601002", "approver1");
-        List<ApproversRequest> approversRequests = new ArrayList<>();
-        approversRequests.add(new ApproversRequest(approverEmp1.getId(), ApprovalRole.APPROVER, 1));
-        int year = BASE_DATE.getYear();
-        generalDraftManagement.createSubmitted(
-                CommonDraftCreateRequest.builder()
-                        .empId(drafter.getId())
-                        .title("title")
-                        .content("content")
-                        .approvers(approversRequests)
-                        .submittedAt(LocalDateTime.of(year, 1, 1, 0, 0, 0))
-                        .build()
-        );
-        Draft draft = draftRepository.findByEmp(drafter).stream().findFirst().orElseThrow();
-
-        generalDraftManagement.approve(
-                draft.getId(), approverEmp1.getId(), LocalDateTime.of(year, 1, 1, 0, 0, 5)
-        );
-
-        return draft;
-    }
 }

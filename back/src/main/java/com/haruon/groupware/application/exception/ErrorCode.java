@@ -44,6 +44,7 @@ public enum ErrorCode {
     INSUFFICIENT_LEAVE_BALANCE_EXCEPTION(HttpStatus.BAD_REQUEST, "DRAFT_006", "사용 휴가 일수가 잔여 휴가 일수를 초과했습니다."),
     UNREQUESTABLE_LEAVE_TYPE_EXCEPTION(HttpStatus.BAD_REQUEST, "DRAFT_007", "신청할 수 없는 휴가 타입입니다."),
     LEAVE_TIME_OUTSIDE_COMPANY_HOURS_EXCEPTION(HttpStatus.BAD_REQUEST, "DRAFT_008", "휴가 시간은 회사 근무시간 내에서만 신청할 수 있습니다."),
+    DRAFT_NOT_APPROVED_EXCEPTION(HttpStatus.BAD_REQUEST, "DRAFT_009", "승인 완료된 기안서만 취소할 수 있습니다."),
 
     // franchise
     FRANCHISE_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND, "FRANCHISE_001", "해당 가맹점 정보를 찾을 수 없습니다"),
@@ -89,7 +90,9 @@ public enum ErrorCode {
 
     // schedule
     UNSUPPORTED_SCHEDULE_TYPE_EXCEPTION(HttpStatus.BAD_REQUEST, "SCHEDULE_001", "지원하지 않는 일정 타입"),
-    SCHEDULE_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND, "SCHEDULE_002", "조회된 일정이 없습니다");
+    SCHEDULE_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND, "SCHEDULE_002", "조회된 일정이 없습니다"),
+    NOT_MANUAL_SCHEDULE_EXCEPTION(HttpStatus.BAD_REQUEST, "SCHEDULE_003", "수기관리 대상 일정이 아닙니다"),
+    EDIT_FORBIDDEN_SCHEDULE_EXCEPTION(HttpStatus.BAD_REQUEST, "SCHEDULE_004", "수정가능한 일정이 아닙니다");
 
     private final HttpStatus status;
     private final String code;
