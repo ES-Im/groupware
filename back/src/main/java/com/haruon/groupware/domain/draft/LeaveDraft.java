@@ -3,7 +3,7 @@ package com.haruon.groupware.domain.draft;
 import com.haruon.groupware.domain.draft.sub.ApproversParam;
 import com.haruon.groupware.domain.draft.sub.LeaveType;
 import com.haruon.groupware.domain.empInfo.Emp;
-import com.haruon.groupware.domain.event.byLeaveApprove.LeaveApprovedEvent;
+import com.haruon.groupware.domain.event.schedule.ScheduleCreationEvent;
 import jakarta.persistence.Entity;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -73,18 +73,8 @@ public class LeaveDraft extends Draft {
         return submitted;
     }
 
-    private static void LeaveApprovedEventRegister(LeaveDraft submitted) {
-        submitted.registerEvent(
-                LeaveApprovedEvent.builder()
-                        .sourceKey(submitted.sourceKey)
-                        .drafterEmpId(submitted.emp.getId())
-                        .title(submitted.title)
-                        .content(submitted.content)
-                        .leaveStartAt(submitted.startAt)
-                        .leaveEndAt(submitted.endAt)
-                        .leaveType(submitted.leaveType)
-                .build()
-        );
+    private void LeaveApprovedEventRegister(LeaveDraft submitted) {
+        submitted.registerEvent(new ScheduleCreationEvent(submitted.sourceKey));
     }
 
     public void editLeaveDraft(

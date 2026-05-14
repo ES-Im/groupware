@@ -31,7 +31,7 @@ public interface BusinessTripDraftManagement {
 
     /** about approve */
     void approve(long draftId, long approverId, LocalDateTime approvedAt);
-    // -> 모든 승인 끝나면 markReadByCirculation 호출
+    //todo -> 모든 승인 끝나면 markReadByCirculation 호출
 
     void reject(long draftId, long rejecterId, String reason, LocalDateTime rejectedAt);
 
@@ -40,7 +40,7 @@ public interface BusinessTripDraftManagement {
 
     void removeCirculatedEmp(long draftId, long drafterId, long circulatedEmpId);
 
-    // isReadableByCirculation -> 조회용, 공람자 리스트 출력시 사용할 것
+    //todo isReadableByCirculation -> 조회용, 공람자 리스트 출력시 사용할 것
 
     /** about file */
     void addFile(long draftId, long drafterId, DraftFileCreateRequest fileParam);

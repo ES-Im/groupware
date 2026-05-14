@@ -13,8 +13,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.jsonwebtoken.lang.Assert.state;
 import static java.util.Objects.requireNonNull;
+import static org.springframework.util.Assert.state;
 
 @Getter
 @Entity

@@ -2,10 +2,10 @@ package com.haruon.groupware.domain.meeting;
 
 import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.event.DomainEvent;
-import com.haruon.groupware.domain.event.byMeetingReservation.MeetingCanceledEvent;
-import com.haruon.groupware.domain.event.byMeetingReservation.MeetingChangedEvent;
-import com.haruon.groupware.domain.event.byMeetingReservation.MeetingParticipantReplaceEvent;
-import com.haruon.groupware.domain.event.byMeetingReservation.MeetingReservedEvent;
+import com.haruon.groupware.domain.event.schedule.MeetingParticipantAdditionEvent;
+import com.haruon.groupware.domain.event.schedule.MeetingParticipantRemovalEvent;
+import com.haruon.groupware.domain.event.schedule.ScheduleCancellationEvent;
+import com.haruon.groupware.domain.event.schedule.ScheduleCreationEvent;
 import lombok.Builder;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,7 +18,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.haruon.groupware.domain.meeting.Meeting.reserve;
@@ -47,7 +46,6 @@ class MeetingTest {
         ReflectionTestUtils.setField(participants.getFirst(), "id", 2L);
         ReflectionTestUtils.setField(participants.get(1), "id", 3L);
 
-        Set<Long> participantIds = participants.stream().map(Emp::getId).collect(Collectors.toSet());
         Meeting reserve = reserve(room, emp, title, date, startTime, endTime, participants);
 
         assertThat(reserve).extracting(
@@ -58,19 +56,11 @@ class MeetingTest {
         assertThat(reserve.isCancel()).isFalse();
 
         List<? extends DomainEvent> domainEvents = reserve.domainEvents();
-        assertThat(domainEvents.getFirst()).isExactlyInstanceOf(MeetingReservedEvent.class);
+        assertThat(domainEvents.getFirst()).isExactlyInstanceOf(ScheduleCreationEvent.class);
 
-        MeetingReservedEvent meetingReservedEvent = (MeetingReservedEvent) domainEvents.getFirst();
+        ScheduleCreationEvent scheduleCreationEvent = (ScheduleCreationEvent) domainEvents.getFirst();
 
-        assertThat(meetingReservedEvent).extracting(
-                MeetingReservedEvent::sourceKey, MeetingReservedEvent::meetingRoomId, MeetingReservedEvent::reserverId,
-                MeetingReservedEvent::title, MeetingReservedEvent::meetingDate, MeetingReservedEvent::startAt, MeetingReservedEvent::endAt
-                , MeetingReservedEvent::participantIds
-        ).containsExactly(
-                reserve.getSourceKey(), room.getId(), emp.getId(),
-                reserve.getTitle(), reserve.getMeetingDate(), reserve.getStartAt(), reserve.getEndAt(),
-                participantIds
-        );
+        assertThat(scheduleCreationEvent.sourceKey()).isEqualTo(reserve.getSourceKey());
     }
 
     private static Stream<Arguments> reserveMeetingArguments() {
@@ -186,20 +176,11 @@ class MeetingTest {
         meeting.cancel();
         assertThat(meeting.isCancel()).isTrue();
 
-        Set<Long> participantIds = meeting.getMeetingParticipants().stream()
-                .map(MeetingParticipant::getEmp)
-                .map(Emp::getId)
-                .collect(Collectors.toSet());
-
         List<? extends DomainEvent> domainEvents = meeting.domainEvents();
-        assertThat(domainEvents.getLast()).isExactlyInstanceOf(MeetingCanceledEvent.class);
-        MeetingCanceledEvent meetingCancelledEvent = (MeetingCanceledEvent) domainEvents.getLast();
+        assertThat(domainEvents.getLast()).isExactlyInstanceOf(ScheduleCancellationEvent.class);
+        ScheduleCancellationEvent meetingCancelledEvent = (ScheduleCancellationEvent) domainEvents.getLast();
 
-        assertThat(meetingCancelledEvent).extracting(
-                MeetingCanceledEvent::sourceKey, MeetingCanceledEvent::participantIds
-        ).containsExactly(
-                meeting.getSourceKey(), participantIds
-        );
+        assertThat(meetingCancelledEvent.sourceKey()).isEqualTo(meeting.getSourceKey());
     }
 
     @Test
@@ -230,42 +211,6 @@ class MeetingTest {
                 Meeting::getMeetingDate, Meeting::getStartAt, Meeting::getEndAt, Meeting::getMeetingRoom, Meeting::getTitle
         ).containsExactly(
                 editedDate, editedStartTime, editedEndTime, editedMeetingRoom, title
-        );
-    }
-
-    @Test
-    @DisplayName("회의 일정정보 수정시, 참여자일정반영 회의 수정이벤트가 발생한다.")
-    void edit_reservation_time_event() {
-        Emp approvedEmp = getApprovedEmp("202601001", "1L");
-        ReflectionTestUtils.setField(approvedEmp, "id", 1L);
-
-        Meeting meeting = getMeeting(approvedEmp);
-        LocalDate editedDate = meeting.getMeetingDate().plusDays(1);
-        LocalTime editedStartTime = meeting.getStartAt().plusHours(1);
-        LocalTime editedEndTime = meeting.getEndAt().plusHours(1);
-        MeetingRoom editedMeetingRoom = MeetingRoom.createMeetingRoom("nd", "de", 10);
-        ReflectionTestUtils.setField(editedMeetingRoom, "id", 1L);
-
-        String title = meeting.getTitle().concat("new");
-
-        meeting.changeReservationInfo(editedDate, editedStartTime, editedEndTime, editedMeetingRoom, title);
-
-        Set<Long> participantIds = meeting.getMeetingParticipants().stream()
-                .map(MeetingParticipant::getEmp)
-                .map(Emp::getId).collect(Collectors.toSet());
-
-        List<? extends DomainEvent> domainEvents = meeting.domainEvents();
-        assertThat(domainEvents.getLast()).isExactlyInstanceOf(MeetingChangedEvent.class);
-        MeetingChangedEvent changedEvent = (MeetingChangedEvent) domainEvents.getLast();
-
-        assertThat(changedEvent).extracting(
-                MeetingChangedEvent::sourceKey, MeetingChangedEvent::meetingRoomId, MeetingChangedEvent::title,
-                MeetingChangedEvent::meetingDate, MeetingChangedEvent::startAt, MeetingChangedEvent::endAt,
-                MeetingChangedEvent::participantEmpIds
-        ).containsExactly(
-                meeting.getSourceKey(), meeting.getMeetingRoom().getId(), meeting.getTitle(),
-                meeting.getMeetingDate(), meeting.getStartAt(), meeting.getEndAt(),
-                participantIds
         );
     }
 
@@ -312,21 +257,21 @@ class MeetingTest {
         meeting.changeParticipants(newParticipants);
 
         List<? extends DomainEvent> domainEvents = meeting.domainEvents();
-        assertThat(domainEvents.get(1)).isExactlyInstanceOf(MeetingParticipantReplaceEvent.class);
-        assertThat(domainEvents.get(2)).isExactlyInstanceOf(MeetingParticipantReplaceEvent.class);
-        MeetingParticipantReplaceEvent removeEvent = (MeetingParticipantReplaceEvent) domainEvents.get(1);
-        MeetingParticipantReplaceEvent addEvent = (MeetingParticipantReplaceEvent) domainEvents.get(2);
+        assertThat(domainEvents.get(2)).isExactlyInstanceOf(MeetingParticipantAdditionEvent.class);
+        assertThat(domainEvents.get(1)).isExactlyInstanceOf(MeetingParticipantRemovalEvent.class);
+        MeetingParticipantAdditionEvent addEvent = (MeetingParticipantAdditionEvent) domainEvents.get(2);
+        MeetingParticipantRemovalEvent removeEvent = (MeetingParticipantRemovalEvent) domainEvents.get(1);
 
         assertThat(removeEvent).extracting(
-                MeetingParticipantReplaceEvent::sourceKey, MeetingParticipantReplaceEvent::removedParticipantIds, MeetingParticipantReplaceEvent::addParticipantIds
+                MeetingParticipantRemovalEvent::sourceKey, MeetingParticipantRemovalEvent::targetParticipantIds
         ).containsExactly(
-                meeting.getSourceKey(), Set.of(deleteTargetEmp.getId()), null
+                meeting.getSourceKey(), Set.of(deleteTargetEmp.getId())
         );
 
         assertThat(addEvent).extracting(
-                MeetingParticipantReplaceEvent::sourceKey, MeetingParticipantReplaceEvent::removedParticipantIds, MeetingParticipantReplaceEvent::addParticipantIds
+                MeetingParticipantAdditionEvent::sourceKey, MeetingParticipantAdditionEvent::targetParticipantIds
         ).containsExactly(
-                meeting.getSourceKey(), null, Set.of(newEmp.getId())
+                meeting.getSourceKey(), Set.of(newEmp.getId())
         );
     }
 

@@ -3,16 +3,16 @@ package com.haruon.groupware.application.exception;
 import lombok.Getter;
 
 @Getter
-public class ApplicationException extends RuntimeException implements ErrorCodeCarrier {
+public class ApplicationException extends RuntimeException {
 
-    private final ErrorCode errorCode;
+    private final ApplicationErrorCode errorCode;
 
-    public ApplicationException(ErrorCode errorCode) {
+    public ApplicationException(ApplicationErrorCode errorCode) {
         super(errorCode.getMessage());
         this.errorCode = errorCode;
     }
 
-    public ApplicationException(ErrorCode errorCode, String message) {
+    public ApplicationException(ApplicationErrorCode errorCode, String message) {
         super(message);
         this.errorCode = errorCode;
     }

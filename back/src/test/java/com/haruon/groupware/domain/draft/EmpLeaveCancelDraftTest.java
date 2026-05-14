@@ -4,8 +4,6 @@ import com.haruon.groupware.domain.draft.sub.ApprovalRole;
 import com.haruon.groupware.domain.draft.sub.ApproversParam;
 import com.haruon.groupware.domain.draft.sub.LeaveType;
 import com.haruon.groupware.domain.empInfo.Emp;
-import com.haruon.groupware.domain.event.DomainEvent;
-import com.haruon.groupware.domain.event.byLeaveApprove.LeaveCancelledEvent;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -36,24 +34,6 @@ class EmpLeaveCancelDraftTest {
 
 
         assertThat(cancelSubmitted.getSourceKey()).isEqualTo(approved.getSourceKey());
-    }
-
-    @Test
-    @DisplayName("연가취소기안이 결재완료되면, 연가일정취소 이벤트가 발행")
-    void create_cancel_submitted() {
-        Emp drafter = getApprovedEmp("202601001", "drafter");
-        LeaveDraft approved = getApproved(drafter);
-        String sourceKey = approved.getSourceKey();
-        ApproversParam approversParam = new ApproversParam(ApprovalRole.APPROVER, 1, getApprovedEmp());
-        LeaveCancelDraft cancelSubmitted = LeaveCancelDraft.createSubmitted(drafter, "test", "test", sourceKey, List.of(approversParam), LocalDateTime.of(2026,4,1,1,1,1));
-
-        cancelSubmitted.approve(approversParam.approver(), LocalDateTime.of(2026,5,1,0,0,0));
-
-        DomainEvent domainEvent = cancelSubmitted.domainEvents().getFirst();
-
-        assertThat(domainEvent).isExactlyInstanceOf(LeaveCancelledEvent.class);
-        LeaveCancelledEvent leaveCancelEvent = (LeaveCancelledEvent) domainEvent;
-        assertThat(leaveCancelEvent.sourceKey()).isEqualTo(sourceKey);
     }
 
     private LeaveDraft getApproved(Emp drafter) {

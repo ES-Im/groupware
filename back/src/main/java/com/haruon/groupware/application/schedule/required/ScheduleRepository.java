@@ -22,4 +22,6 @@ public interface ScheduleRepository extends Repository<Schedule, Long> {
     List<Schedule> findBySourceKey(String sourceKey);
 
     List<Schedule> saveAll(Iterable<Schedule> schedules);
+
+    void flush();
 }

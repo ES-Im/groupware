@@ -5,6 +5,7 @@ import com.haruon.groupware.application.draft.required.DraftRepository;
 import com.haruon.groupware.application.draft.service.dto.*;
 import com.haruon.groupware.application.empInfo.required.DeptRepository;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.schedule.required.ScheduleRepository;
 import com.haruon.groupware.domain.AbstractEntity;
 import com.haruon.groupware.domain.draft.Approver;
 import com.haruon.groupware.domain.draft.BusinessTripDraft;
@@ -13,6 +14,7 @@ import com.haruon.groupware.domain.draft.sub.ApprovalRole;
 import com.haruon.groupware.domain.empInfo.Emp;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -27,17 +29,21 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@Slf4j
 @TestIntegrationConfig
 record BusinessTripDraftManagementTest(
         DraftRepository draftRepository,
         DeptRepository deptRepository,
+        ScheduleRepository scheduleRepository,
         BusinessTripDraftManagement businessTripDraftManagement,
         EmpRepository empRepository,
         EntityManager entityManager
 ) {
 
+
     @AfterEach
     void tearDown() {
+        scheduleRepository.deleteAll();
         draftRepository.deleteAll();
         empRepository.deleteAll();
         deptRepository.deleteAll();
