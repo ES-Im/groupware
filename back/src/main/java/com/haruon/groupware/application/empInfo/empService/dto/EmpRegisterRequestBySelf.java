@@ -27,4 +27,5 @@ public record EmpRegisterRequestBySelf (
                 RegexpValidator.empIdCheck(loginId);
                 RegexpValidator.passwordCheck(rawPassword);
         }
+
 }

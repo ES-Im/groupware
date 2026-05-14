@@ -417,7 +417,6 @@ record EmpAccountManagerTest(
                         .empStatus(newEmpStatus)
                         .systemRoleCode(newSystemRoleCode)
                         .belongingsParam(newBelongingsParam)
-                        .companyDomain("groupware.com")
                 .build()
         );
 

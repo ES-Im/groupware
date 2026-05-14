@@ -1,4 +1,4 @@
-package com.haruon.groupware.adapter.persistence.franchise;
+package com.haruon.groupware.adapter.persistence;
 
 import com.haruon.groupware.application.franchise.required.FranchiseSalesQueryRepository;
 import com.haruon.groupware.application.franchise.service.dto.SalesResult;

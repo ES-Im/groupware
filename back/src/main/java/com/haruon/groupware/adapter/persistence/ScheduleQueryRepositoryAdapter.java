@@ -1,4 +1,4 @@
-package com.haruon.groupware.adapter.persistence.schedule;
+package com.haruon.groupware.adapter.persistence;
 
 import com.haruon.groupware.application.schedule.required.ScheduleQueryRepository;
 import com.haruon.groupware.domain.schedule.QScheduleParticipant;

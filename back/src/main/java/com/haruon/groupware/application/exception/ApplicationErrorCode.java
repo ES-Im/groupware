@@ -4,7 +4,7 @@ import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
 @Getter
-public enum ErrorCode {
+public enum ApplicationErrorCode {
 
     // 공통
     REQUIRED_VALUE_MISSING_EXCEPTION(HttpStatus.BAD_REQUEST, "COMMON_001", "필수 값이 누락되었습니다."),
@@ -98,7 +98,7 @@ public enum ErrorCode {
     private final String code;
     private final String message;
 
-    ErrorCode(HttpStatus status, String code, String message) {
+    ApplicationErrorCode(HttpStatus status, String code, String message) {
         this.status = status;
         this.code = code;
         this.message = message;

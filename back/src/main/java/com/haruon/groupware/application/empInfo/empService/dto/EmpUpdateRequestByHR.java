@@ -53,19 +53,12 @@ public record EmpUpdateRequestByHR(
 
         // 직원 소속 정보
         @Nullable
-        EmpBelongingsParam belongingsParam,
-
-        @Nullable
-        String companyDomain
+        EmpBelongingsParam belongingsParam
 
 ) {
 
     public EmpUpdateRequestByHR {
         if(editorId == null || targetEmpId == null) throw new RequiredValueMissingException();
-
-        if(loginId != null && companyDomain == null) {
-            throw new RequiredValueMissingException();
-        }
 
         if(empName == null && loginId == null
                 && newRawPassword == null && extensionNo == null
