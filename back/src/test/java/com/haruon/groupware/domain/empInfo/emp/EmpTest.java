@@ -211,11 +211,6 @@ class EmpTest {
                         .empName("EditedName")
                         .build()),
 
-                Arguments.of("사번을 변경할 수 있다.", EmpAdminUpdateTestParam.builder()
-                        .companyDomain("@haruon.com")
-                        .empId("202603999")
-                        .build()),
-
                 Arguments.of("비밀번호를 변경할 수 있다.", EmpAdminUpdateTestParam.builder()
                         .companyDomain("@haruon.com")
                         .newRawPassword(")p9o8i7u6y")
@@ -262,8 +257,6 @@ class EmpTest {
         // when
         emp.changeInfoByHR(
                 params.empName(),
-                params.empId(),
-                createEmail(params.empId(), params.companyDomain()),
                 params.newRawPassword(),
                 params.extensionNo(),
                 params.empStatus(),
@@ -496,8 +489,6 @@ class EmpTest {
 
         emp.changeInfoByHR(
                 null,
-                null,
-                null,
                 "!Q2w3e4r5t_",
                 null,
                 null,
@@ -548,8 +539,6 @@ class EmpTest {
             registeredEmp.changeInfoByHR(
                     null,
                     null,
-                    null,
-                    null,
                     "111-1111",
                     null,
                     null,
@@ -578,9 +567,8 @@ class EmpTest {
         ).isInstanceOf(IllegalStateException.class);
 
         assertThatThrownBy(() ->
-            approvedEmp.changeInfoByHR(
-                    null,
-                    null,
+            approvedEmp
+                    .changeInfoByHR(
                     null,
                     null,
                     null,

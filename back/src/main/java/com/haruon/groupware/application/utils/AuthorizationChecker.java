@@ -28,6 +28,18 @@ public class AuthorizationChecker {
     }
 
     /**
+     * ACTIVE 사원 검증(loginId)
+     */
+    public static Emp findActiveEmpByLoginId(EmpRepository empRepository, String loginId) {
+        if(loginId == null) throw new RequiredValueMissingException();
+
+        return empRepository
+                .findByLoginId(loginId)
+                .filter(e -> e.getStatus().equals(EmpStatus.ACTIVE))
+                .orElseThrow(ActiveEmployeeNotFoundException::new);
+    }
+
+    /**
      * ADMIN 롤 권한 검증
      */
     public static void checkAdminById(EmpRepository empRepository, Long id) {

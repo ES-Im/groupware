@@ -11,10 +11,12 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
 
-  redis:
+  redis:      #todo 운영 서버에서는 비밀번호, bind 0.0.0.0, replication(선택) 반드시 설정
     image: redis:7.2
     ports:
       - ${REDIS_PORT}
+#    command:
+#      - redis-server --requirepass ${REDIS_PASSWORD}
 
 volumes:
   mysql_data:

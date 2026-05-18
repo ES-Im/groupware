@@ -13,7 +13,7 @@ import com.haruon.groupware.application.utils.AuthorizationChecker;
 import com.haruon.groupware.application.utils.CompanyPolicyPort;
 import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.empInfo.EmpLeave;
-import com.haruon.groupware.domain.empInfo.PasswordEncoder;
+import com.haruon.groupware.domain.empInfo.EmpPasswordEncoder;
 import com.haruon.groupware.domain.empInfo.enums.EmpStatus;
 import com.haruon.groupware.domain.shared.Email;
 import jakarta.transaction.Transactional;
@@ -33,7 +33,7 @@ import static java.util.Objects.requireNonNull;
 @Transactional
 public class EmpService extends LeaveCalculator implements EmpAccountManager {
 
-    private final PasswordEncoder encoder;
+    private final EmpPasswordEncoder encoder;
     private final EmpRepository empRepository;
     private final EmpLeaveRepository empLeaveRepository;
     private final CompanyPolicyPort companyPolicy;
@@ -100,7 +100,7 @@ public class EmpService extends LeaveCalculator implements EmpAccountManager {
     @Override
     public void updateEmpFileBySelf(EmpUpdateRequestBySelf request) {
         requireNonNull(request);
-        Emp emp = findActiveEmpById(empRepository, request.empId());
+        Emp emp = findActiveEmpByLoginId(empRepository, request.loginId());
 
         EmpFileReplaceParam fileParam = requireNonNull(request.fileRequest());
 
@@ -132,15 +132,10 @@ public class EmpService extends LeaveCalculator implements EmpAccountManager {
 
         Emp emp = findActiveEmpById(empRepository, request.targetEmpId());
 
-        Email newEmail = request.loginId() != null
-                ? makeEmailByLoginId(request.loginId())
-                : null;
         if(request.belongingsParam() != null) updateBelongingsByHR(request);
 
         emp.changeInfoByHR(
                 request.empName(),
-                request.loginId(),
-                newEmail,
                 request.newRawPassword(),
                 request.extensionNo(),
                 request.empStatus(),
@@ -164,7 +159,7 @@ public class EmpService extends LeaveCalculator implements EmpAccountManager {
     @Override
     public void updateInfoBySelf(EmpUpdateRequestBySelf empRequest) {
         requireNonNull(empRequest);
-        Emp emp = findActiveEmpById(empRepository, empRequest.empId());
+        Emp emp = findActiveEmpByLoginId(empRepository, empRequest.loginId());
 
         emp.changeInfoBySelf(
                 empRequest.extensionNo(),
@@ -186,7 +181,7 @@ public class EmpService extends LeaveCalculator implements EmpAccountManager {
     public void updateFileActiveStatusBySelf(EmpUpdateRequestBySelf request) {
         requireNonNull(request.fileStatusParam());
 
-        updateFileStatus(request.empId(), request.fileStatusParam());
+        updateFileStatus(request.loginId(), request.fileStatusParam());
     }
 
     private Email makeEmailByLoginId(String loginId) {
@@ -205,6 +200,17 @@ public class EmpService extends LeaveCalculator implements EmpAccountManager {
         requireNonNull(request);
 
         Emp emp = findActiveEmpById(empRepository, empId);
+
+        emp.changeFileActiveStatus(
+                request.fileId(),
+                request.targetActive()
+        );
+    }
+
+    private void updateFileStatus(String loginId, EmpFileStatusChangeParam request) {
+        requireNonNull(request);
+
+        Emp emp = findActiveEmpByLoginId(empRepository, loginId);
 
         emp.changeFileActiveStatus(
                 request.fileId(),

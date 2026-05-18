@@ -58,14 +58,14 @@ public class Emp extends AbstractEntity {
             String loginId,
             String rawPassword,
             Email email,
-            PasswordEncoder passwordEncoder)
+            EmpPasswordEncoder empPasswordEncoder)
     {
         Emp emp = new Emp();
 
         emp.empNo = requireNonNull(empNo);
         emp.empName = requireNonNull(empName);
         emp.loginId = requireNonNull(loginId);
-        emp.empPassword = requireNonNull(passwordEncoder.encode(rawPassword));
+        emp.empPassword = requireNonNull(empPasswordEncoder.encode(rawPassword));
         emp.email = requireNonNull(email);
 
         emp.status = EmpStatus.PENDING;
@@ -183,7 +183,7 @@ public class Emp extends AbstractEntity {
             @Nullable String extensionNo,
             String currentPassword,
             @Nullable String newRawPassword,
-            PasswordEncoder encoder
+            EmpPasswordEncoder encoder
     ) {
         ensureActive();
         checkPassword(currentPassword, encoder);
@@ -218,24 +218,20 @@ public class Emp extends AbstractEntity {
 
     public void changeInfoByHR(
             @Nullable String empName,
-            @Nullable String loginId,
-            @Nullable Email email,
             @Nullable String newRawPassword,
             @Nullable String extensionNo,
             @Nullable EmpStatus empStatus,
             @Nullable SystemRoleCode systemRoleCode,
             @Nullable LocalDate hiredAt,
-            @Nullable PasswordEncoder encoder
+            @Nullable EmpPasswordEncoder encoder
     ) {
         ensureActive();
 
-        boolean hasChanges = empName != null || loginId != null || email != null || newRawPassword != null ||
+        boolean hasChanges = empName != null || newRawPassword != null ||
                 extensionNo != null || empStatus != null || systemRoleCode != null || hiredAt != null;
         state(hasChanges, "변경할 내용이 없습니다.");
 
         if(empName != null) changeEmpName(empName);
-
-        if(loginId != null) changeLoginIdAndEmail(loginId, email);
 
         if(newRawPassword != null) changePassword(newRawPassword, encoder);
 
@@ -261,14 +257,6 @@ public class Emp extends AbstractEntity {
         this.status = newEmpStatus;
     }
 
-    private void changeLoginIdAndEmail(String newEmpId, Email email) {
-        requireNonNull(newEmpId);
-        requireNonNull(email);
-
-        this.loginId = newEmpId;
-        this.email = email;
-    }
-
     private void changeEmpName(String newEmpName) {
         this.empName = newEmpName;
     }
@@ -278,14 +266,14 @@ public class Emp extends AbstractEntity {
         this.systemRoles.add(newSystemRoleCode);
     }
 
-    private void changePassword(String newRawPassword, PasswordEncoder encoder) {
+    private void changePassword(String newRawPassword, EmpPasswordEncoder encoder) {
         requireNonNull(encoder, "비밀번호 변경을 위해 encoder가 필요합니다.");
         state(!encoder.matches(newRawPassword, this.empPassword), "새 비밀번호는 현재 비밀번호와 달라야 합니다.");
 
         this.empPassword = encoder.encode(newRawPassword);
     }
 
-    private void checkPassword(String inputPassword, PasswordEncoder encoder) {
+    private void checkPassword(String inputPassword, EmpPasswordEncoder encoder) {
         state(encoder.matches(inputPassword, this.empPassword), "현재 비밀번호가 일치하지 않습니다.");
     }
 
