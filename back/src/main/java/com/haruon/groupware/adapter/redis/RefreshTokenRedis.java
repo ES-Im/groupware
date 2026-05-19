@@ -42,6 +42,7 @@ public class RefreshTokenRedis implements RefreshTokenStore {
     @Override
     public void deleteRefreshToken(String loginId) {
         redisTemplate.delete(key(loginId));
+        log.info("로그아웃 성공");
     }
 
     private String key(String loginId) {

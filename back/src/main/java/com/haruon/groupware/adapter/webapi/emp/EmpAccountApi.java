@@ -1,9 +1,9 @@
 package com.haruon.groupware.adapter.webapi.emp;
 
 import com.haruon.groupware.adapter.security.empDtails.EmpDetails;
-import com.haruon.groupware.adapter.webapi.emp.dto.EmpInfoResponse;
-import com.haruon.groupware.adapter.webapi.emp.dto.EmpRegisterRequest;
-import com.haruon.groupware.adapter.webapi.emp.dto.EmpUpdateRequest;
+import com.haruon.groupware.adapter.webapi.emp.dto.request.EmpRegisterRequest;
+import com.haruon.groupware.adapter.webapi.emp.dto.request.EmpUpdateRequest;
+import com.haruon.groupware.adapter.webapi.emp.dto.response.EmpInfoResponse;
 import com.haruon.groupware.application.empInfo.provided.EmpAccountManager;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,8 +20,11 @@ public class EmpAccountApi {
     
     private final EmpAccountManager empAccountManager;
 
+
     @PostMapping
-    public ResponseEntity<Void> register(@RequestBody @Valid EmpRegisterRequest request) {
+    public ResponseEntity<Void> register(
+            @RequestBody @Valid EmpRegisterRequest request
+    ) {
         empAccountManager.registerEmp(request.toRequestBySelf());
 
         return ResponseEntity.ok().build();
@@ -49,6 +52,7 @@ public class EmpAccountApi {
 
         return ResponseEntity.ok().build();
     }
+
 
 
 

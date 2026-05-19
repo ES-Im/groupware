@@ -2,12 +2,12 @@ package com.haruon.groupware.adapter.webapi.auth;
 
 import com.haruon.groupware.adapter.security.JwtCookieManager;
 import com.haruon.groupware.adapter.security.empDtails.EmpDetails;
+import com.haruon.groupware.adapter.webapi.emp.dto.response.LoginResponse;
 import com.haruon.groupware.application.auth.dto.JwtResponse;
 import com.haruon.groupware.application.auth.provided.AuthManagement;
 import com.haruon.groupware.application.exception.common.role.PermissionDeniedException;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -22,14 +22,14 @@ public class AuthApi {
     private final JwtCookieManager jwtCookieManager;
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(
+    public ResponseEntity<LoginResponse> login(
             @RequestBody @Valid EmpLoginRequest request,
             HttpServletResponse response
     ) {
-        JwtResponse tokens = authManagement.login(request.loginId, request.password);
+        JwtResponse tokens = authManagement.login(request.loginId(), request.password());
         jwtCookieManager.setRefreshCookie(tokens.refreshToken(), response);
 
-        return ResponseEntity.ok(tokens.accessToken());
+        return ResponseEntity.ok(new LoginResponse(tokens.accessToken()));
     }
 
     @PostMapping("/logout")
@@ -52,8 +52,6 @@ public class AuthApi {
         return ResponseEntity.ok(accessToken);
     }
 
-    public record EmpLoginRequest(
-            @NotBlank(message = "아이디를 입력해주세요") String loginId,
-            @NotBlank(message = "비밀번호를 입력해주세요") String password
-    ) { }
+
+
 }

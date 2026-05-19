@@ -1,0 +1,38 @@
+package com.haruon.groupware.adapter.docs;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.haruon.groupware.adapter.webapi.exception.GlobalExceptionHandler;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.restdocs.RestDocumentationContextProvider;
+import org.springframework.restdocs.RestDocumentationExtension;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
+import java.nio.charset.StandardCharsets;
+
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
+
+@ExtendWith(RestDocumentationExtension.class)
+public abstract class RestDocsSupport {
+
+    protected MockMvc mockMvc;
+    protected ObjectMapper objectMapper = new ObjectMapper();
+
+    @BeforeEach
+    void setUp(RestDocumentationContextProvider provider) {
+        this.mockMvc = MockMvcBuilders.standaloneSetup(initController())
+                .setMessageConverters(
+                        new StringHttpMessageConverter(StandardCharsets.UTF_8),
+                        new MappingJackson2HttpMessageConverter(objectMapper)
+                )
+                .setControllerAdvice(GlobalExceptionHandler.class)
+                .apply(documentationConfiguration(provider))
+                .build();
+
+    }
+
+    protected abstract Object initController();
+}

@@ -92,6 +92,7 @@ dependencies {
     annotationProcessor("jakarta.annotation:jakarta.annotation-api")
 
     // mock
+    mockitoAgent("org.mockito:mockito-core:5.20.0")
 
 
 }
@@ -102,7 +103,11 @@ nullaway {
 
 tasks.withType<Test> {
     useJUnitPlatform()
-    jvmArgs("-javaagent:${mockitoAgent.asPath}")
+
+    val mockitoCoreJar = mockitoAgent.files
+        .single { it.name.startsWith("mockito-core") }
+
+    jvmArgs("-javaagent:${mockitoCoreJar.absolutePath}")
 }
 
 
