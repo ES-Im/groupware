@@ -4,7 +4,7 @@ import com.haruon.groupware.domain.draft.sub.ApprovalRole;
 import com.haruon.groupware.domain.draft.sub.ApproversParam;
 import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.event.DomainEvent;
-import com.haruon.groupware.domain.event.byBusinessTripApprove.BusinessTripCancelledEvent;
+import com.haruon.groupware.domain.event.schedule.ScheduleCancellationEvent;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -35,6 +35,7 @@ class BusinessTripCancelDraftTest {
 
 
         assertThat(cancelSubmitted.getSourceKey()).isEqualTo(approved.getSourceKey());
+
     }
 
     @Test
@@ -49,10 +50,9 @@ class BusinessTripCancelDraftTest {
         cancelSubmitted.approve(approversParam.approver(), LocalDateTime.of(2026,5,1,0,0,0));
 
         DomainEvent domainEvent = cancelSubmitted.domainEvents().getFirst();
+        ScheduleCancellationEvent event = (ScheduleCancellationEvent) domainEvent;
 
-        assertThat(domainEvent).isExactlyInstanceOf(BusinessTripCancelledEvent.class);
-        BusinessTripCancelledEvent BusinessTripCancelEvent = (BusinessTripCancelledEvent) domainEvent;
-        assertThat(BusinessTripCancelEvent.sourceKey()).isEqualTo(sourceKey);
+        assertThat(event.sourceKey()).isEqualTo(sourceKey);
     }
 
     private BusinessTripDraft getApproved(Emp drafter) {

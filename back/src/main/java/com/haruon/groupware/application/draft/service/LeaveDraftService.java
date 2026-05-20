@@ -157,6 +157,7 @@ public class LeaveDraftService extends CommonDraftService implements LeaveDraftM
         if (draft.getApproval().getStatus().equals(ApprovalStatus.APPROVED)) {
             reflectUsage(draft);
         }
+        leaveDraftRepository.save(draft);
     }
 
     private void reflectUsage(LeaveDraft draft) {

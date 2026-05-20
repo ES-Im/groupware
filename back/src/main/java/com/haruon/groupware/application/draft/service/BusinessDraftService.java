@@ -89,7 +89,7 @@ public class BusinessDraftService extends CommonDraftService implements Business
     @Override
     public void updateDraft(BusinessTripDraftUpdateRequest req) {
         CommonDraftUpdateRequest commonReq = req.param();
-        BusinessTripDraft businessTripDraft = getBusinessTripDraft(commonReq.draftId(), commonReq.drafterId());
+        BusinessTripDraft businessTripDraft = getBusinessTripDraftByDraftIdAndDrafterId(commonReq.draftId(), commonReq.drafterId());
 
         businessTripDraft.editBusinessTripDraft(
                 commonReq.title(), commonReq.content(), req.startAt(), req.endAt(), req.destination(), req.purpose()
@@ -98,13 +98,35 @@ public class BusinessDraftService extends CommonDraftService implements Business
 
     @Override
     public void updateParticipants(long draftId, long drafter, Set<Long> participantId) {
-        BusinessTripDraft businessTripDraft = getBusinessTripDraft(draftId, drafter);
+        BusinessTripDraft businessTripDraft = getBusinessTripDraftByDraftIdAndDrafterId(draftId, drafter);
         List<Emp> empListById = getEmpListById(participantId);
 
         businessTripDraft.changeParticipants(empListById);
     }
 
-    private BusinessTripDraft getBusinessTripDraft(long draftId, long drafterId) {
+    @Override
+    public void approve(long draftId, long approverId, LocalDateTime approvedAt) {
+        BusinessTripDraft businessTripDraft = getBusinessTripDraftByDraftId(draftId);
+
+        businessTripDraft.approve(
+                findActiveEmpById(approverId),
+                approvedAt
+        );
+
+        businessTripDraftRepository.save(businessTripDraft);
+    }
+
+    private BusinessTripDraft getBusinessTripDraftByDraftId(long draftId) {
+        Draft draft = findDraftByDraftId(draftId);
+
+        if(!(draft instanceof BusinessTripDraft businessTripDraft)) {
+            throw new DraftTypeMismatchException();
+        }
+
+        return businessTripDraft;
+    }
+
+    private BusinessTripDraft getBusinessTripDraftByDraftIdAndDrafterId(long draftId, long drafterId) {
         Draft draft = findDraftByDraftIdAndEmpId(draftId, drafterId);
 
         if(!(draft instanceof BusinessTripDraft businessTripDraft)) {

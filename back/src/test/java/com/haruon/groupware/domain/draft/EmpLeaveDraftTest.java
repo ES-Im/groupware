@@ -5,8 +5,7 @@ import com.haruon.groupware.domain.draft.sub.ApproversParam;
 import com.haruon.groupware.domain.draft.sub.LeaveType;
 import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.event.DomainEvent;
-import com.haruon.groupware.domain.event.byLeaveApprove.LeaveApprovedEvent;
-import com.haruon.groupware.domain.schedule.ScheduleType;
+import com.haruon.groupware.domain.event.schedule.ScheduleCreationEvent;
 import lombok.Builder;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,6 +20,7 @@ import java.util.stream.Stream;
 import static com.haruon.groupware.domain.shared.EmpFixture.getApprovedEmp;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class EmpLeaveDraftTest {
 
@@ -197,24 +197,14 @@ public class EmpLeaveDraftTest {
 
         List<? extends DomainEvent> domainEvents = submitted.domainEvents();
         DomainEvent domainEvent = domainEvents.getFirst();
-        assertThat(domainEvent).isExactlyInstanceOf(LeaveApprovedEvent.class);
 
-        LeaveApprovedEvent leaveApprovedEvent = (LeaveApprovedEvent) domainEvent;
-        assertThat(leaveApprovedEvent).extracting(
-                LeaveApprovedEvent::sourceKey, LeaveApprovedEvent::drafterEmpId, LeaveApprovedEvent::title,
-                LeaveApprovedEvent::content, LeaveApprovedEvent::leaveStartAt, LeaveApprovedEvent::leaveEndAt,
-                LeaveApprovedEvent::leaveType, LeaveApprovedEvent::scheduleType
-        ).containsExactly(
-                submitted.getSourceKey(), drafter.getId(), title,
-                content, startAt, endAt,
-                type, ScheduleType.LEAVE
-        );
+        ScheduleCreationEvent scheduleCreationEvent = (ScheduleCreationEvent) domainEvent;
+        assertEquals(submitted.getSourceKey(), scheduleCreationEvent.sourceKey());
     }
 
     @Test
     @DisplayName("휴가 기안서 승인이 마무리되지않으면 휴가승인 이벤트가 발생하지 않는다.")
     void leave_not_approved_event() {
-        // given
         Emp drafter = getApprovedEmp("202601001", "drafter");
         Emp approver1 = getApprovedEmp("202601002", "approver1");
         Emp approver2 = getApprovedEmp("202601003", "approver2");
@@ -239,7 +229,6 @@ public class EmpLeaveDraftTest {
         List<? extends DomainEvent> domainEvents = submitted.domainEvents();
         assertThat(domainEvents).isEmpty();
     }
-
 
     private static LeaveDraft getLeaveDraft(LocalDateTime startAt, LocalDateTime endAt, LeaveType leaveType) {
         return LeaveDraft.createDraft(

@@ -2,10 +2,10 @@ package com.haruon.groupware.domain.meeting;
 
 import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.event.AbstractEventAggregateRoot;
-import com.haruon.groupware.domain.event.byMeetingReservation.MeetingCanceledEvent;
-import com.haruon.groupware.domain.event.byMeetingReservation.MeetingChangedEvent;
-import com.haruon.groupware.domain.event.byMeetingReservation.MeetingParticipantReplaceEvent;
-import com.haruon.groupware.domain.event.byMeetingReservation.MeetingReservedEvent;
+import com.haruon.groupware.domain.event.schedule.MeetingParticipantAdditionEvent;
+import com.haruon.groupware.domain.event.schedule.MeetingParticipantRemovalEvent;
+import com.haruon.groupware.domain.event.schedule.ScheduleCancellationEvent;
+import com.haruon.groupware.domain.event.schedule.ScheduleCreationEvent;
 import jakarta.persistence.Entity;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -79,8 +79,7 @@ public class Meeting extends AbstractEventAggregateRoot {
             meeting.addParticipant(participant);
         }
 
-        Set<Long> participantIds = getEmpIdsFromParticipants(meeting.meetingParticipants);
-        meeting.issueMeetingReservedEvent(participantIds);
+        meeting.issueMeetingReservedEvent();
 
         return meeting;
     }
@@ -91,8 +90,7 @@ public class Meeting extends AbstractEventAggregateRoot {
         state(!this.isCancel, "이미 취소된 예약임");
         this.isCancel = true;
 
-        Set<Long> participantIds = getEmpIdsFromParticipants(this.meetingParticipants);
-        this.issueMeetingCanceledEvent(participantIds);
+        this.issueMeetingCanceledEvent();
     }
 
     public void changeReservationInfo(
@@ -119,8 +117,6 @@ public class Meeting extends AbstractEventAggregateRoot {
             state(!title.isBlank(), "회의 title에 빈값이 올 수 없음");
             this.title = title;
         }
-
-        editMeetingScheduleEvent();
     }
 
     public void changeParticipants(List<Emp> newParticipants) {
@@ -137,8 +133,10 @@ public class Meeting extends AbstractEventAggregateRoot {
 
         List<MeetingParticipant> removeTargets = this.meetingParticipants.stream()
                 .filter(mp -> !newParticipantSet.contains(mp.getEmp())).toList();
+
         List<Emp> addTargets = newParticipantSet.stream()
                 .filter(emp -> !currentEmpSet.contains(emp)).toList();
+
         if (removeTargets.isEmpty() && addTargets.isEmpty()) return;
 
         for (MeetingParticipant removeTarget : removeTargets) this.meetingParticipants.remove(removeTarget);
@@ -178,64 +176,20 @@ public class Meeting extends AbstractEventAggregateRoot {
                 .map(p -> p.getEmp().getId()).collect(Collectors.toSet());
     }
 
-    private void editMeetingScheduleEvent() {
-        registerEvent(
-                MeetingChangedEvent.builder()
-                        .sourceKey(this.sourceKey)
-                        .meetingRoomId(this.meetingRoom.getId())
-                        .title(this.title)
-                        .meetingDate(this.meetingDate)
-                        .startAt(this.startAt)
-                        .endAt(this.endAt)
-                        .participantEmpIds(
-                                getEmpIdsFromParticipants(
-                                        this.meetingParticipants
-                                )
-                        )
-                .build()
-        );
+    private void issueMeetingReservedEvent() {
+        registerEvent(new ScheduleCreationEvent(this.sourceKey));
     }
 
-    private void issueMeetingReservedEvent(Set<Long> targetEmpIds) {
-        registerEvent(
-                MeetingReservedEvent.builder()
-                        .sourceKey(this.sourceKey)
-                        .meetingRoomId(this.meetingRoom.getId())
-                        .reserverId(this.emp.getId())
-                        .title(this.title)
-                        .meetingDate(this.meetingDate)
-                        .startAt(this.startAt)
-                        .endAt(this.endAt)
-                        .participantIds(targetEmpIds)
-                        .build()
-        );
-    }
-
-    private void issueMeetingCanceledEvent(Set<Long> targetEmpIds) {
-        registerEvent(
-                MeetingCanceledEvent.builder()
-                        .sourceKey(this.sourceKey)
-                        .participantIds(targetEmpIds)
-                .build()
-        );
+    private void issueMeetingCanceledEvent() {
+        registerEvent(new ScheduleCancellationEvent(this.sourceKey));
     }
 
     private void removeParticipantsEvent(Set<Long> targetEmpIds) {
-        registerEvent(
-                MeetingParticipantReplaceEvent.builder()
-                        .sourceKey(this.sourceKey)
-                        .removedParticipantIds(targetEmpIds)
-                .build()
-        );
+        registerEvent(new MeetingParticipantRemovalEvent(this.sourceKey, targetEmpIds));
     }
 
     private void addParticipantsEvent(Set<Long> targetEmpIds) {
-        registerEvent(
-                MeetingParticipantReplaceEvent.builder()
-                        .sourceKey(this.sourceKey)
-                        .addParticipantIds(targetEmpIds)
-                .build()
-        );
+        registerEvent(new MeetingParticipantAdditionEvent(this.sourceKey, targetEmpIds));
     }
 
 

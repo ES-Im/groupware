@@ -2,7 +2,7 @@ package com.haruon.groupware.domain.draft;
 
 import com.haruon.groupware.domain.draft.sub.ApproversParam;
 import com.haruon.groupware.domain.empInfo.Emp;
-import com.haruon.groupware.domain.event.byBusinessTripApprove.BusinessTripApprovedEvent;
+import com.haruon.groupware.domain.event.schedule.ScheduleCreationEvent;
 import jakarta.persistence.Entity;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -182,23 +182,8 @@ public class BusinessTripDraft extends Draft {
         this.participants.add(participant);
     }
 
-    private static void publishBusinessTripApprovedEvent(BusinessTripDraft submitted) {
-        submitted.registerEvent(
-                BusinessTripApprovedEvent.builder()
-                        .sourceKey(submitted.sourceKey)
-                        .drafterEmpId(submitted.emp.getId())
-                        .title(submitted.title)
-                        .content(submitted.content)
-                        .startAt(submitted.startAt)
-                        .endAt(submitted.endAt)
-                        .destination(submitted.destination)
-                        .purpose(submitted.purpose)
-                        .participantsId(submitted.participants.stream()
-                                .map(p -> p.getEmp().getId())
-                                .toList()
-                        )
-                .build()
-        );
+    private void publishBusinessTripApprovedEvent(BusinessTripDraft submitted) {
+        submitted.registerEvent(new ScheduleCreationEvent(submitted.getSourceKey()));
     }
 
 

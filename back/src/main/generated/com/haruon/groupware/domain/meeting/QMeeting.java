@@ -45,6 +45,10 @@ public class QMeeting extends EntityPathBase<Meeting> {
 
     public final TimePath<java.time.LocalTime> startAt = createTime("startAt", java.time.LocalTime.class);
 
+    public final SimplePath<Object> sueMeetingCanceledEvent = createSimple("sueMeetingCanceledEvent", Object.class);
+
+    public final SimplePath<Object> sueMeetingReservedEvent = createSimple("sueMeetingReservedEvent", Object.class);
+
     public final StringPath title = createString("title");
 
     public QMeeting(String variable) {

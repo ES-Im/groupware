@@ -2,7 +2,7 @@ package com.haruon.groupware.domain.draft;
 
 import com.haruon.groupware.domain.draft.sub.ApproversParam;
 import com.haruon.groupware.domain.empInfo.Emp;
-import com.haruon.groupware.domain.event.byLeaveApprove.LeaveCancelledEvent;
+import com.haruon.groupware.domain.event.schedule.ScheduleCancellationEvent;
 import jakarta.persistence.Entity;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -71,9 +71,7 @@ public class LeaveCancelDraft extends Draft {
     }
 
     private void publishLeaveCancelledEvent() {
-        registerEvent(
-                LeaveCancelledEvent.builder().sourceKey(this.sourceKey).build()
-        );
+        registerEvent(new ScheduleCancellationEvent(this.sourceKey));
     }
 
 

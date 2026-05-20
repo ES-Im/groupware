@@ -70,3 +70,7 @@ front/*.sw?
 
 front/.vscode/*
 !front/.vscode/extensions.json
+/docs/security-design-procedure.md
+/docs/todo.md
+/docs/시큐리티.md
+/docs/api_초안.md

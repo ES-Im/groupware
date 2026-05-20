@@ -15,6 +15,7 @@ import com.haruon.groupware.application.meeting.service.dto.MeetingReserveReques
 import com.haruon.groupware.application.meeting.service.dto.MeetingRoomCreateRequest;
 import com.haruon.groupware.application.meeting.service.dto.MeetingRoomFileCreateRequest;
 import com.haruon.groupware.application.meeting.service.dto.MeetingRoomUpdateRequest;
+import com.haruon.groupware.application.schedule.required.ScheduleRepository;
 import com.haruon.groupware.application.utils.FileDto;
 import com.haruon.groupware.domain.empInfo.Dept;
 import com.haruon.groupware.domain.empInfo.Emp;
@@ -46,6 +47,7 @@ record MeetingRoomManagementTest(
         EmpRepository empRepository,
         DeptRepository deptRepository,
         MeetingRoomRepository meetingRoomRepository,
+        ScheduleRepository scheduleRepository,
 
         MeetingRoomManagement meetingRoomManagement,
         MeetingManagement meetingManagement,
@@ -53,6 +55,7 @@ record MeetingRoomManagementTest(
 ) {
     @AfterEach
     void tearDown() {
+        scheduleRepository.deleteAll();
         meetingRepository.deleteAll();
         meetingRoomRepository.deleteAll();
         empRepository.deleteAll();
@@ -88,6 +91,7 @@ record MeetingRoomManagementTest(
                 .isTrue();
     }
 
+    @Transactional
     @Test
     @DisplayName("회의실 등록 테스트 - Facility 권한을 가진 활성사원이라면 회의실 수정이 가능하다")
     void updateMeetingRoom_info_success() {
@@ -285,7 +289,6 @@ record MeetingRoomManagementTest(
                 meetingRoomManagement.deactivate(roomId, emp.getId())
         ).isInstanceOf(ReservedMeetingExistException.class);
     }
-
 
     private long saveMeetingRoom(Emp emp) {
         String roomName = "testRoom";
