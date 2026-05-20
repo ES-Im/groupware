@@ -1,0 +1,20 @@
+ifndef::snippets[]
+:snippets: ../../build/generated-snippets
+endif::[]
+
+= Groupware REST API
+backtony.github.io(부제)
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+:toc: left
+:toclevels: 2
+:sectlinks:
+
+[[AUTH-API]]
+== AUTH API
+
+[[LOGIN]]
+=== LOGIN
+include::api/auth/Login-API.adoc[]
+

@@ -13,7 +13,7 @@ import org.jspecify.annotations.Nullable;
 @Builder
 public record EmpUpdateRequestBySelf (
 
-        Long empId,
+        String loginId,
 
         String currentPassword,
 
@@ -31,7 +31,7 @@ public record EmpUpdateRequestBySelf (
 ) {
 
     public EmpUpdateRequestBySelf {
-        if(empId == null || currentPassword == null) throw new RequiredValueMissingException();
+        if(loginId == null || currentPassword == null) throw new RequiredValueMissingException();
 
         if(currentPassword.isBlank()) throw new BlankValueNotAllowedException();
 

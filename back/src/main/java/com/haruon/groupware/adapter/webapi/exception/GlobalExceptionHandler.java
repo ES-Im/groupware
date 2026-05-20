@@ -1,10 +1,12 @@
 package com.haruon.groupware.adapter.webapi.exception;
 
+import com.haruon.groupware.adapter.webapi.exception.auth.InvalidLoginException;
 import com.haruon.groupware.application.exception.ApplicationException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -38,6 +40,20 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(400)
                 .body(ErrorResponse.from(e));
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ErrorResponse> handleBadCredentials(BadCredentialsException ex) {
+        InvalidLoginException e = new InvalidLoginException();
+
+        log.warn("[BadCredentialsException] message={}, className={}",
+                ex.getMessage(),
+                ex.getClass().getName()
+        );
+
+        return ResponseEntity
+                .status(e.getErrorCode().getStatus())
+                .body(ErrorResponse.from(e.getErrorCode()));
     }
 
     @ExceptionHandler(Exception.class)

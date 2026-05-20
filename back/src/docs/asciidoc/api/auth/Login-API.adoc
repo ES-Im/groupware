@@ -1,0 +1,35 @@
+[tabs%nosync]
+
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/LOGIN/http-request.adoc[]
+_Request fields_
+include::{snippets}/LOGIN/request-fields.adoc[]
+--
+Response (200)::
++
+--
+_HTTP response_
+include::{snippets}/LOGIN/http-response.adoc[]
+
+_Response cookie_
+include::{snippets}/LOGIN/response-cookies.adoc[]
+
+_Response fields_
+include::{snippets}/LOGIN/response-fields.adoc[]
+
+--
+Response (401)::
++
+--
+_HTTP response_
+include::{snippets}/LOGIN_FAIL/http-response.adoc[]
+
+_Response fields_
+include::{snippets}/LOGIN_FAIL/response-fields.adoc[]
+
+--
+====

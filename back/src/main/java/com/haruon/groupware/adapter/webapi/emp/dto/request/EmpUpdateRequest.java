@@ -1,9 +1,11 @@
-package com.haruon.groupware.adapter.webapi.emp.dto;
+package com.haruon.groupware.adapter.webapi.emp.dto.request;
 
+import com.haruon.groupware.adapter.security.empDtails.EmpDetails;
 import com.haruon.groupware.application.empInfo.empService.dto.EmpUpdateRequestBySelf;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 import static com.haruon.groupware.domain.shared.RegexpUtil.*;
 
@@ -37,9 +39,11 @@ public record EmpUpdateRequest(
 
 ) {
 
-    public EmpUpdateRequestBySelf toEmpUpdateRequestBySelf() {
+    public EmpUpdateRequestBySelf toEmpUpdateRequestBySelf(
+            @AuthenticationPrincipal EmpDetails user
+    ) {
         return EmpUpdateRequestBySelf.builder()
-                .empId(loginId)
+                .loginId(user.getUsername())
                 .currentPassword(currentPassword)
                 .extensionNo(extensionNo)
                 .newRawPassword(newRawPassword)

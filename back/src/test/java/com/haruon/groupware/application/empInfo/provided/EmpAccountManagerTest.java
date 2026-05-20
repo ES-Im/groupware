@@ -36,7 +36,7 @@ record EmpAccountManagerTest(
         DeptRepository deptRepository,
         EmpLeaveRepository empLeaveRepository,
         EntityManager entityManager,
-        PasswordEncoder encoder
+        EmpPasswordEncoder encoder
 ) {
 
     @AfterEach
@@ -273,7 +273,7 @@ record EmpAccountManagerTest(
 
         empAccountManager.updateInfoBySelf(
                 EmpUpdateRequestBySelf.builder()
-                        .empId(emp.getId())
+                        .loginId(emp.getLoginId())
                         .currentPassword("!1currentPassword")
                         .newRawPassword("new!1Password")
                         .extensionNo("123-0000")
@@ -391,7 +391,6 @@ record EmpAccountManagerTest(
         Emp hrEmp = saveEmpWithRoleAndDept(empRepository, deptRepository, "202603001", "loginid03", otherDept, SystemRoleCode.HR);
 
         String newName = "editName";
-        String newLoginId = "editLoginId";
         String newExtensionNo = "888-9999";
         String newRawPassword = "!1newPassword";
         EmpStatus newEmpStatus = EmpStatus.ACTIVE;
@@ -411,7 +410,6 @@ record EmpAccountManagerTest(
                         .editorId(hrEmp.getId())
                         .targetEmpId(targetEmp.getId())
                         .empName(newName)
-                        .loginId(newLoginId)
                         .newRawPassword(newRawPassword)
                         .extensionNo(newExtensionNo)
                         .empStatus(newEmpStatus)
@@ -430,7 +428,6 @@ record EmpAccountManagerTest(
 
         empRepository.findByEmpNo("202601001").ifPresent(emp -> {
             assertThat(emp.getEmpName()).isEqualTo(newName);
-            assertThat(emp.getLoginId()).isEqualTo(newLoginId);
             assertThat(emp.getExtensionNo()).isEqualTo(newExtensionNo);
             assertThat(encoder.matches(newRawPassword, emp.getEmpPassword())).isTrue();
             assertThat(emp.getStatus()).isEqualTo(newEmpStatus);
@@ -550,7 +547,7 @@ record EmpAccountManagerTest(
 
         empAccountManager.updateEmpFileBySelf(
                 EmpUpdateRequestBySelf.builder()
-                        .empId(emp.getId())
+                        .loginId(emp.getLoginId())
                         .currentPassword(encoder.encode(emp.getEmpPassword()))
                         .fileRequest(empFileInfo)
                         .build()
@@ -643,7 +640,7 @@ record EmpAccountManagerTest(
         long fileId = empFiles.getFirst().getId();
 
         EmpUpdateRequestBySelf request = EmpUpdateRequestBySelf.builder()
-                .empId(emp.getId())
+                .loginId(emp.getLoginId())
                 .currentPassword("!1currentPassword")
                 .fileStatusParam(
                         EmpFileStatusChangeParam.builder()
@@ -684,7 +681,7 @@ record EmpAccountManagerTest(
 
         empAccountManager.updateEmpFileBySelf(
                 EmpUpdateRequestBySelf.builder()
-                        .empId(emp.getId())
+                        .loginId(emp.getLoginId())
                         .currentPassword("!1currentPassword")
                         .fileRequest(empFileInfo)
                         .build()

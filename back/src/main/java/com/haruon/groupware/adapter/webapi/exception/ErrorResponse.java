@@ -1,6 +1,7 @@
 package com.haruon.groupware.adapter.webapi.exception;
 
 import com.haruon.groupware.application.exception.ApplicationErrorCode;
+import org.springframework.http.HttpStatus;
 
 /**
  * Error를 JSON 변환해주는 응답 DTO
@@ -10,13 +11,13 @@ public record ErrorResponse(
 ) {
     public static ErrorResponse from(ApplicationErrorCode ec) {
         return new ErrorResponse(
-                ec.name(), ec.getCode(), ec.getStatus().value(), ec.getMessage()
+                ec.getCode(), ec.name(), ec.getStatus().value(), ec.getMessage()
         );
     }
 
     public static ErrorResponse from(AdapterErrorCode ec) {
         return new ErrorResponse(
-                ec.name(), ec.getCode(), ec.getStatus().value(), ec.getMessage()
+                ec.getCode(), ec.name(), ec.getStatus().value(), ec.getMessage()
         );
     }
 
@@ -24,8 +25,10 @@ public record ErrorResponse(
         return new ErrorResponse(
                 e.getClass().getSimpleName(),
                 e.getClass().getName(),
-                500,
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 e.getMessage()
         );
     }
+
+
 }

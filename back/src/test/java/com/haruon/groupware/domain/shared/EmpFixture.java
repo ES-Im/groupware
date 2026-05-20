@@ -2,7 +2,7 @@ package com.haruon.groupware.domain.shared;
 
 import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.empInfo.EmpFile;
-import com.haruon.groupware.domain.empInfo.PasswordEncoder;
+import com.haruon.groupware.domain.empInfo.EmpPasswordEncoder;
 import com.haruon.groupware.domain.empInfo.enums.FileType;
 import com.haruon.groupware.domain.empInfo.enums.PositionCode;
 import com.haruon.groupware.domain.empInfo.enums.SystemRoleCode;
@@ -66,8 +66,6 @@ public class EmpFixture {
                 null,
                 null,
                 null,
-                null,
-                null,
                 SystemRoleCode.ADMIN,
                 null,
                 encoder
@@ -110,7 +108,7 @@ public class EmpFixture {
         return Emp.register(empNo, "Test", loginId, "!1currentPassword", newEmail, encoder);
     }
 
-    public static PasswordEncoder encoder = new PasswordEncoder() {
+    public static EmpPasswordEncoder encoder = new EmpPasswordEncoder() {
         @Override
         public String encode(String rawPassword) {
             return rawPassword.toUpperCase(Locale.ROOT);

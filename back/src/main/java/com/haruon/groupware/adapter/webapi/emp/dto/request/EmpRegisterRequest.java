@@ -1,5 +1,4 @@
-package com.haruon.groupware.adapter.webapi.emp.dto;
-
+package com.haruon.groupware.adapter.webapi.emp.dto.request;
 
 import com.haruon.groupware.application.empInfo.empService.dto.EmpRegisterRequestBySelf;
 import jakarta.validation.constraints.NotBlank;
@@ -19,7 +18,7 @@ public record EmpRegisterRequest(
 
         @Size(max = 20)
         @NotBlank(message = "사원명은 필수입니다.")
-        String empName,
+        String name,
 
         @NotBlank(message = "로그인 ID는 필수입니다.")
         @Pattern(
@@ -34,11 +33,11 @@ public record EmpRegisterRequest(
                 regexp = PASSWORD_PATTERN,
                 message = PASSWORD_PATTERN_MESSAGE
         )
-        String rawPassword
+        String password
 
 ) {
 
     public EmpRegisterRequestBySelf toRequestBySelf() {
-        return new EmpRegisterRequestBySelf(empNo, empName, loginId, rawPassword);
+        return new EmpRegisterRequestBySelf(empNo, name, loginId, password);
     }
 }
