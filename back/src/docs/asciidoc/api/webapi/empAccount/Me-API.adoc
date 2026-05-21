@@ -1,0 +1,31 @@
+[tabs%nosync]
+
+
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/RETRIEVE_ME_INFO/http-request.adoc[]
+_Request header_
+include::{snippets}/RETRIEVE_ME_INFO/request-headers.adoc[]
+--
+Response (200)::
++
+--
+_HTTP response_
+include::{snippets}/RETRIEVE_ME_INFO/http-response.adoc[]
+_Response fields_
+include::{snippets}/RETRIEVE_ME_INFO/response-fields.adoc[]
+--
+Response (401)::
++
+--
+_HTTP response_
+include::{snippets}/RETRIEVE_ME_INFO_FAIL/http-response.adoc[]
+
+_Response fields_
+include::{snippets}/RETRIEVE_ME_INFO_FAIL/response-fields.adoc[]
+
+--
+====

@@ -6,4 +6,5 @@ public interface AuthManagement {
     void logout(String loginId);
     JwtResponse login(String loginId, String password);
     String reIssue(String refreshToken);
+
 }

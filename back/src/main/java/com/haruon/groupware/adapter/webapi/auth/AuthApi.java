@@ -2,7 +2,7 @@ package com.haruon.groupware.adapter.webapi.auth;
 
 import com.haruon.groupware.adapter.security.JwtCookieManager;
 import com.haruon.groupware.adapter.security.empDtails.EmpDetails;
-import com.haruon.groupware.adapter.webapi.emp.dto.response.LoginResponse;
+import com.haruon.groupware.adapter.webapi.auth.dto.response.IssueAccessTokenResponse;
 import com.haruon.groupware.application.auth.dto.JwtResponse;
 import com.haruon.groupware.application.auth.provided.AuthManagement;
 import com.haruon.groupware.application.exception.common.role.PermissionDeniedException;
@@ -22,14 +22,14 @@ public class AuthApi {
     private final JwtCookieManager jwtCookieManager;
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(
+    public ResponseEntity<IssueAccessTokenResponse> login(
             @RequestBody @Valid EmpLoginRequest request,
             HttpServletResponse response
     ) {
         JwtResponse tokens = authManagement.login(request.loginId(), request.password());
         jwtCookieManager.setRefreshCookie(tokens.refreshToken(), response);
 
-        return ResponseEntity.ok(new LoginResponse(tokens.accessToken()));
+        return ResponseEntity.ok(new IssueAccessTokenResponse(tokens.accessToken()));
     }
 
     @PostMapping("/logout")
@@ -43,15 +43,13 @@ public class AuthApi {
     }
 
     @PostMapping("/reissue")
-    public ResponseEntity<String> reissue(
+    public ResponseEntity<IssueAccessTokenResponse> reissue(
             @CookieValue(name = "refreshToken", required = false) String refreshToken
     ) {
         if(refreshToken == null || refreshToken.isBlank()) throw new PermissionDeniedException();
         String accessToken = authManagement.reIssue(refreshToken);
 
-        return ResponseEntity.ok(accessToken);
+        return ResponseEntity.ok(new IssueAccessTokenResponse(accessToken));
     }
-
-
 
 }

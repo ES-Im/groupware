@@ -1,4 +1,4 @@
-package com.haruon.groupware.application.empInfo.empService.dto;
+package com.haruon.groupware.application.empInfo.empService.dto.request;
 
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import lombok.Builder;

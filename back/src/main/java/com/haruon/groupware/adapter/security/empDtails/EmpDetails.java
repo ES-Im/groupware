@@ -1,5 +1,6 @@
 package com.haruon.groupware.adapter.security.empDtails;
 
+import com.haruon.groupware.application.empInfo.empService.dto.response.BelongingInfo;
 import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.empInfo.enums.EmpStatus;
 import com.haruon.groupware.domain.empInfo.enums.SystemRoleCode;
@@ -19,14 +20,14 @@ public class EmpDetails implements UserDetails {
     private final String loginId;
     private final String password;
     private final List<SystemRoleCode> roles;
-    @Getter private final List<Belonging> belongings;
+    @Getter private final List<BelongingInfo> belongings;
     @Getter private final EmpStatus status;
 
     public EmpDetails(
             String loginId,
             String password,
             List<SystemRoleCode> roles,
-            List<Belonging> belongings,
+            List<BelongingInfo> belongings,
             EmpStatus status
     ) {
         this.loginId = loginId;
@@ -43,10 +44,12 @@ public class EmpDetails implements UserDetails {
                 emp.getSystemRoles().stream().toList(),
                 emp.getEmpBelongings().stream()
                         .filter(belonging -> belonging.getEndAt() == null)
-                        .map(b -> new Belonging(
+                        .map(b -> new BelongingInfo(
+                                b.getId(),
                                 b.getDept().getDeptName(),
-                                b.getPosition().name(),
-                                b.isPrimary()
+                                b.getPosition(),
+                                b.isPrimary(),
+                                null, null
                         )).toList(),
                 emp.getStatus()
         );
@@ -74,9 +77,4 @@ public class EmpDetails implements UserDetails {
         return status == EmpStatus.ACTIVE;
     }
 
-    public record Belonging (
-            String dept,
-            String position,
-            boolean primary
-    ) {}
 }

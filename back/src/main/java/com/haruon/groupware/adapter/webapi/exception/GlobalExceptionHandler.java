@@ -5,6 +5,7 @@ import com.haruon.groupware.application.exception.ApplicationException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.query.sqm.UnknownPathException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -54,6 +55,15 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(e.getErrorCode().getStatus())
                 .body(ErrorResponse.from(e.getErrorCode()));
+    }
+
+    //todo - 운영환경에서는 지우기
+    @ExceptionHandler(UnknownPathException.class)
+    public ResponseEntity<ErrorResponse> handle(UnknownPathException e) {
+        log.error("쿼리 잘못함 =============================");
+
+        return ResponseEntity.status(500)
+                .body(ErrorResponse.from(e));
     }
 
     @ExceptionHandler(Exception.class)

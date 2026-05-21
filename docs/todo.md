@@ -64,4 +64,23 @@ PasswordEncoder, findByLoginId, JWT Provider, Filter, AuthController
  - 그리고 Batch 등 Controller안타는 검증이 있을 수 있는데, @Validated 딸깍 한번이면 Controller 안탈때도 검증이 안정적으로 돌아가는데 if문으로 돌아가면서 쓰니까 유지보수가 더 어려워질것 같아. 
  - 다음에 팀프로젝트하면 무조건 이대로 나누지 말자. 클린스프링 강의에서 토비강사님이 `Domain Entity/DTO를 Adapter로 노출해도 된다.` 라고 했는데, 그 내용이랑 관련 있음. 프로젝트 끝나면 다시 숙지 해보자 
  - 
-2. 
+
+
+
+# provided/required 조회 네이밍
+```
+[인터페이스]
+조회 행위(Use-case/Provided)
+→ XxxRetriever
+
+외부에서 조회 요구(Required)
+→ XxxFinder
+
+[서비스]
+조회 : XxxQueryService
+조회 외 : XxxCommandService
+
+[repository]
+조회 : XxxQueryRepository
+조회 외 : XxxRepository
+```

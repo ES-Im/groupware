@@ -64,5 +64,4 @@ public class AuthService implements AuthManagement  {
         return tokenIssuer.issueAccessToken(loginId, roles);
     }
 
-
 }

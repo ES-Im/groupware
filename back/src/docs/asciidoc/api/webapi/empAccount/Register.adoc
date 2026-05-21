@@ -1,0 +1,39 @@
+[tabs%nosync]
+
+
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/REGISTER/http-request.adoc[]
+_Request cookie_
+include::{snippets}/REGISTER/request-fields.adoc[]
+--
+Response (200)::
++
+--
+_HTTP response_
+include::{snippets}/REGISTER/http-response.adoc[]
+--
+Response - Duplicate EmpNo (401)::
++
+--
+_HTTP response_
+include::{snippets}/REGISTER_DuplicateEmpNoException/http-response.adoc[]
+
+_Response fields_
+include::{snippets}/REGISTER_DuplicateEmpNoException/response-fields.adoc[]
+
+--
+Response - Duplicate ID (401)::
++
+--
+_HTTP response_
+include::{snippets}/REGISTER_DuplicateLoginIdException/http-response.adoc[]
+
+_Response fields_
+include::{snippets}/REGISTER_DuplicateLoginIdException/response-fields.adoc[]
+
+--
+====

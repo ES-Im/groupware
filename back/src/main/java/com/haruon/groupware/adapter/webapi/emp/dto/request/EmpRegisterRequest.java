@@ -1,6 +1,6 @@
 package com.haruon.groupware.adapter.webapi.emp.dto.request;
 
-import com.haruon.groupware.application.empInfo.empService.dto.EmpRegisterRequestBySelf;
+import com.haruon.groupware.application.empInfo.empService.dto.request.EmpRegisterRequestBySelf;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;

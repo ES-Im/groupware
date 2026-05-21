@@ -1,6 +1,6 @@
 package com.haruon.groupware.application.empInfo.empService;
 
-import com.haruon.groupware.application.empInfo.empService.dto.*;
+import com.haruon.groupware.application.empInfo.empService.dto.request.*;
 import com.haruon.groupware.application.empInfo.leaveService.LeaveCalculator;
 import com.haruon.groupware.application.empInfo.provided.EmpAccountManager;
 import com.haruon.groupware.application.empInfo.required.EmpLeaveRepository;
@@ -31,7 +31,7 @@ import static java.util.Objects.requireNonNull;
 @RequiredArgsConstructor
 @Service
 @Transactional
-public class EmpService extends LeaveCalculator implements EmpAccountManager {
+public class EmpCommandService extends LeaveCalculator implements EmpAccountManager {
 
     private final EmpPasswordEncoder encoder;
     private final EmpRepository empRepository;

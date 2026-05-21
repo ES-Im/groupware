@@ -1,0 +1,22 @@
+[tabs%nosync]
+
+
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/RETRIEVE_BELONGINGS_INFOS/http-request.adoc[]
+_Request header_
+include::{snippets}/RETRIEVE_BELONGINGS_INFOS/request-headers.adoc[]
+--
+Response (200)::
++
+--
+_HTTP response_
+include::{snippets}/RETRIEVE_BELONGINGS_INFOS/http-response.adoc[]
+_Response fields_
+include::{snippets}/RETRIEVE_BELONGINGS_INFOS/response-fields.adoc[]
+※ 미조회시, 빈 배열 반환
+--
+====

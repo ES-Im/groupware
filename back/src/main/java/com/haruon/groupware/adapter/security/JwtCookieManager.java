@@ -14,16 +14,16 @@ public class JwtCookieManager {
 
     private final JwtTokenProvider jwtTokenProvider;
 
-public void setRefreshCookie(String refreshToken, HttpServletResponse response) {
-    Cookie cookie = new Cookie("refreshToken", refreshToken);
+    public void setRefreshCookie(String refreshToken, HttpServletResponse response) {
+        Cookie cookie = new Cookie("refreshToken", refreshToken);
 
-    cookie.setHttpOnly(true);
-    cookie.setPath("/");
-    cookie.setMaxAge(jwtTokenProvider.getRefreshTokenExpiresIn().intValue() / 1000);
-    cookie.setSecure(false);    //todo HTTPS 환경에서 true로 변경 필요
+        cookie.setHttpOnly(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(jwtTokenProvider.getRefreshTokenExpiresIn().intValue() / 1000);
+        cookie.setSecure(false);    //todo HTTPS 환경에서 true로 변경 필요
 
-    response.addCookie(cookie);
-}
+        response.addCookie(cookie);
+    }
 
     public void deleteRefreshCookie(HttpServletResponse response) {
         Cookie cookie = new Cookie("refreshToken", "");

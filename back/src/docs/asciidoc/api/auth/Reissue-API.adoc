@@ -1,0 +1,30 @@
+[tabs%nosync]
+
+
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/REGISTER/http-request.adoc[]
+_Request cookie_
+include::{snippets}/REGISTER/request-fields.adoc[]
+--
+Response (200)::
++
+--
+_HTTP response_
+include::{snippets}/REGISTER/http-response.adoc[]
+
+--
+Response (401)::
++
+--
+_HTTP response - Duplicate Id_
+include::{snippets}/REISSUE_FAIL/http-response.adoc[]
+
+_Response fields_
+include::{snippets}/REISSUE_FAIL/response-fields.adoc[]
+
+--
+====

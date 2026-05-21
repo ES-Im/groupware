@@ -66,9 +66,9 @@ public class SecurityConfig {
 
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/", "/error", "/api/employees").permitAll()
+                        .requestMatchers("/", "/error", "/api/emp").permitAll()
                         .requestMatchers("/api/auth/login", "/api/auth/reissue").permitAll()
-                        .requestMatchers("/api/employees/**").hasRole(SystemRoleCode.EMPLOYEE.name())
+                        .requestMatchers("/api/emp/**").hasRole(SystemRoleCode.EMPLOYEE.name())
                         .anyRequest().authenticated());
 
         http
