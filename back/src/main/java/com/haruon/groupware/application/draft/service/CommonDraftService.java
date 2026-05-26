@@ -9,6 +9,8 @@ import com.haruon.groupware.application.exception.draft.ApprovalLineRequiredExce
 import com.haruon.groupware.application.exception.draft.DraftNotFoundException;
 import com.haruon.groupware.application.utils.AuthorizationChecker;
 import com.haruon.groupware.application.utils.Utils;
+import com.haruon.groupware.application.utils.file.StoreFile;
+import com.haruon.groupware.application.utils.file.required.FileStorage;
 import com.haruon.groupware.domain.draft.Draft;
 import com.haruon.groupware.domain.draft.sub.ApproversParam;
 import com.haruon.groupware.domain.empInfo.Emp;
@@ -27,10 +29,14 @@ abstract class CommonDraftService {
 
     private final EmpRepository empRepository;
     private final DraftRepository draftRepository;
+    private final FileStorage fileStorage;
 
-    public CommonDraftService(EmpRepository empRepository, DraftRepository draftRepository) {
+    private static final String DRAFT_FILE_TYPE = "draft";
+
+    public CommonDraftService(EmpRepository empRepository, DraftRepository draftRepository, FileStorage fileStorage) {
         this.empRepository = empRepository;
         this.draftRepository = draftRepository;
+        this.fileStorage = fileStorage;
     }
 
     public void revertToDraft(long draftId, long drafterId) {
@@ -78,12 +84,15 @@ abstract class CommonDraftService {
 
     public void addFile(long draftId, long drafterId, DraftFileCreateRequest fileParam) {
         Draft draft = findDraftByDraftIdAndEmpId(draftId, drafterId);
+        StoreFile storedFile = fileStorage.store(fileParam.file(), DRAFT_FILE_TYPE);
 
         draft.addFile(
-                fileParam.file().mimeType(),
-                fileParam.file().originalFileName(),
-                fileParam.file().extension(),
-                fileParam.file().fileSize()
+                storedFile.mimeType(),
+                storedFile.originalName(),
+                storedFile.storedName(),
+                storedFile.extension(),
+                storedFile.fileSize(),
+                storedFile.storedPath()
         );
     }
 

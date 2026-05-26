@@ -147,15 +147,19 @@ public class Board extends AbstractEntity {
             Emp author,
             String mimeType,
             String originalName,
+            String storedName,
             String extension,
             Long fileSize,
+            String storedPath,
             @Nullable LocalDateTime modifiedAt
     ) {
         validateAuthor(author);
         requireNonNull(mimeType);
         requireNonNull(originalName);
+        requireNonNull(storedName);
         requireNonNull(extension);
         requireNonNull(fileSize);
+        requireNonNull(storedPath);
 
         if(!this.isDraft) {
             requireNonNull(modifiedAt);
@@ -165,7 +169,7 @@ public class Board extends AbstractEntity {
         }
 
         BoardFile boardFile = BoardFile.create(
-                this, mimeType, originalName, extension, fileSize
+                this, mimeType, originalName, storedName, extension, fileSize, storedPath
         );
 
         this.boardFiles.add(boardFile);

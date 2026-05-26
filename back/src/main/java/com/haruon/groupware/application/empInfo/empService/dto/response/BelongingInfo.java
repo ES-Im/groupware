@@ -6,10 +6,11 @@ import org.jspecify.annotations.Nullable;
 import java.time.LocalDate;
 
 public record BelongingInfo(
-        Long id,
-        String dept,
-        PositionCode position,
-        Boolean primary,
+        Long deptId,
+        String deptCode,
+        String deptName,
+        PositionCode positionName,
+        Boolean isPrimary,
         @Nullable LocalDate startAt,
         @Nullable LocalDate endAt
 ) {}

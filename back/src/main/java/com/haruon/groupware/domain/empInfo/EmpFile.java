@@ -25,8 +25,10 @@ public class EmpFile extends AbstractFileEntity {
             FileType fileType,
             String mimeType,
             String originalName,
+            String storedName,
             String extension,
-            Long fileSize
+            Long fileSize,
+            String storedPath
     ) {
         EmpFile empFile = new EmpFile();
 
@@ -34,7 +36,7 @@ public class EmpFile extends AbstractFileEntity {
         empFile.isActive = true;
         empFile.fileType = requireNonNull(fileType);
 
-        empFile.initFileMetadata(mimeType, originalName, extension, fileSize);
+        empFile.initFileMetadata(mimeType, originalName, storedName, extension, fileSize, storedPath);
 
         return empFile;
     }

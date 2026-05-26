@@ -274,7 +274,7 @@ class BoardTest {
         Emp author = getApprovedEmp();
         Board board = getBoard(author, true);
 
-        board.addBoardFile(author, "test", "test", "test", 1000L, null);
+        board.addBoardFile(author, "test", "test", "stored-test", "test", 1000L, "/test/stored-test", null);
 
         assertThat(board.getBoardFiles().size()).isEqualTo(1);
     }
@@ -287,7 +287,7 @@ class BoardTest {
         Board board = getBoard(author, true);
 
         assertThatThrownBy(() ->
-                board.addBoardFile(notAuthor, "test", "test", "test", 1000L, null)
+                board.addBoardFile(notAuthor, "test", "test", "stored-test", "test", 1000L, "/test/stored-test", null)
         ).hasMessage("작성자만 수정/발행가능");
 
     }
@@ -299,7 +299,7 @@ class BoardTest {
         Board board = getBoard(author, false);
         LocalDateTime modifiedAt = board.getPublishedAt().plusDays(1);
 
-        board.addBoardFile(author, "test", "test", "test", 1000L, modifiedAt);
+        board.addBoardFile(author, "test", "test", "stored-test", "test", 1000L, "/test/stored-test", modifiedAt);
 
         assertThat(board.getBoardFiles().size()).isEqualTo(1);
         assertThat(board.getModifiedAt()).isEqualTo(modifiedAt);
@@ -313,7 +313,7 @@ class BoardTest {
         LocalDateTime modifiedAt = null;
 
         assertThatThrownBy(() ->
-                board.addBoardFile(author, "test", "test", "test", 1000L, modifiedAt)
+                board.addBoardFile(author, "test", "test", "stored-test", "test", 1000L, "/test/stored-test", modifiedAt)
         ).isInstanceOf(NullPointerException.class);
     }
 
@@ -324,7 +324,7 @@ class BoardTest {
         Emp author = getApprovedEmp();
         Board board = getBoard(author, true);
 
-        board.addBoardFile(author, "test", "test", "test", 1000L, null);
+        board.addBoardFile(author, "test", "test", "stored-test", "test", 1000L, "/test/stored-test", null);
         BoardFile first = board.getBoardFiles().getFirst();
         ReflectionTestUtils.setField(first, "id", 1L);
 
@@ -339,7 +339,7 @@ class BoardTest {
         Emp author = getApprovedEmp();
         Emp notAuthor = getApprovedEmp("202601002", "login2");
         Board board = getBoard(author, true);
-        board.addBoardFile(author, "test", "test", "test", 1000L, null);
+        board.addBoardFile(author, "test", "test", "stored-test", "test", 1000L, "/test/stored-test", null);
         BoardFile first = board.getBoardFiles().getFirst();
         ReflectionTestUtils.setField(first, "id", 1L);
 
@@ -355,7 +355,7 @@ class BoardTest {
         Emp author = getApprovedEmp();
         Board board = getBoard(author, false);
         LocalDateTime modifiedAt = board.getPublishedAt().plusDays(1);
-        board.addBoardFile(author, "test", "test", "test", 1000L, modifiedAt);
+        board.addBoardFile(author, "test", "test", "stored-test", "test", 1000L, "/test/stored-test", modifiedAt);
 
         BoardFile first = board.getBoardFiles().getFirst();
         ReflectionTestUtils.setField(first, "id", 1L);

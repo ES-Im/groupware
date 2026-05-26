@@ -1,8 +1,8 @@
 package com.haruon.groupware.application.board.service.dto;
 
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
-import com.haruon.groupware.application.utils.FileDto;
-import com.haruon.groupware.application.utils.FileValidator;
+import com.haruon.groupware.application.utils.file.FileDto;
+import com.haruon.groupware.application.utils.file.FileValidator;
 import lombok.Builder;
 
 import java.time.LocalDateTime;

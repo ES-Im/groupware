@@ -1,0 +1,13 @@
+[source,http,options="nowrap"]
+----
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+Content-Length: 160
+
+{
+  "code" : "COMMON_007",
+  "name" : "PAST_TIME_NOT_ALLOWED_EXCEPTION",
+  "httpStatus" : 400,
+  "message" : "과거일시로 지정할 수 없습니다"
+}
+----

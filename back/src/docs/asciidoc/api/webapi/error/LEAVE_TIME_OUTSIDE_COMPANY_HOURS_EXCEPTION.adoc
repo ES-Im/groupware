@@ -1,0 +1,13 @@
+[source,http,options="nowrap"]
+----
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+Content-Length: 205
+
+{
+  "code" : "DRAFT_008",
+  "name" : "LEAVE_TIME_OUTSIDE_COMPANY_HOURS_EXCEPTION",
+  "httpStatus" : 400,
+  "message" : "휴가 시간은 회사 근무시간 내에서만 신청할 수 있습니다."
+}
+----

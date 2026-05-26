@@ -1,0 +1,13 @@
+[source,http,options="nowrap"]
+----
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+Content-Length: 154
+
+{
+  "code" : "DRAFT_001",
+  "name" : "APPROVAL_LINE_REQUIRED_EXCEPTION",
+  "httpStatus" : 400,
+  "message" : "결재선 설정은 필수입니다."
+}
+----

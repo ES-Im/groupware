@@ -1,0 +1,13 @@
+[source,http,options="nowrap"]
+----
+HTTP/1.1 403 Forbidden
+Content-Type: application/json
+Content-Length: 173
+
+{
+  "code" : "FRANCHISE_003",
+  "name" : "EDUCATION_REGISTER_MISMATCH_EXCEPTION",
+  "httpStatus" : 403,
+  "message" : "교육 등록자와 일치하지 않습니다."
+}
+----

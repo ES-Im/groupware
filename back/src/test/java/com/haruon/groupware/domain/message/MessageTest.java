@@ -181,7 +181,7 @@ class MessageTest {
         Emp sender = getApprovedEmp();
         Message message = getDraftMessage(sender);
 
-        message.addFile(sender, "application/pdf", "test.pdf", "pdf", 1000L);
+        message.addFile(sender, "application/pdf", "test", "test-stored.pdf", "pdf", 1000L, "/test/test-stored.pdf");
 
         assertThat(message.getMessageFiles().size()).isEqualTo(1);
     }
@@ -194,7 +194,7 @@ class MessageTest {
         Message message = getSentMessage(sender, receiver);
 
         assertThatThrownBy(() ->
-                message.addFile(sender, "application/pdf", "test.pdf", "pdf", 1000L)
+                message.addFile(sender, "application/pdf", "test", "test-stored.pdf", "pdf", 1000L, "/test/test-stored.pdf")
         ).hasMessage("발송 전에만 수정가능");
     }
 
@@ -203,7 +203,7 @@ class MessageTest {
     void removeFile_success() {
         Emp sender = getApprovedEmp();
         Message message = getDraftMessage(sender);
-        message.addFile(sender, "application/pdf", "test.pdf", "pdf", 1000L);
+        message.addFile(sender, "application/pdf", "test", "test-stored.pdf", "pdf", 1000L, "/test/test-stored.pdf");
 
         MessageFile file = message.getMessageFiles().getFirst();
         ReflectionTestUtils.setField(file, "id", 1L);

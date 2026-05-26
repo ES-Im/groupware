@@ -13,7 +13,7 @@ import com.haruon.groupware.application.franchise.required.FranchiseRepository;
 import com.haruon.groupware.application.franchise.service.dto.EducationCreateRequest;
 import com.haruon.groupware.application.franchise.service.dto.EducationFileCreateRequest;
 import com.haruon.groupware.application.franchise.service.dto.EducationUpdateRequest;
-import com.haruon.groupware.application.utils.FileDto;
+import com.haruon.groupware.application.utils.file.FileDto;
 import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.franchise.Education;
 import com.haruon.groupware.domain.franchise.EducationFile;
@@ -194,6 +194,7 @@ record EducationManagementTest(
                                 .mimeType(mimeType)
                                 .originalFileFullName(originalFileFullName)
                                 .fileSize(fileSize)
+                                .bytes(new byte[]{1})
                                 .build()
                         ).build()
         );
@@ -221,6 +222,7 @@ record EducationManagementTest(
                                 .mimeType(mimeType)
                                 .originalFileFullName("originalFile.exe")
                                 .fileSize(fileSize)
+                                .bytes(new byte[]{1})
                                 .build(),
                         UnsupportedFileExtensionException.class
                 ),
@@ -230,6 +232,7 @@ record EducationManagementTest(
                                 .mimeType("application/octet-stream")
                                 .originalFileFullName(originalFileFullName)
                                 .fileSize(fileSize)
+                                .bytes(new byte[]{1})
                                 .build(),
                         UnsupportedMimeTypeException.class
                 ),
@@ -239,6 +242,7 @@ record EducationManagementTest(
                                 .mimeType(mimeType)
                                 .originalFileFullName(originalFileFullName)
                                 .fileSize(20 * 1024 * 1024L + 1)
+                                .bytes(new byte[]{1})
                                 .build(),
                         FileSizeLimitExceededException.class
                 )
@@ -281,6 +285,7 @@ record EducationManagementTest(
                                 .mimeType("application/pdf")
                                 .originalFileFullName("originalFile.pdf")
                                 .fileSize(5 * 1024 * 1024L)
+                                .bytes(new byte[]{1})
                                 .build()
                         ).build()
         );

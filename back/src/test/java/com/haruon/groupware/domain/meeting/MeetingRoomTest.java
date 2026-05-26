@@ -191,9 +191,11 @@ class MeetingRoomTest {
 
         String mimeType = "image/png";
         String originName = "origin";
+        String storedName = "stored.png";
         String extension = "png";
         long fileSize = 1024L;
-        room.addRoomFile(mimeType, originName, extension, fileSize);
+        String storedPath = "/test/stored.png";
+        room.addRoomFile(mimeType, originName, storedName, extension, fileSize, storedPath);
 
         assertThat(room.getRoomFiles())
                 .singleElement()
@@ -202,10 +204,12 @@ class MeetingRoomTest {
                             MeetingRoomFile::getMeetingRoom,
                             MeetingRoomFile::getMimeType,
                             MeetingRoomFile::getOriginalName,
+                            MeetingRoomFile::getStoredName,
                             MeetingRoomFile::getExtension,
-                            MeetingRoomFile::getFileSize
+                            MeetingRoomFile::getFileSize,
+                            MeetingRoomFile::getStoredPath
                     ).containsExactly(
-                            room, mimeType, originName, extension, fileSize
+                            room, mimeType, originName, storedName, extension, fileSize, storedPath
                     );
 
                     assertThat(f.getStoredName()).isNotNull();
@@ -217,7 +221,7 @@ class MeetingRoomTest {
     void removeRoomFileTest() {
         MeetingRoom room = getMeetingRoom();
 
-        room.addRoomFile("image/png", "origin", "png", 1024L);
+        room.addRoomFile("image/png", "origin", "stored.png", "png", 1024L, "/test/stored.png");
         MeetingRoomFile file = room.getRoomFiles().getFirst();
 
         room.removeRoomFile(file);

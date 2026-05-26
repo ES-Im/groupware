@@ -9,6 +9,7 @@ import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.empInfo.EmpPasswordEncoder;
 import com.haruon.groupware.domain.empInfo.enums.FileType;
 import com.haruon.groupware.domain.empInfo.enums.PositionCode;
+import com.haruon.groupware.domain.empInfo.enums.SystemRoleCode;
 import com.haruon.groupware.domain.shared.Email;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -21,14 +22,30 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 public class IntegrityTestFixtures {
 
+    /**
+     * status = PENDING / 신규사원
+     */
+    public static void registeredEmp(
+            EmpRepository empRepository,
+            EmpPasswordEncoder encoder,
+            String loginId, String password
+    ) {
+        Email newEmail = Email.of(loginId, "haruon.com");
+        Emp test = Emp.register("202602001", "Test", loginId, password, newEmail, encoder);
 
+        empRepository.save(test);
+    }
+
+    /**
+     * status = ACTIVE / 막 가입승인된 사원
+     */
     public static void registerAndApproveEmp(
             EmpRepository empRepository,
             EmpPasswordEncoder encoder,
             String loginId, String password
     ) {
         Email newEmail = Email.of(loginId, "haruon.com");
-        Emp test = Emp.register("202601999", "Test", loginId, password, newEmail, encoder);
+        Emp test = Emp.register("202602002", "Test", loginId, password, newEmail, encoder);
         test.approveRegister(LocalDate.of(2026,1,1));
 
         empRepository.save(test);
@@ -49,23 +66,17 @@ public class IntegrityTestFixtures {
         test.approveRegister(LocalDate.of(2026,1,1));
 
         test.changeEmpFile(
-                FileType.PROFILE_PICTURE, "image/jpeg", "profilePicture", "jpg", 1024L
+                FileType.PROFILE_PICTURE, "image/jpeg", "profilePicture", "profilePicture.jpg", "jpg", 1024L, "/test/profilePicture.jpg"
         );
 
         test.changeEmpFile(
-                FileType.SIGNATURE, "image/jpeg", "oldSig", "jpg", 1024L
+                FileType.SIGNATURE, "image/jpeg", "oldSig", "oldSig.jpg", "jpg", 1024L, "/test/oldSig.jpg"
         );
 
         test.changeEmpFile(
-                FileType.SIGNATURE, "image/jpeg", "newSig", "jpg", 1024L
+                FileType.SIGNATURE, "image/jpeg", "newSig", "newSig.jpg", "jpg", 1024L, "/test/newSig.jpg"
         );
 
-
-        Dept hr = deptRepository.findByDeptCode("001").orElseGet(() ->
-            deptRepository.save(
-                    Dept.registerDept("001", "HR")
-            )
-        );
 
         Dept it = deptRepository.findByDeptCode("002").orElseGet(() ->
                 deptRepository.save(
@@ -75,12 +86,8 @@ public class IntegrityTestFixtures {
 
         Dept fin = deptRepository.findByDeptCode("003").orElseGet(() ->
                 deptRepository.save(
-                        Dept.registerDept("003", "IT")
+                        Dept.registerDept("003", "FIN")
                 )
-        );
-
-        test.changeBelongingsByHR(
-                hr, PositionCode.ASSISTANT_MANAGER, true, LocalDate.of(2026,1,1), null
         );
 
         test.changeBelongingsByHR(
@@ -90,6 +97,72 @@ public class IntegrityTestFixtures {
         test.changeBelongingsByHR(
                 fin, PositionCode.STAFF, true, LocalDate.of(2025,1,1), LocalDate.of(2026,1,1)
         );
+
+        empRepository.save(test);
+    }
+
+    /**
+     *  주부서 : HR 권한 : (HR ROLE) <br>
+     */
+    public static void getEmpHavingWithHrRole(
+            EmpRepository empRepository,
+            DeptRepository deptRepository,
+            EmpPasswordEncoder encoder,
+            String loginId, String password
+    ) {
+        Emp test = Emp.register("202601000", "AdminName", loginId, password, Email.of(loginId, "haruon.com"), encoder);
+        test.approveRegister(LocalDate.of(2026,1,1));
+
+        Dept hr = deptRepository.findByDeptCode("001").orElseGet(() ->
+            deptRepository.save(
+                    Dept.registerDept("001", "HR")
+            )
+        );
+
+        test.changeBelongingsByHR(
+                hr, PositionCode.ASSISTANT_MANAGER, true, LocalDate.of(2026,1,1), null
+        );
+
+
+        test.changeInfoByHR(null, null, null, null, SystemRoleCode.HR, LocalDate.of(2026,1,1), null);
+
+        empRepository.save(test);
+    }
+
+    /**
+     *  주부서 : fin 부부서 : it 권한 : (Manager ROLE) <br>
+     */
+    public static void getEmpHavingWithManagerRole(
+            EmpRepository empRepository,
+            DeptRepository deptRepository,
+            EmpPasswordEncoder encoder,
+            String loginId, String password
+    ) {
+        Emp test = Emp.register("202601500", "ManagerName", loginId, password, Email.of(loginId, "haruon.com"), encoder);
+        test.approveRegister(LocalDate.of(2026,1,1));
+
+        Dept it = deptRepository.findByDeptCode("002").orElseGet(() ->
+                deptRepository.save(
+                        Dept.registerDept("002", "IT")
+                )
+        );
+
+        Dept fin = deptRepository.findByDeptCode("003").orElseGet(() ->
+                deptRepository.save(
+                        Dept.registerDept("003", "FIN")
+                )
+        );
+
+        test.changeBelongingsByHR(
+                it, PositionCode.STAFF, false, LocalDate.of(2026,2,1), null
+        );
+
+        test.changeBelongingsByHR(
+                fin, PositionCode.STAFF, true, LocalDate.of(2025,1,1), LocalDate.of(2026,1,1)
+        );
+
+
+        test.changeInfoByHR(null, null, null, null, SystemRoleCode.DEPT_MANAGER, LocalDate.of(2026,1,1), null);
 
         empRepository.save(test);
     }

@@ -51,6 +51,9 @@ public class QMessageFile extends EntityPathBase<MessageFile> {
     public final StringPath storedName = _super.storedName;
 
     //inherited
+    public final StringPath storedPath = _super.storedPath;
+
+    //inherited
     public final DateTimePath<java.time.Instant> updatedAt = _super.updatedAt;
 
     public QMessageFile(String variable) {

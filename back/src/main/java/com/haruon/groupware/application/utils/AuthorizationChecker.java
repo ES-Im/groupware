@@ -5,9 +5,11 @@ import com.haruon.groupware.application.exception.common.RequiredValueMissingExc
 import com.haruon.groupware.application.exception.common.role.ActiveEmployeeNotFoundException;
 import com.haruon.groupware.application.exception.common.role.DepartmentMismatchException;
 import com.haruon.groupware.application.exception.common.role.PermissionDeniedException;
+import com.haruon.groupware.application.exception.empInfo.InvalidPasswordException;
 import com.haruon.groupware.domain.empInfo.Dept;
 import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.empInfo.EmpBelongings;
+import com.haruon.groupware.domain.empInfo.EmpPasswordEncoder;
 import com.haruon.groupware.domain.empInfo.enums.EmpStatus;
 import com.haruon.groupware.domain.empInfo.enums.SystemRoleCode;
 
@@ -15,6 +17,14 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class AuthorizationChecker {
+
+    /** 비밀번호 확인 */
+    public static void validateCurrentPassword(EmpPasswordEncoder encoder, String rawPassword, String encodedPassword) {
+        if(!encoder.matches(rawPassword, encodedPassword)) {
+            throw new InvalidPasswordException();
+        };
+    }
+
     /**
      * ACTIVE 사원 검증
      */
@@ -51,6 +61,12 @@ public class AuthorizationChecker {
     /**
      * DEPT_MANAGER 롤 권한 검증
      */
+    public static void checkDeptManagerById(EmpRepository empRepository, Long id) {
+        Emp foundEmp = findActiveEmpById(empRepository, id);
+
+        notExistRoleThrowException(foundEmp, SystemRoleCode.DEPT_MANAGER);
+    }
+
     public static DeptManagerInfo checkDeptManagerById(
             EmpRepository empRepository, Long managerId, Long editTargetId
     ) {
@@ -97,6 +113,16 @@ public class AuthorizationChecker {
         Emp foundEmp = findActiveEmpById(empRepository, empId);
 
         notExistRoleThrowException(foundEmp, SystemRoleCode.HR);
+    }
+
+    /**
+     * HR 또는 DEPT MANAGER 롤 검증
+     */
+    public static void checkHRorDeptManagerRoleEmp(EmpRepository empRepository, long empId) {
+        Emp foundEmp = findActiveEmpById(empRepository, empId);
+
+        if(foundEmp.getSystemRoles().contains(SystemRoleCode.HR)) return;
+        notExistRoleThrowException(foundEmp, SystemRoleCode.DEPT_MANAGER);
     }
 
     /**

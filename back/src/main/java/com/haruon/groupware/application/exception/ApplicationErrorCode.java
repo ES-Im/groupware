@@ -59,6 +59,7 @@ public enum ApplicationErrorCode {
     DUPLICATE_EMP_NO_EXCEPTION(HttpStatus.BAD_REQUEST, "EMP_003", "이미 존재하는 사원 번호입니다"),
     INVALID_RESIGN_DATE_EXCEPTION(HttpStatus.BAD_REQUEST, "EMP_004","퇴직일자는 입사일자보다 이를 수 없습니다."),
     EMP_ALREADY_ACTIVE_EXCEPTION(HttpStatus.BAD_REQUEST,"EMP_005","이미 활성화된 사원입니다."),
+    INVALID_PASSWORD_EXCEPTION(HttpStatus.BAD_REQUEST, "EMP_006", "변경 전 비밀번호와 동일합니다."),
 
     // user-leave-info
     EMP_ANNUAL_LEAVE_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND, "LEAVE_001", "해당 사원의 연차 정보가 없습니다"),

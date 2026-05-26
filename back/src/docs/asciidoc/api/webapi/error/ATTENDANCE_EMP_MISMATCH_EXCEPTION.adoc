@@ -1,0 +1,13 @@
+[source,http,options="nowrap"]
+----
+HTTP/1.1 403 Forbidden
+Content-Type: application/json
+Content-Length: 171
+
+{
+  "code" : "ATTENDANCE_002",
+  "name" : "ATTENDANCE_EMP_MISMATCH_EXCEPTION",
+  "httpStatus" : 403,
+  "message" : "해당 사원의 근태 정보가 아닙니다."
+}
+----

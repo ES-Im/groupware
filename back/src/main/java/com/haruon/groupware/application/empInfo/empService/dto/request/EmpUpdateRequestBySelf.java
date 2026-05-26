@@ -1,10 +1,12 @@
 package com.haruon.groupware.application.empInfo.empService.dto.request;
 
-import com.haruon.groupware.application.exception.common.BlankValueNotAllowedException;
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import com.haruon.groupware.application.utils.RegexpValidator;
+import jakarta.validation.constraints.Pattern;
 import lombok.Builder;
 import org.jspecify.annotations.Nullable;
+
+import static com.haruon.groupware.domain.shared.RegexpUtil.*;
 
 /*
  * `Emp.SystemRoleCode` = `EMPLOYEE`
@@ -13,33 +15,30 @@ import org.jspecify.annotations.Nullable;
 @Builder
 public record EmpUpdateRequestBySelf (
 
-        String loginId,
-
-        String currentPassword,
-
         @Nullable
+        @Pattern(
+                regexp = EXTENSION_NO_PATTERN,
+                message = EXTENSION_NO_PATTERN_MESSAGE
+        )
         String extensionNo,
 
         @Nullable
-        String newRawPassword,
+        @Pattern(
+                regexp = PASSWORD_PATTERN,
+                message = PASSWORD_PATTERN_MESSAGE
+        )
+        String newRawPassword
 
-        @Nullable
-        EmpFileReplaceParam fileRequest,
-
-        @Nullable
-        EmpFileStatusChangeParam fileStatusParam
 ) {
 
     public EmpUpdateRequestBySelf {
-        if(loginId == null || currentPassword == null) throw new RequiredValueMissingException();
 
-        if(currentPassword.isBlank()) throw new BlankValueNotAllowedException();
-
-        if(extensionNo == null && newRawPassword == null && fileRequest == null && fileStatusParam == null) {
+        if(extensionNo == null && newRawPassword == null) {
             throw new RequiredValueMissingException();
         }
 
         if(extensionNo != null) RegexpValidator.extensionNoCheck(extensionNo);
         if(newRawPassword != null) RegexpValidator.passwordCheck(newRawPassword);
     }
+
 }

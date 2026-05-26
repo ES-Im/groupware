@@ -1,0 +1,13 @@
+[source,http,options="nowrap"]
+----
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+Content-Length: 177
+
+{
+  "code" : "DRAFT_005",
+  "name" : "INVALID_LEAVE_HOUR_UNIT_EXCEPTION",
+  "httpStatus" : 400,
+  "message" : "휴가는 4시간 단위로만 사용할 수 있습니다."
+}
+----

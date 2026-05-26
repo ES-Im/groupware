@@ -1,34 +1,40 @@
 package com.haruon.groupware.application.empInfo.provided;
 
-import com.haruon.groupware.application.empInfo.empService.dto.request.EmpRegisterRequestBySelf;
-import com.haruon.groupware.application.empInfo.empService.dto.request.EmpUpdateRequestByDeptManager;
-import com.haruon.groupware.application.empInfo.empService.dto.request.EmpUpdateRequestByHR;
-import com.haruon.groupware.application.empInfo.empService.dto.request.EmpUpdateRequestBySelf;
+import com.haruon.groupware.application.empInfo.empService.dto.request.*;
+
+import java.time.LocalDate;
 
 /**
  * 사원관련 정보 등록 및 수정, 삭제
  */
 public interface EmpAccountManager {
     
-    void registerEmp(EmpRegisterRequestBySelf request);
+    void registerEmp(EmpRegisterRequest request);
 
-    void approveRegisterByHR(EmpUpdateRequestByHR request);
 
-    void updateResignedEmpByHR(EmpUpdateRequestByHR request);
+    void updateInfoBySelf(EmpUpdateRequestBySelf request, Long empId);
 
-    void updateInfoBySelf(EmpUpdateRequestBySelf request);
+    void updateEmpFileBySelf(EmpFileReplaceParam request, Long empId);
 
-    void updateInfoByDeptManager(EmpUpdateRequestByDeptManager request);
+    void updateFileActiveStatusBySelf(Long targetFileId, Boolean isForActivate, Long empId);
 
-    void updateInfoByHR(EmpUpdateRequestByHR request);
+    void deleteEmpFileBySelf(Long fileId, Long empId);
+
+
+    void approveRegisterByHR(Long editorId, Long targetEmpId, LocalDate hiredAt);
+
+    void updateResignedEmpByHR(Long editorId, Long targetEmpId, LocalDate resignedAt);
+
+    void updateInfoByHR(EmpUpdateRequestByHR request, Long editorId);
+
+    void updateBelongingsByHR(EmpBelongingsParam request, Long editorId);
 
     void activateEmpByHR(Long editorId, Long targetId);
 
-    void deleteEmpFileBySelf(Long empId, Long fileId);
+    void updateFileActiveStatusByHR(Long editorId, Long targetEmpId, Long targetFileId, Boolean isForActivate);
 
-    void updateEmpFileBySelf(EmpUpdateRequestBySelf request);
 
-    void updateFileActiveStatusByHR(EmpUpdateRequestByHR request);
+    void updateInfoByDeptManager(EmpUpdateRequestByDeptManager request, Long managerId);
 
-    void updateFileActiveStatusBySelf(EmpUpdateRequestBySelf request);
+
 }

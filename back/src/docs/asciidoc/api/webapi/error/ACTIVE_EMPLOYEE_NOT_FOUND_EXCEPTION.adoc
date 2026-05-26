@@ -1,0 +1,13 @@
+[source,http,options="nowrap"]
+----
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+Content-Length: 175
+
+{
+  "code" : "ROLE_001",
+  "name" : "ACTIVE_EMPLOYEE_NOT_FOUND_EXCEPTION",
+  "httpStatus" : 404,
+  "message" : "해당 활성화된 사원이 존재하지 않습니다"
+}
+----

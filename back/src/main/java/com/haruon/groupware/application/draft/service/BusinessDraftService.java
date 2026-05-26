@@ -8,6 +8,7 @@ import com.haruon.groupware.application.draft.service.dto.CommonDraftCreateReque
 import com.haruon.groupware.application.draft.service.dto.CommonDraftUpdateRequest;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
 import com.haruon.groupware.application.exception.draft.DraftTypeMismatchException;
+import com.haruon.groupware.application.utils.file.required.FileStorage;
 import com.haruon.groupware.domain.draft.BusinessTripDraft;
 import com.haruon.groupware.domain.draft.Draft;
 import com.haruon.groupware.domain.draft.sub.ApproversParam;
@@ -28,8 +29,12 @@ public class BusinessDraftService extends CommonDraftService implements Business
 
     private final BusinessTripDraftRepository businessTripDraftRepository;
 
-    public BusinessDraftService(EmpRepository empRepository, BusinessTripDraftRepository businessTripDraftRepository) {
-        super(empRepository, businessTripDraftRepository);
+    public BusinessDraftService(
+            EmpRepository empRepository,
+            BusinessTripDraftRepository businessTripDraftRepository,
+            FileStorage fileStorage
+    ) {
+        super(empRepository, businessTripDraftRepository, fileStorage);
         this.businessTripDraftRepository = businessTripDraftRepository;
     }
 

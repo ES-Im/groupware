@@ -5,12 +5,12 @@ import com.haruon.groupware.application.empInfo.leaveService.LeaveCalculator;
 import com.haruon.groupware.application.empInfo.provided.EmpAccountManager;
 import com.haruon.groupware.application.empInfo.required.EmpLeaveRepository;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
-import com.haruon.groupware.application.exception.empInfo.DuplicateEmpNoException;
-import com.haruon.groupware.application.exception.empInfo.DuplicateLoginIdException;
-import com.haruon.groupware.application.exception.empInfo.EmpAlreadyActiveException;
-import com.haruon.groupware.application.exception.empInfo.InvalidResignDateException;
+import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
+import com.haruon.groupware.application.exception.empInfo.*;
 import com.haruon.groupware.application.utils.AuthorizationChecker;
 import com.haruon.groupware.application.utils.CompanyPolicyPort;
+import com.haruon.groupware.application.utils.file.StoreFile;
+import com.haruon.groupware.application.utils.file.required.FileStorage;
 import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.empInfo.EmpLeave;
 import com.haruon.groupware.domain.empInfo.EmpPasswordEncoder;
@@ -26,7 +26,6 @@ import static com.haruon.groupware.application.utils.AuthorizationChecker.*;
 import static com.haruon.groupware.application.utils.Utils.findEmpById;
 import static com.haruon.groupware.domain.empInfo.Emp.register;
 import static com.haruon.groupware.domain.empInfo.EmpLeave.createEmpLeave;
-import static java.util.Objects.requireNonNull;
 
 @RequiredArgsConstructor
 @Service
@@ -37,19 +36,23 @@ public class EmpCommandService extends LeaveCalculator implements EmpAccountMana
     private final EmpRepository empRepository;
     private final EmpLeaveRepository empLeaveRepository;
     private final CompanyPolicyPort companyPolicy;
+    private final FileStorage fileStorage;
 
+    /**
+     *  본인 정보 등록 / 수정
+     */
     @Override
-    public void registerEmp(EmpRegisterRequestBySelf request) {
-        requireNonNull(request);
+    public void registerEmp(EmpRegisterRequest request) {
+        if(request == null) throw new RequiredValueMissingException();
 
         checkDuplicateLoginId(request.loginId());
         checkDuplicateEmpNo(request.empNo());
 
         Emp register = register(
                 request.empNo(),
-                request.empName(),
+                request.name(),
                 request.loginId(),
-                request.rawPassword(),
+                request.password(),
                 makeEmailByLoginId(request.loginId()),
                 encoder
         );
@@ -58,81 +61,111 @@ public class EmpCommandService extends LeaveCalculator implements EmpAccountMana
     }
 
     @Override
-    public void approveRegisterByHR(EmpUpdateRequestByHR request) {
-        requireNonNull(request);
-        AuthorizationChecker.checkHRRoleEmp(empRepository, request.editorId());
+    public void updateInfoBySelf(
+            EmpUpdateRequestBySelf empRequest,
+            Long empId
+    ) {
+        if(empRequest == null) throw new RequiredValueMissingException();
+        Emp emp = findActiveEmpById(empRepository, empId);
 
-        Emp emp = findEmpById(empRepository, request.targetEmpId());
-        LocalDate hire = requireNonNull(request.hireAt());
+        if(empRequest.newRawPassword() != null) {
+            validateNewPassword(empRequest.newRawPassword(), emp.getEmpPassword());
+        }
 
-        emp.approveRegister(hire);
+        emp.changeInfoBySelf(
+                empRequest.extensionNo(),
+                empRequest.newRawPassword(),
+                encoder
+        );
+    }
+
+    @Override
+    public void updateEmpFileBySelf(
+            EmpFileReplaceParam fileParam,
+            Long loginId
+    ) {
+        if(fileParam == null) throw new RequiredValueMissingException();
+        Emp emp = findActiveEmpById(empRepository, loginId);
+
+        StoreFile storedFile = fileStorage.store(fileParam.file(), fileParam.fileType().name());
+
+        emp.changeEmpFile(
+                fileParam.fileType(),
+                storedFile.mimeType(),
+                storedFile.originalName(),
+                storedFile.storedName(),
+                storedFile.extension(),
+                storedFile.fileSize(),
+                storedFile.storedPath()
+        );
+    }
+
+    @Override
+    public void updateFileActiveStatusBySelf(
+            Long targetFileId, Boolean isForActivate,
+            Long empId
+    ) {
+        Emp emp = findActiveEmpById(empRepository, empId);
+
+        emp.changeFileActiveStatus(
+                targetFileId,
+                isForActivate
+        );
+    }
+
+    @Override
+    public void deleteEmpFileBySelf(Long fileId, Long empId) {
+        Emp emp = findActiveEmpById(empRepository, empId);
+
+        emp.removeFile(fileId);
+    }
+
+
+
+
+    /**
+     *  모든사원 정보 등록 / 수정 (By HR)
+     */
+    @Override
+    public void approveRegisterByHR(Long editorId, Long targetEmpId, LocalDate hiredAt) {
+        if(hiredAt == null) throw new RequiredValueMissingException();
+
+        AuthorizationChecker.checkHRRoleEmp(empRepository, editorId);
+
+        Emp emp = findEmpById(empRepository, targetEmpId);
+
+        emp.approveRegister(hiredAt);
 
         EmpLeave empLeave = createEmpLeave(
                 emp,
-                hire.getYear(),
-                calculateTotalLeaveDays(companyPolicy, emp, hire)
+                hiredAt.getYear(),
+                calculateTotalLeaveDays(companyPolicy, emp, hiredAt)
         );
 
         empLeaveRepository.save(empLeave);
     }
 
     @Override
-    public void updateResignedEmpByHR(EmpUpdateRequestByHR request) {
-        requireNonNull(request);
-        AuthorizationChecker.checkHRRoleEmp(empRepository, request.editorId());
+    public void updateResignedEmpByHR(Long editorId, Long targetEmpId, LocalDate resignedAt) {
+        if(resignedAt == null) throw new RequiredValueMissingException();
+        AuthorizationChecker.checkHRRoleEmp(empRepository, editorId);
 
-        Emp targetEmployee = findEmpById(empRepository, request.targetEmpId());
-        LocalDate resignedAt = requireNonNull(request.resignedAt());
+        Emp targetEmployee = findEmpById(empRepository, targetEmpId);
 
         if(resignedAt.isBefore(targetEmployee.getHiredAt())) throw new InvalidResignDateException();
 
         targetEmployee.changeResignedEmpInfoByHR(resignedAt);
     }
 
-
     @Override
-    public void deleteEmpFileBySelf(Long empId, Long fileId) {
-        Emp emp = findActiveEmpById(empRepository, empId);
-
-        emp.removeFile(fileId);
-    }
-
-    @Override
-    public void updateEmpFileBySelf(EmpUpdateRequestBySelf request) {
-        requireNonNull(request);
-        Emp emp = findActiveEmpByLoginId(empRepository, request.loginId());
-
-        EmpFileReplaceParam fileParam = requireNonNull(request.fileRequest());
-
-        emp.changeEmpFile(
-                fileParam.fileType(),
-                fileParam.file().mimeType(),
-                fileParam.file().originalFileName(),
-                fileParam.file().extension(),
-                fileParam.file().fileSize()
-        );
-    }
-
-    @Override
-    public void updateInfoByDeptManager(EmpUpdateRequestByDeptManager request) {
-        requireNonNull(request);
-
-        DeptManagerInfo deptManagerInfo = checkDeptManagerById(empRepository, request.deptManagerId(), request.targetEmpId());
-
-        Emp targetEmp = deptManagerInfo.targetEmp();
-        targetEmp.changeInfoByDeptManager(
-                request.extensionNo(),
-                request.systemRoleCode()
-        );
-    }
-
-    @Override
-    public void updateInfoByHR(EmpUpdateRequestByHR request) {
-        requireNonNull(request);
+    public void updateInfoByHR(EmpUpdateRequestByHR request, Long editorId) {
+        AuthorizationChecker.checkHRRoleEmp(empRepository, editorId);
 
         Emp emp = findActiveEmpById(empRepository, request.targetEmpId());
 
-        if(request.belongingsParam() != null) updateBelongingsByHR(request);
+        if(request.newRawPassword() != null) {
+            validateNewPassword(request.newRawPassword(), emp.getEmpPassword());
+        }
 
         emp.changeInfoByHR(
                 request.empName(),
@@ -146,8 +179,22 @@ public class EmpCommandService extends LeaveCalculator implements EmpAccountMana
     }
 
     @Override
+    public void updateBelongingsByHR(EmpBelongingsParam request, Long editorId) {
+        AuthorizationChecker.checkHRRoleEmp(empRepository, editorId);
+
+        Emp emp = findActiveEmpById(empRepository, request.targetEmpId());
+
+        emp.changeBelongingsByHR(
+                request.dept(),
+                request.position(),
+                request.isPrimary(),
+                request.startAt(),
+                request.endAt()
+        );
+    }
+
+    @Override
     public void activateEmpByHR(Long editorId, Long targetId) {
-        requireNonNull(editorId);
         AuthorizationChecker.checkHRRoleEmp(empRepository, editorId);
 
         Emp emp = findEmpById(empRepository, targetId);
@@ -156,33 +203,37 @@ public class EmpCommandService extends LeaveCalculator implements EmpAccountMana
         emp.activateEmp();
     }
 
-    @Override
-    public void updateInfoBySelf(EmpUpdateRequestBySelf empRequest) {
-        requireNonNull(empRequest);
-        Emp emp = findActiveEmpByLoginId(empRepository, empRequest.loginId());
 
-        emp.changeInfoBySelf(
-                empRequest.extensionNo(),
-                empRequest.currentPassword(),
-                empRequest.newRawPassword(),
-                encoder
+    @Override
+    public void updateFileActiveStatusByHR(
+            Long editorId, Long targetEmpId,
+            Long targetFileId, Boolean isForActivate
+    ) {
+        AuthorizationChecker.checkHRRoleEmp(empRepository, editorId);
+
+        Emp emp = findEmpById(empRepository, targetEmpId);
+
+        emp.changeFileActiveStatus(
+                targetFileId,
+                isForActivate
+        );
+    }
+
+    /**
+     *  같은 부서 사원의 정보 등록 / 수정 (By DeptManager)
+     */
+    @Override
+    public void updateInfoByDeptManager(EmpUpdateRequestByDeptManager request, Long managerId) {
+        DeptManagerInfo deptManagerInfo = checkDeptManagerById(empRepository, managerId, request.targetEmpId());
+
+        Emp targetEmp = deptManagerInfo.targetEmp();
+        targetEmp.changeInfoByDeptManager(
+                request.extensionNo(),
+                request.systemRoleCode()
         );
     }
 
 
-    @Override
-    public void updateFileActiveStatusByHR(EmpUpdateRequestByHR request) {
-        requireNonNull(request.fileStatusParam());
-
-        updateFileStatus(request.targetEmpId(), request.fileStatusParam());
-    }
-
-    @Override
-    public void updateFileActiveStatusBySelf(EmpUpdateRequestBySelf request) {
-        requireNonNull(request.fileStatusParam());
-
-        updateFileStatus(request.loginId(), request.fileStatusParam());
-    }
 
     private Email makeEmailByLoginId(String loginId) {
         return Email.of(loginId, companyPolicy.getCompanyDomain());
@@ -196,40 +247,10 @@ public class EmpCommandService extends LeaveCalculator implements EmpAccountMana
         if (empRepository.existsByLoginId(loginId)) { throw new DuplicateLoginIdException(); }
     }
 
-    private void updateFileStatus(long empId, EmpFileStatusChangeParam request) {
-        requireNonNull(request);
-
-        Emp emp = findActiveEmpById(empRepository, empId);
-
-        emp.changeFileActiveStatus(
-                request.fileId(),
-                request.targetActive()
-        );
+    private void validateNewPassword(String newPassword, String oldPassword) {
+        if(encoder.matches(newPassword, oldPassword)) {
+            throw new InvalidPasswordException();
+        }
     }
 
-    private void updateFileStatus(String loginId, EmpFileStatusChangeParam request) {
-        requireNonNull(request);
-
-        Emp emp = findActiveEmpByLoginId(empRepository, loginId);
-
-        emp.changeFileActiveStatus(
-                request.fileId(),
-                request.targetActive()
-        );
-    }
-
-    private void updateBelongingsByHR(EmpUpdateRequestByHR request) {
-        requireNonNull(request);
-
-        Emp emp = findActiveEmpById(empRepository, request.targetEmpId());
-        EmpBelongingsParam empBelongingsParam = requireNonNull(request.belongingsParam());
-
-        emp.changeBelongingsByHR(
-                empBelongingsParam.dept(),
-                empBelongingsParam.position(),
-                empBelongingsParam.isPrimary(),
-                empBelongingsParam.startAt(),
-                empBelongingsParam.endAt()
-        );
-    }
 }

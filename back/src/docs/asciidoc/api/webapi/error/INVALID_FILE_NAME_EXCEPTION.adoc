@@ -1,0 +1,13 @@
+[source,http,options="nowrap"]
+----
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+Content-Length: 147
+
+{
+  "code" : "FILE_004",
+  "name" : "INVALID_FILE_NAME_EXCEPTION",
+  "httpStatus" : 400,
+  "message" : "유효한 파일명이 아닙니다"
+}
+----

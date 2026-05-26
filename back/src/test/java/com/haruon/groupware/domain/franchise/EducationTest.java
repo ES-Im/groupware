@@ -311,10 +311,12 @@ class EducationTest {
 
         String mimeType = "image/png";
         String originName = "originName";
+        String storedName = "storedName.png";
         String extension = "png";
         long size = 1024L;
+        String storedPath = "/test/storedName.png";
 
-        education.addEducationFile(mimeType, originName, extension, size);
+        education.addEducationFile(mimeType, originName, storedName, extension, size, storedPath);
 
         assertThat(education.getEducationFiles())
                 .as("비활성화 상태에서 파일을 추가할 수 있다.")
@@ -324,15 +326,16 @@ class EducationTest {
                 .singleElement().satisfies(f -> {
                 assertThat(f).extracting(
                         EducationFile::getEducation, EducationFile::getMimeType,
-                        EducationFile::getOriginalName, EducationFile::getExtension,
-                        EducationFile::getFileSize
+                        EducationFile::getOriginalName, EducationFile::getStoredName,
+                        EducationFile::getExtension, EducationFile::getFileSize,
+                        EducationFile::getStoredPath
                 ).containsExactly(
-                        education, mimeType, originName, extension, size
+                        education, mimeType, originName, storedName, extension, size, storedPath
                 );
         });
 
         education.activate();
-        education.addEducationFile(mimeType, originName, extension, size);
+        education.addEducationFile(mimeType, originName, storedName, extension, size, storedPath);
 
         assertThat(education.getEducationFiles()).as("활성화 상태에서 파일을 추가 할 수 있다.").hasSize(2);
 
@@ -346,7 +349,7 @@ class EducationTest {
                 getApprovedEmp(), LocalDateTime.of(2026, 4, 5, 0, 0, 0), "testPlace", "testTitle", "testContent", 20L
         );
 
-        education.addEducationFile("image/png", "originName", "png", 1024L);
+        education.addEducationFile("image/png", "originName", "storedName.png", "png", 1024L, "/test/storedName.png");
         EducationFile targetFile = education.getEducationFiles().getFirst();
         ReflectionTestUtils.setField(targetFile, "id", 1L);
 
@@ -355,7 +358,7 @@ class EducationTest {
                 .as("비활성화 상태에서 파일을 삭제할 수 있다.")
                 .isEmpty();
 
-        education.addEducationFile("image/png", "originName", "png", 1024L);
+        education.addEducationFile("image/png", "originName", "storedName.png", "png", 1024L, "/test/storedName.png");
         EducationFile targetFile2 = education.getEducationFiles().getFirst();
         ReflectionTestUtils.setField(targetFile2, "id", 1L);
         education.activate();

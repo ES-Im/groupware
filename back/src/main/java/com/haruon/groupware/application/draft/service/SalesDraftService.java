@@ -11,6 +11,7 @@ import com.haruon.groupware.application.empInfo.required.EmpRepository;
 import com.haruon.groupware.application.exception.draft.DraftTypeMismatchException;
 import com.haruon.groupware.application.exception.franchise.FranchiseNotFoundException;
 import com.haruon.groupware.application.franchise.required.FranchiseRepository;
+import com.haruon.groupware.application.utils.file.required.FileStorage;
 import com.haruon.groupware.domain.draft.Draft;
 import com.haruon.groupware.domain.draft.SalesDraft;
 import com.haruon.groupware.domain.draft.sub.ApproversParam;
@@ -32,9 +33,10 @@ public class SalesDraftService extends CommonDraftService implements SalesDraftM
     public SalesDraftService(
             EmpRepository empRepository,
             SalesDraftRepository salesDraftRepository,
-            FranchiseRepository franchiseRepository
+            FranchiseRepository franchiseRepository,
+            FileStorage fileStorage
     ) {
-        super(empRepository, salesDraftRepository);
+        super(empRepository, salesDraftRepository, fileStorage);
         this.salesDraftRepository = salesDraftRepository;
         this.franchiseRepository = franchiseRepository;
     }

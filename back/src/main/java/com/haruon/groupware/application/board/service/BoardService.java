@@ -8,7 +8,9 @@ import com.haruon.groupware.application.board.service.dto.BoardFileRequest;
 import com.haruon.groupware.application.board.service.dto.BoardUpdateRequest;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
 import com.haruon.groupware.application.exception.common.role.PermissionDeniedException;
-import com.haruon.groupware.application.utils.FileDto;
+import com.haruon.groupware.application.utils.file.FileDto;
+import com.haruon.groupware.application.utils.file.StoreFile;
+import com.haruon.groupware.application.utils.file.required.FileStorage;
 import com.haruon.groupware.domain.board.Board;
 import com.haruon.groupware.domain.board.Category;
 import com.haruon.groupware.domain.empInfo.Emp;
@@ -31,6 +33,9 @@ public class BoardService implements BoardManagement {
     private final BoardRepository boardRepository;
     private final EmpRepository empRepository;
     private final CategoryRepository categoryRepository;
+    private final FileStorage fileStorage;
+
+    private static final String BOARD_FILE_TYPE = "board";
 
     @Override
     public long registerBoard(Long authorId, BoardCreateRequest request) {
@@ -75,8 +80,17 @@ public class BoardService implements BoardManagement {
         validateAuthor(author, board);
 
         FileDto file = request.file();
+        StoreFile storedFile = fileStorage.store(file, BOARD_FILE_TYPE);
+
         board.addBoardFile(
-                author, file.mimeType(), file.originalFileName(), file.extension(), file.fileSize(), request.modifiedAt()
+                author,
+                storedFile.mimeType(),
+                storedFile.originalName(),
+                storedFile.storedName(),
+                storedFile.extension(),
+                storedFile.fileSize(),
+                storedFile.storedPath(),
+                request.modifiedAt()
         );
     }
 

@@ -1,0 +1,13 @@
+[source,http,options="nowrap"]
+----
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+Content-Length: 191
+
+{
+  "code" : "LEAVE_002",
+  "name" : "GRANTED_DATE_BEFORE_HIRED_DATE_EXCEPTION",
+  "httpStatus" : 400,
+  "message" : "연차 부여시점이 입사일자보다 이를 수 없습니다"
+}
+----

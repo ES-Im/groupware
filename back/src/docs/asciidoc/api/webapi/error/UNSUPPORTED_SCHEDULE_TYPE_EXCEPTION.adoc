@@ -1,0 +1,13 @@
+[source,http,options="nowrap"]
+----
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+Content-Length: 157
+
+{
+  "code" : "SCHEDULE_001",
+  "name" : "UNSUPPORTED_SCHEDULE_TYPE_EXCEPTION",
+  "httpStatus" : 400,
+  "message" : "지원하지 않는 일정 타입"
+}
+----

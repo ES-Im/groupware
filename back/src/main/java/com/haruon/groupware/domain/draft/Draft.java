@@ -204,13 +204,15 @@ public abstract class Draft extends AbstractEventAggregateRoot {
     public void addFile(
             String mimeType,
             String originalName,
+            String storedName,
             String extension,
-            Long fileSize
+            Long fileSize,
+            String storedPath
     ) {
         state(isDraft(), "첨부파일수정가능 상태(UNSUBMITTED)가 아님");
 
         DraftFile file = DraftFile.create(
-                this, mimeType, originalName, extension, fileSize
+                this, mimeType, originalName, storedName, extension, fileSize, storedPath
         );
 
         this.draftFiles.add(file);

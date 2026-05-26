@@ -19,13 +19,15 @@ public class MeetingRoomFile extends AbstractFileEntity {
             MeetingRoom meetingRoom,
             String mimeType,
             String originalName,
+            String storedName,
             String extension,
-            Long fileSize
+            Long fileSize,
+            String storedPath
     ) {
         MeetingRoomFile roomFile = new MeetingRoomFile();
         roomFile.meetingRoom = requireNonNull(meetingRoom);
 
-        roomFile.initFileMetadata(mimeType, originalName, extension, fileSize);
+        roomFile.initFileMetadata(mimeType, originalName, storedName, extension, fileSize, storedPath);
 
         return roomFile;
     }

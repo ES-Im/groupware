@@ -1,0 +1,13 @@
+[source,http,options="nowrap"]
+----
+HTTP/1.1 401 Unauthorized
+Content-Type: application/json
+Content-Length: 155
+
+{
+  "code" : "AUTH_001",
+  "name" : "INVALIDLOGIN",
+  "httpStatus" : 401,
+  "message" : "아이디 또는 비밀번호가 올바르지 않습니다"
+}
+----

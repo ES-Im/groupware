@@ -10,7 +10,7 @@ import com.haruon.groupware.application.message.required.MessageRepository;
 import com.haruon.groupware.application.message.service.dto.MessageCreateRequest;
 import com.haruon.groupware.application.message.service.dto.MessageFileRequest;
 import com.haruon.groupware.application.message.service.dto.MessageUpdateRequest;
-import com.haruon.groupware.application.utils.FileDto;
+import com.haruon.groupware.application.utils.file.FileDto;
 import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.message.Message;
 import com.haruon.groupware.domain.message.MessageReceiving;
@@ -685,6 +685,7 @@ record MessageDraftManagementTest(
                         .mimeType("application/pdf")
                         .originalFileFullName("test.pdf")
                         .fileSize(1024L)
+                        .bytes(new byte[]{1})
                         .build())
                 .build();
 
@@ -715,6 +716,7 @@ record MessageDraftManagementTest(
                         .mimeType("application/pdf")
                         .originalFileFullName("test.pdf")
                         .fileSize(1024L)
+                        .bytes(new byte[]{1})
                         .build())
                 .build();
 
@@ -739,6 +741,7 @@ record MessageDraftManagementTest(
                         .mimeType("application/pdf")
                         .originalFileFullName("test.pdf")
                         .fileSize(1024L)
+                        .bytes(new byte[]{1})
                         .build())
                 .build();
 
@@ -767,6 +770,7 @@ record MessageDraftManagementTest(
                         .mimeType("application/pdf")
                         .originalFileFullName("test.pdf")
                         .fileSize(1024L)
+                        .bytes(new byte[]{1})
                         .build())
                 .build();
 
@@ -795,6 +799,7 @@ record MessageDraftManagementTest(
                         .mimeType("application/pdf")
                         .originalFileFullName("test.pdf")
                         .fileSize(1024L)
+                        .bytes(new byte[]{1})
                         .build())
                 .build();
 

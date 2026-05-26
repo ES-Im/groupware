@@ -1,0 +1,13 @@
+[source,http,options="nowrap"]
+----
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+Content-Length: 154
+
+{
+  "code" : "EMP_001",
+  "name" : "EMPLOYEE_NOT_FOUND_EXCEPTION",
+  "httpStatus" : 404,
+  "message" : "해당 사원이 존재하지 않습니다"
+}
+----

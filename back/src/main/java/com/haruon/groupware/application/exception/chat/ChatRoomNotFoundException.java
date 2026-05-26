@@ -5,6 +5,6 @@ import com.haruon.groupware.application.exception.ApplicationException;
 
 public class ChatRoomNotFoundException extends ApplicationException {
     public ChatRoomNotFoundException() {
-        super(ApplicationErrorCode.CATEGORY_NOT_FOUND_EXCEPTION);
+        super(ApplicationErrorCode.CHATROOM_NOT_FOUND_EXCEPTION);
     }
 }

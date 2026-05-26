@@ -1,0 +1,13 @@
+[source,http,options="nowrap"]
+----
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+Content-Length: 189
+
+{
+  "code" : "DRAFT_006",
+  "name" : "INSUFFICIENT_LEAVE_BALANCE_EXCEPTION",
+  "httpStatus" : 400,
+  "message" : "사용 휴가 일수가 잔여 휴가 일수를 초과했습니다."
+}
+----

@@ -1,0 +1,13 @@
+[source,http,options="nowrap"]
+----
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+Content-Length: 152
+
+{
+  "code" : "EMP_003",
+  "name" : "DUPLICATE_EMP_NO_EXCEPTION",
+  "httpStatus" : 400,
+  "message" : "이미 존재하는 사원 번호입니다"
+}
+----

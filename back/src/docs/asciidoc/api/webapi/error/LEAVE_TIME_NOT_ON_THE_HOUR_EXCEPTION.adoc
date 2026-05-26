@@ -1,0 +1,13 @@
+[source,http,options="nowrap"]
+----
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+Content-Length: 195
+
+{
+  "code" : "DRAFT_002",
+  "name" : "LEAVE_TIME_NOT_ON_THE_HOUR_EXCEPTION",
+  "httpStatus" : 400,
+  "message" : "휴가신청 시작 시각과 종료 시각은 정각이어야 합니다."
+}
+----

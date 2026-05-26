@@ -19,13 +19,15 @@ public class EducationFile extends AbstractFileEntity {
             Education education,
             String mimeType,
             String originalName,
+            String storedName,
             String extension,
-            long fileSize
+            long fileSize,
+            String storedPath
     ) {
         EducationFile educationFile = new EducationFile();
 
         educationFile.education = requireNonNull(education);
-        educationFile.initFileMetadata(mimeType, originalName, extension, fileSize);
+        educationFile.initFileMetadata(mimeType, originalName, storedName, extension, fileSize, storedPath);
 
         return educationFile;
     }

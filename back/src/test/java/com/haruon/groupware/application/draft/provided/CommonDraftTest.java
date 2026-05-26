@@ -10,7 +10,7 @@ import com.haruon.groupware.application.empInfo.required.EmpRepository;
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import com.haruon.groupware.application.exception.draft.ApprovalLineRequiredException;
 import com.haruon.groupware.application.exception.draft.DraftNotFoundException;
-import com.haruon.groupware.application.utils.FileDto;
+import com.haruon.groupware.application.utils.file.FileDto;
 import com.haruon.groupware.domain.draft.Approver;
 import com.haruon.groupware.domain.draft.Draft;
 import com.haruon.groupware.domain.draft.DraftFile;
@@ -391,6 +391,7 @@ record CommonDraftTest(
                         .mimeType("application/pdf")
                         .originalFileFullName(originalFileName)
                         .fileSize(5 * 1024 * 1024L)
+                        .bytes(new byte[]{1})
                         .build())
                 .build();
 
@@ -417,6 +418,7 @@ record CommonDraftTest(
                         .mimeType("application/pdf")
                         .originalFileFullName(originalFileName)
                         .fileSize(5 * 1024 * 1024L)
+                        .bytes(new byte[]{1})
                         .build())
                 .build();
 
@@ -449,6 +451,7 @@ record CommonDraftTest(
                         .mimeType("application/pdf")
                         .originalFileFullName("test.pdf")
                         .fileSize(5 * 1024 * 1024L)
+                        .bytes(new byte[]{1})
                         .build())
                 .build();
 
@@ -475,6 +478,7 @@ record CommonDraftTest(
                         .mimeType("application/pdf")
                         .originalFileFullName(originalFileName)
                         .fileSize(5 * 1024 * 1024L)
+                        .bytes(new byte[]{1})
                         .build())
                 .build();
 

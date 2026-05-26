@@ -83,15 +83,19 @@ public class MeetingRoom extends AbstractEntity {
     public void addRoomFile (
             String mimeType,
             String originalName,
+            String storedName,
             String extension,
-            Long fileSize) {
+            Long fileSize,
+            String storedPath) {
 
         this.roomFiles.add(MeetingRoomFile.create(
                 this,
                 mimeType,
                 originalName,
+                storedName,
                 extension,
-                fileSize
+                fileSize,
+                storedPath
         ));
 
     }

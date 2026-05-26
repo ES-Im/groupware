@@ -1,0 +1,13 @@
+[source,http,options="nowrap"]
+----
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+Content-Length: 146
+
+{
+  "code" : "BOARD_003",
+  "name" : "BOARD_NOT_FOUND_EXCEPTION",
+  "httpStatus" : 404,
+  "message" : "조회된 게시글이 없습니다"
+}
+----

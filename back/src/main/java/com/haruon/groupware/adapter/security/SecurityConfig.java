@@ -70,6 +70,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/login", "/api/auth/reissue").permitAll()
                         .requestMatchers("/api/emp/**").hasRole(SystemRoleCode.EMPLOYEE.name())
                         .anyRequest().authenticated());
+        //todo - /api/emp post 가 permitAll()로 통과됨 : permitAll용, employee용, hr용 matchers를 따로 만드는것이 좋아 보임
 
         http
                 .addFilterBefore(
@@ -104,6 +105,12 @@ public class SecurityConfig {
                 .role(SystemRoleCode.ADMIN.name()).implies(SystemRoleCode.DEPT_MANAGER.name())
                 .role(SystemRoleCode.ADMIN.name()).implies(SystemRoleCode.EMPLOYEE.name())
                 .role(SystemRoleCode.DEPT_MANAGER.name()).implies(SystemRoleCode.EMPLOYEE.name())
+
+                .role(SystemRoleCode.HR.name()).implies(SystemRoleCode.EMPLOYEE.name())
+                .role(SystemRoleCode.IT.name()).implies(SystemRoleCode.EMPLOYEE.name())
+                .role(SystemRoleCode.FACILITY.name()).implies(SystemRoleCode.EMPLOYEE.name())
+                .role(SystemRoleCode.FRANCHISE.name()).implies(SystemRoleCode.EMPLOYEE.name())
+
                 .build();
     }
 

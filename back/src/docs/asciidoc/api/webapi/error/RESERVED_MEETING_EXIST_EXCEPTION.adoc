@@ -1,0 +1,13 @@
+[source,http,options="nowrap"]
+----
+HTTP/1.1 403 Forbidden
+Content-Type: application/json
+Content-Length: 188
+
+{
+  "code" : "meeting_004",
+  "name" : "RESERVED_MEETING_EXIST_EXCEPTION",
+  "httpStatus" : 403,
+  "message" : "예약된 회의가 있어 수정이 불가능한 회의실입니다"
+}
+----

@@ -11,7 +11,9 @@ import com.haruon.groupware.application.meeting.required.MeetingRoomRepository;
 import com.haruon.groupware.application.meeting.service.dto.MeetingRoomCreateRequest;
 import com.haruon.groupware.application.meeting.service.dto.MeetingRoomFileCreateRequest;
 import com.haruon.groupware.application.meeting.service.dto.MeetingRoomUpdateRequest;
-import com.haruon.groupware.application.utils.FileDto;
+import com.haruon.groupware.application.utils.file.FileDto;
+import com.haruon.groupware.application.utils.file.StoreFile;
+import com.haruon.groupware.application.utils.file.required.FileStorage;
 import com.haruon.groupware.domain.meeting.Meeting;
 import com.haruon.groupware.domain.meeting.MeetingRoom;
 import com.haruon.groupware.domain.meeting.MeetingRoomFile;
@@ -32,6 +34,9 @@ public class MeetingRoomService implements MeetingRoomManagement {
     private final EmpRepository empRepository;
     private final MeetingRepository meetingRepository;
     private final MeetingRoomRepository meetingRoomRepository;
+    private final FileStorage fileStorage;
+
+    private static final String MEETING_ROOM_FILE_TYPE = "meeting-room";
 
     @Override
     public long createMeetingRoom(MeetingRoomCreateRequest request) {
@@ -82,9 +87,15 @@ public class MeetingRoomService implements MeetingRoomManagement {
 
         MeetingRoom room = findMeetingRoom(request.meetingRoomId());
         FileDto file = request.file();
+        StoreFile storedFile = fileStorage.store(file, MEETING_ROOM_FILE_TYPE);
 
         room.addRoomFile(
-                file.mimeType(), file.originalFileName(), file.extension(), file.fileSize()
+                storedFile.mimeType(),
+                storedFile.originalName(),
+                storedFile.storedName(),
+                storedFile.extension(),
+                storedFile.fileSize(),
+                storedFile.storedPath()
         );
     }
 

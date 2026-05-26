@@ -1,0 +1,48 @@
+[tabs%nosync]
+
+
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/ADD_EMP_FILES/http-request.adoc[]
+_Request Part_
+include::{snippets}/ADD_EMP_FILES/request-parts.adoc[]
+_Request Param_
+[cols="1,1,1,3"]
+|===
+|파트명|타입|필수|설명
+
+|fileType
+|String
+|true
+|파일 타입 +
+예: `PROFILE_PICTURE`, `SIGNATURE`
+|===
+
+--
+Response (200)::
++
+--
+_HTTP response_
+include::{snippets}/ADD_EMP_FILES/http-response.adoc[]
+--
+Exception::
++
+--
+이 API에서 발생 가능한 에러:
+
+|===
+|Error Code
+
+|FILE_CONVERT_FAILED_EXCEPTION
+|REQUIRED_VALUE_MISSING_EXCEPTION
+|ACTIVE_EMPLOYEE_NOT_FOUND_EXCEPTION
+|EMPLOYEE_ACCESS_DENIED
+|FILE_STORE_FAILED_EXCEPTION
+
+
+|===
+--
+====

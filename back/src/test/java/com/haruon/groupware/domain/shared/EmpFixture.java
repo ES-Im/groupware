@@ -91,8 +91,10 @@ public class EmpFixture {
                 fileType,
                 "image/jpg",
                 "testOriginFileName",
+                "testStoredFileName.jpeg",
                 "jpeg",
-                (long)(1024 * 1024)
+                (long)(1024 * 1024),
+                "/test/testStoredFileName.jpeg"
         );
 
         return emp.getEmpFiles().getLast();

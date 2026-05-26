@@ -14,6 +14,7 @@ import com.haruon.groupware.application.exception.draft.DraftTypeMismatchExcepti
 import com.haruon.groupware.application.exception.empInfo.EmpAnnualLeaveNotFoundException;
 import com.haruon.groupware.application.exception.empInfo.UnsupportedLeaveTypeException;
 import com.haruon.groupware.application.utils.CompanyPolicyPort;
+import com.haruon.groupware.application.utils.file.required.FileStorage;
 import com.haruon.groupware.domain.draft.Draft;
 import com.haruon.groupware.domain.draft.LeaveCancelDraft;
 import com.haruon.groupware.domain.draft.LeaveDraft;
@@ -39,8 +40,15 @@ public class LeaveCancelDraftService extends CommonDraftService implements Leave
     private final EmpLeaveRepository empLeaveRepository;
 
 
-    public LeaveCancelDraftService(LeaveCancelDraftRepository leaveCancelDraftRepository, EmpRepository empRepository, DraftRepository draftRepository, CompanyPolicyPort policyPort, EmpLeaveRepository empLeaveRepository) {
-        super(empRepository, draftRepository);
+    public LeaveCancelDraftService(
+            LeaveCancelDraftRepository leaveCancelDraftRepository,
+            EmpRepository empRepository,
+            DraftRepository draftRepository,
+            CompanyPolicyPort policyPort,
+            EmpLeaveRepository empLeaveRepository,
+            FileStorage fileStorage
+    ) {
+        super(empRepository, draftRepository, fileStorage);
         this.leaveCancelDraftRepository = leaveCancelDraftRepository;
         this.draftRepository = draftRepository;
         this.policyPort = policyPort;

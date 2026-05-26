@@ -1,0 +1,13 @@
+[source,http,options="nowrap"]
+----
+HTTP/1.1 401 Unauthorized
+Content-Type: application/json
+Content-Length: 188
+
+{
+  "code" : "ROLE_003",
+  "name" : "DEPARTMENT_MISMATCH_EXCEPTION",
+  "httpStatus" : 401,
+  "message" : "부서 관리자는 같은 부서의 사원만 수정할 수 있습니다."
+}
+----

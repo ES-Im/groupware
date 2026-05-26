@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.hibernate.query.sqm.UnknownPathException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -64,6 +65,26 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(500)
                 .body(ErrorResponse.from(e));
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleValidation(
+            MethodArgumentNotValidException e
+    ) {
+        String message = e.getBindingResult()
+                .getFieldErrors()
+                .getFirst()
+                .getDefaultMessage();
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                "VALIDATION_ERROR",
+                "Validation Error",
+                400,
+                message
+        );
+
+        return ResponseEntity.badRequest()
+                .body(errorResponse);
     }
 
     @ExceptionHandler(Exception.class)

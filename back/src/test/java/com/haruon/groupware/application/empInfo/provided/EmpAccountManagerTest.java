@@ -12,7 +12,7 @@ import com.haruon.groupware.application.exception.empInfo.DuplicateEmpNoExceptio
 import com.haruon.groupware.application.exception.empInfo.DuplicateLoginIdException;
 import com.haruon.groupware.application.exception.empInfo.EmpAlreadyActiveException;
 import com.haruon.groupware.application.exception.empInfo.InvalidResignDateException;
-import com.haruon.groupware.application.utils.FileDto;
+import com.haruon.groupware.application.utils.file.FileDto;
 import com.haruon.groupware.domain.empInfo.*;
 import com.haruon.groupware.domain.empInfo.enums.EmpStatus;
 import com.haruon.groupware.domain.empInfo.enums.FileType;
@@ -55,11 +55,11 @@ record EmpAccountManagerTest(
 
         return List.of(
                 DynamicTest.dynamicTest("사번과 아이디가 중복되지 않으면 회원이 등록된다.", () -> {
-                    empAccountManager.registerEmp(EmpRegisterRequestBySelf.builder()
+                    empAccountManager.registerEmp(EmpRegisterRequest.builder()
                             .empNo(empNo)
-                            .empName("사원1")
+                            .name("사원1")
                             .loginId(loginId)
-                            .rawPassword("Test!1234")
+                            .password("Test!1234")
                             .build()
                     );
 
@@ -67,21 +67,21 @@ record EmpAccountManagerTest(
                     assertThat(emp.getId()).isNotNull();
                 }), DynamicTest.dynamicTest("이미 존재하는 사원번호 입력시 회원이 등록되지 않는다.", () -> {
                     assertThatThrownBy(() ->
-                            empAccountManager.registerEmp(EmpRegisterRequestBySelf.builder()
+                            empAccountManager.registerEmp(EmpRegisterRequest.builder()
                                     .empNo(empNo)
-                                    .empName("사원2")
+                                    .name("사원2")
                                     .loginId("loginId2")
-                                    .rawPassword("Test!1234")
+                                    .password("Test!1234")
                                     .build()
                             )
                     ).isInstanceOf(DuplicateEmpNoException.class);
                 }), DynamicTest.dynamicTest("이미 존재하는 아이디 입력시 회원이 등록되지 않는다.", () -> {
                     assertThatThrownBy(() ->
-                            empAccountManager.registerEmp(EmpRegisterRequestBySelf.builder()
+                            empAccountManager.registerEmp(EmpRegisterRequest.builder()
                                     .empNo("202601002")
-                                    .empName("사원2")
+                                    .name("사원2")
                                     .loginId(loginId)
-                                    .rawPassword("Test!1234")
+                                    .password("Test!1234")
                                     .build()
                             )
                     ).isInstanceOf(DuplicateLoginIdException.class);
@@ -100,11 +100,9 @@ record EmpAccountManagerTest(
 
         System.out.println("===== approve 시작 =====");
         empAccountManager.approveRegisterByHR(
-                EmpUpdateRequestByHR.builder()
-                        .editorId(hrEmp.getId())
-                        .targetEmpId(registered.getId())
-                        .hireAt(LocalDate.of(2026,4,1))
-                        .build()
+                hrEmp.getId(),
+                registered.getId(),
+                LocalDate.of(2026,4,1)
         );
         System.out.println("===== approve 종료 =====");
 
@@ -126,11 +124,9 @@ record EmpAccountManagerTest(
         Emp registered = saveRegisteredEmp(empRepository);
 
         empAccountManager.approveRegisterByHR(
-                EmpUpdateRequestByHR.builder()
-                        .editorId(hrEmp.getId())
-                        .targetEmpId(registered.getId())
-                        .hireAt(LocalDate.of(2026,4,1))
-                        .build()
+                        hrEmp.getId(),
+                        registered.getId(),
+                        LocalDate.of(2026,4,1)
         );
 
         Emp emp = empRepository.findByEmpNo(registered.getEmpNo()).orElseThrow();
@@ -152,11 +148,9 @@ record EmpAccountManagerTest(
 
          assertThatThrownBy(() ->
                  empAccountManager.approveRegisterByHR(
-                         EmpUpdateRequestByHR.builder()
-                                 .editorId(normalEmp.getId())
-                                 .targetEmpId(registered.getId())
-                                 .hireAt(LocalDate.of(2026,4,1))
-                                 .build()
+                                 normalEmp.getId(),
+                                 registered.getId(),
+                                 LocalDate.of(2026,4,1)
                  )
          ).isInstanceOf(PermissionDeniedException.class);
     }
@@ -167,16 +161,14 @@ record EmpAccountManagerTest(
 
         Dept dept = saveDept(deptRepository, "001", "HR");
 
-        Emp registered = saveApprovedEmp(empRepository);
+        Emp registered = saveRegisteredEmp(empRepository);
         Emp hrEmp = saveEmpWithRoleAndDept(empRepository, deptRepository, "202603001", "loginid03", dept, SystemRoleCode.HR);
 
          assertThatThrownBy(() ->
                  empAccountManager.approveRegisterByHR(
-                         EmpUpdateRequestByHR.builder()
-                                 .editorId(hrEmp.getId())
-                                 .targetEmpId(registered.getId())
-                                 .hireAt(null)
-                                 .build()
+                                 hrEmp.getId(),
+                                 registered.getId(),
+                                 null
                  )
          ).isInstanceOf(RequiredValueMissingException.class);
     }
@@ -191,11 +183,9 @@ record EmpAccountManagerTest(
 
         System.out.println("===== resign emp 처리 시작 =====");
         empAccountManager.updateResignedEmpByHR(
-                EmpUpdateRequestByHR.builder()
-                        .editorId(hrEmp.getId())
-                        .targetEmpId(approvedEmp.getId())
-                        .resignedAt(approvedEmp.getHiredAt().plusMonths(1))
-                .build()
+                        hrEmp.getId(),
+                        approvedEmp.getId(),
+                        approvedEmp.getHiredAt().plusMonths(1)
         );
 
         entityManager.clear();
@@ -217,11 +207,9 @@ record EmpAccountManagerTest(
 
         assertThatThrownBy(() ->
             empAccountManager.updateResignedEmpByHR(
-                    EmpUpdateRequestByHR.builder()
-                            .editorId(normalEmp.getId())
-                            .targetEmpId(targetEmp.getId())
-                            .resignedAt(targetEmp.getHiredAt().plusMonths(1))
-                    .build()
+                            normalEmp.getId(),
+                            targetEmp.getId(),
+                            targetEmp.getHiredAt().plusMonths(1)
             )
         ).isInstanceOf(PermissionDeniedException.class);
     }
@@ -237,11 +225,9 @@ record EmpAccountManagerTest(
 
         assertThatThrownBy(() ->
             empAccountManager.updateResignedEmpByHR(
-                    EmpUpdateRequestByHR.builder()
-                            .editorId(hrEmp.getId())
-                            .targetEmpId(target.getId())
-                            .resignedAt(null)
-                    .build()
+                            hrEmp.getId(),
+                            target.getId(),
+                            null
             )
         ).isInstanceOf(RequiredValueMissingException.class);
     }
@@ -257,11 +243,9 @@ record EmpAccountManagerTest(
 
         assertThatThrownBy(() ->
             empAccountManager.updateResignedEmpByHR(
-                    EmpUpdateRequestByHR.builder()
-                            .editorId(hrEmp.getId())
-                            .targetEmpId(target.getId())
-                            .resignedAt(target.getHiredAt().minusMonths(1))
-                    .build()
+                            hrEmp.getId(),
+                            target.getId(),
+                            target.getHiredAt().minusMonths(1)
             )
         ).isInstanceOf(InvalidResignDateException.class);
     }
@@ -273,11 +257,10 @@ record EmpAccountManagerTest(
 
         empAccountManager.updateInfoBySelf(
                 EmpUpdateRequestBySelf.builder()
-                        .loginId(emp.getLoginId())
-                        .currentPassword("!1currentPassword")
                         .newRawPassword("new!1Password")
                         .extensionNo("123-0000")
-                        .build()
+                        .build(),
+                emp.getId()
         );
     }
 
@@ -301,10 +284,10 @@ record EmpAccountManagerTest(
         empAccountManager.updateInfoByDeptManager(
                 EmpUpdateRequestByDeptManager.builder()
                         .targetEmpId(targetEmp.getId())
-                        .deptManagerId(deptManager.getId())
                         .systemRoleCode(updatedRole)
                         .extensionNo(updateExtensionNo)
-                        .build()
+                        .build(),
+                deptManager.getId()
         );
 
         Emp foundEmp = empRepository.findByEmpNo(targetEmp.getEmpNo()).orElseThrow();
@@ -329,10 +312,10 @@ record EmpAccountManagerTest(
                 empAccountManager.updateInfoByDeptManager(
                         EmpUpdateRequestByDeptManager.builder()
                                 .targetEmpId(targetEmp.getId())
-                                .deptManagerId(deptManager.getId())
                                 .systemRoleCode(SystemRoleCode.DEPT_MANAGER)
                                 .extensionNo("999-9999")
-                                .build()
+                                .build(),
+                        deptManager.getId()
                 )
         ).isInstanceOf(Exception.class);
     }
@@ -351,10 +334,10 @@ record EmpAccountManagerTest(
                 empAccountManager.updateInfoByDeptManager(
                         EmpUpdateRequestByDeptManager.builder()
                                 .targetEmpId(targetEmp.getId())
-                                .deptManagerId(otherEmp.getId())
                                 .systemRoleCode(SystemRoleCode.DEPT_MANAGER)
                                 .extensionNo("999-9999")
-                                .build()
+                                .build(),
+                        otherEmp.getId()
                 )
         ).isInstanceOf(PermissionDeniedException.class);
     }
@@ -373,10 +356,10 @@ record EmpAccountManagerTest(
                 empAccountManager.updateInfoByDeptManager(
                         EmpUpdateRequestByDeptManager.builder()
                                 .targetEmpId(targetEmp.getId())
-                                .deptManagerId(otherEmp.getId())
                                 .systemRoleCode(SystemRoleCode.ADMIN)
                                 .extensionNo("999-9999")
-                                .build()
+                                .build(),
+                        otherEmp.getId()
                 )
         ).isInstanceOf(PermissionDeniedException.class);
     }
@@ -398,6 +381,7 @@ record EmpAccountManagerTest(
         PositionCode newPosition = PositionCode.ASSISTANT_MANAGER;
 
         EmpBelongingsParam newBelongingsParam = EmpBelongingsParam.builder()
+                .targetEmpId(targetEmp.getId())
                 .dept(dept)
                 .position(newPosition)
                 .isPrimary(true)
@@ -407,15 +391,19 @@ record EmpAccountManagerTest(
 
         empAccountManager.updateInfoByHR(
                 EmpUpdateRequestByHR.builder()
-                        .editorId(hrEmp.getId())
                         .targetEmpId(targetEmp.getId())
                         .empName(newName)
                         .newRawPassword(newRawPassword)
                         .extensionNo(newExtensionNo)
                         .empStatus(newEmpStatus)
                         .systemRoleCode(newSystemRoleCode)
-                        .belongingsParam(newBelongingsParam)
-                .build()
+                .build(),
+                hrEmp.getId()
+        );
+
+
+        empAccountManager.updateBelongingsByHR(
+                newBelongingsParam, hrEmp.getId()
         );
 
         Emp foundEmp = empRepository.findByEmpNo(targetEmp.getEmpNo()).orElseThrow();
@@ -461,10 +449,10 @@ record EmpAccountManagerTest(
 
         empAccountManager.updateInfoByHR(
                 EmpUpdateRequestByHR.builder()
-                        .editorId(otherEmp.getId())
                         .targetEmpId(targetEmp.getId())
                         .empStatus(EmpStatus.SUSPENDED)
-                        .build()
+                        .build(),
+                otherEmp.getId()
         );
 
         entityManager.flush();
@@ -476,10 +464,10 @@ record EmpAccountManagerTest(
         assertThatThrownBy(() ->
                 empAccountManager.updateInfoByHR(
                         EmpUpdateRequestByHR.builder()
-                                .editorId(otherEmp.getId())
                                 .targetEmpId(targetEmp.getId())
                                 .empName("newName")
-                                .build()
+                                .build(),
+                        otherEmp.getId()
                 )
         ).isInstanceOf(ActiveEmployeeNotFoundException.class);
     }
@@ -495,10 +483,10 @@ record EmpAccountManagerTest(
 
         empAccountManager.updateInfoByHR(
                 EmpUpdateRequestByHR.builder()
-                        .editorId(hrEmp.getId())
                         .targetEmpId(targetEmp.getId())
                         .empStatus(EmpStatus.SUSPENDED)
-                        .build()
+                        .build(),
+                hrEmp.getId()
         );
 
         empAccountManager.activateEmpByHR(hrEmp.getId(), targetEmp.getId());
@@ -537,20 +525,17 @@ record EmpAccountManagerTest(
                 .mimeType(mimeType)
                 .originalFileFullName(imageName.concat(".").concat(ext))
                 .fileSize(fileSize)
+                .bytes(new byte[]{1})
                 .build();
 
         FileType signature = FileType.SIGNATURE;
-        EmpFileReplaceParam empFileInfo = EmpFileReplaceParam.builder()
-                        .file(fileInfo)
-                        .fileType(signature)
-                        .build();
 
         empAccountManager.updateEmpFileBySelf(
-                EmpUpdateRequestBySelf.builder()
-                        .loginId(emp.getLoginId())
-                        .currentPassword(encoder.encode(emp.getEmpPassword()))
-                        .fileRequest(empFileInfo)
-                        .build()
+                EmpFileReplaceParam.builder()
+                        .file(fileInfo)
+                        .fileType(signature)
+                        .build(),
+                emp.getId()
         );
 
         Emp afterEmp = empRepository.findById(emp.getId()).orElseThrow();
@@ -582,7 +567,7 @@ record EmpAccountManagerTest(
 
         Emp emp = empRepository.findByEmpNo(empNo).orElseThrow();
         List<EmpFile> empFiles = emp.getEmpFiles();
-        empAccountManager.deleteEmpFileBySelf(emp.getId(), empFiles.getFirst().getId());
+        empAccountManager.deleteEmpFileBySelf(empFiles.getFirst().getId(), emp.getId());
 
         assertThat(empRepository.findById(emp.getId()).orElseThrow().getEmpFiles()).isEmpty();
     }
@@ -603,16 +588,10 @@ record EmpAccountManagerTest(
         long fileId = empFiles.getFirst().getId();
 
         empAccountManager.updateFileActiveStatusByHR(
-                EmpUpdateRequestByHR.builder()
-                        .editorId(editor.getId())
-                        .targetEmpId(emp.getId())
-                        .fileStatusParam(
-                                EmpFileStatusChangeParam.builder()
-                                        .fileId(fileId)
-                                        .targetActive(false)
-                                        .build()
-                        )
-                        .build()
+                        editor.getId(),
+                        emp.getId(),
+                        fileId,
+                        false
         );
 
         entityManager.flush();
@@ -639,17 +618,7 @@ record EmpAccountManagerTest(
         List<EmpFile> empFiles = emp.getEmpFiles();
         long fileId = empFiles.getFirst().getId();
 
-        EmpUpdateRequestBySelf request = EmpUpdateRequestBySelf.builder()
-                .loginId(emp.getLoginId())
-                .currentPassword("!1currentPassword")
-                .fileStatusParam(
-                        EmpFileStatusChangeParam.builder()
-                                .fileId(fileId)
-                                .targetActive(false)
-                                .build())
-                .build();
-
-        empAccountManager.updateFileActiveStatusBySelf(request);
+        empAccountManager.updateFileActiveStatusBySelf(fileId, false, emp.getId());
 
         Emp foundEmp = empRepository.findById(emp.getId()).orElseThrow();
         EmpFile foundFile = foundEmp.getEmpFiles().stream()
@@ -671,20 +640,17 @@ record EmpAccountManagerTest(
                 .mimeType(mimeType)
                 .originalFileFullName(imageName.concat(".").concat(ext))
                 .fileSize(fileSize)
+                .bytes(new byte[]{1})
                 .build();
 
         FileType signature = FileType.SIGNATURE;
-        EmpFileReplaceParam empFileInfo = EmpFileReplaceParam.builder()
-                .file(fileInfo)
-                .fileType(signature)
-                .build();
 
         empAccountManager.updateEmpFileBySelf(
-                EmpUpdateRequestBySelf.builder()
-                        .loginId(emp.getLoginId())
-                        .currentPassword("!1currentPassword")
-                        .fileRequest(empFileInfo)
-                        .build()
+                EmpFileReplaceParam.builder()
+                        .file(fileInfo)
+                        .fileType(signature)
+                        .build(),
+                emp.getId()
         );
 
         return emp.getEmpNo();

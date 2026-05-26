@@ -1,0 +1,13 @@
+[source,http,options="nowrap"]
+----
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+Content-Length: 168
+
+{
+  "code" : "message_002",
+  "name" : "MESSAGE_RECEIVER_REQUIRED_EXCEPTION",
+  "httpStatus" : 400,
+  "message" : "쪽지 수신자 목록이 비어있습니다"
+}
+----

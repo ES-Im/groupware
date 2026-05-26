@@ -1,0 +1,13 @@
+[source,http,options="nowrap"]
+----
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+Content-Length: 157
+
+{
+  "code" : "EMP_002",
+  "name" : "DUPLICATE_LOGIN_ID_EXCEPTION",
+  "httpStatus" : 400,
+  "message" : "이미 존재하는 사원 아이디입니다"
+}
+----

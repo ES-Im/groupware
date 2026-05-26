@@ -150,11 +150,13 @@ public class Education extends AbstractEntity {
     public void addEducationFile(
             String mimeType,
             String originalName,
+            String storedName,
             String extension,
-            long fileSize
+            long fileSize,
+            String storedPath
     ) {
         EducationFile educationFile = EducationFile.create(
-                this, mimeType, originalName, extension, fileSize
+                this, mimeType, originalName, storedName, extension, fileSize, storedPath
         );
 
         this.educationFiles.add(educationFile);

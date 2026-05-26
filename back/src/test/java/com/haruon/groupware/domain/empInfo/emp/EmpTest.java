@@ -106,7 +106,6 @@ class EmpTest {
 
         emp.changeInfoBySelf(
                 "123-4567",
-                emp.getEmpPassword(),
                 null,
                 encoder);
 
@@ -121,7 +120,6 @@ class EmpTest {
 
         emp.changeInfoBySelf(
                 null,
-                oldPassword,
                 "!Qw123456",
                 encoder);
 
@@ -137,8 +135,10 @@ class EmpTest {
                 FileType.PROFILE_PICTURE,
                 "image/png",
                 "원본",
+                "stored.png",
                 "png",
-                (1024L * 1024)
+                (1024L * 1024),
+                "/test/stored.png"
         );
 
         assertThat(emp.getEmpFiles()).hasSize(1);
@@ -156,20 +156,6 @@ class EmpTest {
 
         assertThat(emp.getEmpFiles()).hasSize(2);
         assertThat(emp.getEmpFiles().stream().filter(EmpFile::isActive)).hasSize(1);
-    }
-
-    @Test
-    @DisplayName("본인 정보를 수정할때 비밀번호를 입력해야한다")
-    void change_EmpInfo_BySelf_WithoutPassword_success() {
-        Emp emp = getApprovedEmp();
-
-        assertThatThrownBy(() ->
-                emp.changeInfoBySelf(
-                        "!Qw123456",
-                        null,
-                        "newPassword!Q2",
-                        encoder)
-        ).isInstanceOf(NullPointerException.class);
     }
 
     @Test
@@ -483,7 +469,7 @@ class EmpTest {
     ) {}
 
     @Test
-    @DisplayName("새로운 비밀번호는 영문 + 숫자 + 특수문자를 포함하며, 이전비밀번호와 달라야한다.")
+    @DisplayName("새로운 비밀번호는 영문 + 숫자 + 특수문자를 포함해야한다")
     void validate_Password_success() {
         Emp emp =  getApprovedEmp();
 
@@ -499,22 +485,10 @@ class EmpTest {
 
         emp.changeInfoBySelf(
                 null,
-                "!Q2w3e4r5t_",
-                "!Q2w3e4r5t__",
+                "!Q2w3e4r5t_12",
                 encoder
         );
     }
-
-    @Test
-    @DisplayName("이전비밀번호와 같다면 실패")
-    void validate_Password_fail() {
-        Emp emp = getApprovedEmp();
-
-        assertThatThrownBy(() ->
-                emp.changeInfoBySelf(null, currentPassword, currentPassword, encoder)
-        ).isInstanceOf(IllegalStateException.class);
-    }
-
 
     @Test
     @DisplayName("Active상태가 아닌 사원의 정보는 변경할 수 없다")
@@ -524,7 +498,6 @@ class EmpTest {
         assertThatThrownBy(() ->
             registeredEmp.changeInfoBySelf(
                     "111-1111",
-                    currentPassword,
                     null,
                     encoder)
         ).isInstanceOf(IllegalStateException.class);
@@ -555,7 +528,6 @@ class EmpTest {
         assertThatThrownBy(() ->
             approvedEmp.changeInfoBySelf(
                     null,
-                    currentPassword,
                     null,
                     encoder)
         ).isInstanceOf(IllegalStateException.class);

@@ -7,10 +7,13 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.haruon.groupware.adapter.webapi.exception.GlobalExceptionHandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.restdocs.RestDocumentationExtension;
+import org.springframework.security.web.context.SecurityContextPersistenceFilter;
+import org.springframework.security.web.method.annotation.AuthenticationPrincipalArgumentResolver;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
@@ -35,6 +38,11 @@ public abstract class RestDocsSupport {
                         new MappingJackson2HttpMessageConverter(objectMapper)
                 )
                 .setControllerAdvice(GlobalExceptionHandler.class)
+                .setCustomArgumentResolvers(
+                        new AuthenticationPrincipalArgumentResolver(),
+                        new PageableHandlerMethodArgumentResolver()
+                )
+                .addFilters(new SecurityContextPersistenceFilter()) //todo - 인증객체를 만들수 있도록 필터를 올림 but deprecated 대안 알아볼 것
                 .apply(documentationConfiguration(provider))
                 .build();
 

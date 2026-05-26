@@ -593,15 +593,18 @@ class DraftCommonTest {
         GeneralDraft draft = getDraftWithApprovers();
         String mimeType = "image/png";
         String originalName = "originName";
+        String storedName = "storedName.png";
         String extension = "png";
         Long fileSize = 1024L;
+        String storedPath = "/test/storedName.png";
 
-        draft.addFile(mimeType, originalName, extension, fileSize);
+        draft.addFile(mimeType, originalName, storedName, extension, fileSize, storedPath);
 
         assertThat(draft.getDraftFiles()).singleElement().extracting(
-                DraftFile::getDraft, DraftFile::getMimeType, DraftFile::getOriginalName, DraftFile::getExtension, DraftFile::getFileSize
+                DraftFile::getDraft, DraftFile::getMimeType, DraftFile::getOriginalName,
+                DraftFile::getStoredName, DraftFile::getExtension, DraftFile::getFileSize, DraftFile::getStoredPath
         ).containsExactly(
-                draft, mimeType, originalName, extension, fileSize
+                draft, mimeType, originalName, storedName, extension, fileSize, storedPath
         );
     }
 
@@ -611,11 +614,13 @@ class DraftCommonTest {
         GeneralDraft submitted = getSubmitted();
         String mimeType = "image/png";
         String originalName = "originName";
+        String storedName = "storedName.png";
         String extension = "png";
         Long fileSize = 1024L;
+        String storedPath = "/test/storedName.png";
 
         assertThatThrownBy(() ->
-                submitted.addFile(mimeType, originalName, extension, fileSize)
+                submitted.addFile(mimeType, originalName, storedName, extension, fileSize, storedPath)
         ).hasMessage("첨부파일수정가능 상태(UNSUBMITTED)가 아님");
     }
 
@@ -625,11 +630,13 @@ class DraftCommonTest {
         GeneralDraft submitted = null;
         String mimeType = "image/png";
         String originalName = "originName";
+        String storedName = "storedName.png";
         String extension = "png";
         Long fileSize = 1024L;
+        String storedPath = "/test/storedName.png";
 
         assertThatThrownBy(() ->
-                submitted.addFile(mimeType, originalName, extension, fileSize)
+                submitted.addFile(mimeType, originalName, storedName, extension, fileSize, storedPath)
         ).isInstanceOf(NullPointerException.class);
     }
 
@@ -637,7 +644,7 @@ class DraftCommonTest {
     @DisplayName("기안 첨부파일을 삭제할 수 있다.")
     void removeFile() {
         GeneralDraft draft = getDraftWithApprovers();
-        draft.addFile("image/png", "originName", "png", 1024L);
+        draft.addFile("image/png", "originName", "storedName.png", "png", 1024L, "/test/storedName.png");
 
         DraftFile first = draft.getDraftFiles().getFirst();
         ReflectionTestUtils.setField(first, "id", 1L);
@@ -651,7 +658,7 @@ class DraftCommonTest {
     @DisplayName("상신했을 경우 기안 첨부파일을 삭제할 수 없다.")
     void removeFile_for_submitted_fail() {
         GeneralDraft submitted = getDraftWithApprovers();
-        submitted.addFile("image/png", "originName", "png", 1024L);
+        submitted.addFile("image/png", "originName", "storedName.png", "png", 1024L, "/test/storedName.png");
         submitted.approve(submitted.getApproval().getApprovers().getFirst().getApprover(),
                 LocalDateTime.of(2026,5, 5,0,0,0));
 

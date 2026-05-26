@@ -1,0 +1,13 @@
+[source,http,options="nowrap"]
+----
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+Content-Length: 206
+
+{
+  "code" : "ATTENDANCE_005",
+  "name" : "CLOSED_ATTENDANCE_EDIT_FORBIDDEN_EXCEPTION",
+  "httpStatus" : 400,
+  "message" : "마감된 근태는 사원이 근태시간을 수정할 수 없습니다."
+}
+----

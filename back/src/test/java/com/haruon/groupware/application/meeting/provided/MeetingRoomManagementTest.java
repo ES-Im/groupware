@@ -16,7 +16,7 @@ import com.haruon.groupware.application.meeting.service.dto.MeetingRoomCreateReq
 import com.haruon.groupware.application.meeting.service.dto.MeetingRoomFileCreateRequest;
 import com.haruon.groupware.application.meeting.service.dto.MeetingRoomUpdateRequest;
 import com.haruon.groupware.application.schedule.required.ScheduleRepository;
-import com.haruon.groupware.application.utils.FileDto;
+import com.haruon.groupware.application.utils.file.FileDto;
 import com.haruon.groupware.domain.empInfo.Dept;
 import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.empInfo.enums.SystemRoleCode;
@@ -168,6 +168,7 @@ record MeetingRoomManagementTest(
                                 .mimeType(mimeType)
                                 .originalFileFullName("orginName.exe")
                                 .fileSize(fileSize)
+                                .bytes(new byte[]{1})
                                 .build(),
                         UnsupportedFileExtensionException.class
                 ), Arguments.of("mimeType은 'image/jpeg', 'image/jpg', 'image/png' 가능하며 그 이외에는 추가할 수 없다.",
@@ -175,6 +176,7 @@ record MeetingRoomManagementTest(
                                 .mimeType("application/octet-stream")
                                 .originalFileFullName(originalFileFullName)
                                 .fileSize(fileSize)
+                                .bytes(new byte[]{1})
                                 .build(),
                         UnsupportedMimeTypeException.class
                 ), Arguments.of("파일 크기는 10 * 1024 * 1024L 까지 가능",
@@ -182,6 +184,7 @@ record MeetingRoomManagementTest(
                                 .mimeType(mimeType)
                                 .originalFileFullName(originalFileFullName)
                                 .fileSize(fileSize+1L)
+                                .bytes(new byte[]{1})
                                 .build(),
                         FileSizeLimitExceededException.class
                 )
@@ -221,6 +224,7 @@ record MeetingRoomManagementTest(
                                         .mimeType("image/png")
                                         .originalFileFullName("orginName.png")
                                         .fileSize(10*1024*1024L)
+                                        .bytes(new byte[]{1})
                                         .build()
                         )
                 .build()
@@ -250,6 +254,7 @@ record MeetingRoomManagementTest(
                                         .mimeType("image/png")
                                         .originalFileFullName("orginName.png")
                                         .fileSize(10*1024*1024L)
+                                        .bytes(new byte[]{1})
                                         .build()
                         )
                 .build()

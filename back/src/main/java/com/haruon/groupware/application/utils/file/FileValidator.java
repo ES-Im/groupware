@@ -1,4 +1,4 @@
-package com.haruon.groupware.application.utils;
+package com.haruon.groupware.application.utils.file;
 
 import com.haruon.groupware.application.exception.common.PositiveValueRequiredException;
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;

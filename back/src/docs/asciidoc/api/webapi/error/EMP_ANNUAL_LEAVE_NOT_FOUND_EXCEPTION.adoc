@@ -1,0 +1,13 @@
+[source,http,options="nowrap"]
+----
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+Content-Length: 168
+
+{
+  "code" : "LEAVE_001",
+  "name" : "EMP_ANNUAL_LEAVE_NOT_FOUND_EXCEPTION",
+  "httpStatus" : 404,
+  "message" : "해당 사원의 연차 정보가 없습니다"
+}
+----

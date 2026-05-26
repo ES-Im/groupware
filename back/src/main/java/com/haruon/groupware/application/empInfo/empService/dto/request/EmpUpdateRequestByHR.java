@@ -18,8 +18,6 @@ import java.time.LocalDate;
 @Builder
 public record EmpUpdateRequestByHR(
 
-        Long editorId,
-
         Long targetEmpId,
 
         // 직원정보
@@ -39,29 +37,18 @@ public record EmpUpdateRequestByHR(
         SystemRoleCode systemRoleCode,
 
         @Nullable
-        LocalDate hireAt,
-
-        @Nullable
-        LocalDate resignedAt,
-
-        // empFile : 활성화 여부
-        @Nullable
-        EmpFileStatusChangeParam fileStatusParam,
-
-        // 직원 소속 정보
-        @Nullable
-        EmpBelongingsParam belongingsParam
+        LocalDate hireAt
 
 ) {
 
     public EmpUpdateRequestByHR {
-        if(editorId == null || targetEmpId == null) throw new RequiredValueMissingException();
+
+        if(targetEmpId == null) throw new RequiredValueMissingException();
 
         if(empName == null
                 && newRawPassword == null && extensionNo == null
                 && empStatus == null && systemRoleCode == null
-                && hireAt == null && resignedAt == null
-                && fileStatusParam == null && belongingsParam == null
+                && hireAt == null
         ) {
             throw new RequiredValueMissingException();
         }

@@ -9,7 +9,7 @@ import com.haruon.groupware.application.board.service.dto.BoardUpdateRequest;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import com.haruon.groupware.application.exception.common.role.PermissionDeniedException;
-import com.haruon.groupware.application.utils.FileDto;
+import com.haruon.groupware.application.utils.file.FileDto;
 import com.haruon.groupware.domain.board.Board;
 import com.haruon.groupware.domain.board.BoardFile;
 import com.haruon.groupware.domain.board.Category;
@@ -307,6 +307,7 @@ record BoardManagementTest(
                                 .mimeType(mimeType)
                                 .originalFileFullName(fileName)
                                 .fileSize(fileSize)
+                                .bytes(new byte[]{1})
                                 .build()
                         )
                         .modifiedAt(modifiedAt)
@@ -353,6 +354,7 @@ record BoardManagementTest(
                                         .mimeType("application/pdf")
                                         .originalFileFullName("test.pdf")
                                         .fileSize(20 * 1024 * 1024L)
+                                        .bytes(new byte[]{1})
                                         .build()
                                 )
                                 .modifiedAt(of(2026, 3, 2, 0, 0, 0))
@@ -381,6 +383,7 @@ record BoardManagementTest(
                                         .mimeType("application/pdf")
                                         .originalFileFullName("test.pdf")
                                         .fileSize(20 * 1024 * 1024L)
+                                        .bytes(new byte[]{1})
                                         .build()
                                 )
                                 .build()
@@ -464,6 +467,7 @@ record BoardManagementTest(
                                 .mimeType(mimeType)
                                 .originalFileFullName(fileName)
                                 .fileSize(fileSize)
+                                .bytes(new byte[]{1})
                                 .build()
                         )
                         .modifiedAt(modifiedAt)

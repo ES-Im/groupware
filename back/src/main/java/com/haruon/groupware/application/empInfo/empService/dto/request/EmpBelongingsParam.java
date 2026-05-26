@@ -9,8 +9,13 @@ import org.jspecify.annotations.Nullable;
 
 import java.time.LocalDate;
 
+/**
+ *  only By HR
+ */
 @Builder
 public record EmpBelongingsParam(
+
+        Long targetEmpId,
 
         @Nullable
         Dept dept,
@@ -29,6 +34,8 @@ public record EmpBelongingsParam(
 
 ) {
     public EmpBelongingsParam {
+        if(targetEmpId == null) throw new RequiredValueMissingException();
+
         if(dept == null && position == null && isPrimary == null && startAt == null && endAt == null) {
             throw new RequiredValueMissingException();
         }

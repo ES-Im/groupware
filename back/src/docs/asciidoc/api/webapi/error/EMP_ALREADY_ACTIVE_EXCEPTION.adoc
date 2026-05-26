@@ -1,0 +1,13 @@
+[source,http,options="nowrap"]
+----
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+Content-Length: 148
+
+{
+  "code" : "EMP_005",
+  "name" : "EMP_ALREADY_ACTIVE_EXCEPTION",
+  "httpStatus" : 400,
+  "message" : "이미 활성화된 사원입니다."
+}
+----

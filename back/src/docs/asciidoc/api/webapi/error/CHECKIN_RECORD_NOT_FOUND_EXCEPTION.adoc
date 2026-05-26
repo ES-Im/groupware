@@ -1,0 +1,13 @@
+[source,http,options="nowrap"]
+----
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+Content-Length: 155
+
+{
+  "code" : "ATTENDANCE_004",
+  "name" : "CHECKIN_RECORD_NOT_FOUND_EXCEPTION",
+  "httpStatus" : 400,
+  "message" : "출근 기록이 없습니다."
+}
+----

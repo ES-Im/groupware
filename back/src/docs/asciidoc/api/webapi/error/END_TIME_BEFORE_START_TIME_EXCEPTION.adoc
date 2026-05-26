@@ -1,0 +1,13 @@
+[source,http,options="nowrap"]
+----
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+Content-Length: 181
+
+{
+  "code" : "COMMON_006",
+  "name" : "END_TIME_BEFORE_START_TIME_EXCEPTION",
+  "httpStatus" : 400,
+  "message" : "종료시간은 시작시간보다 이를 수 없습니다"
+}
+----

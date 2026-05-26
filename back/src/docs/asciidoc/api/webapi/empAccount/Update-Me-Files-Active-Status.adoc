@@ -1,0 +1,46 @@
+[tabs%nosync]
+
+
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/ACTIVATE_ME_FILE/http-request.adoc[]
+
+_Path_parameters_
+include::{snippets}/ACTIVATE_ME_FILE/path-parameters.adoc[]
+
+_Request Param_
+[cols="1,1,1,3"]
+|===
+|파트명|타입|필수|설명
+
+|isForActivate
+|Boolean
+|true
+|`true` : 활성화 +
+`false` : 비활성화
+|===
+
+--
+Response (200)::
++
+--
+_HTTP response_
+include::{snippets}/ACTIVATE_ME_FILE/http-response.adoc[]
+--
+Exception::
++
+--
+이 API에서 발생 가능한 에러:
+
+|===
+|Error Code
+
+|ACTIVE_EMPLOYEE_NOT_FOUND_EXCEPTION
+
+
+|===
+--
+====

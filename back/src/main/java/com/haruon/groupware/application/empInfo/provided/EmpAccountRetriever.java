@@ -1,8 +1,10 @@
 package com.haruon.groupware.application.empInfo.provided;
 
-import com.haruon.groupware.application.empInfo.empService.dto.response.BelongingInfo;
-import com.haruon.groupware.application.empInfo.empService.dto.response.EmpFileInfo;
-import com.haruon.groupware.application.empInfo.empService.dto.response.EmpInfoResponse;
+import com.haruon.groupware.application.empInfo.empService.dto.response.*;
+import com.haruon.groupware.domain.empInfo.enums.EmpStatus;
+import org.jspecify.annotations.Nullable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -11,10 +13,21 @@ import java.util.List;
  */
 public interface EmpAccountRetriever {
 
-    EmpInfoResponse retrieveEmpAccountInfo(String loginId);
+    EmpInfoResponse retrieveEmpAccountInfo(Long empId);
 
-    List<EmpFileInfo> retrieveEmpFilesInfo(String loginId);
+    List<EmpFileInfo> retrieveEmpFilesInfo(Long empId);
 
-    List<BelongingInfo> retrieveEmpBelongingsInfo(String loginId);
+    List<BelongingInfo> retrieveEmpBelongingsInfo(Long empId);
 
+    Page<EmpInfoForManagement> retrieveEmpAccountInfoListForManagement(
+            Long managerOrAdminId,
+            List<BelongingInfo> belongings,
+            @Nullable Long deptId,
+            @Nullable EmpStatus status,
+            @Nullable String keyword,
+            Pageable pageable
+    );
+
+
+    Page<EmpBasicInfo> retrieveNewEmpInfoList(Long adminId, String keyword, Pageable pageable);
 }

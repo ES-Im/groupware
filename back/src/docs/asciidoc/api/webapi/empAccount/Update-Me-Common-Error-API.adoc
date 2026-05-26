@@ -1,0 +1,48 @@
+[tabs%nosync]
+
+
+====
+
+필수값 누락::
++
+--
+_REQUIRED_VALUE_MISSING_EXCEPTION_
+include::../error/REQUIRED_VALUE_MISSING_EXCEPTION.adoc[]
+
+|===
+|필드명|타입|설명
+|`+code+`
+|`+String+`
+|에러 코드
+|`+name+`
+|`+String+`
+|에러 이름
+|`+httpStatus+`
+|`+Number+`
+|HTTP 상태 코드
+|`+message+`
+|`+String+`
+|에러 메시지
+|===
+--
+
+Response (200)::
++
+--
+_HTTP response_
+include::{snippets}/RETRIEVE_ME_INFO/http-response.adoc[]
+_Response fields_
+include::{snippets}/RETRIEVE_ME_INFO/response-fields.adoc[]
+--
+
+Response (401)::
++
+--
+_HTTP response_
+include::{snippets}/RETRIEVE_ME_INFO_FAIL/http-response.adoc[]
+
+_Response fields_
+include::{snippets}/RETRIEVE_ME_INFO_FAIL/response-fields.adoc[]
+
+--
+====

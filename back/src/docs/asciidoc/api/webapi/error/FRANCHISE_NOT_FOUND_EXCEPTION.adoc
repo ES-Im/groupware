@@ -1,0 +1,13 @@
+[source,http,options="nowrap"]
+----
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+Content-Length: 169
+
+{
+  "code" : "FRANCHISE_001",
+  "name" : "FRANCHISE_NOT_FOUND_EXCEPTION",
+  "httpStatus" : 404,
+  "message" : "해당 가맹점 정보를 찾을 수 없습니다"
+}
+----

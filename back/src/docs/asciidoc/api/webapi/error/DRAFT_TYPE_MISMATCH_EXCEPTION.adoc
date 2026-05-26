@@ -1,0 +1,13 @@
+[source,http,options="nowrap"]
+----
+HTTP/1.1 403 Forbidden
+Content-Type: application/json
+Content-Length: 164
+
+{
+  "code" : "DRAFT_003",
+  "name" : "DRAFT_TYPE_MISMATCH_EXCEPTION",
+  "httpStatus" : 403,
+  "message" : "기안서 양식과 종류가 불일치합니다."
+}
+----

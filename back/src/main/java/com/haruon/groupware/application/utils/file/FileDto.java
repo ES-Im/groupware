@@ -1,4 +1,4 @@
-package com.haruon.groupware.application.utils;
+package com.haruon.groupware.application.utils.file;
 
 import com.haruon.groupware.application.exception.common.BlankValueNotAllowedException;
 import com.haruon.groupware.application.exception.common.PositiveValueRequiredException;
@@ -21,12 +21,18 @@ public record FileDto(
 
         String originalFileFullName,
 
-        Long fileSize
+        Long fileSize,
+
+        byte[] bytes
 
 ) {
     public FileDto {
-        if(mimeType == null || originalFileFullName == null || fileSize == null) {
+        if (mimeType == null || originalFileFullName == null || fileSize == null || bytes == null) {
             throw new RequiredValueMissingException();
+        }
+
+        if (bytes.length == 0) {
+            throw new PositiveValueRequiredException();
         }
 
         if(mimeType.isBlank() || originalFileFullName.isBlank()) {

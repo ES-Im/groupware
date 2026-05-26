@@ -16,8 +16,6 @@ public record EmpUpdateRequestByDeptManager (
 
         Long targetEmpId,
 
-        Long deptManagerId,
-
         @Nullable
         SystemRoleCode systemRoleCode,
 
@@ -27,7 +25,7 @@ public record EmpUpdateRequestByDeptManager (
 ) {
 
     public EmpUpdateRequestByDeptManager {
-        if(deptManagerId == null || targetEmpId == null) throw new RequiredValueMissingException();
+        if(targetEmpId == null) throw new RequiredValueMissingException();
 
         if(systemRoleCode == null && extensionNo == null) throw new RequiredValueMissingException();
 

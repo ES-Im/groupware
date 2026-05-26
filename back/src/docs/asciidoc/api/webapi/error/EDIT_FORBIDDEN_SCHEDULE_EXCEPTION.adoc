@@ -1,0 +1,13 @@
+[source,http,options="nowrap"]
+----
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+Content-Length: 160
+
+{
+  "code" : "SCHEDULE_004",
+  "name" : "EDIT_FORBIDDEN_SCHEDULE_EXCEPTION",
+  "httpStatus" : 400,
+  "message" : "수정가능한 일정이 아닙니다"
+}
+----

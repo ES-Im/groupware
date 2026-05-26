@@ -1,0 +1,13 @@
+[source,http,options="nowrap"]
+----
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+Content-Length: 156
+
+{
+  "code" : "COMMON_002",
+  "name" : "BLANK_VALUE_NOT_ALLOWED_EXCEPTION",
+  "httpStatus" : 400,
+  "message" : "공백은 허용되지 않습니다."
+}
+----

@@ -1,0 +1,13 @@
+[source,http,options="nowrap"]
+----
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+Content-Length: 174
+
+{
+  "code" : "FRANCHISE_005",
+  "name" : "FRANCHISE_DAILY_SALES_NOT_FOUND_EXCEPTION",
+  "httpStatus" : 404,
+  "message" : "조회된 일매출 기록이 없습니다."
+}
+----

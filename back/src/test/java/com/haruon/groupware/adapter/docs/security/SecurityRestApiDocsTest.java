@@ -130,7 +130,8 @@ public class SecurityRestApiDocsTest extends RestDocsSupport {
                 "!Q2w3ee4r5t",
                 List.of(SystemRoleCode.EMPLOYEE),
                 List.of(),
-                EmpStatus.ACTIVE
+                EmpStatus.ACTIVE,
+                1L
         );
 
         doAnswer(inv -> {

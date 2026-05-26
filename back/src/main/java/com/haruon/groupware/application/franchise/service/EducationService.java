@@ -7,6 +7,8 @@ import com.haruon.groupware.application.franchise.required.EducationRepository;
 import com.haruon.groupware.application.franchise.service.dto.EducationCreateRequest;
 import com.haruon.groupware.application.franchise.service.dto.EducationFileCreateRequest;
 import com.haruon.groupware.application.franchise.service.dto.EducationUpdateRequest;
+import com.haruon.groupware.application.utils.file.StoreFile;
+import com.haruon.groupware.application.utils.file.required.FileStorage;
 import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.franchise.Education;
 import jakarta.transaction.Transactional;
@@ -23,6 +25,9 @@ public class EducationService implements EducationManagement {
 
     private final EmpRepository empRepository;
     private final EducationRepository educationRepository;
+    private final FileStorage fileStorage;
+
+    private static final String EDUCATION_FILE_TYPE = "education";
 
     @Override
     public long createEducation(long managerId, EducationCreateRequest request) {
@@ -74,12 +79,15 @@ public class EducationService implements EducationManagement {
     public void addEducationFile(long educationId, long managerId, EducationFileCreateRequest request) {
         Education education = findEducation(educationRepository, educationId);
         validateRegister(education, managerId);
+        StoreFile storedFile = fileStorage.store(request.file(), EDUCATION_FILE_TYPE);
 
         education.addEducationFile(
-                request.file().mimeType(),
-                request.file().originalFileName(),
-                request.file().extension(),
-                request.file().fileSize()
+                storedFile.mimeType(),
+                storedFile.originalName(),
+                storedFile.storedName(),
+                storedFile.extension(),
+                storedFile.fileSize(),
+                storedFile.storedPath()
         );
     }
 

@@ -100,8 +100,10 @@ public class Emp extends AbstractEntity {
             FileType fileType,
             String mimeType,
             String originalName,
+            String storedName,
             String extension,
-            Long fileSize) {
+            Long fileSize,
+            String storedPath) {
         ensureActive();
 
         deactivateFilesByType(fileType);
@@ -111,8 +113,10 @@ public class Emp extends AbstractEntity {
                 fileType,
                 mimeType,
                 originalName,
+                storedName,
                 extension,
-                fileSize
+                fileSize,
+                storedPath
         ));
 
     }
@@ -181,12 +185,10 @@ public class Emp extends AbstractEntity {
 
     public void changeInfoBySelf(
             @Nullable String extensionNo,
-            String currentPassword,
             @Nullable String newRawPassword,
             EmpPasswordEncoder encoder
     ) {
         ensureActive();
-        checkPassword(currentPassword, encoder);
 
         boolean hasChanges = extensionNo != null || newRawPassword != null;
         state(hasChanges, "변경할 내용이 없습니다.");
@@ -262,6 +264,7 @@ public class Emp extends AbstractEntity {
     }
 
     private void changeGrade(SystemRoleCode newSystemRoleCode) {
+        //todo - 이 경우 여러 롤을 넣을 수 없음. List로 받도록 변경할 것.
         this.systemRoles.clear();
         this.systemRoles.add(newSystemRoleCode);
     }
@@ -271,10 +274,6 @@ public class Emp extends AbstractEntity {
         state(!encoder.matches(newRawPassword, this.empPassword), "새 비밀번호는 현재 비밀번호와 달라야 합니다.");
 
         this.empPassword = encoder.encode(newRawPassword);
-    }
-
-    private void checkPassword(String inputPassword, EmpPasswordEncoder encoder) {
-        state(encoder.matches(inputPassword, this.empPassword), "현재 비밀번호가 일치하지 않습니다.");
     }
 
     private void changeExtension(String newExtensionNo) {

@@ -19,13 +19,15 @@ public class DraftFile extends AbstractFileEntity {
             Draft draft,
             String mimeType,
             String originalName,
+            String storedName,
             String extension,
-            Long fileSize
+            Long fileSize,
+            String storedPath
     ) {
         DraftFile draftFile = new DraftFile();
         draftFile.draft = requireNonNull(draft);
 
-        draftFile.initFileMetadata(mimeType, originalName, extension, fileSize);
+        draftFile.initFileMetadata(mimeType, originalName, storedName, extension, fileSize, storedPath);
 
         return draftFile;
     }

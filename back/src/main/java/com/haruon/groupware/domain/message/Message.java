@@ -112,18 +112,22 @@ public class Message extends AbstractEntity {
             Emp sender,
             String mimeType,
             String originalName,
+            String storedName,
             String extension,
-            Long fileSize
+            Long fileSize,
+            String storedPath
     ) {
         validateSender(sender);
         validateDraft();
 
         requireNonNull(mimeType);
         requireNonNull(originalName);
+        requireNonNull(storedName);
         requireNonNull(extension);
         requireNonNull(fileSize);
+        requireNonNull(storedPath);
 
-        this.messageFiles.add(MessageFile.create(this, mimeType, originalName, extension, fileSize));
+        this.messageFiles.add(MessageFile.create(this, mimeType, originalName, storedName, extension, fileSize, storedPath));
     }
 
     public void removeFile(Emp sender, long fileId) {

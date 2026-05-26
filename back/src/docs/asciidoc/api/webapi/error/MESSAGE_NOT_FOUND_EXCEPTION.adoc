@@ -1,0 +1,13 @@
+[source,http,options="nowrap"]
+----
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+Content-Length: 147
+
+{
+  "code" : "message_001",
+  "name" : "MESSAGE_NOT_FOUND_EXCEPTION",
+  "httpStatus" : 404,
+  "message" : "조회된 쪽지가 없습니다"
+}
+----

@@ -1,0 +1,13 @@
+[source,http,options="nowrap"]
+----
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+Content-Length: 160
+
+{
+  "code" : "SCHEDULE_003",
+  "name" : "NOT_MANUAL_SCHEDULE_EXCEPTION",
+  "httpStatus" : 400,
+  "message" : "수기관리 대상 일정이 아닙니다"
+}
+----

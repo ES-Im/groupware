@@ -18,23 +18,26 @@ import java.util.List;
 public class EmpDetails implements UserDetails {
 
     private final String loginId;
-    private final String password;
+    @Getter private final String password;
     private final List<SystemRoleCode> roles;
     @Getter private final List<BelongingInfo> belongings;
     @Getter private final EmpStatus status;
+    @Getter private final Long empId;
 
     public EmpDetails(
             String loginId,
             String password,
             List<SystemRoleCode> roles,
             List<BelongingInfo> belongings,
-            EmpStatus status
+            EmpStatus status,
+            Long empId
     ) {
         this.loginId = loginId;
         this.password = password;
         this.roles = roles;
         this.belongings = belongings;
         this.status = status;
+        this.empId = empId;
     }
 
     public static EmpDetails from(Emp emp) {
@@ -45,24 +48,22 @@ public class EmpDetails implements UserDetails {
                 emp.getEmpBelongings().stream()
                         .filter(belonging -> belonging.getEndAt() == null)
                         .map(b -> new BelongingInfo(
-                                b.getId(),
+                                b.getDept().getId(),
+                                b.getDept().getDeptCode(),
                                 b.getDept().getDeptName(),
                                 b.getPosition(),
                                 b.isPrimary(),
-                                null, null
+                                b.getStartAt(),
+                                b.getEndAt()
                         )).toList(),
-                emp.getStatus()
+                emp.getStatus(),
+                emp.getId()
         );
     }
 
     @Override
     public String getUsername() {
         return loginId;
-    }
-
-    @Override
-    public String getPassword() {
-        return password;
     }
 
     @Override

@@ -1,0 +1,13 @@
+[source,http,options="nowrap"]
+----
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+Content-Length: 157
+
+{
+  "code" : "COMMON_004",
+  "name" : "INVALID_FORMAT_EXCEPTION",
+  "httpStatus" : 400,
+  "message" : "입력값 형식이 올바르지 않습니다."
+}
+----

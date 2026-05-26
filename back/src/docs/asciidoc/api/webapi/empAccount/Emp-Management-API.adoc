@@ -1,0 +1,48 @@
+[tabs%nosync]
+
+
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/EMPS_FOR_MANAGEMENT/http-request.adoc[]
+_Request header_
+include::{snippets}/EMPS_FOR_MANAGEMENT/request-headers.adoc[]
+_권한별 조회_
+
+|===
+|권한|조회범위
+
+|`+ADMIN+`
+|전 부서의 사원 정보 조회가능
+|`+DEPT_MANAGER+`
+|소속 부서의 사원 정보 조회가능
+|===
+
+_Query Parameter_
+include::{snippets}/EMPS_FOR_MANAGEMENT/query-parameters.adoc[]
+
+--
+Response (200)::
++
+--
+_HTTP response_
+include::{snippets}/EMPS_FOR_MANAGEMENT/http-response.adoc[]
+_Response fields_
+include::{snippets}/EMPS_FOR_MANAGEMENT/response-fields.adoc[]
+--
+Exception::
++
+--
+이 API에서 발생 가능한 에러:
+
+|===
+|Error Code
+
+|PERMISSION_DENIED_EXCEPTION
+|ACTIVE_EMPLOYEE_NOT_FOUND_EXCEPTION
+
+|===
+--
+====

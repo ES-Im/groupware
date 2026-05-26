@@ -1,0 +1,13 @@
+[source,http,options="nowrap"]
+----
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+Content-Length: 164
+
+{
+  "code" : "DRAFT_007",
+  "name" : "UNREQUESTABLE_LEAVE_TYPE_EXCEPTION",
+  "httpStatus" : 400,
+  "message" : "신청할 수 없는 휴가 타입입니다."
+}
+----

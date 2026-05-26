@@ -40,6 +40,8 @@ public class QAbstractFileEntity extends EntityPathBase<AbstractFileEntity> {
 
     public final StringPath storedName = createString("storedName");
 
+    public final StringPath storedPath = createString("storedPath");
+
     //inherited
     public final DateTimePath<java.time.Instant> updatedAt = _super.updatedAt;
 

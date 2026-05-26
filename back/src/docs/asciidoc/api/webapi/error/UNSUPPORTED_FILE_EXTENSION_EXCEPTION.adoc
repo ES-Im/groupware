@@ -1,0 +1,13 @@
+[source,http,options="nowrap"]
+----
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+Content-Length: 160
+
+{
+  "code" : "FILE_003",
+  "name" : "UNSUPPORTED_FILE_EXTENSION_EXCEPTION",
+  "httpStatus" : 400,
+  "message" : "허용되지 않는 확장자입니다."
+}
+----

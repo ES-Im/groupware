@@ -19,13 +19,15 @@ public class BoardFile extends AbstractFileEntity {
             Board board,
             String mimeType,
             String originalName,
+            String storedName,
             String extension,
-            Long fileSize
+            Long fileSize,
+            String storedPath
     ) {
         BoardFile boardFile = new BoardFile();
         boardFile.board = requireNonNull(board);
 
-        boardFile.initFileMetadata(mimeType, originalName, extension, fileSize);
+        boardFile.initFileMetadata(mimeType, originalName, storedName, extension, fileSize, storedPath);
 
         return boardFile;
     }

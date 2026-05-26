@@ -1,6 +1,9 @@
 package com.haruon.groupware.application;
 
 import com.haruon.groupware.application.utils.CompanyPolicyPort;
+import com.haruon.groupware.application.utils.file.FileDto;
+import com.haruon.groupware.application.utils.file.StoreFile;
+import com.haruon.groupware.application.utils.file.required.FileStorage;
 import com.haruon.groupware.domain.empInfo.EmpPasswordEncoder;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -75,6 +78,25 @@ public class TestBeanConfig {
             @Override
             public Double getMaxAnnualLeaveDaysForFirstYearEmp() {
                 return 11.0;
+            }
+        };
+    }
+
+    @Bean
+    @Primary
+    public FileStorage fileStorage() {
+        return new FileStorage() {
+            @Override
+            public StoreFile store(FileDto fileDto, String fileType) {
+                String storedName = "stored-" + fileDto.originalFileFullName();
+                return new StoreFile(
+                        fileDto.originalFileName(),
+                        storedName,
+                        fileDto.mimeType(),
+                        fileDto.extension(),
+                        fileDto.fileSize(),
+                        "/test/" + fileType + "/" + storedName
+                );
             }
         };
     }

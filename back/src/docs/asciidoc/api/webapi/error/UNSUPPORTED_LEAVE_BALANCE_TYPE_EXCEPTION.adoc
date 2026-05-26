@@ -1,0 +1,13 @@
+[source,http,options="nowrap"]
+----
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+Content-Length: 200
+
+{
+  "code" : "LEAVE_004",
+  "name" : "UNSUPPORTED_LEAVE_BALANCE_TYPE_EXCEPTION",
+  "httpStatus" : 400,
+  "message" : "해당 휴가 타입은 연차 잔여일수 계산 대상이 아닙니다."
+}
+----

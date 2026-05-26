@@ -1,0 +1,13 @@
+[source,http,options="nowrap"]
+----
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+Content-Length: 219
+
+{
+  "code" : "LEAVE_003",
+  "name" : "INVALID_ANNUAL_LEAVE_GRANTED_DATE_EXCEPTION",
+  "httpStatus" : 400,
+  "message" : "신입 연차 부여를 제외한 연차 부여일은 매년 1월 1일이어야 합니다."
+}
+----

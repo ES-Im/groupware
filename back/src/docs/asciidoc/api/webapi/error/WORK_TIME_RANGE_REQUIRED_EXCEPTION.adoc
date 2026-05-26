@@ -1,0 +1,13 @@
+[source,http,options="nowrap"]
+----
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+Content-Length: 219
+
+{
+  "code" : "ATTENDANCE_003",
+  "name" : "WORK_TIME_RANGE_REQUIRED_EXCEPTION",
+  "httpStatus" : 400,
+  "message" : "정상근무 시간을 계산하려면 시작시각과 종료시각이 모두 필요합니다."
+}
+----

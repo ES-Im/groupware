@@ -1,0 +1,13 @@
+[source,http,options="nowrap"]
+----
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+Content-Length: 155
+
+{
+  "code" : "COMMON_001",
+  "name" : "REQUIRED_VALUE_MISSING_EXCEPTION",
+  "httpStatus" : 400,
+  "message" : "필수 값이 누락되었습니다."
+}
+----

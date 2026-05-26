@@ -1,0 +1,34 @@
+[tabs%nosync]
+
+
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/DELETE_ME_FILE/http-request.adoc[]
+
+_Path_parameters_
+include::{snippets}/DELETE_ME_FILE/path-parameters.adoc[]
+
+--
+Response (200)::
++
+--
+_HTTP response_
+include::{snippets}/DELETE_ME_FILE/http-response.adoc[]
+--
+Exception::
++
+--
+이 API에서 발생 가능한 에러:
+
+|===
+|Error Code
+
+|ACTIVE_EMPLOYEE_NOT_FOUND_EXCEPTION
+
+
+|===
+--
+====

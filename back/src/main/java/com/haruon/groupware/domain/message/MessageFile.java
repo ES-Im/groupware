@@ -18,13 +18,15 @@ public class MessageFile extends AbstractFileEntity {
             Message message,
             String mimeType,
             String originalName,
+            String storedName,
             String extension,
-            Long fileSize
+            Long fileSize,
+            String storedPath
     ) {
         MessageFile messageFile = new MessageFile();
         messageFile.message = requireNonNull(message);
 
-        messageFile.initFileMetadata(mimeType, originalName, extension, fileSize);
+        messageFile.initFileMetadata(mimeType, originalName, storedName, extension, fileSize, storedPath);
 
         return messageFile;
     }
