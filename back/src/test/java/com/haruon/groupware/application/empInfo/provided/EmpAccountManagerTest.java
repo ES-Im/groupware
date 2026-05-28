@@ -12,7 +12,7 @@ import com.haruon.groupware.application.exception.empInfo.DuplicateEmpNoExceptio
 import com.haruon.groupware.application.exception.empInfo.DuplicateLoginIdException;
 import com.haruon.groupware.application.exception.empInfo.EmpAlreadyActiveException;
 import com.haruon.groupware.application.exception.empInfo.InvalidResignDateException;
-import com.haruon.groupware.application.utils.file.FileDto;
+import com.haruon.groupware.application.file.dto.request.FileDto;
 import com.haruon.groupware.domain.empInfo.*;
 import com.haruon.groupware.domain.empInfo.enums.EmpStatus;
 import com.haruon.groupware.domain.empInfo.enums.FileType;
@@ -278,13 +278,13 @@ record EmpAccountManagerTest(
         );
 
         String updateExtensionNo = "999-9999";
-        SystemRoleCode updatedRole = SystemRoleCode.DEPT_MANAGER;
+        Set<SystemRoleCode> updatedRoles = Set.of(SystemRoleCode.EMPLOYEE, SystemRoleCode.DEPT_MANAGER);
 
         System.out.println("================ 변경 테스트 시작 ================");
         empAccountManager.updateInfoByDeptManager(
                 EmpUpdateRequestByDeptManager.builder()
                         .targetEmpId(targetEmp.getId())
-                        .systemRoleCode(updatedRole)
+                        .systemRoleCode(updatedRoles)
                         .extensionNo(updateExtensionNo)
                         .build(),
                 deptManager.getId()
@@ -294,7 +294,7 @@ record EmpAccountManagerTest(
         Set<SystemRoleCode> roles = new HashSet<>(foundEmp.getSystemRoles());
 
         assertThat(foundEmp.getExtensionNo()).isEqualTo(updateExtensionNo);
-        assertThat(roles).containsExactly(updatedRole);
+        assertThat(roles).containsExactlyInAnyOrderElementsOf(updatedRoles);
     }
 
     @Test
@@ -312,7 +312,7 @@ record EmpAccountManagerTest(
                 empAccountManager.updateInfoByDeptManager(
                         EmpUpdateRequestByDeptManager.builder()
                                 .targetEmpId(targetEmp.getId())
-                                .systemRoleCode(SystemRoleCode.DEPT_MANAGER)
+                                .systemRoleCode(Set.of(SystemRoleCode.DEPT_MANAGER))
                                 .extensionNo("999-9999")
                                 .build(),
                         deptManager.getId()
@@ -334,7 +334,7 @@ record EmpAccountManagerTest(
                 empAccountManager.updateInfoByDeptManager(
                         EmpUpdateRequestByDeptManager.builder()
                                 .targetEmpId(targetEmp.getId())
-                                .systemRoleCode(SystemRoleCode.DEPT_MANAGER)
+                                .systemRoleCode(Set.of(SystemRoleCode.DEPT_MANAGER))
                                 .extensionNo("999-9999")
                                 .build(),
                         otherEmp.getId()
@@ -356,7 +356,7 @@ record EmpAccountManagerTest(
                 empAccountManager.updateInfoByDeptManager(
                         EmpUpdateRequestByDeptManager.builder()
                                 .targetEmpId(targetEmp.getId())
-                                .systemRoleCode(SystemRoleCode.ADMIN)
+                                .systemRoleCode(Set.of(SystemRoleCode.ADMIN))
                                 .extensionNo("999-9999")
                                 .build(),
                         otherEmp.getId()
@@ -377,7 +377,7 @@ record EmpAccountManagerTest(
         String newExtensionNo = "888-9999";
         String newRawPassword = "!1newPassword";
         EmpStatus newEmpStatus = EmpStatus.ACTIVE;
-        SystemRoleCode newSystemRoleCode = SystemRoleCode.DEPT_MANAGER;
+        Set<SystemRoleCode> newSystemRoleCodes = Set.of(SystemRoleCode.DEPT_MANAGER, SystemRoleCode.HR);
         PositionCode newPosition = PositionCode.ASSISTANT_MANAGER;
 
         EmpBelongingsParam newBelongingsParam = EmpBelongingsParam.builder()
@@ -396,7 +396,7 @@ record EmpAccountManagerTest(
                         .newRawPassword(newRawPassword)
                         .extensionNo(newExtensionNo)
                         .empStatus(newEmpStatus)
-                        .systemRoleCode(newSystemRoleCode)
+                        .systemRoleCode(newSystemRoleCodes)
                 .build(),
                 hrEmp.getId()
         );
@@ -419,7 +419,7 @@ record EmpAccountManagerTest(
             assertThat(emp.getExtensionNo()).isEqualTo(newExtensionNo);
             assertThat(encoder.matches(newRawPassword, emp.getEmpPassword())).isTrue();
             assertThat(emp.getStatus()).isEqualTo(newEmpStatus);
-            assertThat(roles).contains(newSystemRoleCode);
+            assertThat(roles).containsExactlyInAnyOrderElementsOf(newSystemRoleCodes);
             assertThat(newDeptList).contains(dept);
             assertThat(newPositionList).contains(newPosition);
         });

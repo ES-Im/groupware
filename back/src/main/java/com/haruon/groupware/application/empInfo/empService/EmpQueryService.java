@@ -38,7 +38,7 @@ public class EmpQueryService implements EmpAccountRetriever {
     }
 
     @Override
-    public List<EmpFileInfo> retrieveEmpFilesInfo(Long empId) {
+    public List<EmpFileListInfo> retrieveEmpFilesInfo(Long empId) {
         return empQueryRepository.findAllEmpFileInfosByEmpId(empId)
                 .orElse(List.of());
     }

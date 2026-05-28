@@ -1,0 +1,45 @@
+[tabs%nosync]
+
+
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/NEW_EMP_LIST/http-request.adoc[]
+_Request header_
+include::{snippets}/NEW_EMP_LIST/request-headers.adoc[]
+_권한별 조회_
+
+|===
+|권한|조회범위
+
+|`+HR+`
+|가입 승인 대기(`status = PENDING`) 신규 사원 리스트 조회
+|===
+_Request param_
+include::{snippets}/NEW_EMP_LIST/query-parameters.adoc[]
+
+--
+Response (200)::
++
+--
+_HTTP response_
+include::{snippets}/NEW_EMP_LIST/http-response.adoc[]
+_Response fields_
+include::{snippets}/NEW_EMP_LIST/response-fields.adoc[]
+--
+Exception ::
++
+--
+이 API에서 발생 가능한 에러:
+
+|===
+|Error Code
+
+|ACTIVE_EMPLOYEE_NOT_FOUND_EXCEPTION
+|PERMISSION_DENIED_EXCEPTION
+|===
+
+--
+====

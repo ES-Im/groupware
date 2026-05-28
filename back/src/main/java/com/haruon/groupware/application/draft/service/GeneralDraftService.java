@@ -7,7 +7,7 @@ import com.haruon.groupware.application.draft.service.dto.CommonDraftUpdateReque
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import com.haruon.groupware.application.exception.draft.DraftTypeMismatchException;
-import com.haruon.groupware.application.utils.file.required.FileStorage;
+import com.haruon.groupware.application.file.required.FileStorage;
 import com.haruon.groupware.domain.draft.Draft;
 import com.haruon.groupware.domain.draft.GeneralDraft;
 import com.haruon.groupware.domain.draft.sub.ApproversParam;

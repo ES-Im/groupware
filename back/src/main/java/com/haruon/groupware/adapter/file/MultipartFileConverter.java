@@ -1,7 +1,7 @@
 package com.haruon.groupware.adapter.file;
 
 import com.haruon.groupware.adapter.webapi.exception.auth.FileConvertFailedException;
-import com.haruon.groupware.application.utils.file.FileDto;
+import com.haruon.groupware.application.file.dto.request.FileDto;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;

@@ -1,4 +1,4 @@
-package com.haruon.groupware.application.utils.file;
+package com.haruon.groupware.application.file.dto.result;
 
 public record StoreFile(
         String originalName,

@@ -10,7 +10,7 @@ import com.haruon.groupware.application.empInfo.required.EmpRepository;
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import com.haruon.groupware.application.exception.draft.ApprovalLineRequiredException;
 import com.haruon.groupware.application.exception.draft.DraftNotFoundException;
-import com.haruon.groupware.application.utils.file.FileDto;
+import com.haruon.groupware.application.file.dto.request.FileDto;
 import com.haruon.groupware.domain.draft.Approver;
 import com.haruon.groupware.domain.draft.Draft;
 import com.haruon.groupware.domain.draft.DraftFile;

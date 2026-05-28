@@ -1,0 +1,41 @@
+[tabs%nosync]
+
+
+====
+Request::
++
+--
+_HTTP request_
+
+include::{snippets}/EMP_FILE_PREVIEW/http-request.adoc[]
+
+_Request header_
+
+include::{snippets}/EMP_FILE_PREVIEW/request-headers.adoc[]
+
+_Path parameter_
+
+include::{snippets}/EMP_FILE_PREVIEW/path-parameters.adoc[]
+--
+Response (200)::
++
+--
+_HTTP response_
+include::{snippets}/EMP_FILE_PREVIEW/http-response.adoc[]
+_Response Header_
+include::{snippets}/EMP_FILE_PREVIEW/response-headers.adoc[]
+--
+Exception ::
++
+--
+이 API에서 발생 가능한 에러:
+
+|===
+|Error Code
+
+|FILE_NOT_FOUND_EXCEPTION
+|UNSUPPORTED_MIME_TYPE_EXCEPTION
+|===
+
+--
+====

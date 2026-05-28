@@ -9,7 +9,7 @@ import com.haruon.groupware.application.board.service.dto.BoardUpdateRequest;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import com.haruon.groupware.application.exception.common.role.PermissionDeniedException;
-import com.haruon.groupware.application.utils.file.FileDto;
+import com.haruon.groupware.application.file.dto.request.FileDto;
 import com.haruon.groupware.domain.board.Board;
 import com.haruon.groupware.domain.board.BoardFile;
 import com.haruon.groupware.domain.board.Category;

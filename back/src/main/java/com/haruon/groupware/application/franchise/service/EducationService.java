@@ -2,13 +2,13 @@ package com.haruon.groupware.application.franchise.service;
 
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
 import com.haruon.groupware.application.exception.franchise.EducationRegisterMismatchException;
+import com.haruon.groupware.application.file.dto.result.StoreFile;
+import com.haruon.groupware.application.file.required.FileStorage;
 import com.haruon.groupware.application.franchise.provided.EducationManagement;
 import com.haruon.groupware.application.franchise.required.EducationRepository;
 import com.haruon.groupware.application.franchise.service.dto.EducationCreateRequest;
 import com.haruon.groupware.application.franchise.service.dto.EducationFileCreateRequest;
 import com.haruon.groupware.application.franchise.service.dto.EducationUpdateRequest;
-import com.haruon.groupware.application.utils.file.StoreFile;
-import com.haruon.groupware.application.utils.file.required.FileStorage;
 import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.franchise.Education;
 import jakarta.transaction.Transactional;

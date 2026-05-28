@@ -1,4 +1,4 @@
-package com.haruon.groupware.application.utils.file;
+package com.haruon.groupware.application.file.dto.request;
 
 import com.haruon.groupware.application.exception.common.BlankValueNotAllowedException;
 import com.haruon.groupware.application.exception.common.PositiveValueRequiredException;
@@ -10,9 +10,6 @@ import java.util.Locale;
 
 /**
  * 파일 관련 Application DTO 공통 필드
- * @param mimeType
- * @param originalFileFullName
- * @param fileSize
  */
 @Builder
 public record FileDto(

@@ -1,8 +1,8 @@
 package com.haruon.groupware.application.empInfo.empService.dto.request;
 
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
-import com.haruon.groupware.application.utils.file.FileDto;
-import com.haruon.groupware.application.utils.file.FileValidator;
+import com.haruon.groupware.application.file.FileValidator;
+import com.haruon.groupware.application.file.dto.request.FileDto;
 import com.haruon.groupware.domain.empInfo.enums.FileType;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;

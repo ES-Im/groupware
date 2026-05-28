@@ -9,6 +9,7 @@ import com.haruon.groupware.domain.empInfo.enums.SystemRoleCode;
 
 import java.time.LocalDate;
 import java.util.Locale;
+import java.util.Set;
 
 import static com.haruon.groupware.domain.shared.DeptFixture.getDept;
 
@@ -66,7 +67,7 @@ public class EmpFixture {
                 null,
                 null,
                 null,
-                SystemRoleCode.ADMIN,
+                Set.of(SystemRoleCode.ADMIN),
                 null,
                 encoder
         );

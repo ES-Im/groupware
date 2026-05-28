@@ -15,7 +15,7 @@ public interface EmpAccountRetriever {
 
     EmpInfoResponse retrieveEmpAccountInfo(Long empId);
 
-    List<EmpFileInfo> retrieveEmpFilesInfo(Long empId);
+    List<EmpFileListInfo> retrieveEmpFilesInfo(Long empId);
 
     List<BelongingInfo> retrieveEmpBelongingsInfo(Long empId);
 

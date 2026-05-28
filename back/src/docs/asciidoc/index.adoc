@@ -63,6 +63,18 @@ include::api/webapi/empAccount/Update-Me-Files-Active-Status.adoc[]
 === 관리용 사원 리스트 조회
 include::api/webapi/empAccount/Emp-Management-API.adoc[]
 
+[[NEW_EMP_LIST]]
+=== 신규 사원 리스트 조회
+include::api/webapi/empAccount/NEW-EMP-LIST.adoc[]
+
+[[EMP_FILE_PREVIEW]]
+=== 사원 파일 미리보기
+include::api/webapi/file/Emp-Preview.adoc[]
+
+[[EMP_FILE_DOWNLOAD]]
+=== 사원 파일 다운로드
+include::api/webapi/file/Emp-Download.adoc[]
+
 [[ERROR]]
 == 에러
 include::api/webapi/error/ERROR_MAIN.adoc[]

@@ -7,10 +7,10 @@ import com.haruon.groupware.application.empInfo.required.EmpRepository;
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import com.haruon.groupware.application.exception.draft.ApprovalLineRequiredException;
 import com.haruon.groupware.application.exception.draft.DraftNotFoundException;
+import com.haruon.groupware.application.file.dto.result.StoreFile;
+import com.haruon.groupware.application.file.required.FileStorage;
 import com.haruon.groupware.application.utils.AuthorizationChecker;
 import com.haruon.groupware.application.utils.Utils;
-import com.haruon.groupware.application.utils.file.StoreFile;
-import com.haruon.groupware.application.utils.file.required.FileStorage;
 import com.haruon.groupware.domain.draft.Draft;
 import com.haruon.groupware.domain.draft.sub.ApproversParam;
 import com.haruon.groupware.domain.empInfo.Emp;
@@ -104,8 +104,7 @@ abstract class CommonDraftService {
 
     private boolean hasApprovers(@Nullable List<ApproversRequest> params, Draft draft) {
 
-        return !(draft.getApproval().getApprovers().isEmpty())
-                || (params != null && !params.isEmpty());
+        return !draft.getApproval().getApprovers().isEmpty() || (params != null && !params.isEmpty());
     }
 
     protected Emp findActiveEmpById(long empId) {

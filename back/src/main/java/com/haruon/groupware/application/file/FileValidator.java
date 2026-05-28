@@ -1,10 +1,11 @@
-package com.haruon.groupware.application.utils.file;
+package com.haruon.groupware.application.file;
 
 import com.haruon.groupware.application.exception.common.PositiveValueRequiredException;
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import com.haruon.groupware.application.exception.file.FileSizeLimitExceededException;
 import com.haruon.groupware.application.exception.file.UnsupportedFileExtensionException;
 import com.haruon.groupware.application.exception.file.UnsupportedMimeTypeException;
+import com.haruon.groupware.application.file.dto.request.FileDto;
 
 import java.util.Locale;
 import java.util.Set;

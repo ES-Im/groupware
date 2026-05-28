@@ -1,13 +1,17 @@
 package com.haruon.groupware.adapter.file;
 
 import com.haruon.groupware.adapter.webapi.exception.auth.FileStoreFailedException;
-import com.haruon.groupware.application.utils.file.FileDto;
-import com.haruon.groupware.application.utils.file.StoreFile;
-import com.haruon.groupware.application.utils.file.required.FileStorage;
+import com.haruon.groupware.application.exception.file.FileNotFoundException;
+import com.haruon.groupware.application.file.dto.request.FileDto;
+import com.haruon.groupware.application.file.dto.result.StoreFile;
+import com.haruon.groupware.application.file.required.FileStorage;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.UUID;
@@ -44,12 +48,34 @@ public class FileStorageAdapter implements FileStorage {
                     fileDto.mimeType(),
                     fileDto.extension(),
                     fileDto.fileSize(),
-                    storedFilePath.toString()
+                    storedPath.toString()
             );
 
         } catch (IOException e) {
             throw new FileStoreFailedException();
         }
 
+    }
+
+    @Override
+    public Resource loadAsResource(String storedPath, String storedName) {
+        try {
+            if (storedPath == null || storedPath.isBlank() || storedName == null || storedName.isBlank()) {
+                throw new FileNotFoundException();
+            }
+
+            Path directory = Path.of(storedPath).normalize();
+            Path path = directory.resolve(storedName).normalize();
+
+            if (!path.startsWith(directory)) throw new FileNotFoundException();
+
+            Resource resource = new UrlResource(path.toUri());
+
+            if(!resource.exists() || !resource.isReadable()) throw new FileNotFoundException();
+
+            return resource;
+        } catch (MalformedURLException e) {
+            throw new FileNotFoundException();
+        }
     }
 }

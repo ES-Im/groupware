@@ -1,0 +1,40 @@
+[tabs%nosync]
+
+
+====
+Request::
++
+--
+_HTTP request_
+
+include::{snippets}/EMP_FILE_DOWNLOAD/http-request.adoc[]
+
+_Request header_
+
+include::{snippets}/EMP_FILE_DOWNLOAD/request-headers.adoc[]
+
+_Path parameter_
+
+include::{snippets}/EMP_FILE_DOWNLOAD/path-parameters.adoc[]
+--
+Response (200)::
++
+--
+_HTTP response_
+include::{snippets}/EMP_FILE_DOWNLOAD/http-response.adoc[]
+_Response Header_
+include::{snippets}/EMP_FILE_DOWNLOAD/response-headers.adoc[]
+--
+Exception ::
++
+--
+이 API에서 발생 가능한 에러:
+
+|===
+|Error Code
+
+|FILE_NOT_FOUND_EXCEPTION
+|===
+
+--
+====

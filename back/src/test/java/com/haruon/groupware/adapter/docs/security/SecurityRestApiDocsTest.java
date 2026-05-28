@@ -202,7 +202,7 @@ public class SecurityRestApiDocsTest extends RestDocsSupport {
                         ),
 
                         responseFields(
-                                fieldWithPath("accessToken").description("Access Token"))
+                                fieldWithPath("accessToken").type(String.class).description("Access Token"))
 
                 ));
     }

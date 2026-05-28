@@ -5,7 +5,7 @@ import com.haruon.groupware.adapter.IntegrityTestFixtures;
 import com.haruon.groupware.adapter.persistence.emp.EmpQueryRepositoryAdapter;
 import com.haruon.groupware.application.empInfo.empService.dto.request.EmpRegisterRequest;
 import com.haruon.groupware.application.empInfo.empService.dto.request.EmpUpdateRequestBySelf;
-import com.haruon.groupware.application.empInfo.empService.dto.response.EmpFileInfo;
+import com.haruon.groupware.application.empInfo.empService.dto.response.EmpFileListInfo;
 import com.haruon.groupware.application.empInfo.empService.dto.response.EmpInfoResponse;
 import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.empInfo.enums.FileType;
@@ -36,7 +36,7 @@ class EmpAccountApiTest extends IntegrationTestSupport {
         EmpRegisterRequest request = new EmpRegisterRequest("202601999", "홍길동", "login12345", "!Q2w3e4r5t");
 
         mockMvc.perform(
-                post("/api/emp")
+                post("/api/employees")
                         .content(objectMapper.writeValueAsBytes(request))
                         .contentType(MediaType.APPLICATION_JSON)
         ).andExpect(status().isOk());
@@ -52,7 +52,7 @@ class EmpAccountApiTest extends IntegrationTestSupport {
         EmpRegisterRequest request = new EmpRegisterRequest("202601999", "홍길동", loginId, password);
 
         mockMvc.perform(
-                post("/api/emp")
+                post("/api/employees")
                         .content(objectMapper.writeValueAsBytes(request))
                         .contentType(MediaType.APPLICATION_JSON)
         ).andExpect(status().is4xxClientError());
@@ -70,7 +70,7 @@ class EmpAccountApiTest extends IntegrationTestSupport {
         log.info("accessToken : {}", accessToken);
         log.info("개인정보조회 시작");
         MvcResult result = mockMvc.perform(
-                        get("/api/emp/me")
+                        get("/api/employees/me")
                                 .header("Authorization", "Bearer " + accessToken)
                 ).andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
@@ -92,7 +92,7 @@ class EmpAccountApiTest extends IntegrationTestSupport {
         String accessToken = loginByIdAndPw(loginId, password);
 
         MvcResult result = mockMvc.perform(
-                        get("/api/emp/me/files")
+                        get("/api/employees/me/files")
                                 .header("Authorization", "Bearer " + accessToken)
                 ).andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
@@ -112,7 +112,7 @@ class EmpAccountApiTest extends IntegrationTestSupport {
         String accessToken = loginByIdAndPw(loginId, password);
 
         MvcResult result = mockMvc.perform(
-                        get("/api/emp/me/belongings")
+                        get("/api/employees/me/belongings")
                                 .header("Authorization", "Bearer " + accessToken)
                 ).andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
@@ -135,7 +135,7 @@ class EmpAccountApiTest extends IntegrationTestSupport {
                 .extensionNo("111-1111").newRawPassword("!newPassword123").build();
 
         mockMvc.perform(
-                        patch("/api/emp/me")
+                        patch("/api/employees/me")
                                 .header("Authorization", "Bearer " + accessToken)
                                 .content(objectMapper.writeValueAsBytes(request))
                                 .contentType(MediaType.APPLICATION_JSON)
@@ -157,7 +157,7 @@ class EmpAccountApiTest extends IntegrationTestSupport {
                 .extensionNo("111-1111").newRawPassword("!newPassword123").build();
 
         mockMvc.perform(
-                        patch("/api/emp/me")
+                        patch("/api/employees/me")
                                 .header("Authorization", "Bearer " + accessToken)
                                 .content(objectMapper.writeValueAsBytes(request))
                                 .contentType(MediaType.APPLICATION_JSON)
@@ -178,7 +178,7 @@ class EmpAccountApiTest extends IntegrationTestSupport {
         MockMultipartFile file = new MockMultipartFile("file", "profile.png", "image/png", new byte[]{1});
 
         mockMvc.perform(
-                        multipart("/api/emp/me/files")
+                        multipart("/api/employees/me/files")
                                 .file(file)
                                 .param("fileType", FileType.PROFILE_PICTURE.name())
                                 .header("Authorization", "Bearer " + accessToken)
@@ -202,33 +202,33 @@ class EmpAccountApiTest extends IntegrationTestSupport {
         String accessToken = loginByIdAndPw(loginId, password);
         Emp emp = empRepository.findByLoginId(loginId).orElseThrow();
 
-        List<EmpFileInfo> allEmpFileInfosByEmpId = empQueryRepositoryAdapter.findAllEmpFileInfosByEmpId(emp.getId()).orElseThrow();
-        Long id = allEmpFileInfosByEmpId.getLast().fileId();    // getLast = 비활성화 파일
+        List<EmpFileListInfo> allEmpFileInfosByEmpIdList = empQueryRepositoryAdapter.findAllEmpFileInfosByEmpId(emp.getId()).orElseThrow();
+        Long id = allEmpFileInfosByEmpIdList.getLast().file().fileId();    // getLast = 비활성화 파일
 
         mockMvc.perform(
-                        patch("/api/emp/me/files/{fileId}/status", id)
+                        patch("/api/employees/me/files/{fileId}/status", id)
                                 .param("isForActivate", "true")
                                 .header("Authorization", "Bearer " + accessToken)
                                 .contentType(MediaType.APPLICATION_JSON)
                 ).andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk());
 
-        EmpFileInfo empFileInfo1 = empQueryRepositoryAdapter.findEmpFileInfoByEmpIdAndFileId(emp.getId(), id).orElseThrow();
+        EmpFileListInfo empFileListInfo1 = empQueryRepositoryAdapter.findEmpFileInfoByEmpIdAndFileId(emp.getId(), id).orElseThrow();
 
-        log.info("empFileInfo1 = {}", empFileInfo1);
-        assertThat(empFileInfo1.isActive()).isTrue();
+        log.info("empFileInfo1 = {}", empFileListInfo1);
+        assertThat(empFileListInfo1.isActive()).isTrue();
 
 
         mockMvc.perform(
-                        patch("/api/emp/me/files/{fileId}/status", id)
+                        patch("/api/employees/me/files/{fileId}/status", id)
                                 .param("isForActivate", "false")
                                 .header("Authorization", "Bearer " + accessToken)
                                 .contentType(MediaType.APPLICATION_JSON)
                 ).andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk());
 
-        EmpFileInfo empFileInfo2 = empQueryRepositoryAdapter.findEmpFileInfoByEmpIdAndFileId(emp.getId(), id).orElseThrow();
-        assertThat(empFileInfo2.isActive()).isFalse();
+        EmpFileListInfo empFileListInfo2 = empQueryRepositoryAdapter.findEmpFileInfoByEmpIdAndFileId(emp.getId(), id).orElseThrow();
+        assertThat(empFileListInfo2.isActive()).isFalse();
 
     }
 
@@ -242,19 +242,19 @@ class EmpAccountApiTest extends IntegrationTestSupport {
         String accessToken = loginByIdAndPw(loginId, password);
         Emp emp = empRepository.findByLoginId(loginId).orElseThrow();
 
-        List<EmpFileInfo> allEmpFileInfosByEmpId = empQueryRepositoryAdapter.findAllEmpFileInfosByEmpId(emp.getId()).orElseThrow();
-        Long id = allEmpFileInfosByEmpId.getLast().fileId();
+        List<EmpFileListInfo> allEmpFileInfosByEmpIdList = empQueryRepositoryAdapter.findAllEmpFileInfosByEmpId(emp.getId()).orElseThrow();
+        Long id = allEmpFileInfosByEmpIdList.getLast().file().fileId();
 
         mockMvc.perform(
-                        delete("/api/emp/me/files/{fileId}", id)
+                        delete("/api/employees/me/files/{fileId}", id)
                                 .header("Authorization", "Bearer " + accessToken)
                                 .contentType(MediaType.APPLICATION_JSON)
                 ).andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk());
 
-        EmpFileInfo empFileInfo = empQueryRepositoryAdapter.findEmpFileInfoByEmpIdAndFileId(emp.getId(), id).orElse(null);
+        EmpFileListInfo empFileListInfo = empQueryRepositoryAdapter.findEmpFileInfoByEmpIdAndFileId(emp.getId(), id).orElse(null);
 
-        assertThat(empFileInfo).isNull();
+        assertThat(empFileListInfo).isNull();
     }
     
     @Test
@@ -273,7 +273,7 @@ class EmpAccountApiTest extends IntegrationTestSupport {
         Long id = otherDeptEmp.currentDepts().getFirst().deptId();
 
         mockMvc.perform(
-                get("/api/emp")
+                get("/api/employees")
                         .header("Authorization", "Bearer " + accessToken)
                         .param("deptId", id+"")
                         .param("status", "ACTIVE")
@@ -302,7 +302,7 @@ class EmpAccountApiTest extends IntegrationTestSupport {
         Long id = otherDeptEmp.currentDepts().getFirst().deptId();
 
         mockMvc.perform(
-                        get("/api/emp")
+                        get("/api/employees")
                                 .header("Authorization", "Bearer " + accessToken)
                                 .param("deptId", id+"")
                                 .param("status", "ACTIVE")
@@ -331,7 +331,7 @@ class EmpAccountApiTest extends IntegrationTestSupport {
         Long id = otherDeptEmp.currentDepts().getFirst().deptId();
 
         mockMvc.perform(
-                        get("/api/emp")
+                        get("/api/employees")
                                 .header("Authorization", "Bearer " + accessToken)
                                 .param("deptId", id+"")
                                 .param("status", "ACTIVE")
@@ -353,7 +353,7 @@ class EmpAccountApiTest extends IntegrationTestSupport {
         String accessToken = loginByIdAndPw(HRLoginId, HRPassword);
         log.info("accessToken = {}", accessToken);
         mockMvc.perform(
-                        get("/api/emp/new")
+                        get("/api/employees/new")
                                 .header("Authorization", "Bearer " + accessToken)
                                 .param("keyword", "t")
                 ).andDo(MockMvcResultHandlers.print())
@@ -376,7 +376,7 @@ class EmpAccountApiTest extends IntegrationTestSupport {
         String accessToken = loginByIdAndPw(managerLoginId, managerPw);
 
         mockMvc.perform(
-                        get("/api/emp/new")
+                        get("/api/employees/new")
                                 .header("Authorization", "Bearer " + accessToken)
                                 .param("keyword", "t")
                 ).andDo(MockMvcResultHandlers.print())
@@ -405,7 +405,7 @@ class EmpAccountApiTest extends IntegrationTestSupport {
 
     private void registerEmpHavingAllInfo(String loginId, String password) {
         IntegrityTestFixtures.getEmpHavingAllInfo(
-                empRepository, deptRepository, encoder, loginId, password
+                empRepository, deptRepository, encoder, empAccountManager, loginId, password
         );
     }
 

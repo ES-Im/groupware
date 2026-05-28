@@ -6,11 +6,11 @@ import com.haruon.groupware.application.exception.common.RequiredValueMissingExc
 import com.haruon.groupware.application.exception.common.role.ActiveEmployeeNotFoundException;
 import com.haruon.groupware.application.exception.message.MessageNotFoundException;
 import com.haruon.groupware.application.exception.message.MessageReceiverRequiredException;
+import com.haruon.groupware.application.file.dto.request.FileDto;
 import com.haruon.groupware.application.message.required.MessageRepository;
 import com.haruon.groupware.application.message.service.dto.MessageCreateRequest;
 import com.haruon.groupware.application.message.service.dto.MessageFileRequest;
 import com.haruon.groupware.application.message.service.dto.MessageUpdateRequest;
-import com.haruon.groupware.application.utils.file.FileDto;
 import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.message.Message;
 import com.haruon.groupware.domain.message.MessageReceiving;

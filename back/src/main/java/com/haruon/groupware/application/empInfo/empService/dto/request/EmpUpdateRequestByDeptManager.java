@@ -7,6 +7,8 @@ import com.haruon.groupware.domain.empInfo.enums.SystemRoleCode;
 import lombok.Builder;
 import org.jspecify.annotations.Nullable;
 
+import java.util.Set;
+
 /* 권한 : `Emp.SystemRoleCode` = `DEPT_MANAGER`
  *  같은 부서 직원의
  *  제한된 시스템 권한, 내선번호 수정 가능
@@ -17,7 +19,7 @@ public record EmpUpdateRequestByDeptManager (
         Long targetEmpId,
 
         @Nullable
-        SystemRoleCode systemRoleCode,
+        Set<SystemRoleCode> systemRoleCode,
 
         @Nullable
         String extensionNo
@@ -29,8 +31,13 @@ public record EmpUpdateRequestByDeptManager (
 
         if(systemRoleCode == null && extensionNo == null) throw new RequiredValueMissingException();
 
-        if (systemRoleCode != null
-                && systemRoleCode.getGrade() > SystemRoleCode.DEPT_MANAGER.getGrade()) {
+        if(systemRoleCode != null
+                && (systemRoleCode.isEmpty() || systemRoleCode.stream().anyMatch(roleCode -> roleCode == null))) {
+            throw new RequiredValueMissingException();
+        }
+
+        if (systemRoleCode != null && systemRoleCode.stream()
+                .anyMatch(roleCode -> roleCode.getGrade() > SystemRoleCode.DEPT_MANAGER.getGrade())) {
             throw new PermissionDeniedException();
         }
 

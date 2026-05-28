@@ -16,6 +16,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static com.haruon.groupware.domain.franchise.franchiseFixture.getFranchise;
@@ -157,7 +158,7 @@ class SalesDraftTest {
         approvedEmp.changeInfoByHR(
                 null, null,
                 null, null,
-                SystemRoleCode.FRANCHISE,
+                Set.of(SystemRoleCode.FRANCHISE),
                 null, null
         );
 

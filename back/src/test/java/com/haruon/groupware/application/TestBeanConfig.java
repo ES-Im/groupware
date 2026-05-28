@@ -1,14 +1,18 @@
 package com.haruon.groupware.application;
 
+import com.haruon.groupware.application.file.dto.request.FileDto;
+import com.haruon.groupware.application.file.dto.result.StoreFile;
+import com.haruon.groupware.application.file.required.FileStorage;
 import com.haruon.groupware.application.utils.CompanyPolicyPort;
-import com.haruon.groupware.application.utils.file.FileDto;
-import com.haruon.groupware.application.utils.file.StoreFile;
-import com.haruon.groupware.application.utils.file.required.FileStorage;
 import com.haruon.groupware.domain.empInfo.EmpPasswordEncoder;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.time.LocalTime;
 import java.util.Locale;
 
@@ -89,14 +93,28 @@ public class TestBeanConfig {
             @Override
             public StoreFile store(FileDto fileDto, String fileType) {
                 String storedName = "stored-" + fileDto.originalFileFullName();
+
                 return new StoreFile(
                         fileDto.originalFileName(),
                         storedName,
                         fileDto.mimeType(),
                         fileDto.extension(),
                         fileDto.fileSize(),
-                        "/test/" + fileType + "/" + storedName
+                        "/test/" + fileType
                 );
+            }
+
+            @Override
+            public Resource loadAsResource(String storedPath, String storedName) {
+                byte[] bytes = ("test-resource:" + Path.of(storedPath).resolve(storedName))
+                        .getBytes(StandardCharsets.UTF_8);
+
+                return new ByteArrayResource(bytes) {
+                    @Override
+                    public String getFilename() {
+                        return storedName;
+                    }
+                };
             }
         };
     }

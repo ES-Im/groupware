@@ -44,6 +44,13 @@ public class EmpQueryRepositoryAdapter implements EmpQueryRepository {
         this.qEmpBelongings = QEmpBelongings.empBelongings;
     }
 
+    private Expression<EmpFileListInfo> empFileListInfoExpression() {
+        return Projections.constructor(
+                EmpFileListInfo.class,
+                qEmpFile.id, qEmpFile.originalName, qEmpFile.extension, qEmpFile.fileSize, qEmpFile.isActive, qEmpFile.fileType
+        );
+    }
+
     @Override
     public Optional<EmpInfoResponse> findEmpInfoByEmpId(Long empId) {
         EmpBasicInfo basicInfo = query
@@ -57,15 +64,9 @@ public class EmpQueryRepositoryAdapter implements EmpQueryRepository {
         
         if(basicInfo == null) return Optional.empty();
 
-        List<EmpFileInfo> activeFileInfos = query
-                .select(Projections.constructor(
-                        EmpFileInfo.class,
-                        qEmpFile.id,
-                        qEmpFile.originalName,
-                        qEmpFile.extension,
-                        qEmpFile.fileType,
-                        qEmpFile.isActive
-                )).from(qEmpFile)
+        List<EmpFileListInfo> activeFileInfos = query
+                .select(empFileListInfoExpression())
+                .from(qEmpFile)
                 .where(qEmpFile.emp.id.eq(empId), qEmpFile.isActive.isTrue())
                 .fetch();
 
@@ -85,12 +86,10 @@ public class EmpQueryRepositoryAdapter implements EmpQueryRepository {
     }
 
     @Override
-    public Optional<List<EmpFileInfo>> findAllEmpFileInfosByEmpId(Long empId) {
+    public Optional<List<EmpFileListInfo>> findAllEmpFileInfosByEmpId(Long empId) {
         return Optional.ofNullable(
-                query.select(Projections.constructor(
-                        EmpFileInfo.class,
-                        qEmpFile.id, qEmpFile.originalName, qEmpFile.extension, qEmpFile.fileType, qEmpFile.isActive)
-                ).from(qEmpFile)
+                query
+                 .select(empFileListInfoExpression()).from(qEmpFile)
                  .where(qEmpFile.emp.id.eq(empId))
                  .orderBy(qEmpFile.isActive.desc(), qEmpFile.createdAt.desc())
                  .fetch()
@@ -98,12 +97,11 @@ public class EmpQueryRepositoryAdapter implements EmpQueryRepository {
     }
 
     @Override
-    public Optional<EmpFileInfo> findEmpFileInfoByEmpIdAndFileId(Long empId, Long fileId) {
+    public Optional<EmpFileListInfo> findEmpFileInfoByEmpIdAndFileId(Long empId, Long fileId) {
         return Optional.ofNullable(
-                query.select(Projections.constructor(
-                        EmpFileInfo.class,
-                        qEmpFile.id, qEmpFile.originalName, qEmpFile.extension, qEmpFile.fileType, qEmpFile.isActive)
-                ).from(qEmpFile)
+                query
+                .select(empFileListInfoExpression())
+                .from(qEmpFile)
                 .where(qEmpFile.emp.id.eq(empId), qEmpFile.id.eq(fileId))
                 .fetchOne()
         );
@@ -217,6 +215,9 @@ public class EmpQueryRepositoryAdapter implements EmpQueryRepository {
                 newEmpList, pageable, totalCount
         );
     }
+
+
+
 
     private List<EmpInfoForManagement> groupByEmp(
             List<EmpInfoForManagementFlat> flatList,

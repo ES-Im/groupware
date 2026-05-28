@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -66,11 +67,19 @@ public class SecurityConfig {
 
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/", "/error", "/api/emp").permitAll()
-                        .requestMatchers("/api/auth/login", "/api/auth/reissue").permitAll()
-                        .requestMatchers("/api/emp/**").hasRole(SystemRoleCode.EMPLOYEE.name())
+
+                        /* Public API*/
+                        .requestMatchers("/", "/error", "/api/auth/login", "/api/auth/reissue").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/employees").permitAll()
+
+                        /* Employee API */
+                        .requestMatchers("/api/auth/logout", "/api/employees/**").hasRole(SystemRoleCode.EMPLOYEE.name())
+
+                        /* Manager API */
+                        .requestMatchers(HttpMethod.GET, "/api/employees")
+                                    .hasAnyRole(SystemRoleCode.HR.name(), SystemRoleCode.DEPT_MANAGER.name())
+
                         .anyRequest().authenticated());
-        //todo - /api/emp post 가 permitAll()로 통과됨 : permitAll용, employee용, hr용 matchers를 따로 만드는것이 좋아 보임
 
         http
                 .addFilterBefore(

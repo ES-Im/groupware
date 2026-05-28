@@ -9,6 +9,7 @@ import com.haruon.groupware.application.exception.file.FileSizeLimitExceededExce
 import com.haruon.groupware.application.exception.file.UnsupportedFileExtensionException;
 import com.haruon.groupware.application.exception.file.UnsupportedMimeTypeException;
 import com.haruon.groupware.application.exception.meeting.ReservedMeetingExistException;
+import com.haruon.groupware.application.file.dto.request.FileDto;
 import com.haruon.groupware.application.meeting.required.MeetingRepository;
 import com.haruon.groupware.application.meeting.required.MeetingRoomRepository;
 import com.haruon.groupware.application.meeting.service.dto.MeetingReserveRequest;
@@ -16,7 +17,6 @@ import com.haruon.groupware.application.meeting.service.dto.MeetingRoomCreateReq
 import com.haruon.groupware.application.meeting.service.dto.MeetingRoomFileCreateRequest;
 import com.haruon.groupware.application.meeting.service.dto.MeetingRoomUpdateRequest;
 import com.haruon.groupware.application.schedule.required.ScheduleRepository;
-import com.haruon.groupware.application.utils.file.FileDto;
 import com.haruon.groupware.domain.empInfo.Dept;
 import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.empInfo.enums.SystemRoleCode;

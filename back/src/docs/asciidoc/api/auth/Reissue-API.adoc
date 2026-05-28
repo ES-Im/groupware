@@ -6,16 +6,18 @@ Request::
 +
 --
 _HTTP request_
-include::{snippets}/REGISTER/http-request.adoc[]
+include::{snippets}/REISSUE_ACCESS_TOKEN/http-request.adoc[]
 _Request cookie_
-include::{snippets}/REGISTER/request-fields.adoc[]
+include::{snippets}/REISSUE_ACCESS_TOKEN/request-cookies.adoc[]
 --
 Response (200)::
 +
 --
 _HTTP response_
-include::{snippets}/REGISTER/http-response.adoc[]
+include::{snippets}/REISSUE_ACCESS_TOKEN/http-response.adoc[]
 
+_Response Fields_
+include::{snippets}/REISSUE_ACCESS_TOKEN/response-fields.adoc[]
 --
 Response (401)::
 +

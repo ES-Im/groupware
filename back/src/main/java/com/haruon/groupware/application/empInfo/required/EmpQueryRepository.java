@@ -17,14 +17,14 @@ public interface EmpQueryRepository {
     /** 사원의 활성화된 현재 개인정보 조회*/
     Optional<EmpInfoResponse> findEmpInfoByEmpId(Long empId);
 
-    /** 사원의 모든 개인정보파일(프로필, 전자서명) 조회*/
-    Optional<List<EmpFileInfo>> findAllEmpFileInfosByEmpId(Long empId);
+    /** 사원의 모든 개인정보파일(프로필, 전자서명) 조회(리소스 제외) */
+    Optional<List<EmpFileListInfo>> findAllEmpFileInfosByEmpId(Long empId);
 
     /** 사원의 모든 소속정보 조회*/
     Optional<List<BelongingInfo>> findAllEmpBelongingInfosByEmpId(Long empId);
 
     /** 사원의 개인정보 파일 한 건 조회 */
-    Optional<EmpFileInfo> findEmpFileInfoByEmpIdAndFileId(Long empId, Long fileId);
+    Optional<EmpFileListInfo> findEmpFileInfoByEmpIdAndFileId(Long empId, Long fileId);
 
     /** 특정 부서의 사원 리스트 조회*/
     Page<EmpInfoForManagement> findEmpInfoList(@Nullable Long deptId, @Nullable EmpStatus status, @Nullable String keyword, Pageable pageable);

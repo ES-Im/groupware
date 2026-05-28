@@ -27,7 +27,7 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/emp")
+@RequestMapping("/api/employees")
 public class EmpAccountApi {
     
     private final EmpAccountManager empAccountManager;
@@ -52,10 +52,10 @@ public class EmpAccountApi {
     }
 
     @GetMapping("/me/files")
-    public ResponseEntity<List<EmpFileInfo>> meFiles(
+    public ResponseEntity<List<EmpFileListInfo>> meFiles(
             @AuthenticationPrincipal EmpDetails details
     ) {
-        List<EmpFileInfo> response = retriever.retrieveEmpFilesInfo(details.getEmpId());
+        List<EmpFileListInfo> response = retriever.retrieveEmpFilesInfo(details.getEmpId());
 
         return ResponseEntity.ok().body(response);
     }
@@ -153,7 +153,14 @@ public class EmpAccountApi {
         return ResponseEntity.ok().body(newEmpList);
     }
 
-
+    @GetMapping("/{empId}/profile")
+    public ResponseEntity<Page<EmpFileListInfo>> empProfile(
+            @AuthenticationPrincipal EmpDetails empDetails,
+            @PathVariable Long empId,
+            @PageableDefault(page = 0, size = 10) Pageable pageable
+    ) {
+        return ResponseEntity.ok().body(null);
+    }
 
 
 

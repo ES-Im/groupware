@@ -9,6 +9,7 @@ import lombok.Builder;
 import org.jspecify.annotations.Nullable;
 
 import java.time.LocalDate;
+import java.util.Set;
 
 /*
  * 권한 : `Emp.SystemRoleCode` = `ADMIN` or `HR`
@@ -34,7 +35,7 @@ public record EmpUpdateRequestByHR(
         EmpStatus empStatus,
 
         @Nullable
-        SystemRoleCode systemRoleCode,
+        Set<SystemRoleCode> systemRoleCode,
 
         @Nullable
         LocalDate hireAt
@@ -44,6 +45,11 @@ public record EmpUpdateRequestByHR(
     public EmpUpdateRequestByHR {
 
         if(targetEmpId == null) throw new RequiredValueMissingException();
+
+        if(systemRoleCode != null
+                && (systemRoleCode.isEmpty() || systemRoleCode.stream().anyMatch(roleCode -> roleCode == null))) {
+            throw new RequiredValueMissingException();
+        }
 
         if(empName == null
                 && newRawPassword == null && extensionNo == null

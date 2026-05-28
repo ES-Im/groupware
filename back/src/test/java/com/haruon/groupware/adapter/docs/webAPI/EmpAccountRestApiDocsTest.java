@@ -65,7 +65,7 @@ public class EmpAccountRestApiDocsTest extends RestDocsSupport {
                 "202601999", "홍길동", "login12345", "!Q2w3e4r5t");
 
         mockMvc.perform(
-                post("/api/emp")
+                post("/api/employees")
                         .content(objectMapper.writeValueAsBytes(request))
                         .contentType(MediaType.APPLICATION_JSON)
                 ).andExpect(status().isOk())
@@ -101,7 +101,7 @@ public class EmpAccountRestApiDocsTest extends RestDocsSupport {
                 .when(empAccountManager).registerEmp(any(com.haruon.groupware.application.empInfo.empService.dto.request.EmpRegisterRequest.class));
 
         mockMvc.perform(
-                post("/api/emp")
+                post("/api/employees")
                         .content(objectMapper.writeValueAsBytes(request))
                         .contentType(MediaType.APPLICATION_JSON)
                 ).andExpect(status().is(400))
@@ -134,7 +134,7 @@ public class EmpAccountRestApiDocsTest extends RestDocsSupport {
                 .when(empAccountManager).registerEmp(any(com.haruon.groupware.application.empInfo.empService.dto.request.EmpRegisterRequest.class));
 
         mockMvc.perform(
-                post("/api/emp")
+                post("/api/employees")
                         .content(objectMapper.writeValueAsBytes(request))
                         .contentType(MediaType.APPLICATION_JSON)
                 ).andExpect(status().is(400))
@@ -162,8 +162,8 @@ public class EmpAccountRestApiDocsTest extends RestDocsSupport {
         EmpInfoResponse empInfoResponse = new EmpInfoResponse(
                 new EmpBasicInfo("사원번호", "사원명", "아이디", "이메일", "직통번호"),
                 List.of(
-                        new EmpFileInfo(1L, "storedFile1", "jpg", FileType.SIGNATURE, true),
-                        new EmpFileInfo(2L, "storedFile2", "jpg", FileType.PROFILE_PICTURE, true)
+                        new EmpFileListInfo(1L, "storedFile1", "jpg", 1024L*1024, true, FileType.SIGNATURE),
+                        new EmpFileListInfo(2L, "storedFile2", "jpg", 1024*1024L, true, FileType.PROFILE_PICTURE)
                 ),
                 List.of(
                         new BelongingInfo(1L, "DEPT1", "부서1", PositionCode.STAFF, true, LocalDate.of(2026, 1, 1), null),
@@ -174,7 +174,8 @@ public class EmpAccountRestApiDocsTest extends RestDocsSupport {
         Mockito.when(empAccountRetriever.retrieveEmpAccountInfo(any())).thenReturn(empInfoResponse);
 
         mockMvc.perform(
-                get("/api/emp/me")
+                get("/api/employees/me")
+                        .with(employeeAuthentication())
                         .header("Authorization", "accessToken")
                 ).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -194,9 +195,11 @@ public class EmpAccountRestApiDocsTest extends RestDocsSupport {
                                 fieldWithPath("empBasicInfo.extensionNo").type(JsonFieldType.STRING).description("사무실 번호"),
 
                                 fieldWithPath("activeFiles").type(JsonFieldType.ARRAY).description("활성화된 사원의 프로필/전자서명 이미지 파일"),
-                                fieldWithPath("activeFiles[].fileId").type(JsonFieldType.NUMBER).description("파일 식별 번호"),
-                                fieldWithPath("activeFiles[].originalName").type(JsonFieldType.STRING).description("파일 원본명"),
-                                fieldWithPath("activeFiles[].extension").type(JsonFieldType.STRING).description("파일 확장자"),
+                                fieldWithPath("activeFiles[].file").type(JsonFieldType.OBJECT).description("파일 기본 정보"),
+                                fieldWithPath("activeFiles[].file.fileId").type(JsonFieldType.NUMBER).description("파일 식별 번호"),
+                                fieldWithPath("activeFiles[].file.originalName").type(JsonFieldType.STRING).description("파일 원본명"),
+                                fieldWithPath("activeFiles[].file.extension").type(JsonFieldType.STRING).description("파일 확장자"),
+                                fieldWithPath("activeFiles[].file.fileSize").type(JsonFieldType.NUMBER).description("파일 크기"),
                                 fieldWithPath("activeFiles[].type").type(JsonFieldType.STRING).description("파일 타입(프로필사진or전자서명파일)"),
                                 fieldWithPath("activeFiles[].isActive").type(JsonFieldType.BOOLEAN).description("파일 활성화 여부, (True만 출력)"),
 
@@ -221,7 +224,8 @@ public class EmpAccountRestApiDocsTest extends RestDocsSupport {
         Mockito.when(empAccountRetriever.retrieveEmpAccountInfo(any())).thenThrow(ex);
 
         mockMvc.perform(
-                get("/api/emp/me")
+                get("/api/employees/me")
+                        .with(employeeAuthentication())
                         .header("Authorization", "accessToken")
                 ).andExpect(status().is(ex.getErrorCode().getStatus().value()))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -249,16 +253,17 @@ public class EmpAccountRestApiDocsTest extends RestDocsSupport {
     @Test
     @DisplayName("개인파일(프로필, 전자서명) 조회 테스트")
     void retriever_me_files_info_success() throws Exception {
-        List<EmpFileInfo> fileInfos = List.of(
-                        new EmpFileInfo(1L, "storedFile1", "jpg", FileType.SIGNATURE, true),
-                        new EmpFileInfo(2L, "storedFile2", "jpg", FileType.PROFILE_PICTURE, false)
+        List<EmpFileListInfo> fileInfos = List.of(
+                        new EmpFileListInfo(1L, "storedFile1", "jpg", 1024L*1024, true, FileType.SIGNATURE),
+                        new EmpFileListInfo(2L, "storedFile2", "jpg", 1024L*1024, false, FileType.PROFILE_PICTURE)
         );
 
 
         Mockito.when(empAccountRetriever.retrieveEmpFilesInfo(any())).thenReturn(fileInfos);
 
         mockMvc.perform(
-                        get("/api/emp/me/files")
+                        get("/api/employees/me/files")
+                                .with(employeeAuthentication())
                                 .header("Authorization", "accessToken")
                 ).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -270,9 +275,11 @@ public class EmpAccountRestApiDocsTest extends RestDocsSupport {
                                 headerWithName("Authorization").description("Bearer Access Token")
                         ),
                         responseFields(
-                                fieldWithPath("[].fileId").type(JsonFieldType.NUMBER).description("파일 식별 번호"),
-                                fieldWithPath("[].originalName").type(JsonFieldType.STRING).description("파일 원본명"),
-                                fieldWithPath("[].extension").type(JsonFieldType.STRING).description("파일 확장자"),
+                                fieldWithPath("[].file").type(JsonFieldType.OBJECT).description("파일 기본 정보"),
+                                fieldWithPath("[].file.fileId").type(JsonFieldType.NUMBER).description("파일 식별 번호"),
+                                fieldWithPath("[].file.originalName").type(JsonFieldType.STRING).description("파일 원본명"),
+                                fieldWithPath("[].file.extension").type(JsonFieldType.STRING).description("파일 확장자"),
+                                fieldWithPath("[].file.fileSize").type(JsonFieldType.NUMBER).description("파일 크기"),
                                 fieldWithPath("[].type").type(JsonFieldType.STRING).description("파일 타입(프로필사진or전자서명파일)"),
                                 fieldWithPath("[].isActive").type(JsonFieldType.BOOLEAN).description("파일 활성화 여부")
                         )
@@ -292,7 +299,8 @@ public class EmpAccountRestApiDocsTest extends RestDocsSupport {
         Mockito.when(empAccountRetriever.retrieveEmpBelongingsInfo(any())).thenReturn(belongingInfoList);
 
         mockMvc.perform(
-                        get("/api/emp/me/belongings")
+                        get("/api/employees/me/belongings")
+                                .with(employeeAuthentication())
                                 .header("Authorization", "accessToken")
                 ).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -327,7 +335,8 @@ public class EmpAccountRestApiDocsTest extends RestDocsSupport {
         Mockito.doNothing().when(empAccountManager).updateInfoBySelf(any(EmpUpdateRequestBySelf.class), anyLong());
 
         mockMvc.perform(
-                patch("/api/emp/me")
+                patch("/api/employees/me")
+                        .with(employeeAuthentication())
                         .content(objectMapper.writeValueAsBytes(request))
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "accessToken")
@@ -371,8 +380,9 @@ public class EmpAccountRestApiDocsTest extends RestDocsSupport {
         );
 
         mockMvc.perform(
-                        multipart("/api/emp/me/files")
+                        multipart("/api/employees/me/files")
                                 .file(file)
+                                .with(employeeAuthentication())
                                 .header("Authorization", "Bearer accessToken")
                                 .param("fileType", FileType.PROFILE_PICTURE.name())
                                 .with(request -> {
@@ -408,7 +418,8 @@ public class EmpAccountRestApiDocsTest extends RestDocsSupport {
                 .when(empAccountManager).updateEmpFileBySelf(any(EmpFileReplaceParam.class), anyLong());
 
         mockMvc.perform(
-                patch("/api/emp/me/files/{fileId}/status", 1L)
+                patch("/api/employees/me/files/{fileId}/status", 1L)
+                        .with(employeeAuthentication())
                         .header("Authorization", "Bearer accessToken")
                         .param("isForActivate", "true")
                 ).andDo(MockMvcResultHandlers.print())
@@ -436,7 +447,8 @@ public class EmpAccountRestApiDocsTest extends RestDocsSupport {
                 .when(empAccountManager).deleteEmpFileBySelf(anyLong(), anyLong());
 
         mockMvc.perform(
-                delete("/api/emp/me/files/{fileId}", 1L)
+                delete("/api/employees/me/files/{fileId}", 1L)
+                        .with(employeeAuthentication())
                         .header("Authorization", "Bearer accessToken")
                 ).andDo(MockMvcResultHandlers.print())
                 .andDo(document("DELETE_ME_FILE",
@@ -495,7 +507,7 @@ public class EmpAccountRestApiDocsTest extends RestDocsSupport {
         )).thenReturn(page);
 
         mockMvc.perform(
-                get("/api/emp")
+                get("/api/employees")
                         .with(authentication(
                                 new UsernamePasswordAuthenticationToken(
                                         empDetails,
@@ -529,7 +541,7 @@ public class EmpAccountRestApiDocsTest extends RestDocsSupport {
                         queryParameters(
                                 parameterWithName("deptId").optional().description("부서 식별 번호"),
                                 parameterWithName("status").optional().description("사원 상태"),
-                                parameterWithName("keyword").optional().description("검색어"),
+                                parameterWithName("keyword").optional().description("사원 이름 검색어"),
                                 parameterWithName("page").optional().description("페이지 번호"),
                                 parameterWithName("size").optional().description("페이지 크기")
                         ),
@@ -602,7 +614,7 @@ public class EmpAccountRestApiDocsTest extends RestDocsSupport {
         )).thenReturn(page);
 
         mockMvc.perform(
-                        get("/api/emp/new")
+                        get("/api/employees/new")
                                 .header("Authorization", "Bearer accessToken")
                                 .with(authentication(
                                         new UsernamePasswordAuthenticationToken(
@@ -616,8 +628,44 @@ public class EmpAccountRestApiDocsTest extends RestDocsSupport {
                                 .param("keyword", "신규사원")
                 )
                 .andExpect(status().isOk())
-                .andDo(MockMvcResultHandlers.print());
-//                .andExpect(jsonPath("$.content[0].name").value("신규사원"));
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(jsonPath("$.content[0].name").value("신규사원"))
+                .andDo(document("NEW_EMP_LIST",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+
+                        requestHeaders(
+                                headerWithName("Authorization").description("Bearer Access Token")
+                        ),
+
+                        queryParameters(
+                                parameterWithName("keyword").optional().description("사원 이름 검색어"),
+                                parameterWithName("page").optional().description("페이지 번호"),
+                                parameterWithName("size").optional().description("페이지 크기")
+                        ),
+
+                        responseFields(
+                                fieldWithPath("content").type(JsonFieldType.ARRAY).description("신규 사원 목록"),
+                                fieldWithPath("content[].empNo").type(JsonFieldType.STRING).description("사원 번호"),
+                                fieldWithPath("content[].name").type(JsonFieldType.STRING).description("사원 이름"),
+                                fieldWithPath("content[].loginId").type(JsonFieldType.STRING).description("로그인 ID"),
+                                fieldWithPath("content[].email").type(JsonFieldType.STRING).description("이메일"),
+                                fieldWithPath("content[].extensionNo").type(JsonFieldType.STRING).description("내선 번호"),
+
+                                fieldWithPath("totalElements").type(JsonFieldType.NUMBER).description("신규 사원 수"),
+                                fieldWithPath("totalPages").type(JsonFieldType.NUMBER).description("전체 페이지 수"),
+                                fieldWithPath("number").type(JsonFieldType.NUMBER).description("현재 페이지 번호"),
+                                fieldWithPath("size").type(JsonFieldType.NUMBER).description("페이지 크기"),
+                                fieldWithPath("numberOfElements").type(JsonFieldType.NUMBER).description("현재 페이지의 데이터 수"),
+                                fieldWithPath("first").type(JsonFieldType.BOOLEAN).description("첫 페이지 여부"),
+                                fieldWithPath("last").type(JsonFieldType.BOOLEAN).description("마지막 페이지 여부"),
+                                fieldWithPath("empty").type(JsonFieldType.BOOLEAN).description("현재 페이지가 비어있는지 여부"),
+
+                                subsectionWithPath("pageable").ignored(),
+                                subsectionWithPath("sort").ignored()
+                        )
+                    )
+                );
 
         Mockito.verify(empAccountRetriever).retrieveNewEmpInfoList(
                 eq(1L),

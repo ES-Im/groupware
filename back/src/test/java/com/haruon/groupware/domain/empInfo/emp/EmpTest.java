@@ -164,7 +164,7 @@ class EmpTest {
         Emp emp = getApprovedEmp();
 
         emp.changeInfoByDeptManager(
-                null, SystemRoleCode.DEPT_MANAGER
+                null, Set.of(SystemRoleCode.DEPT_MANAGER)
         );
     }
 
@@ -175,7 +175,7 @@ class EmpTest {
 
         assertThatThrownBy(() ->
                 emp.changeInfoByDeptManager(
-                        null, SystemRoleCode.ADMIN
+                        null, Set.of(SystemRoleCode.ADMIN)
                 )
         ).isInstanceOf(IllegalArgumentException.class);
     }
@@ -219,7 +219,7 @@ class EmpTest {
 
                 Arguments.of("시스템 권한을 변경할 수 있다.", EmpAdminUpdateTestParam.builder()
                         .companyDomain("@haruon.com")
-                        .systemRoleCode(SystemRoleCode.ADMIN)
+                        .systemRoleCode(Set.of(SystemRoleCode.ADMIN, SystemRoleCode.HR))
                         .build())
         );
     }
@@ -285,7 +285,7 @@ class EmpTest {
         }
 
         if (params.systemRoleCode() != null) {
-            assertThat(emp.getSystemRoles()).isEqualTo(Set.of(params.systemRoleCode()));
+            assertThat(emp.getSystemRoles()).isEqualTo(params.systemRoleCode());
         } else {
             assertThat(emp.getSystemRoles()).isEqualTo(beforeSystemRoleCode);
         }
@@ -311,7 +311,7 @@ class EmpTest {
             String newRawPassword,
             String extensionNo,
             EmpStatus empStatus,
-            SystemRoleCode systemRoleCode,
+            Set<SystemRoleCode> systemRoleCode,
             LocalDate hireAt,
             String companyDomain
     ) {}

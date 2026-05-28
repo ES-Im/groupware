@@ -201,12 +201,18 @@ public class Emp extends AbstractEntity {
 
     public void changeInfoByDeptManager(
             @Nullable String extensionNo,
-            @Nullable SystemRoleCode systemRoleCode
+            @Nullable Set<SystemRoleCode> systemRoleCode
     ) {
         ensureActive();
 
-        if(systemRoleCode != null && systemRoleCode.getGrade() > SystemRoleCode.DEPT_MANAGER.getGrade()) {
-            throw new IllegalArgumentException("부서시스템담당자는 부서시스템이상의 시스템권한을 부여할 수 없습니다.");
+        if(systemRoleCode != null) {
+            validateSystemRoles(systemRoleCode);
+
+            for (SystemRoleCode roleCode : systemRoleCode) {
+                if(roleCode.getGrade() > SystemRoleCode.DEPT_MANAGER.getGrade()) {
+                    throw new IllegalArgumentException("부서시스템담당자는 부서시스템이상의 시스템권한을 부여할 수 없습니다.");
+                }
+            }
         }
 
         boolean hasChanges = extensionNo != null || systemRoleCode != null;
@@ -223,7 +229,7 @@ public class Emp extends AbstractEntity {
             @Nullable String newRawPassword,
             @Nullable String extensionNo,
             @Nullable EmpStatus empStatus,
-            @Nullable SystemRoleCode systemRoleCode,
+            @Nullable Set<SystemRoleCode> systemRoleCode,
             @Nullable LocalDate hiredAt,
             @Nullable EmpPasswordEncoder encoder
     ) {
@@ -235,13 +241,19 @@ public class Emp extends AbstractEntity {
 
         if(empName != null) changeEmpName(empName);
 
-        if(newRawPassword != null) changePassword(newRawPassword, encoder);
+        if(newRawPassword != null) {
+            requireNonNull(encoder);
+            changePassword(newRawPassword, encoder);
+        }
 
         if(extensionNo != null) changeExtension(extensionNo);
 
         if(empStatus != null) changeEmpStatus(empStatus);
 
-        if(systemRoleCode != null) changeGrade(systemRoleCode);
+        if(systemRoleCode != null) {
+            validateSystemRoles(systemRoleCode);
+            changeGrade(systemRoleCode);
+        }
 
         if(hiredAt != null) this.hiredAt = hiredAt;
 
@@ -263,10 +275,14 @@ public class Emp extends AbstractEntity {
         this.empName = newEmpName;
     }
 
-    private void changeGrade(SystemRoleCode newSystemRoleCode) {
-        //todo - 이 경우 여러 롤을 넣을 수 없음. List로 받도록 변경할 것.
+    private void changeGrade(Set<SystemRoleCode> newSystemRoleCode) {
         this.systemRoles.clear();
-        this.systemRoles.add(newSystemRoleCode);
+        this.systemRoles.addAll(newSystemRoleCode);
+    }
+
+    private void validateSystemRoles(Set<SystemRoleCode> newSystemRoleCode) {
+        state(!newSystemRoleCode.isEmpty(), "시스템 권한은 비어 있을 수 없습니다.");
+        newSystemRoleCode.forEach(roleCode -> requireNonNull(roleCode, "시스템 권한은 null일 수 없습니다."));
     }
 
     private void changePassword(String newRawPassword, EmpPasswordEncoder encoder) {
