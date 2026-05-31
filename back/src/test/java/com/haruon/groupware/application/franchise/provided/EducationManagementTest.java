@@ -8,11 +8,11 @@ import com.haruon.groupware.application.exception.file.FileSizeLimitExceededExce
 import com.haruon.groupware.application.exception.file.UnsupportedFileExtensionException;
 import com.haruon.groupware.application.exception.file.UnsupportedMimeTypeException;
 import com.haruon.groupware.application.exception.franchise.EducationRegisterMismatchException;
+import com.haruon.groupware.application.file.dto.request.EducationFileUploadRequest;
 import com.haruon.groupware.application.file.dto.request.FileDto;
 import com.haruon.groupware.application.franchise.required.EducationRepository;
 import com.haruon.groupware.application.franchise.required.FranchiseRepository;
 import com.haruon.groupware.application.franchise.service.dto.EducationCreateRequest;
-import com.haruon.groupware.application.franchise.service.dto.EducationFileCreateRequest;
 import com.haruon.groupware.application.franchise.service.dto.EducationUpdateRequest;
 import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.franchise.Education;
@@ -189,7 +189,7 @@ record EducationManagementTest(
         long fileSize = 5 * 1024 * 1024L;
         educationManagement.addEducationFile(
                 education, franchiseEmp.getId(),
-                EducationFileCreateRequest.builder()
+                EducationFileUploadRequest.builder()
                         .file(FileDto.builder()
                                 .mimeType(mimeType)
                                 .originalFileFullName(originalFileFullName)
@@ -261,7 +261,7 @@ record EducationManagementTest(
         assertThatThrownBy(() ->
                 educationManagement.addEducationFile(
                         education, franchiseEmp.getId(),
-                        EducationFileCreateRequest.builder()
+                        EducationFileUploadRequest.builder()
                                 .file(param)
                                 .build()
                 )
@@ -280,7 +280,7 @@ record EducationManagementTest(
 
         educationManagement.addEducationFile(
                 education, franchiseEmp.getId(),
-                EducationFileCreateRequest.builder()
+                EducationFileUploadRequest.builder()
                         .file(FileDto.builder()
                                 .mimeType("application/pdf")
                                 .originalFileFullName("originalFile.pdf")

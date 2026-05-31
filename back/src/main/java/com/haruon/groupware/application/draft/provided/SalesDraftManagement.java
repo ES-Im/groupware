@@ -1,7 +1,6 @@
 package com.haruon.groupware.application.draft.provided;
 
 import com.haruon.groupware.application.draft.service.dto.ApproversRequest;
-import com.haruon.groupware.application.draft.service.dto.DraftFileCreateRequest;
 import com.haruon.groupware.application.draft.service.dto.SalesDraftCreateRequest;
 import com.haruon.groupware.application.draft.service.dto.SalesDraftUpdateRequest;
 import org.jspecify.annotations.Nullable;
@@ -39,8 +38,4 @@ public interface SalesDraftManagement {
 
     // isReadableByCirculation -> 조회용, 공람자 리스트 출력시 사용할 것
 
-    /** about file */
-    void addFile(long draftId, long drafterId, DraftFileCreateRequest fileParam);
-
-    void removeFile(long draftId, long drafterId, long fileId);
 }

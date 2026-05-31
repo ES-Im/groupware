@@ -36,6 +36,9 @@ public class QBusinessTripDraft extends EntityPathBase<BusinessTripDraft> {
     //inherited
     public final StringPath content;
 
+    //inherited
+    public final DateTimePath<java.time.Instant> createdAt;
+
     public final StringPath destination = createString("destination");
 
     //inherited
@@ -48,6 +51,9 @@ public class QBusinessTripDraft extends EntityPathBase<BusinessTripDraft> {
     public final com.haruon.groupware.domain.empInfo.QEmp emp;
 
     public final DateTimePath<java.time.LocalDateTime> endAt = createDateTime("endAt", java.time.LocalDateTime.class);
+
+    //inherited
+    public final NumberPath<Long> id;
 
     public final ListPath<BusinessTripParticipant, QBusinessTripParticipant> participants = this.<BusinessTripParticipant, QBusinessTripParticipant>createList("participants", BusinessTripParticipant.class, QBusinessTripParticipant.class, PathInits.DIRECT2);
 
@@ -63,6 +69,9 @@ public class QBusinessTripDraft extends EntityPathBase<BusinessTripDraft> {
 
     //inherited
     public final StringPath title;
+
+    //inherited
+    public final DateTimePath<java.time.Instant> updatedAt;
 
     public QBusinessTripDraft(String variable) {
         this(BusinessTripDraft.class, forVariable(variable), INITS);
@@ -86,12 +95,15 @@ public class QBusinessTripDraft extends EntityPathBase<BusinessTripDraft> {
         this.approval = _super.approval;
         this.circulations = _super.circulations;
         this.content = _super.content;
+        this.createdAt = _super.createdAt;
         this.draft = _super.draft;
         this.draftFiles = _super.draftFiles;
         this.emp = _super.emp;
+        this.id = _super.id;
         this.sourceKey = _super.sourceKey;
         this.submittedAt = _super.submittedAt;
         this.title = _super.title;
+        this.updatedAt = _super.updatedAt;
     }
 
 }

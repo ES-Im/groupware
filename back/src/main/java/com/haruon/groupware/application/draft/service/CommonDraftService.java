@@ -2,12 +2,10 @@ package com.haruon.groupware.application.draft.service;
 
 import com.haruon.groupware.application.draft.required.DraftRepository;
 import com.haruon.groupware.application.draft.service.dto.ApproversRequest;
-import com.haruon.groupware.application.draft.service.dto.DraftFileCreateRequest;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import com.haruon.groupware.application.exception.draft.ApprovalLineRequiredException;
 import com.haruon.groupware.application.exception.draft.DraftNotFoundException;
-import com.haruon.groupware.application.file.dto.result.StoreFile;
 import com.haruon.groupware.application.file.required.FileStorage;
 import com.haruon.groupware.application.utils.AuthorizationChecker;
 import com.haruon.groupware.application.utils.Utils;
@@ -82,25 +80,6 @@ abstract class CommonDraftService {
         draft.removeCirculation(circulatedEmp);
     }
 
-    public void addFile(long draftId, long drafterId, DraftFileCreateRequest fileParam) {
-        Draft draft = findDraftByDraftIdAndEmpId(draftId, drafterId);
-        StoreFile storedFile = fileStorage.store(fileParam.file(), DRAFT_FILE_TYPE);
-
-        draft.addFile(
-                storedFile.mimeType(),
-                storedFile.originalName(),
-                storedFile.storedName(),
-                storedFile.extension(),
-                storedFile.fileSize(),
-                storedFile.storedPath()
-        );
-    }
-
-    public void removeFile(long draftId, long drafterId, long fileId) {
-        Draft draft = findDraftByDraftIdAndEmpId(draftId, drafterId);
-
-        draft.removeFile(fileId);
-    }
 
     private boolean hasApprovers(@Nullable List<ApproversRequest> params, Draft draft) {
 

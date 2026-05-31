@@ -3,13 +3,9 @@ package com.haruon.groupware.application.message.service;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import com.haruon.groupware.application.exception.message.MessageReceiverRequiredException;
-import com.haruon.groupware.application.file.dto.request.FileDto;
-import com.haruon.groupware.application.file.dto.result.StoreFile;
-import com.haruon.groupware.application.file.required.FileStorage;
 import com.haruon.groupware.application.message.provided.MessageDraftManagement;
 import com.haruon.groupware.application.message.required.MessageRepository;
 import com.haruon.groupware.application.message.service.dto.MessageCreateRequest;
-import com.haruon.groupware.application.message.service.dto.MessageFileRequest;
 import com.haruon.groupware.application.message.service.dto.MessageUpdateRequest;
 import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.message.Message;
@@ -34,9 +30,7 @@ public class MessageDraftService implements MessageDraftManagement {
 
     private final MessageRepository messageRepository;
     private final EmpRepository empRepository;
-    private final FileStorage fileStorage;
 
-    private static final String MESSAGE_FILE_TYPE = "message";
 
     @Override
     public long saveMessageBeforeSend(Long senderId, MessageCreateRequest request) {
@@ -106,32 +100,6 @@ public class MessageDraftService implements MessageDraftManagement {
 
         List<Emp> receivers = findEmpListById(empRepository, receiverIds);
         found.replaceReceivers(writer, receivers);
-    }
-
-    @Override
-    public void addFile(Long writerId, Long messageDraftId, MessageFileRequest request) {
-        Message found = findMessage(messageRepository, messageDraftId);
-        Emp writer = findActiveEmpById(empRepository, writerId);
-        FileDto file = request.file();
-        StoreFile storedFile = fileStorage.store(file, MESSAGE_FILE_TYPE);
-
-        found.addFile(
-                writer,
-                storedFile.mimeType(),
-                storedFile.originalName(),
-                storedFile.storedName(),
-                storedFile.extension(),
-                storedFile.fileSize(),
-                storedFile.storedPath()
-        );
-    }
-
-    @Override
-    public void removeFile(Long writerId, Long messageDraftId, Long fileId) {
-        Message found = findMessage(messageRepository, messageDraftId);
-        Emp writer = findActiveEmpById(empRepository, writerId);
-
-        found.removeFile(writer, fileId);
     }
 
 }

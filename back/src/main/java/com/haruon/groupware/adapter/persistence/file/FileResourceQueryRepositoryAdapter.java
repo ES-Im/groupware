@@ -2,12 +2,14 @@ package com.haruon.groupware.adapter.persistence.file;
 
 import com.haruon.groupware.application.file.dto.result.FileResourceInfo;
 import com.haruon.groupware.application.file.required.FileResourceQueryRepository;
+import com.haruon.groupware.domain.QAbstractFileEntity;
 import com.haruon.groupware.domain.board.QBoardFile;
 import com.haruon.groupware.domain.draft.QDraftFile;
 import com.haruon.groupware.domain.empInfo.QEmpFile;
 import com.haruon.groupware.domain.franchise.QEducationFile;
 import com.haruon.groupware.domain.meeting.QMeetingRoomFile;
 import com.haruon.groupware.domain.message.QMessageFile;
+import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.extern.slf4j.Slf4j;
@@ -35,21 +37,27 @@ public class FileResourceQueryRepositoryAdapter implements FileResourceQueryRepo
         this.qDraftFile = QDraftFile.draftFile;
         this.qMeetingRoomFile = QMeetingRoomFile.meetingRoomFile;
         this.qEducationFile = QEducationFile.educationFile;
+
     }
+
+    private Expression<FileResourceInfo> fileResourceInfoExpression(QAbstractFileEntity fileEntity) {
+        return Projections.constructor(
+                FileResourceInfo.class,
+                fileEntity.id,
+                fileEntity.originalName,
+                fileEntity.storedPath,
+                fileEntity.storedName,
+                fileEntity.mimeType,
+                fileEntity.extension,
+                fileEntity.fileSize
+        );
+    }
+
 
     @Override
     public Optional<FileResourceInfo> findEmpFileInfoByEmpIdAndFileIdForResource(Long empId, Long fileId) {
         return Optional.ofNullable(
-                query.select(Projections.constructor(
-                                FileResourceInfo.class,
-                                qEmpFile.id,
-                                qEmpFile.originalName,
-                                qEmpFile.storedPath,
-                                qEmpFile.storedName,
-                                qEmpFile.mimeType,
-                                qEmpFile.extension,
-                                qEmpFile.fileSize
-                        ))
+                query.select(fileResourceInfoExpression(qEmpFile._super))
                         .from(qEmpFile)
                         .where(
                                 qEmpFile.emp.id.eq(empId),
@@ -61,26 +69,66 @@ public class FileResourceQueryRepositoryAdapter implements FileResourceQueryRepo
 
     @Override
     public Optional<FileResourceInfo> findDraftFileInfoByDraftIdAndFileIdForResource(Long draftId, Long fileId) {
-        return Optional.empty();
+        return Optional.ofNullable(
+                query.select(fileResourceInfoExpression(qDraftFile._super))
+                        .from(qDraftFile)
+                        .where(
+                                qDraftFile.draft.id.eq(draftId),
+                                qDraftFile.id.eq(fileId)
+                        )
+                        .fetchOne()
+        );
     }
 
     @Override
     public Optional<FileResourceInfo> findMessageFileInfoByMessageIdAndFileIdForResource(Long messageId, Long fileId) {
-        return Optional.empty();
+        return Optional.ofNullable(
+                query.select(fileResourceInfoExpression(qMessageFile._super))
+                        .from(qMessageFile)
+                        .where(
+                                qMessageFile.message.id.eq(messageId),
+                                qMessageFile.id.eq(fileId)
+                        )
+                        .fetchOne()
+        );
     }
 
     @Override
     public Optional<FileResourceInfo> findBoardFileInfoByBoardIdAndFileIdForResource(Long boardId, Long fileId) {
-        return Optional.empty();
+        return Optional.ofNullable(
+                query.select(fileResourceInfoExpression(qBoardFile._super))
+                        .from(qBoardFile)
+                        .where(
+                                qBoardFile.board.id.eq(boardId),
+                                qBoardFile.id.eq(fileId)
+                        )
+                        .fetchOne()
+        );
     }
 
     @Override
     public Optional<FileResourceInfo> findEducationFileInfoByEducationIdAndFileIdForResource(Long educationId, Long fileId) {
-        return Optional.empty();
+        return Optional.ofNullable(
+                query.select(fileResourceInfoExpression(qEducationFile._super))
+                        .from(qEducationFile)
+                        .where(
+                                qEducationFile.education.id.eq(educationId),
+                                qEducationFile.id.eq(fileId)
+                        )
+                        .fetchOne()
+        );
     }
 
     @Override
     public Optional<FileResourceInfo> findMeetingRoomFileInfoByMeetingRoomIdAndFileIdForResource(Long meetingRoomId, Long fileId) {
-        return Optional.empty();
+        return Optional.ofNullable(
+                query.select(fileResourceInfoExpression(qMeetingRoomFile._super))
+                        .from(qMeetingRoomFile)
+                        .where(
+                                qMeetingRoomFile.meetingRoom.id.eq(meetingRoomId),
+                                qMeetingRoomFile.id.eq(fileId)
+                        )
+                        .fetchOne()
+        );
     }
 }

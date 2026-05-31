@@ -37,6 +37,9 @@ public class QSalesDraft extends EntityPathBase<SalesDraft> {
     public final StringPath content;
 
     //inherited
+    public final DateTimePath<java.time.Instant> createdAt;
+
+    //inherited
     public final BooleanPath draft;
 
     //inherited
@@ -46,6 +49,9 @@ public class QSalesDraft extends EntityPathBase<SalesDraft> {
     public final com.haruon.groupware.domain.empInfo.QEmp emp;
 
     public final com.haruon.groupware.domain.franchise.QFranchise franchise;
+
+    //inherited
+    public final NumberPath<Long> id;
 
     public final ComparablePath<java.time.YearMonth> reportMonth = createComparable("reportMonth", java.time.YearMonth.class);
 
@@ -59,6 +65,9 @@ public class QSalesDraft extends EntityPathBase<SalesDraft> {
 
     //inherited
     public final StringPath title;
+
+    //inherited
+    public final DateTimePath<java.time.Instant> updatedAt;
 
     public QSalesDraft(String variable) {
         this(SalesDraft.class, forVariable(variable), INITS);
@@ -82,13 +91,16 @@ public class QSalesDraft extends EntityPathBase<SalesDraft> {
         this.approval = _super.approval;
         this.circulations = _super.circulations;
         this.content = _super.content;
+        this.createdAt = _super.createdAt;
         this.draft = _super.draft;
         this.draftFiles = _super.draftFiles;
         this.emp = _super.emp;
         this.franchise = inits.isInitialized("franchise") ? new com.haruon.groupware.domain.franchise.QFranchise(forProperty("franchise"), inits.get("franchise")) : null;
+        this.id = _super.id;
         this.sourceKey = _super.sourceKey;
         this.submittedAt = _super.submittedAt;
         this.title = _super.title;
+        this.updatedAt = _super.updatedAt;
     }
 
 }

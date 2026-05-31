@@ -1,7 +1,6 @@
 package com.haruon.groupware.application.message.provided;
 
 import com.haruon.groupware.application.message.service.dto.MessageCreateRequest;
-import com.haruon.groupware.application.message.service.dto.MessageFileRequest;
 import com.haruon.groupware.application.message.service.dto.MessageUpdateRequest;
 
 import java.time.LocalDateTime;
@@ -21,7 +20,5 @@ public interface MessageDraftManagement {
 
     void changeReceivers(Long writerId, Long messageDraftId, Set<Long> receiverIds);
 
-    void addFile(Long writerId, Long messageDraftId, MessageFileRequest request);
 
-    void removeFile(Long writerId, Long messageDraftId, Long fileId);
 }

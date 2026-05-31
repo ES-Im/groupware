@@ -25,13 +25,21 @@ public class QMeeting extends EntityPathBase<Meeting> {
 
     public static final QMeeting meeting = new QMeeting("meeting");
 
+    public final com.haruon.groupware.domain.event.QAbstractEventAggregateRoot _super = new com.haruon.groupware.domain.event.QAbstractEventAggregateRoot(this);
+
     public final BooleanPath cancel = createBoolean("cancel");
+
+    //inherited
+    public final DateTimePath<java.time.Instant> createdAt = _super.createdAt;
 
     public final SimplePath<Object> editableDate = createSimple("editableDate", Object.class);
 
     public final com.haruon.groupware.domain.empInfo.QEmp emp;
 
     public final TimePath<java.time.LocalTime> endAt = createTime("endAt", java.time.LocalTime.class);
+
+    //inherited
+    public final NumberPath<Long> id = _super.id;
 
     public final BooleanPath isCancel = createBoolean("isCancel");
 
@@ -50,6 +58,9 @@ public class QMeeting extends EntityPathBase<Meeting> {
     public final SimplePath<Object> sueMeetingReservedEvent = createSimple("sueMeetingReservedEvent", Object.class);
 
     public final StringPath title = createString("title");
+
+    //inherited
+    public final DateTimePath<java.time.Instant> updatedAt = _super.updatedAt;
 
     public QMeeting(String variable) {
         this(Meeting.class, forVariable(variable), INITS);

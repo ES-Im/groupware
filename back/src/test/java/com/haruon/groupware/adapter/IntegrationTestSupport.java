@@ -47,4 +47,34 @@ public class IntegrationTestSupport {
 
     protected static final String REFRESH_TOKEN_KEY_PREFIX = "auth:refresh:";
 
+    protected String loginByIdAndPw(String loginId, String password) throws Exception {
+        return IntegrityTestFixtures.getAccessToken(
+                empRepository, encoder, mockMvc, objectMapper, loginId, password
+        );
+    }
+
+    protected void registerEmp(String loginId, String password) {
+        IntegrityTestFixtures.registeredEmp(
+                empRepository, encoder, loginId, password
+        );
+    }
+
+    protected void registerHR(String loginId, String password) {
+        IntegrityTestFixtures.getEmpHavingWithHrRole(
+                empRepository, deptRepository, encoder, loginId, password
+        );
+    }
+
+    protected void registerDeptManager(String loginId, String password) {
+        IntegrityTestFixtures.getEmpHavingWithManagerRole(
+                empRepository, deptRepository, encoder, loginId, password
+        );
+    }
+
+    protected void registerEmpHavingAllInfo(String loginId, String password) {
+        IntegrityTestFixtures.getEmpHavingAllInfo(
+                empRepository, deptRepository, encoder, empAccountManager, loginId, password
+        );
+    }
+
 }

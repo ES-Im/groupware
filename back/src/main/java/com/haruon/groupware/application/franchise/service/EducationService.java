@@ -1,13 +1,9 @@
 package com.haruon.groupware.application.franchise.service;
 
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
-import com.haruon.groupware.application.exception.franchise.EducationRegisterMismatchException;
-import com.haruon.groupware.application.file.dto.result.StoreFile;
-import com.haruon.groupware.application.file.required.FileStorage;
 import com.haruon.groupware.application.franchise.provided.EducationManagement;
 import com.haruon.groupware.application.franchise.required.EducationRepository;
 import com.haruon.groupware.application.franchise.service.dto.EducationCreateRequest;
-import com.haruon.groupware.application.franchise.service.dto.EducationFileCreateRequest;
 import com.haruon.groupware.application.franchise.service.dto.EducationUpdateRequest;
 import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.franchise.Education;
@@ -15,8 +11,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import static com.haruon.groupware.application.franchise.service.FranchiseUtils.findEducation;
-import static com.haruon.groupware.application.franchise.service.FranchiseUtils.getFranchiseRoleAssignedEmp;
+import static com.haruon.groupware.application.franchise.service.FranchiseUtils.*;
 
 @Service
 @Transactional
@@ -25,9 +20,6 @@ public class EducationService implements EducationManagement {
 
     private final EmpRepository empRepository;
     private final EducationRepository educationRepository;
-    private final FileStorage fileStorage;
-
-    private static final String EDUCATION_FILE_TYPE = "education";
 
     @Override
     public long createEducation(long managerId, EducationCreateRequest request) {
@@ -48,7 +40,7 @@ public class EducationService implements EducationManagement {
     @Override
     public void updateEducation(long educationId, long managerId, EducationUpdateRequest request) {
         Education education = findEducation(educationRepository, educationId);
-        validateRegister(education, managerId);
+        validateRegister(empRepository, education, managerId);
 
         education.changeEducationInfo(
                 request.educationDate(),
@@ -62,7 +54,7 @@ public class EducationService implements EducationManagement {
     @Override
     public void activate(long educationId, long managerId) {
         Education education = findEducation(educationRepository, educationId);
-        validateRegister(education, managerId);
+        validateRegister(empRepository, education, managerId);
 
         education.activate();
     }
@@ -70,39 +62,12 @@ public class EducationService implements EducationManagement {
     @Override
     public void deactivate(long educationId, long managerId) {
         Education education = findEducation(educationRepository, educationId);
-        validateRegister(education, managerId);
+        validateRegister(empRepository, education, managerId);
 
         education.deactivate();
     }
 
-    @Override
-    public void addEducationFile(long educationId, long managerId, EducationFileCreateRequest request) {
-        Education education = findEducation(educationRepository, educationId);
-        validateRegister(education, managerId);
-        StoreFile storedFile = fileStorage.store(request.file(), EDUCATION_FILE_TYPE);
 
-        education.addEducationFile(
-                storedFile.mimeType(),
-                storedFile.originalName(),
-                storedFile.storedName(),
-                storedFile.extension(),
-                storedFile.fileSize(),
-                storedFile.storedPath()
-        );
-    }
 
-    @Override
-    public void removeEducationFile(long educationId, long managerId, long fileId) {
-        Education education = findEducation(educationRepository, educationId);
-        validateRegister(education, managerId);
 
-        education.removeEducationFile(fileId);
-    }
-
-    private void validateRegister(Education education, long managerId) {
-        Emp assignedEmp = getFranchiseRoleAssignedEmp(empRepository, managerId);
-
-        if(!education.getEmp().equals(assignedEmp))
-            throw new EducationRegisterMismatchException();
-    }
 }

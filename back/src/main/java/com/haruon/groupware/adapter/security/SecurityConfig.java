@@ -79,6 +79,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/employees")
                                     .hasAnyRole(SystemRoleCode.HR.name(), SystemRoleCode.DEPT_MANAGER.name())
 
+                        /* File API */
+                        .requestMatchers(HttpMethod.GET, "/api/files/**").hasAnyRole(SystemRoleCode.EMPLOYEE.name())
+
                         .anyRequest().authenticated());
 
         http

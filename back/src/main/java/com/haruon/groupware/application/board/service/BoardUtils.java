@@ -24,7 +24,7 @@ public class BoardUtils {
         return category;
     }
 
-    static Board findBoard(BoardRepository boardRepository, Long boardId) {
+    public static Board findBoard(BoardRepository boardRepository, Long boardId) {
         return boardRepository.findById(boardId)
                 .orElseThrow(BoardNotFoundException::new);
     }

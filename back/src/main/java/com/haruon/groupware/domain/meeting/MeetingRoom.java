@@ -100,11 +100,20 @@ public class MeetingRoom extends AbstractEntity {
 
     }
 
-    public void removeRoomFile(MeetingRoomFile meetingRoomFile) {
-        requireNonNull(meetingRoomFile, "삭제할 파일이 없음");
+    public void removeRoomFile(Long fileId) {
+        MeetingRoomFile meetingRoomFile = findMeetingRoomFile(fileId);
+
         state(this.roomFiles.contains(meetingRoomFile), "삭제할 파일이 없음");
         this.roomFiles.remove(meetingRoomFile);
 
+    }
+
+    private MeetingRoomFile findMeetingRoomFile(Long fileId) {
+        return this.roomFiles.stream()
+                .filter(file -> file.getId().equals(fileId))
+                .findFirst()
+                .orElseThrow(() ->
+                        new IllegalArgumentException("대상 파일을 찾을 수 없습니다."));
     }
 
  }

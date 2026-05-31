@@ -2,10 +2,10 @@ package com.haruon.groupware.adapter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.haruon.groupware.adapter.webapi.auth.EmpLoginRequest;
-import com.haruon.groupware.application.empInfo.empService.dto.request.EmpFileReplaceParam;
 import com.haruon.groupware.application.empInfo.provided.EmpAccountManager;
 import com.haruon.groupware.application.empInfo.required.DeptRepository;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.file.dto.request.EmpFileUploadRequest;
 import com.haruon.groupware.application.file.dto.request.FileDto;
 import com.haruon.groupware.domain.empInfo.Dept;
 import com.haruon.groupware.domain.empInfo.Emp;
@@ -72,7 +72,7 @@ public class IntegrityTestFixtures {
         test.approveRegister(LocalDate.of(2026,1,1));
 
         empRepository.save(test);
-        EmpFileReplaceParam profileFile1 = EmpFileReplaceParam.builder()
+        EmpFileUploadRequest profileFile1 = EmpFileUploadRequest.builder()
                 .file(FileDto.builder()
                         .mimeType("image/jpeg")
                         .originalFileFullName("profilePicture.jpg")
@@ -82,7 +82,7 @@ public class IntegrityTestFixtures {
                 ).fileType(FileType.PROFILE_PICTURE)
                 .build();
 
-        EmpFileReplaceParam signature1 = EmpFileReplaceParam.builder()
+        EmpFileUploadRequest signature1 = EmpFileUploadRequest.builder()
                 .file(FileDto.builder()
                         .mimeType("image/jpeg")
                         .originalFileFullName("signature1.jpg")
@@ -92,7 +92,7 @@ public class IntegrityTestFixtures {
                 ).fileType(FileType.SIGNATURE)
                 .build();
 
-        EmpFileReplaceParam signature2 = EmpFileReplaceParam.builder()
+        EmpFileUploadRequest signature2 = EmpFileUploadRequest.builder()
                 .file(FileDto.builder()
                         .mimeType("image/jpeg")
                         .originalFileFullName("signature2.jpg")

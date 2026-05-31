@@ -20,6 +20,7 @@ public enum ApplicationErrorCode {
     UNSUPPORTED_FILE_EXTENSION_EXCEPTION(HttpStatus.BAD_REQUEST, "FILE_003", "허용되지 않는 확장자입니다."),
     INVALID_FILE_NAME_EXCEPTION(HttpStatus.BAD_REQUEST, "FILE_004", "유효한 파일명이 아닙니다"),
     FILE_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND, "FILE_005", "조회된 파일이 없습니다"),
+    UNSUPPORTED_DOMAIN_FILE_TYPE(HttpStatus.BAD_REQUEST, "FILE_006", "허용되지 않는 파일 타입입니다."),
 
     // 권한
     ACTIVE_EMPLOYEE_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND, "ROLE_001", "해당 활성화된 사원이 존재하지 않습니다"),

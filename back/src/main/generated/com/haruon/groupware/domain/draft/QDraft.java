@@ -25,11 +25,16 @@ public class QDraft extends EntityPathBase<Draft> {
 
     public static final QDraft draft1 = new QDraft("draft1");
 
+    public final com.haruon.groupware.domain.event.QAbstractEventAggregateRoot _super = new com.haruon.groupware.domain.event.QAbstractEventAggregateRoot(this);
+
     public final QApproval approval;
 
     public final ListPath<Circulation, QCirculation> circulations = this.<Circulation, QCirculation>createList("circulations", Circulation.class, QCirculation.class, PathInits.DIRECT2);
 
     public final StringPath content = createString("content");
+
+    //inherited
+    public final DateTimePath<java.time.Instant> createdAt = _super.createdAt;
 
     public final BooleanPath draft = createBoolean("draft");
 
@@ -37,11 +42,17 @@ public class QDraft extends EntityPathBase<Draft> {
 
     public final com.haruon.groupware.domain.empInfo.QEmp emp;
 
+    //inherited
+    public final NumberPath<Long> id = _super.id;
+
     public final StringPath sourceKey = createString("sourceKey");
 
     public final DateTimePath<java.time.LocalDateTime> submittedAt = createDateTime("submittedAt", java.time.LocalDateTime.class);
 
     public final StringPath title = createString("title");
+
+    //inherited
+    public final DateTimePath<java.time.Instant> updatedAt = _super.updatedAt;
 
     public QDraft(String variable) {
         this(Draft.class, forVariable(variable), INITS);

@@ -67,6 +67,9 @@ include::api/webapi/empAccount/Emp-Management-API.adoc[]
 === 신규 사원 리스트 조회
 include::api/webapi/empAccount/NEW-EMP-LIST.adoc[]
 
+[[FILE_API]]
+== FILE API
+
 [[EMP_FILE_PREVIEW]]
 === 사원 파일 미리보기
 include::api/webapi/file/Emp-Preview.adoc[]
@@ -74,6 +77,46 @@ include::api/webapi/file/Emp-Preview.adoc[]
 [[EMP_FILE_DOWNLOAD]]
 === 사원 파일 다운로드
 include::api/webapi/file/Emp-Download.adoc[]
+
+[[DRAFT_FILE_PREVIEW]]
+=== 기안서 첨부 파일 미리보기
+include::api/webapi/file/Draft-Preview.adoc[]
+
+[[DRAFT_FILE_DOWNLOAD]]
+=== 기안서 첨부 파일 다운로드
+include::api/webapi/file/Draft-Download.adoc[]
+
+[[BOARD_FILE_PREVIEW]]
+=== 게시판 첨부 파일 미리보기
+include::api/webapi/file/Board-Preview.adoc[]
+
+[[BOARD_FILE_DOWNLOAD]]
+=== 게시판 첨부 파일 다운로드
+include::api/webapi/file/Board-Download.adoc[]
+
+[[MESSAGE_FILE_PREVIEW]]
+=== 쪽지 첨부 파일 미리보기
+include::api/webapi/file/Message-Preview.adoc[]
+
+[[MESSAGE_FILE_DOWNLOAD]]
+=== 쪽지 첨부 파일 다운로드
+include::api/webapi/file/Message-Download.adoc[]
+
+[[EDUCATION_FILE_PREVIEW]]
+=== 교육 첨부 파일 미리보기
+include::api/webapi/file/Education-Preview.adoc[]
+
+[[EDUCATION_FILE_DOWNLOAD]]
+=== 교육 첨부 파일 다운로드
+include::api/webapi/file/Education-Download.adoc[]
+
+[[MEETING_ROOM_FILE_PREVIEW]]
+=== 회의실 첨부 파일 미리보기
+include::api/webapi/file/MeetingRoom-Preview.adoc[]
+
+[[MEETING_ROOM_FILE_DOWNLOAD]]
+=== 회의실 첨부 파일 다운로드
+include::api/webapi/file/MeetingRoom-Download.adoc[]
 
 [[ERROR]]
 == 에러

@@ -26,6 +26,9 @@
         </attributes>
     </mapped-superclass>
 
+    <mapped-superclass class="com.haruon.groupware.domain.event.AbstractEventAggregateRoot" access="FIELD">
+    </mapped-superclass>
+
     <mapped-superclass class="com.haruon.groupware.domain.AbstractFileEntity" access="FIELD">
         <attributes>
             <basic name="originalName">

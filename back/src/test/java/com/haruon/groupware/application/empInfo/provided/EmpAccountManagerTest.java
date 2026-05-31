@@ -12,6 +12,7 @@ import com.haruon.groupware.application.exception.empInfo.DuplicateEmpNoExceptio
 import com.haruon.groupware.application.exception.empInfo.DuplicateLoginIdException;
 import com.haruon.groupware.application.exception.empInfo.EmpAlreadyActiveException;
 import com.haruon.groupware.application.exception.empInfo.InvalidResignDateException;
+import com.haruon.groupware.application.file.dto.request.EmpFileUploadRequest;
 import com.haruon.groupware.application.file.dto.request.FileDto;
 import com.haruon.groupware.domain.empInfo.*;
 import com.haruon.groupware.domain.empInfo.enums.EmpStatus;
@@ -531,7 +532,7 @@ record EmpAccountManagerTest(
         FileType signature = FileType.SIGNATURE;
 
         empAccountManager.updateEmpFileBySelf(
-                EmpFileReplaceParam.builder()
+                EmpFileUploadRequest.builder()
                         .file(fileInfo)
                         .fileType(signature)
                         .build(),
@@ -646,7 +647,7 @@ record EmpAccountManagerTest(
         FileType signature = FileType.SIGNATURE;
 
         empAccountManager.updateEmpFileBySelf(
-                EmpFileReplaceParam.builder()
+                EmpFileUploadRequest.builder()
                         .file(fileInfo)
                         .fileType(signature)
                         .build(),

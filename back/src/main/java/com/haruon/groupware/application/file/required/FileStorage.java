@@ -9,4 +9,6 @@ public interface FileStorage {
     StoreFile store(FileDto fileDto, String fileType);
 
     Resource loadAsResource(String storedPath, String storedName);
+
+    void delete(String storedPath, String storedName);
 }

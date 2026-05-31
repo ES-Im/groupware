@@ -30,7 +30,6 @@ public class FileStorageAdapter implements FileStorage {
         return UUID.randomUUID() + "." + extension;
     }
 
-
     @Override
     public StoreFile store(FileDto fileDto, String type) {
         try {
@@ -60,14 +59,7 @@ public class FileStorageAdapter implements FileStorage {
     @Override
     public Resource loadAsResource(String storedPath, String storedName) {
         try {
-            if (storedPath == null || storedPath.isBlank() || storedName == null || storedName.isBlank()) {
-                throw new FileNotFoundException();
-            }
-
-            Path directory = Path.of(storedPath).normalize();
-            Path path = directory.resolve(storedName).normalize();
-
-            if (!path.startsWith(directory)) throw new FileNotFoundException();
+            Path path = validateStoredPathName(storedPath, storedName);
 
             Resource resource = new UrlResource(path.toUri());
 
@@ -78,4 +70,38 @@ public class FileStorageAdapter implements FileStorage {
             throw new FileNotFoundException();
         }
     }
+
+    @Override
+    public void delete(String storedPath, String storedName) {
+        try {
+            Path path = validateStoredPathName(storedPath, storedName).toAbsolutePath().normalize();
+
+            if(!Files.exists(path) || !Files.isRegularFile(path)) throw new FileNotFoundException();
+
+            Files.delete(path);
+
+        } catch (IOException e) {
+            throw new FileNotFoundException();
+        }
+    }
+
+    private Path validateStoredPathName(String storedPath, String storedName) {
+        if (storedPath == null || storedPath.isBlank() || storedName == null || storedName.isBlank()) {
+            throw new FileNotFoundException();
+        }
+
+        Path directory = Path.of(storedPath).normalize();
+        Path path = directory.resolve(storedName).normalize();
+
+        if(!path.startsWith(directory)) throw new FileNotFoundException();
+
+        return path;
+    }
+
 }
+
+/*todo : 이어서 할거
+    1. /me api에서 파일 삭제 시, 물리삭제 로직 추가 -> 위에 Resource 조회까지만 적용함
+    2. EmpApi에서 사원 단건 조회 테스트 필요
+ */
+

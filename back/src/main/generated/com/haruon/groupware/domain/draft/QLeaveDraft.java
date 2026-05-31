@@ -37,6 +37,9 @@ public class QLeaveDraft extends EntityPathBase<LeaveDraft> {
     public final StringPath content;
 
     //inherited
+    public final DateTimePath<java.time.Instant> createdAt;
+
+    //inherited
     public final BooleanPath draft;
 
     //inherited
@@ -46,6 +49,9 @@ public class QLeaveDraft extends EntityPathBase<LeaveDraft> {
     public final com.haruon.groupware.domain.empInfo.QEmp emp;
 
     public final DateTimePath<java.time.LocalDateTime> endAt = createDateTime("endAt", java.time.LocalDateTime.class);
+
+    //inherited
+    public final NumberPath<Long> id;
 
     public final EnumPath<com.haruon.groupware.domain.draft.sub.LeaveType> leaveType = createEnum("leaveType", com.haruon.groupware.domain.draft.sub.LeaveType.class);
 
@@ -61,6 +67,9 @@ public class QLeaveDraft extends EntityPathBase<LeaveDraft> {
 
     //inherited
     public final StringPath title;
+
+    //inherited
+    public final DateTimePath<java.time.Instant> updatedAt;
 
     public QLeaveDraft(String variable) {
         this(LeaveDraft.class, forVariable(variable), INITS);
@@ -84,12 +93,15 @@ public class QLeaveDraft extends EntityPathBase<LeaveDraft> {
         this.approval = _super.approval;
         this.circulations = _super.circulations;
         this.content = _super.content;
+        this.createdAt = _super.createdAt;
         this.draft = _super.draft;
         this.draftFiles = _super.draftFiles;
         this.emp = _super.emp;
+        this.id = _super.id;
         this.sourceKey = _super.sourceKey;
         this.submittedAt = _super.submittedAt;
         this.title = _super.title;
+        this.updatedAt = _super.updatedAt;
     }
 
 }

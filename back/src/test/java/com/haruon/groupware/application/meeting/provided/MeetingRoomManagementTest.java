@@ -10,11 +10,11 @@ import com.haruon.groupware.application.exception.file.UnsupportedFileExtensionE
 import com.haruon.groupware.application.exception.file.UnsupportedMimeTypeException;
 import com.haruon.groupware.application.exception.meeting.ReservedMeetingExistException;
 import com.haruon.groupware.application.file.dto.request.FileDto;
+import com.haruon.groupware.application.file.dto.request.MeetingRoomFileUploadRequest;
 import com.haruon.groupware.application.meeting.required.MeetingRepository;
 import com.haruon.groupware.application.meeting.required.MeetingRoomRepository;
 import com.haruon.groupware.application.meeting.service.dto.MeetingReserveRequest;
 import com.haruon.groupware.application.meeting.service.dto.MeetingRoomCreateRequest;
-import com.haruon.groupware.application.meeting.service.dto.MeetingRoomFileCreateRequest;
 import com.haruon.groupware.application.meeting.service.dto.MeetingRoomUpdateRequest;
 import com.haruon.groupware.application.schedule.required.ScheduleRepository;
 import com.haruon.groupware.domain.empInfo.Dept;
@@ -199,7 +199,7 @@ record MeetingRoomManagementTest(
         
         assertThatThrownBy(() ->
                 meetingRoomManagement.addRoomFile(
-                        MeetingRoomFileCreateRequest.builder()
+                        MeetingRoomFileUploadRequest.builder()
                                 .meetingRoomId(roomId)
                                 .editorId(emp.getId())
                                 .file(fileDto)
@@ -216,7 +216,7 @@ record MeetingRoomManagementTest(
         long roomId = saveMeetingRoom(emp);
 
         meetingRoomManagement.addRoomFile(
-                MeetingRoomFileCreateRequest.builder()
+                MeetingRoomFileUploadRequest.builder()
                         .meetingRoomId(roomId)
                         .editorId(emp.getId())
                         .file(
@@ -236,39 +236,6 @@ record MeetingRoomManagementTest(
         MeetingRoom room = meetingRoomRepository.findById(roomId).orElseThrow();
 
         assertThat(room.getRoomFiles()).hasSize(1);
-    }
-
-    @Transactional
-    @Test
-    @DisplayName("회의실 파일 삭제 테스트 - 활성화여부와 예약상태 상관없이 회의실 이미지 편집 가능")
-    void removeRoomFile_success() {
-        Emp emp = getFacilityRoleEmp("202601001", "facility1");
-        long roomId = saveMeetingRoom(emp);
-
-        meetingRoomManagement.addRoomFile(
-                MeetingRoomFileCreateRequest.builder()
-                        .meetingRoomId(roomId)
-                        .editorId(emp.getId())
-                        .file(
-                                FileDto.builder()
-                                        .mimeType("image/png")
-                                        .originalFileFullName("orginName.png")
-                                        .fileSize(10*1024*1024L)
-                                        .bytes(new byte[]{1})
-                                        .build()
-                        )
-                .build()
-        );
-
-        entityManager.flush();
-        entityManager.clear();
-
-        MeetingRoom room = meetingRoomRepository.findById(roomId).orElseThrow();
-        Long id = room.getRoomFiles().getFirst().getId();
-
-        meetingRoomManagement.removeRoomFile(roomId, emp.getId(), id);
-
-        assertThat(meetingRoomRepository.findById(roomId).orElseThrow().getRoomFiles()).isEmpty();
     }
 
     @Test

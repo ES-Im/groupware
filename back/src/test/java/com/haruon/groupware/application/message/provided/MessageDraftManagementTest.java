@@ -7,9 +7,9 @@ import com.haruon.groupware.application.exception.common.role.ActiveEmployeeNotF
 import com.haruon.groupware.application.exception.message.MessageNotFoundException;
 import com.haruon.groupware.application.exception.message.MessageReceiverRequiredException;
 import com.haruon.groupware.application.file.dto.request.FileDto;
+import com.haruon.groupware.application.file.dto.request.MessageFileUploadRequest;
 import com.haruon.groupware.application.message.required.MessageRepository;
 import com.haruon.groupware.application.message.service.dto.MessageCreateRequest;
-import com.haruon.groupware.application.message.service.dto.MessageFileRequest;
 import com.haruon.groupware.application.message.service.dto.MessageUpdateRequest;
 import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.message.Message;
@@ -680,7 +680,7 @@ record MessageDraftManagementTest(
 
         long draftId = messageDraftManagement.saveMessageBeforeSend(sender.getId(), createRequest);
 
-        MessageFileRequest fileRequest = MessageFileRequest.builder()
+        MessageFileUploadRequest fileRequest = MessageFileUploadRequest.builder()
                 .file(FileDto.builder()
                         .mimeType("application/pdf")
                         .originalFileFullName("test.pdf")
@@ -711,7 +711,7 @@ record MessageDraftManagementTest(
         long draftId = messageDraftManagement.saveMessageBeforeSend(sender.getId(), createRequest);
         em.flush(); em.clear();
 
-        MessageFileRequest fileRequest = MessageFileRequest.builder()
+        MessageFileUploadRequest fileRequest = MessageFileUploadRequest.builder()
                 .file(FileDto.builder()
                         .mimeType("application/pdf")
                         .originalFileFullName("test.pdf")
@@ -736,7 +736,7 @@ record MessageDraftManagementTest(
     void add_file_fail_when_draft_not_found() {
         Emp sender = saveApprovedEmp(empRepository, "202601001", "sender");
 
-        MessageFileRequest fileRequest = MessageFileRequest.builder()
+        MessageFileUploadRequest fileRequest = MessageFileUploadRequest.builder()
                 .file(FileDto.builder()
                         .mimeType("application/pdf")
                         .originalFileFullName("test.pdf")
@@ -765,7 +765,7 @@ record MessageDraftManagementTest(
 
         long draftId = messageDraftManagement.saveMessageBeforeSend(sender.getId(), createRequest);
 
-        MessageFileRequest fileRequest = MessageFileRequest.builder()
+        MessageFileUploadRequest fileRequest = MessageFileUploadRequest.builder()
                 .file(FileDto.builder()
                         .mimeType("application/pdf")
                         .originalFileFullName("test.pdf")
@@ -794,7 +794,7 @@ record MessageDraftManagementTest(
 
         long messageId = messageDraftManagement.sendMessage(sender.getId(), createRequest);
 
-        MessageFileRequest fileRequest = MessageFileRequest.builder()
+        MessageFileUploadRequest fileRequest = MessageFileUploadRequest.builder()
                 .file(FileDto.builder()
                         .mimeType("application/pdf")
                         .originalFileFullName("test.pdf")

@@ -1,6 +1,7 @@
 package com.haruon.groupware.domain.event;
 
 import com.haruon.groupware.domain.AbstractEntity;
+import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.Transient;
 import org.springframework.data.domain.AfterDomainEventPublication;
 import org.springframework.data.domain.DomainEvents;
@@ -11,6 +12,7 @@ import java.util.List;
 
 import static java.util.Objects.requireNonNull;
 
+@MappedSuperclass
 public abstract class AbstractEventAggregateRoot extends AbstractEntity {
 
     @Transient private transient final List<DomainEvent> domainEvents = new ArrayList<>();

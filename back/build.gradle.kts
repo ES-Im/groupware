@@ -32,6 +32,14 @@ configurations {
     create("asciidoctorExt")
 }
 
+sourceSets {
+    main {
+        java {
+            srcDir(layout.buildDirectory.dir("generated/sources/annotationProcessor/java/main"))
+        }
+    }
+}
+
 dependencies {
     // web
     implementation("org.springframework.boot:spring-boot-starter")

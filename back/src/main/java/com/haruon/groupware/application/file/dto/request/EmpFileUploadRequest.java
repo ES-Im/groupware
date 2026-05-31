@@ -1,8 +1,8 @@
-package com.haruon.groupware.application.empInfo.empService.dto.request;
+package com.haruon.groupware.application.file.dto.request;
 
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import com.haruon.groupware.application.file.FileValidator;
-import com.haruon.groupware.application.file.dto.request.FileDto;
+import com.haruon.groupware.application.file.fileService.FileDomain;
 import com.haruon.groupware.domain.empInfo.enums.FileType;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
@@ -10,15 +10,20 @@ import lombok.Builder;
 import java.util.Set;
 
 @Builder
-public record EmpFileReplaceParam(
+public record EmpFileUploadRequest(
 
-        @NotNull
-        FileDto file,
+        @NotNull Long empId,
+        @NotNull FileType fileType,
 
-        @NotNull
-        FileType fileType
+        @NotNull FileDto file
 
-) {
+
+) implements FileUploadRequest {
+
+    @Override
+    public FileDomain domain() {
+        return FileDomain.EMP;
+    }
 
     private static final long FILE_SIZE_MAX = 5 * 1024 * 1024L;
 
@@ -30,7 +35,7 @@ public record EmpFileReplaceParam(
             "image/jpeg", "image/jpg", "image/png"
     );
 
-    public EmpFileReplaceParam {
+    public EmpFileUploadRequest {
 
         if(fileType == null || file == null) throw new RequiredValueMissingException();
 

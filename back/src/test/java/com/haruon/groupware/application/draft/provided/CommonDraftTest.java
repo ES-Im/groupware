@@ -4,12 +4,12 @@ import com.haruon.groupware.application.TestIntegrationConfig;
 import com.haruon.groupware.application.draft.required.DraftRepository;
 import com.haruon.groupware.application.draft.service.dto.ApproversRequest;
 import com.haruon.groupware.application.draft.service.dto.CommonDraftCreateRequest;
-import com.haruon.groupware.application.draft.service.dto.DraftFileCreateRequest;
 import com.haruon.groupware.application.empInfo.required.DeptRepository;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import com.haruon.groupware.application.exception.draft.ApprovalLineRequiredException;
 import com.haruon.groupware.application.exception.draft.DraftNotFoundException;
+import com.haruon.groupware.application.file.dto.request.DraftFileUploadRequest;
 import com.haruon.groupware.application.file.dto.request.FileDto;
 import com.haruon.groupware.domain.draft.Approver;
 import com.haruon.groupware.domain.draft.Draft;
@@ -386,7 +386,7 @@ record CommonDraftTest(
         Draft draft = createDraft(drafter, "test", "test", List.of());
 
         String originalFileName = "test.pdf";
-        DraftFileCreateRequest fileRequest = DraftFileCreateRequest.builder()
+        DraftFileUploadRequest fileRequest = DraftFileUploadRequest.builder()
                 .file(FileDto.builder()
                         .mimeType("application/pdf")
                         .originalFileFullName(originalFileName)
@@ -413,7 +413,7 @@ record CommonDraftTest(
         Draft draft = createDraft(drafter, "test", "test", List.of());
 
         String originalFileName = "test.pdf";
-        DraftFileCreateRequest fileRequest = DraftFileCreateRequest.builder()
+        DraftFileUploadRequest fileRequest = DraftFileUploadRequest.builder()
                 .file(FileDto.builder()
                         .mimeType("application/pdf")
                         .originalFileFullName(originalFileName)
@@ -446,7 +446,7 @@ record CommonDraftTest(
                 LocalDateTime.of(2026, 1, 1, 0, 0, 0)
         );
 
-        DraftFileCreateRequest file = DraftFileCreateRequest.builder()
+        DraftFileUploadRequest file = DraftFileUploadRequest.builder()
                 .file(FileDto.builder()
                         .mimeType("application/pdf")
                         .originalFileFullName("test.pdf")
@@ -473,7 +473,7 @@ record CommonDraftTest(
         Draft draft = createDraft(drafter, "test", "test", List.of(approver));
 
         String originalFileName = "test.pdf";
-        DraftFileCreateRequest fileRequest = DraftFileCreateRequest.builder()
+        DraftFileUploadRequest fileRequest = DraftFileUploadRequest.builder()
                 .file(FileDto.builder()
                         .mimeType("application/pdf")
                         .originalFileFullName(originalFileName)

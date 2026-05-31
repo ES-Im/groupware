@@ -45,14 +45,14 @@ class FileApiTest extends IntegrationTestSupport {
         log.info("originalName = {}", originalName);
 
         mockMvc.perform(
-                        get("/api/files/employees/{fileId}/preview", fileId)
+                        get("/api/files/employees/{empId}/{fileId}/preview", emp.getId(), fileId)
                                 .header("Authorization", "Bearer " + accessToken)
                 )
+                .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
                 .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION, containsString("inline")))
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, containsString("image/jpeg")))
-                .andExpect(content().string(containsString("profilePicture content")))
-                .andDo(MockMvcResultHandlers.print());
+                .andExpect(content().string(containsString("profilePicture content")));
     }
 
     @Test
@@ -73,14 +73,14 @@ class FileApiTest extends IntegrationTestSupport {
                 .findFirst().orElseThrow().file().fileId();
 
         mockMvc.perform(
-                        get("/api/files/employees/{fileId}/download", fileId)
+                        get("/api/files/employees/{empId}/{fileId}/download", emp.getId(), fileId)
                                 .header("Authorization", "Bearer " + accessToken)
                 )
+                .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
                 .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION, containsString("attachment")))
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, containsString("image/jpeg")))
-                .andExpect(content().string(containsString("profilePicture content")))
-                .andDo(MockMvcResultHandlers.print());
+                .andExpect(content().string(containsString("profilePicture content")));
     }
 
     private void getEmpHavingFiles(String loginId, String password) {

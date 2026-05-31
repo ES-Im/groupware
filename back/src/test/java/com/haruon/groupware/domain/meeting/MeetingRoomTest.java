@@ -216,16 +216,4 @@ class MeetingRoomTest {
                 });
     }
 
-    @Test
-    @DisplayName("회의실 파일 삭제 테스트")
-    void removeRoomFileTest() {
-        MeetingRoom room = getMeetingRoom();
-
-        room.addRoomFile("image/png", "origin", "stored.png", "png", 1024L, "/test/stored.png");
-        MeetingRoomFile file = room.getRoomFiles().getFirst();
-
-        room.removeRoomFile(file);
-
-        assertThat(room.getRoomFiles().size()).isEqualTo(0);
-    }
 }

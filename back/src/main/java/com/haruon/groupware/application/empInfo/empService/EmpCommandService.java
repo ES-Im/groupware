@@ -7,7 +7,6 @@ import com.haruon.groupware.application.empInfo.required.EmpLeaveRepository;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import com.haruon.groupware.application.exception.empInfo.*;
-import com.haruon.groupware.application.file.dto.result.StoreFile;
 import com.haruon.groupware.application.file.required.FileStorage;
 import com.haruon.groupware.application.utils.AuthorizationChecker;
 import com.haruon.groupware.application.utils.CompanyPolicyPort;
@@ -37,6 +36,7 @@ public class EmpCommandService extends LeaveCalculator implements EmpAccountMana
     private final EmpLeaveRepository empLeaveRepository;
     private final CompanyPolicyPort companyPolicy;
     private final FileStorage fileStorage;
+
 
     /**
      *  본인 정보 등록 / 수정
@@ -80,27 +80,6 @@ public class EmpCommandService extends LeaveCalculator implements EmpAccountMana
     }
 
     @Override
-    public void updateEmpFileBySelf(
-            EmpFileReplaceParam fileParam,
-            Long loginId
-    ) {
-        if(fileParam == null) throw new RequiredValueMissingException();
-        Emp emp = findActiveEmpById(empRepository, loginId);
-
-        StoreFile storedFile = fileStorage.store(fileParam.file(), fileParam.fileType().name());
-
-        emp.changeEmpFile(
-                fileParam.fileType(),
-                storedFile.mimeType(),
-                storedFile.originalName(),
-                storedFile.storedName(),
-                storedFile.extension(),
-                storedFile.fileSize(),
-                storedFile.storedPath()
-        );
-    }
-
-    @Override
     public void updateFileActiveStatusBySelf(
             Long targetFileId, Boolean isForActivate,
             Long empId
@@ -112,16 +91,6 @@ public class EmpCommandService extends LeaveCalculator implements EmpAccountMana
                 isForActivate
         );
     }
-
-    @Override
-    public void deleteEmpFileBySelf(Long fileId, Long empId) {
-        Emp emp = findActiveEmpById(empRepository, empId);
-
-        emp.removeFile(fileId);
-    }
-
-
-
 
     /**
      *  모든사원 정보 등록 / 수정 (By HR)

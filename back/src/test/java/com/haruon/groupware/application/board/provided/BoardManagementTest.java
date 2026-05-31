@@ -4,11 +4,11 @@ import com.haruon.groupware.application.TestIntegrationConfig;
 import com.haruon.groupware.application.board.required.BoardRepository;
 import com.haruon.groupware.application.board.required.CategoryRepository;
 import com.haruon.groupware.application.board.service.dto.BoardCreateRequest;
-import com.haruon.groupware.application.board.service.dto.BoardFileRequest;
 import com.haruon.groupware.application.board.service.dto.BoardUpdateRequest;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import com.haruon.groupware.application.exception.common.role.PermissionDeniedException;
+import com.haruon.groupware.application.file.dto.request.BoardFileUploadRequest;
 import com.haruon.groupware.application.file.dto.request.FileDto;
 import com.haruon.groupware.domain.board.Board;
 import com.haruon.groupware.domain.board.BoardFile;
@@ -302,7 +302,7 @@ record BoardManagementTest(
         boardManagement.addFile(
                 author.getId(),
                 unPublishedBoard,
-                BoardFileRequest.builder()
+                BoardFileUploadRequest.builder()
                         .file(FileDto.builder()
                                 .mimeType(mimeType)
                                 .originalFileFullName(fileName)
@@ -349,7 +349,7 @@ record BoardManagementTest(
                 boardManagement.addFile(
                         otherEmp.getId(),
                         unPublishedBoard,
-                        BoardFileRequest.builder()
+                        BoardFileUploadRequest.builder()
                                 .file(FileDto.builder()
                                         .mimeType("application/pdf")
                                         .originalFileFullName("test.pdf")
@@ -378,7 +378,7 @@ record BoardManagementTest(
                 boardManagement.addFile(
                         author.getId(),
                         publishedBoard,
-                        BoardFileRequest.builder()
+                        BoardFileUploadRequest.builder()
                                 .file(FileDto.builder()
                                         .mimeType("application/pdf")
                                         .originalFileFullName("test.pdf")
@@ -462,7 +462,7 @@ record BoardManagementTest(
         boardManagement.addFile(
                 author.getId(),
                 publishedBoard,
-                BoardFileRequest.builder()
+                BoardFileUploadRequest.builder()
                         .file(FileDto.builder()
                                 .mimeType(mimeType)
                                 .originalFileFullName(fileName)

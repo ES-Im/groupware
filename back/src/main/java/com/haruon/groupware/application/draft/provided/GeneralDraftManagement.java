@@ -3,7 +3,6 @@ package com.haruon.groupware.application.draft.provided;
 import com.haruon.groupware.application.draft.service.dto.ApproversRequest;
 import com.haruon.groupware.application.draft.service.dto.CommonDraftCreateRequest;
 import com.haruon.groupware.application.draft.service.dto.CommonDraftUpdateRequest;
-import com.haruon.groupware.application.draft.service.dto.DraftFileCreateRequest;
 import org.jspecify.annotations.Nullable;
 
 import java.time.LocalDateTime;
@@ -37,11 +36,6 @@ public interface GeneralDraftManagement {
 
     void removeCirculatedEmp(long draftId, long drafterId, long circulatedEmpId);
 
-    // isReadableByCirculation -> 조회용, 공람자 리스트 출력시 사용할 것
-
-    /** about file */
-    void addFile(long draftId, long drafterId, DraftFileCreateRequest fileParam);
-
-    void removeFile(long draftId, long drafterId, long fileId);
+    //todo isReadableByCirculation -> 조회용, 공람자 리스트 출력시 사용할 것
 
 }

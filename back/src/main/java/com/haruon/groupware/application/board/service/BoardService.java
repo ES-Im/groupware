@@ -4,13 +4,9 @@ import com.haruon.groupware.application.board.provided.BoardManagement;
 import com.haruon.groupware.application.board.required.BoardRepository;
 import com.haruon.groupware.application.board.required.CategoryRepository;
 import com.haruon.groupware.application.board.service.dto.BoardCreateRequest;
-import com.haruon.groupware.application.board.service.dto.BoardFileRequest;
 import com.haruon.groupware.application.board.service.dto.BoardUpdateRequest;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
 import com.haruon.groupware.application.exception.common.role.PermissionDeniedException;
-import com.haruon.groupware.application.file.dto.request.FileDto;
-import com.haruon.groupware.application.file.dto.result.StoreFile;
-import com.haruon.groupware.application.file.required.FileStorage;
 import com.haruon.groupware.domain.board.Board;
 import com.haruon.groupware.domain.board.Category;
 import com.haruon.groupware.domain.empInfo.Emp;
@@ -33,9 +29,6 @@ public class BoardService implements BoardManagement {
     private final BoardRepository boardRepository;
     private final EmpRepository empRepository;
     private final CategoryRepository categoryRepository;
-    private final FileStorage fileStorage;
-
-    private static final String BOARD_FILE_TYPE = "board";
 
     @Override
     public long registerBoard(Long authorId, BoardCreateRequest request) {
@@ -71,36 +64,6 @@ public class BoardService implements BoardManagement {
         board.changeBoard(
                 author, category, request.title(), request.content(), request.modifiedAt()
         );
-    }
-
-    @Override
-    public void addFile(Long authorId, Long boardId, BoardFileRequest request) {
-        Emp author = findActiveEmpById(empRepository, authorId);
-        Board board = findBoard(boardRepository, boardId);
-        validateAuthor(author, board);
-
-        FileDto file = request.file();
-        StoreFile storedFile = fileStorage.store(file, BOARD_FILE_TYPE);
-
-        board.addBoardFile(
-                author,
-                storedFile.mimeType(),
-                storedFile.originalName(),
-                storedFile.storedName(),
-                storedFile.extension(),
-                storedFile.fileSize(),
-                storedFile.storedPath(),
-                request.modifiedAt()
-        );
-    }
-
-    @Override
-    public void removeFile(Long authorId, Long boardId, Long fileId, LocalDateTime modifiedAt) {
-        Emp author = findActiveEmpById(empRepository, authorId);
-        Board board = findBoard(boardRepository, boardId);
-        validateAuthor(author, board);
-
-        board.removeBoardFile(author, fileId, modifiedAt);
     }
 
     private void validateAuthor(Emp author, Board board) {

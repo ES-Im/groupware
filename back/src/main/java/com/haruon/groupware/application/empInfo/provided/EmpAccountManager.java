@@ -14,11 +14,7 @@ public interface EmpAccountManager {
 
     void updateInfoBySelf(EmpUpdateRequestBySelf request, Long empId);
 
-    void updateEmpFileBySelf(EmpFileReplaceParam request, Long empId);
-
     void updateFileActiveStatusBySelf(Long targetFileId, Boolean isForActivate, Long empId);
-
-    void deleteEmpFileBySelf(Long fileId, Long empId);
 
 
     void approveRegisterByHR(Long editorId, Long targetEmpId, LocalDate hiredAt);

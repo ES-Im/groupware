@@ -13,3 +13,4 @@ public record FileResourceInfo(
         Long fileSize
 ) {
 }
+
