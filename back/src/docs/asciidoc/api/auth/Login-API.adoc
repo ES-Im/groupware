@@ -5,8 +5,11 @@ Request::
 +
 --
 _HTTP request_
+
 include::{snippets}/LOGIN/http-request.adoc[]
+
 _Request fields_
+
 include::{snippets}/LOGIN/request-fields.adoc[]
 --
 Response (200)::

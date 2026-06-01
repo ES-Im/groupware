@@ -8,6 +8,9 @@ Request::
 _HTTP request_
 include::{snippets}/DELETE_ME_FILE/http-request.adoc[]
 
+_Request header_
+include::{snippets}/DELETE_ME_FILE/request-headers.adoc[]
+
 _Path_parameters_
 include::{snippets}/DELETE_ME_FILE/path-parameters.adoc[]
 

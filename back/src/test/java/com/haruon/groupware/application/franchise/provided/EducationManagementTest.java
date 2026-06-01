@@ -3,31 +3,19 @@ package com.haruon.groupware.application.franchise.provided;
 import com.haruon.groupware.application.TestIntegrationConfig;
 import com.haruon.groupware.application.empInfo.required.DeptRepository;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
-import com.haruon.groupware.application.exception.ApplicationException;
-import com.haruon.groupware.application.exception.file.FileSizeLimitExceededException;
-import com.haruon.groupware.application.exception.file.UnsupportedFileExtensionException;
-import com.haruon.groupware.application.exception.file.UnsupportedMimeTypeException;
 import com.haruon.groupware.application.exception.franchise.EducationRegisterMismatchException;
-import com.haruon.groupware.application.file.dto.request.EducationFileUploadRequest;
-import com.haruon.groupware.application.file.dto.request.FileDto;
 import com.haruon.groupware.application.franchise.required.EducationRepository;
 import com.haruon.groupware.application.franchise.required.FranchiseRepository;
 import com.haruon.groupware.application.franchise.service.dto.EducationCreateRequest;
 import com.haruon.groupware.application.franchise.service.dto.EducationUpdateRequest;
 import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.franchise.Education;
-import com.haruon.groupware.domain.franchise.EducationFile;
 import jakarta.persistence.EntityManager;
-import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 
 import java.time.LocalDateTime;
-import java.util.stream.Stream;
 
 import static com.haruon.groupware.application.dbFixture.FranchiseFixture.getSavedFranchiseEmp;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -173,137 +161,6 @@ record EducationManagementTest(
 
         Education foundEducation = educationRepository.findById(education).orElseThrow();
         assertThat(foundEducation.isActive()).isFalse();
-    }
-
-    @Test
-    @Transactional
-    @DisplayName("교육 등록 사원은 교육 첨부파일을 등록할 수 있다.")
-    void addEducationFile_by_register_success() {
-        Emp franchiseEmp = getFranchiseEmp("202601001", "franchise1");
-        long education = getEducation(franchiseEmp);
-        entityManager.flush();
-        entityManager.clear();
-
-        String mimeType = "application/pdf";
-        String originalFileFullName = "originalFile.pdf";
-        long fileSize = 5 * 1024 * 1024L;
-        educationManagement.addEducationFile(
-                education, franchiseEmp.getId(),
-                EducationFileUploadRequest.builder()
-                        .file(FileDto.builder()
-                                .mimeType(mimeType)
-                                .originalFileFullName(originalFileFullName)
-                                .fileSize(fileSize)
-                                .bytes(new byte[]{1})
-                                .build()
-                        ).build()
-        );
-
-
-        Education foundEducation = educationRepository.findById(education).orElseThrow();
-        assertThat(foundEducation.getEducationFiles()).singleElement().extracting(
-                EducationFile::getMimeType,
-                EducationFile::getOriginalName,
-                EducationFile::getFileSize
-        ).containsExactly(
-                mimeType, originalFileFullName.substring(0, originalFileFullName.lastIndexOf('.')), fileSize
-        );
-    }
-
-    private static Stream<Arguments> notAllowedFiles() {
-        String mimeType = "application/pdf";
-        String originalFileFullName = "originalFile.pdf";
-        long fileSize = 5 * 1024 * 1024L;
-
-        return Stream.of(
-                Arguments.of(
-                        "허용되지 않는 파일 확장자",
-                        FileDto.builder()
-                                .mimeType(mimeType)
-                                .originalFileFullName("originalFile.exe")
-                                .fileSize(fileSize)
-                                .bytes(new byte[]{1})
-                                .build(),
-                        UnsupportedFileExtensionException.class
-                ),
-                Arguments.of(
-                        "허용되지 않는 MIME 타입",
-                        FileDto.builder()
-                                .mimeType("application/octet-stream")
-                                .originalFileFullName(originalFileFullName)
-                                .fileSize(fileSize)
-                                .bytes(new byte[]{1})
-                                .build(),
-                        UnsupportedMimeTypeException.class
-                ),
-                Arguments.of(
-                        "파일 크기 제한 초과",
-                        FileDto.builder()
-                                .mimeType(mimeType)
-                                .originalFileFullName(originalFileFullName)
-                                .fileSize(20 * 1024 * 1024L + 1)
-                                .bytes(new byte[]{1})
-                                .build(),
-                        FileSizeLimitExceededException.class
-                )
-        );
-    }
-    @Transactional
-    @ParameterizedTest(name = "{index} ==> {0}")
-    @MethodSource("notAllowedFiles")
-    @DisplayName("허용치 않는 파일은 첨부할 수 없다")
-    void addEducationFile_when_attach_not_allowed_file_fail(String description, FileDto param, Class<? extends ApplicationException> expectedException) {
-        Emp franchiseEmp = getFranchiseEmp("202601001", "franchise1");
-        long education = getEducation(franchiseEmp);
-        entityManager.flush();
-        entityManager.clear();
-
-        assertThatThrownBy(() ->
-                educationManagement.addEducationFile(
-                        education, franchiseEmp.getId(),
-                        EducationFileUploadRequest.builder()
-                                .file(param)
-                                .build()
-                )
-        ).isInstanceOf(expectedException);
-    }
-
-    @Test
-    @Transactional
-    @DisplayName("교육 등록 사원은 교육 첨부파일을 삭제할 수 있다.")
-    void removeEducationFile_by_register_success() {
-        Emp franchiseEmp = getFranchiseEmp("202601001", "franchise1");
-        long education = getEducation(franchiseEmp);
-
-        entityManager.flush();
-        entityManager.clear();
-
-        educationManagement.addEducationFile(
-                education, franchiseEmp.getId(),
-                EducationFileUploadRequest.builder()
-                        .file(FileDto.builder()
-                                .mimeType("application/pdf")
-                                .originalFileFullName("originalFile.pdf")
-                                .fileSize(5 * 1024 * 1024L)
-                                .bytes(new byte[]{1})
-                                .build()
-                        ).build()
-        );
-
-        Education education1 = educationRepository.findById(education).orElseThrow();
-
-        EducationFile educationFile = education1.getEducationFiles().stream().findFirst().orElseThrow();
-
-        entityManager.flush();
-        entityManager.clear();
-
-        educationManagement.removeEducationFile(
-                education, franchiseEmp.getId(), educationFile.getId()
-        );
-
-        Education foundEducation = educationRepository.findById(education).orElseThrow();
-
-        assertThat(foundEducation.getEducationFiles()).isEmpty();
     }
 
     private long getEducation(Emp franchiseEmp) {

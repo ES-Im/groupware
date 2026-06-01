@@ -8,7 +8,7 @@ backtony.github.io(부제)
 :icons: font
 :source-highlighter: highlightjs
 :toc: left
-:toclevels: 2
+:toclevels: 3
 :sectlinks:
 
 [[AUTH-API]]
@@ -33,6 +33,10 @@ include::api/auth/Reissue-API.adoc[]
 [[REGISTER]]
 === 회원가입
 include::api/webapi/empAccount/Register.adoc[]
+
+[[EMP_INFO]]
+=== 사원 단건 정보 조회
+include::api/webapi/empAccount/Emp-API.adoc[]
 
 
 [[ME_INFO]]
@@ -59,6 +63,10 @@ include::api/webapi/empAccount/Add-Me-File.adoc[]
 === 본인 개인파일 활성화/비활성화
 include::api/webapi/empAccount/Update-Me-Files-Active-Status.adoc[]
 
+[[DELETE_ME_FILE]]
+=== 본인 개인파일 삭제
+include::api/webapi/empAccount/Delete-Me-File.adoc[]
+
 [[EMP_MANAGEMENT_LIST]]
 === 관리용 사원 리스트 조회
 include::api/webapi/empAccount/Emp-Management-API.adoc[]
@@ -67,56 +75,141 @@ include::api/webapi/empAccount/Emp-Management-API.adoc[]
 === 신규 사원 리스트 조회
 include::api/webapi/empAccount/NEW-EMP-LIST.adoc[]
 
+[[HR_APPROVE_EMP_REGISTRATION]]
+=== 신규 사원 가입 승인
+include::api/webapi/empAccount/HR-Approve-Registration.adoc[]
+
+[[HR_RESIGN_EMP]]
+=== 사원 퇴직 처리
+include::api/webapi/empAccount/HR-Resign-Emp.adoc[]
+
+[[HR_ACTIVATE_EMP]]
+=== 사원 활성화 처리
+include::api/webapi/empAccount/HR-Activate-Emp.adoc[]
+
+[[HR_SUSPEND_EMP]]
+=== 사원 정직 처리
+include::api/webapi/empAccount/HR-Suspend-Emp.adoc[]
+
+[[HR_UPDATE_EMP_INFO]]
+=== 특정 사원 정보 수정 (HR)
+include::api/webapi/empAccount/HR-Update-Emp-Info.adoc[]
+
+[[DEPT_MANAGER_UPDATE_EMP_INFO]]
+=== 특정 사원 정보 수정 (부서매니저)
+include::api/webapi/empAccount/DeptManager-Update-Emp-Info.adoc[]
+
+[[HR_UPDATE_ONES_FILE_STATUS]]
+=== 특정 사원 파일 활성화/비활성화 (HR)
+include::api/webapi/empAccount/HR-Update-Emp-File-Status.adoc[]
+
 [[FILE_API]]
 == FILE API
 
+[[FILE_PREVIEW,DOWNLOAD]]
+=== 미리보기, 다운로드
+
 [[EMP_FILE_PREVIEW]]
-=== 사원 파일 미리보기
+==== 사원 파일 미리보기
 include::api/webapi/file/Emp-Preview.adoc[]
 
 [[EMP_FILE_DOWNLOAD]]
-=== 사원 파일 다운로드
+==== 사원 파일 다운로드
 include::api/webapi/file/Emp-Download.adoc[]
 
 [[DRAFT_FILE_PREVIEW]]
-=== 기안서 첨부 파일 미리보기
+==== 기안서 첨부 파일 미리보기
 include::api/webapi/file/Draft-Preview.adoc[]
 
 [[DRAFT_FILE_DOWNLOAD]]
-=== 기안서 첨부 파일 다운로드
+==== 기안서 첨부 파일 다운로드
 include::api/webapi/file/Draft-Download.adoc[]
 
 [[BOARD_FILE_PREVIEW]]
-=== 게시판 첨부 파일 미리보기
+==== 게시판 첨부 파일 미리보기
 include::api/webapi/file/Board-Preview.adoc[]
 
 [[BOARD_FILE_DOWNLOAD]]
-=== 게시판 첨부 파일 다운로드
+==== 게시판 첨부 파일 다운로드
 include::api/webapi/file/Board-Download.adoc[]
 
 [[MESSAGE_FILE_PREVIEW]]
-=== 쪽지 첨부 파일 미리보기
+==== 쪽지 첨부 파일 미리보기
 include::api/webapi/file/Message-Preview.adoc[]
 
 [[MESSAGE_FILE_DOWNLOAD]]
-=== 쪽지 첨부 파일 다운로드
+==== 쪽지 첨부 파일 다운로드
 include::api/webapi/file/Message-Download.adoc[]
 
 [[EDUCATION_FILE_PREVIEW]]
-=== 교육 첨부 파일 미리보기
+==== 교육 첨부 파일 미리보기
 include::api/webapi/file/Education-Preview.adoc[]
 
 [[EDUCATION_FILE_DOWNLOAD]]
-=== 교육 첨부 파일 다운로드
+==== 교육 첨부 파일 다운로드
 include::api/webapi/file/Education-Download.adoc[]
 
 [[MEETING_ROOM_FILE_PREVIEW]]
-=== 회의실 첨부 파일 미리보기
+==== 회의실 첨부 파일 미리보기
 include::api/webapi/file/MeetingRoom-Preview.adoc[]
 
 [[MEETING_ROOM_FILE_DOWNLOAD]]
-=== 회의실 첨부 파일 다운로드
+==== 회의실 첨부 파일 다운로드
 include::api/webapi/file/MeetingRoom-Download.adoc[]
+
+[[FILE_UPLOAD]]
+=== 파일 업로드
+
+[[EMP_FILE_UPLOAD]]
+==== 사원 파일 업로드
+include::api/webapi/file/Emp-Upload.adoc[]
+
+[[DRAFT_FILE_UPLOAD]]
+==== 기안서 첨부 파일 업로드
+include::api/webapi/file/Draft-Upload.adoc[]
+
+[[BOARD_FILE_UPLOAD]]
+==== 게시판 첨부 파일 업로드
+include::api/webapi/file/Board-Upload.adoc[]
+
+[[MESSAGE_FILE_UPLOAD]]
+==== 쪽지 첨부 파일 업로드
+include::api/webapi/file/Message-Upload.adoc[]
+
+[[EDUCATION_FILE_UPLOAD]]
+==== 교육 첨부 파일 업로드
+include::api/webapi/file/Education-Upload.adoc[]
+
+[[MEETING_ROOM_FILE_UPLOAD]]
+==== 회의실 첨부 파일 업로드
+include::api/webapi/file/MeetingRoom-Upload.adoc[]
+
+[[FILE_DELETE]]
+=== 파일 삭제
+
+[[EMP_FILE_DELETE]]
+==== 사원 파일 삭제
+include::api/webapi/file/Emp-Delete.adoc[]
+
+[[DRAFT_FILE_DELETE]]
+==== 기안서 첨부 파일 삭제
+include::api/webapi/file/Draft-Delete.adoc[]
+
+[[BOARD_FILE_DELETE]]
+==== 게시판 첨부 파일 삭제
+include::api/webapi/file/Board-Delete.adoc[]
+
+[[MESSAGE_FILE_DELETE]]
+==== 쪽지 첨부 파일 삭제
+include::api/webapi/file/Message-Delete.adoc[]
+
+[[EDUCATION_FILE_DELETE]]
+==== 교육 첨부 파일 삭제
+include::api/webapi/file/Education-Delete.adoc[]
+
+[[MEETING_ROOM_FILE_DELETE]]
+==== 회의실 첨부 파일 삭제
+include::api/webapi/file/MeetingRoom-Delete.adoc[]
 
 [[ERROR]]
 == 에러

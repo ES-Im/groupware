@@ -1,0 +1,35 @@
+[tabs%nosync]
+
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/HR_APPROVE_EMP_REGISTRATION/http-request.adoc[]
+
+_Request header_
+include::{snippets}/HR_APPROVE_EMP_REGISTRATION/request-headers.adoc[]
+
+_Path parameter_
+include::{snippets}/HR_APPROVE_EMP_REGISTRATION/path-parameters.adoc[]
+--
+Response (200)::
++
+--
+_HTTP response_
+include::{snippets}/HR_APPROVE_EMP_REGISTRATION/http-response.adoc[]
+--
+Exception ::
++
+--
+이 API에서 발생 가능한 에러:
+
+|===
+|Error Code
+
+|ACTIVE_EMPLOYEE_NOT_FOUND_EXCEPTION
+|PERMISSION_DENIED_EXCEPTION
+|REQUIRED_VALUE_MISSING_EXCEPTION
+|===
+--
+====

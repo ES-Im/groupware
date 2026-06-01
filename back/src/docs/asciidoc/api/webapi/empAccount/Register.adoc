@@ -6,8 +6,11 @@ Request::
 +
 --
 _HTTP request_
+
 include::{snippets}/REGISTER/http-request.adoc[]
+
 _Request cookie_
+
 include::{snippets}/REGISTER/request-fields.adoc[]
 --
 Response (200)::

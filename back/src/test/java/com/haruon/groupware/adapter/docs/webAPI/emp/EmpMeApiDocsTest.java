@@ -4,27 +4,24 @@ import com.haruon.groupware.adapter.docs.RestDocsSupport;
 import com.haruon.groupware.adapter.webapi.emp.EmpMeAPI;
 import com.haruon.groupware.application.empInfo.empService.dto.request.EmpUpdateRequestBySelf;
 import com.haruon.groupware.application.empInfo.empService.dto.response.BelongingInfo;
-import com.haruon.groupware.application.empInfo.empService.dto.response.EmpBasicInfo;
 import com.haruon.groupware.application.empInfo.empService.dto.response.EmpFileListInfo;
 import com.haruon.groupware.application.empInfo.empService.dto.response.EmpInfoResponse;
 import com.haruon.groupware.application.empInfo.provided.EmpAccountManager;
 import com.haruon.groupware.application.empInfo.provided.EmpAccountRetriever;
 import com.haruon.groupware.application.exception.common.role.ActiveEmployeeNotFoundException;
-import com.haruon.groupware.application.file.dto.request.EmpFileUploadRequest;
 import com.haruon.groupware.domain.empInfo.enums.FileType;
 import com.haruon.groupware.domain.empInfo.enums.PositionCode;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.List;
 
+import static com.haruon.groupware.adapter.docs.webAPI.emp.empApiSupport.getEmpInfoResponse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
@@ -33,9 +30,11 @@ import static org.springframework.restdocs.headers.HeaderDocumentation.requestHe
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
-import static org.springframework.restdocs.request.RequestDocumentation.*;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.restdocs.snippet.Attributes.key;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 public class EmpMeApiDocsTest extends RestDocsSupport {
@@ -53,17 +52,7 @@ public class EmpMeApiDocsTest extends RestDocsSupport {
     @Test
     @DisplayName("개인정보 조회 테스트")
     void retriever_me_info_success() throws Exception {
-        EmpInfoResponse empInfoResponse = new EmpInfoResponse(
-                new EmpBasicInfo("사원번호", "사원명", "아이디", "이메일", "직통번호"),
-                List.of(
-                        new EmpFileListInfo(1L, "storedFile1", "jpg", 1024L*1024, true, FileType.SIGNATURE),
-                        new EmpFileListInfo(2L, "storedFile2", "jpg", 1024*1024L, true, FileType.PROFILE_PICTURE)
-                ),
-                List.of(
-                        new BelongingInfo(1L, "DEPT1", "부서1", PositionCode.STAFF, true, LocalDate.of(2026, 1, 1), null),
-                        new BelongingInfo(2L, "DEPT2", "부서2", PositionCode.STAFF, false, LocalDate.of(2026, 1, 1), null)
-                )
-        );
+        EmpInfoResponse empInfoResponse = getEmpInfoResponse();
 
         Mockito.when(empAccountRetriever.retrieveEmpAccountInfo(any())).thenReturn(empInfoResponse);
 
@@ -110,6 +99,8 @@ public class EmpMeApiDocsTest extends RestDocsSupport {
 
                 ));
     }
+
+
 
     @Test
     @DisplayName("개인정보 조회 실패 테스트")
@@ -260,56 +251,10 @@ public class EmpMeApiDocsTest extends RestDocsSupport {
     }
 
     @Test
-    @DisplayName("파일 추가 테스트")
-    void addMeFile_success() throws Exception {
-
-        Mockito.doNothing()
-                .when(empAccountManager).updateEmpFileBySelf(any(EmpFileUploadRequest.class), anyLong());
-
-        MockMultipartFile file = new MockMultipartFile(
-                "file",
-                "profile.png",
-                "image/png",
-                "test image content".getBytes(StandardCharsets.UTF_8)
-        );
-
-        mockMvc.perform(
-                        multipart("/api/employees/me/files")
-                                .file(file)
-                                .with(employeeAuthentication())
-                                .header("Authorization", "Bearer accessToken")
-                                .param("fileType", FileType.PROFILE_PICTURE.name())
-                                .with(request -> {
-                                    request.setMethod("PATCH");
-                                    return request;
-                                })
-                                .contentType(MediaType.MULTIPART_FORM_DATA)
-                )
-                .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk())
-                .andDo(document("ADD_EMP_FILES",
-                                preprocessRequest(prettyPrint()),
-                                preprocessResponse(prettyPrint()),
-
-                                requestHeaders(
-                                        headerWithName("Authorization").description("Bearer Access Token")
-                                ),
-
-                                requestParts(
-                                        partWithName("file").description("업로드할 사원 파일")
-                                )
-
-
-
-                        )
-                );
-    }
-
-    @Test
     @DisplayName("파일 활성화/비활성화 테스트")
     void activate_file() throws Exception {
         Mockito.doNothing()
-                .when(empAccountManager).updateEmpFileBySelf(any(EmpFileUploadRequest.class), anyLong());
+                .when(empAccountManager).updateFileActiveStatusBySelf(anyLong(), any(Boolean.class), anyLong());
 
         mockMvc.perform(
                         patch("/api/employees/me/files/{fileId}/status", 1L)
@@ -330,31 +275,6 @@ public class EmpMeApiDocsTest extends RestDocsSupport {
                                         parameterWithName("fileId").description("파일 식별 번호")
                                 )
 
-                        )
-                );
-    }
-
-    @Test
-    @DisplayName("파일 삭제 테스트")
-    void deleteFileTest() throws Exception {
-        Mockito.doNothing()
-                .when(empAccountManager).deleteEmpFileBySelf(anyLong(), anyLong());
-
-        mockMvc.perform(
-                        delete("/api/employees/me/files/{fileId}", 1L)
-                                .with(employeeAuthentication())
-                                .header("Authorization", "Bearer accessToken")
-                ).andDo(MockMvcResultHandlers.print())
-                .andDo(document("DELETE_ME_FILE",
-                                preprocessRequest(prettyPrint()),
-                                preprocessResponse(prettyPrint()),
-
-                                requestHeaders(
-                                        headerWithName("Authorization").description("Bearer Access Token")
-                                ),
-                                pathParameters(
-                                        parameterWithName("fileId").description("파일 식별 번호")
-                                )
                         )
                 );
     }

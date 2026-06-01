@@ -75,12 +75,30 @@ public class SecurityConfig {
                         /* Employee API */
                         .requestMatchers("/api/auth/logout", "/api/employees/**").hasRole(SystemRoleCode.EMPLOYEE.name())
 
-                        /* Manager API */
+                        /* Employee - Manager API */
                         .requestMatchers(HttpMethod.GET, "/api/employees")
                                     .hasAnyRole(SystemRoleCode.HR.name(), SystemRoleCode.DEPT_MANAGER.name())
 
+                        .requestMatchers(HttpMethod.PATCH,
+                                "/api/employees/*/registration-approval",
+                                "/api/employees/*/resignation",
+                                "/api/employees/*/hr-managed-info",
+                                "/api/employees/*/status/activation",
+                                "/api/employees/*/status/suspension"
+                        ).hasRole(SystemRoleCode.HR.name())
+
+                        .requestMatchers(HttpMethod.PATCH,
+                                "/api/employees/*/dept-managed-info"
+                        ).hasRole(SystemRoleCode.DEPT_MANAGER.name())
+
                         /* File API */
-                        .requestMatchers(HttpMethod.GET, "/api/files/**").hasAnyRole(SystemRoleCode.EMPLOYEE.name())
+                        .requestMatchers(HttpMethod.GET,
+                                "/api/drafts/*/files/**",
+                                "/api/boards/*/files/**",
+                                "/api/messages/*/files/**",
+                                "/api/educations/*/files/**",
+                                "/api/meeting-rooms/*/files/**"
+                        ).hasAnyRole(SystemRoleCode.EMPLOYEE.name())
 
                         .anyRequest().authenticated());
 

@@ -28,7 +28,7 @@ public class EmpApi {
     }
 
     @GetMapping("/{empId}")
-    public ResponseEntity<EmpInfoResponse> get(
+    public ResponseEntity<EmpInfoResponse> getEmp(
             @PathVariable Long empId
     ) {
         EmpInfoResponse response = retriever.retrieveEmpAccountInfo(empId);

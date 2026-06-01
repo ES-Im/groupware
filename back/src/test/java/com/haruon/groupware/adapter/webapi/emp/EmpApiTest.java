@@ -2,16 +2,24 @@ package com.haruon.groupware.adapter.webapi.emp;
 
 import com.haruon.groupware.adapter.IntegrationTestSupport;
 import com.haruon.groupware.application.empInfo.empService.dto.request.EmpRegisterRequest;
+import com.haruon.groupware.application.empInfo.provided.EmpAccountRetriever;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @Slf4j
 public class EmpApiTest extends IntegrationTestSupport {
+
+    @Autowired
+    private EmpAccountRetriever empAccountRetriever;
 
     @Test
     @DisplayName("회원가입 성공 테스트")
@@ -41,5 +49,23 @@ public class EmpApiTest extends IntegrationTestSupport {
         ).andExpect(status().is4xxClientError());
     }
 
-    //todo - 사원 단건 조회
+    @Test
+    @DisplayName("사원 단건 조회")
+    void getEmp_success() throws Exception {
+        String accessToken = loginByIdAndPw("login12345", "!Q2w3e4r5t");
+
+        String loginId = "login12346";
+        String password = "!Q2w3e4r5t";
+        registerEmpHavingAllInfo(loginId, password);
+
+        Long empId = empRepository.findByLoginId(loginId).orElseThrow().getId();
+
+        mockMvc.perform(
+                get("/api/employees/{empId}", empId)
+                        .header("Authorization", "Bearer " + accessToken)
+                )
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+    }
 }

@@ -3,14 +3,8 @@ package com.haruon.groupware.application.meeting.provided;
 import com.haruon.groupware.application.TestIntegrationConfig;
 import com.haruon.groupware.application.empInfo.required.DeptRepository;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
-import com.haruon.groupware.application.exception.ApplicationException;
 import com.haruon.groupware.application.exception.common.role.PermissionDeniedException;
-import com.haruon.groupware.application.exception.file.FileSizeLimitExceededException;
-import com.haruon.groupware.application.exception.file.UnsupportedFileExtensionException;
-import com.haruon.groupware.application.exception.file.UnsupportedMimeTypeException;
 import com.haruon.groupware.application.exception.meeting.ReservedMeetingExistException;
-import com.haruon.groupware.application.file.dto.request.FileDto;
-import com.haruon.groupware.application.file.dto.request.MeetingRoomFileUploadRequest;
 import com.haruon.groupware.application.meeting.required.MeetingRepository;
 import com.haruon.groupware.application.meeting.required.MeetingRoomRepository;
 import com.haruon.groupware.application.meeting.service.dto.MeetingReserveRequest;
@@ -26,14 +20,10 @@ import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import static com.haruon.groupware.application.dbFixture.EmpFixture.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -155,87 +145,6 @@ record MeetingRoomManagementTest(
 
         MeetingRoom room = meetingRoomRepository.findById(roomId).orElseThrow();
         assertTrue(room.isAvailable());
-    }
-
-    private static Stream<Arguments> RoomFileFailArguments() {
-        String mimeType = "image/png";
-        String originalFileFullName = "originName.png";
-        Long fileSize = 10*1024*1024L;
-
-        return Stream.of(
-                Arguments.of("확장자는  'jpg', 'jpeg', 'png' 가능하며 그 이외는 추가할 수 없다.",
-                        FileDto.builder()
-                                .mimeType(mimeType)
-                                .originalFileFullName("orginName.exe")
-                                .fileSize(fileSize)
-                                .bytes(new byte[]{1})
-                                .build(),
-                        UnsupportedFileExtensionException.class
-                ), Arguments.of("mimeType은 'image/jpeg', 'image/jpg', 'image/png' 가능하며 그 이외에는 추가할 수 없다.",
-                        FileDto.builder()
-                                .mimeType("application/octet-stream")
-                                .originalFileFullName(originalFileFullName)
-                                .fileSize(fileSize)
-                                .bytes(new byte[]{1})
-                                .build(),
-                        UnsupportedMimeTypeException.class
-                ), Arguments.of("파일 크기는 10 * 1024 * 1024L 까지 가능",
-                        FileDto.builder()
-                                .mimeType(mimeType)
-                                .originalFileFullName(originalFileFullName)
-                                .fileSize(fileSize+1L)
-                                .bytes(new byte[]{1})
-                                .build(),
-                        FileSizeLimitExceededException.class
-                )
-        );
-    }
-    @ParameterizedTest(name = "{index} ==> {0}")
-    @MethodSource("RoomFileFailArguments")
-    @DisplayName("회의실 파일 등록 실패 테스트")
-    void addRoomFile_fail(String description, FileDto fileDto, Class<? extends ApplicationException> expectedException) {
-        Emp emp = getFacilityRoleEmp("202601001", "facility1");
-        long roomId = saveMeetingRoom(emp);
-        
-        assertThatThrownBy(() ->
-                meetingRoomManagement.addRoomFile(
-                        MeetingRoomFileUploadRequest.builder()
-                                .meetingRoomId(roomId)
-                                .editorId(emp.getId())
-                                .file(fileDto)
-                                .build()
-                )
-        ).isInstanceOf(expectedException);
-    }
-
-    @Transactional
-    @Test
-    @DisplayName("회의실 파일 등록 테스트 - 활성화여부와 예약상태 상관없이 회의실 이미지 편집 가능")
-    void addRoomFile_success() {
-        Emp emp = getFacilityRoleEmp("202601001", "facility1");
-        long roomId = saveMeetingRoom(emp);
-
-        meetingRoomManagement.addRoomFile(
-                MeetingRoomFileUploadRequest.builder()
-                        .meetingRoomId(roomId)
-                        .editorId(emp.getId())
-                        .file(
-                                FileDto.builder()
-                                        .mimeType("image/png")
-                                        .originalFileFullName("orginName.png")
-                                        .fileSize(10*1024*1024L)
-                                        .bytes(new byte[]{1})
-                                        .build()
-                        )
-                .build()
-        );
-
-        entityManager.flush();
-        entityManager.clear();
-
-        MeetingRoom room = meetingRoomRepository.findById(roomId).orElseThrow();
-
-        assertThat(room.getRoomFiles()).hasSize(1);
     }
 
     @Test

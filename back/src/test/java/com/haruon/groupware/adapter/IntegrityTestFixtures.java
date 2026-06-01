@@ -2,11 +2,8 @@ package com.haruon.groupware.adapter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.haruon.groupware.adapter.webapi.auth.EmpLoginRequest;
-import com.haruon.groupware.application.empInfo.provided.EmpAccountManager;
 import com.haruon.groupware.application.empInfo.required.DeptRepository;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
-import com.haruon.groupware.application.file.dto.request.EmpFileUploadRequest;
-import com.haruon.groupware.application.file.dto.request.FileDto;
 import com.haruon.groupware.domain.empInfo.Dept;
 import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.empInfo.EmpPasswordEncoder;
@@ -18,7 +15,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.Set;
 
@@ -56,6 +52,20 @@ public class IntegrityTestFixtures {
         empRepository.save(test);
     }
 
+    public static void suspendedEmp(
+            EmpRepository empRepository,
+            EmpPasswordEncoder encoder,
+            String loginId, String password
+    ) {
+        Email newEmail = Email.of(loginId, "haruon.com");
+        Emp test = Emp.register("202602002", "Test", loginId, password, newEmail, encoder);
+        test.approveRegister(LocalDate.of(2026,1,1));
+
+        test.suspendEmp();
+
+        empRepository.save(test);
+    }
+
     /**
      *  주부서 : HR / 부부서 : IT / 이전부서 : FIN <br>
      *  현재전자서명 : newSig / 예전전자서명 : oldSig / 현재프사 : profilePicture
@@ -64,7 +74,6 @@ public class IntegrityTestFixtures {
             EmpRepository empRepository,
             DeptRepository deptRepository,
             EmpPasswordEncoder encoder,
-            EmpAccountManager empAccountManager,
             String loginId, String password
     ) {
         Email newEmail = Email.of(loginId, "haruon.com");
@@ -72,39 +81,33 @@ public class IntegrityTestFixtures {
         test.approveRegister(LocalDate.of(2026,1,1));
 
         empRepository.save(test);
-        EmpFileUploadRequest profileFile1 = EmpFileUploadRequest.builder()
-                .file(FileDto.builder()
-                        .mimeType("image/jpeg")
-                        .originalFileFullName("profilePicture.jpg")
-                        .fileSize(1024L)
-                        .bytes("profilePicture content".getBytes(StandardCharsets.UTF_8))
-                        .build()
-                ).fileType(FileType.PROFILE_PICTURE)
-                .build();
-
-        EmpFileUploadRequest signature1 = EmpFileUploadRequest.builder()
-                .file(FileDto.builder()
-                        .mimeType("image/jpeg")
-                        .originalFileFullName("signature1.jpg")
-                        .fileSize(1024L)
-                        .bytes("signature content".getBytes(StandardCharsets.UTF_8))
-                        .build()
-                ).fileType(FileType.SIGNATURE)
-                .build();
-
-        EmpFileUploadRequest signature2 = EmpFileUploadRequest.builder()
-                .file(FileDto.builder()
-                        .mimeType("image/jpeg")
-                        .originalFileFullName("signature2.jpg")
-                        .fileSize(1024L)
-                        .bytes("signature content".getBytes(StandardCharsets.UTF_8))
-                        .build()
-                ).fileType(FileType.SIGNATURE)
-                .build();
-
-        empAccountManager.updateEmpFileBySelf(profileFile1, test.getId());
-        empAccountManager.updateEmpFileBySelf(signature1, test.getId());
-        empAccountManager.updateEmpFileBySelf(signature2, test.getId());
+        test.changeEmpFile(
+                FileType.PROFILE_PICTURE,
+                "image/jpeg",
+                "profilePicture",
+                "profilePicture content",
+                "jpg",
+                1024L,
+                "/test/emp"
+        );
+        test.changeEmpFile(
+                FileType.SIGNATURE,
+                "image/jpeg",
+                "signature1",
+                "signature1 content",
+                "jpg",
+                1024L,
+                "/test/emp"
+        );
+        test.changeEmpFile(
+                FileType.SIGNATURE,
+                "image/jpeg",
+                "signature2",
+                "signature2 content",
+                "jpg",
+                1024L,
+                "/test/emp"
+        );
 
         Dept it = deptRepository.findByDeptCode("002").orElseGet(() ->
                 deptRepository.save(
@@ -152,7 +155,7 @@ public class IntegrityTestFixtures {
         );
 
 
-        test.changeInfoByHR(null, null, null, null, Set.of(SystemRoleCode.HR), LocalDate.of(2026,1,1), null);
+        test.changeInfoByHR(null, null, null, Set.of(SystemRoleCode.HR), LocalDate.of(2026,1,1), null);
 
         empRepository.save(test);
     }
@@ -164,33 +167,16 @@ public class IntegrityTestFixtures {
             EmpRepository empRepository,
             DeptRepository deptRepository,
             EmpPasswordEncoder encoder,
-            String loginId, String password
+            String loginId, String password, Dept dept
     ) {
         Emp test = Emp.register("202601500", "ManagerName", loginId, password, Email.of(loginId, "haruon.com"), encoder);
         test.approveRegister(LocalDate.of(2026,1,1));
 
-        Dept it = deptRepository.findByDeptCode("002").orElseGet(() ->
-                deptRepository.save(
-                        Dept.registerDept("002", "IT")
-                )
-        );
-
-        Dept fin = deptRepository.findByDeptCode("003").orElseGet(() ->
-                deptRepository.save(
-                        Dept.registerDept("003", "FIN")
-                )
-        );
-
         test.changeBelongingsByHR(
-                it, PositionCode.STAFF, false, LocalDate.of(2026,2,1), null
+                dept, PositionCode.STAFF, false, LocalDate.of(2026,2,1), null
         );
 
-        test.changeBelongingsByHR(
-                fin, PositionCode.STAFF, true, LocalDate.of(2025,1,1), LocalDate.of(2026,1,1)
-        );
-
-
-        test.changeInfoByHR(null, null, null, null, Set.of(SystemRoleCode.DEPT_MANAGER), LocalDate.of(2026,1,1), null);
+        test.changeInfoByHR(null, null, null, Set.of(SystemRoleCode.DEPT_MANAGER), LocalDate.of(2026,1,1), null);
 
         empRepository.save(test);
     }
@@ -219,5 +205,6 @@ public class IntegrityTestFixtures {
         String contentAsString = result.getResponse().getContentAsString();
         return objectMapper.readTree(contentAsString).get("accessToken").asText();
     }
+
 
 }

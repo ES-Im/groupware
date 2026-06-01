@@ -57,4 +57,8 @@ public record BoardFileUploadRequest(
 
         FileValidator.validate(file, ALLOWED_EXTENSIONS, ALLOWED_MIME_TYPES, FILE_SIZE_MAX);
     }
+
+    public static BoardFileUploadRequest toBoardFileUploadRequest(Long boardId, Long requesterId, FileDto file, LocalDateTime modifiedAt) {
+        return new BoardFileUploadRequest(requesterId, boardId, file, modifiedAt);
+    }
 }

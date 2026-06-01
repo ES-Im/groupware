@@ -1,0 +1,34 @@
+[tabs%nosync]
+
+
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/RETRIEVE_EMP_INFO/http-request.adoc[]
+_Request header_
+include::{snippets}/RETRIEVE_EMP_INFO/request-headers.adoc[]
+--
+Response (200)::
++
+--
+_HTTP response_
+include::{snippets}/RETRIEVE_EMP_INFO/http-response.adoc[]
+_Response fields_
+include::{snippets}/RETRIEVE_EMP_INFO/response-fields.adoc[]
+--
+Exception::
++
+--
+이 API에서 발생 가능한 에러:
+
+|===
+|Error Code
+
+|ACTIVE_EMPLOYEE_NOT_FOUND_EXCEPTION
+
+
+|===
+--
+====

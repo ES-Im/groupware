@@ -24,7 +24,7 @@ class FranchiseInquiryAnswerTest {
         String content = "test";
         Emp emp = EmpFixture.getApprovedEmp();
 
-        emp.changeInfoByHR(null, null, null, null, Set.of(SystemRoleCode.FRANCHISE), null, null);
+        emp.changeInfoByHR(null, null, null, Set.of(SystemRoleCode.FRANCHISE), null, null);
 
         inquiry.createAnswerDraft(content, emp);
 
@@ -48,7 +48,7 @@ class FranchiseInquiryAnswerTest {
         FranchiseInquiry inquiry = getFranchiseInquiry(getFranchise());
         Emp emp = EmpFixture.getApprovedEmp();
 
-        emp.changeInfoByHR(null, null, null, null, Set.of(SystemRoleCode.FRANCHISE), null, null);
+        emp.changeInfoByHR(null, null, null, Set.of(SystemRoleCode.FRANCHISE), null, null);
         inquiry.createAnswerDraft("test", emp);
 
         FranchiseInquiryAnswer answer = inquiry.getAnswer();
@@ -65,7 +65,7 @@ class FranchiseInquiryAnswerTest {
         FranchiseInquiry inquiry = getFranchiseInquiry(getFranchise());
         Emp emp = EmpFixture.getApprovedEmp();
 
-        emp.changeInfoByHR(null, null, null, null, Set.of(SystemRoleCode.FRANCHISE), null, null);
+        emp.changeInfoByHR(null, null, null, Set.of(SystemRoleCode.FRANCHISE), null, null);
         inquiry.createAnswerDraft("test", emp);
         FranchiseInquiryAnswer answer = inquiry.getAnswer();
 
@@ -81,7 +81,7 @@ class FranchiseInquiryAnswerTest {
         FranchiseInquiry inquiry = getFranchiseInquiry(getFranchise());
         Emp emp = EmpFixture.getApprovedEmp();
 
-        emp.changeInfoByHR(null, null, null, null, Set.of(SystemRoleCode.FRANCHISE), null, null);
+        emp.changeInfoByHR(null, null, null, Set.of(SystemRoleCode.FRANCHISE), null, null);
         inquiry.createAnswerDraft("test",emp);
         FranchiseInquiryAnswer answer = inquiry.getAnswer();
         answer.submit(LocalDateTime.of(2026,5,2,0,0,0));
@@ -98,7 +98,7 @@ class FranchiseInquiryAnswerTest {
         FranchiseInquiry inquiry = getFranchiseInquiry(getFranchise());
         Emp emp = EmpFixture.getApprovedEmp();
 
-        emp.changeInfoByHR(null, null, null, null, Set.of(SystemRoleCode.FRANCHISE), null, null);
+        emp.changeInfoByHR(null, null, null, Set.of(SystemRoleCode.FRANCHISE), null, null);
         inquiry.createAnswerDraft("test", emp);
         FranchiseInquiryAnswer answer = inquiry.getAnswer();
         LocalDateTime answerAt = LocalDateTime.of(2026, 5, 2, 0, 0, 0);
@@ -113,13 +113,13 @@ class FranchiseInquiryAnswerTest {
     void submit_fail_when_not_assigned_emp() {
         FranchiseInquiry inquiry = getFranchiseInquiry(getFranchise());
         Emp emp = EmpFixture.getApprovedEmp("202601001", "login1");
-        emp.changeInfoByHR(null, null, null, null, Set.of(SystemRoleCode.FRANCHISE), null, null);
+        emp.changeInfoByHR(null, null, null, Set.of(SystemRoleCode.FRANCHISE), null, null);
 
         inquiry.createAnswerDraft("test", emp);
         LocalDateTime answerAt = LocalDateTime.of(2026, 5, 2, 0, 0, 0);
 
         Emp otherEmp = EmpFixture.getApprovedEmp("202601002", "login2");
-        emp.changeInfoByHR(null, null, null, null, Set.of(SystemRoleCode.FRANCHISE), null, null);
+        emp.changeInfoByHR(null, null, null, Set.of(SystemRoleCode.FRANCHISE), null, null);
 
         assertThatThrownBy(() ->
                 inquiry.submitAnswer(answerAt, otherEmp)
@@ -134,7 +134,7 @@ class FranchiseInquiryAnswerTest {
         FranchiseInquiry inquiry = getFranchiseInquiry(getFranchise());
         Emp emp = EmpFixture.getApprovedEmp();
 
-        emp.changeInfoByHR(null, null, null, null, Set.of(SystemRoleCode.FRANCHISE), null, null);
+        emp.changeInfoByHR(null, null, null, Set.of(SystemRoleCode.FRANCHISE), null, null);
         inquiry.createAnswerDraft("test", emp);
         LocalDateTime answerAt = LocalDateTime.of(2026, 5, 2, 0, 0, 0);
         inquiry.submitAnswer(answerAt, emp);
@@ -149,12 +149,12 @@ class FranchiseInquiryAnswerTest {
     void udpate_assigned_emp_when_update_answer() {
         FranchiseInquiry inquiry = getFranchiseInquiry(getFranchise());
         Emp emp1 = EmpFixture.getApprovedEmp("202601001", "login1");
-        emp1.changeInfoByHR(null, null, null, null, Set.of(SystemRoleCode.FRANCHISE), null, null);
+        emp1.changeInfoByHR(null, null, null, Set.of(SystemRoleCode.FRANCHISE), null, null);
 
         inquiry.createAnswerDraft("test", emp1);
 
         Emp emp2 = EmpFixture.getApprovedEmp("202601001", "login1");
-        emp2.changeInfoByHR( null, null, null, null, Set.of(SystemRoleCode.FRANCHISE), null, null);
+        emp2.changeInfoByHR( null, null, null, Set.of(SystemRoleCode.FRANCHISE), null, null);
 
         assertThatThrownBy(() ->
                 inquiry.updateAnswerDraft("test2", emp2)
@@ -167,7 +167,7 @@ class FranchiseInquiryAnswerTest {
         FranchiseInquiry inquiry = getFranchiseInquiry(getFranchise());
 
         Emp emp2 = EmpFixture.getApprovedEmp("202601001", "login1");
-        emp2.changeInfoByHR(null, null, null, null, Set.of(SystemRoleCode.FRANCHISE), null, null);
+        emp2.changeInfoByHR(null, null, null, Set.of(SystemRoleCode.FRANCHISE), null, null);
         inquiry.assign(emp2);
 
         assertThatThrownBy(() ->

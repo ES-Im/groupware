@@ -5,20 +5,19 @@ import com.haruon.groupware.adapter.persistence.emp.EmpQueryRepositoryAdapter;
 import com.haruon.groupware.application.empInfo.empService.dto.request.EmpUpdateRequestBySelf;
 import com.haruon.groupware.application.empInfo.empService.dto.response.EmpFileListInfo;
 import com.haruon.groupware.domain.empInfo.Emp;
-import com.haruon.groupware.domain.empInfo.enums.FileType;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -137,32 +136,6 @@ public class EmpMeApiTest extends IntegrationTestSupport {
     }
 
     @Test
-    @DisplayName("파일 추가 테스트")
-    void addMeFileTest() throws Exception {
-        String loginId = "login12345";
-        String password = "!Q2w3e4r5t";
-        registerEmpHavingAllInfo(loginId, password);
-
-        String accessToken = loginByIdAndPw(loginId, password);
-
-        MockMultipartFile file = new MockMultipartFile("file", "profile.png", "image/png", new byte[]{1});
-
-        mockMvc.perform(
-                        multipart("/api/employees/me/files")
-                                .file(file)
-                                .param("fileType", FileType.PROFILE_PICTURE.name())
-                                .header("Authorization", "Bearer " + accessToken)
-                                .with(req -> {
-                                    req.setMethod("PATCH");
-
-                                    return req;
-                                })
-                                .contentType(MediaType.MULTIPART_FORM_DATA)
-                ).andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk());
-    }
-
-    @Test
     @DisplayName("파일 활성화/비활성화 테스트")
     void activateFileTest() throws Exception {
         String loginId = "login12345";
@@ -200,31 +173,6 @@ public class EmpMeApiTest extends IntegrationTestSupport {
         EmpFileListInfo empFileListInfo2 = empQueryRepositoryAdapter.findEmpFileInfoByEmpIdAndFileId(emp.getId(), id).orElseThrow();
         assertThat(empFileListInfo2.isActive()).isFalse();
 
-    }
-
-    @Test
-    @DisplayName("파일 삭제 테스트")
-    void deleteFileTest() throws Exception {
-        String loginId = "login12345";
-        String password = "!Q2w3e4r5t";
-        registerEmpHavingAllInfo(loginId, password);
-
-        String accessToken = loginByIdAndPw(loginId, password);
-        Emp emp = empRepository.findByLoginId(loginId).orElseThrow();
-
-        List<EmpFileListInfo> allEmpFileInfosByEmpIdList = empQueryRepositoryAdapter.findAllEmpFileInfosByEmpId(emp.getId()).orElseThrow();
-        Long id = allEmpFileInfosByEmpIdList.getLast().file().fileId();
-
-        mockMvc.perform(
-                        delete("/api/employees/me/files/{fileId}", id)
-                                .header("Authorization", "Bearer " + accessToken)
-                                .contentType(MediaType.APPLICATION_JSON)
-                ).andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk());
-
-        EmpFileListInfo empFileListInfo = empQueryRepositoryAdapter.findEmpFileInfoByEmpIdAndFileId(emp.getId(), id).orElse(null);
-
-        assertThat(empFileListInfo).isNull();
     }
 
 }

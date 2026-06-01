@@ -42,4 +42,8 @@ public record EmpFileUploadRequest(
         FileValidator.validate(file, ALLOWED_EXTENSIONS, ALLOWED_MIME_TYPES, FILE_SIZE_MAX);
     }
 
+    public static EmpFileUploadRequest toEmpFileUploadRequest(Long empId, FileType fileType, FileDto file) {
+        return new EmpFileUploadRequest(empId, fileType, file);
+    }
+
 }

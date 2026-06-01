@@ -54,4 +54,8 @@ public record EducationFileUploadRequest(
 
         FileValidator.validate(file, ALLOWED_EXTENSIONS, ALLOWED_MIME_TYPES, FILE_SIZE_MAX);
     }
+
+    public static EducationFileUploadRequest toEducationFileUploadRequest(Long educationId, Long registerId, FileDto file) {
+        return new EducationFileUploadRequest(educationId, registerId, file);
+    }
 }

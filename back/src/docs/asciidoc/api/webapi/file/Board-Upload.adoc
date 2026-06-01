@@ -1,0 +1,51 @@
+[tabs%nosync]
+
+
+====
+Request::
++
+--
+_HTTP request_
+
+include::{snippets}/BOARD_FILE_UPLOAD/http-request.adoc[]
+
+_Request header_
+
+include::{snippets}/BOARD_FILE_UPLOAD/request-headers.adoc[]
+
+_Path parameter_
+
+include::{snippets}/BOARD_FILE_UPLOAD/path-parameters.adoc[]
+
+_Request part_
+
+include::{snippets}/BOARD_FILE_UPLOAD/request-parts.adoc[]
+--
+Response (200)::
++
+--
+_HTTP response_
+include::{snippets}/BOARD_FILE_UPLOAD/http-response.adoc[]
+--
+Exception ::
++
+--
+이 API에서 발생 가능한 에러:
+
+|===
+|Error Code
+
+|FILE_CONVERT_FAILED_EXCEPTION
+|REQUIRED_VALUE_MISSING_EXCEPTION
+|UNSUPPORTED_MIME_TYPE_EXCEPTION
+|FILE_SIZE_LIMIT_EXCEEDED_EXCEPTION
+|UNSUPPORTED_FILE_EXTENSION_EXCEPTION
+|INVALID_FILE_NAME_EXCEPTION
+|ACTIVE_EMPLOYEE_NOT_FOUND_EXCEPTION
+|BOARD_NOT_FOUND_EXCEPTION
+|PERMISSION_DENIED_EXCEPTION
+|FILE_STORE_FAILED_EXCEPTION
+|===
+
+--
+====

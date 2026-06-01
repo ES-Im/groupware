@@ -12,8 +12,6 @@ import com.haruon.groupware.application.exception.empInfo.DuplicateEmpNoExceptio
 import com.haruon.groupware.application.exception.empInfo.DuplicateLoginIdException;
 import com.haruon.groupware.application.exception.empInfo.EmpAlreadyActiveException;
 import com.haruon.groupware.application.exception.empInfo.InvalidResignDateException;
-import com.haruon.groupware.application.file.dto.request.EmpFileUploadRequest;
-import com.haruon.groupware.application.file.dto.request.FileDto;
 import com.haruon.groupware.domain.empInfo.*;
 import com.haruon.groupware.domain.empInfo.enums.EmpStatus;
 import com.haruon.groupware.domain.empInfo.enums.FileType;
@@ -283,12 +281,12 @@ record EmpAccountManagerTest(
 
         System.out.println("================ 변경 테스트 시작 ================");
         empAccountManager.updateInfoByDeptManager(
+                deptManager.getId(),
+                targetEmp.getId(),
                 EmpUpdateRequestByDeptManager.builder()
-                        .targetEmpId(targetEmp.getId())
                         .systemRoleCode(updatedRoles)
                         .extensionNo(updateExtensionNo)
-                        .build(),
-                deptManager.getId()
+                        .build()
         );
 
         Emp foundEmp = empRepository.findByEmpNo(targetEmp.getEmpNo()).orElseThrow();
@@ -296,6 +294,60 @@ record EmpAccountManagerTest(
 
         assertThat(foundEmp.getExtensionNo()).isEqualTo(updateExtensionNo);
         assertThat(roles).containsExactlyInAnyOrderElementsOf(updatedRoles);
+    }
+
+    @Transactional
+    @Test
+    @DisplayName("부서매니저는 본인이 가진 부서형 시스템 권한을 같은 부서 사원에게 부여할 수 있다.")
+    void updateInfoByDeptManager_with_owned_dept_role_success() {
+        Dept dept = saveDept(deptRepository, "001", "HR");
+        Emp targetEmp = saveEmpWithDept(empRepository, deptRepository, "202601001", "login1234", dept);
+        Emp deptManager = saveEmpWithRoleAndDept(
+                empRepository, deptRepository, "202601002", "deptManager", dept, SystemRoleCode.DEPT_MANAGER
+        );
+        deptManager.changeInfoByHR(
+                null,
+                null,
+                null,
+                Set.of(SystemRoleCode.DEPT_MANAGER, SystemRoleCode.FRANCHISE),
+                null,
+                null
+        );
+        empRepository.save(deptManager);
+
+        Set<SystemRoleCode> updatedRoles = Set.of(SystemRoleCode.EMPLOYEE, SystemRoleCode.FRANCHISE);
+
+        empAccountManager.updateInfoByDeptManager(
+                deptManager.getId(),
+                targetEmp.getId(),
+                EmpUpdateRequestByDeptManager.builder()
+                        .systemRoleCode(updatedRoles)
+                        .build()
+        );
+
+        Emp foundEmp = empRepository.findByEmpNo(targetEmp.getEmpNo()).orElseThrow();
+        assertThat(foundEmp.getSystemRoles()).containsExactlyInAnyOrderElementsOf(updatedRoles);
+    }
+
+    @Transactional
+    @Test
+    @DisplayName("부서매니저는 본인이 갖지 않은 부서형 시스템 권한을 같은 부서 사원에게 부여할 수 없다.")
+    void updateInfoByDeptManager_with_not_owned_dept_role_fail() {
+        Dept dept = saveDept(deptRepository, "001", "HR");
+        Emp targetEmp = saveEmpWithDept(empRepository, deptRepository, "202601001", "login1234", dept);
+        Emp deptManager = saveEmpWithRoleAndDept(
+                empRepository, deptRepository, "202601002", "deptManager", dept, SystemRoleCode.DEPT_MANAGER
+        );
+
+        assertThatThrownBy(() ->
+                empAccountManager.updateInfoByDeptManager(
+                        deptManager.getId(),
+                        targetEmp.getId(),
+                        EmpUpdateRequestByDeptManager.builder()
+                                .systemRoleCode(Set.of(SystemRoleCode.EMPLOYEE, SystemRoleCode.HR))
+                                .build()
+                )
+        ).isInstanceOf(PermissionDeniedException.class);
     }
 
     @Test
@@ -311,12 +363,12 @@ record EmpAccountManagerTest(
         System.out.println("================ 변경 테스트 시작 ================");
         assertThatThrownBy(() ->
                 empAccountManager.updateInfoByDeptManager(
+                        deptManager.getId(),
+                        targetEmp.getId(),
                         EmpUpdateRequestByDeptManager.builder()
-                                .targetEmpId(targetEmp.getId())
                                 .systemRoleCode(Set.of(SystemRoleCode.DEPT_MANAGER))
                                 .extensionNo("999-9999")
-                                .build(),
-                        deptManager.getId()
+                                .build()
                 )
         ).isInstanceOf(Exception.class);
     }
@@ -333,12 +385,12 @@ record EmpAccountManagerTest(
         System.out.println("================ 변경 테스트 시작 ================");
         assertThatThrownBy(() ->
                 empAccountManager.updateInfoByDeptManager(
+                        otherEmp.getId(),
+                        targetEmp.getId(),
                         EmpUpdateRequestByDeptManager.builder()
-                                .targetEmpId(targetEmp.getId())
                                 .systemRoleCode(Set.of(SystemRoleCode.DEPT_MANAGER))
                                 .extensionNo("999-9999")
-                                .build(),
-                        otherEmp.getId()
+                                .build()
                 )
         ).isInstanceOf(PermissionDeniedException.class);
     }
@@ -355,12 +407,12 @@ record EmpAccountManagerTest(
         System.out.println("================ 변경 테스트 시작 ================");
         assertThatThrownBy(() ->
                 empAccountManager.updateInfoByDeptManager(
+                        otherEmp.getId(),
+                        targetEmp.getId(),
                         EmpUpdateRequestByDeptManager.builder()
-                                .targetEmpId(targetEmp.getId())
                                 .systemRoleCode(Set.of(SystemRoleCode.ADMIN))
                                 .extensionNo("999-9999")
-                                .build(),
-                        otherEmp.getId()
+                                .build()
                 )
         ).isInstanceOf(PermissionDeniedException.class);
     }
@@ -377,7 +429,6 @@ record EmpAccountManagerTest(
         String newName = "editName";
         String newExtensionNo = "888-9999";
         String newRawPassword = "!1newPassword";
-        EmpStatus newEmpStatus = EmpStatus.ACTIVE;
         Set<SystemRoleCode> newSystemRoleCodes = Set.of(SystemRoleCode.DEPT_MANAGER, SystemRoleCode.HR);
         PositionCode newPosition = PositionCode.ASSISTANT_MANAGER;
 
@@ -391,15 +442,14 @@ record EmpAccountManagerTest(
                 .build();
 
         empAccountManager.updateInfoByHR(
+                hrEmp.getId(),
+                targetEmp.getId(),
                 EmpUpdateRequestByHR.builder()
-                        .targetEmpId(targetEmp.getId())
                         .empName(newName)
-                        .newRawPassword(newRawPassword)
+                        .password(newRawPassword)
                         .extensionNo(newExtensionNo)
-                        .empStatus(newEmpStatus)
                         .systemRoleCode(newSystemRoleCodes)
-                .build(),
-                hrEmp.getId()
+                .build()
         );
 
 
@@ -419,7 +469,7 @@ record EmpAccountManagerTest(
             assertThat(emp.getEmpName()).isEqualTo(newName);
             assertThat(emp.getExtensionNo()).isEqualTo(newExtensionNo);
             assertThat(encoder.matches(newRawPassword, emp.getEmpPassword())).isTrue();
-            assertThat(emp.getStatus()).isEqualTo(newEmpStatus);
+            assertThat(emp.getStatus()).isEqualTo(EmpStatus.ACTIVE);
             assertThat(roles).containsExactlyInAnyOrderElementsOf(newSystemRoleCodes);
             assertThat(newDeptList).contains(dept);
             assertThat(newPositionList).contains(newPosition);
@@ -448,13 +498,7 @@ record EmpAccountManagerTest(
                 empRepository, deptRepository, "202601002", "deptManager", dept, SystemRoleCode.HR
         );
 
-        empAccountManager.updateInfoByHR(
-                EmpUpdateRequestByHR.builder()
-                        .targetEmpId(targetEmp.getId())
-                        .empStatus(EmpStatus.SUSPENDED)
-                        .build(),
-                otherEmp.getId()
-        );
+        empAccountManager.suspendEmpByHR(otherEmp.getId(), targetEmp.getId());
 
         entityManager.flush();
         entityManager.clear();
@@ -464,11 +508,11 @@ record EmpAccountManagerTest(
 
         assertThatThrownBy(() ->
                 empAccountManager.updateInfoByHR(
+                        otherEmp.getId(),
+                        targetEmp.getId(),
                         EmpUpdateRequestByHR.builder()
-                                .targetEmpId(targetEmp.getId())
                                 .empName("newName")
-                                .build(),
-                        otherEmp.getId()
+                                .build()
                 )
         ).isInstanceOf(ActiveEmployeeNotFoundException.class);
     }
@@ -482,13 +526,7 @@ record EmpAccountManagerTest(
                 empRepository, deptRepository, "202601002", "deptManager", dept, SystemRoleCode.HR
         );
 
-        empAccountManager.updateInfoByHR(
-                EmpUpdateRequestByHR.builder()
-                        .targetEmpId(targetEmp.getId())
-                        .empStatus(EmpStatus.SUSPENDED)
-                        .build(),
-                hrEmp.getId()
-        );
+        empAccountManager.suspendEmpByHR(hrEmp.getId(), targetEmp.getId());
 
         empAccountManager.activateEmpByHR(hrEmp.getId(), targetEmp.getId());
 
@@ -509,68 +547,6 @@ record EmpAccountManagerTest(
         assertThatThrownBy(() ->
                 empAccountManager.activateEmpByHR(hrEmp.getId(), targetEmp.getId())
         ).isInstanceOf(EmpAlreadyActiveException.class);
-    }
-
-    @Transactional
-    @Test
-    @DisplayName("사원은 본인의 프로필사진 또는 전자결재 서명이미지를 추가할 수 있다.")
-    void updateEmpFileBySelf_success() {
-        Emp emp = saveApprovedEmp(empRepository);
-
-
-        String imageName = "random";
-        long fileSize = 1024 * 1024L;
-        String ext = "png";
-        String mimeType = "image/png";
-        FileDto fileInfo = FileDto.builder()
-                .mimeType(mimeType)
-                .originalFileFullName(imageName.concat(".").concat(ext))
-                .fileSize(fileSize)
-                .bytes(new byte[]{1})
-                .build();
-
-        FileType signature = FileType.SIGNATURE;
-
-        empAccountManager.updateEmpFileBySelf(
-                EmpFileUploadRequest.builder()
-                        .file(fileInfo)
-                        .fileType(signature)
-                        .build(),
-                emp.getId()
-        );
-
-        Emp afterEmp = empRepository.findById(emp.getId()).orElseThrow();
-
-        List<EmpFile> empFiles = afterEmp.getEmpFiles();
-
-
-        assertThat(empFiles).singleElement().extracting(
-                EmpFile::getEmp, EmpFile::getFileType, EmpFile::isActive,
-                EmpFile::getOriginalName, EmpFile::getFileSize,
-                EmpFile::getMimeType, EmpFile::getExtension
-        ).containsExactly(
-                emp, signature, true,
-                imageName, fileSize,
-                mimeType, ext
-        );
-
-        assertThat(empFiles.getLast().getStoredName()).isNotNull();
-    }
-
-    @Transactional
-    @Test
-    @DisplayName("사원은 본인의 프로필사진/서명파일을 삭제할 수 있다.")
-    void deleteEmpFile_BySelf_success() {
-        String empNo = findEmpNoHasFile();
-
-        entityManager.flush();
-        entityManager.clear();
-
-        Emp emp = empRepository.findByEmpNo(empNo).orElseThrow();
-        List<EmpFile> empFiles = emp.getEmpFiles();
-        empAccountManager.deleteEmpFileBySelf(empFiles.getFirst().getId(), emp.getId());
-
-        assertThat(empRepository.findById(emp.getId()).orElseThrow().getEmpFiles()).isEmpty();
     }
 
     @Transactional
@@ -637,21 +613,17 @@ record EmpAccountManagerTest(
         long fileSize = 1024 * 1024L;
         String ext = "png";
         String mimeType = "image/png";
-        FileDto fileInfo = FileDto.builder()
-                .mimeType(mimeType)
-                .originalFileFullName(imageName.concat(".").concat(ext))
-                .fileSize(fileSize)
-                .bytes(new byte[]{1})
-                .build();
 
         FileType signature = FileType.SIGNATURE;
 
-        empAccountManager.updateEmpFileBySelf(
-                EmpFileUploadRequest.builder()
-                        .file(fileInfo)
-                        .fileType(signature)
-                        .build(),
-                emp.getId()
+        emp.changeEmpFile(
+                signature,
+                mimeType,
+                imageName,
+                "stored-" + imageName + "." + ext,
+                ext,
+                fileSize,
+                "/test/emp"
         );
 
         return emp.getEmpNo();

@@ -1,0 +1,35 @@
+[tabs%nosync]
+
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/HR_ACTIVATE_EMP/http-request.adoc[]
+
+_Request header_
+include::{snippets}/HR_ACTIVATE_EMP/request-headers.adoc[]
+
+_Path parameter_
+include::{snippets}/HR_ACTIVATE_EMP/path-parameters.adoc[]
+--
+Response (200)::
++
+--
+_HTTP response_
+include::{snippets}/HR_ACTIVATE_EMP/http-response.adoc[]
+--
+Exception ::
++
+--
+이 API에서 발생 가능한 에러:
+
+|===
+|Error Code
+
+|ACTIVE_EMPLOYEE_NOT_FOUND_EXCEPTION
+|PERMISSION_DENIED_EXCEPTION
+|EMP_ALREADY_ACTIVE_EXCEPTION
+|===
+--
+====

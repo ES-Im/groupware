@@ -37,4 +37,8 @@ public record MeetingRoomFileUploadRequest(
 
         FileValidator.validate(file, ALLOWED_EXTENSIONS, ALLOWED_MIME_TYPES, FILE_SIZE_MAX);
     }
+
+    public static MeetingRoomFileUploadRequest toMeetingRoomFileUploadRequest(Long editorId, Long meetingRoomId, FileDto file) {
+        return new MeetingRoomFileUploadRequest(editorId, meetingRoomId, file);
+    }
 }

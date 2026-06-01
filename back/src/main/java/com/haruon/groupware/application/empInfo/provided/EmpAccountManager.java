@@ -21,16 +21,18 @@ public interface EmpAccountManager {
 
     void updateResignedEmpByHR(Long editorId, Long targetEmpId, LocalDate resignedAt);
 
-    void updateInfoByHR(EmpUpdateRequestByHR request, Long editorId);
+    void updateInfoByHR(Long editorId, Long targetEmpId, EmpUpdateRequestByHR request);
 
     void updateBelongingsByHR(EmpBelongingsParam request, Long editorId);
 
     void activateEmpByHR(Long editorId, Long targetId);
 
+    void suspendEmpByHR(Long editorId, Long targetId);
+
     void updateFileActiveStatusByHR(Long editorId, Long targetEmpId, Long targetFileId, Boolean isForActivate);
 
 
-    void updateInfoByDeptManager(EmpUpdateRequestByDeptManager request, Long managerId);
+    void updateInfoByDeptManager(Long managerId, Long targetEmpId, EmpUpdateRequestByDeptManager request);
 
 
 }

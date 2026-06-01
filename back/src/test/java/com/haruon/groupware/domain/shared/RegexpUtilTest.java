@@ -14,12 +14,12 @@ public class RegexpUtilTest {
 //        return Stream.of(
 //                Arguments.of("영문 + 숫자 + 특수문자 조합이 아니라면 실패",
 //                        EmpSelfUpdateParam.builder()
-//                                .newRawPassword("Eng123456")
+//                                .password("Eng123456")
 //                                .currentPassword(currentPassword)
 //                                .build()),
 //                Arguments.of("8자 이상이 아니라면 실패",
 //                        EmpSelfUpdateParam.builder()
-//                                .newRawPassword("!Q2w")
+//                                .password("!Q2w")
 //                                .currentPassword(currentPassword)
 //                                .build())
 //        );
@@ -39,7 +39,7 @@ public class RegexpUtilTest {
 //    void validate_extension_fail() {
 //        EmpSelfUpdateParam param = EmpSelfUpdateParam.builder()
 //                .extensionNo("0000000")
-//                .newRawPassword("Eng123456")
+//                .password("Eng123456")
 //                .build();
 //
 //        var violations = validator.validate(param);

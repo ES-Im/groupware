@@ -157,7 +157,7 @@ class SalesDraftTest {
 
         approvedEmp.changeInfoByHR(
                 null, null,
-                null, null,
+                null,
                 Set.of(SystemRoleCode.FRANCHISE),
                 null, null
         );

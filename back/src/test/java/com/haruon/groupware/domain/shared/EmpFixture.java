@@ -66,7 +66,6 @@ public class EmpFixture {
                 null,
                 null,
                 null,
-                null,
                 Set.of(SystemRoleCode.ADMIN),
                 null,
                 encoder

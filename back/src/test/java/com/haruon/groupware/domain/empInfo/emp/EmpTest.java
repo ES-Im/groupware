@@ -212,11 +212,6 @@ class EmpTest {
                         .hireAt(LocalDate.of(2025, 1, 1))
                         .build()),
 
-                Arguments.of("직무상태를 변경할 수 있다.", EmpAdminUpdateTestParam.builder()
-                        .companyDomain("@haruon.com")
-                        .empStatus(EmpStatus.SUSPENDED)
-                        .build()),
-
                 Arguments.of("시스템 권한을 변경할 수 있다.", EmpAdminUpdateTestParam.builder()
                         .companyDomain("@haruon.com")
                         .systemRoleCode(Set.of(SystemRoleCode.ADMIN, SystemRoleCode.HR))
@@ -245,7 +240,6 @@ class EmpTest {
                 params.empName(),
                 params.newRawPassword(),
                 params.extensionNo(),
-                params.empStatus(),
                 params.systemRoleCode(),
                 params.hireAt(),
                 encoder
@@ -278,11 +272,7 @@ class EmpTest {
             assertThat(emp.getExtensionNo()).isEqualTo(beforeExtensionNo);
         }
 
-        if (params.empStatus() != null) {
-            assertThat(emp.getStatus()).isEqualTo(params.empStatus());
-        } else {
-            assertThat(emp.getStatus()).isEqualTo(beforeEmpStatus);
-        }
+        assertThat(emp.getStatus()).isEqualTo(beforeEmpStatus);
 
         if (params.systemRoleCode() != null) {
             assertThat(emp.getSystemRoles()).isEqualTo(params.systemRoleCode());
@@ -310,7 +300,6 @@ class EmpTest {
             String empId,
             String newRawPassword,
             String extensionNo,
-            EmpStatus empStatus,
             Set<SystemRoleCode> systemRoleCode,
             LocalDate hireAt,
             String companyDomain
@@ -479,7 +468,6 @@ class EmpTest {
                 null,
                 null,
                 null,
-                null,
                 encoder
         );
 
@@ -515,7 +503,6 @@ class EmpTest {
                     "111-1111",
                     null,
                     null,
-                    null,
                     null)
         ).isInstanceOf(IllegalStateException.class);
     }
@@ -541,7 +528,6 @@ class EmpTest {
         assertThatThrownBy(() ->
             approvedEmp
                     .changeInfoByHR(
-                    null,
                     null,
                     null,
                     null,

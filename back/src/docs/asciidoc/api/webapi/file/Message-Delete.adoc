@@ -1,0 +1,41 @@
+[tabs%nosync]
+
+
+====
+Request::
++
+--
+_HTTP request_
+
+include::{snippets}/MESSAGE_FILE_DELETE/http-request.adoc[]
+
+_Request header_
+
+include::{snippets}/MESSAGE_FILE_DELETE/request-headers.adoc[]
+
+_Path parameter_
+
+include::{snippets}/MESSAGE_FILE_DELETE/path-parameters.adoc[]
+--
+Response (200)::
++
+--
+_HTTP response_
+include::{snippets}/MESSAGE_FILE_DELETE/http-response.adoc[]
+--
+Exception ::
++
+--
+이 API에서 발생 가능한 에러:
+
+|===
+|Error Code
+
+|FILE_NOT_FOUND_EXCEPTION
+|REQUIRED_VALUE_MISSING_EXCEPTION
+|MESSAGE_NOT_FOUND_EXCEPTION
+|PERMISSION_DENIED_EXCEPTION
+|===
+
+--
+====

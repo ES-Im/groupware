@@ -6,7 +6,9 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.haruon.groupware.adapter.security.empDtails.EmpDetails;
 import com.haruon.groupware.adapter.webapi.exception.GlobalExceptionHandler;
+import com.haruon.groupware.application.empInfo.empService.dto.response.BelongingInfo;
 import com.haruon.groupware.domain.empInfo.enums.EmpStatus;
+import com.haruon.groupware.domain.empInfo.enums.PositionCode;
 import com.haruon.groupware.domain.empInfo.enums.SystemRoleCode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,6 +26,7 @@ import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.util.List;
 
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
@@ -65,6 +68,44 @@ public abstract class RestDocsSupport {
                 "password",
                 List.of(SystemRoleCode.EMPLOYEE),
                 List.of(),
+                EmpStatus.ACTIVE,
+                1L
+        );
+
+        return authentication(
+                new UsernamePasswordAuthenticationToken(
+                        empDetails,
+                        null,
+                        empDetails.getAuthorities()
+                )
+        );
+    }
+
+    protected RequestPostProcessor hrAuthentication() {
+        EmpDetails empDetails = new EmpDetails(
+                "hr",
+                "password",
+                List.of(SystemRoleCode.HR),
+                List.of(),
+                EmpStatus.ACTIVE,
+                1L
+        );
+
+        return authentication(
+                new UsernamePasswordAuthenticationToken(
+                        empDetails,
+                        null,
+                        empDetails.getAuthorities()
+                )
+        );
+    }
+
+    protected RequestPostProcessor deptManagerAuthentication() {
+        EmpDetails empDetails = new EmpDetails(
+                "deptManager",
+                "password",
+                List.of(SystemRoleCode.DEPT_MANAGER),
+                List.of(new BelongingInfo(1L, "001", "IT", PositionCode.ASSISTANT_MANAGER, true, LocalDate.of(2026,1,1), null)),
                 EmpStatus.ACTIVE,
                 1L
         );

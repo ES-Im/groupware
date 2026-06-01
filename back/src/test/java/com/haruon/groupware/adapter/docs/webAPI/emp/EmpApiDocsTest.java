@@ -3,6 +3,7 @@ package com.haruon.groupware.adapter.docs.webAPI.emp;
 import com.haruon.groupware.adapter.docs.RestDocsSupport;
 import com.haruon.groupware.adapter.webapi.emp.EmpApi;
 import com.haruon.groupware.application.empInfo.empService.dto.request.EmpRegisterRequest;
+import com.haruon.groupware.application.empInfo.empService.dto.response.EmpInfoResponse;
 import com.haruon.groupware.application.empInfo.provided.EmpAccountManager;
 import com.haruon.groupware.application.empInfo.provided.EmpAccountRetriever;
 import com.haruon.groupware.application.exception.empInfo.DuplicateEmpNoException;
@@ -11,16 +12,23 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.http.MediaType;
+import org.springframework.restdocs.payload.JsonFieldType;
 
+import static com.haruon.groupware.adapter.docs.webAPI.emp.empApiSupport.getEmpInfoResponse;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
+import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.restdocs.snippet.Attributes.key;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 public class EmpApiDocsTest extends RestDocsSupport {
 
@@ -72,7 +80,7 @@ public class EmpApiDocsTest extends RestDocsSupport {
 
         DuplicateLoginIdException ex = new DuplicateLoginIdException();
         Mockito.doThrow(ex)
-                .when(empAccountManager).registerEmp(any(com.haruon.groupware.application.empInfo.empService.dto.request.EmpRegisterRequest.class));
+                .when(empAccountManager).registerEmp(any(EmpRegisterRequest.class));
 
         mockMvc.perform(
                         post("/api/employees")
@@ -105,7 +113,7 @@ public class EmpApiDocsTest extends RestDocsSupport {
 
         DuplicateEmpNoException ex = new DuplicateEmpNoException();
         Mockito.doThrow(ex)
-                .when(empAccountManager).registerEmp(any(com.haruon.groupware.application.empInfo.empService.dto.request.EmpRegisterRequest.class));
+                .when(empAccountManager).registerEmp(any(EmpRegisterRequest.class));
 
         mockMvc.perform(
                         post("/api/employees")
@@ -130,6 +138,62 @@ public class EmpApiDocsTest extends RestDocsSupport {
                 );
     }
 
-    //todo : ResponseEntity<EmpInfoResponse> get 테스트 필요
+    @Test
+    @DisplayName("사원 단건 조회")
+    void getEmp_success() throws Exception {
+        EmpInfoResponse empInfoResponse = getEmpInfoResponse();
+
+        Mockito.when(empAccountRetriever.retrieveEmpAccountInfo(eq(1L)))
+                .thenReturn(empInfoResponse);
+
+        mockMvc.perform(
+                get("/api/employees/{empId}", 1L)
+                        .with(employeeAuthentication())
+                        .header("Authorization", "accessToken")
+        )
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andDo(document("RETRIEVE_EMP_INFO",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+
+                        pathParameters(
+                                parameterWithName("empId").description("사원 식별 번호")
+                        ),
+
+                        requestHeaders(
+                                headerWithName("Authorization").description("Bearer Access Token")
+                        ),
+
+                        responseFields(
+                                fieldWithPath("empBasicInfo").type(JsonFieldType.OBJECT).description("사원의 기본정보"),
+                                fieldWithPath("empBasicInfo.empNo").type(JsonFieldType.STRING).description("사원 번호"),
+                                fieldWithPath("empBasicInfo.name").type(JsonFieldType.STRING).description("사원 이름"),
+                                fieldWithPath("empBasicInfo.loginId").type(JsonFieldType.STRING).description("아이디"),
+                                fieldWithPath("empBasicInfo.email").type(JsonFieldType.STRING).description("이메일"),
+                                fieldWithPath("empBasicInfo.extensionNo").type(JsonFieldType.STRING).description("사무실 번호"),
+
+                                fieldWithPath("activeFiles").type(JsonFieldType.ARRAY).description("활성화된 사원의 프로필/전자서명 이미지 파일"),
+                                fieldWithPath("activeFiles[].file").type(JsonFieldType.OBJECT).description("파일 기본 정보"),
+                                fieldWithPath("activeFiles[].file.fileId").type(JsonFieldType.NUMBER).description("파일 식별 번호"),
+                                fieldWithPath("activeFiles[].file.originalName").type(JsonFieldType.STRING).description("파일 원본명"),
+                                fieldWithPath("activeFiles[].file.extension").type(JsonFieldType.STRING).description("파일 확장자"),
+                                fieldWithPath("activeFiles[].file.fileSize").type(JsonFieldType.NUMBER).description("파일 크기"),
+                                fieldWithPath("activeFiles[].type").type(JsonFieldType.STRING).description("파일 타입(프로필사진or전자서명파일)"),
+                                fieldWithPath("activeFiles[].isActive").type(JsonFieldType.BOOLEAN).description("파일 활성화 여부, (True만 출력)"),
+
+                                fieldWithPath("currentDepts").type(JsonFieldType.ARRAY).description("현재 소속정보"),
+                                fieldWithPath("currentDepts[].deptId").type(JsonFieldType.NUMBER).description("부서 식별 번호"),
+                                fieldWithPath("currentDepts[].deptCode").type(JsonFieldType.STRING).description("부서 코드"),
+                                fieldWithPath("currentDepts[].deptName").type(JsonFieldType.STRING).description("부서명"),
+                                fieldWithPath("currentDepts[].positionName").type(JsonFieldType.STRING).description("직급"),
+                                fieldWithPath("currentDepts[].isPrimary").type(JsonFieldType.BOOLEAN).description("주요부서여부"),
+                                fieldWithPath("currentDepts[].startAt").type(JsonFieldType.STRING).description("발령 시작일"),
+                                fieldWithPath("currentDepts[].endAt").type(JsonFieldType.NULL).description("종료일, 현재 소속만 출력(현재 소속이면 null)")
+
+                        )
+
+                ));
+    }
 }
 

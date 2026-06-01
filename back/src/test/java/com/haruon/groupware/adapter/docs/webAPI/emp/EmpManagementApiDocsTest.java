@@ -3,6 +3,8 @@ package com.haruon.groupware.adapter.docs.webAPI.emp;
 import com.haruon.groupware.adapter.docs.RestDocsSupport;
 import com.haruon.groupware.adapter.security.empDtails.EmpDetails;
 import com.haruon.groupware.adapter.webapi.emp.EmpManagementApi;
+import com.haruon.groupware.application.empInfo.empService.dto.request.EmpUpdateRequestByDeptManager;
+import com.haruon.groupware.application.empInfo.empService.dto.request.EmpUpdateRequestByHR;
 import com.haruon.groupware.application.empInfo.empService.dto.response.BelongingInfo;
 import com.haruon.groupware.application.empInfo.empService.dto.response.EmpBasicInfo;
 import com.haruon.groupware.application.empInfo.empService.dto.response.EmpInfoForManagement;
@@ -26,6 +28,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.mock;
@@ -34,10 +37,11 @@ import static org.springframework.restdocs.headers.HeaderDocumentation.requestHe
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
-import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
-import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
+import static org.springframework.restdocs.request.RequestDocumentation.*;
+import static org.springframework.restdocs.snippet.Attributes.key;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @Slf4j
@@ -259,6 +263,252 @@ public class EmpManagementApiDocsTest extends RestDocsSupport {
                 eq("신규사원"),
                 any(Pageable.class)
         );
+    }
+
+
+    @Test
+    @DisplayName("회원 가입 가입 승인 (HR)")
+    void approve_registration() throws Exception {
+        Mockito.doNothing()
+                .when(empAccountManager).approveRegisterByHR(eq(1L), eq(2L), eq(LocalDate.of(2026, 1, 1)));
+
+        mockMvc.perform(
+                patch("/api/employees/{empId}/registration-approval", 2L)
+                        .header("Authorization", "Bearer accessToken")
+                        .with(hrAuthentication())
+        )
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isOk())
+                .andDo(document("HR_APPROVE_EMP_REGISTRATION",
+                        preprocessRequest(prettyPrint()),
+
+                        pathParameters(
+                                parameterWithName("empId").description("사원 식별 번호")
+                        ),
+
+                        requestHeaders(
+                                headerWithName("Authorization").description("Bearer Access Token")
+                        )
+                    )
+                );
+    }
+    
+    @Test
+    @DisplayName("회원 퇴직 처리 (HR)")
+    void resignation_emp() throws Exception {
+
+        Mockito.doNothing()
+                .when(empAccountManager).updateResignedEmpByHR(eq(1L), eq(2L), eq(LocalDate.of(2026, 1, 1)));
+
+        mockMvc.perform(
+                patch("/api/employees/{empId}/registration-approval", 2L)
+                        .header("Authorization", "Bearer accessToken")
+                        .with(hrAuthentication())
+        )
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isOk())
+                .andDo(document("HR_RESIGN_EMP",
+                        preprocessRequest(prettyPrint()),
+
+                        pathParameters(
+                                parameterWithName("empId").description("사원 식별 번호")
+                        ),
+
+                        requestHeaders(
+                                headerWithName("Authorization").description("Bearer Access Token")
+                        )
+
+                    )
+                );
+    }
+
+    @Test
+    @DisplayName("정직 사원 활성화 처리 (HR)")
+    void activate_emp() throws Exception {
+        Mockito.doNothing()
+                .when(empAccountManager).activateEmpByHR(eq(1L), eq(2L));
+
+        mockMvc.perform(
+                patch("/api/employees/{empId}/status/activation", 2L)
+                        .header("Authorization", "Bearer accessToken")
+                        .with(hrAuthentication())
+        )
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isOk())
+                .andDo(document("HR_ACTIVATE_EMP",
+                        preprocessRequest(prettyPrint()),
+
+                        pathParameters(
+                                parameterWithName("empId").description("사원 식별 번호")
+                        ),
+
+                        requestHeaders(
+                                headerWithName("Authorization").description("Bearer Access Token")
+                        )
+                    )
+                );
+    }
+
+    @Test
+    @DisplayName("사원 정직처리 - (HR)")
+    void suspend_emp() throws Exception {
+        Mockito.doNothing()
+                .when(empAccountManager).suspendEmpByHR(eq(1L), eq(2L));
+
+        mockMvc.perform(
+                patch("/api/employees/{empId}/status/suspension", 2L)
+                        .header("Authorization", "Bearer accessToken")
+                        .with(hrAuthentication())
+        )
+                .andExpect(status().isOk())
+                .andDo(document("HR_SUSPEND_EMP",
+                        preprocessRequest(prettyPrint()),
+
+                        pathParameters(
+                                parameterWithName("empId").description("사원 식별 번호")
+                        ),
+
+                        requestHeaders(
+                                headerWithName("Authorization").description("Bearer Access Token")
+                        )
+                    )
+                );
+    }
+
+    @Test
+    @DisplayName("특정 사원의 특정파일 비활성화 - (HR)")
+    void update_empFile_status_by_hr() throws Exception {
+        Mockito.doNothing()
+                .when(empAccountManager).updateFileActiveStatusByHR(eq(1L), eq(2L), eq(3L), eq(false));
+
+        mockMvc.perform(
+                patch("/api/employees/{empId}/files/{fileId}/status", 2L, 3L)
+                        .with(hrAuthentication())
+                        .header("Authorization", "Bearer accessToken")
+                        .queryParam("isForActivate", "false")
+        )
+                .andExpect(status().isOk())
+                .andDo(document("HR_UPDATE_ONES_FILE_STATUS",
+                        preprocessRequest(prettyPrint()),
+
+                        pathParameters(
+                                parameterWithName("empId").description("사원 식별 번호"),
+                                parameterWithName("fileId").description("파일 식별 번호")
+                        ),
+
+                        queryParameters(
+                                parameterWithName("isForActivate").description("파일 활성화여부 \n true = 활성화 \n false = 비활성화")
+                        ),
+
+                        requestHeaders(
+                                headerWithName("Authorization").description("Bearer Access Token")
+                        )
+                    )
+                );
+    }
+
+    @Test
+    @DisplayName("특정 사원 정보 수정 - HR")
+    void update_emp_info_by_hr() throws Exception {
+        String newEmployeeName = "새로운 이름";
+        String newPassword = "new!Q2w3e4r5t";
+        String newExtensionNo = "111-1234";
+        Set<SystemRoleCode> newSystemRole = Set.of(SystemRoleCode.FRANCHISE, SystemRoleCode.EMPLOYEE);
+        LocalDate newHireAt = LocalDate.of(2024, 1, 1);
+
+        EmpUpdateRequestByHR request = EmpUpdateRequestByHR.builder()
+                .empName(newEmployeeName)
+                .password(newPassword)
+                .extensionNo(newExtensionNo)
+                .systemRoleCode(newSystemRole)
+                .hireAt(newHireAt)
+                .build();
+
+        Mockito.doNothing()
+                .when(empAccountManager).updateInfoByHR(eq(1L), eq(2L), any(EmpUpdateRequestByHR.class));
+
+
+        mockMvc.perform(
+                patch("/api/employees/{empId}/hr-managed-info", 2L)
+                        .with(hrAuthentication())
+                        .header("Authorization", "Bearer AccessToken")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(request))
+        )
+                .andExpect(status().isOk())
+                .andDo(document("HR_UPDATE_EMP_INFO",
+                        preprocessRequest(prettyPrint()),
+
+                        pathParameters(
+                                parameterWithName("empId").description("사원 식별 번호")
+                        ),
+
+                        requestHeaders(
+                                headerWithName("Authorization").description("Bearer Access Token")
+                        ),
+
+                        requestFields(
+                                fieldWithPath("empName").type(JsonFieldType.STRING)
+                                        .attributes(key("constraints").value("20자 이하"))
+                                        .description("사원 이름"),
+                                fieldWithPath("password").type(JsonFieldType.STRING)
+                                        .attributes(key("constraints").value("8자이상, 영문+숫자+특수문자 조합"))
+                                        .type(JsonFieldType.STRING).description("새로운 비밀번호"),
+                                fieldWithPath("extensionNo").type(JsonFieldType.STRING)
+                                        .attributes(key("constraints").value("3자리 숫자 - 4자리 숫자 형식"))
+                                        .description("사무실 직통 번호"),
+                                fieldWithPath("systemRoleCode").type(JsonFieldType.ARRAY)
+                                        .attributes(key("constraints").value("-"))
+                                        .description("시스템 권한(기존 권한과 상관없이 지정한 권한들로 교체됨) \n [EMPLOYEE,DEPT_MANAGER,ADMIN] \n [FRANCHISE,IT,HR,FACILITY]"),
+                                fieldWithPath("hireAt").type(JsonFieldType.STRING)
+                                        .attributes(key("constraints").value("yyyy-MM-dd"))
+                                        .description("입사일자")
+
+                        )
+                    )
+                );
+    }
+
+    @Test
+    @DisplayName("특정 사원 정보 수정 - DeptManager")
+    void update_emp_info_by_deptManager() throws Exception {
+        String newExtensionNo = "111-1234";
+        Set<SystemRoleCode> newSystemRole = Set.of(SystemRoleCode.FRANCHISE, SystemRoleCode.EMPLOYEE);
+        EmpUpdateRequestByDeptManager request = EmpUpdateRequestByDeptManager.builder()
+                .systemRoleCode(newSystemRole).extensionNo(newExtensionNo).build();
+
+        Mockito.doNothing()
+                .when(empAccountManager).updateInfoByDeptManager(eq(1L), eq(2L), any(EmpUpdateRequestByDeptManager.class));
+
+        mockMvc.perform(
+                patch("/api/employees/{empId}/dept-managed-info", 2L)
+                        .with(deptManagerAuthentication())
+                        .header("Authorization", "Bearer AccessToken")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(request))
+        )
+                .andExpect(status().isOk())
+                .andDo(document("DEPT_MANAGER_UPDATE_EMP_INFO",
+                                preprocessRequest(prettyPrint()),
+
+                                pathParameters(
+                                        parameterWithName("empId").description("사원 식별 번호")
+                                ),
+
+                                requestHeaders(
+                                        headerWithName("Authorization").description("Bearer Access Token")
+                                ),
+
+                                requestFields(
+                                        fieldWithPath("extensionNo").type(JsonFieldType.STRING)
+                                                .attributes(key("constraints").value("3자리 숫자 - 4자리 숫자 형식"))
+                                                .description("사무실 직통 번호"),
+                                        fieldWithPath("systemRoleCode").type(JsonFieldType.ARRAY)
+                                                .attributes(key("constraints").value("-"))
+                                                .description("시스템 권한 \n (기존 권한과 상관없이 지정한 권한들로 교체되며, 부서매니저 상위 권한 부여 불가) \n [EMPLOYEE,DEPT_MANAGER] \n [FRANCHISE,IT,HR,FACILITY 중 부서 매니저가 가진 권한]")
+                                )
+                        )
+                );
     }
 
 

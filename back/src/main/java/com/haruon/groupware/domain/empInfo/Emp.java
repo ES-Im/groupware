@@ -228,7 +228,6 @@ public class Emp extends AbstractEntity {
             @Nullable String empName,
             @Nullable String newRawPassword,
             @Nullable String extensionNo,
-            @Nullable EmpStatus empStatus,
             @Nullable Set<SystemRoleCode> systemRoleCode,
             @Nullable LocalDate hiredAt,
             @Nullable EmpPasswordEncoder encoder
@@ -236,7 +235,7 @@ public class Emp extends AbstractEntity {
         ensureActive();
 
         boolean hasChanges = empName != null || newRawPassword != null ||
-                extensionNo != null || empStatus != null || systemRoleCode != null || hiredAt != null;
+                extensionNo != null || systemRoleCode != null || hiredAt != null;
         state(hasChanges, "변경할 내용이 없습니다.");
 
         if(empName != null) changeEmpName(empName);
@@ -247,8 +246,6 @@ public class Emp extends AbstractEntity {
         }
 
         if(extensionNo != null) changeExtension(extensionNo);
-
-        if(empStatus != null) changeEmpStatus(empStatus);
 
         if(systemRoleCode != null) {
             validateSystemRoles(systemRoleCode);
@@ -262,6 +259,9 @@ public class Emp extends AbstractEntity {
     public void activateEmp() {
         this.status = EmpStatus.ACTIVE;
     }
+
+    public void suspendEmp() { this.status = EmpStatus.SUSPENDED; }
+
 
     public boolean isHR() {
         return this.getSystemRoles().contains(SystemRoleCode.HR);
@@ -368,5 +368,6 @@ public class Emp extends AbstractEntity {
             currentBelonging.changeEndAt(endAt);
         }
     }
+
 
 }

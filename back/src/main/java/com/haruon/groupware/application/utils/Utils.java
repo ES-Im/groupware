@@ -7,12 +7,15 @@ import com.haruon.groupware.domain.empInfo.Emp;
 import org.jspecify.annotations.Nullable;
 
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Set;
 
 import static com.haruon.groupware.application.utils.AuthorizationChecker.findActiveEmpById;
 
 public class Utils {
+
+    public static ZoneId ZONE_SEOUL = ZoneId.of("Asia/Seoul");
 
     public static LocalTime getEarlierTime(@Nullable LocalTime targetStartAt, @Nullable LocalTime baseTime) {
         return (targetStartAt == null || (baseTime != null && targetStartAt.isAfter(baseTime) ))? baseTime : targetStartAt;

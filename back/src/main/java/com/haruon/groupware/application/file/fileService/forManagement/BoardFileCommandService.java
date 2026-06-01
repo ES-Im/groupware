@@ -20,6 +20,7 @@ import java.time.LocalDateTime;
 
 import static com.haruon.groupware.application.board.service.BoardUtils.findBoard;
 import static com.haruon.groupware.application.utils.AuthorizationChecker.findActiveEmpById;
+import static com.haruon.groupware.application.utils.Utils.ZONE_SEOUL;
 
 @Service
 public class BoardFileCommandService extends AbstractFileManagerService<BoardFileUploadRequest> {
@@ -57,7 +58,7 @@ public class BoardFileCommandService extends AbstractFileManagerService<BoardFil
         Board board = findBoard(boardRepository, request.domainPkId());
 
         Emp author = validateRequester(request.requesterEmpId(), board);
-        LocalDateTime editedTime = LocalDateTime.now();
+        LocalDateTime editedTime = LocalDateTime.now(ZONE_SEOUL);
 
         board.removeBoardFile(author, request.fileId(), editedTime);
     }

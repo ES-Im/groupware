@@ -9,11 +9,8 @@ import com.haruon.groupware.application.empInfo.required.EmpRepository;
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import com.haruon.groupware.application.exception.draft.ApprovalLineRequiredException;
 import com.haruon.groupware.application.exception.draft.DraftNotFoundException;
-import com.haruon.groupware.application.file.dto.request.DraftFileUploadRequest;
-import com.haruon.groupware.application.file.dto.request.FileDto;
 import com.haruon.groupware.domain.draft.Approver;
 import com.haruon.groupware.domain.draft.Draft;
-import com.haruon.groupware.domain.draft.DraftFile;
 import com.haruon.groupware.domain.draft.sub.ApprovalRole;
 import com.haruon.groupware.domain.draft.sub.ApprovalStatus;
 import com.haruon.groupware.domain.empInfo.Emp;
@@ -378,118 +375,6 @@ record CommonDraftTest(
         );
     }
     
-    @Test
-    @Transactional
-    @DisplayName("전자결재 공통 사항 테스트 - 기안서 파일 첨부는 상신전에 할 수 있다.")
-    void add_file_when_unsubmitted_success() {
-        Emp drafter = saveApprovedEmp(empRepository, "202601001", "drafter");
-        Draft draft = createDraft(drafter, "test", "test", List.of());
-
-        String originalFileName = "test.pdf";
-        DraftFileUploadRequest fileRequest = DraftFileUploadRequest.builder()
-                .file(FileDto.builder()
-                        .mimeType("application/pdf")
-                        .originalFileFullName(originalFileName)
-                        .fileSize(5 * 1024 * 1024L)
-                        .bytes(new byte[]{1})
-                        .build())
-                .build();
-
-        generalDraftManagement.addFile(draft.getId(), drafter.getId(), fileRequest);
-
-        assertThat(draft.getDraftFiles()).hasSize(1);
-        assertThat(draft.getDraftFiles()).singleElement().extracting(
-                DraftFile::getFileSize, DraftFile::getExtension, DraftFile::getOriginalName
-        ).containsExactly(
-                5 * 1024 * 1024L, "pdf", originalFileName.substring(0, originalFileName.lastIndexOf('.'))
-        );
-    }
-
-    @Test
-    @Transactional
-    @DisplayName("전자결재 공통 사항 테스트 - 상신 전 첨부된 파일을 삭제할 수 있다.")
-    void remove_file_when_unsubmitted_success() {
-        Emp drafter = saveApprovedEmp(empRepository, "202601001", "drafter");
-        Draft draft = createDraft(drafter, "test", "test", List.of());
-
-        String originalFileName = "test.pdf";
-        DraftFileUploadRequest fileRequest = DraftFileUploadRequest.builder()
-                .file(FileDto.builder()
-                        .mimeType("application/pdf")
-                        .originalFileFullName(originalFileName)
-                        .fileSize(5 * 1024 * 1024L)
-                        .bytes(new byte[]{1})
-                        .build())
-                .build();
-
-        generalDraftManagement.addFile(draft.getId(), drafter.getId(), fileRequest);
-
-        entityManager.flush();
-        entityManager.clear();
-
-        Draft result = draftRepository.findById(draft.getId()).orElseThrow();
-        generalDraftManagement.removeFile(result.getId(), drafter.getId(), draft.getDraftFiles().getFirst().getId());
-
-        assertThat(result.getDraftFiles()).hasSize(0);
-    }
-
-    @Test
-    @Transactional
-    @DisplayName("전자결재 공통 사항 테스트 - 기안서 파일 첨부는 상신 후에는 할 수 없다.")
-    void add_file_when_submitted_fail() {
-        Emp drafter = saveApprovedEmp(empRepository, "202601001", "drafter");
-        Draft draft = createSubmitted(
-                drafter,
-                "test",
-                "test",
-                List.of(saveApprovedEmp(empRepository, "202601002", "approver")),
-                LocalDateTime.of(2026, 1, 1, 0, 0, 0)
-        );
-
-        DraftFileUploadRequest file = DraftFileUploadRequest.builder()
-                .file(FileDto.builder()
-                        .mimeType("application/pdf")
-                        .originalFileFullName("test.pdf")
-                        .fileSize(5 * 1024 * 1024L)
-                        .bytes(new byte[]{1})
-                        .build())
-                .build();
-
-        assertThatThrownBy(() ->
-                generalDraftManagement.addFile(
-                        draft.getId(), drafter.getId(), file
-                )
-
-        ).isInstanceOf(IllegalStateException.class);
-    }
-
-
-    @Test
-    @Transactional
-    @DisplayName("전자결재 공통 사항 테스트 - 상신 후 첨부된 파일을 삭제할 수 있다.")
-    void remove_file_when_submitted_fail() {
-        Emp drafter = saveApprovedEmp(empRepository, "202601001", "drafter");
-        Emp approver = saveApprovedEmp(empRepository, "202601002", "approver");
-        Draft draft = createDraft(drafter, "test", "test", List.of(approver));
-
-        String originalFileName = "test.pdf";
-        DraftFileUploadRequest fileRequest = DraftFileUploadRequest.builder()
-                .file(FileDto.builder()
-                        .mimeType("application/pdf")
-                        .originalFileFullName(originalFileName)
-                        .fileSize(5 * 1024 * 1024L)
-                        .bytes(new byte[]{1})
-                        .build())
-                .build();
-
-        generalDraftManagement.addFile(draft.getId(), drafter.getId(), fileRequest);
-        generalDraftManagement.submit(draft.getId(), drafter.getId(), LocalDateTime.of(2026,4,1,0,0,0), List.of());
-
-        assertThatThrownBy(() ->
-                generalDraftManagement.removeFile(draft.getId(), drafter.getId(), draft.getDraftFiles().get(0).getId())
-        ).isInstanceOf(IllegalStateException.class);
-    }
-
     private Draft createDraft(
             Emp drafter,
             String title,

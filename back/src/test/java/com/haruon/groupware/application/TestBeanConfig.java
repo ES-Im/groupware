@@ -116,6 +116,10 @@ public class TestBeanConfig {
                     }
                 };
             }
+
+            @Override
+            public void delete(String storedPath, String storedName) {
+            }
         };
     }
 //

@@ -56,4 +56,8 @@ public record DraftFileUploadRequest(
         FileValidator.validate(file, ALLOWED_EXTENSIONS, ALLOWED_MIME_TYPES, FILE_SIZE_MAX);
     }
 
+    public static DraftFileUploadRequest toDraftFileUploadRequest(Long draftId, Long drafterId, FileDto file) {
+        return new DraftFileUploadRequest(draftId, drafterId, file);
+    }
+
 }

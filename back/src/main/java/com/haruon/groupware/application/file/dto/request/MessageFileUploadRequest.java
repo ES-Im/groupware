@@ -52,4 +52,8 @@ public record MessageFileUploadRequest(
 
         FileValidator.validate(file, ALLOWED_EXTENSIONS, ALLOWED_MIME_TYPES, FILE_SIZE_MAX);
     }
+
+    public static MessageFileUploadRequest toMessageFileUploadRequest(Long writerId, Long messageDraftId, FileDto file) {
+        return new MessageFileUploadRequest(writerId, messageDraftId, file);
+    }
 }

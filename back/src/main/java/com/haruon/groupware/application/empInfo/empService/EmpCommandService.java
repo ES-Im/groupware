@@ -6,6 +6,7 @@ import com.haruon.groupware.application.empInfo.provided.EmpAccountManager;
 import com.haruon.groupware.application.empInfo.required.EmpLeaveRepository;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
+import com.haruon.groupware.application.exception.common.role.PermissionDeniedException;
 import com.haruon.groupware.application.exception.empInfo.*;
 import com.haruon.groupware.application.file.required.FileStorage;
 import com.haruon.groupware.application.utils.AuthorizationChecker;
@@ -14,12 +15,15 @@ import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.empInfo.EmpLeave;
 import com.haruon.groupware.domain.empInfo.EmpPasswordEncoder;
 import com.haruon.groupware.domain.empInfo.enums.EmpStatus;
+import com.haruon.groupware.domain.empInfo.enums.SystemRoleCode;
 import com.haruon.groupware.domain.shared.Email;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.Set;
 
 import static com.haruon.groupware.application.utils.AuthorizationChecker.*;
 import static com.haruon.groupware.application.utils.Utils.findEmpById;
@@ -127,20 +131,19 @@ public class EmpCommandService extends LeaveCalculator implements EmpAccountMana
     }
 
     @Override
-    public void updateInfoByHR(EmpUpdateRequestByHR request, Long editorId) {
+    public void updateInfoByHR(Long editorId, Long targetEmpId, EmpUpdateRequestByHR request) {
         AuthorizationChecker.checkHRRoleEmp(empRepository, editorId);
 
-        Emp emp = findActiveEmpById(empRepository, request.targetEmpId());
+        Emp emp = findActiveEmpById(empRepository, targetEmpId);
 
-        if(request.newRawPassword() != null) {
-            validateNewPassword(request.newRawPassword(), emp.getEmpPassword());
+        if(request.password() != null) {
+            validateNewPassword(request.password(), emp.getEmpPassword());
         }
 
         emp.changeInfoByHR(
                 request.empName(),
-                request.newRawPassword(),
+                request.password(),
                 request.extensionNo(),
-                request.empStatus(),
                 request.systemRoleCode(),
                 request.hireAt(),
                 encoder
@@ -172,6 +175,15 @@ public class EmpCommandService extends LeaveCalculator implements EmpAccountMana
         emp.activateEmp();
     }
 
+    @Override
+    public void suspendEmpByHR(Long editorId, Long targetId) {
+        AuthorizationChecker.checkHRRoleEmp(empRepository, editorId);
+
+        Emp emp = findEmpById(empRepository, targetId);
+        if(!emp.getStatus().equals(EmpStatus.ACTIVE)) throw new EmpIsNotActiveException();
+
+        emp.suspendEmp();
+    }
 
     @Override
     public void updateFileActiveStatusByHR(
@@ -192,8 +204,10 @@ public class EmpCommandService extends LeaveCalculator implements EmpAccountMana
      *  같은 부서 사원의 정보 등록 / 수정 (By DeptManager)
      */
     @Override
-    public void updateInfoByDeptManager(EmpUpdateRequestByDeptManager request, Long managerId) {
-        DeptManagerInfo deptManagerInfo = checkDeptManagerById(empRepository, managerId, request.targetEmpId());
+    public void updateInfoByDeptManager(Long managerId, Long targetEmpId, EmpUpdateRequestByDeptManager request) {
+        DeptManagerInfo deptManagerInfo = checkDeptManagerById(empRepository, managerId, targetEmpId);
+
+        validateAssignableRolesByDeptManager(deptManagerInfo.manager(), request.systemRoleCode());
 
         Emp targetEmp = deptManagerInfo.targetEmp();
         targetEmp.changeInfoByDeptManager(
@@ -203,6 +217,21 @@ public class EmpCommandService extends LeaveCalculator implements EmpAccountMana
     }
 
 
+
+    private void validateAssignableRolesByDeptManager(Emp manager, @Nullable Set<SystemRoleCode> requestedRoles) {
+        if (requestedRoles == null) return;
+
+        Set<SystemRoleCode> managerRoles = manager.getSystemRoles();
+
+        for (SystemRoleCode role : requestedRoles) {
+            boolean isDefaultAssignableRole = role == SystemRoleCode.EMPLOYEE || role == SystemRoleCode.DEPT_MANAGER;
+            boolean isOwnedDeptRole = role.isDeptType() && managerRoles.contains(role);
+
+            if (!isDefaultAssignableRole && !isOwnedDeptRole) {
+                throw new PermissionDeniedException();
+            }
+        }
+    }
 
     private Email makeEmailByLoginId(String loginId) {
         return Email.of(loginId, companyPolicy.getCompanyDomain());

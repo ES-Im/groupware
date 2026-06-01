@@ -1,4 +1,4 @@
-package com.haruon.groupware.adapter.docs.webAPI;
+package com.haruon.groupware.adapter.docs.webAPI.file;
 
 import com.haruon.groupware.adapter.docs.RestDocsSupport;
 import com.haruon.groupware.adapter.webapi.file.FileApi;
@@ -32,7 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @Slf4j
-public class FileRestApiDocsTest extends RestDocsSupport {
+public class FileForRetrieverRestApiDocsTest extends RestDocsSupport {
 
     private final FileResourceRetrieverResolver retrieverMapper = mock(FileResourceRetrieverResolver.class);
     private final FileResourceRetriever resourceRetriever = mock(FileResourceRetriever.class);
@@ -49,7 +49,7 @@ public class FileRestApiDocsTest extends RestDocsSupport {
         documentPreview(
                 FileDomain.EMP,
                 "EMP_FILE_PREVIEW",
-                "/api/files/employees/{empId}/{fileId}/preview",
+                "/api/employees/{empId}/files/{fileId}/preview",
                 "empId",
                 "사원 식별 번호"
         );
@@ -61,7 +61,7 @@ public class FileRestApiDocsTest extends RestDocsSupport {
         documentDownload(
                 FileDomain.EMP,
                 "EMP_FILE_DOWNLOAD",
-                "/api/files/employees/{empId}/{fileId}/download",
+                "/api/employees/{empId}/files/{fileId}/download",
                 "empId",
                 "사원 식별 번호"
         );
@@ -73,7 +73,7 @@ public class FileRestApiDocsTest extends RestDocsSupport {
         documentPreview(
                 FileDomain.DRAFT,
                 "DRAFT_FILE_PREVIEW",
-                "/api/files/drafts/{draftId}/{fileId}/preview",
+                "/api/drafts/{draftId}/files/{fileId}/preview",
                 "draftId",
                 "기안서 식별 번호"
         );
@@ -85,7 +85,7 @@ public class FileRestApiDocsTest extends RestDocsSupport {
         documentDownload(
                 FileDomain.DRAFT,
                 "DRAFT_FILE_DOWNLOAD",
-                "/api/files/drafts/{draftId}/{fileId}/download",
+                "/api/drafts/{draftId}/files/{fileId}/download",
                 "draftId",
                 "기안서 식별 번호"
         );
@@ -97,7 +97,7 @@ public class FileRestApiDocsTest extends RestDocsSupport {
         documentPreview(
                 FileDomain.BOARD,
                 "BOARD_FILE_PREVIEW",
-                "/api/files/boards/{boardId}/{fileId}/preview",
+                "/api/boards/{boardId}/files/{fileId}/preview",
                 "boardId",
                 "게시글 식별 번호"
         );
@@ -109,7 +109,7 @@ public class FileRestApiDocsTest extends RestDocsSupport {
         documentDownload(
                 FileDomain.BOARD,
                 "BOARD_FILE_DOWNLOAD",
-                "/api/files/boards/{boardId}/{fileId}/download",
+                "/api/boards/{boardId}/files/{fileId}/download",
                 "boardId",
                 "게시글 식별 번호"
         );
@@ -121,7 +121,7 @@ public class FileRestApiDocsTest extends RestDocsSupport {
         documentPreview(
                 FileDomain.MESSAGE,
                 "MESSAGE_FILE_PREVIEW",
-                "/api/files/messages/{messageId}/{fileId}/preview",
+                "/api/messages/{messageId}/files/{fileId}/preview",
                 "messageId",
                 "쪽지 식별 번호"
         );
@@ -133,7 +133,7 @@ public class FileRestApiDocsTest extends RestDocsSupport {
         documentDownload(
                 FileDomain.MESSAGE,
                 "MESSAGE_FILE_DOWNLOAD",
-                "/api/files/messages/{messageId}/{fileId}/download",
+                "/api/messages/{messageId}/files/{fileId}/download",
                 "messageId",
                 "쪽지 식별 번호"
         );
@@ -145,7 +145,7 @@ public class FileRestApiDocsTest extends RestDocsSupport {
         documentPreview(
                 FileDomain.EDUCATION,
                 "EDUCATION_FILE_PREVIEW",
-                "/api/files/educations/{educationId}/{fileId}/preview",
+                "/api/educations/{educationId}/files/{fileId}/preview",
                 "educationId",
                 "교육 식별 번호"
         );
@@ -157,7 +157,7 @@ public class FileRestApiDocsTest extends RestDocsSupport {
         documentDownload(
                 FileDomain.EDUCATION,
                 "EDUCATION_FILE_DOWNLOAD",
-                "/api/files/educations/{educationId}/{fileId}/download",
+                "/api/educations/{educationId}/files/{fileId}/download",
                 "educationId",
                 "교육 식별 번호"
         );
@@ -169,7 +169,7 @@ public class FileRestApiDocsTest extends RestDocsSupport {
         documentPreview(
                 FileDomain.MEETING_ROOM,
                 "MEETING_ROOM_FILE_PREVIEW",
-                "/api/files/meetingRooms/{meetingRoomId}/{fileId}/preview",
+                "/api/meeting-rooms/{meetingRoomId}/files/{fileId}/preview",
                 "meetingRoomId",
                 "회의실 식별 번호"
         );
@@ -181,7 +181,7 @@ public class FileRestApiDocsTest extends RestDocsSupport {
         documentDownload(
                 FileDomain.MEETING_ROOM,
                 "MEETING_ROOM_FILE_DOWNLOAD",
-                "/api/files/meetingRooms/{meetingRoomId}/{fileId}/download",
+                "/api/meeting-rooms/{meetingRoomId}/files/{fileId}/download",
                 "meetingRoomId",
                 "회의실 식별 번호"
         );
@@ -287,4 +287,6 @@ public class FileRestApiDocsTest extends RestDocsSupport {
                 FileDisposition.ATTACHMENT
         );
     }
+
+
 }
