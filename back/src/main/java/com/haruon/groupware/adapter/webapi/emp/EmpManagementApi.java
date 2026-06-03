@@ -8,18 +8,18 @@ import com.haruon.groupware.application.empInfo.empService.dto.response.EmpInfoF
 import com.haruon.groupware.application.empInfo.provided.EmpAccountManager;
 import com.haruon.groupware.application.empInfo.provided.EmpAccountRetriever;
 import com.haruon.groupware.domain.empInfo.enums.EmpStatus;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-
-import static com.haruon.groupware.application.utils.Utils.ZONE_SEOUL;
 
 /**
  * 부서 매니저 혹은 인사과 권한 사원의 사원 관리용 조회/정보 수정 API
@@ -74,9 +74,10 @@ public class EmpManagementApi {
     @PatchMapping("/{empId}/registration-approval")
     public ResponseEntity<Void> approveRegistration(
             @AuthenticationPrincipal EmpDetails details,
-            @PathVariable Long empId
+            @PathVariable Long empId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hiredAt
     ) {
-        empAccountManager.approveRegisterByHR(details.getEmpId(), empId, LocalDate.now(ZONE_SEOUL));
+        empAccountManager.approveRegisterByHR(details.getEmpId(), empId, hiredAt);
 
         return ResponseEntity.ok().build();
     }
@@ -84,9 +85,10 @@ public class EmpManagementApi {
     @PatchMapping("/{empId}/resignation")
     public ResponseEntity<Void> resignEmployee(
             @AuthenticationPrincipal EmpDetails details,
-            @PathVariable Long empId
+            @PathVariable Long empId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hiredAt
     ) {
-        empAccountManager.updateResignedEmpByHR(details.getEmpId(), empId, LocalDate.now(ZONE_SEOUL));
+        empAccountManager.updateResignedEmpByHR(details.getEmpId(), empId, hiredAt);
 
         return ResponseEntity.ok().build();
     }
@@ -127,7 +129,7 @@ public class EmpManagementApi {
     public ResponseEntity<Void> updateEmp(
             @AuthenticationPrincipal EmpDetails details,
             @PathVariable Long empId,
-            @RequestBody EmpUpdateRequestByHR request
+            @RequestBody @Valid EmpUpdateRequestByHR request
     ) {
         empAccountManager.updateInfoByHR(details.getEmpId(), empId, request);
 
@@ -139,7 +141,7 @@ public class EmpManagementApi {
     @PatchMapping("/{empId}/dept-managed-info")
     public ResponseEntity<Void> updateEmpInfoByDeptManager(
             @AuthenticationPrincipal EmpDetails details,
-            @RequestBody EmpUpdateRequestByDeptManager request,
+            @RequestBody @Valid EmpUpdateRequestByDeptManager request,
             @PathVariable Long empId
     ) {
         empAccountManager.updateInfoByDeptManager(details.getEmpId(), empId, request);

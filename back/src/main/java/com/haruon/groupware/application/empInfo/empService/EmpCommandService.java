@@ -132,7 +132,9 @@ public class EmpCommandService extends LeaveCalculator implements EmpAccountMana
 
     @Override
     public void updateInfoByHR(Long editorId, Long targetEmpId, EmpUpdateRequestByHR request) {
-        AuthorizationChecker.checkHRRoleEmp(empRepository, editorId);
+        Emp editor = findActiveEmpById(empRepository, editorId);
+        validateHRRoleOrAdmin(editor);
+        validateAssignableRolesByHR(editor, request.systemRoleCode());
 
         Emp emp = findActiveEmpById(empRepository, targetEmpId);
 
@@ -217,6 +219,23 @@ public class EmpCommandService extends LeaveCalculator implements EmpAccountMana
     }
 
 
+
+    private void validateHRRoleOrAdmin(Emp editor) {
+        if (editor.isHR() || editor.isAdmin()) return;
+
+        throw new PermissionDeniedException();
+    }
+
+    private void validateAssignableRolesByHR(Emp editor, @Nullable Set<SystemRoleCode> requestedRoles) {
+        if (requestedRoles == null || editor.isAdmin()) return;
+
+        boolean hasNotAssignableRole = requestedRoles.stream()
+                .anyMatch(role -> !role.canBeGrantedByHr());
+
+        if (hasNotAssignableRole) {
+            throw new PermissionDeniedException();
+        }
+    }
 
     private void validateAssignableRolesByDeptManager(Emp manager, @Nullable Set<SystemRoleCode> requestedRoles) {
         if (requestedRoles == null) return;

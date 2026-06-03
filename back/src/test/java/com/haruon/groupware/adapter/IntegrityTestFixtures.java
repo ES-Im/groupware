@@ -2,7 +2,7 @@ package com.haruon.groupware.adapter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.haruon.groupware.adapter.webapi.auth.EmpLoginRequest;
-import com.haruon.groupware.application.empInfo.required.DeptRepository;
+import com.haruon.groupware.application.dept.required.DeptRepository;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
 import com.haruon.groupware.domain.empInfo.Dept;
 import com.haruon.groupware.domain.empInfo.Emp;
@@ -23,6 +23,23 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 public class IntegrityTestFixtures {
 
+    private static long empNo = 202602002;
+
+    private static String setEmpNo() {
+        return empNo++ + "";
+    }
+
+    /**
+     *  활성화된 부서 생성
+     */
+    public static Dept getDeptForFixture(DeptRepository deptRepository, String number, String name) {
+        return deptRepository.findByDeptCode(number).orElseGet(() ->
+                deptRepository.save(
+                        Dept.registerDept(number, name)
+                )
+        );
+    }
+
     /**
      * status = PENDING / 신규사원
      */
@@ -32,7 +49,7 @@ public class IntegrityTestFixtures {
             String loginId, String password
     ) {
         Email newEmail = Email.of(loginId, "haruon.com");
-        Emp test = Emp.register("202602001", "Test", loginId, password, newEmail, encoder);
+        Emp test = Emp.register(setEmpNo(), "Test", loginId, password, newEmail, encoder);
 
         empRepository.save(test);
     }
@@ -46,7 +63,7 @@ public class IntegrityTestFixtures {
             String loginId, String password
     ) {
         Email newEmail = Email.of(loginId, "haruon.com");
-        Emp test = Emp.register("202602002", "Test", loginId, password, newEmail, encoder);
+        Emp test = Emp.register(setEmpNo(), "Test", loginId, password, newEmail, encoder);
         test.approveRegister(LocalDate.of(2026,1,1));
 
         empRepository.save(test);
@@ -58,7 +75,7 @@ public class IntegrityTestFixtures {
             String loginId, String password
     ) {
         Email newEmail = Email.of(loginId, "haruon.com");
-        Emp test = Emp.register("202602002", "Test", loginId, password, newEmail, encoder);
+        Emp test = Emp.register(setEmpNo(), "Test", loginId, password, newEmail, encoder);
         test.approveRegister(LocalDate.of(2026,1,1));
 
         test.suspendEmp();
@@ -77,7 +94,7 @@ public class IntegrityTestFixtures {
             String loginId, String password
     ) {
         Email newEmail = Email.of(loginId, "haruon.com");
-        Emp test = Emp.register("202601999", "Test", loginId, password, newEmail, encoder);
+        Emp test = Emp.register(setEmpNo(), "Test", loginId, password, newEmail, encoder);
         test.approveRegister(LocalDate.of(2026,1,1));
 
         empRepository.save(test);
@@ -109,17 +126,9 @@ public class IntegrityTestFixtures {
                 "/test/emp"
         );
 
-        Dept it = deptRepository.findByDeptCode("002").orElseGet(() ->
-                deptRepository.save(
-                        Dept.registerDept("002", "IT")
-                )
-        );
+        Dept it = getDeptForFixture(deptRepository, "002", "IT");
 
-        Dept fin = deptRepository.findByDeptCode("003").orElseGet(() ->
-                deptRepository.save(
-                        Dept.registerDept("003", "FIN")
-                )
-        );
+        Dept fin = getDeptForFixture(deptRepository, "003", "FIN");
 
         test.changeBelongingsByHR(
                 it, PositionCode.STAFF, false, LocalDate.of(2026,2,1), null
@@ -133,6 +142,30 @@ public class IntegrityTestFixtures {
     }
 
     /**
+     * 주부서 : HR 권한 : ADMIN
+     */
+    public static void getAdmin(
+            EmpRepository empRepository,
+            DeptRepository deptRepository,
+            EmpPasswordEncoder encoder,
+            String loginId, String password
+    ) {
+        Emp test = Emp.register(setEmpNo(), "AdminName", loginId, password, Email.of(loginId, "haruon.com"), encoder);
+        test.approveRegister(LocalDate.of(2026,1,1));
+
+        Dept hr = getDeptForFixture(deptRepository, "001", "HR");
+
+        test.changeBelongingsByHR(
+                hr, PositionCode.ASSISTANT_MANAGER, true, LocalDate.of(2026,1,1), null
+        );
+
+
+        test.changeInfoByHR(null, null, null, Set.of(SystemRoleCode.ADMIN), LocalDate.of(2026,1,1), null);
+
+        empRepository.save(test);
+    }
+
+    /**
      *  주부서 : HR 권한 : (HR ROLE) <br>
      */
     public static void getEmpHavingWithHrRole(
@@ -141,14 +174,10 @@ public class IntegrityTestFixtures {
             EmpPasswordEncoder encoder,
             String loginId, String password
     ) {
-        Emp test = Emp.register("202601000", "AdminName", loginId, password, Email.of(loginId, "haruon.com"), encoder);
+        Emp test = Emp.register(setEmpNo(), "AdminName", loginId, password, Email.of(loginId, "haruon.com"), encoder);
         test.approveRegister(LocalDate.of(2026,1,1));
 
-        Dept hr = deptRepository.findByDeptCode("001").orElseGet(() ->
-            deptRepository.save(
-                    Dept.registerDept("001", "HR")
-            )
-        );
+        Dept hr = getDeptForFixture(deptRepository, "001", "HR");
 
         test.changeBelongingsByHR(
                 hr, PositionCode.ASSISTANT_MANAGER, true, LocalDate.of(2026,1,1), null
@@ -169,7 +198,7 @@ public class IntegrityTestFixtures {
             EmpPasswordEncoder encoder,
             String loginId, String password, Dept dept
     ) {
-        Emp test = Emp.register("202601500", "ManagerName", loginId, password, Email.of(loginId, "haruon.com"), encoder);
+        Emp test = Emp.register(setEmpNo(), "ManagerName", loginId, password, Email.of(loginId, "haruon.com"), encoder);
         test.approveRegister(LocalDate.of(2026,1,1));
 
         test.changeBelongingsByHR(

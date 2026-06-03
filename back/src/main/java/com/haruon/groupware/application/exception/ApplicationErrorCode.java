@@ -73,6 +73,10 @@ public enum ApplicationErrorCode {
     DEPT_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND, "DEPT_001", "조회된 부서가 없습니다"),
     DUPLICATE_DEPT_EXCEPTION(HttpStatus.BAD_REQUEST, "DEPT_002", "이미 존재하는 부서 코드입니다"),
 
+    // company
+    COMPANY_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND, "COMPANY_001", "조회된 회사 정보가 없습니다"),
+    COMPANY_ALREADY_EXISTS_EXCEPTION(HttpStatus.BAD_REQUEST, "COMPANY_002", "이미 회사 정보가 등록되어 있습니다"),
+
     // attendance
     ATTENDANCE_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND, "ATTENDANCE_001", "조회된 근태 정보가 없습니다."),
     ATTENDANCE_EMP_MISMATCH_EXCEPTION(HttpStatus.FORBIDDEN, "ATTENDANCE_002", "해당 사원의 근태 정보가 아닙니다."),

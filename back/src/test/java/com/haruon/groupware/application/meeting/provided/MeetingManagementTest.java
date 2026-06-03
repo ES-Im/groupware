@@ -1,7 +1,7 @@
 package com.haruon.groupware.application.meeting.provided;
 
 import com.haruon.groupware.application.TestIntegrationConfig;
-import com.haruon.groupware.application.empInfo.required.DeptRepository;
+import com.haruon.groupware.application.dept.required.DeptRepository;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
 import com.haruon.groupware.application.exception.ApplicationException;
 import com.haruon.groupware.application.exception.common.BlankValueNotAllowedException;

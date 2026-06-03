@@ -53,7 +53,7 @@ class EmpManagementApiTest extends IntegrationTestSupport {
 
         mockMvc.perform(
                 get("/api/employees")
-                        .header("Authorization", "Bearer " + accessToken)
+                        .header("Authorization", BEARER + accessToken)
                         .param("deptId", id+"")
                         .param("status", "ACTIVE")
                         .param("keyword", "t")
@@ -82,7 +82,7 @@ class EmpManagementApiTest extends IntegrationTestSupport {
 
         mockMvc.perform(
                         get("/api/employees")
-                                .header("Authorization", "Bearer " + accessToken)
+                                .header("Authorization", BEARER + accessToken)
                                 .param("deptId", id+"")
                                 .param("status", "ACTIVE")
                                 .param("keyword", "t")
@@ -112,7 +112,7 @@ class EmpManagementApiTest extends IntegrationTestSupport {
 
         mockMvc.perform(
                         get("/api/employees")
-                                .header("Authorization", "Bearer " + accessToken)
+                                .header("Authorization", BEARER + accessToken)
                                 .param("deptId", id+"")
                                 .param("status", "ACTIVE")
                 ).andDo(MockMvcResultHandlers.print())
@@ -132,7 +132,7 @@ class EmpManagementApiTest extends IntegrationTestSupport {
         log.info("accessToken = {}", accessToken);
         mockMvc.perform(
                         get("/api/employees/new")
-                                .header("Authorization", "Bearer " + accessToken)
+                                .header("Authorization", BEARER + accessToken)
                                 .param("keyword", "t")
                 ).andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
@@ -154,7 +154,7 @@ class EmpManagementApiTest extends IntegrationTestSupport {
 
         mockMvc.perform(
                         get("/api/employees/new")
-                                .header("Authorization", "Bearer " + accessToken)
+                                .header("Authorization", BEARER + accessToken)
                                 .param("keyword", "t")
                 ).andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isUnauthorized());
@@ -175,13 +175,15 @@ class EmpManagementApiTest extends IntegrationTestSupport {
 
         mockMvc.perform(
                 patch("/api/employees/{empId}/registration-approval", newMemberId)
-                        .header("Authorization", "Bearer " + accessToken)
+                        .header("Authorization", BEARER + accessToken)
+                        .param("hiredAt", "2026-01-01")
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk());
 
         Emp emp = empRepository.findById(newMemberId).orElseThrow();
         assertEquals(emp.getStatus(), EmpStatus.ACTIVE);
+        assertEquals(emp.getHiredAt(), LocalDate.of(2026, 1, 1));
     }
 
     @Test
@@ -196,13 +198,15 @@ class EmpManagementApiTest extends IntegrationTestSupport {
 
         mockMvc.perform(
                 patch("/api/employees/{empId}/resignation", resignedEmpId)
-                        .header("Authorization", "Bearer " + accessToken)
+                        .header("Authorization", BEARER + accessToken)
+                        .param("hiredAt", "2026-02-01")
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk());
 
         Emp emp = empRepository.findById(resignedEmpId).orElseThrow();
         assertEquals(emp.getStatus(), EmpStatus.RESIGNED);
+        assertEquals(emp.getResignedAt(), LocalDate.of(2026, 2, 1));
     }
 
     @Test
@@ -217,7 +221,7 @@ class EmpManagementApiTest extends IntegrationTestSupport {
 
         mockMvc.perform(
                 patch("/api/employees/{empId}/status/activation", suspendEmpId)
-                        .header("Authorization", "Bearer " + accessToken)
+                        .header("Authorization", BEARER + accessToken)
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk());
@@ -237,7 +241,7 @@ class EmpManagementApiTest extends IntegrationTestSupport {
 
         mockMvc.perform(
                 patch("/api/employees/{empId}/status/suspension", targetEmpId)
-                        .header("Authorization", "Bearer " + accessToken)
+                        .header("Authorization", BEARER + accessToken)
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk());
@@ -259,7 +263,7 @@ class EmpManagementApiTest extends IntegrationTestSupport {
 
         mockMvc.perform(
                 patch("/api/employees/{empId}/files/{fileId}/status", targetEmp.getId(), targetFileId)
-                        .header("Authorization", "Bearer " + accessToken)
+                        .header("Authorization", BEARER + accessToken)
                         .param("isForActivate", "false")
         )
                 .andDo(MockMvcResultHandlers.print())
@@ -295,7 +299,7 @@ class EmpManagementApiTest extends IntegrationTestSupport {
 
         mockMvc.perform(
                 patch("/api/employees/{empId}/hr-managed-info", targetEmp.getId())
-                        .header("Authorization", "Bearer " + accessToken)
+                        .header("Authorization", BEARER + accessToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(request))
         )
@@ -313,6 +317,58 @@ class EmpManagementApiTest extends IntegrationTestSupport {
                 .getContent()
                 .getFirst();
         assertThat(updatedEmpInfo.systemRoleCodeName()).containsExactlyInAnyOrderElementsOf(newSystemRole);
+    }
+
+    @Test
+    @Transactional
+    @DisplayName("HR롤은 특정 사원에게 ADMIN 권한을 부여할 수 없다")
+    void update_emp_by_hr_with_admin_role_fail() throws Exception {
+        String accessToken = getHrAccessToken();
+
+        String targetEmpLoginId = "login12346";
+        getEmpHavingAllInfos(targetEmpLoginId);
+        Emp targetEmp = empRepository.findByLoginId(targetEmpLoginId).orElseThrow();
+
+        EmpUpdateRequestByHR request = EmpUpdateRequestByHR.builder()
+                .systemRoleCode(Set.of(SystemRoleCode.ADMIN, SystemRoleCode.EMPLOYEE))
+                .build();
+
+        mockMvc.perform(
+                patch("/api/employees/{empId}/hr-managed-info", targetEmp.getId())
+                        .header("Authorization", BEARER + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(request))
+        )
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @Transactional
+    @DisplayName("ADMIN롤은 특정 사원에게 ADMIN 권한을 부여할 수 있다")
+    void update_emp_by_admin_with_admin_role_success() throws Exception {
+        String accessToken = getAdminAccessToken();
+
+        String targetEmpLoginId = "login12346";
+        getEmpHavingAllInfos(targetEmpLoginId);
+        Emp targetEmp = empRepository.findByLoginId(targetEmpLoginId).orElseThrow();
+        Set<SystemRoleCode> newSystemRole = Set.of(SystemRoleCode.ADMIN, SystemRoleCode.HR, SystemRoleCode.EMPLOYEE);
+
+        EmpUpdateRequestByHR request = EmpUpdateRequestByHR.builder()
+                .systemRoleCode(newSystemRole)
+                .build();
+
+        mockMvc.perform(
+                patch("/api/employees/{empId}/hr-managed-info", targetEmp.getId())
+                        .header("Authorization", BEARER + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(request))
+        )
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isOk());
+
+        Emp updatedEmp = empRepository.findById(targetEmp.getId()).orElseThrow();
+        assertThat(updatedEmp.getSystemRoles()).containsExactlyInAnyOrderElementsOf(newSystemRole);
     }
     
     @Test
@@ -337,7 +393,7 @@ class EmpManagementApiTest extends IntegrationTestSupport {
 
         mockMvc.perform(
                 patch("/api/employees/{empId}/dept-managed-info", targetEmp.getId())
-                        .header("Authorization", "Bearer " + deptManagerAccessToken)
+                        .header("Authorization", BEARER + deptManagerAccessToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(request))
         )
@@ -377,6 +433,14 @@ class EmpManagementApiTest extends IntegrationTestSupport {
         registerHR(HRLoginId, HRPassword);
 
         return getAccessToken(HRLoginId, HRPassword);
+    }
+
+    private String getAdminAccessToken() throws Exception {
+        String adminLoginId = "adminLogin123";
+        String adminPassword = "!Q2w3e4r5t";
+        registerAdmin(adminLoginId, adminPassword);
+
+        return getAccessToken(adminLoginId, adminPassword);
     }
 
     private String getDeptManagerAccessToken(Dept dept) throws Exception {

@@ -22,4 +22,8 @@ public enum SystemRoleCode {
         this.isDeptType = isDeptType;
     }
 
+    public boolean canBeGrantedByHr() {
+        return this != ADMIN;
+    }
+
 }

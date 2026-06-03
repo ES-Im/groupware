@@ -1,4 +1,4 @@
-package com.haruon.groupware.application.empInfo.empService.dto.response;
+package com.haruon.groupware.application.empInfo.empService.dto.response.projection;
 
 import com.haruon.groupware.domain.empInfo.enums.EmpStatus;
 import com.haruon.groupware.domain.empInfo.enums.PositionCode;

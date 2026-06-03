@@ -1,12 +1,12 @@
 package com.haruon.groupware.application.empInfo.provided;
 
 import com.haruon.groupware.application.TestIntegrationConfig;
+import com.haruon.groupware.application.dept.required.DeptRepository;
 import com.haruon.groupware.application.empInfo.attendanceService.AttendanceClosing;
 import com.haruon.groupware.application.empInfo.attendanceService.dto.ApproveAttendanceByDeptManagerParam;
 import com.haruon.groupware.application.empInfo.attendanceService.dto.AttendanceCloseParam;
 import com.haruon.groupware.application.empInfo.attendanceService.dto.EditAttendanceByDeptManagerParam;
 import com.haruon.groupware.application.empInfo.required.AttendanceRepository;
-import com.haruon.groupware.application.empInfo.required.DeptRepository;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
 import com.haruon.groupware.application.exception.common.EndTimeBeforeStartTimeException;
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;

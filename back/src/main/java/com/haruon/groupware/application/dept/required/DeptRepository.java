@@ -1,4 +1,4 @@
-package com.haruon.groupware.application.empInfo.required;
+package com.haruon.groupware.application.dept.required;
 
 import com.haruon.groupware.domain.empInfo.Dept;
 import org.springframework.data.repository.Repository;

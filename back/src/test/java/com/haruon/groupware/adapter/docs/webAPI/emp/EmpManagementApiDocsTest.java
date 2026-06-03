@@ -276,6 +276,7 @@ public class EmpManagementApiDocsTest extends RestDocsSupport {
                 patch("/api/employees/{empId}/registration-approval", 2L)
                         .header("Authorization", "Bearer accessToken")
                         .with(hrAuthentication())
+                        .queryParam("hiredAt", "2026-01-01")
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
@@ -288,6 +289,10 @@ public class EmpManagementApiDocsTest extends RestDocsSupport {
 
                         requestHeaders(
                                 headerWithName("Authorization").description("Bearer Access Token")
+                        ),
+
+                        queryParameters(
+                                parameterWithName("hiredAt").description("입사일자, yyyy-MM-dd")
                         )
                     )
                 );
@@ -298,12 +303,13 @@ public class EmpManagementApiDocsTest extends RestDocsSupport {
     void resignation_emp() throws Exception {
 
         Mockito.doNothing()
-                .when(empAccountManager).updateResignedEmpByHR(eq(1L), eq(2L), eq(LocalDate.of(2026, 1, 1)));
+                .when(empAccountManager).updateResignedEmpByHR(eq(1L), eq(2L), eq(LocalDate.of(2026, 2, 1)));
 
         mockMvc.perform(
-                patch("/api/employees/{empId}/registration-approval", 2L)
+                patch("/api/employees/{empId}/resignation", 2L)
                         .header("Authorization", "Bearer accessToken")
                         .with(hrAuthentication())
+                        .queryParam("hiredAt", "2026-02-01")
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
@@ -316,6 +322,10 @@ public class EmpManagementApiDocsTest extends RestDocsSupport {
 
                         requestHeaders(
                                 headerWithName("Authorization").description("Bearer Access Token")
+                        ),
+
+                        queryParameters(
+                                parameterWithName("hiredAt").description("퇴사일자, yyyy-MM-dd")
                         )
 
                     )
@@ -459,7 +469,7 @@ public class EmpManagementApiDocsTest extends RestDocsSupport {
                                         .description("사무실 직통 번호"),
                                 fieldWithPath("systemRoleCode").type(JsonFieldType.ARRAY)
                                         .attributes(key("constraints").value("-"))
-                                        .description("시스템 권한(기존 권한과 상관없이 지정한 권한들로 교체됨) \n [EMPLOYEE,DEPT_MANAGER,ADMIN] \n [FRANCHISE,IT,HR,FACILITY]"),
+                                        .description("시스템 권한(기존 권한과 상관없이 지정한 권한들로 교체됨, HR은 ADMIN 부여 불가, ADMIN은 전체 부여 가능) \n [EMPLOYEE,DEPT_MANAGER,ADMIN] \n [FRANCHISE,IT,HR,FACILITY]"),
                                 fieldWithPath("hireAt").type(JsonFieldType.STRING)
                                         .attributes(key("constraints").value("yyyy-MM-dd"))
                                         .description("입사일자")

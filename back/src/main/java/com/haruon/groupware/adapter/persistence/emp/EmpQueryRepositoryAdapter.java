@@ -1,6 +1,7 @@
 package com.haruon.groupware.adapter.persistence.emp;
 
 import com.haruon.groupware.application.empInfo.empService.dto.response.*;
+import com.haruon.groupware.application.empInfo.empService.dto.response.projection.EmpInfoForManagementFlat;
 import com.haruon.groupware.application.empInfo.required.EmpQueryRepository;
 import com.haruon.groupware.domain.empInfo.*;
 import com.haruon.groupware.domain.empInfo.enums.EmpStatus;
@@ -267,7 +268,7 @@ public class EmpQueryRepositoryAdapter implements EmpQueryRepository {
     private BooleanExpression keywordContains(String keyword) {
         return keyword == null || keyword.isBlank()
                 ? null
-                : qEmp.empName.contains(keyword);
+                : qEmp.empName.containsIgnoreCase(keyword);
     }
 
     private NumberExpression<Integer> positionLevel() {

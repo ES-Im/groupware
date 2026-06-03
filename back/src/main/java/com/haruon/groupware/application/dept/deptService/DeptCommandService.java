@@ -1,31 +1,37 @@
-package com.haruon.groupware.application.empInfo.deptService;
+package com.haruon.groupware.application.dept.deptService;
 
-import com.haruon.groupware.application.empInfo.provided.DeptManagement;
-import com.haruon.groupware.application.empInfo.required.DeptRepository;
+import com.haruon.groupware.application.dept.deptService.dto.request.DeptRegisterRequest;
+import com.haruon.groupware.application.dept.provided.DeptManagement;
+import com.haruon.groupware.application.dept.required.DeptRepository;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
 import com.haruon.groupware.application.exception.empInfo.DeptNotFoundException;
 import com.haruon.groupware.application.exception.empInfo.DuplicateDeptException;
 import com.haruon.groupware.application.utils.AuthorizationChecker;
 import com.haruon.groupware.domain.empInfo.Dept;
+import com.haruon.groupware.domain.empInfo.Emp;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+
+import static com.haruon.groupware.application.utils.AuthorizationChecker.findActiveEmpById;
 import static java.util.Objects.requireNonNull;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class DeptManageService implements DeptManagement {
+public class DeptCommandService implements DeptManagement {
 
     private final DeptRepository deptRepository;
     private final EmpRepository empRepository;
 
     @Override
-    public void registerDept(DeptRegisterRequest adminRequest) {
-        AuthorizationChecker.checkAdminById(empRepository, adminRequest.adminId());
+    public void registerDept(Long adminId, DeptRegisterRequest adminRequest) {
+        AuthorizationChecker.checkAdminById(empRepository, adminId);
         requireNonNull(adminRequest);
-        checkDuplicateDeptCode(adminRequest.deptName());
+        checkDuplicateDeptCode(adminRequest.deptCode());
 
         Dept dept = Dept.registerDept(
                 adminRequest.deptCode(),
@@ -55,13 +61,39 @@ public class DeptManageService implements DeptManagement {
     @Override
     public void updateDeptName(Long deptId, String newDeptName, Long adminId) {
         AuthorizationChecker.checkAdminById(empRepository, adminId);
-        checkDuplicateDeptCode(newDeptName);
 
         Dept dept = getDept(deptId);
 
         dept.renameDept(
                 newDeptName
         );
+    }
+
+    @Override
+    public void changeParentDept(Long deptId, @Nullable Long parentDeptId, Long adminId) {
+        AuthorizationChecker.checkAdminById(empRepository, adminId);
+
+        Dept dept = getDept(deptId);
+        Dept parentDept = parentDeptId == null ? null : getDept(parentDeptId);
+
+        dept.changeParent(parentDept);
+    }
+
+    @Override
+    public void appointLeader(Long deptId, Long leaderEmpId, LocalDate startAt, Long adminId) {
+        AuthorizationChecker.checkHRRoleEmp(empRepository, adminId);
+        Dept dept = getDept(deptId);
+        Emp leader = findActiveEmpById(empRepository, leaderEmpId);
+
+        dept.appointLeader(leader, startAt);
+    }
+
+    @Override
+    public void endCurrentLeader(Long deptId, LocalDate endAt, Long adminId) {
+        AuthorizationChecker.checkAdminById(empRepository, adminId);
+        Dept dept = getDept(deptId);
+
+        dept.endCurrentLeader(endAt);
     }
 
     private Dept getDept(Long deptId) {

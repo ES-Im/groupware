@@ -1,0 +1,36 @@
+[tabs%nosync]
+
+
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/DEPTS/http-request.adoc[]
+_Request cookie_
+include::{snippets}/DEPTS/request-headers.adoc[]
+_Request param_
+include::{snippets}/DEPTS/query-parameters.adoc[]
+--
+Response (200)::
++
+--
+_HTTP response_
+include::{snippets}/DEPTS/http-response.adoc[]
+_Response fields_
+include::{snippets}/DEPTS/response-fields.adoc[]
+--
+Exception::
++
+--
+이 API에서 발생 가능한 에러:
+
+|===
+|Error Code
+
+|ACTIVE_EMPLOYEE_NOT_FOUND_EXCEPTION
+
+
+|===
+--
+====

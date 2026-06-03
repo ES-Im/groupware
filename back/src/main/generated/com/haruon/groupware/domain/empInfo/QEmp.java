@@ -27,6 +27,8 @@ public class QEmp extends EntityPathBase<Emp> {
 
     public final com.haruon.groupware.domain.QAbstractEntity _super = new com.haruon.groupware.domain.QAbstractEntity(this);
 
+    public final BooleanPath admin = createBoolean("admin");
+
     //inherited
     public final DateTimePath<java.time.Instant> createdAt = _super.createdAt;
 

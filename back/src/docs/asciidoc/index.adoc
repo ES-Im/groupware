@@ -103,6 +103,13 @@ include::api/webapi/empAccount/DeptManager-Update-Emp-Info.adoc[]
 === 특정 사원 파일 활성화/비활성화 (HR)
 include::api/webapi/empAccount/HR-Update-Emp-File-Status.adoc[]
 
+[[DEPT_API]]
+== DEPT API
+
+[[DEPTS]]
+=== 전체 부서정보 조회
+include::api/webapi/dept/Dept-API.adoc[]
+
 [[FILE_API]]
 == FILE API
 

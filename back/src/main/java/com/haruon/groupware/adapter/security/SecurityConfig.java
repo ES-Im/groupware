@@ -91,6 +91,12 @@ public class SecurityConfig {
                                 "/api/employees/*/dept-managed-info"
                         ).hasRole(SystemRoleCode.DEPT_MANAGER.name())
 
+                        /* Dept API */
+                        .requestMatchers(HttpMethod.GET, "/api/departments", "/api/departments/**").authenticated()
+                        .requestMatchers(HttpMethod.PATCH, "/api/departments/**").hasRole(SystemRoleCode.ADMIN.name())
+                        .requestMatchers(HttpMethod.POST, "/api/departments/**").hasRole(SystemRoleCode.ADMIN.name())
+                        .requestMatchers(HttpMethod.DELETE, "/api/departments/**").hasRole(SystemRoleCode.ADMIN.name())
+
                         /* File API */
                         .requestMatchers(HttpMethod.GET,
                                 "/api/drafts/*/files/**",
@@ -133,6 +139,7 @@ public class SecurityConfig {
 
         return RoleHierarchyImpl.withRolePrefix("ROLE_")
                 .role(SystemRoleCode.ADMIN.name()).implies(SystemRoleCode.DEPT_MANAGER.name())
+                .role(SystemRoleCode.ADMIN.name()).implies(SystemRoleCode.HR.name())
                 .role(SystemRoleCode.ADMIN.name()).implies(SystemRoleCode.EMPLOYEE.name())
                 .role(SystemRoleCode.DEPT_MANAGER.name()).implies(SystemRoleCode.EMPLOYEE.name())
 

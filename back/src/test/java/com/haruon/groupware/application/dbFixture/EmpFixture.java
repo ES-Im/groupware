@@ -1,6 +1,6 @@
 package com.haruon.groupware.application.dbFixture;
 
-import com.haruon.groupware.application.empInfo.required.DeptRepository;
+import com.haruon.groupware.application.dept.required.DeptRepository;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
 import com.haruon.groupware.domain.empInfo.Dept;
 import com.haruon.groupware.domain.empInfo.Emp;

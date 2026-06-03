@@ -5,13 +5,14 @@ import com.haruon.groupware.adapter.redis.RefreshTokenRedis;
 import com.haruon.groupware.adapter.security.JwtCookieManager;
 import com.haruon.groupware.application.auth.provided.AuthManagement;
 import com.haruon.groupware.application.auth.required.TokenParser;
+import com.haruon.groupware.application.dept.required.DeptRepository;
 import com.haruon.groupware.application.empInfo.provided.EmpAccountManager;
-import com.haruon.groupware.application.empInfo.required.DeptRepository;
 import com.haruon.groupware.application.empInfo.required.EmpLeaveRepository;
 import com.haruon.groupware.application.empInfo.required.EmpQueryRepository;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
 import com.haruon.groupware.domain.empInfo.Dept;
 import com.haruon.groupware.domain.empInfo.EmpPasswordEncoder;
+import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 @Slf4j
 @SpringBootTest
@@ -43,16 +48,36 @@ public class IntegrationTestSupport {
     @Autowired protected EmpLeaveRepository empLeaveRepository;
 
     @Autowired protected EmpQueryRepository empQueryRepository;
+    @Autowired protected EntityManager entityManager;
+    @Autowired protected PlatformTransactionManager transactionManager;
+
 
     @AfterEach
     void tearDown() {
-        empLeaveRepository.deleteAll();
-        empRepository.deleteAll();
-        deptRepository.deleteAll();
+        if (!TransactionSynchronizationManager.isActualTransactionActive()) {
+            cleanDatabase();
+        }
+
         redisTemplate.delete("auth:refresh:test12345");
     }
 
+    private void cleanDatabase() {
+        TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
+        transactionTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+
+        transactionTemplate.executeWithoutResult(status -> {
+            entityManager.createQuery("delete from DeptLeader").executeUpdate();
+            entityManager.createQuery("update Dept d set d.parentDept = null").executeUpdate();
+            entityManager.clear();
+
+            empLeaveRepository.deleteAll();
+            empRepository.deleteAll();
+            deptRepository.deleteAll();
+        });
+    }
+
     protected static final String REFRESH_TOKEN_KEY_PREFIX = "auth:refresh:";
+    protected static final String BEARER = "Bearer ";
 
     // 로그인 -> accessToken 발급
     protected String loginByIdAndPw(String loginId, String password) throws Exception {
@@ -85,6 +110,12 @@ public class IntegrationTestSupport {
     // 인사권한으로 등록
     protected void registerHR(String loginId, String password) {
         IntegrityTestFixtures.getEmpHavingWithHrRole(
+                empRepository, deptRepository, encoder, loginId, password
+        );
+    }
+
+    protected void registerAdmin(String loginId, String password) {
+        IntegrityTestFixtures.getAdmin(
                 empRepository, deptRepository, encoder, loginId, password
         );
     }

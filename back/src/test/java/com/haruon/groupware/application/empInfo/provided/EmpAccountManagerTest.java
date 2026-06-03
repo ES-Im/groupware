@@ -1,8 +1,8 @@
 package com.haruon.groupware.application.empInfo.provided;
 
 import com.haruon.groupware.application.TestIntegrationConfig;
+import com.haruon.groupware.application.dept.required.DeptRepository;
 import com.haruon.groupware.application.empInfo.empService.dto.request.*;
-import com.haruon.groupware.application.empInfo.required.DeptRepository;
 import com.haruon.groupware.application.empInfo.required.EmpLeaveRepository;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
@@ -419,7 +419,7 @@ record EmpAccountManagerTest(
 
     @Test
     @Transactional
-    @DisplayName("HR 권한을 가진 사원은 모든 사원의 개인정보를 수정할 수 있다.")
+    @DisplayName("HR 권한을 가진 사원은 ADMIN을 제외한 모든 사원의 개인정보와 시스템권한을 수정할 수 있다.")
     void updateInfoByHR_success() {
         Dept dept = saveDept(deptRepository, "001", "HR");
         Dept otherDept = saveDept(deptRepository, "002", "IT");
@@ -474,6 +474,45 @@ record EmpAccountManagerTest(
             assertThat(newDeptList).contains(dept);
             assertThat(newPositionList).contains(newPosition);
         });
+    }
+
+    @Test
+    @DisplayName("HR 권한을 가진 사원은 ADMIN 권한을 부여할 수 없다.")
+    void updateInfoByHR_with_admin_role_fail() {
+        Dept dept = saveDept(deptRepository, "001", "HR");
+        Emp targetEmp = saveEmpWithDept(empRepository, deptRepository, "202601001", "login1234", dept);
+        Emp hrEmp = saveEmpWithRoleAndDept(empRepository, deptRepository, "202603001", "loginid03", dept, SystemRoleCode.HR);
+
+        assertThatThrownBy(() ->
+                empAccountManager.updateInfoByHR(
+                        hrEmp.getId(),
+                        targetEmp.getId(),
+                        EmpUpdateRequestByHR.builder()
+                                .systemRoleCode(Set.of(SystemRoleCode.EMPLOYEE, SystemRoleCode.ADMIN))
+                                .build()
+                )
+        ).isInstanceOf(PermissionDeniedException.class);
+    }
+
+    @Test
+    @Transactional
+    @DisplayName("ADMIN 권한을 가진 사원은 ADMIN 권한을 포함한 모든 시스템권한을 부여할 수 있다.")
+    void updateInfoByAdmin_with_admin_role_success() {
+        Emp admin = saveAdmin(empRepository);
+        Emp targetEmp = saveApprovedEmp(empRepository);
+        Set<SystemRoleCode> newSystemRoleCodes = Set.of(SystemRoleCode.ADMIN, SystemRoleCode.HR, SystemRoleCode.IT);
+
+        empAccountManager.updateInfoByHR(
+                admin.getId(),
+                targetEmp.getId(),
+                EmpUpdateRequestByHR.builder()
+                        .systemRoleCode(newSystemRoleCodes)
+                        .build()
+        );
+
+        Emp foundEmp = empRepository.findById(targetEmp.getId()).orElseThrow();
+
+        assertThat(foundEmp.getSystemRoles()).containsExactlyInAnyOrderElementsOf(newSystemRoleCodes);
     }
 
     private static List<PositionCode> getPositionList(ArrayList<EmpBelongings> empBelongings) {

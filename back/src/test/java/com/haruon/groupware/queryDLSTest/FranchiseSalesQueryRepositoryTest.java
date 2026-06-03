@@ -1,7 +1,7 @@
 package com.haruon.groupware.queryDLSTest;
 
 import com.haruon.groupware.application.TestIntegrationConfig;
-import com.haruon.groupware.application.empInfo.required.DeptRepository;
+import com.haruon.groupware.application.dept.required.DeptRepository;
 import com.haruon.groupware.application.empInfo.required.EmpRepository;
 import com.haruon.groupware.application.franchise.provided.FranchiseDailySalesImporter;
 import com.haruon.groupware.application.franchise.provided.FranchiseManagement;
