@@ -110,6 +110,42 @@ include::api/webapi/empAccount/HR-Update-Emp-File-Status.adoc[]
 === 전체 부서정보 조회
 include::api/webapi/dept/Dept-API.adoc[]
 
+[[DEPT_INFO]]
+=== 부서 기본정보 조회
+include::api/webapi/dept/Dept-Info.adoc[]
+
+[[DEPT_MEMBERS]]
+=== 특정 부서의 멤버 리스트 조회
+include::api/webapi/dept/Dept-Members.adoc[]
+
+[[DEPT_REGISTER]]
+=== 부서 등록
+include::api/webapi/dept/Dept-Register.adoc[]
+
+[[DEPT_ACTIVATE]]
+=== 부서 활성화
+include::api/webapi/dept/Dept-Activate.adoc[]
+
+[[DEPT_DEACTIVATE]]
+=== 부서 비활성화
+include::api/webapi/dept/Dept-Deactivate.adoc[]
+
+[[DEPT_UPDATE_NAME]]
+=== 부서명 변경
+include::api/webapi/dept/Dept-Update-Name.adoc[]
+
+[[DEPT_UPDATE_PARENT]]
+=== 상위 부서 변경
+include::api/webapi/dept/Dept-Update-Parent.adoc[]
+
+[[DEPT_APPOINT_LEADER]]
+=== 부서장 지정
+include::api/webapi/dept/Dept-Appoint-Leader.adoc[]
+
+[[DEPT_END_LEADER]]
+=== 현재 부서장 종료
+include::api/webapi/dept/Dept-End-Leader.adoc[]
+
 [[FILE_API]]
 == FILE API
 

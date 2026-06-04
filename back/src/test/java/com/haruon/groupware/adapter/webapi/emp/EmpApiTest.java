@@ -1,8 +1,8 @@
 package com.haruon.groupware.adapter.webapi.emp;
 
 import com.haruon.groupware.adapter.IntegrationTestSupport;
-import com.haruon.groupware.application.empInfo.empService.dto.request.EmpRegisterRequest;
-import com.haruon.groupware.application.empInfo.provided.EmpAccountRetriever;
+import com.haruon.groupware.application.empInfo.emp.provided.EmpAccountRetriever;
+import com.haruon.groupware.application.empInfo.emp.service.dto.request.EmpRegisterRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,7 +17,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @Slf4j
 public class EmpApiTest extends IntegrationTestSupport {
-
     @Autowired
     private EmpAccountRetriever empAccountRetriever;
 

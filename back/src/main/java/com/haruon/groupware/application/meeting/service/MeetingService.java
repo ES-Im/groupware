@@ -1,6 +1,6 @@
 package com.haruon.groupware.application.meeting.service;
 
-import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
 import com.haruon.groupware.application.exception.meeting.MeetingNotFoundException;
 import com.haruon.groupware.application.exception.meeting.MeetingRoomNotFoundException;
 import com.haruon.groupware.application.meeting.provided.MeetingManagement;
@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Set;
 
 import static com.haruon.groupware.application.meeting.service.MeetingRoomService.findActiveMeetingRoom;
-import static com.haruon.groupware.application.utils.AuthorizationChecker.findActiveEmpById;
+import static com.haruon.groupware.application.utils.AuthorizationValidator.findActiveEmpById;
 import static com.haruon.groupware.application.utils.Utils.findEmpListById;
 
 /**

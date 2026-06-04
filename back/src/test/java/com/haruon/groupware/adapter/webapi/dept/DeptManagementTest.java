@@ -5,8 +5,8 @@ import com.haruon.groupware.application.dept.deptService.dto.request.DeptRegiste
 import com.haruon.groupware.application.dept.deptService.dto.response.DeptInfoResponse;
 import com.haruon.groupware.application.dept.provided.DeptManagement;
 import com.haruon.groupware.application.dept.provided.DeptRetriever;
-import com.haruon.groupware.application.empInfo.empService.dto.response.BelongingInfo;
-import com.haruon.groupware.application.empInfo.provided.EmpAccountRetriever;
+import com.haruon.groupware.application.empInfo.emp.provided.EmpAccountRetriever;
+import com.haruon.groupware.application.empInfo.emp.service.dto.response.BelongingInfo;
 import com.haruon.groupware.domain.empInfo.Dept;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

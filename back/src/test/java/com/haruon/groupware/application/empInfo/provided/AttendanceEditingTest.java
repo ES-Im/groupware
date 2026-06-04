@@ -2,20 +2,22 @@ package com.haruon.groupware.application.empInfo.provided;
 
 import com.haruon.groupware.application.TestIntegrationConfig;
 import com.haruon.groupware.application.dept.required.DeptRepository;
-import com.haruon.groupware.application.empInfo.attendanceService.AttendanceClosing;
-import com.haruon.groupware.application.empInfo.attendanceService.dto.ApproveAttendanceByDeptManagerParam;
-import com.haruon.groupware.application.empInfo.attendanceService.dto.AttendanceCloseParam;
-import com.haruon.groupware.application.empInfo.attendanceService.dto.EditAttendanceByDeptManagerParam;
-import com.haruon.groupware.application.empInfo.required.AttendanceRepository;
-import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.empInfo.attendance.provided.AttendanceEditing;
+import com.haruon.groupware.application.empInfo.attendance.provided.AttendanceRecord;
+import com.haruon.groupware.application.empInfo.attendance.required.AttendanceRepository;
+import com.haruon.groupware.application.empInfo.attendance.service.AttendanceClosing;
+import com.haruon.groupware.application.empInfo.attendance.service.dto.request.ApproveAttendanceByDeptManagerRequest;
+import com.haruon.groupware.application.empInfo.attendance.service.dto.request.AttendanceCloseRequest;
+import com.haruon.groupware.application.empInfo.attendance.service.dto.request.EditAttendanceByDeptManagerRequest;
+import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
 import com.haruon.groupware.application.exception.common.EndTimeBeforeStartTimeException;
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import com.haruon.groupware.application.exception.common.role.ActiveEmployeeNotFoundException;
 import com.haruon.groupware.application.exception.common.role.DepartmentMismatchException;
 import com.haruon.groupware.application.exception.common.role.PermissionDeniedException;
-import com.haruon.groupware.application.exception.empInfo.AttendanceEmpMismatchException;
+import com.haruon.groupware.application.exception.empInfo.attendance.AttendanceEmpMismatchException;
 import com.haruon.groupware.application.schedule.required.ScheduleRepository;
-import com.haruon.groupware.application.utils.CompanyPolicyPort;
+import com.haruon.groupware.application.utils.required.CompanyPolicyPort;
 import com.haruon.groupware.domain.empInfo.Attendance;
 import com.haruon.groupware.domain.empInfo.Dept;
 import com.haruon.groupware.domain.empInfo.Emp;
@@ -94,10 +96,10 @@ record AttendanceEditingTest(
 
         log.info("===== 승인 쿼리 시작 =====");
         attendanceEditing.updateApproveAttendance(
-                ApproveAttendanceByDeptManagerParam.builder()
-                        .approverId(deptManager.getId())
+                deptManager.getId(),
+                attendance.getId(),
+                ApproveAttendanceByDeptManagerRequest.builder()
                         .targetEmpId(targetEmp.getId())
-                        .attendanceId(attendance.getId())
                         .approvedAt(approvedAt)
                         .build()
         );
@@ -131,24 +133,23 @@ record AttendanceEditingTest(
         LocalDateTime approvedAt = of(2026, 1, 31, 9, 0, 0);
 
         attendanceEditing.updateApproveAttendance(
-                ApproveAttendanceByDeptManagerParam.builder()
-                        .approverId(deptManager.getId())
+                deptManager.getId(),
+                attendance.getId(),
+                ApproveAttendanceByDeptManagerRequest.builder()
                         .targetEmpId(targetEmp.getId())
-                        .attendanceId(attendance.getId())
                         .approvedAt(approvedAt)
                         .build()
         );
 
         assertThatThrownBy(() -> attendanceEditing.updateAttendanceByDeptManager(
-                EditAttendanceByDeptManagerParam.builder()
+                deptManager.getId(),
+                attendance.getId(),
+                EditAttendanceByDeptManagerRequest.builder()
                         .targetEmpId(targetEmp.getId())
-                        .attendanceId(attendance.getId())
                         .startAt( companyPolicy.getStartTime())
                         .endAt( companyPolicy.getStartTime().plusHours(1))
                         .editedAt(LocalDateTime.of(2026,4,30,0,0,0))
                         .editReason("test")
-                        .editorId(deptManager.getId())
-                        .isIncludeHalfLeaveInDay(false)
                         .build()
         )).isInstanceOf(IllegalStateException.class);
 
@@ -180,10 +181,10 @@ record AttendanceEditingTest(
         LocalDateTime approvedAt = of(2026, 1, 31, 9, 0, 0);
 
         assertThatThrownBy(() -> attendanceEditing.updateApproveAttendance(
-                ApproveAttendanceByDeptManagerParam.builder()
-                        .approverId(deptManager.getId())
+                deptManager.getId(),
+                attendance.getId(),
+                ApproveAttendanceByDeptManagerRequest.builder()
                         .targetEmpId(unrelatedEmp.getId())
-                        .attendanceId(attendance.getId())
                         .approvedAt(approvedAt)
                         .build()
         )).isInstanceOf(AttendanceEmpMismatchException.class);
@@ -216,15 +217,14 @@ record AttendanceEditingTest(
         LocalDateTime approvedAt = of(2026, 1, 31, 9, 0, 0);
 
         assertThatThrownBy(() -> attendanceEditing.updateAttendanceByDeptManager(
-                EditAttendanceByDeptManagerParam.builder()
+                deptManager.getId(),
+                attendance.getId(),
+                EditAttendanceByDeptManagerRequest.builder()
                         .targetEmpId(unrelatedEmp.getId())
-                        .attendanceId(attendance.getId())
                         .startAt( companyPolicy.getStartTime())
                         .endAt( companyPolicy.getStartTime().plusHours(1))
                         .editedAt(LocalDateTime.of(2026,4,30,0,0,0))
                         .editReason("test")
-                        .editorId(deptManager.getId())
-                        .isIncludeHalfLeaveInDay(false)
                         .build()
         )).isInstanceOf(AttendanceEmpMismatchException.class);
 
@@ -248,10 +248,10 @@ record AttendanceEditingTest(
 
         assertThatThrownBy(() ->
                 attendanceEditing.updateApproveAttendance(
-                        ApproveAttendanceByDeptManagerParam.builder()
-                                .approverId(notManager.getId())
+                        notManager.getId(),
+                        attendance.getId(),
+                        ApproveAttendanceByDeptManagerRequest.builder()
                                 .targetEmpId(targetEmp.getId())
-                                .attendanceId(attendance.getId())
                                 .approvedAt(of(2026, 1, 31, 9, 0, 0))
                                 .build()
                 )
@@ -278,10 +278,10 @@ record AttendanceEditingTest(
 
         assertThatThrownBy(() ->
                 attendanceEditing.updateApproveAttendance(
-                        ApproveAttendanceByDeptManagerParam.builder()
-                                .approverId(inactiveManager.getId())
+                        inactiveManager.getId(),
+                        attendance.getId(),
+                        ApproveAttendanceByDeptManagerRequest.builder()
                                 .targetEmpId(targetEmp.getId())
-                                .attendanceId(attendance.getId())
                                 .approvedAt(of(2026, 1, 31, 9, 0, 0))
                                 .build()
                 )
@@ -308,10 +308,10 @@ record AttendanceEditingTest(
 
         assertThatThrownBy(() ->
                 attendanceEditing.updateApproveAttendance(
-                        ApproveAttendanceByDeptManagerParam.builder()
-                                .approverId(otherDeptManager.getId())
+                        otherDeptManager.getId(),
+                        attendance.getId(),
+                        ApproveAttendanceByDeptManagerRequest.builder()
                                 .targetEmpId(targetEmp.getId())
-                                .attendanceId(attendance.getId())
                                 .approvedAt(of(2026, 1, 31, 9, 0, 0))
                                 .build()
                 )
@@ -324,7 +324,7 @@ record AttendanceEditingTest(
 //    시간 변경 + 상태 NORMAL → 근무시간 기준으로 재계산
 //    시간 변경 + 상태 ABSENT → 근무시간 기준으로 재계산
 //    시간 변경 + 상태 LATE_EARLY → 근무시간 기준으로 재계산
-//    반차 포함 여부(isIncludeHalfLeaveInDay)에 따라 상태 계산이 달라지는지 확인
+//    동일자 반차 근태 포함 여부에 따라 상태 계산이 달라지는지 확인
 
     private Stream<Arguments> updateAttendanceStatusArgumentsWithSubAttendance() {
 
@@ -393,7 +393,7 @@ record AttendanceEditingTest(
         attendanceRecord.recordCheckIn(targetEmp.getId(), LocalDateTime.of(date, LocalTime.of(12,0,0)));
         attendanceRecord.recordCheckOut(targetEmp.getId(), LocalDateTime.of(date, LocalTime.of(13,0,0)));
 
-        attendanceClosing.closeAttendance(new AttendanceCloseParam(targetEmp.getId(), date));
+        attendanceClosing.closeAttendance(new AttendanceCloseRequest(targetEmp.getId(), date));
 
         List<Attendance> attendancesBeforeUpdate = attendanceRepository.findByEmpIdAndAttendanceDate(targetEmp.getId(), date);
         Attendance attendance = attendancesBeforeUpdate.stream()
@@ -403,15 +403,14 @@ record AttendanceEditingTest(
 
         log.info("========================= update 쿼리");
         attendanceEditing.updateAttendanceByDeptManager(
-                EditAttendanceByDeptManagerParam.builder()
+                deptManager.getId(),
+                attendance.getId(),
+                EditAttendanceByDeptManagerRequest.builder()
                         .targetEmpId(targetEmp.getId())
-                        .attendanceId(attendance.getId())
                         .startAt(empWorkStartTime)
                         .endAt(empWorkEndTime)
                         .editedAt(of(2026,4,30,0,0,0))
                         .editReason("edit")
-                        .editorId(deptManager.getId())
-                        .isIncludeHalfLeaveInDay(true)
                         .build()
         );
 
@@ -473,15 +472,14 @@ record AttendanceEditingTest(
         LocalDateTime editedAt = of(2026, 2, 1, 0, 0, 0);
         String reasonForEdit = "test";
         attendanceEditing.updateAttendanceByDeptManager(
-                EditAttendanceByDeptManagerParam.builder()
+                deptManager.getId(),
+                attendance.getId(),
+                EditAttendanceByDeptManagerRequest.builder()
                         .targetEmpId(targetEmp.getId())
-                        .attendanceId(attendance.getId())
                         .startAt(startAt)
                         .endAt(endAt)
                         .editedAt(editedAt)
                         .editReason(reasonForEdit)
-                        .editorId(deptManager.getId())
-                        .isIncludeHalfLeaveInDay(false)
                         .build()
         );
 
@@ -692,15 +690,14 @@ record AttendanceEditingTest(
             Emp deptManager
     ) {
         attendanceEditing.updateAttendanceByDeptManager(
-                EditAttendanceByDeptManagerParam.builder()
+                deptManager.getId(),
+                attendance.getId(),
+                EditAttendanceByDeptManagerRequest.builder()
                         .targetEmpId(targetEmp.getId())
-                        .attendanceId(attendance.getId())
                         .startAt(editedStartAt)
                         .endAt(editedEndAt)
                         .editedAt(of(2026, 2, 1, 0, 0, 0))
                         .editReason("test")
-                        .editorId(deptManager.getId())
-                        .isIncludeHalfLeaveInDay(false)
                         .build()
         );
     }
@@ -712,9 +709,9 @@ record AttendanceEditingTest(
 
         attendanceRecord.recordCheckIn(targetEmp.getId(), of(date, workStartAt));
         attendanceRecord.recordCheckOut(targetEmp.getId(), of(date, workEndAt));
-        AttendanceCloseParam attendanceCloseParam = new AttendanceCloseParam(targetEmp.getId(), date);
+        AttendanceCloseRequest attendanceCloseRequest = new AttendanceCloseRequest(targetEmp.getId(), date);
 
-        attendanceClosing.closeAttendance(attendanceCloseParam);
+        attendanceClosing.closeAttendance(attendanceCloseRequest);
 
         return attendanceRepository.findByEmpIdAndAttendanceDate(targetEmp.getId(), date).stream().findFirst().orElseThrow();
     }

@@ -1,7 +1,7 @@
 package com.haruon.groupware.application.message.provided;
 
 import com.haruon.groupware.application.TestIntegrationConfig;
-import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
 import com.haruon.groupware.application.exception.message.MessageNotFoundException;
 import com.haruon.groupware.application.message.required.MessageRepository;
 import com.haruon.groupware.application.message.service.dto.MessageCreateRequest;

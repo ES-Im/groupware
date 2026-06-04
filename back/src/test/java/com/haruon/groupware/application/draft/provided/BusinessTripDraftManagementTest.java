@@ -4,7 +4,7 @@ import com.haruon.groupware.application.TestIntegrationConfig;
 import com.haruon.groupware.application.dept.required.DeptRepository;
 import com.haruon.groupware.application.draft.required.DraftRepository;
 import com.haruon.groupware.application.draft.service.dto.*;
-import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
 import com.haruon.groupware.application.schedule.required.ScheduleRepository;
 import com.haruon.groupware.domain.AbstractEntity;
 import com.haruon.groupware.domain.draft.Approver;

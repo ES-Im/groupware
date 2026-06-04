@@ -5,9 +5,9 @@ import com.haruon.groupware.application.dept.deptService.dto.request.DeptRegiste
 import com.haruon.groupware.application.dept.provided.DeptManagement;
 import com.haruon.groupware.application.dept.provided.DeptRetriever;
 import com.haruon.groupware.application.dept.required.DeptRepository;
-import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
 import com.haruon.groupware.application.exception.common.role.PermissionDeniedException;
-import com.haruon.groupware.application.exception.empInfo.DuplicateDeptException;
+import com.haruon.groupware.application.exception.empInfo.dept.DuplicateDeptException;
 import com.haruon.groupware.domain.empInfo.Dept;
 import com.haruon.groupware.domain.empInfo.DeptLeader;
 import com.haruon.groupware.domain.empInfo.Emp;

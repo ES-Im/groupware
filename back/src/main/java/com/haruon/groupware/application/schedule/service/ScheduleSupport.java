@@ -2,7 +2,7 @@ package com.haruon.groupware.application.schedule.service;
 
 import com.haruon.groupware.application.exception.schedule.ScheduleNotFoundException;
 import com.haruon.groupware.application.schedule.required.ScheduleRepository;
-import com.haruon.groupware.application.utils.CompanyPolicyPort;
+import com.haruon.groupware.application.utils.required.CompanyPolicyPort;
 import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.schedule.Schedule;
 import com.haruon.groupware.domain.schedule.ScheduleType;

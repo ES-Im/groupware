@@ -1,13 +1,13 @@
 package com.haruon.groupware.adapter.docs.webAPI.emp;
 
 import com.haruon.groupware.adapter.docs.RestDocsSupport;
-import com.haruon.groupware.adapter.webapi.emp.EmpApi;
-import com.haruon.groupware.application.empInfo.empService.dto.request.EmpRegisterRequest;
-import com.haruon.groupware.application.empInfo.empService.dto.response.EmpInfoResponse;
-import com.haruon.groupware.application.empInfo.provided.EmpAccountManager;
-import com.haruon.groupware.application.empInfo.provided.EmpAccountRetriever;
-import com.haruon.groupware.application.exception.empInfo.DuplicateEmpNoException;
-import com.haruon.groupware.application.exception.empInfo.DuplicateLoginIdException;
+import com.haruon.groupware.adapter.webapi.emp.account.EmpApi;
+import com.haruon.groupware.application.empInfo.emp.provided.EmpAccountManager;
+import com.haruon.groupware.application.empInfo.emp.provided.EmpAccountRetriever;
+import com.haruon.groupware.application.empInfo.emp.service.dto.request.EmpRegisterRequest;
+import com.haruon.groupware.application.empInfo.emp.service.dto.response.EmpInfoResponse;
+import com.haruon.groupware.application.exception.empInfo.emp.DuplicateEmpNoException;
+import com.haruon.groupware.application.exception.empInfo.emp.DuplicateLoginIdException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;

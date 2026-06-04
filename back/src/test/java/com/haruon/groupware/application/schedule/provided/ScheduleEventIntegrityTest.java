@@ -8,8 +8,8 @@ import com.haruon.groupware.application.draft.provided.LeaveCancelDraftManagemen
 import com.haruon.groupware.application.draft.provided.LeaveDraftManagement;
 import com.haruon.groupware.application.draft.required.DraftRepository;
 import com.haruon.groupware.application.draft.service.dto.*;
-import com.haruon.groupware.application.empInfo.required.EmpLeaveRepository;
-import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
+import com.haruon.groupware.application.empInfo.leave.required.EmpLeaveRepository;
 import com.haruon.groupware.application.exception.schedule.EditForbiddenScheduleException;
 import com.haruon.groupware.application.exception.schedule.UnsupportedScheduleTypeException;
 import com.haruon.groupware.application.meeting.provided.MeetingManagement;

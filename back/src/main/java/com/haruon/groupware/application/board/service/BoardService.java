@@ -5,7 +5,7 @@ import com.haruon.groupware.application.board.required.BoardRepository;
 import com.haruon.groupware.application.board.required.CategoryRepository;
 import com.haruon.groupware.application.board.service.dto.BoardCreateRequest;
 import com.haruon.groupware.application.board.service.dto.BoardUpdateRequest;
-import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
 import com.haruon.groupware.application.exception.common.role.PermissionDeniedException;
 import com.haruon.groupware.domain.board.Board;
 import com.haruon.groupware.domain.board.Category;
@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
 
 import static com.haruon.groupware.application.board.service.BoardUtils.findBoard;
 import static com.haruon.groupware.application.board.service.BoardUtils.findVisableCategory;
-import static com.haruon.groupware.application.utils.AuthorizationChecker.findActiveEmpById;
+import static com.haruon.groupware.application.utils.AuthorizationValidator.findActiveEmpById;
 
 @Transactional
 @Service

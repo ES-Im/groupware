@@ -3,7 +3,7 @@ package com.haruon.groupware.application.chat.provided;
 import com.haruon.groupware.application.TestIntegrationConfig;
 import com.haruon.groupware.application.chat.required.ChatRepository;
 import com.haruon.groupware.application.chat.required.ChatRoomRepository;
-import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
 import com.haruon.groupware.application.exception.chat.ChatRoomNotFoundException;
 import com.haruon.groupware.application.exception.common.role.ActiveEmployeeNotFoundException;
 import com.haruon.groupware.domain.chat.ChatMessage;

@@ -1,7 +1,7 @@
 package com.haruon.groupware.application.file.fileService.forManagement;
 
 import com.haruon.groupware.application.draft.required.DraftRepository;
-import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import com.haruon.groupware.application.exception.draft.DraftNotFoundException;
 import com.haruon.groupware.application.exception.file.FileNotFoundException;
@@ -14,7 +14,7 @@ import com.haruon.groupware.application.file.required.FileStoredInfoQueryReposit
 import com.haruon.groupware.domain.draft.Draft;
 import org.springframework.stereotype.Service;
 
-import static com.haruon.groupware.application.utils.AuthorizationChecker.findActiveEmpById;
+import static com.haruon.groupware.application.utils.AuthorizationValidator.findActiveEmpById;
 
 @Service
 public class DraftFileCommandService extends AbstractFileManagerService<DraftFileUploadRequest> {

@@ -4,7 +4,7 @@ import com.haruon.groupware.application.dept.deptService.dto.response.DeptInfoRe
 import com.haruon.groupware.application.dept.deptService.dto.response.projection.DeptMemberInfo;
 import com.haruon.groupware.application.dept.provided.DeptRetriever;
 import com.haruon.groupware.application.dept.required.DeptQueryRepository;
-import com.haruon.groupware.application.exception.empInfo.DeptNotFoundException;
+import com.haruon.groupware.application.exception.empInfo.dept.DeptNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.Page;

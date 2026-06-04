@@ -1,7 +1,7 @@
 package com.haruon.groupware.application.file.fileService.forManagement;
 
 import com.haruon.groupware.application.board.required.BoardRepository;
-import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import com.haruon.groupware.application.exception.common.role.PermissionDeniedException;
 import com.haruon.groupware.application.exception.file.FileNotFoundException;
@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 
 import static com.haruon.groupware.application.board.service.BoardUtils.findBoard;
-import static com.haruon.groupware.application.utils.AuthorizationChecker.findActiveEmpById;
+import static com.haruon.groupware.application.utils.AuthorizationValidator.findActiveEmpById;
 import static com.haruon.groupware.application.utils.Utils.ZONE_SEOUL;
 
 @Service

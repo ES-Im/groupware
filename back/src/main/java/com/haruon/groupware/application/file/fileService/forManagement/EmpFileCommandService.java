@@ -1,6 +1,6 @@
 package com.haruon.groupware.application.file.fileService.forManagement;
 
-import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import com.haruon.groupware.application.exception.file.FileNotFoundException;
 import com.haruon.groupware.application.file.dto.request.EmpFileUploadRequest;

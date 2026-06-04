@@ -24,9 +24,9 @@ public class Attendance extends AbstractEntity {
 
     private Emp emp;
 
-    private AttendanceStatus attendanceStatus;
-
     private LocalDate attendanceDate;
+
+    @Nullable private AttendanceStatus attendanceStatus;
 
     @Nullable private LocalTime startAt;
 

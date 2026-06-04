@@ -1,11 +1,11 @@
 package com.haruon.groupware.application.empInfo.provided;
 
 import com.haruon.groupware.application.TestIntegrationConfig;
-import com.haruon.groupware.application.empInfo.leaveService.LeaveManagementService;
-import com.haruon.groupware.application.empInfo.required.EmpLeaveRepository;
-import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
+import com.haruon.groupware.application.empInfo.leave.required.EmpLeaveRepository;
+import com.haruon.groupware.application.empInfo.leave.service.LeaveManagementService;
 import com.haruon.groupware.application.exception.common.role.PermissionDeniedException;
-import com.haruon.groupware.application.exception.empInfo.EmpAnnualLeaveNotFoundException;
+import com.haruon.groupware.application.exception.empInfo.leave.EmpAnnualLeaveNotFoundException;
 import com.haruon.groupware.application.schedule.required.ScheduleRepository;
 import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.empInfo.EmpLeave;

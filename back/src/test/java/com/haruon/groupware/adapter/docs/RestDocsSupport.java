@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.haruon.groupware.adapter.security.empDtails.EmpDetails;
 import com.haruon.groupware.adapter.webapi.exception.GlobalExceptionHandler;
-import com.haruon.groupware.application.empInfo.empService.dto.response.BelongingInfo;
+import com.haruon.groupware.application.empInfo.emp.service.dto.response.BelongingInfo;
 import com.haruon.groupware.domain.empInfo.enums.EmpStatus;
 import com.haruon.groupware.domain.empInfo.enums.PositionCode;
 import com.haruon.groupware.domain.empInfo.enums.SystemRoleCode;

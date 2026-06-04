@@ -7,7 +7,7 @@ import com.haruon.groupware.application.company.companyService.dto.request.Compa
 import com.haruon.groupware.application.company.companyService.dto.request.CompanyRegisterRequest;
 import com.haruon.groupware.application.company.companyService.dto.response.CompanyInfoResponse;
 import com.haruon.groupware.application.company.required.CompanyRepository;
-import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
 import com.haruon.groupware.application.exception.common.role.PermissionDeniedException;
 import com.haruon.groupware.application.exception.company.CompanyAlreadyExistsException;
 import com.haruon.groupware.application.exception.company.CompanyNotFoundException;

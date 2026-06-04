@@ -3,7 +3,7 @@ package com.haruon.groupware.application.chat.service;
 import com.haruon.groupware.application.chat.provided.ChatSender;
 import com.haruon.groupware.application.chat.required.ChatRepository;
 import com.haruon.groupware.application.chat.required.ChatRoomRepository;
-import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
 import com.haruon.groupware.domain.chat.ChatMessage;
 import com.haruon.groupware.domain.chat.ChatRoom;
 import com.haruon.groupware.domain.empInfo.Emp;
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 
 import static com.haruon.groupware.application.chat.service.ChatUtils.findChatRoom;
-import static com.haruon.groupware.application.utils.AuthorizationChecker.findActiveEmpById;
+import static com.haruon.groupware.application.utils.AuthorizationValidator.findActiveEmpById;
 
 @Transactional
 @Service

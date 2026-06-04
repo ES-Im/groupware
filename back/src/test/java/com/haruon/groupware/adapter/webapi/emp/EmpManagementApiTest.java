@@ -2,10 +2,10 @@ package com.haruon.groupware.adapter.webapi.emp;
 
 import com.haruon.groupware.adapter.IntegrationTestSupport;
 import com.haruon.groupware.adapter.persistence.emp.EmpQueryRepositoryAdapter;
-import com.haruon.groupware.application.empInfo.empService.dto.request.EmpUpdateRequestByDeptManager;
-import com.haruon.groupware.application.empInfo.empService.dto.request.EmpUpdateRequestByHR;
-import com.haruon.groupware.application.empInfo.empService.dto.response.EmpFileListInfo;
-import com.haruon.groupware.application.empInfo.empService.dto.response.EmpInfoResponse;
+import com.haruon.groupware.application.empInfo.emp.service.dto.request.EmpUpdateRequestByDeptManager;
+import com.haruon.groupware.application.empInfo.emp.service.dto.request.EmpUpdateRequestByHR;
+import com.haruon.groupware.application.empInfo.emp.service.dto.response.EmpFileListInfo;
+import com.haruon.groupware.application.empInfo.emp.service.dto.response.EmpInfoResponse;
 import com.haruon.groupware.domain.empInfo.Dept;
 import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.empInfo.enums.EmpStatus;

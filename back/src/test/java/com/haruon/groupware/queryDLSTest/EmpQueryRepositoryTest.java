@@ -1,7 +1,7 @@
 package com.haruon.groupware.queryDLSTest;
 
 import com.haruon.groupware.application.TestIntegrationConfig;
-import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
 import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.empInfo.QDept;
 import com.haruon.groupware.domain.empInfo.QEmp;

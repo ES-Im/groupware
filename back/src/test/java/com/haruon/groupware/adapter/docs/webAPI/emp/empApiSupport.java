@@ -1,9 +1,9 @@
 package com.haruon.groupware.adapter.docs.webAPI.emp;
 
-import com.haruon.groupware.application.empInfo.empService.dto.response.BelongingInfo;
-import com.haruon.groupware.application.empInfo.empService.dto.response.EmpBasicInfo;
-import com.haruon.groupware.application.empInfo.empService.dto.response.EmpFileListInfo;
-import com.haruon.groupware.application.empInfo.empService.dto.response.EmpInfoResponse;
+import com.haruon.groupware.application.empInfo.emp.service.dto.response.BelongingInfo;
+import com.haruon.groupware.application.empInfo.emp.service.dto.response.EmpBasicInfo;
+import com.haruon.groupware.application.empInfo.emp.service.dto.response.EmpFileListInfo;
+import com.haruon.groupware.application.empInfo.emp.service.dto.response.EmpInfoResponse;
 import com.haruon.groupware.domain.empInfo.enums.FileType;
 import com.haruon.groupware.domain.empInfo.enums.PositionCode;
 

@@ -1,6 +1,6 @@
 package com.haruon.groupware.application.franchise.service;
 
-import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
 import com.haruon.groupware.application.franchise.provided.FranchiseManagement;
 import com.haruon.groupware.application.franchise.required.FranchiseRepository;
 import com.haruon.groupware.application.franchise.service.dto.FranchiseCreateRequest;
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 
 import static com.haruon.groupware.application.franchise.service.FranchiseUtils.findFranchiseById;
 import static com.haruon.groupware.application.franchise.service.FranchiseUtils.getFranchiseRoleAssignedEmp;
-import static com.haruon.groupware.application.utils.AuthorizationChecker.checkFranchiseRoleEmp;
+import static com.haruon.groupware.application.utils.AuthorizationValidator.checkFranchiseRoleEmp;
 
 @Service
 @Transactional

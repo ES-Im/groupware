@@ -1,6 +1,6 @@
 package com.haruon.groupware.application.file.fileService.forManagement;
 
-import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import com.haruon.groupware.application.exception.file.FileNotFoundException;
 import com.haruon.groupware.application.exception.message.MessageNotFoundException;
@@ -16,7 +16,7 @@ import com.haruon.groupware.domain.message.Message;
 import org.springframework.stereotype.Service;
 
 import static com.haruon.groupware.application.message.service.MessageUtils.findMessage;
-import static com.haruon.groupware.application.utils.AuthorizationChecker.findActiveEmpById;
+import static com.haruon.groupware.application.utils.AuthorizationValidator.findActiveEmpById;
 import static com.haruon.groupware.application.utils.Utils.findEmpById;
 
 @Service

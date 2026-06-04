@@ -2,12 +2,12 @@ package com.haruon.groupware.application.draft.service;
 
 import com.haruon.groupware.application.draft.required.DraftRepository;
 import com.haruon.groupware.application.draft.service.dto.ApproversRequest;
-import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import com.haruon.groupware.application.exception.draft.ApprovalLineRequiredException;
 import com.haruon.groupware.application.exception.draft.DraftNotFoundException;
 import com.haruon.groupware.application.file.required.FileStorage;
-import com.haruon.groupware.application.utils.AuthorizationChecker;
+import com.haruon.groupware.application.utils.AuthorizationValidator;
 import com.haruon.groupware.application.utils.Utils;
 import com.haruon.groupware.domain.draft.Draft;
 import com.haruon.groupware.domain.draft.sub.ApproversParam;
@@ -87,7 +87,7 @@ abstract class CommonDraftService {
     }
 
     protected Emp findActiveEmpById(long empId) {
-        return AuthorizationChecker.findActiveEmpById(empRepository, empId);
+        return AuthorizationValidator.findActiveEmpById(empRepository, empId);
     }
 
     protected List<Emp> getEmpListById(Set<Long> participantId){

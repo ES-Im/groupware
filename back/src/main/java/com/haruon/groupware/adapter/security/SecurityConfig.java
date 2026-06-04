@@ -91,11 +91,19 @@ public class SecurityConfig {
                                 "/api/employees/*/dept-managed-info"
                         ).hasRole(SystemRoleCode.DEPT_MANAGER.name())
 
+                        /* Company API */
+                        .requestMatchers(HttpMethod.GET, "/api/company").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/company", "/api/company/**").hasRole(SystemRoleCode.ADMIN.name())
+
                         /* Dept API */
                         .requestMatchers(HttpMethod.GET, "/api/departments", "/api/departments/**").authenticated()
                         .requestMatchers(HttpMethod.PATCH, "/api/departments/**").hasRole(SystemRoleCode.ADMIN.name())
                         .requestMatchers(HttpMethod.POST, "/api/departments/**").hasRole(SystemRoleCode.ADMIN.name())
                         .requestMatchers(HttpMethod.DELETE, "/api/departments/**").hasRole(SystemRoleCode.ADMIN.name())
+
+                        /* ATTENDANCE API*/
+                        .requestMatchers("/api/employees/attendances/me/**").authenticated()
+                        .requestMatchers("/api/employees/attendances/**").hasRole(SystemRoleCode.DEPT_MANAGER.name())
 
                         /* File API */
                         .requestMatchers(HttpMethod.GET,

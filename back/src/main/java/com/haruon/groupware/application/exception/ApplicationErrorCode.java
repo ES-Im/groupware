@@ -72,6 +72,7 @@ public enum ApplicationErrorCode {
     // dept
     DEPT_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND, "DEPT_001", "조회된 부서가 없습니다"),
     DUPLICATE_DEPT_EXCEPTION(HttpStatus.BAD_REQUEST, "DEPT_002", "이미 존재하는 부서 코드입니다"),
+    Dept_IS_NOT_ACTIVE_EXCEPTION(HttpStatus.BAD_REQUEST, "DEPT_003", "비활성화된 부서입니다"),
 
     // company
     COMPANY_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND, "COMPANY_001", "조회된 회사 정보가 없습니다"),

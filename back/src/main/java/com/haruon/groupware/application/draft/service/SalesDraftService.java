@@ -7,7 +7,7 @@ import com.haruon.groupware.application.draft.service.dto.CommonDraftCreateReque
 import com.haruon.groupware.application.draft.service.dto.CommonDraftUpdateRequest;
 import com.haruon.groupware.application.draft.service.dto.SalesDraftCreateRequest;
 import com.haruon.groupware.application.draft.service.dto.SalesDraftUpdateRequest;
-import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
 import com.haruon.groupware.application.exception.draft.DraftTypeMismatchException;
 import com.haruon.groupware.application.exception.franchise.FranchiseNotFoundException;
 import com.haruon.groupware.application.file.required.FileStorage;

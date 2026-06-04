@@ -1,6 +1,6 @@
 package com.haruon.groupware.application.message.service;
 
-import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import com.haruon.groupware.application.exception.message.MessageReceiverRequiredException;
 import com.haruon.groupware.application.message.provided.MessageDraftManagement;
@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Set;
 
 import static com.haruon.groupware.application.message.service.MessageUtils.findMessage;
-import static com.haruon.groupware.application.utils.AuthorizationChecker.findActiveEmpById;
+import static com.haruon.groupware.application.utils.AuthorizationValidator.findActiveEmpById;
 import static com.haruon.groupware.application.utils.Utils.findEmpListById;
 import static com.haruon.groupware.domain.message.Message.createDraft;
 import static com.haruon.groupware.domain.message.Message.createSent;

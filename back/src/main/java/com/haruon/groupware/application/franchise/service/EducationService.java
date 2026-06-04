@@ -1,6 +1,6 @@
 package com.haruon.groupware.application.franchise.service;
 
-import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
 import com.haruon.groupware.application.franchise.provided.EducationManagement;
 import com.haruon.groupware.application.franchise.required.EducationRepository;
 import com.haruon.groupware.application.franchise.service.dto.EducationCreateRequest;

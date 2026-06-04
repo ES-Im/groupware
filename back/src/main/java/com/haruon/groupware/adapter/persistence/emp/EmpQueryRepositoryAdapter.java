@@ -1,8 +1,8 @@
 package com.haruon.groupware.adapter.persistence.emp;
 
-import com.haruon.groupware.application.empInfo.empService.dto.response.*;
-import com.haruon.groupware.application.empInfo.empService.dto.response.projection.EmpInfoForManagementFlat;
-import com.haruon.groupware.application.empInfo.required.EmpQueryRepository;
+import com.haruon.groupware.application.empInfo.emp.required.EmpQueryRepository;
+import com.haruon.groupware.application.empInfo.emp.service.dto.response.*;
+import com.haruon.groupware.application.empInfo.emp.service.dto.response.projection.EmpInfoForManagementFlat;
 import com.haruon.groupware.domain.empInfo.*;
 import com.haruon.groupware.domain.empInfo.enums.EmpStatus;
 import com.haruon.groupware.domain.empInfo.enums.PositionCode;

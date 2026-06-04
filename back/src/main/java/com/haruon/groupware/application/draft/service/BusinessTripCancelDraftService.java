@@ -4,7 +4,7 @@ import com.haruon.groupware.application.draft.provided.BusinessTripCancelDraftMa
 import com.haruon.groupware.application.draft.required.DraftRepository;
 import com.haruon.groupware.application.draft.service.dto.CancelDraftCreateRequest;
 import com.haruon.groupware.application.draft.service.dto.CommonDraftCreateRequest;
-import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import com.haruon.groupware.application.exception.draft.DraftNotApprovedException;
 import com.haruon.groupware.application.exception.draft.DraftNotFoundException;

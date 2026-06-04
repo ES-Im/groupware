@@ -1,6 +1,6 @@
 package com.haruon.groupware.adapter.security.empDtails;
 
-import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
 import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.empInfo.enums.EmpStatus;
 import lombok.RequiredArgsConstructor;

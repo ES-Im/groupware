@@ -1,13 +1,13 @@
 package com.haruon.groupware.adapter.docs.webAPI.emp;
 
 import com.haruon.groupware.adapter.docs.RestDocsSupport;
-import com.haruon.groupware.adapter.webapi.emp.EmpMeAPI;
-import com.haruon.groupware.application.empInfo.empService.dto.request.EmpUpdateRequestBySelf;
-import com.haruon.groupware.application.empInfo.empService.dto.response.BelongingInfo;
-import com.haruon.groupware.application.empInfo.empService.dto.response.EmpFileListInfo;
-import com.haruon.groupware.application.empInfo.empService.dto.response.EmpInfoResponse;
-import com.haruon.groupware.application.empInfo.provided.EmpAccountManager;
-import com.haruon.groupware.application.empInfo.provided.EmpAccountRetriever;
+import com.haruon.groupware.adapter.webapi.emp.account.EmpMeAPI;
+import com.haruon.groupware.application.empInfo.emp.provided.EmpAccountManager;
+import com.haruon.groupware.application.empInfo.emp.provided.EmpAccountRetriever;
+import com.haruon.groupware.application.empInfo.emp.service.dto.request.EmpUpdateRequestBySelf;
+import com.haruon.groupware.application.empInfo.emp.service.dto.response.BelongingInfo;
+import com.haruon.groupware.application.empInfo.emp.service.dto.response.EmpFileListInfo;
+import com.haruon.groupware.application.empInfo.emp.service.dto.response.EmpInfoResponse;
 import com.haruon.groupware.application.exception.common.role.ActiveEmployeeNotFoundException;
 import com.haruon.groupware.domain.empInfo.enums.FileType;
 import com.haruon.groupware.domain.empInfo.enums.PositionCode;

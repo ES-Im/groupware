@@ -5,11 +5,12 @@ import com.haruon.groupware.adapter.redis.RefreshTokenRedis;
 import com.haruon.groupware.adapter.security.JwtCookieManager;
 import com.haruon.groupware.application.auth.provided.AuthManagement;
 import com.haruon.groupware.application.auth.required.TokenParser;
+import com.haruon.groupware.application.company.required.CompanyRepository;
 import com.haruon.groupware.application.dept.required.DeptRepository;
-import com.haruon.groupware.application.empInfo.provided.EmpAccountManager;
-import com.haruon.groupware.application.empInfo.required.EmpLeaveRepository;
-import com.haruon.groupware.application.empInfo.required.EmpQueryRepository;
-import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.empInfo.emp.provided.EmpAccountManager;
+import com.haruon.groupware.application.empInfo.emp.required.EmpQueryRepository;
+import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
+import com.haruon.groupware.application.empInfo.leave.required.EmpLeaveRepository;
 import com.haruon.groupware.domain.empInfo.Dept;
 import com.haruon.groupware.domain.empInfo.EmpPasswordEncoder;
 import jakarta.persistence.EntityManager;
@@ -43,6 +44,7 @@ public class IntegrationTestSupport {
     @Autowired protected TokenParser tokenParser;
     @Autowired protected EmpPasswordEncoder encoder;
 
+    @Autowired protected CompanyRepository companyRepository;
     @Autowired protected DeptRepository deptRepository;
     @Autowired protected EmpRepository empRepository;
     @Autowired protected EmpLeaveRepository empLeaveRepository;
@@ -70,6 +72,7 @@ public class IntegrationTestSupport {
             entityManager.createQuery("update Dept d set d.parentDept = null").executeUpdate();
             entityManager.clear();
 
+            companyRepository.deleteAll();
             empLeaveRepository.deleteAll();
             empRepository.deleteAll();
             deptRepository.deleteAll();

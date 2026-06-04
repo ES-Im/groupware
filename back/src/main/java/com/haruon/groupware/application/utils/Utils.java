@@ -1,6 +1,6 @@
 package com.haruon.groupware.application.utils;
 
-import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
 import com.haruon.groupware.application.exception.common.EmployeeNotFoundException;
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import com.haruon.groupware.domain.empInfo.Emp;
@@ -11,7 +11,7 @@ import java.time.ZoneId;
 import java.util.List;
 import java.util.Set;
 
-import static com.haruon.groupware.application.utils.AuthorizationChecker.findActiveEmpById;
+import static com.haruon.groupware.application.utils.AuthorizationValidator.findActiveEmpById;
 
 public class Utils {
 

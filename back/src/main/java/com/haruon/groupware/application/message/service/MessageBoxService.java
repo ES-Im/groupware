@@ -1,6 +1,6 @@
 package com.haruon.groupware.application.message.service;
 
-import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
 import com.haruon.groupware.application.message.provided.ReceivedMessageManagement;
 import com.haruon.groupware.application.message.provided.SentMessageManagement;
 import com.haruon.groupware.application.message.required.MessageRepository;

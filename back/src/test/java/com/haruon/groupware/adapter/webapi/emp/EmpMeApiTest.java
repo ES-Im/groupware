@@ -2,8 +2,8 @@ package com.haruon.groupware.adapter.webapi.emp;
 
 import com.haruon.groupware.adapter.IntegrationTestSupport;
 import com.haruon.groupware.adapter.persistence.emp.EmpQueryRepositoryAdapter;
-import com.haruon.groupware.application.empInfo.empService.dto.request.EmpUpdateRequestBySelf;
-import com.haruon.groupware.application.empInfo.empService.dto.response.EmpFileListInfo;
+import com.haruon.groupware.application.empInfo.emp.service.dto.request.EmpUpdateRequestBySelf;
+import com.haruon.groupware.application.empInfo.emp.service.dto.response.EmpFileListInfo;
 import com.haruon.groupware.domain.empInfo.Emp;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;

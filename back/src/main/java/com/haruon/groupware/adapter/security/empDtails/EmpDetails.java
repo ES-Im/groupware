@@ -1,6 +1,6 @@
 package com.haruon.groupware.adapter.security.empDtails;
 
-import com.haruon.groupware.application.empInfo.empService.dto.response.BelongingInfo;
+import com.haruon.groupware.application.empInfo.emp.service.dto.response.BelongingInfo;
 import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.empInfo.enums.EmpStatus;
 import com.haruon.groupware.domain.empInfo.enums.SystemRoleCode;

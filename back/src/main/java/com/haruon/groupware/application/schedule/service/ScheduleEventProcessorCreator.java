@@ -1,7 +1,7 @@
 package com.haruon.groupware.application.schedule.service;
 
 import com.haruon.groupware.application.draft.required.DraftRepository;
-import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
 import com.haruon.groupware.application.exception.schedule.EditForbiddenScheduleException;
 import com.haruon.groupware.application.exception.schedule.UnsupportedScheduleTypeException;
 import com.haruon.groupware.application.meeting.required.MeetingRepository;
@@ -12,7 +12,7 @@ import com.haruon.groupware.application.schedule.contentFormatter.ScheduleConten
 import com.haruon.groupware.application.schedule.provided.ScheduleEventProcessor;
 import com.haruon.groupware.application.schedule.required.ScheduleQueryRepository;
 import com.haruon.groupware.application.schedule.required.ScheduleRepository;
-import com.haruon.groupware.application.utils.CompanyPolicyPort;
+import com.haruon.groupware.application.utils.required.CompanyPolicyPort;
 import com.haruon.groupware.domain.draft.BusinessTripDraft;
 import com.haruon.groupware.domain.draft.BusinessTripParticipant;
 import com.haruon.groupware.domain.draft.Draft;

@@ -1,9 +1,10 @@
 package com.haruon.groupware.application.empInfo.provided;
 
 import com.haruon.groupware.application.TestIntegrationConfig;
-import com.haruon.groupware.application.empInfo.required.AttendanceRepository;
-import com.haruon.groupware.application.empInfo.required.EmpRepository;
-import com.haruon.groupware.application.exception.empInfo.CheckInRecordNotFoundException;
+import com.haruon.groupware.application.empInfo.attendance.provided.AttendanceRecord;
+import com.haruon.groupware.application.empInfo.attendance.required.AttendanceRepository;
+import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
+import com.haruon.groupware.application.exception.empInfo.attendance.CheckInRecordNotFoundException;
 import com.haruon.groupware.domain.empInfo.Emp;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.*;
@@ -68,7 +69,7 @@ record AttendanceRecordTest(
                 }), DynamicTest.dynamicTest("퇴근을 다시 찍을 수 있다.", () -> {
                     attendanceRepository.findByEmpIdAndAttendanceDate(emp.getId(), date).stream().findFirst().ifPresent(att -> {
                         System.out.println("===== 퇴근 재기록 쿼리 시작 =====");
-                        attendanceRecord.rerecordEndAtByEmp(att.getId(), LocalDateTime.of(date, endAt.plusHours(1)));
+                        attendanceRecord.recordCheckOut(emp.getId(), LocalDateTime.of(date, endAt.plusHours(1)));
                         System.out.println("===== 퇴근 재기록 쿼리 종료 =====");
 
                         attendanceRepository.findByEmpIdAndAttendanceDate(emp.getId(), date).stream().findFirst().ifPresent(att2 -> {

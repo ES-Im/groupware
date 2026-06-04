@@ -5,7 +5,7 @@ import com.haruon.groupware.application.board.required.BoardRepository;
 import com.haruon.groupware.application.board.required.CategoryRepository;
 import com.haruon.groupware.application.board.service.dto.BoardCreateRequest;
 import com.haruon.groupware.application.board.service.dto.BoardUpdateRequest;
-import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import com.haruon.groupware.application.exception.common.role.PermissionDeniedException;
 import com.haruon.groupware.domain.board.Board;

@@ -2,7 +2,7 @@ package com.haruon.groupware.application.board.provided;
 
 import com.haruon.groupware.application.TestIntegrationConfig;
 import com.haruon.groupware.application.board.required.CategoryRepository;
-import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
 import com.haruon.groupware.application.exception.common.role.PermissionDeniedException;
 import com.haruon.groupware.domain.board.Category;
 import com.haruon.groupware.domain.empInfo.Emp;

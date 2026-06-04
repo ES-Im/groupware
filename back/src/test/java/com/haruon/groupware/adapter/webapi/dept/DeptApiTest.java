@@ -2,7 +2,7 @@ package com.haruon.groupware.adapter.webapi.dept;
 
 import com.haruon.groupware.adapter.IntegrationTestSupport;
 import com.haruon.groupware.application.dept.provided.DeptRetriever;
-import com.haruon.groupware.application.empInfo.provided.EmpAccountRetriever;
+import com.haruon.groupware.application.empInfo.emp.provided.EmpAccountRetriever;
 import com.haruon.groupware.domain.empInfo.Emp;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;

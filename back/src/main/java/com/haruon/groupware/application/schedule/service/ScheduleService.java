@@ -1,10 +1,10 @@
 package com.haruon.groupware.application.schedule.service;
 
-import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
 import com.haruon.groupware.application.exception.schedule.NotManualScheduleException;
 import com.haruon.groupware.application.schedule.provided.ScheduleManagement;
 import com.haruon.groupware.application.schedule.required.ScheduleRepository;
-import com.haruon.groupware.application.utils.CompanyPolicyPort;
+import com.haruon.groupware.application.utils.required.CompanyPolicyPort;
 import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.schedule.Schedule;
 import com.haruon.groupware.domain.schedule.ScheduleType;
@@ -19,7 +19,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import static com.haruon.groupware.application.schedule.service.ScheduleSupport.getSchedulesById;
-import static com.haruon.groupware.application.utils.AuthorizationChecker.findActiveEmpById;
+import static com.haruon.groupware.application.utils.AuthorizationValidator.findActiveEmpById;
 import static com.haruon.groupware.application.utils.Utils.findEmpListById;
 import static java.util.Objects.requireNonNull;
 

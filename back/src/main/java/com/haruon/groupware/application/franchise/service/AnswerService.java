@@ -1,6 +1,6 @@
 package com.haruon.groupware.application.franchise.service;
 
-import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
 import com.haruon.groupware.application.exception.franchise.FranchiseInquiryNotFoundException;
 import com.haruon.groupware.application.franchise.provided.AnswerManagement;
 import com.haruon.groupware.application.franchise.required.FranchiseInquiryRepository;

@@ -1,12 +1,13 @@
 package com.haruon.groupware.application.empInfo.provided;
 
 import com.haruon.groupware.application.TestIntegrationConfig;
-import com.haruon.groupware.application.empInfo.attendanceService.AttendanceClosing;
-import com.haruon.groupware.application.empInfo.attendanceService.dto.AttendanceCloseParam;
-import com.haruon.groupware.application.empInfo.required.AttendanceRepository;
-import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.empInfo.attendance.provided.AttendanceRecord;
+import com.haruon.groupware.application.empInfo.attendance.required.AttendanceRepository;
+import com.haruon.groupware.application.empInfo.attendance.service.AttendanceClosing;
+import com.haruon.groupware.application.empInfo.attendance.service.dto.request.AttendanceCloseRequest;
+import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
 import com.haruon.groupware.application.schedule.required.ScheduleRepository;
-import com.haruon.groupware.application.utils.CompanyPolicyPort;
+import com.haruon.groupware.application.utils.required.CompanyPolicyPort;
 import com.haruon.groupware.domain.empInfo.Attendance;
 import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.empInfo.enums.AttendanceStatus;
@@ -88,9 +89,9 @@ record AttendanceClosingTest(
         Emp emp = saveApprovedEmp(empRepository);
         LocalDate date = LocalDate.of(2026, 1, 1);
         saveAttendanceByClosing(emp, date, startAt, endAt);
-        AttendanceCloseParam attendanceCloseParam = new AttendanceCloseParam(emp.getId(), date);
+        AttendanceCloseRequest attendanceCloseRequest = new AttendanceCloseRequest(emp.getId(), date);
 
-        attendanceClosing.closeAttendance(attendanceCloseParam);
+        attendanceClosing.closeAttendance(attendanceCloseRequest);
 
         attendanceRepository.findByEmpIdAndAttendanceDate(emp.getId(), date).stream().findFirst().ifPresent(att -> {
             assertThat(att.getAttendanceStatus()).isEqualTo(expectedStatus);
@@ -172,7 +173,7 @@ record AttendanceClosingTest(
         );
         scheduleRepository.save(schedule);
 
-        AttendanceCloseParam param = new AttendanceCloseParam(emp.getId(), date);
+        AttendanceCloseRequest param = new AttendanceCloseRequest(emp.getId(), date);
         attendanceClosing.closeAttendance(param);
 
         attendanceRepository.findByEmpIdAndAttendanceDate(emp.getId(), date).stream().findFirst().ifPresent(att -> {
@@ -280,7 +281,7 @@ record AttendanceClosingTest(
         );
         scheduleRepository.save(schedule);
 
-        AttendanceCloseParam closeParam = new AttendanceCloseParam(emp.getId(), date);
+        AttendanceCloseRequest closeParam = new AttendanceCloseRequest(emp.getId(), date);
         attendanceClosing.closeAttendance(closeParam);
 
         List<Attendance> attendances = attendanceRepository.findByEmpIdAndAttendanceDate(emp.getId(), date);
@@ -322,7 +323,7 @@ record AttendanceClosingTest(
         );
         scheduleRepository.save(schedule);
 
-        AttendanceCloseParam param = new AttendanceCloseParam(emp.getId(), date);
+        AttendanceCloseRequest param = new AttendanceCloseRequest(emp.getId(), date);
         attendanceClosing.closeAttendance(param);
 
         Attendance att = attendanceRepository.findByEmpIdAndAttendanceDate(emp.getId(), date)
@@ -352,7 +353,7 @@ record AttendanceClosingTest(
         );
         scheduleRepository.save(schedule);
 
-        AttendanceCloseParam param = new AttendanceCloseParam(emp.getId(), date);
+        AttendanceCloseRequest param = new AttendanceCloseRequest(emp.getId(), date);
         attendanceClosing.closeAttendance(param);
 
         Attendance att = attendanceRepository.findByEmpIdAndAttendanceDate(emp.getId(), date)
@@ -388,7 +389,7 @@ record AttendanceClosingTest(
         schedule.cancel();
         scheduleRepository.save(schedule);
 
-        AttendanceCloseParam param = new AttendanceCloseParam(emp.getId(), date);
+        AttendanceCloseRequest param = new AttendanceCloseRequest(emp.getId(), date);
         attendanceClosing.closeAttendance(param);
 
         attendanceRepository.findByEmpIdAndAttendanceDate(emp.getId(), date)
@@ -418,7 +419,7 @@ record AttendanceClosingTest(
         schedule.cancel();
         scheduleRepository.save(schedule);
 
-        AttendanceCloseParam param = new AttendanceCloseParam(emp.getId(), date);
+        AttendanceCloseRequest param = new AttendanceCloseRequest(emp.getId(), date);
         attendanceClosing.closeAttendance(param);
 
         attendanceRepository.findByEmpIdAndAttendanceDate(emp.getId(), date)
@@ -453,7 +454,7 @@ record AttendanceClosingTest(
         schedule.cancel();
         scheduleRepository.save(schedule);
 
-        AttendanceCloseParam param = new AttendanceCloseParam(emp.getId(), date);
+        AttendanceCloseRequest param = new AttendanceCloseRequest(emp.getId(), date);
         attendanceClosing.closeAttendance(param);
 
 
@@ -483,7 +484,7 @@ record AttendanceClosingTest(
         schedule.cancel();
         scheduleRepository.save(schedule);
 
-        AttendanceCloseParam param = new AttendanceCloseParam(emp.getId(), date);
+        AttendanceCloseRequest param = new AttendanceCloseRequest(emp.getId(), date);
         attendanceClosing.closeAttendance(param);
 
         assertThat(attendanceRepository.findByEmpIdAndAttendanceDate(emp.getId(), date)).hasSize(1);

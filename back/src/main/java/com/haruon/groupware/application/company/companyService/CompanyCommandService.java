@@ -6,7 +6,7 @@ import com.haruon.groupware.application.company.companyService.dto.request.Compa
 import com.haruon.groupware.application.company.companyService.dto.request.CompanyRegisterRequest;
 import com.haruon.groupware.application.company.provided.CompanyManagement;
 import com.haruon.groupware.application.company.required.CompanyRepository;
-import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import com.haruon.groupware.application.exception.company.CompanyAlreadyExistsException;
 import com.haruon.groupware.application.exception.company.CompanyNotFoundException;
@@ -15,7 +15,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import static com.haruon.groupware.application.utils.AuthorizationChecker.checkAdminById;
+import static com.haruon.groupware.application.utils.AuthorizationValidator.checkAdminById;
 
 @Service
 @Transactional

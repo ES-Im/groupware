@@ -2,14 +2,14 @@ package com.haruon.groupware.application.board.service;
 
 import com.haruon.groupware.application.board.provided.CategoryManagement;
 import com.haruon.groupware.application.board.required.CategoryRepository;
-import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
 import com.haruon.groupware.domain.board.Category;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import static com.haruon.groupware.application.board.service.BoardUtils.findCategory;
-import static com.haruon.groupware.application.utils.AuthorizationChecker.checkAdminById;
+import static com.haruon.groupware.application.utils.AuthorizationValidator.checkAdminById;
 
 @Service
 @RequiredArgsConstructor

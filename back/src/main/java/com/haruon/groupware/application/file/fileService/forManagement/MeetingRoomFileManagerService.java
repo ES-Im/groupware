@@ -1,6 +1,6 @@
 package com.haruon.groupware.application.file.fileService.forManagement;
 
-import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import com.haruon.groupware.application.exception.file.FileNotFoundException;
 import com.haruon.groupware.application.exception.meeting.MeetingRoomNotFoundException;
@@ -14,7 +14,7 @@ import com.haruon.groupware.application.meeting.required.MeetingRoomRepository;
 import com.haruon.groupware.domain.meeting.MeetingRoom;
 import org.springframework.stereotype.Service;
 
-import static com.haruon.groupware.application.utils.AuthorizationChecker.checkFacilityRoleEmp;
+import static com.haruon.groupware.application.utils.AuthorizationValidator.checkFacilityRoleEmp;
 
 @Service
 public class MeetingRoomFileManagerService extends AbstractFileManagerService<MeetingRoomFileUploadRequest> {

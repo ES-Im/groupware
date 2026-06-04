@@ -9,7 +9,7 @@ import com.haruon.groupware.application.dept.required.DeptRepository;
 import com.haruon.groupware.application.draft.provided.GeneralDraftManagement;
 import com.haruon.groupware.application.draft.required.DraftRepository;
 import com.haruon.groupware.application.draft.service.dto.CommonDraftCreateRequest;
-import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
 import com.haruon.groupware.application.file.dto.request.*;
 import com.haruon.groupware.application.file.dto.result.FileDisposition;
 import com.haruon.groupware.application.file.dto.result.FileResourceResponse;

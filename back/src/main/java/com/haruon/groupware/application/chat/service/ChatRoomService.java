@@ -4,7 +4,7 @@ import com.haruon.groupware.application.chat.provided.ChatRoomCleanup;
 import com.haruon.groupware.application.chat.provided.ChatRoomManagement;
 import com.haruon.groupware.application.chat.required.ChatRepository;
 import com.haruon.groupware.application.chat.required.ChatRoomRepository;
-import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
 import com.haruon.groupware.domain.chat.ChatMessage;
 import com.haruon.groupware.domain.chat.ChatRoom;
 import com.haruon.groupware.domain.empInfo.Emp;
@@ -18,7 +18,7 @@ import java.util.Set;
 
 import static com.haruon.groupware.application.chat.service.ChatUtils.findChat;
 import static com.haruon.groupware.application.chat.service.ChatUtils.findChatRoom;
-import static com.haruon.groupware.application.utils.AuthorizationChecker.findActiveEmpById;
+import static com.haruon.groupware.application.utils.AuthorizationValidator.findActiveEmpById;
 import static com.haruon.groupware.application.utils.Utils.findEmpListById;
 import static com.haruon.groupware.domain.chat.ChatRoom.createRoom;
 

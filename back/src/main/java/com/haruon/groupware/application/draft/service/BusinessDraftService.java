@@ -6,7 +6,7 @@ import com.haruon.groupware.application.draft.service.dto.BusinessTripDraftCreat
 import com.haruon.groupware.application.draft.service.dto.BusinessTripDraftUpdateRequest;
 import com.haruon.groupware.application.draft.service.dto.CommonDraftCreateRequest;
 import com.haruon.groupware.application.draft.service.dto.CommonDraftUpdateRequest;
-import com.haruon.groupware.application.empInfo.required.EmpRepository;
+import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
 import com.haruon.groupware.application.exception.draft.DraftTypeMismatchException;
 import com.haruon.groupware.application.file.required.FileStorage;
 import com.haruon.groupware.domain.draft.BusinessTripDraft;
