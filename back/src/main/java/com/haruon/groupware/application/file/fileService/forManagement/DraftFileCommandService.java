@@ -14,7 +14,7 @@ import com.haruon.groupware.application.file.required.FileStoredInfoQueryReposit
 import com.haruon.groupware.domain.draft.Draft;
 import org.springframework.stereotype.Service;
 
-import static com.haruon.groupware.application.utils.AuthorizationValidator.findActiveEmpById;
+import static com.haruon.groupware.application.utils.AuthValidator.findActiveEmpById;
 
 @Service
 public class DraftFileCommandService extends AbstractFileManagerService<DraftFileUploadRequest> {

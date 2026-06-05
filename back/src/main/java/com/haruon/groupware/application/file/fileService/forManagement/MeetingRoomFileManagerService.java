@@ -1,6 +1,5 @@
 package com.haruon.groupware.application.file.fileService.forManagement;
 
-import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import com.haruon.groupware.application.exception.file.FileNotFoundException;
 import com.haruon.groupware.application.exception.meeting.MeetingRoomNotFoundException;
@@ -11,16 +10,17 @@ import com.haruon.groupware.application.file.fileService.FileDomain;
 import com.haruon.groupware.application.file.required.FileStorage;
 import com.haruon.groupware.application.file.required.FileStoredInfoQueryRepository;
 import com.haruon.groupware.application.meeting.required.MeetingRoomRepository;
+import com.haruon.groupware.application.utils.required.AuthorizationQueryRepository;
 import com.haruon.groupware.domain.meeting.MeetingRoom;
 import org.springframework.stereotype.Service;
 
-import static com.haruon.groupware.application.utils.AuthorizationValidator.checkFacilityRoleEmp;
+import static com.haruon.groupware.application.utils.AuthValidator.checkFacilityRoleEmp;
 
 @Service
 public class MeetingRoomFileManagerService extends AbstractFileManagerService<MeetingRoomFileUploadRequest> {
 
     private final MeetingRoomRepository meetingRoomRepository;
-    private final EmpRepository empRepository;
+    private final AuthorizationQueryRepository authorizationQueryRepository;
 
     @Override
     public FileDomain domain() {
@@ -31,11 +31,11 @@ public class MeetingRoomFileManagerService extends AbstractFileManagerService<Me
             FileStoredInfoQueryRepository fileStoredInfoQueryRepository,
             FileStorage fileStorage,
             MeetingRoomRepository meetingRoomRepository,
-            EmpRepository empRepository
+            AuthorizationQueryRepository authorizationQueryRepository
     ) {
         super(fileStoredInfoQueryRepository, fileStorage);
         this.meetingRoomRepository = meetingRoomRepository;
-        this.empRepository = empRepository;
+        this.authorizationQueryRepository = authorizationQueryRepository;
     }
 
     @Override
@@ -74,7 +74,7 @@ public class MeetingRoomFileManagerService extends AbstractFileManagerService<Me
     }
 
     private void validateEditor(Long empId) {
-        checkFacilityRoleEmp(empRepository, empId);
+        checkFacilityRoleEmp(authorizationQueryRepository, empId);
     }
 
     private MeetingRoom findRoomById(Long roomId) {

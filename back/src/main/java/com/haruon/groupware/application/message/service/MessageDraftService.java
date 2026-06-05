@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Set;
 
 import static com.haruon.groupware.application.message.service.MessageUtils.findMessage;
-import static com.haruon.groupware.application.utils.AuthorizationValidator.findActiveEmpById;
+import static com.haruon.groupware.application.utils.AuthValidator.findActiveEmpById;
 import static com.haruon.groupware.application.utils.Utils.findEmpListById;
 import static com.haruon.groupware.domain.message.Message.createDraft;
 import static com.haruon.groupware.domain.message.Message.createSent;

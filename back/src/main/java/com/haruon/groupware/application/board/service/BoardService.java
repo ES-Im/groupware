@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
 
 import static com.haruon.groupware.application.board.service.BoardUtils.findBoard;
 import static com.haruon.groupware.application.board.service.BoardUtils.findVisableCategory;
-import static com.haruon.groupware.application.utils.AuthorizationValidator.findActiveEmpById;
+import static com.haruon.groupware.application.utils.AuthValidator.findActiveEmpById;
 
 @Transactional
 @Service

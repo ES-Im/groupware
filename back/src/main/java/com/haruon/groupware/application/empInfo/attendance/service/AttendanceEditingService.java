@@ -4,11 +4,10 @@ import com.haruon.groupware.application.empInfo.attendance.provided.AttendanceEd
 import com.haruon.groupware.application.empInfo.attendance.required.AttendanceRepository;
 import com.haruon.groupware.application.empInfo.attendance.service.dto.request.ApproveAttendanceByDeptManagerRequest;
 import com.haruon.groupware.application.empInfo.attendance.service.dto.request.EditAttendanceByDeptManagerRequest;
-import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
 import com.haruon.groupware.application.exception.empInfo.attendance.AttendanceEmpMismatchException;
 import com.haruon.groupware.application.exception.empInfo.attendance.WorkTimeRangeRequiredException;
-import com.haruon.groupware.application.utils.AuthorizationValidator;
-import com.haruon.groupware.application.utils.AuthorizationValidator.DeptManagerInfo;
+import com.haruon.groupware.application.utils.projection.DeptManagerAndTargetEmpInfo;
+import com.haruon.groupware.application.utils.required.AuthorizationQueryRepository;
 import com.haruon.groupware.application.utils.required.CompanyPolicyPort;
 import com.haruon.groupware.domain.empInfo.Attendance;
 import com.haruon.groupware.domain.empInfo.Emp;
@@ -21,6 +20,7 @@ import java.time.LocalTime;
 
 import static com.haruon.groupware.application.empInfo.attendance.service.AttendanceUtils.findAttendanceById;
 import static com.haruon.groupware.application.empInfo.attendance.service.AttendanceUtils.getStatusByRecognizedHours;
+import static com.haruon.groupware.application.utils.AuthValidator.checkSameDeptManagerByManagerIdAndEmpId;
 
 @Service
 @Transactional
@@ -28,18 +28,22 @@ import static com.haruon.groupware.application.empInfo.attendance.service.Attend
 public class AttendanceEditingService implements AttendanceEditing {
 
     private final AttendanceRepository attendanceRepository;
-    private final EmpRepository empRepository;
+    private final AuthorizationQueryRepository authorizationQueryRepository;
     private final CompanyPolicyPort companyPolicy;
 
 
     @Override
     public void updateApproveAttendance(Long managerId, Long attendanceId, ApproveAttendanceByDeptManagerRequest param) {
-        DeptManagerInfo deptManagerInfo = AuthorizationValidator.checkDeptManagerByIdAndEmpId(empRepository, managerId, param.targetEmpId());
+        DeptManagerAndTargetEmpInfo deptManagerInfo = checkSameDeptManagerByManagerIdAndEmpId(
+                authorizationQueryRepository,
+                managerId,
+                param.targetEmpId()
+        );
 
         Attendance attendance = findAttendanceById(attendanceRepository, attendanceId);
 
-        Emp manager = deptManagerInfo.manager();
-        Emp targetEmp = deptManagerInfo.targetEmp();
+        Emp manager = deptManagerInfo.managerEmp();
+        Emp targetEmp = deptManagerInfo.editedTargetEmp();
 
         if(!targetEmp.equals(attendance.getEmp())) throw new AttendanceEmpMismatchException();
 
@@ -48,10 +52,14 @@ public class AttendanceEditingService implements AttendanceEditing {
 
     @Override
     public void updateAttendanceByDeptManager(Long managerId, Long attendanceId, EditAttendanceByDeptManagerRequest param) {
-        DeptManagerInfo deptManagerInfo = AuthorizationValidator.checkDeptManagerByIdAndEmpId(empRepository, managerId, param.targetEmpId());
+        DeptManagerAndTargetEmpInfo deptManagerInfo = checkSameDeptManagerByManagerIdAndEmpId(
+                authorizationQueryRepository,
+                managerId,
+                param.targetEmpId()
+        );
         Attendance attendance = findAttendanceById(attendanceRepository, attendanceId);
-        Emp manager = deptManagerInfo.manager();
-        Emp targetEmp = deptManagerInfo.targetEmp();
+        Emp manager = deptManagerInfo.managerEmp();
+        Emp targetEmp = deptManagerInfo.editedTargetEmp();
 
         if(!targetEmp.equals(attendance.getEmp())) throw new AttendanceEmpMismatchException();
 

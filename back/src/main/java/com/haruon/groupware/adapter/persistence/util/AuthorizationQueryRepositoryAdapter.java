@@ -1,17 +1,19 @@
 package com.haruon.groupware.adapter.persistence.util;
 
+import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
+import com.haruon.groupware.application.utils.projection.DeptManagerAndTargetEmpInfo;
 import com.haruon.groupware.application.utils.required.AuthorizationQueryRepository;
 import com.haruon.groupware.domain.empInfo.QDept;
 import com.haruon.groupware.domain.empInfo.QEmp;
 import com.haruon.groupware.domain.empInfo.QEmpBelongings;
+import com.haruon.groupware.domain.empInfo.enums.EmpStatus;
 import com.haruon.groupware.domain.empInfo.enums.SystemRoleCode;
-import com.querydsl.core.types.Expression;
-import com.querydsl.core.types.dsl.CaseBuilder;
+import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
-
-import java.util.Objects;
 
 @Slf4j
 @Repository
@@ -30,29 +32,115 @@ public class AuthorizationQueryRepositoryAdapter implements AuthorizationQueryRe
     }
 
     @Override
-    public boolean existsCurrentBelongingByManagerEmpIdAndDeptId(Long empId, Long deptId) {
-        Long managerDeptId = query.select(dept.id)
-                .from(belongings.dept)
-                .where(belongings.emp.id.eq(empId))
-                .fetchOne();
+    public boolean existsAdminOrCurrentDeptManagerByEmpIdAndDeptId(Long empId, Long deptId) {
+        if(empId == null || deptId == null) throw new RequiredValueMissingException();
+        if (hasAdminRoleByEmpId(empId)) return true;
 
-        return Objects.equals(managerDeptId, deptId);
+        Integer exists = query.selectOne()
+                .from(belongings)
+                .join(belongings.emp, emp).on(emp.systemRoles.contains(SystemRoleCode.DEPT_MANAGER))
+                .join(belongings.dept, dept).on(dept.isActive.isTrue())
+                .where(
+                        emp.id.eq(empId),
+                        dept.id.eq(deptId),
+                        belongings.endAt.isNull(),
+                        isActiveEmp()
+                ).fetchFirst();
+
+        return exists != null;
     }
 
     @Override
-    public boolean existsSameCurrentDeptByManagerIdAndTargetId(Long managerId, Long targetEmpId) {
-        return false;
+    public DeptManagerAndTargetEmpInfo findDeptManagerInfoIfSameCurrentDeptOrAdmin(     //todo - alias 나눠서 한 거 gitbook 정리
+            Long managerId,
+            Long targetEmpId
+    ) {
+        if(managerId == null || targetEmpId == null) throw new RequiredValueMissingException();
+
+        QEmp manager = new QEmp("manager");
+        QEmp targetEmp = new QEmp("targetEmp");
+        QEmpBelongings managerBelonging = new QEmpBelongings("managerBelonging");
+        QEmpBelongings targetBelonging = new QEmpBelongings("targetBelonging");
+
+        BooleanExpression sameCurrentDept = JPAExpressions
+                .selectOne()
+                .from(managerBelonging, targetBelonging)
+                .where(
+                        managerBelonging.emp.eq(manager),
+                        targetBelonging.emp.eq(targetEmp),
+
+                        managerBelonging.endAt.isNull(),
+                        targetBelonging.endAt.isNull(),
+
+                        managerBelonging.dept.eq(targetBelonging.dept)
+                )
+                .exists();
+
+        return query
+                .select(Projections.constructor(
+                        DeptManagerAndTargetEmpInfo.class,
+                        manager,
+                        targetEmp
+                ))
+                .from(manager, targetEmp)
+                .where(
+                        manager.id.eq(managerId),
+                        isActiveEmp(manager),
+
+                        targetEmp.id.eq(targetEmpId),
+
+                        manager.systemRoles.contains(SystemRoleCode.ADMIN)
+                        .or(
+                                manager.systemRoles.contains(SystemRoleCode.DEPT_MANAGER)
+                                        .and(sameCurrentDept)
+                        )
+                )
+                .fetchFirst();
     }
 
     @Override
-    public boolean existsByEmpIdAndSystemRoleCode(Long empId, SystemRoleCode code) {
-        return false;
+    public boolean existsActiveEmpByIdAndSystemRoleCodeOrAdmin(Long empId, SystemRoleCode code) {
+        if(empId == null || code == null) throw new RequiredValueMissingException();
+
+        Integer exists = query.selectOne()
+                .from(emp)
+                .where(
+                        emp.id.eq(empId),
+                        isActiveEmp(),
+                        hasSystemRoleOrAdminRole(code)
+                )
+                .fetchFirst();
+
+        return exists != null;
     }
 
-    private Expression<Boolean> isSameDept(QDept dept1, QDept dept2) {
-        return new CaseBuilder()
-                .when(dept1.eq(dept2))
-                .then(true)
-                .otherwise(false);
+    private BooleanExpression isActiveEmp() {
+        return emp.status.eq(EmpStatus.ACTIVE);
     }
+
+    private BooleanExpression isActiveEmp(QEmp targetEmp) {
+        return targetEmp.status.eq(EmpStatus.ACTIVE);
+    }
+
+    private BooleanExpression hasSystemRoleOrAdminRole(SystemRoleCode role) {
+        if (role == SystemRoleCode.ADMIN) {
+            return emp.systemRoles.contains(SystemRoleCode.ADMIN);
+        }
+
+        return emp.systemRoles.contains(SystemRoleCode.ADMIN)
+                .or(emp.systemRoles.contains(role));
+    }
+
+    private boolean hasAdminRoleByEmpId(Long empId) {
+        Integer hasAdminRole = query.selectOne()
+                .from(emp)
+                .where(
+                        emp.id.eq(empId),
+                        isActiveEmp(),
+                        emp.systemRoles.contains(SystemRoleCode.ADMIN))
+                .fetchFirst();
+
+        return hasAdminRole != null;
+    }
+
 }

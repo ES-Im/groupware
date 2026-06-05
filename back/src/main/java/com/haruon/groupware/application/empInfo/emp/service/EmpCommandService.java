@@ -9,8 +9,8 @@ import com.haruon.groupware.application.exception.common.RequiredValueMissingExc
 import com.haruon.groupware.application.exception.common.role.PermissionDeniedException;
 import com.haruon.groupware.application.exception.empInfo.emp.*;
 import com.haruon.groupware.application.file.required.FileStorage;
-import com.haruon.groupware.application.utils.AuthorizationValidator;
-import com.haruon.groupware.application.utils.AuthorizationValidator.DeptManagerInfo;
+import com.haruon.groupware.application.utils.projection.DeptManagerAndTargetEmpInfo;
+import com.haruon.groupware.application.utils.required.AuthorizationQueryRepository;
 import com.haruon.groupware.application.utils.required.CompanyPolicyPort;
 import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.empInfo.EmpLeave;
@@ -26,7 +26,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.Set;
 
-import static com.haruon.groupware.application.utils.AuthorizationValidator.findActiveEmpById;
+import static com.haruon.groupware.application.utils.AuthValidator.*;
 import static com.haruon.groupware.application.utils.Utils.findEmpById;
 import static com.haruon.groupware.domain.empInfo.Emp.register;
 import static com.haruon.groupware.domain.empInfo.EmpLeave.createEmpLeave;
@@ -41,6 +41,7 @@ public class EmpCommandService extends LeaveCalculator implements EmpAccountMana
     private final EmpLeaveRepository empLeaveRepository;
     private final CompanyPolicyPort companyPolicy;
     private final FileStorage fileStorage;
+    private final AuthorizationQueryRepository authorizationQueryRepository;
 
 
     /**
@@ -104,7 +105,7 @@ public class EmpCommandService extends LeaveCalculator implements EmpAccountMana
     public void approveRegisterByHR(Long editorId, Long targetEmpId, LocalDate hiredAt) {
         if(hiredAt == null) throw new RequiredValueMissingException();
 
-        AuthorizationValidator.checkHRRoleEmp(empRepository, editorId);
+        checkHRRoleEmp(authorizationQueryRepository, editorId);
 
         Emp emp = findEmpById(empRepository, targetEmpId);
 
@@ -122,7 +123,7 @@ public class EmpCommandService extends LeaveCalculator implements EmpAccountMana
     @Override
     public void updateResignedEmpByHR(Long editorId, Long targetEmpId, LocalDate resignedAt) {
         if(resignedAt == null) throw new RequiredValueMissingException();
-        AuthorizationValidator.checkHRRoleEmp(empRepository, editorId);
+        checkHRRoleEmp(authorizationQueryRepository, editorId);
 
         Emp targetEmployee = findEmpById(empRepository, targetEmpId);
 
@@ -155,7 +156,7 @@ public class EmpCommandService extends LeaveCalculator implements EmpAccountMana
 
     @Override
     public void updateBelongingsByHR(EmpBelongingsParam request, Long editorId) {
-        AuthorizationValidator.checkHRRoleEmp(empRepository, editorId);
+        checkHRRoleEmp(authorizationQueryRepository, editorId);
 
         Emp emp = findActiveEmpById(empRepository, request.targetEmpId());
 
@@ -170,7 +171,7 @@ public class EmpCommandService extends LeaveCalculator implements EmpAccountMana
 
     @Override
     public void activateEmpByHR(Long editorId, Long targetId) {
-        AuthorizationValidator.checkHRRoleEmp(empRepository, editorId);
+        checkHRRoleEmp(authorizationQueryRepository, editorId);
 
         Emp emp = findEmpById(empRepository, targetId);
         if(emp.getStatus().equals(EmpStatus.ACTIVE)) throw new EmpAlreadyActiveException();
@@ -180,7 +181,7 @@ public class EmpCommandService extends LeaveCalculator implements EmpAccountMana
 
     @Override
     public void suspendEmpByHR(Long editorId, Long targetId) {
-        AuthorizationValidator.checkHRRoleEmp(empRepository, editorId);
+        checkHRRoleEmp(authorizationQueryRepository, editorId);
 
         Emp emp = findEmpById(empRepository, targetId);
         if(!emp.getStatus().equals(EmpStatus.ACTIVE)) throw new EmpIsNotActiveException();
@@ -193,7 +194,7 @@ public class EmpCommandService extends LeaveCalculator implements EmpAccountMana
             Long editorId, Long targetEmpId,
             Long targetFileId, Boolean isForActivate
     ) {
-        AuthorizationValidator.checkHRRoleEmp(empRepository, editorId);
+        checkHRRoleEmp(authorizationQueryRepository, editorId);
 
         Emp emp = findEmpById(empRepository, targetEmpId);
 
@@ -208,11 +209,15 @@ public class EmpCommandService extends LeaveCalculator implements EmpAccountMana
      */
     @Override
     public void updateInfoByDeptManager(Long managerId, Long targetEmpId, EmpUpdateRequestByDeptManager request) {
-        DeptManagerInfo deptManagerInfo = AuthorizationValidator.checkDeptManagerByIdAndEmpId(empRepository, managerId, targetEmpId);
+        DeptManagerAndTargetEmpInfo deptManagerInfo = checkSameDeptManagerByManagerIdAndEmpId(
+                authorizationQueryRepository,
+                managerId,
+                targetEmpId
+        );
 
-        validateAssignableRolesByDeptManager(deptManagerInfo.manager(), request.systemRoleCode());
+        validateAssignableRolesByDeptManager(deptManagerInfo.managerEmp(), request.systemRoleCode());
 
-        Emp targetEmp = deptManagerInfo.targetEmp();
+        Emp targetEmp = deptManagerInfo.editedTargetEmp();
         targetEmp.changeInfoByDeptManager(
                 request.extensionNo(),
                 request.systemRoleCode()

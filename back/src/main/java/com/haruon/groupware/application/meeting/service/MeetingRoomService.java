@@ -1,6 +1,5 @@
 package com.haruon.groupware.application.meeting.service;
 
-import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
 import com.haruon.groupware.application.exception.meeting.InactivatedMeetingRoomException;
 import com.haruon.groupware.application.exception.meeting.MeetingRoomNotFoundException;
 import com.haruon.groupware.application.exception.meeting.ReservedMeetingExistException;
@@ -9,6 +8,7 @@ import com.haruon.groupware.application.meeting.required.MeetingRepository;
 import com.haruon.groupware.application.meeting.required.MeetingRoomRepository;
 import com.haruon.groupware.application.meeting.service.dto.MeetingRoomCreateRequest;
 import com.haruon.groupware.application.meeting.service.dto.MeetingRoomUpdateRequest;
+import com.haruon.groupware.application.utils.required.AuthorizationQueryRepository;
 import com.haruon.groupware.domain.meeting.Meeting;
 import com.haruon.groupware.domain.meeting.MeetingRoom;
 import jakarta.transaction.Transactional;
@@ -18,20 +18,20 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 import static com.haruon.groupware.application.meeting.service.MeetingService.findReservedMeeting;
-import static com.haruon.groupware.application.utils.AuthorizationValidator.checkFacilityRoleEmp;
+import static com.haruon.groupware.application.utils.AuthValidator.checkFacilityRoleEmp;
 
 @Transactional
 @Service
 @RequiredArgsConstructor
 public class MeetingRoomService implements MeetingRoomManagement {
 
-    private final EmpRepository empRepository;
+    private final AuthorizationQueryRepository authorizationQueryRepository;
     private final MeetingRepository meetingRepository;
     private final MeetingRoomRepository meetingRoomRepository;
 
     @Override
     public long createMeetingRoom(MeetingRoomCreateRequest request) {
-        checkFacilityRoleEmp(empRepository, request.editorId());
+        checkFacilityRoleEmp(authorizationQueryRepository, request.editorId());
 
         MeetingRoom room = MeetingRoom.createMeetingRoom(
                 request.name(), request.description(), request.capacity()
@@ -43,7 +43,7 @@ public class MeetingRoomService implements MeetingRoomManagement {
     @Override
     public void changeRoomInfo(MeetingRoomUpdateRequest request) {
         isEditable(request.roomId());
-        checkFacilityRoleEmp(empRepository, request.editorId());
+        checkFacilityRoleEmp(authorizationQueryRepository, request.editorId());
 
         MeetingRoom room = findActiveMeetingRoom(meetingRoomRepository, request.roomId());
 
@@ -54,7 +54,7 @@ public class MeetingRoomService implements MeetingRoomManagement {
 
     @Override
     public void activate(Long roomId, Long editorId) {
-        checkFacilityRoleEmp(empRepository, editorId);
+        checkFacilityRoleEmp(authorizationQueryRepository, editorId);
 
         MeetingRoom room = findMeetingRoom(roomId);
 
@@ -65,7 +65,7 @@ public class MeetingRoomService implements MeetingRoomManagement {
     @Override
     public void deactivate(Long roomId, Long editorId) {
         isEditable(roomId);
-        checkFacilityRoleEmp(empRepository, editorId);
+        checkFacilityRoleEmp(authorizationQueryRepository, editorId);
 
         MeetingRoom room = findActiveMeetingRoom(meetingRoomRepository, roomId);
 

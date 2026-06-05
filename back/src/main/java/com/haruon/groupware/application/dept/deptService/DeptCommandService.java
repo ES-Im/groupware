@@ -6,7 +6,7 @@ import com.haruon.groupware.application.dept.required.DeptRepository;
 import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
 import com.haruon.groupware.application.exception.empInfo.dept.DeptNotFoundException;
 import com.haruon.groupware.application.exception.empInfo.dept.DuplicateDeptException;
-import com.haruon.groupware.application.utils.AuthorizationValidator;
+import com.haruon.groupware.application.utils.required.AuthorizationQueryRepository;
 import com.haruon.groupware.domain.empInfo.Dept;
 import com.haruon.groupware.domain.empInfo.Emp;
 import jakarta.transaction.Transactional;
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 
-import static com.haruon.groupware.application.utils.AuthorizationValidator.findActiveEmpById;
+import static com.haruon.groupware.application.utils.AuthValidator.*;
 import static java.util.Objects.requireNonNull;
 
 @Service
@@ -26,10 +26,11 @@ public class DeptCommandService implements DeptManagement {
 
     private final DeptRepository deptRepository;
     private final EmpRepository empRepository;
+    private final AuthorizationQueryRepository authorizationQueryRepository;
 
     @Override
     public void registerDept(Long adminId, DeptRegisterRequest adminRequest) {
-        AuthorizationValidator.checkAdminById(empRepository, adminId);
+        checkAdminById(authorizationQueryRepository, adminId);
         requireNonNull(adminRequest);
         checkDuplicateDeptCode(adminRequest.deptCode());
 
@@ -44,7 +45,7 @@ public class DeptCommandService implements DeptManagement {
 
     @Override
     public void activate(Long deptId, Long adminId) {
-        AuthorizationValidator.checkAdminById(empRepository, adminId);
+        checkAdminById(authorizationQueryRepository, adminId);
         Dept dept = getDept(deptId);
 
         dept.activate();
@@ -52,7 +53,7 @@ public class DeptCommandService implements DeptManagement {
 
     @Override
     public void deactivate(Long deptId, Long adminId) {
-        AuthorizationValidator.checkAdminById(empRepository, adminId);
+        checkAdminById(authorizationQueryRepository, adminId);
         Dept dept = getDept(deptId);
 
         dept.deactivate();
@@ -60,7 +61,7 @@ public class DeptCommandService implements DeptManagement {
 
     @Override
     public void updateDeptName(Long deptId, String newDeptName, Long adminId) {
-        AuthorizationValidator.checkAdminById(empRepository, adminId);
+        checkAdminById(authorizationQueryRepository, adminId);
 
         Dept dept = getDept(deptId);
 
@@ -71,7 +72,7 @@ public class DeptCommandService implements DeptManagement {
 
     @Override
     public void changeParentDept(Long deptId, @Nullable Long parentDeptId, Long adminId) {
-        AuthorizationValidator.checkAdminById(empRepository, adminId);
+        checkAdminById(authorizationQueryRepository, adminId);
 
         Dept dept = getDept(deptId);
         Dept parentDept = parentDeptId == null ? null : getDept(parentDeptId);
@@ -81,7 +82,7 @@ public class DeptCommandService implements DeptManagement {
 
     @Override
     public void appointLeader(Long deptId, Long leaderEmpId, LocalDate startAt, Long adminId) {
-        AuthorizationValidator.checkHRRoleEmp(empRepository, adminId);
+        checkHRRoleEmp(authorizationQueryRepository, adminId);
         Dept dept = getDept(deptId);
         Emp leader = findActiveEmpById(empRepository, leaderEmpId);
 
@@ -90,7 +91,7 @@ public class DeptCommandService implements DeptManagement {
 
     @Override
     public void endCurrentLeader(Long deptId, LocalDate endAt, Long adminId) {
-        AuthorizationValidator.checkAdminById(empRepository, adminId);
+        checkAdminById(authorizationQueryRepository, adminId);
         Dept dept = getDept(deptId);
 
         dept.endCurrentLeader(endAt);

@@ -5,6 +5,7 @@ import com.haruon.groupware.application.franchise.provided.EducationManagement;
 import com.haruon.groupware.application.franchise.required.EducationRepository;
 import com.haruon.groupware.application.franchise.service.dto.EducationCreateRequest;
 import com.haruon.groupware.application.franchise.service.dto.EducationUpdateRequest;
+import com.haruon.groupware.application.utils.required.AuthorizationQueryRepository;
 import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.franchise.Education;
 import jakarta.transaction.Transactional;
@@ -20,10 +21,11 @@ public class EducationService implements EducationManagement {
 
     private final EmpRepository empRepository;
     private final EducationRepository educationRepository;
+    private final AuthorizationQueryRepository authorizationQueryRepository;
 
     @Override
     public long createEducation(long managerId, EducationCreateRequest request) {
-        Emp assignedEmp = getFranchiseRoleAssignedEmp(empRepository, managerId);
+        Emp assignedEmp = getFranchiseRoleAssignedEmp(empRepository, authorizationQueryRepository, managerId);
 
         Education education = Education.create(
                 assignedEmp,
@@ -40,7 +42,7 @@ public class EducationService implements EducationManagement {
     @Override
     public void updateEducation(long educationId, long managerId, EducationUpdateRequest request) {
         Education education = findEducation(educationRepository, educationId);
-        validateRegister(empRepository, education, managerId);
+        validateRegister(empRepository, authorizationQueryRepository, education, managerId);
 
         education.changeEducationInfo(
                 request.educationDate(),
@@ -54,7 +56,7 @@ public class EducationService implements EducationManagement {
     @Override
     public void activate(long educationId, long managerId) {
         Education education = findEducation(educationRepository, educationId);
-        validateRegister(empRepository, education, managerId);
+        validateRegister(empRepository, authorizationQueryRepository, education, managerId);
 
         education.activate();
     }
@@ -62,7 +64,7 @@ public class EducationService implements EducationManagement {
     @Override
     public void deactivate(long educationId, long managerId) {
         Education education = findEducation(educationRepository, educationId);
-        validateRegister(empRepository, education, managerId);
+        validateRegister(empRepository, authorizationQueryRepository, education, managerId);
 
         education.deactivate();
     }

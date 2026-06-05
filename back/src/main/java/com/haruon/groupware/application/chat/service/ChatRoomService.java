@@ -18,7 +18,7 @@ import java.util.Set;
 
 import static com.haruon.groupware.application.chat.service.ChatUtils.findChat;
 import static com.haruon.groupware.application.chat.service.ChatUtils.findChatRoom;
-import static com.haruon.groupware.application.utils.AuthorizationValidator.findActiveEmpById;
+import static com.haruon.groupware.application.utils.AuthValidator.findActiveEmpById;
 import static com.haruon.groupware.application.utils.Utils.findEmpListById;
 import static com.haruon.groupware.domain.chat.ChatRoom.createRoom;
 

@@ -16,7 +16,7 @@ import com.haruon.groupware.domain.message.Message;
 import org.springframework.stereotype.Service;
 
 import static com.haruon.groupware.application.message.service.MessageUtils.findMessage;
-import static com.haruon.groupware.application.utils.AuthorizationValidator.findActiveEmpById;
+import static com.haruon.groupware.application.utils.AuthValidator.findActiveEmpById;
 import static com.haruon.groupware.application.utils.Utils.findEmpById;
 
 @Service

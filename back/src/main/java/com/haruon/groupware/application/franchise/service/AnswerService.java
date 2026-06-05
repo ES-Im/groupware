@@ -4,6 +4,7 @@ import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
 import com.haruon.groupware.application.exception.franchise.FranchiseInquiryNotFoundException;
 import com.haruon.groupware.application.franchise.provided.AnswerManagement;
 import com.haruon.groupware.application.franchise.required.FranchiseInquiryRepository;
+import com.haruon.groupware.application.utils.required.AuthorizationQueryRepository;
 import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.franchise.FranchiseInquiry;
 import jakarta.transaction.Transactional;
@@ -19,6 +20,7 @@ public class AnswerService implements AnswerManagement {
 
     private final FranchiseInquiryRepository inquiryRepository;
     private final EmpRepository empRepository;
+    private final AuthorizationQueryRepository authorizationQueryRepository;
 
     @Override
     public void assignEmpToAnswer(long inquiryId, long empId) {
@@ -59,6 +61,10 @@ public class AnswerService implements AnswerManagement {
     }
 
     private Emp getFranchiseRoleAssignedEmp(long empId) {
-        return FranchiseUtils.getFranchiseRoleAssignedEmp(empRepository, empId);
+        return FranchiseUtils.getFranchiseRoleAssignedEmp(
+                empRepository,
+                authorizationQueryRepository,
+                empId
+        );
     }
 }

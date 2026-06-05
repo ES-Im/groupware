@@ -5,6 +5,7 @@ import com.haruon.groupware.application.franchise.provided.FranchiseManagement;
 import com.haruon.groupware.application.franchise.required.FranchiseRepository;
 import com.haruon.groupware.application.franchise.service.dto.FranchiseCreateRequest;
 import com.haruon.groupware.application.franchise.service.dto.FranchiseUpdateRequest;
+import com.haruon.groupware.application.utils.required.AuthorizationQueryRepository;
 import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.franchise.BusinessStatus;
 import com.haruon.groupware.domain.franchise.Franchise;
@@ -15,7 +16,7 @@ import org.springframework.stereotype.Service;
 
 import static com.haruon.groupware.application.franchise.service.FranchiseUtils.findFranchiseById;
 import static com.haruon.groupware.application.franchise.service.FranchiseUtils.getFranchiseRoleAssignedEmp;
-import static com.haruon.groupware.application.utils.AuthorizationValidator.checkFranchiseRoleEmp;
+import static com.haruon.groupware.application.utils.AuthValidator.checkFranchiseRoleEmp;
 
 @Service
 @Transactional
@@ -24,6 +25,7 @@ public class FranchiseService implements FranchiseManagement {
 
     private final FranchiseRepository franchiseRepository;
     private final EmpRepository empRepository;
+    private final AuthorizationQueryRepository authorizationQueryRepository;
 
     @Override
     public long createFranchise(long franchiseRegisterId, FranchiseCreateRequest request) {
@@ -44,7 +46,7 @@ public class FranchiseService implements FranchiseManagement {
 
     @Override
     public void updateFranchise(long franchiseId, long updaterId, FranchiseUpdateRequest request) {
-        checkFranchiseRoleEmp(empRepository, updaterId);
+        checkFranchiseRoleEmp(authorizationQueryRepository, updaterId);
         Franchise franchise = findFranchiseById(franchiseRepository, franchiseId);
 
         franchise.changeFranchiseInfo(
@@ -61,7 +63,7 @@ public class FranchiseService implements FranchiseManagement {
 
     @Override
     public void updateFranchiseStatus(long franchiseId, long updaterId, BusinessStatus status) {
-        checkFranchiseRoleEmp(empRepository, updaterId);
+        checkFranchiseRoleEmp(authorizationQueryRepository, updaterId);
         Franchise franchise = findFranchiseById(franchiseRepository, franchiseId);
 
         franchise.changeBusinessStatus(status);
@@ -69,17 +71,17 @@ public class FranchiseService implements FranchiseManagement {
 
     @Override
     public void updateManager(long franchiseId, long updaterId, long newManagerId) {
-        checkFranchiseRoleEmp(empRepository, updaterId);
+        checkFranchiseRoleEmp(authorizationQueryRepository, updaterId);
         Franchise franchise = findFranchiseById(franchiseRepository, franchiseId);
 
-        Emp newManager = getFranchiseRoleAssignedEmp(empRepository, newManagerId);
+        Emp newManager = getFranchiseRoleAssignedEmp(empRepository, authorizationQueryRepository, newManagerId);
 
         franchise.changeManager(newManager);
     }
 
     @Override
     public void updateMemo(long franchiseId, long updaterId, String memo) {
-        checkFranchiseRoleEmp(empRepository, updaterId);
+        checkFranchiseRoleEmp(authorizationQueryRepository, updaterId);
         Franchise franchise = findFranchiseById(franchiseRepository, franchiseId);
 
         franchise.changeMemo(memo);
@@ -87,7 +89,7 @@ public class FranchiseService implements FranchiseManagement {
 
     @Override
     public void clearMemo(long franchiseId, long updaterId) {
-        checkFranchiseRoleEmp(empRepository, updaterId);
+        checkFranchiseRoleEmp(authorizationQueryRepository, updaterId);
         Franchise franchise = findFranchiseById(franchiseRepository, franchiseId);
 
         franchise.clearMemo();
@@ -101,15 +103,15 @@ public class FranchiseService implements FranchiseManagement {
             boolean registerEqualsManager = managerId.equals(franchiseRegisterId);
 
             if(registerEqualsManager) {
-                manager = getFranchiseRoleAssignedEmp(empRepository, franchiseRegisterId);
+                manager = getFranchiseRoleAssignedEmp(empRepository, authorizationQueryRepository, franchiseRegisterId);
             } else {
-                manager = getFranchiseRoleAssignedEmp(empRepository, managerId);
+                manager = getFranchiseRoleAssignedEmp(empRepository, authorizationQueryRepository, managerId);
             }
 
         }
 
         if(managerId == null) {
-            checkFranchiseRoleEmp(empRepository, franchiseRegisterId);
+            checkFranchiseRoleEmp(authorizationQueryRepository, franchiseRegisterId);
         }
 
         return manager;

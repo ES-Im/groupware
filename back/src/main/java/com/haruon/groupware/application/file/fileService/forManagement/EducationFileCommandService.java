@@ -10,6 +10,7 @@ import com.haruon.groupware.application.file.fileService.FileDomain;
 import com.haruon.groupware.application.file.required.FileStorage;
 import com.haruon.groupware.application.file.required.FileStoredInfoQueryRepository;
 import com.haruon.groupware.application.franchise.required.EducationRepository;
+import com.haruon.groupware.application.utils.required.AuthorizationQueryRepository;
 import com.haruon.groupware.domain.franchise.Education;
 import org.springframework.stereotype.Service;
 
@@ -21,16 +22,19 @@ public class EducationFileCommandService extends AbstractFileManagerService<Educ
 
     private final EmpRepository empRepository;
     private final EducationRepository educationRepository;
+    private final AuthorizationQueryRepository authorizationQueryRepository;
 
     public EducationFileCommandService(
             FileStoredInfoQueryRepository fileStoredInfoQueryRepository,
             FileStorage fileStorage,
             EmpRepository empRepository,
-            EducationRepository educationRepository
+            EducationRepository educationRepository,
+            AuthorizationQueryRepository authorizationQueryRepository
     ) {
         super(fileStoredInfoQueryRepository, fileStorage);
         this.empRepository = empRepository;
         this.educationRepository = educationRepository;
+        this.authorizationQueryRepository = authorizationQueryRepository;
     }
 
     @Override
@@ -50,7 +54,7 @@ public class EducationFileCommandService extends AbstractFileManagerService<Educ
         if(request.requesterEmpId() == null) throw new RequiredValueMissingException();
 
         Education education = findEducation(educationRepository, request.domainPkId());
-        validateRegister(empRepository, education, request.requesterEmpId());
+        validateRegister(empRepository, authorizationQueryRepository, education, request.requesterEmpId());
 
         education.removeEducationFile(request.fileId());
     }
@@ -60,7 +64,7 @@ public class EducationFileCommandService extends AbstractFileManagerService<Educ
         if(uploadRequest == null || storedInfo == null) throw new RequiredValueMissingException();
 
         Education education = findEducation(educationRepository, uploadRequest.educationId());
-        validateRegister(empRepository, education, uploadRequest.registerId());
+        validateRegister(empRepository, authorizationQueryRepository, education, uploadRequest.registerId());
 
         FileDto file = uploadRequest.file();
 

@@ -19,7 +19,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import static com.haruon.groupware.application.schedule.service.ScheduleSupport.getSchedulesById;
-import static com.haruon.groupware.application.utils.AuthorizationValidator.findActiveEmpById;
+import static com.haruon.groupware.application.utils.AuthValidator.findActiveEmpById;
 import static com.haruon.groupware.application.utils.Utils.findEmpListById;
 import static java.util.Objects.requireNonNull;
 

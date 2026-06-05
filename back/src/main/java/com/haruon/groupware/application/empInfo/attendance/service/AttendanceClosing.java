@@ -22,7 +22,7 @@ import java.time.LocalTime;
 import java.util.List;
 
 import static com.haruon.groupware.application.empInfo.attendance.service.AttendanceUtils.getStatusByRecognizedHours;
-import static com.haruon.groupware.application.utils.AuthorizationValidator.findActiveEmpById;
+import static com.haruon.groupware.application.utils.AuthValidator.findActiveEmpById;
 import static com.haruon.groupware.application.utils.Utils.getEarlierTime;
 import static com.haruon.groupware.application.utils.Utils.getLaterTime;
 import static com.haruon.groupware.domain.empInfo.Attendance.*;

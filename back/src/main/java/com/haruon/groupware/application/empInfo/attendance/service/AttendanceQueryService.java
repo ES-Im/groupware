@@ -1,14 +1,12 @@
 package com.haruon.groupware.application.empInfo.attendance.service;
 
-import com.haruon.groupware.application.dept.required.DeptRepository;
 import com.haruon.groupware.application.empInfo.attendance.provided.AttendanceRetriever;
 import com.haruon.groupware.application.empInfo.attendance.required.AttendanceQueryRepository;
 import com.haruon.groupware.application.empInfo.attendance.service.dto.response.AttendanceInfoResponse;
 import com.haruon.groupware.application.empInfo.attendance.service.dto.response.AttendanceInfoSummaryResponse;
 import com.haruon.groupware.application.empInfo.attendance.service.dto.response.result.DeptAttendanceResponse;
 import com.haruon.groupware.application.empInfo.attendance.service.dto.response.result.DeptPendingAttendanceResponse;
-import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
-import com.haruon.groupware.application.utils.AuthorizationValidator;
+import com.haruon.groupware.application.utils.required.AuthorizationQueryRepository;
 import com.haruon.groupware.domain.empInfo.enums.AttendanceStatus;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.Nullable;
@@ -19,14 +17,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.YearMonth;
 
+import static com.haruon.groupware.application.utils.AuthValidator.checkDeptManagerOrAdminByEmpIdAndDeptId;
+
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class AttendanceQueryService implements AttendanceRetriever {
 
     private final AttendanceQueryRepository attendanceQueryRepository;
-    private final EmpRepository empRepository;
-    private final DeptRepository deptRepository;
+    private final AuthorizationQueryRepository authorizationQueryRepository;
 
     @Override
     public Page<AttendanceInfoResponse> retrieverMyAttendanceMonthly(
@@ -81,6 +80,6 @@ public class AttendanceQueryService implements AttendanceRetriever {
     }
 
     private void checkDeptManager(Long managerId, Long deptId) {
-        AuthorizationValidator.checkDeptManagerByIdAndDeptId(empRepository, deptRepository, managerId, deptId);
+        checkDeptManagerOrAdminByEmpIdAndDeptId(authorizationQueryRepository, managerId, deptId);
     }
 }

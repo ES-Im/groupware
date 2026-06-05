@@ -7,7 +7,7 @@ import com.haruon.groupware.application.exception.common.RequiredValueMissingExc
 import com.haruon.groupware.application.exception.draft.ApprovalLineRequiredException;
 import com.haruon.groupware.application.exception.draft.DraftNotFoundException;
 import com.haruon.groupware.application.file.required.FileStorage;
-import com.haruon.groupware.application.utils.AuthorizationValidator;
+import com.haruon.groupware.application.utils.AuthValidator;
 import com.haruon.groupware.application.utils.Utils;
 import com.haruon.groupware.domain.draft.Draft;
 import com.haruon.groupware.domain.draft.sub.ApproversParam;
@@ -87,7 +87,7 @@ abstract class CommonDraftService {
     }
 
     protected Emp findActiveEmpById(long empId) {
-        return AuthorizationValidator.findActiveEmpById(empRepository, empId);
+        return AuthValidator.findActiveEmpById(empRepository, empId);
     }
 
     protected List<Emp> getEmpListById(Set<Long> participantId){

@@ -6,7 +6,7 @@ import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
 import com.haruon.groupware.application.empInfo.emp.service.dto.response.*;
 import com.haruon.groupware.application.exception.common.role.ActiveEmployeeNotFoundException;
 import com.haruon.groupware.application.exception.common.role.PermissionDeniedException;
-import com.haruon.groupware.application.utils.AuthorizationValidator;
+import com.haruon.groupware.application.utils.required.AuthorizationQueryRepository;
 import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.empInfo.enums.EmpStatus;
 import com.haruon.groupware.domain.empInfo.enums.SystemRoleCode;
@@ -20,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Set;
 
-import static com.haruon.groupware.application.utils.AuthorizationValidator.findActiveEmpById;
+import static com.haruon.groupware.application.utils.AuthValidator.*;
 
 @Service
 @Transactional(readOnly = true)
@@ -29,6 +29,7 @@ public class EmpQueryService implements EmpAccountRetriever {
 
     private final EmpQueryRepository empQueryRepository;
     private final EmpRepository empRepository;
+    private final AuthorizationQueryRepository authorizationQueryRepository;
 
     @Override
     public EmpInfoResponse retrieveEmpAccountInfo(Long empId) {
@@ -62,18 +63,13 @@ public class EmpQueryService implements EmpAccountRetriever {
         Set<SystemRoleCode> systemRoles = foundEmp.getSystemRoles();
 
         if(systemRoles.contains(SystemRoleCode.HR)) {
-            AuthorizationValidator.checkHRRoleEmp(empRepository, managerOrHrId);
+            checkHRRoleEmp(authorizationQueryRepository, managerOrHrId);
 
             return empQueryRepository.findEmpInfoList(deptId, status, keyword, pageable);
         } else if (systemRoles.contains(SystemRoleCode.DEPT_MANAGER)) {
-            AuthorizationValidator.checkDeptManagerById(empRepository, managerOrHrId);
 
-            boolean contains = belongings.stream()
-                    .map(BelongingInfo::deptId)
-                    .toList()
-                    .contains(deptId);
-
-            if(!contains) throw new PermissionDeniedException();
+            if(deptId == null) throw new PermissionDeniedException();
+            checkDeptManagerOrAdminByEmpIdAndDeptId(authorizationQueryRepository, managerOrHrId, deptId);
 
             return empQueryRepository.findEmpInfoList(deptId, status, keyword, pageable);
         }
@@ -87,7 +83,7 @@ public class EmpQueryService implements EmpAccountRetriever {
             String keyword,
             Pageable pageable
     ) {
-        AuthorizationValidator.checkHRRoleEmp(empRepository, hrEmpId);
+        checkHRRoleEmp(authorizationQueryRepository, hrEmpId);
 
         return empQueryRepository.findNewEmpInfoList(
                 keyword, pageable
