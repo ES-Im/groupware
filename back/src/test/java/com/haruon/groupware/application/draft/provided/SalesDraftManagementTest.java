@@ -2,8 +2,9 @@ package com.haruon.groupware.application.draft.provided;
 
 import com.haruon.groupware.application.TestIntegrationConfig;
 import com.haruon.groupware.application.dept.required.DeptRepository;
+import com.haruon.groupware.application.draft.provided.forCommand.SalesDraftManagement;
 import com.haruon.groupware.application.draft.required.DraftRepository;
-import com.haruon.groupware.application.draft.service.dto.*;
+import com.haruon.groupware.application.draft.service.command.dto.*;
 import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
 import com.haruon.groupware.application.franchise.provided.FranchiseManagement;
 import com.haruon.groupware.application.franchise.required.FranchiseRepository;

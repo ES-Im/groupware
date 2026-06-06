@@ -1,0 +1,22 @@
+[tabs%nosync]
+
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/MY_ATTENDANCE_MONTHLY/http-request.adoc[]
+_Request header_
+include::{snippets}/MY_ATTENDANCE_MONTHLY/request-headers.adoc[]
+_Query Parameter_
+include::{snippets}/MY_ATTENDANCE_MONTHLY/query-parameters.adoc[]
+--
+Response (200)::
++
+--
+_HTTP response_
+include::{snippets}/MY_ATTENDANCE_MONTHLY/http-response.adoc[]
+_Response fields_
+include::{snippets}/MY_ATTENDANCE_MONTHLY/response-fields.adoc[]
+--
+====

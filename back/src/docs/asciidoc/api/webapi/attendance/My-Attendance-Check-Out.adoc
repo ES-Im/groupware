@@ -1,0 +1,22 @@
+[tabs%nosync]
+
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/MY_ATTENDANCE_CHECK_OUT/http-request.adoc[]
+_Request header_
+include::{snippets}/MY_ATTENDANCE_CHECK_OUT/request-headers.adoc[]
+_Query Parameter_
+include::{snippets}/MY_ATTENDANCE_CHECK_OUT/query-parameters.adoc[]
+
+NOTE: 퇴근 시각을 다시 기록할 때도 동일한 API를 사용한다.
+--
+Response (200)::
++
+--
+_HTTP response_
+include::{snippets}/MY_ATTENDANCE_CHECK_OUT/http-response.adoc[]
+--
+====

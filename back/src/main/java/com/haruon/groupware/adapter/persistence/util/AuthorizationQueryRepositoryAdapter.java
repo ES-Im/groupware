@@ -51,7 +51,7 @@ public class AuthorizationQueryRepositoryAdapter implements AuthorizationQueryRe
     }
 
     @Override
-    public DeptManagerAndTargetEmpInfo findDeptManagerInfoIfSameCurrentDeptOrAdmin(     //todo - alias 나눠서 한 거 gitbook 정리
+    public DeptManagerAndTargetEmpInfo findDeptManagerInfoIfSameCurrentDeptOrAdmin(
             Long managerId,
             Long targetEmpId
     ) {

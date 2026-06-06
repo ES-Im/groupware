@@ -2,11 +2,13 @@ package com.haruon.groupware.application.draft.provided;
 
 import com.haruon.groupware.application.TestIntegrationConfig;
 import com.haruon.groupware.application.dept.required.DeptRepository;
+import com.haruon.groupware.application.draft.provided.forCommand.BusinessTripDraftManagement;
+import com.haruon.groupware.application.draft.provided.forCommand.GeneralDraftManagement;
 import com.haruon.groupware.application.draft.required.DraftRepository;
-import com.haruon.groupware.application.draft.service.dto.ApproversRequest;
-import com.haruon.groupware.application.draft.service.dto.BusinessTripDraftCreateRequest;
-import com.haruon.groupware.application.draft.service.dto.CommonDraftCreateRequest;
-import com.haruon.groupware.application.draft.service.dto.CommonDraftUpdateRequest;
+import com.haruon.groupware.application.draft.service.command.dto.ApproversRequest;
+import com.haruon.groupware.application.draft.service.command.dto.BusinessTripDraftCreateRequest;
+import com.haruon.groupware.application.draft.service.command.dto.CommonDraftCreateRequest;
+import com.haruon.groupware.application.draft.service.command.dto.CommonDraftUpdateRequest;
 import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import com.haruon.groupware.application.exception.draft.DraftTypeMismatchException;

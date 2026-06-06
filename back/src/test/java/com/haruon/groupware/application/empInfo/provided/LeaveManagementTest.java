@@ -3,7 +3,7 @@ package com.haruon.groupware.application.empInfo.provided;
 import com.haruon.groupware.application.TestIntegrationConfig;
 import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
 import com.haruon.groupware.application.empInfo.leave.required.EmpLeaveRepository;
-import com.haruon.groupware.application.empInfo.leave.service.LeaveManagementService;
+import com.haruon.groupware.application.empInfo.leave.service.LeaveCommandService;
 import com.haruon.groupware.application.exception.common.role.PermissionDeniedException;
 import com.haruon.groupware.application.exception.empInfo.leave.EmpAnnualLeaveNotFoundException;
 import com.haruon.groupware.application.schedule.required.ScheduleRepository;
@@ -24,7 +24,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @TestIntegrationConfig
 record LeaveManagementTest(
         EmpLeaveRepository empLeaveRepository,
-        LeaveManagementService leaveManagementService,
+        LeaveCommandService leaveCommandService,
         EmpRepository empRepository,
         ScheduleRepository scheduleRepository
 ) {
@@ -45,8 +45,8 @@ record LeaveManagementTest(
         EmpLeave empLeave = createEmpLeave(targetEmp, thisYear, 15);
         empLeaveRepository.save(empLeave);
 
-        leaveManagementService.adjustSpecialGrantDays(admin.getId(), targetEmp.getId(), 1.0);
-        leaveManagementService.adjustCompensatoryGrantDays(admin.getId(), targetEmp.getId(), 1.0);
+        leaveCommandService.adjustSpecialGrantDays(admin.getId(), targetEmp.getId(), 1.0);
+        leaveCommandService.adjustCompensatoryGrantDays(admin.getId(), targetEmp.getId(), 1.0);
 
 
         EmpLeave foundLeave = empLeaveRepository.findByEmpIdAndGrantYear(targetEmp.getId(), thisYear)
@@ -67,11 +67,11 @@ record LeaveManagementTest(
 
 
         assertThatThrownBy(() ->
-                leaveManagementService.adjustSpecialGrantDays(notAdmin.getId(), targetEmp.getId(), 1.0)
+                leaveCommandService.adjustSpecialGrantDays(notAdmin.getId(), targetEmp.getId(), 1.0)
         ).isInstanceOf(PermissionDeniedException.class);
 
         assertThatThrownBy(() ->
-                leaveManagementService.adjustCompensatoryGrantDays(notAdmin.getId(), targetEmp.getId(), 1.0)
+                leaveCommandService.adjustCompensatoryGrantDays(notAdmin.getId(), targetEmp.getId(), 1.0)
         ).isInstanceOf(PermissionDeniedException.class);
 
     }
@@ -87,11 +87,11 @@ record LeaveManagementTest(
         empLeaveRepository.save(empLeave);
 
         assertThatThrownBy(() ->
-                leaveManagementService.adjustSpecialGrantDays(admin.getId(), targetEmp.getId(), -1.0)
+                leaveCommandService.adjustSpecialGrantDays(admin.getId(), targetEmp.getId(), -1.0)
         ).isInstanceOf(IllegalStateException.class);
 
         assertThatThrownBy(() ->
-                leaveManagementService.adjustCompensatoryGrantDays(admin.getId(), targetEmp.getId(), -1.0)
+                leaveCommandService.adjustCompensatoryGrantDays(admin.getId(), targetEmp.getId(), -1.0)
         ).isInstanceOf(IllegalStateException.class);
 
 
@@ -104,11 +104,11 @@ record LeaveManagementTest(
         Emp targetEmp = saveApprovedEmp(empRepository);
 
         assertThatThrownBy(() ->
-                leaveManagementService.adjustSpecialGrantDays(admin.getId(), targetEmp.getId(), 1.0)
+                leaveCommandService.adjustSpecialGrantDays(admin.getId(), targetEmp.getId(), 1.0)
         ).isInstanceOf(EmpAnnualLeaveNotFoundException.class);
 
         assertThatThrownBy(() ->
-                leaveManagementService.adjustCompensatoryGrantDays(admin.getId(), targetEmp.getId(), 1.0)
+                leaveCommandService.adjustCompensatoryGrantDays(admin.getId(), targetEmp.getId(), 1.0)
         ).isInstanceOf(EmpAnnualLeaveNotFoundException.class);
     }
 

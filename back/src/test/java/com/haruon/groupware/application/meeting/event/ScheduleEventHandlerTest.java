@@ -1,8 +1,8 @@
 package com.haruon.groupware.application.meeting.event;
 
 import com.haruon.groupware.application.TestIntegrationConfig;
-import com.haruon.groupware.application.draft.provided.BusinessTripDraftManagement;
-import com.haruon.groupware.application.draft.provided.LeaveDraftManagement;
+import com.haruon.groupware.application.draft.provided.forCommand.BusinessTripDraftManagement;
+import com.haruon.groupware.application.draft.provided.forCommand.LeaveDraftManagement;
 import com.haruon.groupware.application.draft.required.BusinessTripDraftRepository;
 import com.haruon.groupware.application.draft.required.DraftRepository;
 import com.haruon.groupware.application.draft.required.LeaveDraftRepository;

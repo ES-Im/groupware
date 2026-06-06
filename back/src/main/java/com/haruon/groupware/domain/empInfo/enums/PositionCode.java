@@ -4,19 +4,21 @@ import lombok.Getter;
 
 @Getter
 public enum PositionCode {
-    NONE(0),
-    INTERN(1),
-    STAFF(2),
-    SENIOR_STAFF(3),
-    ASSISTANT_MANAGER(4),
-    MANAGER(5),
-    SENIOR_MANAGER(6),
-    DIRECTOR(7),
-    EXECUTIVE(8);
+    NONE("미지정", 0),
+    INTERN("인턴", 1),
+    STAFF("사원", 2),
+    SENIOR_STAFF("주임", 3),
+    ASSISTANT_MANAGER("대리", 4),
+    MANAGER("과장", 5),
+    SENIOR_MANAGER("차장", 6),
+    DIRECTOR("부장", 7),
+    EXECUTIVE("임원", 8);
 
+    private final String description;
     private final int level;
 
-    PositionCode(int level) {
+    PositionCode(String description, int level) {
+        this.description = description;
         this.level = level;
     }
 

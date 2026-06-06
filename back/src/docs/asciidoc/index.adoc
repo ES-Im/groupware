@@ -103,6 +103,41 @@ include::api/webapi/empAccount/DeptManager-Update-Emp-Info.adoc[]
 === 특정 사원 파일 활성화/비활성화 (HR)
 include::api/webapi/empAccount/HR-Update-Emp-File-Status.adoc[]
 
+[[ATTENDANCE_API]]
+== ATTENDANCE API
+
+[[MY_ATTENDANCE_MONTHLY]]
+=== 내 월별 근태 조회
+include::api/webapi/attendance/My-Attendance-Monthly.adoc[]
+
+[[MY_ATTENDANCE_MONTHLY_SUMMARY]]
+=== 내 월별 근태 요약 조회
+include::api/webapi/attendance/My-Attendance-Monthly-Summary.adoc[]
+
+[[MY_ATTENDANCE_CHECK_IN]]
+=== 출근 기록
+include::api/webapi/attendance/My-Attendance-Check-In.adoc[]
+
+[[MY_ATTENDANCE_CHECK_OUT]]
+=== 퇴근 기록
+include::api/webapi/attendance/My-Attendance-Check-Out.adoc[]
+
+[[DEPT_ATTENDANCE_MONTHLY]]
+=== 부서 월별 근태 조회
+include::api/webapi/attendance/Dept-Attendance-Monthly.adoc[]
+
+[[DEPT_ATTENDANCE_PENDING]]
+=== 부서 승인 대기 근태 조회
+include::api/webapi/attendance/Dept-Attendance-Pending.adoc[]
+
+[[DEPT_ATTENDANCE_UPDATE]]
+=== 부서 매니저 근태 수정
+include::api/webapi/attendance/Dept-Attendance-Update.adoc[]
+
+[[DEPT_ATTENDANCE_APPROVE]]
+=== 부서 매니저 근태 승인
+include::api/webapi/attendance/Dept-Attendance-Approve.adoc[]
+
 [[DEPT_API]]
 == DEPT API
 

@@ -77,7 +77,7 @@ public class MyAttendanceApi {
         return ResponseEntity.ok().build();
     }
 
-    //todo - docs에 퇴근시간 재 기록도 해당 api사용 명시
+
     @PatchMapping("/check-out")
     public ResponseEntity<Void> checkOut(
             @AuthenticationPrincipal EmpDetails details,

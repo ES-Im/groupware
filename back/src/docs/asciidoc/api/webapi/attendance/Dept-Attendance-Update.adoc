@@ -1,0 +1,22 @@
+[tabs%nosync]
+
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/DEPT_ATTENDANCE_UPDATE/http-request.adoc[]
+_Request header_
+include::{snippets}/DEPT_ATTENDANCE_UPDATE/request-headers.adoc[]
+_Path Parameter_
+include::{snippets}/DEPT_ATTENDANCE_UPDATE/path-parameters.adoc[]
+_Request fields_
+include::{snippets}/DEPT_ATTENDANCE_UPDATE/request-fields.adoc[]
+--
+Response (200)::
++
+--
+_HTTP response_
+include::{snippets}/DEPT_ATTENDANCE_UPDATE/http-response.adoc[]
+--
+====

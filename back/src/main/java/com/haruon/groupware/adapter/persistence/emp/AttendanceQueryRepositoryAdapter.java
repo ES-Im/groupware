@@ -290,7 +290,7 @@ public class AttendanceQueryRepositoryAdapter implements AttendanceQueryReposito
 
     private AttendanceInfoSummaryResponse toSummary(List<AttendanceInfoResponse> attendanceInfos) {
         int approvedCount = (int) attendanceInfos.stream()
-                .filter(attendanceInfo -> Boolean.TRUE.equals(attendanceInfo.isApproved()))
+                .filter(AttendanceInfoResponse::isApproved)
                 .count();
         int totalCount = attendanceInfos.size();
         int overtimeMinutes = attendanceInfos.stream()
@@ -331,7 +331,7 @@ public class AttendanceQueryRepositoryAdapter implements AttendanceQueryReposito
                 : qEmp.empName.containsIgnoreCase(keyword);
     }
 
-    private record DeptAttendanceFlat(
+    public record DeptAttendanceFlat(
             Long empId,
             String empNo,
             String empName,
