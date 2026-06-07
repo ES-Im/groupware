@@ -26,7 +26,7 @@ import static com.haruon.groupware.application.utils.Utils.ZONE_SEOUL;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/employees/me/leave")
+@RequestMapping("/api/employees/me/leaves")
 public class MyLeaveInfoApi {
 
     private final LeaveRetriever leaveRetriever;
@@ -63,6 +63,6 @@ public class MyLeaveInfoApi {
     }
 
     private int getTargetYear(Year year) {
-        return year == null ? LocalDate.now().getYear() : year.getValue();
+        return year == null ? LocalDate.now(ZONE_SEOUL).getYear() : year.getValue();
     }
 }

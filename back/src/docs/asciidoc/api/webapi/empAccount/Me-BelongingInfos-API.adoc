@@ -19,4 +19,17 @@ _Response fields_
 include::{snippets}/RETRIEVE_BELONGINGS_INFOS/response-fields.adoc[]
 ※ 미조회시, 빈 배열 반환
 --
+Exception::
++
+--
+이 API에서 발생 가능한 에러:
+
+|===
+|Error Code
+
+|ACTIVE_EMPLOYEE_NOT_FOUND_EXCEPTION
+|PERMISSION_DENIED_EXCEPTION
+
+|===
+--
 ====

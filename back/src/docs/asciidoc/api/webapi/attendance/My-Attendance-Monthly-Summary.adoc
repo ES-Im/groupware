@@ -19,4 +19,17 @@ include::{snippets}/MY_ATTENDANCE_MONTHLY_SUMMARY/http-response.adoc[]
 _Response fields_
 include::{snippets}/MY_ATTENDANCE_MONTHLY_SUMMARY/response-fields.adoc[]
 --
+Exception::
++
+--
+이 API에서 발생 가능한 에러:
+
+|===
+|Error Code
+
+|REQUIRED_VALUE_MISSING_EXCEPTION
+|PERMISSION_DENIED_EXCEPTION
+
+|===
+--
 ====

@@ -39,4 +39,19 @@ _Response fields_
 include::{snippets}/REGISTER_DuplicateLoginIdException/response-fields.adoc[]
 
 --
+Exception::
++
+--
+이 API에서 발생 가능한 에러:
+
+|===
+|Error Code
+
+|REQUIRED_VALUE_MISSING_EXCEPTION
+|BLANK_VALUE_NOT_ALLOWED_EXCEPTION
+|DUPLICATE_EMP_NO_EXCEPTION
+|DUPLICATE_LOGIN_ID_EXCEPTION
+
+|===
+--
 ====

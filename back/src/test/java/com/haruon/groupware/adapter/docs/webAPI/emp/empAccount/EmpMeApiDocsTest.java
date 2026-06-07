@@ -1,4 +1,4 @@
-package com.haruon.groupware.adapter.docs.webAPI.emp;
+package com.haruon.groupware.adapter.docs.webAPI.emp.empAccount;
 
 import com.haruon.groupware.adapter.docs.RestDocsSupport;
 import com.haruon.groupware.adapter.webapi.emp.account.EmpMeAPI;

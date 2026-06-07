@@ -91,6 +91,16 @@ public class SecurityConfig {
                                 "/api/employees/*/dept-managed-info"
                         ).hasRole(SystemRoleCode.DEPT_MANAGER.name())
 
+                        /* EmpLeave API*/
+                        .requestMatchers("/api/employees/me/leaves/**").authenticated()
+                        .requestMatchers("/api/employees/*/leaves/special").hasRole(SystemRoleCode.ADMIN.name())
+                        .requestMatchers("/api/employees/*/leaves/compansatory").hasRole(SystemRoleCode.ADMIN.name())
+                        .requestMatchers("/api/employees/leaves/**").hasRole(SystemRoleCode.ADMIN.name())
+                        .requestMatchers("/api/employees/*/leaves").hasRole(SystemRoleCode.DEPT_MANAGER.name())
+                        .requestMatchers("/api/employees/*/leaves/usage-summary").hasRole(SystemRoleCode.DEPT_MANAGER.name())
+                        .requestMatchers("/api/employees/*/leaves/request-history").hasRole(SystemRoleCode.DEPT_MANAGER.name())
+
+
                         /* Company API */
                         .requestMatchers(HttpMethod.GET, "/api/company").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/company", "/api/company/**").hasRole(SystemRoleCode.ADMIN.name())

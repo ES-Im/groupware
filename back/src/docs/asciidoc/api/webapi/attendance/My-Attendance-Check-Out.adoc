@@ -19,4 +19,19 @@ Response (200)::
 _HTTP response_
 include::{snippets}/MY_ATTENDANCE_CHECK_OUT/http-response.adoc[]
 --
+Exception::
++
+--
+이 API에서 발생 가능한 에러:
+
+|===
+|Error Code
+
+|REQUIRED_VALUE_MISSING_EXCEPTION
+|CHECKIN_RECORD_NOT_FOUND_EXCEPTION
+|CLOSED_ATTENDANCE_EDIT_FORBIDDEN_EXCEPTION
+|PERMISSION_DENIED_EXCEPTION
+
+|===
+--
 ====

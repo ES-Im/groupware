@@ -1,4 +1,4 @@
-package com.haruon.groupware.adapter.webapi.emp;
+package com.haruon.groupware.adapter.webapi.emp.empAccount;
 
 import com.haruon.groupware.adapter.IntegrationTestSupport;
 import com.haruon.groupware.adapter.persistence.emp.EmpQueryRepositoryAdapter;

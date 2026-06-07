@@ -138,6 +138,17 @@ include::api/webapi/attendance/Dept-Attendance-Update.adoc[]
 === 부서 매니저 근태 승인
 include::api/webapi/attendance/Dept-Attendance-Approve.adoc[]
 
+[[LEAVE_API]]
+== LEAVE API
+
+[[MY_LEAVE_REQUEST_HISTORY]]
+=== 내 휴가 신청 이력 조회
+include::api/webapi/leave/My-Leave-Request-History.adoc[]
+
+[[DEPT_LEAVE_REQUEST_HISTORY]]
+=== 부서 휴가 신청 이력 조회
+include::api/webapi/leave/Dept-Leave-Request-History.adoc[]
+
 [[DEPT_API]]
 == DEPT API
 

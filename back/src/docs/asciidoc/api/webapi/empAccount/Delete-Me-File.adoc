@@ -6,20 +6,20 @@ Request::
 +
 --
 _HTTP request_
-include::{snippets}/DELETE_ME_FILE/http-request.adoc[]
+include::{snippets}/EMP_FILE_DELETE/http-request.adoc[]
 
 _Request header_
-include::{snippets}/DELETE_ME_FILE/request-headers.adoc[]
+include::{snippets}/EMP_FILE_DELETE/request-headers.adoc[]
 
 _Path_parameters_
-include::{snippets}/DELETE_ME_FILE/path-parameters.adoc[]
+include::{snippets}/EMP_FILE_DELETE/path-parameters.adoc[]
 
 --
 Response (200)::
 +
 --
 _HTTP response_
-include::{snippets}/DELETE_ME_FILE/http-response.adoc[]
+include::{snippets}/EMP_FILE_DELETE/http-response.adoc[]
 --
 Exception::
 +
@@ -29,7 +29,9 @@ Exception::
 |===
 |Error Code
 
-|ACTIVE_EMPLOYEE_NOT_FOUND_EXCEPTION
+|FILE_NOT_FOUND_EXCEPTION
+|REQUIRED_VALUE_MISSING_EXCEPTION
+|PERMISSION_DENIED_EXCEPTION
 
 
 |===

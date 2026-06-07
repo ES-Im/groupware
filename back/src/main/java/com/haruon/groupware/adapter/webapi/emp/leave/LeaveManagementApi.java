@@ -2,7 +2,7 @@ package com.haruon.groupware.adapter.webapi.emp.leave;
 
 import com.haruon.groupware.adapter.security.empDtails.EmpDetails;
 import com.haruon.groupware.application.draft.provided.forRetriever.LeaveDraftRetriever;
-import com.haruon.groupware.application.draft.service.query.dto.response.LeaveRequestHistoryResponse;
+import com.haruon.groupware.application.draft.service.query.dto.response.LeaveRequestHistoryAndEmpInfoResponse;
 import com.haruon.groupware.application.empInfo.leave.provided.LeaveGrantManagement;
 import com.haruon.groupware.application.empInfo.leave.provided.LeaveRetriever;
 import com.haruon.groupware.application.empInfo.leave.service.dto.response.LeaveSummaryAndEmpInfoResponse;
@@ -35,8 +35,7 @@ public class LeaveManagementApi {
     private final LeaveDraftRetriever leaveDraftRetriever;
 
 
-    // 어드민 - 특휴 조정 {empId}/leave/special
-    @PatchMapping("/{empId}/leave/special")
+    @PatchMapping("/{empId}/leaves/special")
     public ResponseEntity<Void> adjustSpecialLeave(
             @AuthenticationPrincipal EmpDetails details,
             @PathVariable Long empId,
@@ -49,8 +48,7 @@ public class LeaveManagementApi {
         return ResponseEntity.ok().build();
     }
 
-    // 어드민 - 대휴 조정 {empId}/leave/compansatory
-    @PatchMapping("/{empId}/leave/compansatory")
+    @PatchMapping("/{empId}/leaves/compansatory")
     public ResponseEntity<Void> adjustCompensatoryLeave(
         @AuthenticationPrincipal EmpDetails details,
         @PathVariable Long empId,
@@ -64,7 +62,7 @@ public class LeaveManagementApi {
     }
 
     // 어드민 - 모든 사원의 잔여 휴가 /leaves/summary : keyword, deptId, year
-    @GetMapping("/leave/summary")
+    @GetMapping("/leaves/summary")
     public ResponseEntity<Page<LeaveSummaryAndEmpInfoResponse>> leaveSummary(
         @AuthenticationPrincipal EmpDetails details,
         @RequestParam(required = false) String keyword,
@@ -85,7 +83,7 @@ public class LeaveManagementApi {
 
 
     // 어드민 - 회사 휴가 사용률 /company/leaves/usage-summary
-    @GetMapping("/leave/usage-summary")
+    @GetMapping("/leaves/usage-summary")
     public ResponseEntity<LeaveUsageSummaryResponse> leaveUsageSummary(
         @AuthenticationPrincipal EmpDetails details,
         @RequestParam(required = false) Long deptId,
@@ -133,7 +131,7 @@ public class LeaveManagementApi {
     // 부서 매니저 - 현재 부서원들 휴가 신청 이력
     // -> 결재 진행률 조회 같이 /{deptId}/leaves/history : keyword, approval-status
     @GetMapping("/{deptId}/leaves/request-history")
-    public ResponseEntity<Page<LeaveRequestHistoryResponse>> deptLeaveRequestHistory(
+    public ResponseEntity<Page<LeaveRequestHistoryAndEmpInfoResponse>> deptLeaveRequestHistory(
             @AuthenticationPrincipal EmpDetails details,
             @PathVariable Long deptId,
             @RequestParam(required = false) String keyword,
@@ -143,7 +141,7 @@ public class LeaveManagementApi {
     ) {
         YearMonth targetYM = yearMonth == null ? YearMonth.now(ZONE_SEOUL) : yearMonth;
 
-        Page<LeaveRequestHistoryResponse> response = leaveDraftRetriever.retrieveDeptLeaveRequestHistories(
+        Page<LeaveRequestHistoryAndEmpInfoResponse> response = leaveDraftRetriever.retrieveDeptLeaveRequestHistories(
                 details.getEmpId(),
                 deptId, keyword, approvalStatus, targetYM,
                 pageable

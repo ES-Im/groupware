@@ -2,6 +2,7 @@ package com.haruon.groupware.application.draft.service.query;
 
 import com.haruon.groupware.application.draft.provided.forRetriever.LeaveDraftRetriever;
 import com.haruon.groupware.application.draft.required.LeaveDraftQueryRepository;
+import com.haruon.groupware.application.draft.service.query.dto.response.LeaveRequestHistoryAndEmpInfoResponse;
 import com.haruon.groupware.application.draft.service.query.dto.response.LeaveRequestHistoryResponse;
 import com.haruon.groupware.application.utils.AuthValidator;
 import com.haruon.groupware.application.utils.required.AuthorizationQueryRepository;
@@ -35,7 +36,7 @@ public class LeaveDraftQueryService implements LeaveDraftRetriever {
     }
 
     @Override
-    public Page<LeaveRequestHistoryResponse> retrieveDeptLeaveRequestHistories(
+    public Page<LeaveRequestHistoryAndEmpInfoResponse> retrieveDeptLeaveRequestHistories(
             Long managerId,
             Long deptId,
             @Nullable String keyword,

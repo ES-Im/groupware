@@ -6,27 +6,22 @@ Request::
 +
 --
 _HTTP request_
-include::{snippets}/ADD_EMP_FILES/http-request.adoc[]
+include::{snippets}/EMP_FILE_UPLOAD/http-request.adoc[]
+_Request header_
+include::{snippets}/EMP_FILE_UPLOAD/request-headers.adoc[]
+_Path Parameter_
+include::{snippets}/EMP_FILE_UPLOAD/path-parameters.adoc[]
+_Query Parameter_
+include::{snippets}/EMP_FILE_UPLOAD/query-parameters.adoc[]
 _Request Part_
-include::{snippets}/ADD_EMP_FILES/request-parts.adoc[]
-_Request Param_
-[cols="1,1,1,3"]
-|===
-|파트명|타입|필수|설명
-
-|fileType
-|String
-|true
-|파일 타입 +
-예: `PROFILE_PICTURE`, `SIGNATURE`
-|===
+include::{snippets}/EMP_FILE_UPLOAD/request-parts.adoc[]
 
 --
 Response (200)::
 +
 --
 _HTTP response_
-include::{snippets}/ADD_EMP_FILES/http-response.adoc[]
+include::{snippets}/EMP_FILE_UPLOAD/http-response.adoc[]
 --
 Exception::
 +
@@ -39,7 +34,7 @@ Exception::
 |FILE_CONVERT_FAILED_EXCEPTION
 |REQUIRED_VALUE_MISSING_EXCEPTION
 |ACTIVE_EMPLOYEE_NOT_FOUND_EXCEPTION
-|EMPLOYEE_ACCESS_DENIED
+|PERMISSION_DENIED_EXCEPTION
 |FILE_STORE_FAILED_EXCEPTION
 
 

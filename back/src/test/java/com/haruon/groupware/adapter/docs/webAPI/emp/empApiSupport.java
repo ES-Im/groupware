@@ -12,7 +12,7 @@ import java.util.List;
 
 public class empApiSupport {
 
-    static EmpInfoResponse getEmpInfoResponse() {
+    public static EmpInfoResponse getEmpInfoResponse() {
         return new EmpInfoResponse(
                 new EmpBasicInfo("사원번호", "사원명", "아이디", "이메일", "직통번호"),
                 List.of(
