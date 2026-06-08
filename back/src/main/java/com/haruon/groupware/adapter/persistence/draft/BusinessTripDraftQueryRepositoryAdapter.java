@@ -1,14 +1,12 @@
 package com.haruon.groupware.adapter.persistence.draft;
 
-import com.haruon.groupware.application.draft.required.LeaveDraftQueryRepository;
-import com.haruon.groupware.application.draft.service.query.dto.response.LeaveRequestHistoryAndEmpInfoResponse;
-import com.haruon.groupware.application.draft.service.query.dto.response.LeaveRequestHistoryResponse;
-import com.haruon.groupware.application.utils.required.CompanyPolicyPort;
+import com.haruon.groupware.application.draft.required.BusinessTripDraftQueryRepository;
+import com.haruon.groupware.application.draft.service.query.dto.response.BusinessTripRequestHistoryAndEmpInfoResponse;
+import com.haruon.groupware.application.draft.service.query.dto.response.BusinessTripRequestHistoryResponse;
 import com.haruon.groupware.domain.draft.QApproval;
-import com.haruon.groupware.domain.draft.QLeaveCancelDraft;
-import com.haruon.groupware.domain.draft.QLeaveDraft;
+import com.haruon.groupware.domain.draft.QBusinessTripCancelDraft;
+import com.haruon.groupware.domain.draft.QBusinessTripDraft;
 import com.haruon.groupware.domain.draft.sub.ApprovalStatus;
-import com.haruon.groupware.domain.draft.sub.LeaveType;
 import com.haruon.groupware.domain.empInfo.QEmp;
 import com.haruon.groupware.domain.empInfo.QEmpBelongings;
 import com.querydsl.core.Tuple;
@@ -17,7 +15,6 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -29,53 +26,49 @@ import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
 
-@Slf4j
 @Repository
-public class LeaveDraftQueryRepositoryAdapter implements LeaveDraftQueryRepository {
+public class BusinessTripDraftQueryRepositoryAdapter implements BusinessTripDraftQueryRepository {
 
     private final JPAQueryFactory query;
     private final QEmp emp;
     private final QEmpBelongings empBelongings;
     private final QApproval approval;
-    private final QLeaveDraft leaveDraft;
-    private final QLeaveCancelDraft leaveCancelDraft;
-    private final CompanyPolicyPort companyPolicyPort;
+    private final QBusinessTripDraft businessTripDraft;
+    private final QBusinessTripCancelDraft businessTripCancelDraft;
 
-    public LeaveDraftQueryRepositoryAdapter(JPAQueryFactory query, CompanyPolicyPort companyPolicyPort) {
+    public BusinessTripDraftQueryRepositoryAdapter(JPAQueryFactory query) {
         this.query = query;
         this.emp = QEmp.emp;
         this.empBelongings = QEmpBelongings.empBelongings;
         this.approval = QApproval.approval;
-        this.leaveDraft = QLeaveDraft.leaveDraft;
-        this.leaveCancelDraft = QLeaveCancelDraft.leaveCancelDraft;
-        this.companyPolicyPort = companyPolicyPort;
+        this.businessTripDraft = QBusinessTripDraft.businessTripDraft;
+        this.businessTripCancelDraft = QBusinessTripCancelDraft.businessTripCancelDraft;
     }
 
     @Override
-    public List<LeaveRequestHistoryResponse> findLeaveRequestHistoriesByEmpIdAndYearMonth(
+    public List<BusinessTripRequestHistoryResponse> findBusinessTripRequestHistoriesByEmpIDAndYearMonth(
             Long empId,
             @Nullable ApprovalStatus approvalStatus,
             YearMonth yearMonth
     ) {
-        List<LeaveRequestHistoryResponseAcceptor> acceptors = query
-                .select(acceptorConstructorExpression()).from(leaveDraft)
-                .join(leaveDraft.approval, approval)
+        List<BusinessTripRequestHistoryAcceptor> acceptors = query
+                .select(acceptorConstructorExpression())
+                .from(businessTripDraft)
+                .join(businessTripDraft.approval, approval)
                 .where(
-                        leaveDraft.emp.id.eq(empId),
+                        businessTripDraft.emp.id.eq(empId),
                         isStatusEq(approvalStatus),
                         isOverlappedWithYearMonth(yearMonth),
                         cancelDraftNotExist()
                 ).fetch();
 
-        int actualWorkHour = companyPolicyPort.getWorkHours();
-
         return acceptors.stream()
-                .map(acceptor -> acceptor.toLeaveRequestHistoryResponse(actualWorkHour))
+                .map(BusinessTripRequestHistoryAcceptor::toBusinessTripRequestHistoryResponse)
                 .toList();
     }
 
     @Override
-    public Page<LeaveRequestHistoryAndEmpInfoResponse> findLeaveRequestHistoriesByDeptIdAndYearMonth (
+    public Page<BusinessTripRequestHistoryAndEmpInfoResponse> findBusinessTripRequestHistoriesByDeptIdAndYearMonth(
             Long deptId,
             YearMonth yearMonth,
             @Nullable String keyword,
@@ -83,11 +76,11 @@ public class LeaveDraftQueryRepositoryAdapter implements LeaveDraftQueryReposito
             Pageable pageable
     ) {
         Long rows = query
-                .select(leaveDraft.id.countDistinct())
-                .from(leaveDraft)
-                .join(leaveDraft.emp, emp)
+                .select(businessTripDraft.id.countDistinct())
+                .from(businessTripDraft)
+                .join(businessTripDraft.emp, emp)
                 .join(emp.empBelongings, empBelongings)
-                .join(leaveDraft.approval, approval)
+                .join(businessTripDraft.approval, approval)
                 .where(
                         empBelongings.dept.id.eq(deptId),
                         empBelongings.endAt.isNull(),
@@ -103,10 +96,11 @@ public class LeaveDraftQueryRepositoryAdapter implements LeaveDraftQueryReposito
         List<Tuple> tuple = query
                 .select(
                         emp.id, emp.empNo, emp.empName,
-                        acceptorConstructorExpression()).from(leaveDraft)
-                .join(leaveDraft.emp, emp)
+                        acceptorConstructorExpression()
+                ).from(businessTripDraft)
+                .join(businessTripDraft.emp, emp)
                 .join(emp.empBelongings, empBelongings)
-                .join(leaveDraft.approval, approval)
+                .join(businessTripDraft.approval, approval)
                 .where(
                         empBelongings.dept.id.eq(deptId),
                         empBelongings.endAt.isNull(),
@@ -117,57 +111,57 @@ public class LeaveDraftQueryRepositoryAdapter implements LeaveDraftQueryReposito
                 )
                 .orderBy(
                         emp.empNo.asc(),
-                        leaveDraft.startAt.desc(),
-                        leaveDraft.id.desc()
+                        businessTripDraft.startAt.desc(),
+                        businessTripDraft.id.desc()
                 )
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
 
-        List<LeaveRequestHistoryAndEmpInfoAssembler> assemblers = new ArrayList<>();
+        List<BusinessTripRequestHistoryAndEmpInfoAssembler> assemblers = new ArrayList<>();
 
         for (Tuple row : tuple) {
             Long empId = row.get(emp.id);
             String empNo = row.get(emp.empNo);
             String empName = row.get(emp.empName);
 
-            LeaveRequestHistoryResponseAcceptor history =
-                    row.get(3, LeaveRequestHistoryResponseAcceptor.class);
+            BusinessTripRequestHistoryAcceptor history =
+                    row.get(3, BusinessTripRequestHistoryAcceptor.class);
 
             assemblers.add(
-                    new LeaveRequestHistoryAndEmpInfoAssembler(empId, empNo, empName, history)
+                    new BusinessTripRequestHistoryAndEmpInfoAssembler(empId, empNo, empName, history)
             );
         }
 
-        int actualWorkHour = companyPolicyPort.getWorkHours();
-        List<LeaveRequestHistoryAndEmpInfoResponse> responses = assemblers.stream()
-                .map(assembler -> assembler.toLeaveRequestHistoryAndEmpInfoResponse(actualWorkHour))
+        List<BusinessTripRequestHistoryAndEmpInfoResponse> responses = assemblers.stream()
+                .map(BusinessTripRequestHistoryAndEmpInfoAssembler::toBusinessTripRequestHistoryAndEmpInfoResponse)
                 .toList();
 
         return new PageImpl<>(responses, pageable, totalRows);
     }
 
-    public record LeaveRequestHistoryAndEmpInfoAssembler(
+    public record BusinessTripRequestHistoryAndEmpInfoAssembler (
             Long empId,
             String empNo,
             String empName,
-            LeaveRequestHistoryResponseAcceptor acceptor
+            BusinessTripRequestHistoryAcceptor acceptor
     ) {
-        LeaveRequestHistoryAndEmpInfoResponse toLeaveRequestHistoryAndEmpInfoResponse(int actualWorkHour) {
+        BusinessTripRequestHistoryAndEmpInfoResponse toBusinessTripRequestHistoryAndEmpInfoResponse() {
 
-            return new LeaveRequestHistoryAndEmpInfoResponse(
-                    empId, empNo, empName, acceptor.toLeaveRequestHistoryResponse(actualWorkHour)
+            return new BusinessTripRequestHistoryAndEmpInfoResponse(
+                    empId, empNo, empName, acceptor.toBusinessTripRequestHistoryResponse()
             );
         }
     }
 
-    public record LeaveRequestHistoryResponseAcceptor(
+    public record BusinessTripRequestHistoryAcceptor(
             Long draftId,
 
-            LeaveType leaveType,
             LocalDateTime startAt,
             LocalDateTime endAt,
-            Long reservedHours,
+
+            String destination,
+            String purpose,
 
             ApprovalStatus approvalStatus
     ) {
@@ -177,51 +171,30 @@ public class LeaveDraftQueryRepositoryAdapter implements LeaveDraftQueryReposito
             return approvalStatus.getDescription();
         }
 
-        private String resolveLeaveTypeName(
-                LeaveType leaveType,
-                Long reservedHours,
-                int actualWorkHour
-        ) {
-            if (leaveType != LeaveType.ANNUAL) {
-                return leaveType.getDescription();
-            }
-
-            if (reservedHours == actualWorkHour / 2L) {
-                return "반차";
-            }
-
-            if (reservedHours * 2 == actualWorkHour) {
-                return "반차";
-            }
-
-            return leaveType.getDescription();
-        }
-
-        LeaveRequestHistoryResponse toLeaveRequestHistoryResponse(int actualWorkHour) {
-            double requestedLeaveDays = reservedHours / (double) actualWorkHour;
-
-            return new LeaveRequestHistoryResponse(
-                    draftId,
-                    resolveLeaveTypeName(leaveType, reservedHours, actualWorkHour),
-                    startAt.toLocalDate(),
-                    endAt.toLocalDate(),
-                    requestedLeaveDays,
-                    resolveApprovalStatusName(approvalStatus)
+        BusinessTripRequestHistoryResponse toBusinessTripRequestHistoryResponse() {
+            return new BusinessTripRequestHistoryResponse(
+                   draftId,
+                   startAt.toLocalDate(),
+                   endAt.toLocalDate(),
+                   destination,
+                   purpose,
+                   resolveApprovalStatusName(approvalStatus)
             );
         }
     }
 
-    private ConstructorExpression<LeaveRequestHistoryResponseAcceptor> acceptorConstructorExpression() {
+    private ConstructorExpression<BusinessTripRequestHistoryAcceptor> acceptorConstructorExpression() {
         return Projections.constructor(
-                LeaveRequestHistoryResponseAcceptor.class,
-                leaveDraft.id,
-                leaveDraft.leaveType,
-                leaveDraft.startAt,
-                leaveDraft.endAt,
-                leaveDraft.reservedHours,
+                BusinessTripRequestHistoryAcceptor.class,
+                businessTripDraft.id,
+                businessTripDraft.startAt,
+                businessTripDraft.endAt,
+                businessTripDraft.destination,
+                businessTripDraft.purpose,
                 approval.status
         );
     }
+
 
     private BooleanExpression isStatusEq(@Nullable ApprovalStatus approvalStatus) {
         return approvalStatus == null
@@ -239,16 +212,16 @@ public class LeaveDraftQueryRepositoryAdapter implements LeaveDraftQueryReposito
         LocalDateTime monthStart = yearMonth.atDay(1).atStartOfDay();
         LocalDateTime nextMonthStart = yearMonth.plusMonths(1).atDay(1).atStartOfDay();
 
-        return leaveDraft.startAt.lt(nextMonthStart)
-                .and(leaveDraft.endAt.goe(monthStart));
+        return businessTripDraft.startAt.lt(nextMonthStart)
+                .and(businessTripDraft.endAt.goe(monthStart));
     }
 
     private BooleanExpression cancelDraftNotExist() {
         return JPAExpressions
                 .selectOne()
-                .from(leaveCancelDraft)
+                .from(businessTripCancelDraft)
                 .where(
-                        leaveCancelDraft.sourceKey.eq(leaveDraft.sourceKey)
+                        businessTripCancelDraft.sourceKey.eq(businessTripDraft.sourceKey)
                 )
                 .notExists();
     }

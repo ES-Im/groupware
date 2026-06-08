@@ -149,6 +149,67 @@ include::api/webapi/leave/My-Leave-Request-History.adoc[]
 === 부서 휴가 신청 이력 조회
 include::api/webapi/leave/Dept-Leave-Request-History.adoc[]
 
+[[BUSINESS_TRIP_API]]
+== BUSINESS TRIP API
+
+[[MY_BUSINESS_TRIP_REQUEST_HISTORY]]
+=== 내 출장 신청 이력 조회
+include::api/webapi/businessTrip/My-Business-Trip-Request-History.adoc[]
+
+[[DEPT_BUSINESS_TRIP_REQUEST_HISTORY]]
+=== 부서 출장 신청 이력 조회
+include::api/webapi/businessTrip/Dept-Business-Trip-Request-History.adoc[]
+
+[[DOCUMENT_BOX_API]]
+== DOCUMENT BOX API
+
+[[MY_SUBMITTED_DRAFTS]]
+=== 내 상신 기안서 목록 조회
+include::api/webapi/documentBox/My-Submitted-Drafts.adoc[]
+
+[[MY_UNSUBMITTED_DRAFTS]]
+=== 내 임시저장 기안서 목록 조회
+include::api/webapi/documentBox/My-Unsubmitted-Drafts.adoc[]
+
+[[MY_PENDING_APPROVAL_DRAFTS]]
+=== 내 결재 대기 기안서 목록 조회
+include::api/webapi/documentBox/My-Pending-Approval-Drafts.adoc[]
+
+[[MY_ACCESSIBLE_DOCUMENTS]]
+=== 내 조회 가능 문서 목록 조회
+include::api/webapi/documentBox/My-Accessible-Documents.adoc[]
+
+[[EMP_LEAVE_API]]
+== EMP LEAVE API
+
+[[MY_EMP_LEAVE_SUMMARY]]
+=== 내 잔여 휴가 요약 조회
+include::api/webapi/empLeave/My-Emp-Leave-Summary.adoc[]
+
+[[EMP_LEAVE_SUMMARY]]
+=== 관리자 사원 휴가 요약 조회
+include::api/webapi/empLeave/Emp-Leave-Summary.adoc[]
+
+[[EMP_LEAVE_USAGE_SUMMARY]]
+=== 관리자 회사 휴가 사용률 조회
+include::api/webapi/empLeave/Emp-Leave-Usage-Summary.adoc[]
+
+[[DEPT_EMP_LEAVE_SUMMARY]]
+=== 부서 사원 휴가 요약 조회
+include::api/webapi/empLeave/Dept-Emp-Leave-Summary.adoc[]
+
+[[DEPT_EMP_LEAVE_USAGE_SUMMARY]]
+=== 부서 휴가 사용률 조회
+include::api/webapi/empLeave/Dept-Emp-Leave-Usage-Summary.adoc[]
+
+[[EMP_LEAVE_ADJUST_SPECIAL_GRANT_DAYS]]
+=== 특별 휴가 부여일수 조정
+include::api/webapi/empLeave/Emp-Leave-Adjust-Special-Grant-Days.adoc[]
+
+[[EMP_LEAVE_ADJUST_COMPENSATORY_GRANT_DAYS]]
+=== 포상 휴가 부여일수 조정
+include::api/webapi/empLeave/Emp-Leave-Adjust-Compensatory-Grant-Days.adoc[]
+
 [[DEPT_API]]
 == DEPT API
 

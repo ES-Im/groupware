@@ -1,0 +1,34 @@
+[tabs%nosync]
+
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/MY_ACCESSIBLE_DOCUMENTS/http-request.adoc[]
+_Request header_
+include::{snippets}/MY_ACCESSIBLE_DOCUMENTS/request-headers.adoc[]
+_Query Parameter_
+include::{snippets}/MY_ACCESSIBLE_DOCUMENTS/query-parameters.adoc[]
+--
+Response (200)::
++
+--
+_HTTP response_
+include::{snippets}/MY_ACCESSIBLE_DOCUMENTS/http-response.adoc[]
+_Response fields_
+include::{snippets}/MY_ACCESSIBLE_DOCUMENTS/response-fields.adoc[]
+--
+Exception::
++
+--
+이 API에서 발생 가능한 에러:
+
+|===
+|Error Code
+
+|PERMISSION_DENIED_EXCEPTION
+
+|===
+--
+====

@@ -2,6 +2,7 @@ package com.haruon.groupware.domain.draft;
 
 import static com.querydsl.core.types.PathMetadataFactory.*;
 
+import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.*;
 
 import com.querydsl.core.types.dsl.StringTemplate;
@@ -68,5 +69,8 @@ public class QApproval extends EntityPathBase<Approval> {
         this.draft = inits.isInitialized("draft") ? new QDraft(forProperty("draft"), inits.get("draft")) : null;
     }
 
+    public Predicate ap() {
+        return null;
+    }
 }
 

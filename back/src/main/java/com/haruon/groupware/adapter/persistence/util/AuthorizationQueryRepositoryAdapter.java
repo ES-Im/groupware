@@ -1,6 +1,8 @@
 package com.haruon.groupware.adapter.persistence.util;
 
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
+import com.haruon.groupware.application.exception.common.role.ActiveEmployeeNotFoundException;
+import com.haruon.groupware.application.exception.common.role.DepartmentMismatchException;
 import com.haruon.groupware.application.utils.projection.DeptManagerAndTargetEmpInfo;
 import com.haruon.groupware.application.utils.required.AuthorizationQueryRepository;
 import com.haruon.groupware.domain.empInfo.QDept;
@@ -10,7 +12,6 @@ import com.haruon.groupware.domain.empInfo.enums.EmpStatus;
 import com.haruon.groupware.domain.empInfo.enums.SystemRoleCode;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
@@ -62,21 +63,7 @@ public class AuthorizationQueryRepositoryAdapter implements AuthorizationQueryRe
         QEmpBelongings managerBelonging = new QEmpBelongings("managerBelonging");
         QEmpBelongings targetBelonging = new QEmpBelongings("targetBelonging");
 
-        BooleanExpression sameCurrentDept = JPAExpressions
-                .selectOne()
-                .from(managerBelonging, targetBelonging)
-                .where(
-                        managerBelonging.emp.eq(manager),
-                        targetBelonging.emp.eq(targetEmp),
-
-                        managerBelonging.endAt.isNull(),
-                        targetBelonging.endAt.isNull(),
-
-                        managerBelonging.dept.eq(targetBelonging.dept)
-                )
-                .exists();
-
-        return query
+        DeptManagerAndTargetEmpInfo info = query
                 .select(Projections.constructor(
                         DeptManagerAndTargetEmpInfo.class,
                         manager,
@@ -85,17 +72,43 @@ public class AuthorizationQueryRepositoryAdapter implements AuthorizationQueryRe
                 .from(manager, targetEmp)
                 .where(
                         manager.id.eq(managerId),
-                        isActiveEmp(manager),
-
-                        targetEmp.id.eq(targetEmpId),
-
-                        manager.systemRoles.contains(SystemRoleCode.ADMIN)
-                        .or(
-                                manager.systemRoles.contains(SystemRoleCode.DEPT_MANAGER)
-                                        .and(sameCurrentDept)
-                        )
+                        targetEmp.id.eq(targetEmpId)
                 )
                 .fetchFirst();
+
+        if (info == null || info.managerEmp() == null || info.editedTargetEmp() == null) {
+            return null;
+        }
+
+        if (!info.managerEmp().getStatus().equals(EmpStatus.ACTIVE)) {
+            throw new ActiveEmployeeNotFoundException();
+        }
+
+        if (info.managerEmp().isAdmin()) {
+            return info;
+        }
+
+        if (!info.managerEmp().getSystemRoles().contains(SystemRoleCode.DEPT_MANAGER)) {
+            return null;
+        }
+
+        Integer sameCurrentDept = query
+                .selectOne()
+                .from(managerBelonging, targetBelonging)
+                .where(
+                        managerBelonging.emp.id.eq(managerId),
+                        targetBelonging.emp.id.eq(targetEmpId),
+                        managerBelonging.endAt.isNull(),
+                        targetBelonging.endAt.isNull(),
+                        managerBelonging.dept.eq(targetBelonging.dept)
+                )
+                .fetchFirst();
+
+        if (sameCurrentDept == null) {
+            throw new DepartmentMismatchException();
+        }
+
+        return info;
     }
 
     @Override
@@ -116,10 +129,6 @@ public class AuthorizationQueryRepositoryAdapter implements AuthorizationQueryRe
 
     private BooleanExpression isActiveEmp() {
         return emp.status.eq(EmpStatus.ACTIVE);
-    }
-
-    private BooleanExpression isActiveEmp(QEmp targetEmp) {
-        return targetEmp.status.eq(EmpStatus.ACTIVE);
     }
 
     private BooleanExpression hasSystemRoleOrAdminRole(SystemRoleCode role) {

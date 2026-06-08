@@ -1,0 +1,36 @@
+[tabs%nosync]
+
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/EMP_LEAVE_ADJUST_SPECIAL_GRANT_DAYS/http-request.adoc[]
+_Request header_
+include::{snippets}/EMP_LEAVE_ADJUST_SPECIAL_GRANT_DAYS/request-headers.adoc[]
+_Path Parameter_
+include::{snippets}/EMP_LEAVE_ADJUST_SPECIAL_GRANT_DAYS/path-parameters.adoc[]
+_Query Parameter_
+include::{snippets}/EMP_LEAVE_ADJUST_SPECIAL_GRANT_DAYS/query-parameters.adoc[]
+--
+Response (200)::
++
+--
+_HTTP response_
+include::{snippets}/EMP_LEAVE_ADJUST_SPECIAL_GRANT_DAYS/http-response.adoc[]
+--
+Exception::
++
+--
+이 API에서 발생 가능한 에러:
+
+|===
+|Error Code
+
+|REQUIRED_VALUE_MISSING_EXCEPTION
+|PERMISSION_DENIED_EXCEPTION
+|EMP_ANNUAL_LEAVE_NOT_FOUND_EXCEPTION
+
+|===
+--
+====

@@ -1,0 +1,34 @@
+[tabs%nosync]
+
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/MY_UNSUBMITTED_DRAFTS/http-request.adoc[]
+_Request header_
+include::{snippets}/MY_UNSUBMITTED_DRAFTS/request-headers.adoc[]
+_Query Parameter_
+include::{snippets}/MY_UNSUBMITTED_DRAFTS/query-parameters.adoc[]
+--
+Response (200)::
++
+--
+_HTTP response_
+include::{snippets}/MY_UNSUBMITTED_DRAFTS/http-response.adoc[]
+_Response fields_
+include::{snippets}/MY_UNSUBMITTED_DRAFTS/response-fields.adoc[]
+--
+Exception::
++
+--
+이 API에서 발생 가능한 에러:
+
+|===
+|Error Code
+
+|PERMISSION_DENIED_EXCEPTION
+
+|===
+--
+====

@@ -1,0 +1,37 @@
+[tabs%nosync]
+
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/DEPT_EMP_LEAVE_USAGE_SUMMARY/http-request.adoc[]
+_Request header_
+include::{snippets}/DEPT_EMP_LEAVE_USAGE_SUMMARY/request-headers.adoc[]
+_Path Parameter_
+include::{snippets}/DEPT_EMP_LEAVE_USAGE_SUMMARY/path-parameters.adoc[]
+_Query Parameter_
+include::{snippets}/DEPT_EMP_LEAVE_USAGE_SUMMARY/query-parameters.adoc[]
+--
+Response (200)::
++
+--
+_HTTP response_
+include::{snippets}/DEPT_EMP_LEAVE_USAGE_SUMMARY/http-response.adoc[]
+_Response fields_
+include::{snippets}/DEPT_EMP_LEAVE_USAGE_SUMMARY/response-fields.adoc[]
+--
+Exception::
++
+--
+이 API에서 발생 가능한 에러:
+
+|===
+|Error Code
+
+|REQUIRED_VALUE_MISSING_EXCEPTION
+|PERMISSION_DENIED_EXCEPTION
+
+|===
+--
+====

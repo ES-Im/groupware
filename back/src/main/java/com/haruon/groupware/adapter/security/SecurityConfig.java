@@ -72,8 +72,15 @@ public class SecurityConfig {
                         .requestMatchers("/", "/error", "/api/auth/login", "/api/auth/reissue").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/employees").permitAll()
 
-                        /* Employee API */
-                        .requestMatchers("/api/auth/logout", "/api/employees/**").hasRole(SystemRoleCode.EMPLOYEE.name())
+                        /* Company API */
+                        .requestMatchers(HttpMethod.GET, "/api/company").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/company", "/api/company/**").hasRole(SystemRoleCode.ADMIN.name())
+
+                        /* Dept API */
+                        .requestMatchers(HttpMethod.GET, "/api/departments", "/api/departments/**").authenticated()
+                        .requestMatchers(HttpMethod.PATCH, "/api/departments/**").hasRole(SystemRoleCode.ADMIN.name())
+                        .requestMatchers(HttpMethod.POST, "/api/departments/**").hasRole(SystemRoleCode.ADMIN.name())
+                        .requestMatchers(HttpMethod.DELETE, "/api/departments/**").hasRole(SystemRoleCode.ADMIN.name())
 
                         /* Employee - Manager API */
                         .requestMatchers(HttpMethod.GET, "/api/employees")
@@ -91,29 +98,32 @@ public class SecurityConfig {
                                 "/api/employees/*/dept-managed-info"
                         ).hasRole(SystemRoleCode.DEPT_MANAGER.name())
 
-                        /* EmpLeave API*/
-                        .requestMatchers("/api/employees/me/leaves/**").authenticated()
-                        .requestMatchers("/api/employees/*/leaves/special").hasRole(SystemRoleCode.ADMIN.name())
-                        .requestMatchers("/api/employees/*/leaves/compansatory").hasRole(SystemRoleCode.ADMIN.name())
-                        .requestMatchers("/api/employees/leaves/**").hasRole(SystemRoleCode.ADMIN.name())
-                        .requestMatchers("/api/employees/*/leaves").hasRole(SystemRoleCode.DEPT_MANAGER.name())
-                        .requestMatchers("/api/employees/*/leaves/usage-summary").hasRole(SystemRoleCode.DEPT_MANAGER.name())
-                        .requestMatchers("/api/employees/*/leaves/request-history").hasRole(SystemRoleCode.DEPT_MANAGER.name())
-
-
-                        /* Company API */
-                        .requestMatchers(HttpMethod.GET, "/api/company").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/company", "/api/company/**").hasRole(SystemRoleCode.ADMIN.name())
-
-                        /* Dept API */
-                        .requestMatchers(HttpMethod.GET, "/api/departments", "/api/departments/**").authenticated()
-                        .requestMatchers(HttpMethod.PATCH, "/api/departments/**").hasRole(SystemRoleCode.ADMIN.name())
-                        .requestMatchers(HttpMethod.POST, "/api/departments/**").hasRole(SystemRoleCode.ADMIN.name())
-                        .requestMatchers(HttpMethod.DELETE, "/api/departments/**").hasRole(SystemRoleCode.ADMIN.name())
+                        /* Employee API */
+                        .requestMatchers("/api/auth/logout", "/api/employees/**").hasRole(SystemRoleCode.EMPLOYEE.name())
 
                         /* ATTENDANCE API*/
                         .requestMatchers("/api/employees/attendances/me/**").authenticated()
                         .requestMatchers("/api/employees/attendances/**").hasRole(SystemRoleCode.DEPT_MANAGER.name())
+
+                        /* EmpLeave API */
+                        .requestMatchers(HttpMethod.GET, "/api/employees/me/leaves/summary").authenticated()
+                        .requestMatchers(HttpMethod.PATCH, "/api/employees/*/leaves/special-grant-days").hasRole(SystemRoleCode.ADMIN.name())
+                        .requestMatchers(HttpMethod.PATCH, "/api/employees/*/leaves/compensatory-grant-days").hasRole(SystemRoleCode.ADMIN.name())
+                        .requestMatchers(HttpMethod.GET, "/api/employees/leaves/summary").hasRole(SystemRoleCode.ADMIN.name())
+                        .requestMatchers(HttpMethod.GET, "/api/employees/leaves/usage-summary").hasRole(SystemRoleCode.ADMIN.name())
+                        .requestMatchers(HttpMethod.GET, "/api/departments/*/employees/leaves/summary").hasRole(SystemRoleCode.DEPT_MANAGER.name())
+                        .requestMatchers(HttpMethod.GET, "/api/departments/*/employees/leaves/usage-summary").hasRole(SystemRoleCode.DEPT_MANAGER.name())
+
+                        /* leave API*/
+                        .requestMatchers("/api/leave/employees/me/**").authenticated()
+                        .requestMatchers("/api/leave/departments/*/request-history").hasRole(SystemRoleCode.DEPT_MANAGER.name())
+
+                        /* BusinessTrip API */
+                        .requestMatchers("/api/businessTrip/employees/me/**").authenticated()
+                        .requestMatchers("/api/businessTrip/departments/*/request-history").hasRole(SystemRoleCode.DEPT_MANAGER.name())
+
+                        /* DocumentBox API */
+                        .requestMatchers("/api/document-box/me/**").authenticated()
 
                         /* File API */
                         .requestMatchers(HttpMethod.GET,

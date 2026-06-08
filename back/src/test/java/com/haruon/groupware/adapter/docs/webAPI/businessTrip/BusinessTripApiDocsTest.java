@@ -1,12 +1,10 @@
-package com.haruon.groupware.adapter.docs.webAPI.emp.leave;
+package com.haruon.groupware.adapter.docs.webAPI.businessTrip;
 
 import com.haruon.groupware.adapter.docs.RestDocsSupport;
-import com.haruon.groupware.adapter.webapi.emp.leave.LeaveManagementApi;
-import com.haruon.groupware.application.draft.provided.forRetriever.LeaveDraftRetriever;
-import com.haruon.groupware.application.draft.service.query.dto.response.LeaveRequestHistoryAndEmpInfoResponse;
-import com.haruon.groupware.application.draft.service.query.dto.response.LeaveRequestHistoryResponse;
-import com.haruon.groupware.application.empInfo.leave.provided.LeaveGrantManagement;
-import com.haruon.groupware.application.empInfo.leave.provided.LeaveRetriever;
+import com.haruon.groupware.adapter.webapi.draft.businessTrip.BusinessTripApi;
+import com.haruon.groupware.application.draft.provided.forRetriever.BusinessTripDraftRetriever;
+import com.haruon.groupware.application.draft.service.query.dto.response.BusinessTripRequestHistoryAndEmpInfoResponse;
+import com.haruon.groupware.application.draft.service.query.dto.response.BusinessTripRequestHistoryResponse;
 import com.haruon.groupware.domain.draft.sub.ApprovalStatus;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -37,41 +35,39 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-public class LeaveManagementApiDocsTest extends RestDocsSupport {
+public class BusinessTripApiDocsTest extends RestDocsSupport {
 
-    private final LeaveGrantManagement leaveGrantManagement = mock(LeaveGrantManagement.class);
-    private final LeaveRetriever leaveRetriever = mock(LeaveRetriever.class);
-    private final LeaveDraftRetriever leaveDraftRetriever = mock(LeaveDraftRetriever.class);
-    private final String REQUEST_MAPPING_URL = "/api/employees";
+    private final BusinessTripDraftRetriever businessTripDraftRetriever = mock(BusinessTripDraftRetriever.class);
+    private final String REQUEST_MAPPING_URL = "/api/businessTrip";
 
     @Override
     protected Object initController() {
-        return new LeaveManagementApi(leaveGrantManagement, leaveRetriever, leaveDraftRetriever);
+        return new BusinessTripApi(businessTripDraftRetriever);
     }
 
     @Test
-    @DisplayName("부서 휴가 신청 이력 조회 문서")
-    void retrieve_dept_leave_request_histories() throws Exception {
-        LeaveRequestHistoryAndEmpInfoResponse content = new LeaveRequestHistoryAndEmpInfoResponse(
+    @DisplayName("부서 출장 신청 이력 조회 문서")
+    void retrieve_dept_business_trip_request_histories() throws Exception {
+        BusinessTripRequestHistoryAndEmpInfoResponse content = new BusinessTripRequestHistoryAndEmpInfoResponse(
                 2L,
                 "202604001",
                 "홍길동",
-                new LeaveRequestHistoryResponse(
+                new BusinessTripRequestHistoryResponse(
                         10L,
-                        "연차",
                         LocalDate.of(2026, 4, 10),
-                        LocalDate.of(2026, 4, 10),
-                        1.0,
+                        LocalDate.of(2026, 4, 12),
+                        "서울",
+                        "고객 미팅",
                         "결재대기"
                 )
         );
-        Page<LeaveRequestHistoryAndEmpInfoResponse> response = new PageImpl<>(
+        Page<BusinessTripRequestHistoryAndEmpInfoResponse> response = new PageImpl<>(
                 List.of(content),
                 PageRequest.of(0, 10),
                 1
         );
 
-        Mockito.when(leaveDraftRetriever.retrieveDeptLeaveRequestHistories(
+        Mockito.when(businessTripDraftRetriever.retrieveDeptBusinessTripRequestHistories(
                 eq(1L),
                 eq(2L),
                 eq("홍"),
@@ -81,7 +77,7 @@ public class LeaveManagementApiDocsTest extends RestDocsSupport {
         )).thenReturn(response);
 
         mockMvc.perform(
-                        get(REQUEST_MAPPING_URL + "/{deptId}/leaves/request-history", 2L)
+                        get(REQUEST_MAPPING_URL + "/departments/{deptId}/request-history", 2L)
                                 .with(deptManagerAuthentication())
                                 .header("Authorization", "Bearer accessToken")
                                 .queryParam("keyword", "홍")
@@ -93,7 +89,7 @@ public class LeaveManagementApiDocsTest extends RestDocsSupport {
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultHandlers.print())
-                .andDo(document("DEPT_LEAVE_REQUEST_HISTORY",
+                .andDo(document("DEPT_BUSINESS_TRIP_REQUEST_HISTORY",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
 
@@ -113,23 +109,78 @@ public class LeaveManagementApiDocsTest extends RestDocsSupport {
                                 parameterWithName("size").optional().description("페이지 크기")
                         ),
 
-                        responseFields(deptLeaveRequestHistoryPageFields())
+                        responseFields(deptBusinessTripRequestHistoryPageFields())
                 ));
     }
 
-    private FieldDescriptor[] deptLeaveRequestHistoryPageFields() {
+    @Test
+    @DisplayName("내 출장 신청 이력 조회 문서")
+    void retrieve_my_business_trip_request_histories() throws Exception {
+        List<BusinessTripRequestHistoryResponse> response = List.of(
+                new BusinessTripRequestHistoryResponse(
+                        10L,
+                        LocalDate.of(2026, 4, 10),
+                        LocalDate.of(2026, 4, 12),
+                        "서울",
+                        "고객 미팅",
+                        "결재대기"
+                )
+        );
+
+        Mockito.when(businessTripDraftRetriever.retrieveMyBusinessTripRequestHistories(
+                eq(1L),
+                eq(ApprovalStatus.WAITING),
+                eq(YearMonth.of(2026, 4))
+        )).thenReturn(response);
+
+        mockMvc.perform(
+                        get(REQUEST_MAPPING_URL + "/employees/me/request-history")
+                                .with(employeeAuthentication())
+                                .header("Authorization", "Bearer accessToken")
+                                .queryParam("approvalStatus", "WAITING")
+                                .queryParam("yearMonth", "2026-04")
+                )
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andDo(document("MY_BUSINESS_TRIP_REQUEST_HISTORY",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+
+                        requestHeaders(
+                                headerWithName("Authorization").description("Bearer Access Token")
+                        ),
+
+                        queryParameters(
+                                parameterWithName("approvalStatus").optional().description("결재 상태 필터. UNSUBMITTED, WAITING, IN_PROGRESS, APPROVED, REJECTED"),
+                                parameterWithName("yearMonth").optional().description("조회 대상 월, yyyy-MM. 미입력 시 현재 월")
+                        ),
+
+                        responseFields(
+                                fieldWithPath("[]").type(JsonFieldType.ARRAY).description("내 출장 신청 이력 목록"),
+                                fieldWithPath("[].draftId").type(JsonFieldType.NUMBER).description("출장 신청 기안서 식별 번호"),
+                                fieldWithPath("[].startAt").type(JsonFieldType.STRING).description("출장 시작일, yyyy-MM-dd"),
+                                fieldWithPath("[].endAt").type(JsonFieldType.STRING).description("출장 종료일, yyyy-MM-dd"),
+                                fieldWithPath("[].destination").type(JsonFieldType.STRING).description("출장지"),
+                                fieldWithPath("[].purpose").type(JsonFieldType.STRING).description("출장 목적"),
+                                fieldWithPath("[].approvalStatus").type(JsonFieldType.STRING).description("결재 상태 표시명")
+                        )
+                ));
+    }
+
+    private FieldDescriptor[] deptBusinessTripRequestHistoryPageFields() {
         return concat(new FieldDescriptor[] {
-                fieldWithPath("content").type(JsonFieldType.ARRAY).description("부서 휴가 신청 이력 목록"),
+                fieldWithPath("content").type(JsonFieldType.ARRAY).description("부서 출장 신청 이력 목록"),
                 fieldWithPath("content[].empId").type(JsonFieldType.NUMBER).description("사원 식별 번호"),
                 fieldWithPath("content[].empNo").type(JsonFieldType.STRING).description("사원 번호"),
                 fieldWithPath("content[].empName").type(JsonFieldType.STRING).description("사원 이름"),
 
-                fieldWithPath("content[].historyResponse").type(JsonFieldType.OBJECT).description("휴가 신청 이력"),
-                fieldWithPath("content[].historyResponse.draftId").type(JsonFieldType.NUMBER).description("휴가 신청 기안서 식별 번호"),
-                fieldWithPath("content[].historyResponse.leaveType").type(JsonFieldType.STRING).description("휴가 유형 표시명"),
-                fieldWithPath("content[].historyResponse.startAt").type(JsonFieldType.STRING).description("휴가 시작일, yyyy-MM-dd"),
-                fieldWithPath("content[].historyResponse.endAt").type(JsonFieldType.STRING).description("휴가 종료일, yyyy-MM-dd"),
-                fieldWithPath("content[].historyResponse.requestedLeaveDays").type(JsonFieldType.NUMBER).description("신청 휴가 일수"),
+                fieldWithPath("content[].historyResponse").type(JsonFieldType.OBJECT).description("출장 신청 이력"),
+                fieldWithPath("content[].historyResponse.draftId").type(JsonFieldType.NUMBER).description("출장 신청 기안서 식별 번호"),
+                fieldWithPath("content[].historyResponse.startAt").type(JsonFieldType.STRING).description("출장 시작일, yyyy-MM-dd"),
+                fieldWithPath("content[].historyResponse.endAt").type(JsonFieldType.STRING).description("출장 종료일, yyyy-MM-dd"),
+                fieldWithPath("content[].historyResponse.destination").type(JsonFieldType.STRING).description("출장지"),
+                fieldWithPath("content[].historyResponse.purpose").type(JsonFieldType.STRING).description("출장 목적"),
                 fieldWithPath("content[].historyResponse.approvalStatus").type(JsonFieldType.STRING).description("결재 상태 표시명")
         }, pageMetadataFields());
     }
