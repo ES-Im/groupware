@@ -156,8 +156,8 @@ public class DocumentBoxQueryRepositoryAdapter implements DocumentBoxQueryReposi
                 .join(draft.emp, emp)
                 .join(emp.empBelongings, empBelongings)
                 .where(
-                        empBelongings.dept.id.in(deptIds)
-                                .or(circulation.viewer.id.eq(empId))
+                        empBelongings.dept.id.in(deptIds).and(approval.status.eq(ApprovalStatus.APPROVED))
+                                .or(circulation.viewer.id.eq(empId).and(approval.status.eq(ApprovalStatus.APPROVED)))
                                 .or(approver.approver.id.eq(empId)),
                         empBelongings.endAt.isNull(),
                         approval.status.eq(ApprovalStatus.APPROVED),
@@ -177,9 +177,9 @@ public class DocumentBoxQueryRepositoryAdapter implements DocumentBoxQueryReposi
                 .join(draft.emp, emp)
                 .join(emp.empBelongings, empBelongings)
                 .where(
-                        empBelongings.dept.id.in(deptIds)
-                                .or(circulation.viewer.id.eq(empId))
-                                .or(approver.approver.id.eq(empId)),
+                        empBelongings.dept.id.in(deptIds).and(approval.status.eq(ApprovalStatus.APPROVED))
+                            .or(circulation.viewer.id.eq(empId).and(approval.status.eq(ApprovalStatus.APPROVED)))
+                            .or(approver.approver.id.eq(empId)),
                         empBelongings.endAt.isNull(),
                         approval.status.eq(ApprovalStatus.APPROVED),
                         keywordContains(keyword)
@@ -189,6 +189,66 @@ public class DocumentBoxQueryRepositoryAdapter implements DocumentBoxQueryReposi
                 .fetch();
 
         return new PageImpl<>(responses, pageable, totalRow);
+    }
+
+    @Override
+    public Long countPendingApprovalDraftsByEmpId(Long empId) {
+        Long rows = query
+                .select(draft.id.countDistinct())
+                .from(draft)
+                .where(
+                        draft.id.in(currentApprovalTurnDraftIdsByEmpId(empId))
+                ).fetchOne();
+
+        return rows == null? 0L : rows;
+    }
+
+    @Override
+    public Long countUnSubmittedDraftsByEmpId(Long empId) {
+        Long rows = query
+                .select(draft.id.countDistinct())
+                .from(draft)
+                .where(
+                        draft.emp.id.eq(empId),
+                        draft.submittedAt.isNull()
+                ).fetchOne();
+
+        return rows == null ? 0L : rows;
+    }
+
+    @Override
+    public Long countSubmittedDraftsByEmpId(Long empId) {
+        Long rows = query
+                .select(draft.id.countDistinct())
+                .from(draft)
+                .where(
+                        draft.emp.id.eq(empId),
+                        draft.submittedAt.isNotNull()
+                ).fetchOne();
+
+        return rows == null ? 0L : rows;
+    }
+
+    @Override
+    public Long countAccessibleDraftsByEmpId(Long empId, List<Long> deptIds) {
+        Long rows = query
+                .select(draft.id.countDistinct())
+                .from(draft)
+                .leftJoin(draft.circulations, circulation)
+                .join(draft.approval, approval)
+                .join(approval.approvers, approver)
+                .join(draft.emp, emp)
+                .join(emp.empBelongings, empBelongings)
+                .where(
+                        empBelongings.dept.id.in(deptIds).and(approval.status.eq(ApprovalStatus.APPROVED))
+                                .or(circulation.viewer.id.eq(empId).and(approval.status.eq(ApprovalStatus.APPROVED)))
+                                .or(approver.approver.id.eq(empId)),
+                        empBelongings.endAt.isNull(),
+                        approval.status.eq(ApprovalStatus.APPROVED)
+                )
+                .fetchOne();
+
+        return rows == null ? 0L : rows;
     }
 
     private BooleanExpression keywordContains(@Nullable String keyword) {

@@ -118,7 +118,7 @@ public class AttendanceManagementApiTest extends IntegrationTestSupport {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsBytes(request))
                 ).andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         Attendance updated = findAttendance(fixture.targetEmp(), LocalDate.of(2026, 4, 1));
 
@@ -150,7 +150,7 @@ public class AttendanceManagementApiTest extends IntegrationTestSupport {
                                 .param("targetEmpId", fixture.targetEmp().getId().toString())
                                 .param("approvedAt", "2026-04-30T09:00:00")
                 ).andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         Attendance approved = findAttendance(fixture.targetEmp(), LocalDate.of(2026, 4, 1));
 

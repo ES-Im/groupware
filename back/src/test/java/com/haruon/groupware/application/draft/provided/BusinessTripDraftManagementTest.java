@@ -4,7 +4,11 @@ import com.haruon.groupware.application.TestIntegrationConfig;
 import com.haruon.groupware.application.dept.required.DeptRepository;
 import com.haruon.groupware.application.draft.provided.forCommand.BusinessTripDraftManagement;
 import com.haruon.groupware.application.draft.required.DraftRepository;
-import com.haruon.groupware.application.draft.service.command.dto.*;
+import com.haruon.groupware.application.draft.service.command.dto.ApproversRequest;
+import com.haruon.groupware.application.draft.service.command.dto.createDraft.BusinessTripDraftCreateRequest;
+import com.haruon.groupware.application.draft.service.command.dto.createDraft.CommonDraftCreateRequest;
+import com.haruon.groupware.application.draft.service.command.dto.updateDraft.BusinessTripDraftUpdateRequest;
+import com.haruon.groupware.application.draft.service.command.dto.updateDraft.CommonDraftUpdateRequest;
 import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
 import com.haruon.groupware.application.schedule.required.ScheduleRepository;
 import com.haruon.groupware.domain.AbstractEntity;
@@ -142,11 +146,11 @@ record BusinessTripDraftManagementTest(
         );
 
         businessTripDraftManagement.updateDraft(
+                drafter.getId(),
+                draft.getId(),
                 BusinessTripDraftUpdateRequest.builder()
                         .param(
                                 CommonDraftUpdateRequest.builder()
-                                        .draftId(draft.getId())
-                                        .drafterId(drafter.getId())
                                         .build()
                         )
                         .startAt(editedStartAt)
@@ -189,9 +193,9 @@ record BusinessTripDraftManagementTest(
             Set<Emp> participants
     ) {
         businessTripDraftManagement.createDraft(
+                drafter.getId(),
                 BusinessTripDraftCreateRequest.builder()
                         .param(CommonDraftCreateRequest.builder()
-                                .empId(drafter.getId())
                                 .title("test")
                                 .content("test")
                                 .build()
@@ -219,9 +223,9 @@ record BusinessTripDraftManagementTest(
             Set<Emp> participants
     ) {
         businessTripDraftManagement.createSubmitted(
+                drafter.getId(),
                 BusinessTripDraftCreateRequest.builder()
                         .param(CommonDraftCreateRequest.builder()
-                                .empId(drafter.getId())
                                 .title("test")
                                 .content("test")
                                 .approvers(List.of(

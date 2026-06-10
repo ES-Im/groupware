@@ -26,7 +26,7 @@ public class EmpLeaveEditingGrantDayApi {
                 details.getEmpId(), empId, plusMinusDays
         );
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/compensatory-grant-days")
@@ -39,6 +39,6 @@ public class EmpLeaveEditingGrantDayApi {
                 details.getEmpId(), empId, plusMinusDays
         );
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 }

@@ -3,8 +3,8 @@ package com.haruon.groupware.application.draft.service.command;
 import com.haruon.groupware.application.draft.provided.forCommand.LeaveCancelDraftManagement;
 import com.haruon.groupware.application.draft.required.DraftRepository;
 import com.haruon.groupware.application.draft.required.LeaveCancelDraftRepository;
-import com.haruon.groupware.application.draft.service.command.dto.CancelDraftCreateRequest;
-import com.haruon.groupware.application.draft.service.command.dto.CommonDraftCreateRequest;
+import com.haruon.groupware.application.draft.service.command.dto.createDraft.CancelDraftCreateRequest;
+import com.haruon.groupware.application.draft.service.command.dto.createDraft.CommonDraftCreateRequest;
 import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
 import com.haruon.groupware.application.empInfo.leave.required.EmpLeaveRepository;
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
@@ -13,7 +13,6 @@ import com.haruon.groupware.application.exception.draft.DraftNotFoundException;
 import com.haruon.groupware.application.exception.draft.DraftTypeMismatchException;
 import com.haruon.groupware.application.exception.empInfo.leave.EmpAnnualLeaveNotFoundException;
 import com.haruon.groupware.application.exception.empInfo.leave.UnsupportedLeaveTypeException;
-import com.haruon.groupware.application.file.required.FileStorage;
 import com.haruon.groupware.application.utils.required.CompanyPolicyPort;
 import com.haruon.groupware.domain.draft.Draft;
 import com.haruon.groupware.domain.draft.LeaveCancelDraft;
@@ -45,10 +44,9 @@ public class LeaveCancelDraftService extends CommonDraftService implements Leave
             EmpRepository empRepository,
             DraftRepository draftRepository,
             CompanyPolicyPort policyPort,
-            EmpLeaveRepository empLeaveRepository,
-            FileStorage fileStorage
+            EmpLeaveRepository empLeaveRepository
     ) {
-        super(empRepository, draftRepository, fileStorage);
+        super(empRepository, draftRepository);
         this.leaveCancelDraftRepository = leaveCancelDraftRepository;
         this.draftRepository = draftRepository;
         this.policyPort = policyPort;
@@ -60,11 +58,11 @@ public class LeaveCancelDraftService extends CommonDraftService implements Leave
     );
 
     @Override
-    public void createDraft(CancelDraftCreateRequest req) {
+    public Long createDraft(Long drafterId, CancelDraftCreateRequest req) {
         validateOriginalLeaveDraft(req.sourceKey());
 
         CommonDraftCreateRequest commonReq = req.param();
-        Emp drafter = findActiveEmpById(commonReq.empId());
+        Emp drafter = findActiveEmpById(drafterId);
         List<ApproversParam> approvers = toApproverParams(commonReq.approvers());
 
         LeaveCancelDraft draft = LeaveCancelDraft.createDraft(
@@ -76,15 +74,17 @@ public class LeaveCancelDraftService extends CommonDraftService implements Leave
         );
 
         draftRepository.save(draft);
+
+        return draft.getId();
     }
 
     @Override
-    public void createSubmitted(CancelDraftCreateRequest req) {
+    public Long createSubmitted(Long drafterId, CancelDraftCreateRequest req) {
         if(req.param().submittedAt() == null) throw new RequiredValueMissingException();
         validateOriginalLeaveDraft(req.sourceKey());
 
         CommonDraftCreateRequest commonReq = req.param();
-        Emp drafter = findActiveEmpById(commonReq.empId());
+        Emp drafter = findActiveEmpById(drafterId);
         List<ApproversParam> approvers = requireApprovers(commonReq.approvers());
         LocalDateTime submittedAt = requireSubmittedAt(commonReq.submittedAt());
 
@@ -98,6 +98,8 @@ public class LeaveCancelDraftService extends CommonDraftService implements Leave
         );
 
         draftRepository.save(draft);
+
+        return draft.getId();
     }
 
     @Override

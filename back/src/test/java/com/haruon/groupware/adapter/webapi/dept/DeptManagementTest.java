@@ -48,7 +48,7 @@ public class DeptManagementTest extends IntegrationTestSupport {
                         .content(objectMapper.writeValueAsBytes(request))
         )
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
     }
 
     @Test
@@ -66,7 +66,7 @@ public class DeptManagementTest extends IntegrationTestSupport {
                         .header("Authorization", BEARER + accessToken)
         )
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
         Dept target = deptRepository.findById(it.getId()).orElseThrow();
         assertTrue(target.isActive());
     }
@@ -84,7 +84,7 @@ public class DeptManagementTest extends IntegrationTestSupport {
                         .header("Authorization", BEARER + accessToken)
         )
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         Dept target = deptRepository.findById(it.getId()).orElseThrow();
         assertFalse(target.isActive());
@@ -105,7 +105,7 @@ public class DeptManagementTest extends IntegrationTestSupport {
                         .param("newName", newName)
         )
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         Dept target = deptRepository.findById(targetDept.getId()).orElseThrow();
         assertEquals(newName, target.getDeptName());
@@ -126,7 +126,7 @@ public class DeptManagementTest extends IntegrationTestSupport {
                         .param("parentDeptId", parentDept.getId() + "")
         )
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         Dept parent = deptRepository.findById(parentDept.getId()).orElseThrow();
         Dept target = deptRepository.findById(targetDept.getId()).orElseThrow();
@@ -152,7 +152,7 @@ public class DeptManagementTest extends IntegrationTestSupport {
                         .param("appointedAt", "2026-03-01")
         )
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         DeptInfoResponse deptInfoResponse = deptRetriever.retrieverDeptInfo(targetDeptId);
         assertEquals(targetEmpid, deptInfoResponse.deptLeader().empId());
@@ -178,7 +178,7 @@ public class DeptManagementTest extends IntegrationTestSupport {
                         .param("endAt", "2026-04-01")
         )
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         DeptInfoResponse deptInfoResponse = deptRetriever.retrieverDeptInfo(targetDeptId);
         assertNotEquals(targetEmpid, deptInfoResponse.deptLeader().empId());

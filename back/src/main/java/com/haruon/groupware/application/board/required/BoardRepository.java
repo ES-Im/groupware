@@ -11,4 +11,6 @@ public interface BoardRepository extends Repository<Board, Long> {
     Optional<Board> findById(Long id);
 
     void deleteAll();
+
+    boolean existsBoardById(Long boardId);
 }

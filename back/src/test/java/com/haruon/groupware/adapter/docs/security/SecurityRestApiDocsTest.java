@@ -153,7 +153,7 @@ public class SecurityRestApiDocsTest extends RestDocsSupport {
                                 )
                         ))
                         .header("Authorization", "Bearer accessToken")
-                ).andExpect(status().isOk())
+                ).andExpect(status().isNoContent())
 
                 .andDo(document("LOGOUT",
                         preprocessRequest(prettyPrint()),

@@ -31,7 +31,7 @@ public class CompanyManagementApi {
     ) {
         companyManagement.registerCompany(details.getEmpId(), request);
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/info")
@@ -41,7 +41,7 @@ public class CompanyManagementApi {
     ) {
         companyManagement.updateCompanyInfo(details.getEmpId(), request);
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/contact")
@@ -51,7 +51,7 @@ public class CompanyManagementApi {
     ) {
         companyManagement.updatePresentedContact(details.getEmpId(), request);
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/home-page-url")
@@ -61,7 +61,7 @@ public class CompanyManagementApi {
     ) {
         companyManagement.updateHomePageURL(details.getEmpId(), request);
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
 }

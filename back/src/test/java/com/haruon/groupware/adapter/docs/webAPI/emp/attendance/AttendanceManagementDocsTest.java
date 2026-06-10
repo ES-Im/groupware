@@ -216,7 +216,7 @@ public class AttendanceManagementDocsTest extends RestDocsSupport {
                                 .content(objectMapper.writeValueAsBytes(request))
                 )
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk())
+                .andExpect(status().isNoContent())
                 .andDo(document("DEPT_ATTENDANCE_UPDATE",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
@@ -269,7 +269,7 @@ public class AttendanceManagementDocsTest extends RestDocsSupport {
                                 .queryParam("approvedAt", "2026-04-30T09:00:00")
                 )
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk())
+                .andExpect(status().isNoContent())
                 .andDo(document("DEPT_ATTENDANCE_APPROVE",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),

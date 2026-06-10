@@ -235,7 +235,7 @@ public class FileForCommanderRestApiDocsTest extends RestDocsSupport {
 
         mockMvc.perform(request)
                 .andDo(print())
-                .andExpect(status().isOk())
+                .andExpect(status().isNoContent())
                 .andDo(documentUploadResult(
                         identifier,
                         pathName,
@@ -265,7 +265,7 @@ public class FileForCommanderRestApiDocsTest extends RestDocsSupport {
                                 .header("Authorization", "Bearer accessToken")
                 )
                 .andDo(print())
-                .andExpect(status().isOk())
+                .andExpect(status().isNoContent())
                 .andDo(documentDeleteResult(identifier, pathName, pathNameDescription));
 
         ArgumentCaptor<FileDeleteRequest> captor = ArgumentCaptor.forClass(FileDeleteRequest.class);

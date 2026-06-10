@@ -64,7 +64,7 @@ public class DeptManagementApiDocsTest extends RestDocsSupport {
                         .content(objectMapper.writeValueAsBytes(request))
         )
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk())
+                .andExpect(status().isNoContent())
                 .andDo(document("DEPT_REGISTER",
                         preprocessRequest(prettyPrint()),
 
@@ -96,7 +96,7 @@ public class DeptManagementApiDocsTest extends RestDocsSupport {
                         .header("Authorization", "Bearer accessToken")
         )
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk())
+                .andExpect(status().isNoContent())
                 .andDo(document("DEPT_ACTIVATE",
                         preprocessRequest(prettyPrint()),
 
@@ -123,7 +123,7 @@ public class DeptManagementApiDocsTest extends RestDocsSupport {
                         .header("Authorization", "Bearer accessToken")
         )
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk())
+                .andExpect(status().isNoContent())
                 .andDo(document("DEPT_DEACTIVATE",
                         preprocessRequest(prettyPrint()),
 
@@ -151,7 +151,7 @@ public class DeptManagementApiDocsTest extends RestDocsSupport {
                         .queryParam("newName", "인사기획팀")
         )
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk())
+                .andExpect(status().isNoContent())
                 .andDo(document("DEPT_UPDATE_NAME",
                         preprocessRequest(prettyPrint()),
 
@@ -183,7 +183,7 @@ public class DeptManagementApiDocsTest extends RestDocsSupport {
                         .queryParam("parentDeptId", "1")
         )
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk())
+                .andExpect(status().isNoContent())
                 .andDo(document("DEPT_UPDATE_PARENT",
                         preprocessRequest(prettyPrint()),
 
@@ -216,7 +216,7 @@ public class DeptManagementApiDocsTest extends RestDocsSupport {
                         .queryParam("appointedAt", "2026-02-01")
         )
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk())
+                .andExpect(status().isNoContent())
                 .andDo(document("DEPT_APPOINT_LEADER",
                         preprocessRequest(prettyPrint()),
 
@@ -249,7 +249,7 @@ public class DeptManagementApiDocsTest extends RestDocsSupport {
                         .queryParam("endAt", "2026-03-01")
         )
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk())
+                .andExpect(status().isNoContent())
                 .andDo(document("DEPT_END_LEADER",
                         preprocessRequest(prettyPrint()),
 

@@ -76,7 +76,7 @@ public class AttendanceManagementApi {
     ) {
         attendanceEditing.updateAttendanceByDeptManager(details.getEmpId(), attendanceId, request);
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{attendanceId}/approval")
@@ -88,7 +88,7 @@ public class AttendanceManagementApi {
     ) {
         attendanceEditing.updateApproveAttendance(details.getEmpId(), attendanceId, new ApproveAttendanceByDeptManagerRequest(targetEmpId, approvedAt));
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     private static YearMonth getYearMonth(@Nullable YearMonth yearMonth) {

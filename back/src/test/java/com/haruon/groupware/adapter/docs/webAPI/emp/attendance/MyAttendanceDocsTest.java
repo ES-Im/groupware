@@ -159,29 +159,22 @@ public class MyAttendanceDocsTest extends RestDocsSupport {
     @Test
     @DisplayName("출근 기록 문서")
     void check_in() throws Exception {
-        LocalDateTime checkInAt = LocalDateTime.of(2026, 4, 5, 9, 0);
-
         Mockito.doNothing()
-                .when(attendanceRecord).recordCheckIn(eq(1L), eq(checkInAt));
+                .when(attendanceRecord).recordCheckIn(eq(1L), any(LocalDateTime.class));
 
         mockMvc.perform(
                         post(REQUEST_MAPPING_URL + "/check-in")
                                 .with(employeeAuthentication())
                                 .header("Authorization", "Bearer accessToken")
-                                .queryParam("checkInAt", "2026-04-05T09:00:00")
                 )
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk())
+                .andExpect(status().isNoContent())
                 .andDo(document("MY_ATTENDANCE_CHECK_IN",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
 
                         requestHeaders(
                                 headerWithName("Authorization").description("Bearer Access Token")
-                        ),
-
-                        queryParameters(
-                                parameterWithName("checkInAt").description("출근 시각, ISO DATE_TIME 형식. 예: 2026-04-05T09:00:00")
                         )
                 ));
     }
@@ -189,30 +182,22 @@ public class MyAttendanceDocsTest extends RestDocsSupport {
     @Test
     @DisplayName("퇴근 기록 문서")
     void check_out() throws Exception {
-        LocalDateTime checkOutAt = LocalDateTime.of(2026, 4, 5, 18, 0);
-
         Mockito.doNothing()
-                .when(attendanceRecord).recordCheckOut(eq(1L), eq(checkOutAt));
+                .when(attendanceRecord).recordCheckOut(eq(1L), any(LocalDateTime.class));
 
         mockMvc.perform(
                         patch(REQUEST_MAPPING_URL + "/check-out")
                                 .with(employeeAuthentication())
                                 .header("Authorization", "Bearer accessToken")
-                                .queryParam("checkOutAt", "2026-04-05T18:00:00")
                 )
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk())
+                .andExpect(status().isNoContent())
                 .andDo(document("MY_ATTENDANCE_CHECK_OUT",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
 
                         requestHeaders(
                                 headerWithName("Authorization").description("Bearer Access Token")
-                        ),
-
-                        queryParameters(
-                                parameterWithName("checkOutAt")
-                                        .description("퇴근 시각, ISO DATE_TIME 형식. 예: 2026-04-05T18:00:00. 퇴근 시각 재기록도 동일 API를 사용한다.")
                         )
                 ));
     }

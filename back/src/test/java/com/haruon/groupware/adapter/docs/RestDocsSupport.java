@@ -43,7 +43,7 @@ public abstract class RestDocsSupport {
 
     @BeforeEach
     void setUp(RestDocumentationContextProvider provider) {
-        this.mockMvc = MockMvcBuilders.standaloneSetup(initController())
+        this.mockMvc = MockMvcBuilders.standaloneSetup(initControllers())
                 .setMessageConverters(
                         new StringHttpMessageConverter(StandardCharsets.UTF_8),
                         new MappingJackson2HttpMessageConverter(objectMapper),
@@ -60,7 +60,13 @@ public abstract class RestDocsSupport {
 
     }
 
-    protected abstract Object initController();
+    protected Object[] initControllers() {
+        return new Object[]{initController()};
+    }
+
+    protected Object initController() {
+        throw new UnsupportedOperationException("initController() or initControllers() must be implemented");
+    }
 
     protected RequestPostProcessor employeeAuthentication() {
         EmpDetails empDetails = new EmpDetails(
@@ -106,6 +112,25 @@ public abstract class RestDocsSupport {
                 "password",
                 List.of(SystemRoleCode.DEPT_MANAGER),
                 List.of(new BelongingInfo(1L, "001", "IT", PositionCode.ASSISTANT_MANAGER, true, LocalDate.of(2026,1,1), null)),
+                EmpStatus.ACTIVE,
+                1L
+        );
+
+        return authentication(
+                new UsernamePasswordAuthenticationToken(
+                        empDetails,
+                        null,
+                        empDetails.getAuthorities()
+                )
+        );
+    }
+
+    protected RequestPostProcessor franchiseAuthentication() {
+        EmpDetails empDetails = new EmpDetails(
+                "franchise",
+                "password",
+                List.of(SystemRoleCode.FRANCHISE),
+                List.of(),
                 EmpStatus.ACTIVE,
                 1L
         );

@@ -3,6 +3,8 @@ package com.haruon.groupware.application.empInfo.emp.service.dto.response;
 import com.haruon.groupware.application.file.dto.response.FileListInfo;
 import com.haruon.groupware.domain.empInfo.enums.FileType;
 
+import static com.haruon.groupware.application.file.dto.response.FileListInfo.toFileListInfo;
+
 /**
  * 목록 조회 응답 DTO
  */
@@ -20,7 +22,7 @@ public record EmpFileListInfo(
             FileType type
     ) {
         this(
-                new FileListInfo(fileId, originalName, extension, fileSize),
+                toFileListInfo(fileId, originalName, extension, fileSize),
                 isActive,
                 type
         );

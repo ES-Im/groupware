@@ -109,7 +109,7 @@ public class EmpMeApiTest extends IntegrationTestSupport {
                                 .content(objectMapper.writeValueAsBytes(request))
                                 .contentType(MediaType.APPLICATION_JSON)
                 ).andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk())
+                .andExpect(status().isNoContent())
                 .andReturn();
     }
 
@@ -131,7 +131,7 @@ public class EmpMeApiTest extends IntegrationTestSupport {
                                 .content(objectMapper.writeValueAsBytes(request))
                                 .contentType(MediaType.APPLICATION_JSON)
                 ).andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk())
+                .andExpect(status().isNoContent())
                 .andReturn();
     }
 
@@ -154,7 +154,7 @@ public class EmpMeApiTest extends IntegrationTestSupport {
                                 .header("Authorization", "Bearer " + accessToken)
                                 .contentType(MediaType.APPLICATION_JSON)
                 ).andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         EmpFileListInfo empFileListInfo1 = empQueryRepositoryAdapter.findEmpFileInfoByEmpIdAndFileId(emp.getId(), id).orElseThrow();
 
@@ -168,7 +168,7 @@ public class EmpMeApiTest extends IntegrationTestSupport {
                                 .header("Authorization", "Bearer " + accessToken)
                                 .contentType(MediaType.APPLICATION_JSON)
                 ).andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         EmpFileListInfo empFileListInfo2 = empQueryRepositoryAdapter.findEmpFileInfoByEmpIdAndFileId(emp.getId(), id).orElseThrow();
         assertThat(empFileListInfo2.isActive()).isFalse();

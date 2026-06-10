@@ -14,7 +14,7 @@ import static com.haruon.groupware.application.utils.AuthValidator.checkAdminByI
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class CategoryService implements CategoryManagement {
+public class CategoryCommandService implements CategoryManagement {
 
     private final AuthorizationQueryRepository authorizationQueryRepository;
     private final CategoryRepository categoryRepository;

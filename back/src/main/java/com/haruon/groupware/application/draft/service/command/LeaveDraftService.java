@@ -2,9 +2,10 @@ package com.haruon.groupware.application.draft.service.command;
 
 import com.haruon.groupware.application.draft.provided.forCommand.LeaveDraftManagement;
 import com.haruon.groupware.application.draft.required.LeaveDraftRepository;
-import com.haruon.groupware.application.draft.service.command.dto.CommonDraftCreateRequest;
-import com.haruon.groupware.application.draft.service.command.dto.LeaveDraftCreateRequest;
-import com.haruon.groupware.application.draft.service.command.dto.LeaveDraftUpdateRequest;
+import com.haruon.groupware.application.draft.service.command.dto.createDraft.CommonDraftCreateRequest;
+import com.haruon.groupware.application.draft.service.command.dto.createDraft.LeaveDraftCreateRequest;
+import com.haruon.groupware.application.draft.service.command.dto.updateDraft.CommonDraftUpdateRequest;
+import com.haruon.groupware.application.draft.service.command.dto.updateDraft.LeaveDraftUpdateRequest;
 import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
 import com.haruon.groupware.application.empInfo.leave.required.EmpLeaveRepository;
 import com.haruon.groupware.application.exception.common.EndTimeBeforeStartTimeException;
@@ -12,7 +13,6 @@ import com.haruon.groupware.application.exception.common.PositiveValueRequiredEx
 import com.haruon.groupware.application.exception.draft.*;
 import com.haruon.groupware.application.exception.empInfo.leave.EmpAnnualLeaveNotFoundException;
 import com.haruon.groupware.application.exception.empInfo.leave.UnsupportedLeaveTypeException;
-import com.haruon.groupware.application.file.required.FileStorage;
 import com.haruon.groupware.application.utils.required.CompanyPolicyPort;
 import com.haruon.groupware.domain.draft.Draft;
 import com.haruon.groupware.domain.draft.LeaveDraft;
@@ -54,19 +54,18 @@ public class LeaveDraftService extends CommonDraftService implements LeaveDraftM
             EmpRepository empRepository,
             LeaveDraftRepository leaveDraftRepository,
             CompanyPolicyPort policyPort,
-            EmpLeaveRepository empLeaveRepository,
-            FileStorage fileStorage
+            EmpLeaveRepository empLeaveRepository
     ) {
-        super(empRepository, leaveDraftRepository, fileStorage);
+        super(empRepository, leaveDraftRepository);
         this.leaveDraftRepository = leaveDraftRepository;
         this.policyPort = policyPort;
         this.empLeaveRepository = empLeaveRepository;
     }
 
     @Override
-    public void createDraft(LeaveDraftCreateRequest req) {
+    public Long createDraft(Long drafterId, LeaveDraftCreateRequest req) {
         long usedHours = getValidatedUsedHours(
-                req.param().empId(),
+                drafterId,
                 req.startAt(),
                 req.endAt(),
                 req.leaveType(),
@@ -74,7 +73,7 @@ public class LeaveDraftService extends CommonDraftService implements LeaveDraftM
         );
 
         CommonDraftCreateRequest commonReq = req.param();
-        Emp drafter = findActiveEmpById(commonReq.empId());
+        Emp drafter = findActiveEmpById(drafterId);
         List<ApproversParam> approvers = toApproverParams(commonReq.approvers());
 
         LeaveDraft draft = LeaveDraft.createDraft(
@@ -89,12 +88,14 @@ public class LeaveDraftService extends CommonDraftService implements LeaveDraftM
         );
 
         leaveDraftRepository.save(draft);
+
+        return draft.getId();
     }
 
     @Override
-    public void createSubmitted(LeaveDraftCreateRequest req) {
+    public Long createSubmitted(Long drafterId, LeaveDraftCreateRequest req) {
         long usedHours = getValidatedUsedHours(
-                req.param().empId(),
+                drafterId,
                 req.startAt(),
                 req.endAt(),
                 req.leaveType(),
@@ -102,7 +103,7 @@ public class LeaveDraftService extends CommonDraftService implements LeaveDraftM
         );
 
         CommonDraftCreateRequest commonReq = req.param();
-        Emp drafter = findActiveEmpById(commonReq.empId());
+        Emp drafter = findActiveEmpById(drafterId);
         List<ApproversParam> approvers = requireApprovers(commonReq.approvers());
         LocalDateTime submittedAt = requireSubmittedAt(commonReq.submittedAt());
 
@@ -119,14 +120,22 @@ public class LeaveDraftService extends CommonDraftService implements LeaveDraftM
         );
 
         leaveDraftRepository.save(draft);
+
+        return draft.getId();
     }
 
     @Override
-    public void updateDraft(LeaveDraftUpdateRequest req) {
-        LeaveDraft leaveDraft = getLeaveDraft(req.param().draftId(), req.param().drafterId());
+    public void updateDraft(Long drafterEmpId, Long draftId, LeaveDraftUpdateRequest req) {
+        LeaveDraft leaveDraft = getLeaveDraft(draftId, drafterEmpId);
 
-        String editedTitle = req.param().title() != null ? req.param().title() : leaveDraft.getTitle();
-        String editedContent = req.param().content() != null ? req.param().content() : leaveDraft.getContent();
+
+        CommonDraftUpdateRequest commonReq = req.param();
+        String editedTitle =
+                (commonReq != null && commonReq.title() != null)
+                        ? commonReq.title() : leaveDraft.getTitle();
+        String editedContent =
+                (commonReq != null && commonReq.content() != null)
+                        ? commonReq.content() : leaveDraft.getContent();
         LocalDateTime editedStartAt = req.startAt() != null ? req.startAt() : leaveDraft.getStartAt();
         LocalDateTime editedEndAt = req.endAt() != null ? req.endAt() : leaveDraft.getEndAt();
         LeaveType editedLeaveType = req.leaveType() != null ? req.leaveType() : leaveDraft.getLeaveType();
@@ -147,6 +156,10 @@ public class LeaveDraftService extends CommonDraftService implements LeaveDraftM
                 editedLeaveType,
                 usedHours
         );
+
+        if (commonReq != null && commonReq.approvers() != null) {
+            leaveDraft.changeApprovalLine(toApproverParams(commonReq.approvers()));
+        }
     }
 
     @Override

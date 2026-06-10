@@ -2,6 +2,7 @@ package com.haruon.groupware.application.board.service.dto;
 
 import com.haruon.groupware.application.exception.common.BlankValueNotAllowedException;
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import org.jspecify.annotations.Nullable;
 
@@ -16,7 +17,7 @@ public record BoardUpdateRequest(
 
         @Nullable String content,
 
-        LocalDateTime modifiedAt
+        @NotNull LocalDateTime modifiedAt
 ) {
 
     public BoardUpdateRequest {

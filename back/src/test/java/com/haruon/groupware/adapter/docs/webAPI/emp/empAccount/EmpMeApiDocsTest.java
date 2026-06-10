@@ -225,7 +225,7 @@ public class EmpMeApiDocsTest extends RestDocsSupport {
                                 .content(objectMapper.writeValueAsBytes(request))
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .header("Authorization", "accessToken")
-                ).andExpect(status().isOk())
+                ).andExpect(status().isNoContent())
                 .andDo(MockMvcResultHandlers.print())
                 .andDo(document("UPDATE_SELF_INFO",
                                 preprocessRequest(prettyPrint()),
@@ -262,7 +262,7 @@ public class EmpMeApiDocsTest extends RestDocsSupport {
                                 .header("Authorization", "Bearer accessToken")
                                 .param("isForActivate", "true")
                 ).andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk())
+                .andExpect(status().isNoContent())
                 .andDo(document("ACTIVATE_ME_FILE",
                                 preprocessRequest(prettyPrint()),
                                 preprocessResponse(prettyPrint()),

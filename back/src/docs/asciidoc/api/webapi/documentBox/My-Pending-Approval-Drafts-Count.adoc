@@ -1,0 +1,18 @@
+[tabs%nosync]
+
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/MY_PENDING_APPROVAL_DRAFTS_COUNT/http-request.adoc[]
+_Request header_
+include::{snippets}/MY_PENDING_APPROVAL_DRAFTS_COUNT/request-headers.adoc[]
+--
+Response (200)::
++
+--
+_HTTP response_
+include::{snippets}/MY_PENDING_APPROVAL_DRAFTS_COUNT/http-response.adoc[]
+--
+====

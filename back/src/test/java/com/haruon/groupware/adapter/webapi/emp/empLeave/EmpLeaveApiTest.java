@@ -171,14 +171,14 @@ public class EmpLeaveApiTest extends IntegrationTestSupport {
                                 .header("Authorization", BEARER + accessToken)
                                 .param("plusMinusDays", "2.5")
                 ).andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         mockMvc.perform(
                         patch("/api/employees/{empId}/leaves/compensatory-grant-days", targetEmp.getId())
                                 .header("Authorization", BEARER + accessToken)
                                 .param("plusMinusDays", "1.5")
                 ).andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         EmpLeave foundLeave = empLeaveRepository
                 .findByEmpIdAndGrantYear(targetEmp.getId(), TARGET_YEAR)

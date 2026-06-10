@@ -37,7 +37,7 @@ public abstract class Draft extends AbstractEventAggregateRoot {
 
     protected List<DraftFile> draftFiles = new ArrayList<>();
 
-    protected Approval approval;
+    @Nullable protected Approval approval;
 
     protected List<Circulation> circulations = new ArrayList<>();
 
@@ -74,6 +74,13 @@ public abstract class Draft extends AbstractEventAggregateRoot {
 
         this.title = editedTitle;
         this.content = editedContent;
+    }
+
+    public void changeApprovalLine(@Nullable List<ApproversParam> params) {
+        state(isDraft(), "미상신 문서만 결재선 수정가능");
+        state(hasApproval(), "결재 정보가 없음");
+
+        this.approval.changeApprovers(params);
     }
 
     protected static void validateDraftBase(String title, String content) {
@@ -185,7 +192,7 @@ public abstract class Draft extends AbstractEventAggregateRoot {
     }
 
     protected boolean hasAllApproved() {
-        return this.approval!=null && this.approval.isApproved();
+        return this.approval != null && this.approval.isApproved();
     }
 
     private Circulation getCirculationByEmp(Emp emp) {

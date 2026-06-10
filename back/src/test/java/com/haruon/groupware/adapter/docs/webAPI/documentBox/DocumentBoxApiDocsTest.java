@@ -4,6 +4,7 @@ import com.haruon.groupware.adapter.docs.RestDocsSupport;
 import com.haruon.groupware.adapter.webapi.draft.MyDocumentBoxApi;
 import com.haruon.groupware.application.draft.provided.forRetriever.DocumentBoxRetriever;
 import com.haruon.groupware.application.draft.service.query.dto.response.DocumentBoxResponse;
+import com.haruon.groupware.application.draft.service.query.dto.response.MyDocumentBoxSummaryResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -141,6 +142,68 @@ public class DocumentBoxApiDocsTest extends RestDocsSupport {
                         queryParameters(documentBoxQueryParameters()),
 
                         responseFields(documentBoxPageFields())
+                ));
+    }
+
+    @Test
+    @DisplayName("내 결재 대기 기안서 갯수 조회 문서")
+    void retrieve_pending_my_approval_drafts_count() throws Exception {
+        Mockito.when(documentBoxRetriever.retrievePendingMyApprovalDraftsCount(eq(1L)))
+                .thenReturn(3L);
+
+        mockMvc.perform(
+                        get(REQUEST_MAPPING_URL + "/me/pending-approval-drafts/count")
+                                .with(employeeAuthentication())
+                                .header("Authorization", "Bearer accessToken")
+                )
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andDo(document("MY_PENDING_APPROVAL_DRAFTS_COUNT",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+
+                        requestHeaders(
+                                headerWithName("Authorization").description("Bearer Access Token")
+                        )
+                ));
+    }
+
+    @Test
+    @DisplayName("내 문서함 요약 조회 문서")
+    void retrieve_my_document_box_summary() throws Exception {
+        MyDocumentBoxSummaryResponse response = new MyDocumentBoxSummaryResponse(
+                3L,
+                2L,
+                7L,
+                12L
+        );
+
+        Mockito.when(documentBoxRetriever.retrieveMyDocumentBoxSummary(eq(1L), anyList()))
+                .thenReturn(response);
+
+        mockMvc.perform(
+                        get(REQUEST_MAPPING_URL + "/me/summary")
+                                .with(employeeAuthentication())
+                                .header("Authorization", "Bearer accessToken")
+                )
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andDo(document("MY_DOCUMENT_BOX_SUMMARY",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+
+                        requestHeaders(
+                                headerWithName("Authorization").description("Bearer Access Token")
+                        ),
+
+                        responseFields(
+                                fieldWithPath("pendingApprovalDraftCount").type(JsonFieldType.NUMBER).description("내 결재 순번으로 대기 중인 기안서 수"),
+                                fieldWithPath("unsubmittedDraftCount").type(JsonFieldType.NUMBER).description("내 임시저장 기안서 수"),
+                                fieldWithPath("submittedDraftCount").type(JsonFieldType.NUMBER).description("내 상신 기안서 수"),
+                                fieldWithPath("accessibleDocumentCount").type(JsonFieldType.NUMBER).description("내 조회 가능 문서 수")
+                        )
                 ));
     }
 

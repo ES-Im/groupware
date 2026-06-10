@@ -39,7 +39,7 @@ public class AuthApi {
         authManagement.logout(details.getUsername());
         jwtCookieManager.deleteRefreshCookie(response);
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/reissue")

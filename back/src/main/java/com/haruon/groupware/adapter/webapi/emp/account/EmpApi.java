@@ -24,7 +24,7 @@ public class EmpApi {
     ) {
         empAccountManager.registerEmp(request);
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{empId}")

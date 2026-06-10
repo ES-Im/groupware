@@ -1,0 +1,30 @@
+[tabs%nosync]
+
+====
+결재 승인::
++
+--
+_HTTP request_
+include::{snippets}/DRAFT_APPROVE/http-request.adoc[]
+_Request header_
+include::{snippets}/DRAFT_APPROVE/request-headers.adoc[]
+_Path parameter_
+include::{snippets}/DRAFT_APPROVE/path-parameters.adoc[]
+_HTTP response_
+include::{snippets}/DRAFT_APPROVE/http-response.adoc[]
+--
+결재 반려::
++
+--
+_HTTP request_
+include::{snippets}/DRAFT_REJECT/http-request.adoc[]
+_Request header_
+include::{snippets}/DRAFT_REJECT/request-headers.adoc[]
+_Path parameter_
+include::{snippets}/DRAFT_REJECT/path-parameters.adoc[]
+_Request fields_
+include::{snippets}/DRAFT_REJECT/request-fields.adoc[]
+_HTTP response_
+include::{snippets}/DRAFT_REJECT/http-response.adoc[]
+--
+====

@@ -1,0 +1,544 @@
+[[CATEGORY_MANAGEMENT]]
+=== 카테고리 관리 목록 조회
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/CATEGORY_MANAGEMENT/http-request.adoc[]
+
+_Request header_
+include::{snippets}/CATEGORY_MANAGEMENT/request-headers.adoc[]
+
+_Request param_
+include::{snippets}/CATEGORY_MANAGEMENT/query-parameters.adoc[]
+--
+Response (200)::
++
+--
+_HTTP response_
+include::{snippets}/CATEGORY_MANAGEMENT/http-response.adoc[]
+
+_Response fields_
+include::{snippets}/CATEGORY_MANAGEMENT/response-fields.adoc[]
+--
+====
+
+[[CATEGORY_LIST]]
+=== 노출 카테고리 목록 조회
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/CATEGORY_LIST/http-request.adoc[]
+
+_Request header_
+include::{snippets}/CATEGORY_LIST/request-headers.adoc[]
+--
+Response (200)::
++
+--
+_HTTP response_
+include::{snippets}/CATEGORY_LIST/http-response.adoc[]
+
+_Response fields_
+include::{snippets}/CATEGORY_LIST/response-fields.adoc[]
+--
+====
+
+[[CATEGORY_REGISTER]]
+=== 카테고리 등록
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/CATEGORY_REGISTER/http-request.adoc[]
+
+_Request header_
+include::{snippets}/CATEGORY_REGISTER/request-headers.adoc[]
+
+_Request fields_
+include::{snippets}/CATEGORY_REGISTER/request-fields.adoc[]
+--
+Response (201)::
++
+--
+_HTTP response_
+include::{snippets}/CATEGORY_REGISTER/http-response.adoc[]
+--
+====
+
+[[CATEGORY_UPDATE_NAME]]
+=== 카테고리명 변경
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/CATEGORY_UPDATE_NAME/http-request.adoc[]
+
+_Request header_
+include::{snippets}/CATEGORY_UPDATE_NAME/request-headers.adoc[]
+
+_Path parameters_
+include::{snippets}/CATEGORY_UPDATE_NAME/path-parameters.adoc[]
+
+_Request fields_
+include::{snippets}/CATEGORY_UPDATE_NAME/request-fields.adoc[]
+--
+Response (204)::
++
+--
+_HTTP response_
+include::{snippets}/CATEGORY_UPDATE_NAME/http-response.adoc[]
+--
+====
+
+[[CATEGORY_ACTIVATE]]
+=== 카테고리 노출
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/CATEGORY_ACTIVATE/http-request.adoc[]
+
+_Request header_
+include::{snippets}/CATEGORY_ACTIVATE/request-headers.adoc[]
+
+_Path parameters_
+include::{snippets}/CATEGORY_ACTIVATE/path-parameters.adoc[]
+--
+Response (204)::
++
+--
+_HTTP response_
+include::{snippets}/CATEGORY_ACTIVATE/http-response.adoc[]
+--
+====
+
+[[CATEGORY_DEACTIVATE]]
+=== 카테고리 숨김
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/CATEGORY_DEACTIVATE/http-request.adoc[]
+
+_Request header_
+include::{snippets}/CATEGORY_DEACTIVATE/request-headers.adoc[]
+
+_Path parameters_
+include::{snippets}/CATEGORY_DEACTIVATE/path-parameters.adoc[]
+--
+Response (204)::
++
+--
+_HTTP response_
+include::{snippets}/CATEGORY_DEACTIVATE/http-response.adoc[]
+--
+====
+
+[[BOARD_REGISTER]]
+=== 게시글 등록
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/BOARD_REGISTER/http-request.adoc[]
+
+_Request header_
+include::{snippets}/BOARD_REGISTER/request-headers.adoc[]
+
+_Request fields_
+include::{snippets}/BOARD_REGISTER/request-fields.adoc[]
+--
+Response (201)::
++
+--
+_HTTP response_
+include::{snippets}/BOARD_REGISTER/http-response.adoc[]
+--
+====
+
+[[BOARD_PUBLISH]]
+=== 임시저장 게시글 발행
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/BOARD_PUBLISH/http-request.adoc[]
+
+_Request header_
+include::{snippets}/BOARD_PUBLISH/request-headers.adoc[]
+
+_Path parameters_
+include::{snippets}/BOARD_PUBLISH/path-parameters.adoc[]
+--
+Response (204)::
++
+--
+_HTTP response_
+include::{snippets}/BOARD_PUBLISH/http-response.adoc[]
+--
+====
+
+[[BOARD_UPDATE]]
+=== 게시글 수정
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/BOARD_UPDATE/http-request.adoc[]
+
+_Request header_
+include::{snippets}/BOARD_UPDATE/request-headers.adoc[]
+
+_Path parameters_
+include::{snippets}/BOARD_UPDATE/path-parameters.adoc[]
+
+_Request fields_
+include::{snippets}/BOARD_UPDATE/request-fields.adoc[]
+--
+Response (204)::
++
+--
+_HTTP response_
+include::{snippets}/BOARD_UPDATE/http-response.adoc[]
+--
+====
+
+[[BOARD_LIST]]
+=== 카테고리별 게시글 목록 조회
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/BOARD_LIST/http-request.adoc[]
+
+_Request header_
+include::{snippets}/BOARD_LIST/request-headers.adoc[]
+
+_Path parameters_
+include::{snippets}/BOARD_LIST/path-parameters.adoc[]
+
+_Request param_
+include::{snippets}/BOARD_LIST/query-parameters.adoc[]
+--
+Response (200)::
++
+--
+_HTTP response_
+include::{snippets}/BOARD_LIST/http-response.adoc[]
+
+_Response fields_
+include::{snippets}/BOARD_LIST/response-fields.adoc[]
+--
+====
+
+[[BOARD_LATEST]]
+=== 카테고리별 최신 게시글 조회
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/BOARD_LATEST/http-request.adoc[]
+
+_Request header_
+include::{snippets}/BOARD_LATEST/request-headers.adoc[]
+
+_Path parameters_
+include::{snippets}/BOARD_LATEST/path-parameters.adoc[]
+
+_Request param_
+include::{snippets}/BOARD_LATEST/query-parameters.adoc[]
+--
+Response (200)::
++
+--
+_HTTP response_
+include::{snippets}/BOARD_LATEST/http-response.adoc[]
+
+_Response fields_
+include::{snippets}/BOARD_LATEST/response-fields.adoc[]
+--
+====
+
+[[BOARD_DETAIL]]
+=== 게시글 상세 조회
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/BOARD_DETAIL/http-request.adoc[]
+
+_Request header_
+include::{snippets}/BOARD_DETAIL/request-headers.adoc[]
+
+_Path parameters_
+include::{snippets}/BOARD_DETAIL/path-parameters.adoc[]
+--
+Response (200)::
++
+--
+_HTTP response_
+include::{snippets}/BOARD_DETAIL/http-response.adoc[]
+
+_Response fields_
+include::{snippets}/BOARD_DETAIL/response-fields.adoc[]
+--
+====
+
+[[BOARD_COMMENTS]]
+=== 게시글 댓글 목록 조회
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/BOARD_COMMENTS/http-request.adoc[]
+
+_Request header_
+include::{snippets}/BOARD_COMMENTS/request-headers.adoc[]
+
+_Path parameters_
+include::{snippets}/BOARD_COMMENTS/path-parameters.adoc[]
+
+_Request param_
+include::{snippets}/BOARD_COMMENTS/query-parameters.adoc[]
+--
+Response (200)::
++
+--
+_HTTP response_
+include::{snippets}/BOARD_COMMENTS/http-response.adoc[]
+
+_Response fields_
+include::{snippets}/BOARD_COMMENTS/response-fields.adoc[]
+--
+====
+
+[[BOARD_FILES]]
+=== 게시글 첨부파일 목록 조회
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/BOARD_FILES/http-request.adoc[]
+
+_Request header_
+include::{snippets}/BOARD_FILES/request-headers.adoc[]
+
+_Path parameters_
+include::{snippets}/BOARD_FILES/path-parameters.adoc[]
+--
+Response (200)::
++
+--
+_HTTP response_
+include::{snippets}/BOARD_FILES/http-response.adoc[]
+
+_Response fields_
+include::{snippets}/BOARD_FILES/response-fields.adoc[]
+--
+====
+
+[[BOARD_EDIT_MODE]]
+=== 게시글 편집 모드 조회
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/BOARD_EDIT_MODE/http-request.adoc[]
+
+_Request header_
+include::{snippets}/BOARD_EDIT_MODE/request-headers.adoc[]
+
+_Path parameters_
+include::{snippets}/BOARD_EDIT_MODE/path-parameters.adoc[]
+--
+Response (200)::
++
+--
+_HTTP response_
+include::{snippets}/BOARD_EDIT_MODE/http-response.adoc[]
+
+_Response fields_
+include::{snippets}/BOARD_EDIT_MODE/response-fields.adoc[]
+--
+====
+
+[[BOARD_DRAFTS]]
+=== 내 임시저장 게시글 목록 조회
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/BOARD_DRAFTS/http-request.adoc[]
+
+_Request header_
+include::{snippets}/BOARD_DRAFTS/request-headers.adoc[]
+--
+Response (200)::
++
+--
+_HTTP response_
+include::{snippets}/BOARD_DRAFTS/http-response.adoc[]
+
+_Response fields_
+include::{snippets}/BOARD_DRAFTS/response-fields.adoc[]
+--
+====
+
+[[COMMENT_REGISTER]]
+=== 댓글 등록
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/COMMENT_REGISTER/http-request.adoc[]
+
+_Request header_
+include::{snippets}/COMMENT_REGISTER/request-headers.adoc[]
+
+_Path parameters_
+include::{snippets}/COMMENT_REGISTER/path-parameters.adoc[]
+
+_Request fields_
+include::{snippets}/COMMENT_REGISTER/request-fields.adoc[]
+--
+Response (201)::
++
+--
+_HTTP response_
+include::{snippets}/COMMENT_REGISTER/http-response.adoc[]
+--
+====
+
+[[COMMENT_REPLY]]
+=== 대댓글 등록
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/COMMENT_REPLY/http-request.adoc[]
+
+_Request header_
+include::{snippets}/COMMENT_REPLY/request-headers.adoc[]
+
+_Path parameters_
+include::{snippets}/COMMENT_REPLY/path-parameters.adoc[]
+
+_Request fields_
+include::{snippets}/COMMENT_REPLY/request-fields.adoc[]
+--
+Response (201)::
++
+--
+_HTTP response_
+include::{snippets}/COMMENT_REPLY/http-response.adoc[]
+--
+====
+
+[[COMMENT_UPDATE]]
+=== 댓글 수정
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/COMMENT_UPDATE/http-request.adoc[]
+
+_Request header_
+include::{snippets}/COMMENT_UPDATE/request-headers.adoc[]
+
+_Path parameters_
+include::{snippets}/COMMENT_UPDATE/path-parameters.adoc[]
+
+_Request fields_
+include::{snippets}/COMMENT_UPDATE/request-fields.adoc[]
+--
+Response (204)::
++
+--
+_HTTP response_
+include::{snippets}/COMMENT_UPDATE/http-response.adoc[]
+--
+====
+
+[[COMMENT_DELETE]]
+=== 댓글 삭제
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/COMMENT_DELETE/http-request.adoc[]
+
+_Request header_
+include::{snippets}/COMMENT_DELETE/request-headers.adoc[]
+
+_Path parameters_
+include::{snippets}/COMMENT_DELETE/path-parameters.adoc[]
+--
+Response (204)::
++
+--
+_HTTP response_
+include::{snippets}/COMMENT_DELETE/http-response.adoc[]
+--
+====

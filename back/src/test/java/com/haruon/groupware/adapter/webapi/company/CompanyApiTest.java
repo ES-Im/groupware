@@ -57,7 +57,7 @@ public class CompanyApiTest extends IntegrationTestSupport {
                         .content(objectMapper.writeValueAsBytes(request))
         )
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         Company company = companyRepository.findFirstByOrderByEditedAtDescIdDesc().orElseThrow();
         assertThat(company.getCompanyName()).isEqualTo("하루온");
@@ -84,7 +84,7 @@ public class CompanyApiTest extends IntegrationTestSupport {
                         .content(objectMapper.writeValueAsBytes(request))
         )
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         Company company = companyRepository.findFirstByOrderByEditedAtDescIdDesc().orElseThrow();
         assertThat(companyRepository.count()).isEqualTo(2);
@@ -112,7 +112,7 @@ public class CompanyApiTest extends IntegrationTestSupport {
                         .content(objectMapper.writeValueAsBytes(request))
         )
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         Company company = companyRepository.findFirstByOrderByEditedAtDescIdDesc().orElseThrow();
         assertThat(companyRepository.count()).isEqualTo(2);
@@ -138,7 +138,7 @@ public class CompanyApiTest extends IntegrationTestSupport {
                         .content(objectMapper.writeValueAsBytes(request))
         )
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         Company company = companyRepository.findFirstByOrderByEditedAtDescIdDesc().orElseThrow();
         assertThat(companyRepository.count()).isEqualTo(2);

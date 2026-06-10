@@ -31,6 +31,8 @@ public enum ApplicationErrorCode {
     CATEGORY_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND, "BOARD_001", "조회된 카테고리가 없습니다"),
     ACTIVE_CATEGORY_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND, "BOARD_002", "비활성화된 카테고리입니다."),
     BOARD_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND, "BOARD_003", "조회된 게시글이 없습니다"),
+    EMP_NOT_MATCH_AUTHOR_EXCEPTION(HttpStatus.BAD_REQUEST, "BOARD_004", "해당 게시글에 대한 편집권한이 없습니다"),
+    BOARD_COMMENT_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND, "BOARD_005", "조회된 댓글이 없습니다"),
 
     // Chat
     CHATROOM_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND, "CHAT_001", "조회된 채팅방이 없습니다"),

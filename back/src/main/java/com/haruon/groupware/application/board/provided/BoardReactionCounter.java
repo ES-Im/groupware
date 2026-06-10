@@ -13,3 +13,5 @@ public interface BoardReactionCounter {
     void decreaseCommentCount(Long boardId, int count);
 
 }
+
+//todo

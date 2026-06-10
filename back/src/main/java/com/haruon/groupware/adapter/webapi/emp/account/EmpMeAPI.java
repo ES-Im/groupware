@@ -62,7 +62,7 @@ public class EmpMeAPI {
     ) {
         empAccountManager.updateInfoBySelf(request, details.getEmpId());
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/files/{fileId}/status")
@@ -73,7 +73,7 @@ public class EmpMeAPI {
     ) {
         empAccountManager.updateFileActiveStatusBySelf(fileId, isForActivate, details.getEmpId());
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
 }

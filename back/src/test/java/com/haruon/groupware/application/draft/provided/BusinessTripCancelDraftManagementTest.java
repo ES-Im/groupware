@@ -6,9 +6,9 @@ import com.haruon.groupware.application.draft.provided.forCommand.BusinessTripCa
 import com.haruon.groupware.application.draft.provided.forCommand.BusinessTripDraftManagement;
 import com.haruon.groupware.application.draft.required.DraftRepository;
 import com.haruon.groupware.application.draft.service.command.dto.ApproversRequest;
-import com.haruon.groupware.application.draft.service.command.dto.BusinessTripDraftCreateRequest;
-import com.haruon.groupware.application.draft.service.command.dto.CancelDraftCreateRequest;
-import com.haruon.groupware.application.draft.service.command.dto.CommonDraftCreateRequest;
+import com.haruon.groupware.application.draft.service.command.dto.createDraft.BusinessTripDraftCreateRequest;
+import com.haruon.groupware.application.draft.service.command.dto.createDraft.CancelDraftCreateRequest;
+import com.haruon.groupware.application.draft.service.command.dto.createDraft.CommonDraftCreateRequest;
 import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
 import com.haruon.groupware.application.empInfo.leave.required.EmpLeaveRepository;
 import com.haruon.groupware.application.schedule.required.ScheduleRepository;
@@ -76,9 +76,9 @@ record BusinessTripCancelDraftManagementTest(
 
         String sourceKey = businessTrip.getSourceKey();
         businessTripCancelDraftManagement.createDraft(
+                drafter.getId(),
                 CancelDraftCreateRequest.builder()
                         .param(CommonDraftCreateRequest.builder()
-                                .empId(drafter.getId())
                                 .title("cancelTitle")
                                 .content("cancelContent")
                                 .approvers(List.of(new ApproversRequest(approver.getId(), ApprovalRole.APPROVER, 1)))
@@ -114,9 +114,9 @@ record BusinessTripCancelDraftManagementTest(
 
         String sourceKey = businessTrip.getSourceKey();
         businessTripCancelDraftManagement.createSubmitted(
+                drafter.getId(),
                 CancelDraftCreateRequest.builder()
                         .param(CommonDraftCreateRequest.builder()
-                                .empId(drafter.getId())
                                 .title("cancelTitle")
                                 .content("cancelContent")
                                 .approvers(List.of(new ApproversRequest(approver.getId(), ApprovalRole.APPROVER, 1)))
@@ -156,9 +156,9 @@ record BusinessTripCancelDraftManagementTest(
 
         String sourceKey = businessTrip.getSourceKey();
         businessTripCancelDraftManagement.createDraft(
+                drafter.getId(),
                 CancelDraftCreateRequest.builder()
                         .param(CommonDraftCreateRequest.builder()
-                                .empId(drafter.getId())
                                 .title("cancelTitle")
                                 .content("cancelContent")
                                 .approvers(List.of(new ApproversRequest(approver.getId(), ApprovalRole.APPROVER, 1)))
@@ -196,9 +196,9 @@ record BusinessTripCancelDraftManagementTest(
 
         Emp approver1 = saveApprovedEmp(empRepository, "202601002", "approver1");
         businessTripDraftManagement.createSubmitted(
+                drafter.getId(),
                 BusinessTripDraftCreateRequest.builder()
                         .param(CommonDraftCreateRequest.builder()
-                                .empId(drafter.getId())
                                 .title("test")
                                 .content("test")
                                 .approvers(List.of(

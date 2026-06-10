@@ -4,7 +4,11 @@ import com.haruon.groupware.application.TestIntegrationConfig;
 import com.haruon.groupware.application.dept.required.DeptRepository;
 import com.haruon.groupware.application.draft.provided.forCommand.SalesDraftManagement;
 import com.haruon.groupware.application.draft.required.DraftRepository;
-import com.haruon.groupware.application.draft.service.command.dto.*;
+import com.haruon.groupware.application.draft.service.command.dto.ApproversRequest;
+import com.haruon.groupware.application.draft.service.command.dto.createDraft.CommonDraftCreateRequest;
+import com.haruon.groupware.application.draft.service.command.dto.createDraft.SalesDraftCreateRequest;
+import com.haruon.groupware.application.draft.service.command.dto.updateDraft.CommonDraftUpdateRequest;
+import com.haruon.groupware.application.draft.service.command.dto.updateDraft.SalesDraftUpdateRequest;
 import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
 import com.haruon.groupware.application.franchise.provided.FranchiseManagement;
 import com.haruon.groupware.application.franchise.required.FranchiseRepository;
@@ -63,9 +67,9 @@ record SalesDraftManagementTest(
 
         long salesAmount = 10000L;
         salesDraftManagement.createDraft(
+                franchiseEmp.getId(),
                 SalesDraftCreateRequest.builder()
                         .param(CommonDraftCreateRequest.builder()
-                                .empId(franchiseEmp.getId())
                                 .title("test")
                                 .content("test")
                                 .build())
@@ -100,9 +104,9 @@ record SalesDraftManagementTest(
         YearMonth reportMonth = YearMonth.of(2026, 4);
         long salesAmount = 10000L;
         salesDraftManagement.createSubmitted(
+                franchiseEmp.getId(),
                 SalesDraftCreateRequest.builder()
                         .param(CommonDraftCreateRequest.builder()
-                                .empId(franchiseEmp.getId())
                                 .title("test")
                                 .content("test")
                                 .approvers(approvers)
@@ -139,11 +143,11 @@ record SalesDraftManagementTest(
         SalesDraft draft = saveDraft(franchiseEmp, franchise.getId(), editedReportMonth, editedSalesAmount);
 
         salesDraftManagement.updateDraft(
+                franchiseEmp.getId(),
+                draft.getId(),
                 SalesDraftUpdateRequest.builder()
                         .param(
                                 CommonDraftUpdateRequest.builder()
-                                        .drafterId(franchiseEmp.getId())
-                                        .draftId(draft.getId())
                                 .build())
                         .franchiseId(franchise.getId())
                         .reportMonth(editedReportMonth)
@@ -173,9 +177,9 @@ record SalesDraftManagementTest(
             long salesAmount
     ) {
         salesDraftManagement.createDraft(
+                franchiseEmp.getId(),
                 SalesDraftCreateRequest.builder()
                         .param(CommonDraftCreateRequest.builder()
-                                .empId(franchiseEmp.getId())
                                 .title("test")
                                 .content("test")
                                 .build())
@@ -199,9 +203,9 @@ record SalesDraftManagementTest(
         List<ApproversRequest> approvers = List.of(new ApproversRequest(approver.getId(), ApprovalRole.APPROVER, 1));
 
         salesDraftManagement.createDraft(
+                franchiseEmp.getId(),
                 SalesDraftCreateRequest.builder()
                         .param(CommonDraftCreateRequest.builder()
-                                .empId(franchiseEmp.getId())
                                 .title("test")
                                 .content("test")
                                 .approvers(approvers)

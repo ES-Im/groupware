@@ -1,7 +1,8 @@
-package com.haruon.groupware.application.draft.service.command.dto;
+package com.haruon.groupware.application.draft.service.command.dto.updateDraft;
 
+import com.haruon.groupware.application.draft.service.command.dto.ApproversRequest;
 import com.haruon.groupware.application.exception.common.BlankValueNotAllowedException;
-import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
+import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import org.jspecify.annotations.Nullable;
 
@@ -9,11 +10,8 @@ import java.util.Set;
 
 @Builder
 public record CommonDraftUpdateRequest(
-        Long drafterId,
-
-        Long draftId,
-
         @Nullable
+        @Size(max = 100)
         String title,
 
         @Nullable
@@ -24,8 +22,6 @@ public record CommonDraftUpdateRequest(
 ) {
 
     public CommonDraftUpdateRequest {
-        if(drafterId == null || draftId == null) throw new RequiredValueMissingException();
-
         if(title != null && title.isBlank()) throw new BlankValueNotAllowedException();
         if(content != null && content.isBlank()) throw new BlankValueNotAllowedException();
     }

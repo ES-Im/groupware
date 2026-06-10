@@ -1,6 +1,6 @@
 package com.haruon.groupware.application.draft.provided.forCommand;
 
-import com.haruon.groupware.application.draft.service.command.dto.CancelDraftCreateRequest;
+import com.haruon.groupware.application.draft.service.command.dto.createDraft.CancelDraftCreateRequest;
 
 import java.time.LocalDateTime;
 
@@ -9,9 +9,9 @@ import java.time.LocalDateTime;
  */
 public interface LeaveCancelDraftManagement {
 
-    void createDraft(CancelDraftCreateRequest param);
+    Long createDraft(Long drafterId, CancelDraftCreateRequest param);
 
-    void createSubmitted(CancelDraftCreateRequest param);
+    Long createSubmitted(Long drafterId, CancelDraftCreateRequest param);
 
     void approve(long draftId, long approverId, LocalDateTime approvedAt);
 

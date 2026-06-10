@@ -71,7 +71,7 @@ public class CompanyManagementApiDocsTest extends RestDocsSupport {
                         .content(objectMapper.writeValueAsBytes(request))
         )
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk())
+                .andExpect(status().isNoContent())
                 .andDo(document("COMPANY_REGISTER",
                         preprocessRequest(prettyPrint()),
 
@@ -127,7 +127,7 @@ public class CompanyManagementApiDocsTest extends RestDocsSupport {
                         .content(objectMapper.writeValueAsBytes(request))
         )
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk())
+                .andExpect(status().isNoContent())
                 .andDo(document("COMPANY_UPDATE_INFO",
                         preprocessRequest(prettyPrint()),
 
@@ -173,7 +173,7 @@ public class CompanyManagementApiDocsTest extends RestDocsSupport {
                         .content(objectMapper.writeValueAsBytes(request))
         )
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk())
+                .andExpect(status().isNoContent())
                 .andDo(document("COMPANY_UPDATE_CONTACT",
                         preprocessRequest(prettyPrint()),
 
@@ -215,7 +215,7 @@ public class CompanyManagementApiDocsTest extends RestDocsSupport {
                         .content(objectMapper.writeValueAsBytes(request))
         )
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk())
+                .andExpect(status().isNoContent())
                 .andDo(document("COMPANY_UPDATE_HOME_PAGE_URL",
                         preprocessRequest(prettyPrint()),
 

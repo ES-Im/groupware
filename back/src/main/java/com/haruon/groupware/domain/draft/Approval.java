@@ -55,6 +55,15 @@ public class Approval extends AbstractEntity {
         this.status = ApprovalStatus.WAITING;
     }
 
+    void changeApprovers(@Nullable List<ApproversParam> params) {
+        state(this.status == ApprovalStatus.UNSUBMITTED, "미상신 상태에서만 결재선 수정 가능");
+
+        this.approvers.clear();
+        if (params != null && !params.isEmpty()) {
+            this.addApprovers(params);
+        }
+    }
+
     static Approval createWaiting(
             Draft draft,
             List<ApproversParam> approverParams

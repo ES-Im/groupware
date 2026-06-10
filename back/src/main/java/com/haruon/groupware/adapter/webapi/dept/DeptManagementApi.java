@@ -30,7 +30,7 @@ public class DeptManagementApi {
     ) {
         deptManagement.registerDept(details.getEmpId(), request);
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{deptId}/activation")
@@ -40,7 +40,7 @@ public class DeptManagementApi {
     ) {
         deptManagement.activate(deptId, details.getEmpId());
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{deptId}/deactivation")
@@ -50,7 +50,7 @@ public class DeptManagementApi {
     )  {
         deptManagement.deactivate(deptId, details.getEmpId());
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{deptId}/name")
@@ -61,7 +61,7 @@ public class DeptManagementApi {
     ) {
         deptManagement.updateDeptName(deptId, newName, details.getEmpId());
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{deptId}/parent")
@@ -72,7 +72,7 @@ public class DeptManagementApi {
     ) {
         deptManagement.changeParentDept(deptId, parentDeptId, details.getEmpId());
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{deptId}/leader/appointment")
@@ -84,7 +84,7 @@ public class DeptManagementApi {
     ) {
         deptManagement.appointLeader(deptId, leaderEmpId, appointedAt, details.getEmpId());
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{deptId}/leader/end")
@@ -95,6 +95,6 @@ public class DeptManagementApi {
     ) {
         deptManagement.endCurrentLeader(deptId, endAt, details.getEmpId());
 
-        return  ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 }

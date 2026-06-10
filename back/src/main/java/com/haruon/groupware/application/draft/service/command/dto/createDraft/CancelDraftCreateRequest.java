@@ -1,4 +1,4 @@
-package com.haruon.groupware.application.draft.service.command.dto;
+package com.haruon.groupware.application.draft.service.command.dto.createDraft;
 
 import com.haruon.groupware.application.exception.common.BlankValueNotAllowedException;
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;

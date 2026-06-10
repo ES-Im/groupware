@@ -24,7 +24,7 @@ import static com.haruon.groupware.application.utils.AuthValidator.findActiveEmp
 @Transactional
 @Service
 @RequiredArgsConstructor
-public class BoardService implements BoardManagement {
+public class BoardCommandService implements BoardManagement {
 
     private final BoardRepository boardRepository;
     private final EmpRepository empRepository;

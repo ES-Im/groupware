@@ -72,19 +72,23 @@ public class SalesDraft extends Draft {
         return salesDraft;
     }
 
+
     public void editSalesDraft(
             @Nullable String title,
             @Nullable String content,
+            @Nullable Franchise franchise,
             @Nullable YearMonth reportMonth,
             @Nullable Long salesAmount
     ) {
         editDraft(title, content);
 
+        Franchise editedFranchise = franchise != null ? franchise : this.franchise;
         YearMonth editedReportMonth = reportMonth != null ? reportMonth : this.reportMonth;
         long editedSalesAmount = salesAmount != null ? salesAmount : this.salesAmount;
 
-        validateSalesInitParam(editedReportMonth, editedSalesAmount);
+        validateSalesInitParam(editedReportMonth, editedSalesAmount, editedFranchise);
 
+        this.franchise = editedFranchise;
         this.reportMonth = editedReportMonth;
         this.salesAmount = editedSalesAmount;
     }
@@ -92,14 +96,15 @@ public class SalesDraft extends Draft {
     private void init(
             YearMonth reportMonth, Long salesAmount, Franchise franchise
     ) {
-        validateSalesInitParam(reportMonth, salesAmount);
+        validateSalesInitParam(reportMonth, salesAmount, franchise);
 
         this.reportMonth = reportMonth;
         this.salesAmount = salesAmount;
         this.franchise = franchise;
     }
 
-    private static void validateSalesInitParam(YearMonth reportMonth, Long salesAmount) {
+    private static void validateSalesInitParam(YearMonth reportMonth, Long salesAmount, Franchise franchise) {
+        requireNonNull(franchise, "가맹점은 null일 될 수 없음");
         requireNonNull(reportMonth, "대상연월은 null일 될 수 없음");
         requireNonNull(salesAmount, "매출액은 null일 될 수 없음");
         state(salesAmount > 0, "매출액은 마이너스가 될 수 없음");

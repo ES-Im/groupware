@@ -1,8 +1,11 @@
-package com.haruon.groupware.application.draft.service.command.dto;
+package com.haruon.groupware.application.draft.service.command.dto.createDraft;
 
+import com.haruon.groupware.application.draft.service.command.dto.ApproversRequest;
 import com.haruon.groupware.application.exception.common.BlankValueNotAllowedException;
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import com.haruon.groupware.application.exception.draft.ApprovalLineRequiredException;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import org.jspecify.annotations.Nullable;
 
@@ -11,10 +14,11 @@ import java.util.List;
 
 @Builder
 public record CommonDraftCreateRequest(
-        Long empId,
-
+        @NotBlank
+        @Size(max = 100)
         String title,
 
+        @NotBlank
         String content,
 
         @Nullable List<ApproversRequest> approvers,
@@ -23,7 +27,7 @@ public record CommonDraftCreateRequest(
 ) {
 
     public CommonDraftCreateRequest {
-        if(empId == null || title == null || content == null) throw new RequiredValueMissingException();
+        if(title == null || content == null) throw new RequiredValueMissingException();
 
         if(submittedAt != null && !(approvers != null && !approvers.isEmpty())) {
             throw new ApprovalLineRequiredException();

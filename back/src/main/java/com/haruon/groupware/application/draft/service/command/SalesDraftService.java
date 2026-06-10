@@ -3,14 +3,13 @@ package com.haruon.groupware.application.draft.service.command;
 
 import com.haruon.groupware.application.draft.provided.forCommand.SalesDraftManagement;
 import com.haruon.groupware.application.draft.required.SalesDraftRepository;
-import com.haruon.groupware.application.draft.service.command.dto.CommonDraftCreateRequest;
-import com.haruon.groupware.application.draft.service.command.dto.CommonDraftUpdateRequest;
-import com.haruon.groupware.application.draft.service.command.dto.SalesDraftCreateRequest;
-import com.haruon.groupware.application.draft.service.command.dto.SalesDraftUpdateRequest;
+import com.haruon.groupware.application.draft.service.command.dto.createDraft.CommonDraftCreateRequest;
+import com.haruon.groupware.application.draft.service.command.dto.createDraft.SalesDraftCreateRequest;
+import com.haruon.groupware.application.draft.service.command.dto.updateDraft.CommonDraftUpdateRequest;
+import com.haruon.groupware.application.draft.service.command.dto.updateDraft.SalesDraftUpdateRequest;
 import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
 import com.haruon.groupware.application.exception.draft.DraftTypeMismatchException;
 import com.haruon.groupware.application.exception.franchise.FranchiseNotFoundException;
-import com.haruon.groupware.application.file.required.FileStorage;
 import com.haruon.groupware.application.franchise.required.FranchiseRepository;
 import com.haruon.groupware.domain.draft.Draft;
 import com.haruon.groupware.domain.draft.SalesDraft;
@@ -33,18 +32,17 @@ public class SalesDraftService extends CommonDraftService implements SalesDraftM
     public SalesDraftService(
             EmpRepository empRepository,
             SalesDraftRepository salesDraftRepository,
-            FranchiseRepository franchiseRepository,
-            FileStorage fileStorage
+            FranchiseRepository franchiseRepository
     ) {
-        super(empRepository, salesDraftRepository, fileStorage);
+        super(empRepository, salesDraftRepository);
         this.salesDraftRepository = salesDraftRepository;
         this.franchiseRepository = franchiseRepository;
     }
 
     @Override
-    public void createDraft(SalesDraftCreateRequest req) {
+    public Long createDraft(Long drafterEmpId, SalesDraftCreateRequest req) {
         CommonDraftCreateRequest commonReq = req.param();
-        Emp drafter = findActiveEmpById(commonReq.empId());
+        Emp drafter = findActiveEmpById(drafterEmpId);
         List<ApproversParam> approvers = toApproverParams(commonReq.approvers());
         Franchise franchise = findFranchise(req);
 
@@ -59,12 +57,14 @@ public class SalesDraftService extends CommonDraftService implements SalesDraftM
         );
 
         salesDraftRepository.save(draft);
+
+        return draft.getId();
     }
 
     @Override
-    public void createSubmitted(SalesDraftCreateRequest req) {
+    public Long createSubmitted(Long drafterEmpId, SalesDraftCreateRequest req) {
         CommonDraftCreateRequest commonReq = req.param();
-        Emp drafter = findActiveEmpById(commonReq.empId());
+        Emp drafter = findActiveEmpById(drafterEmpId);
         List<ApproversParam> approvers = requireApprovers(commonReq.approvers());
         LocalDateTime submittedAt = requireSubmittedAt(commonReq.submittedAt());
         Franchise franchise = findFranchise(req);
@@ -81,19 +81,37 @@ public class SalesDraftService extends CommonDraftService implements SalesDraftM
         );
 
         salesDraftRepository.save(draft);
+
+        return draft.getId();
     }
 
     @Override
-    public void updateDraft(SalesDraftUpdateRequest req) {
+    public void updateDraft(Long drafterEmpId, Long draftId, SalesDraftUpdateRequest req) {
+        SalesDraft salesDraft = getSalesDraft(draftId, drafterEmpId);
+
         CommonDraftUpdateRequest commonReq = req.param();
-        SalesDraft salesDraft = getSalesDraft(commonReq.draftId(), commonReq.drafterId());
+        String editedTitle =
+                (commonReq != null && commonReq.title() != null)
+                        ? commonReq.title() : null;
+        String editedContent =
+                (commonReq != null && commonReq.content() != null)
+                        ? commonReq.content() : null;
+
+        Franchise editedFranchise = req.franchiseId() != null
+                ? franchiseRepository.findById(req.franchiseId()).orElseThrow(FranchiseNotFoundException::new)
+                : null;
 
         salesDraft.editSalesDraft(
-                commonReq.title(),
-                commonReq.content(),
+                editedTitle,
+                editedContent,
+                editedFranchise,
                 req.reportMonth(),
                 req.salesAmount()
         );
+
+        if (commonReq != null && commonReq.approvers() != null) {
+            salesDraft.changeApprovalLine(toApproverParams(commonReq.approvers()));
+        }
     }
 
     private SalesDraft getSalesDraft(long draftId, long drafterId) {

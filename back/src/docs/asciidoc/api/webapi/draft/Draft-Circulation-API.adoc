@@ -1,0 +1,42 @@
+[tabs%nosync]
+
+====
+공람자 추가::
++
+--
+_HTTP request_
+include::{snippets}/DRAFT_CIRCULATION_ADD/http-request.adoc[]
+_Request header_
+include::{snippets}/DRAFT_CIRCULATION_ADD/request-headers.adoc[]
+_Path parameter_
+include::{snippets}/DRAFT_CIRCULATION_ADD/path-parameters.adoc[]
+_Request fields_
+include::{snippets}/DRAFT_CIRCULATION_ADD/request-fields.adoc[]
+_HTTP response_
+include::{snippets}/DRAFT_CIRCULATION_ADD/http-response.adoc[]
+--
+공람자 삭제::
++
+--
+_HTTP request_
+include::{snippets}/DRAFT_CIRCULATION_REMOVE/http-request.adoc[]
+_Request header_
+include::{snippets}/DRAFT_CIRCULATION_REMOVE/request-headers.adoc[]
+_Path parameter_
+include::{snippets}/DRAFT_CIRCULATION_REMOVE/path-parameters.adoc[]
+_HTTP response_
+include::{snippets}/DRAFT_CIRCULATION_REMOVE/http-response.adoc[]
+--
+공람 문서 읽음 처리::
++
+--
+_HTTP request_
+include::{snippets}/DRAFT_CIRCULATION_READ/http-request.adoc[]
+_Request header_
+include::{snippets}/DRAFT_CIRCULATION_READ/request-headers.adoc[]
+_Path parameter_
+include::{snippets}/DRAFT_CIRCULATION_READ/path-parameters.adoc[]
+_HTTP response_
+include::{snippets}/DRAFT_CIRCULATION_READ/http-response.adoc[]
+--
+====

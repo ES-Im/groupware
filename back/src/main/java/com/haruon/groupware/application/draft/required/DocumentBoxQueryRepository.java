@@ -33,4 +33,12 @@ public interface DocumentBoxQueryRepository {
             @Nullable String keyword,
             Pageable pageable
     );
+
+    Long countPendingApprovalDraftsByEmpId(Long empId);
+
+    Long countUnSubmittedDraftsByEmpId(Long empId);
+
+    Long countSubmittedDraftsByEmpId(Long empId);
+
+    Long countAccessibleDraftsByEmpId(Long empId, List<Long> deptIds);
 }

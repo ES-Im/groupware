@@ -6,9 +6,9 @@ import com.haruon.groupware.application.draft.provided.forCommand.LeaveCancelDra
 import com.haruon.groupware.application.draft.provided.forCommand.LeaveDraftManagement;
 import com.haruon.groupware.application.draft.required.DraftRepository;
 import com.haruon.groupware.application.draft.service.command.dto.ApproversRequest;
-import com.haruon.groupware.application.draft.service.command.dto.CancelDraftCreateRequest;
-import com.haruon.groupware.application.draft.service.command.dto.CommonDraftCreateRequest;
-import com.haruon.groupware.application.draft.service.command.dto.LeaveDraftCreateRequest;
+import com.haruon.groupware.application.draft.service.command.dto.createDraft.CancelDraftCreateRequest;
+import com.haruon.groupware.application.draft.service.command.dto.createDraft.CommonDraftCreateRequest;
+import com.haruon.groupware.application.draft.service.command.dto.createDraft.LeaveDraftCreateRequest;
 import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
 import com.haruon.groupware.application.empInfo.leave.required.EmpLeaveRepository;
 import com.haruon.groupware.application.schedule.required.ScheduleQueryRepository;
@@ -79,9 +79,9 @@ record LeaveCancelDraftManagementTest(
 
         String sourceKey = getApprovedLeaveDraft.getSourceKey();
         leaveCancelDraftManagement.createDraft(
+                drafter.getId(),
                 CancelDraftCreateRequest.builder()
                         .param(CommonDraftCreateRequest.builder()
-                                .empId(drafter.getId())
                                 .title("cancelTitle")
                                 .content("cancelContent")
                                 .approvers(List.of(new ApproversRequest(approver.getId(), ApprovalRole.APPROVER, 1)))
@@ -119,9 +119,9 @@ record LeaveCancelDraftManagementTest(
 
         String sourceKey = getApprovedLeaveDraft.getSourceKey();
         leaveCancelDraftManagement.createSubmitted(
+                drafter.getId(),
                 CancelDraftCreateRequest.builder()
                         .param(CommonDraftCreateRequest.builder()
-                                .empId(drafter.getId())
                                 .title("cancelTitle")
                                 .content("cancelContent")
                                 .approvers(List.of(new ApproversRequest(approver.getId(), ApprovalRole.APPROVER, 1)))
@@ -167,9 +167,9 @@ record LeaveCancelDraftManagementTest(
 
         String sourceKey = getApprovedLeaveDraft.getSourceKey();
         leaveCancelDraftManagement.createSubmitted(
+                drafter.getId(),
                 CancelDraftCreateRequest.builder()
                         .param(CommonDraftCreateRequest.builder()
-                                .empId(drafter.getId())
                                 .title("cancelTitle")
                                 .content("cancelContent")
                                 .approvers(List.of(new ApproversRequest(approver.getId(), ApprovalRole.APPROVER, 1)))
@@ -212,10 +212,10 @@ record LeaveCancelDraftManagementTest(
         Emp approver2 = saveApprovedEmp(empRepository, "202601003", "approver2");
 
         leaveDraftManagement.createSubmitted(
+                drafter.getId(),
                 LeaveDraftCreateRequest.builder()
                         .param(
                                 CommonDraftCreateRequest.builder()
-                                        .empId(drafter.getId())
                                         .title("test")
                                         .content("test")
                                         .approvers(List.of(

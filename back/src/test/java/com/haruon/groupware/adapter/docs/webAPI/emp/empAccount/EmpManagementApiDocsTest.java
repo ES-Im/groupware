@@ -279,7 +279,7 @@ public class EmpManagementApiDocsTest extends RestDocsSupport {
                         .queryParam("hiredAt", "2026-01-01")
         )
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk())
+                .andExpect(status().isNoContent())
                 .andDo(document("HR_APPROVE_EMP_REGISTRATION",
                         preprocessRequest(prettyPrint()),
 
@@ -312,7 +312,7 @@ public class EmpManagementApiDocsTest extends RestDocsSupport {
                         .queryParam("hiredAt", "2026-02-01")
         )
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk())
+                .andExpect(status().isNoContent())
                 .andDo(document("HR_RESIGN_EMP",
                         preprocessRequest(prettyPrint()),
 
@@ -344,7 +344,7 @@ public class EmpManagementApiDocsTest extends RestDocsSupport {
                         .with(hrAuthentication())
         )
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk())
+                .andExpect(status().isNoContent())
                 .andDo(document("HR_ACTIVATE_EMP",
                         preprocessRequest(prettyPrint()),
 
@@ -370,7 +370,7 @@ public class EmpManagementApiDocsTest extends RestDocsSupport {
                         .header("Authorization", "Bearer accessToken")
                         .with(hrAuthentication())
         )
-                .andExpect(status().isOk())
+                .andExpect(status().isNoContent())
                 .andDo(document("HR_SUSPEND_EMP",
                         preprocessRequest(prettyPrint()),
 
@@ -397,7 +397,7 @@ public class EmpManagementApiDocsTest extends RestDocsSupport {
                         .header("Authorization", "Bearer accessToken")
                         .queryParam("isForActivate", "false")
         )
-                .andExpect(status().isOk())
+                .andExpect(status().isNoContent())
                 .andDo(document("HR_UPDATE_ONES_FILE_STATUS",
                         preprocessRequest(prettyPrint()),
 
@@ -445,7 +445,7 @@ public class EmpManagementApiDocsTest extends RestDocsSupport {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(request))
         )
-                .andExpect(status().isOk())
+                .andExpect(status().isNoContent())
                 .andDo(document("HR_UPDATE_EMP_INFO",
                         preprocessRequest(prettyPrint()),
 
@@ -497,7 +497,7 @@ public class EmpManagementApiDocsTest extends RestDocsSupport {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(request))
         )
-                .andExpect(status().isOk())
+                .andExpect(status().isNoContent())
                 .andDo(document("DEPT_MANAGER_UPDATE_EMP_INFO",
                                 preprocessRequest(prettyPrint()),
 

@@ -1,0 +1,20 @@
+[tabs%nosync]
+
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/MY_DOCUMENT_BOX_SUMMARY/http-request.adoc[]
+_Request header_
+include::{snippets}/MY_DOCUMENT_BOX_SUMMARY/request-headers.adoc[]
+--
+Response (200)::
++
+--
+_HTTP response_
+include::{snippets}/MY_DOCUMENT_BOX_SUMMARY/http-response.adoc[]
+_Response fields_
+include::{snippets}/MY_DOCUMENT_BOX_SUMMARY/response-fields.adoc[]
+--
+====

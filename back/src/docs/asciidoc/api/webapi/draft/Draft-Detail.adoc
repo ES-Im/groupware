@@ -1,0 +1,22 @@
+[tabs%nosync]
+
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/DRAFT_DETAIL/http-request.adoc[]
+_Request header_
+include::{snippets}/DRAFT_DETAIL/request-headers.adoc[]
+_Path parameter_
+include::{snippets}/DRAFT_DETAIL/path-parameters.adoc[]
+--
+Response (200)::
++
+--
+_HTTP response_
+include::{snippets}/DRAFT_DETAIL/http-response.adoc[]
+_Response fields_
+include::{snippets}/DRAFT_DETAIL/response-fields.adoc[]
+--
+====

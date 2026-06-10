@@ -79,7 +79,7 @@ public class EmpManagementApi {
     ) {
         empAccountManager.approveRegisterByHR(details.getEmpId(), empId, hiredAt);
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{empId}/resignation")
@@ -90,7 +90,7 @@ public class EmpManagementApi {
     ) {
         empAccountManager.updateResignedEmpByHR(details.getEmpId(), empId, hiredAt);
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{empId}/status/activation")
@@ -100,7 +100,7 @@ public class EmpManagementApi {
     ) {
         empAccountManager.activateEmpByHR(details.getEmpId(), empId);
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{empId}/status/suspension")
@@ -110,7 +110,7 @@ public class EmpManagementApi {
     ) {
         empAccountManager.suspendEmpByHR(details.getEmpId(), empId);
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{empId}/files/{fileId}/status")
@@ -122,7 +122,7 @@ public class EmpManagementApi {
     ) {
         empAccountManager.updateFileActiveStatusByHR(details.getEmpId(), empId, fileId, isForActivate);
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{empId}/hr-managed-info")
@@ -133,7 +133,7 @@ public class EmpManagementApi {
     ) {
         empAccountManager.updateInfoByHR(details.getEmpId(), empId, request);
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
 
@@ -146,7 +146,7 @@ public class EmpManagementApi {
     ) {
         empAccountManager.updateInfoByDeptManager(details.getEmpId(), empId, request);
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
 

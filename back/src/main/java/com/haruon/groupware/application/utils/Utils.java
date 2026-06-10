@@ -15,7 +15,8 @@ import static com.haruon.groupware.application.utils.AuthValidator.findActiveEmp
 
 public class Utils {
 
-    public static ZoneId ZONE_SEOUL = ZoneId.of("Asia/Seoul");
+    public static final ZoneId SEOUL_ZONE = ZoneId.of("Asia/Seoul");
+    public static final ZoneId ZONE_SEOUL = SEOUL_ZONE;
 
     public static LocalTime getEarlierTime(@Nullable LocalTime targetStartAt, @Nullable LocalTime baseTime) {
         return (targetStartAt == null || (baseTime != null && targetStartAt.isAfter(baseTime) ))? baseTime : targetStartAt;

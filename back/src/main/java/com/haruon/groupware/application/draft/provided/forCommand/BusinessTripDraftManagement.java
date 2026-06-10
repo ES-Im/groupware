@@ -1,8 +1,8 @@
 package com.haruon.groupware.application.draft.provided.forCommand;
 
 import com.haruon.groupware.application.draft.service.command.dto.ApproversRequest;
-import com.haruon.groupware.application.draft.service.command.dto.BusinessTripDraftCreateRequest;
-import com.haruon.groupware.application.draft.service.command.dto.BusinessTripDraftUpdateRequest;
+import com.haruon.groupware.application.draft.service.command.dto.createDraft.BusinessTripDraftCreateRequest;
+import com.haruon.groupware.application.draft.service.command.dto.updateDraft.BusinessTripDraftUpdateRequest;
 import org.jspecify.annotations.Nullable;
 
 import java.time.LocalDateTime;
@@ -15,11 +15,11 @@ import java.util.Set;
 public interface BusinessTripDraftManagement {
 
     /** about business trip */
-    void createDraft(BusinessTripDraftCreateRequest param);
+    Long createDraft(Long drafterId, BusinessTripDraftCreateRequest param);
 
-    void createSubmitted(BusinessTripDraftCreateRequest param);
+    Long createSubmitted(Long drafterId, BusinessTripDraftCreateRequest param);
 
-    void updateDraft(BusinessTripDraftUpdateRequest param);
+    void updateDraft(Long drafterEmpId, Long draftId, BusinessTripDraftUpdateRequest param);
 
     void updateParticipants(long draftId, long drafter, Set<Long> participantId);
 
@@ -30,7 +30,6 @@ public interface BusinessTripDraftManagement {
 
     /** about approve */
     void approve(long draftId, long approverId, LocalDateTime approvedAt);
-    //todo -> 모든 승인 끝나면 markReadByCirculation 호출
 
     void reject(long draftId, long rejecterId, String reason, LocalDateTime rejectedAt);
 
@@ -38,6 +37,4 @@ public interface BusinessTripDraftManagement {
     void addCirculatedEmp(long draftId, long drafterId, long circulatedEmpId);
 
     void removeCirculatedEmp(long draftId, long drafterId, long circulatedEmpId);
-
-    //todo isReadableByCirculation -> 조회용, 공람자 리스트 출력시 사용할 것
 }

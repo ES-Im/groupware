@@ -179,7 +179,7 @@ class EmpManagementApiTest extends IntegrationTestSupport {
                         .param("hiredAt", "2026-01-01")
         )
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         Emp emp = empRepository.findById(newMemberId).orElseThrow();
         assertEquals(emp.getStatus(), EmpStatus.ACTIVE);
@@ -202,7 +202,7 @@ class EmpManagementApiTest extends IntegrationTestSupport {
                         .param("hiredAt", "2026-02-01")
         )
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         Emp emp = empRepository.findById(resignedEmpId).orElseThrow();
         assertEquals(emp.getStatus(), EmpStatus.RESIGNED);
@@ -224,7 +224,7 @@ class EmpManagementApiTest extends IntegrationTestSupport {
                         .header("Authorization", BEARER + accessToken)
         )
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         Emp emp = empRepository.findById(suspendEmpId).orElseThrow();
         assertEquals(emp.getStatus(), EmpStatus.ACTIVE);
@@ -244,7 +244,7 @@ class EmpManagementApiTest extends IntegrationTestSupport {
                         .header("Authorization", BEARER + accessToken)
         )
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         Emp emp = empRepository.findById(targetEmpId).orElseThrow();
         assertEquals(emp.getStatus(), EmpStatus.SUSPENDED);
@@ -267,7 +267,7 @@ class EmpManagementApiTest extends IntegrationTestSupport {
                         .param("isForActivate", "false")
         )
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         EmpFileListInfo empFileListInfo = empQueryRepository.findEmpFileInfoByEmpIdAndFileId(targetEmp.getId(), targetFileId).orElseThrow();
 
@@ -304,7 +304,7 @@ class EmpManagementApiTest extends IntegrationTestSupport {
                         .content(objectMapper.writeValueAsBytes(request))
         )
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         Emp updatedEmp = empRepository.findById(targetEmp.getId()).orElseThrow();
         assertThat(updatedEmp.getEmpName()).isEqualTo(newEmployeeName);
@@ -365,7 +365,7 @@ class EmpManagementApiTest extends IntegrationTestSupport {
                         .content(objectMapper.writeValueAsBytes(request))
         )
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         Emp updatedEmp = empRepository.findById(targetEmp.getId()).orElseThrow();
         assertThat(updatedEmp.getSystemRoles()).containsExactlyInAnyOrderElementsOf(newSystemRole);
@@ -398,7 +398,7 @@ class EmpManagementApiTest extends IntegrationTestSupport {
                         .content(objectMapper.writeValueAsBytes(request))
         )
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
 
         var updatedEmpInfo = empQueryRepositoryAdapter

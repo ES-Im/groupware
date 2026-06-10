@@ -6,9 +6,9 @@ import com.haruon.groupware.application.draft.provided.forCommand.BusinessTripDr
 import com.haruon.groupware.application.draft.provided.forCommand.GeneralDraftManagement;
 import com.haruon.groupware.application.draft.required.DraftRepository;
 import com.haruon.groupware.application.draft.service.command.dto.ApproversRequest;
-import com.haruon.groupware.application.draft.service.command.dto.BusinessTripDraftCreateRequest;
-import com.haruon.groupware.application.draft.service.command.dto.CommonDraftCreateRequest;
-import com.haruon.groupware.application.draft.service.command.dto.CommonDraftUpdateRequest;
+import com.haruon.groupware.application.draft.service.command.dto.createDraft.BusinessTripDraftCreateRequest;
+import com.haruon.groupware.application.draft.service.command.dto.createDraft.CommonDraftCreateRequest;
+import com.haruon.groupware.application.draft.service.command.dto.updateDraft.CommonDraftUpdateRequest;
 import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import com.haruon.groupware.application.exception.draft.DraftTypeMismatchException;
@@ -55,9 +55,9 @@ public record generalDraftTest(
 
         Draft draft = createDraft(drafter, "test", "test", List.of());
         generalDraftManagement.updateDraft(
+                drafter.getId(),
+                draft.getId(),
                 CommonDraftUpdateRequest.builder()
-                        .drafterId(drafter.getId())
-                        .draftId(draft.getId())
                         .title(editedTitle)
                         .content(editedContent)
                         .build()
@@ -77,9 +77,9 @@ public record generalDraftTest(
         Draft draft = createDraft(drafter, "test", "test", List.of());
         assertThatThrownBy(() ->
                 generalDraftManagement.updateDraft(
+                        drafter.getId(),
+                        draft.getId(),
                         CommonDraftUpdateRequest.builder()
-                                .drafterId(drafter.getId())
-                                .draftId(draft.getId())
                                 .build()
                 )
         ).isInstanceOf(RequiredValueMissingException.class);
@@ -100,9 +100,9 @@ public record generalDraftTest(
 
         assertThatThrownBy(() ->
                 generalDraftManagement.updateDraft(
+                        drafter.getId(),
+                        draft.getId(),
                         CommonDraftUpdateRequest.builder()
-                                .drafterId(drafter.getId())
-                                .draftId(draft.getId())
                                 .title("edit")
                                 .content("edit")
                                 .build()
@@ -116,9 +116,9 @@ public record generalDraftTest(
         Emp drafter = saveApprovedEmp(empRepository, "202601001", "drafter");
 
         businessTripDraftManagement.createDraft(
+                drafter.getId(),
                 BusinessTripDraftCreateRequest.builder()
                         .param(CommonDraftCreateRequest.builder()
-                                .empId(drafter.getId())
                                 .title("test")
                                 .content("test")
                                 .build()
@@ -135,9 +135,9 @@ public record generalDraftTest(
 
         assertThatThrownBy(() ->
                 generalDraftManagement.updateDraft(
+                        drafter.getId(),
+                        draft.getId(),
                         CommonDraftUpdateRequest.builder()
-                                .drafterId(drafter.getId())
-                                .draftId(draft.getId())
                                 .title("edit")
                                 .content("edit")
                                 .build()
@@ -158,8 +158,8 @@ public record generalDraftTest(
         }
 
         generalDraftManagement.createDraft(
+                drafter.getId(),
                 CommonDraftCreateRequest.builder()
-                        .empId(drafter.getId())
                         .title(title)
                         .content(content)
                         .approvers(approversRequests)
@@ -184,8 +184,8 @@ public record generalDraftTest(
         }
 
         generalDraftManagement.createSubmitted(
+                drafter.getId(),
                 CommonDraftCreateRequest.builder()
-                        .empId(drafter.getId())
                         .title(title)
                         .content(content)
                         .approvers(approversRequests)

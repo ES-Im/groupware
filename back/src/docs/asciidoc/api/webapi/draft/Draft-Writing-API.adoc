@@ -1,0 +1,254 @@
+[tabs%nosync]
+
+====
+일반기안 임시저장::
++
+--
+_HTTP request_
+include::{snippets}/GENERAL_DRAFT_CREATE/http-request.adoc[]
+_Request header_
+include::{snippets}/GENERAL_DRAFT_CREATE/request-headers.adoc[]
+_Request fields_
+include::{snippets}/GENERAL_DRAFT_CREATE/request-fields.adoc[]
+_HTTP response_
+include::{snippets}/GENERAL_DRAFT_CREATE/http-response.adoc[]
+_Response fields_
+include::{snippets}/GENERAL_DRAFT_CREATE/response-fields.adoc[]
+--
+휴가기안 임시저장::
++
+--
+_HTTP request_
+include::{snippets}/LEAVE_DRAFT_CREATE/http-request.adoc[]
+_Request header_
+include::{snippets}/LEAVE_DRAFT_CREATE/request-headers.adoc[]
+_Request fields_
+include::{snippets}/LEAVE_DRAFT_CREATE/request-fields.adoc[]
+_HTTP response_
+include::{snippets}/LEAVE_DRAFT_CREATE/http-response.adoc[]
+_Response fields_
+include::{snippets}/LEAVE_DRAFT_CREATE/response-fields.adoc[]
+--
+출장기안 임시저장::
++
+--
+_HTTP request_
+include::{snippets}/BUSINESS_TRIP_DRAFT_CREATE/http-request.adoc[]
+_Request header_
+include::{snippets}/BUSINESS_TRIP_DRAFT_CREATE/request-headers.adoc[]
+_Request fields_
+include::{snippets}/BUSINESS_TRIP_DRAFT_CREATE/request-fields.adoc[]
+_HTTP response_
+include::{snippets}/BUSINESS_TRIP_DRAFT_CREATE/http-response.adoc[]
+_Response fields_
+include::{snippets}/BUSINESS_TRIP_DRAFT_CREATE/response-fields.adoc[]
+--
+매출기안 임시저장::
++
+--
+_HTTP request_
+include::{snippets}/SALES_DRAFT_CREATE/http-request.adoc[]
+_Request header_
+include::{snippets}/SALES_DRAFT_CREATE/request-headers.adoc[]
+_Request fields_
+include::{snippets}/SALES_DRAFT_CREATE/request-fields.adoc[]
+_HTTP response_
+include::{snippets}/SALES_DRAFT_CREATE/http-response.adoc[]
+_Response fields_
+include::{snippets}/SALES_DRAFT_CREATE/response-fields.adoc[]
+--
+일반기안 작성 즉시 상신::
++
+--
+_HTTP request_
+include::{snippets}/GENERAL_DRAFT_CREATE_SUBMISSION/http-request.adoc[]
+_Request header_
+include::{snippets}/GENERAL_DRAFT_CREATE_SUBMISSION/request-headers.adoc[]
+_Request fields_
+include::{snippets}/GENERAL_DRAFT_CREATE_SUBMISSION/request-fields.adoc[]
+_HTTP response_
+include::{snippets}/GENERAL_DRAFT_CREATE_SUBMISSION/http-response.adoc[]
+_Response fields_
+include::{snippets}/GENERAL_DRAFT_CREATE_SUBMISSION/response-fields.adoc[]
+--
+휴가기안 작성 즉시 상신::
++
+--
+_HTTP request_
+include::{snippets}/LEAVE_DRAFT_CREATE_SUBMISSION/http-request.adoc[]
+_Request header_
+include::{snippets}/LEAVE_DRAFT_CREATE_SUBMISSION/request-headers.adoc[]
+_Request fields_
+include::{snippets}/LEAVE_DRAFT_CREATE_SUBMISSION/request-fields.adoc[]
+_HTTP response_
+include::{snippets}/LEAVE_DRAFT_CREATE_SUBMISSION/http-response.adoc[]
+_Response fields_
+include::{snippets}/LEAVE_DRAFT_CREATE_SUBMISSION/response-fields.adoc[]
+--
+출장기안 작성 즉시 상신::
++
+--
+_HTTP request_
+include::{snippets}/BUSINESS_TRIP_DRAFT_CREATE_SUBMISSION/http-request.adoc[]
+_Request header_
+include::{snippets}/BUSINESS_TRIP_DRAFT_CREATE_SUBMISSION/request-headers.adoc[]
+_Request fields_
+include::{snippets}/BUSINESS_TRIP_DRAFT_CREATE_SUBMISSION/request-fields.adoc[]
+_HTTP response_
+include::{snippets}/BUSINESS_TRIP_DRAFT_CREATE_SUBMISSION/http-response.adoc[]
+_Response fields_
+include::{snippets}/BUSINESS_TRIP_DRAFT_CREATE_SUBMISSION/response-fields.adoc[]
+--
+매출기안 작성 즉시 상신::
++
+--
+_HTTP request_
+include::{snippets}/SALES_DRAFT_CREATE_SUBMISSION/http-request.adoc[]
+_Request header_
+include::{snippets}/SALES_DRAFT_CREATE_SUBMISSION/request-headers.adoc[]
+_Request fields_
+include::{snippets}/SALES_DRAFT_CREATE_SUBMISSION/request-fields.adoc[]
+_HTTP response_
+include::{snippets}/SALES_DRAFT_CREATE_SUBMISSION/http-response.adoc[]
+_Response fields_
+include::{snippets}/SALES_DRAFT_CREATE_SUBMISSION/response-fields.adoc[]
+--
+====
+
+[tabs%nosync]
+
+====
+일반기안 수정::
++
+--
+_HTTP request_
+include::{snippets}/GENERAL_DRAFT_UPDATE/http-request.adoc[]
+_Request header_
+include::{snippets}/GENERAL_DRAFT_UPDATE/request-headers.adoc[]
+_Path parameter_
+include::{snippets}/GENERAL_DRAFT_UPDATE/path-parameters.adoc[]
+_Request fields_
+include::{snippets}/GENERAL_DRAFT_UPDATE/request-fields.adoc[]
+_HTTP response_
+include::{snippets}/GENERAL_DRAFT_UPDATE/http-response.adoc[]
+--
+휴가기안 수정::
++
+--
+_HTTP request_
+include::{snippets}/LEAVE_DRAFT_UPDATE/http-request.adoc[]
+_Request header_
+include::{snippets}/LEAVE_DRAFT_UPDATE/request-headers.adoc[]
+_Path parameter_
+include::{snippets}/LEAVE_DRAFT_UPDATE/path-parameters.adoc[]
+_Request fields_
+include::{snippets}/LEAVE_DRAFT_UPDATE/request-fields.adoc[]
+_HTTP response_
+include::{snippets}/LEAVE_DRAFT_UPDATE/http-response.adoc[]
+--
+출장기안 수정::
++
+--
+_HTTP request_
+include::{snippets}/BUSINESS_TRIP_DRAFT_UPDATE/http-request.adoc[]
+_Request header_
+include::{snippets}/BUSINESS_TRIP_DRAFT_UPDATE/request-headers.adoc[]
+_Path parameter_
+include::{snippets}/BUSINESS_TRIP_DRAFT_UPDATE/path-parameters.adoc[]
+_Request fields_
+include::{snippets}/BUSINESS_TRIP_DRAFT_UPDATE/request-fields.adoc[]
+_HTTP response_
+include::{snippets}/BUSINESS_TRIP_DRAFT_UPDATE/http-response.adoc[]
+--
+매출기안 수정::
++
+--
+_HTTP request_
+include::{snippets}/SALES_DRAFT_UPDATE/http-request.adoc[]
+_Request header_
+include::{snippets}/SALES_DRAFT_UPDATE/request-headers.adoc[]
+_Path parameter_
+include::{snippets}/SALES_DRAFT_UPDATE/path-parameters.adoc[]
+_Request fields_
+include::{snippets}/SALES_DRAFT_UPDATE/request-fields.adoc[]
+_HTTP response_
+include::{snippets}/SALES_DRAFT_UPDATE/http-response.adoc[]
+--
+출장기안 참여자 수정::
++
+--
+_HTTP request_
+include::{snippets}/BUSINESS_TRIP_PARTICIPANTS_UPDATE/http-request.adoc[]
+_Request header_
+include::{snippets}/BUSINESS_TRIP_PARTICIPANTS_UPDATE/request-headers.adoc[]
+_Path parameter_
+include::{snippets}/BUSINESS_TRIP_PARTICIPANTS_UPDATE/path-parameters.adoc[]
+_Request fields_
+include::{snippets}/BUSINESS_TRIP_PARTICIPANTS_UPDATE/request-fields.adoc[]
+_HTTP response_
+include::{snippets}/BUSINESS_TRIP_PARTICIPANTS_UPDATE/http-response.adoc[]
+--
+====
+
+[tabs%nosync]
+
+====
+임시저장 기안서 상신::
++
+--
+_HTTP request_
+include::{snippets}/DRAFT_SUBMIT/http-request.adoc[]
+_Request header_
+include::{snippets}/DRAFT_SUBMIT/request-headers.adoc[]
+_Path parameter_
+include::{snippets}/DRAFT_SUBMIT/path-parameters.adoc[]
+_Request fields_
+include::{snippets}/DRAFT_SUBMIT/request-fields.adoc[]
+_HTTP response_
+include::{snippets}/DRAFT_SUBMIT/http-response.adoc[]
+--
+상신 취소::
++
+--
+_HTTP request_
+include::{snippets}/DRAFT_SUBMISSION_WITHDRAWAL/http-request.adoc[]
+_Request header_
+include::{snippets}/DRAFT_SUBMISSION_WITHDRAWAL/request-headers.adoc[]
+_Path parameter_
+include::{snippets}/DRAFT_SUBMISSION_WITHDRAWAL/path-parameters.adoc[]
+_HTTP response_
+include::{snippets}/DRAFT_SUBMISSION_WITHDRAWAL/http-response.adoc[]
+--
+취소기안 임시저장::
++
+--
+_HTTP request_
+include::{snippets}/DRAFT_CANCELLATION_CREATE/http-request.adoc[]
+_Request header_
+include::{snippets}/DRAFT_CANCELLATION_CREATE/request-headers.adoc[]
+_Path parameter_
+include::{snippets}/DRAFT_CANCELLATION_CREATE/path-parameters.adoc[]
+_Request fields_
+include::{snippets}/DRAFT_CANCELLATION_CREATE/request-fields.adoc[]
+_HTTP response_
+include::{snippets}/DRAFT_CANCELLATION_CREATE/http-response.adoc[]
+_Response fields_
+include::{snippets}/DRAFT_CANCELLATION_CREATE/response-fields.adoc[]
+--
+취소기안 작성 즉시 상신::
++
+--
+_HTTP request_
+include::{snippets}/DRAFT_CANCELLATION_CREATE_SUBMISSION/http-request.adoc[]
+_Request header_
+include::{snippets}/DRAFT_CANCELLATION_CREATE_SUBMISSION/request-headers.adoc[]
+_Path parameter_
+include::{snippets}/DRAFT_CANCELLATION_CREATE_SUBMISSION/path-parameters.adoc[]
+_Request fields_
+include::{snippets}/DRAFT_CANCELLATION_CREATE_SUBMISSION/request-fields.adoc[]
+_HTTP response_
+include::{snippets}/DRAFT_CANCELLATION_CREATE_SUBMISSION/http-response.adoc[]
+_Response fields_
+include::{snippets}/DRAFT_CANCELLATION_CREATE_SUBMISSION/response-fields.adoc[]
+--
+====

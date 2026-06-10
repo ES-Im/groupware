@@ -1,8 +1,8 @@
 package com.haruon.groupware.application.draft.provided.forCommand;
 
 import com.haruon.groupware.application.draft.service.command.dto.ApproversRequest;
-import com.haruon.groupware.application.draft.service.command.dto.SalesDraftCreateRequest;
-import com.haruon.groupware.application.draft.service.command.dto.SalesDraftUpdateRequest;
+import com.haruon.groupware.application.draft.service.command.dto.createDraft.SalesDraftCreateRequest;
+import com.haruon.groupware.application.draft.service.command.dto.updateDraft.SalesDraftUpdateRequest;
 import org.jspecify.annotations.Nullable;
 
 import java.time.LocalDateTime;
@@ -14,11 +14,11 @@ import java.util.List;
 public interface SalesDraftManagement {
 
     /** about sales draft */
-    void createDraft(SalesDraftCreateRequest param);
+    Long createDraft(Long drafterEmpId, SalesDraftCreateRequest param);
 
-    void createSubmitted(SalesDraftCreateRequest param);
+    Long createSubmitted(Long drafterEmpId, SalesDraftCreateRequest param);
 
-    void updateDraft(SalesDraftUpdateRequest param);
+    void updateDraft(Long drafterEmpId, Long draftId, SalesDraftUpdateRequest param);
 
     /** about draft */
     void revertToDraft(long draftId, long drafterId);
@@ -35,7 +35,5 @@ public interface SalesDraftManagement {
     void addCirculatedEmp(long draftId, long drafterId, long circulatedEmpId);
 
     void removeCirculatedEmp(long draftId, long drafterId, long circulatedEmpId);
-
-    // isReadableByCirculation -> 조회용, 공람자 리스트 출력시 사용할 것
 
 }

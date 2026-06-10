@@ -1,8 +1,12 @@
-package com.haruon.groupware.application.draft.service.command.dto;
+package com.haruon.groupware.application.draft.service.command.dto.createDraft;
 
 import com.haruon.groupware.application.exception.common.BlankValueNotAllowedException;
 import com.haruon.groupware.application.exception.common.EndTimeBeforeStartTimeException;
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import org.jspecify.annotations.Nullable;
 
@@ -12,14 +16,21 @@ import java.util.Set;
 @Builder
 public record BusinessTripDraftCreateRequest(
 
+        @NotNull @Valid
         CommonDraftCreateRequest param,
 
+        @NotNull
         LocalDateTime startAt,
 
+        @NotNull
         LocalDateTime endAt,
 
+        @NotBlank
+        @Size(max = 200)
         String destination,
 
+        @NotBlank
+        @Size(max = 200)
         String purpose,
 
         @Nullable

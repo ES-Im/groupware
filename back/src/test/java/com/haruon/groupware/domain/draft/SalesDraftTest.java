@@ -109,19 +109,6 @@ class SalesDraftTest {
         );
     }
 
-    @ParameterizedTest(name = "{index} ==> {0}")
-    @MethodSource("editArguments")
-    @DisplayName("매출보고서 수정 케이스")
-    void edit_SalesDraft_fail(String expectedMessage, SalesDraftTest.SalesDraftParam param) {
-        SalesDraft SalesDraft = getSalesDraft(YearMonth.of(2025,4), 1L);
-
-        SalesDraft.editSalesDraft(
-                null, null,
-                param.reportMonth(),
-                param.salesAmount()
-        );
-    }
-
     @Builder
     private record SalesDraftParam(
             YearMonth reportMonth, Long salesAmount

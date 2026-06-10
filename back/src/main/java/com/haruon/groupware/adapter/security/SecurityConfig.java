@@ -115,15 +115,20 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/departments/*/employees/leaves/usage-summary").hasRole(SystemRoleCode.DEPT_MANAGER.name())
 
                         /* leave API*/
-                        .requestMatchers("/api/leave/employees/me/**").authenticated()
+                        .requestMatchers("/api/leave/employees/me/**").hasRole(SystemRoleCode.EMPLOYEE.name())
                         .requestMatchers("/api/leave/departments/*/request-history").hasRole(SystemRoleCode.DEPT_MANAGER.name())
 
                         /* BusinessTrip API */
-                        .requestMatchers("/api/businessTrip/employees/me/**").authenticated()
+                        .requestMatchers("/api/businessTrip/employees/me/**").hasRole(SystemRoleCode.EMPLOYEE.name())
                         .requestMatchers("/api/businessTrip/departments/*/request-history").hasRole(SystemRoleCode.DEPT_MANAGER.name())
 
+                        /* Draft API */
+                        .requestMatchers(HttpMethod.POST, "/api/drafts/sales", "/api/drafts/sales/submission").hasRole(SystemRoleCode.FRANCHISE.name())
+                        .requestMatchers(HttpMethod.PATCH, "/api/drafts/sales/*").hasRole(SystemRoleCode.FRANCHISE.name())
+                        .requestMatchers("/api/drafts/**").hasRole(SystemRoleCode.EMPLOYEE.name())
+
                         /* DocumentBox API */
-                        .requestMatchers("/api/document-box/me/**").authenticated()
+                        .requestMatchers("/api/document-box/me/**").hasRole(SystemRoleCode.EMPLOYEE.name())
 
                         /* File API */
                         .requestMatchers(HttpMethod.GET,

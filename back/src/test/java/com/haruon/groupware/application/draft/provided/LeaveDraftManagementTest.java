@@ -5,7 +5,12 @@ import com.haruon.groupware.application.dept.required.DeptRepository;
 import com.haruon.groupware.application.draft.provided.forCommand.BusinessTripDraftManagement;
 import com.haruon.groupware.application.draft.provided.forCommand.LeaveDraftManagement;
 import com.haruon.groupware.application.draft.required.DraftRepository;
-import com.haruon.groupware.application.draft.service.command.dto.*;
+import com.haruon.groupware.application.draft.service.command.dto.ApproversRequest;
+import com.haruon.groupware.application.draft.service.command.dto.createDraft.BusinessTripDraftCreateRequest;
+import com.haruon.groupware.application.draft.service.command.dto.createDraft.CommonDraftCreateRequest;
+import com.haruon.groupware.application.draft.service.command.dto.createDraft.LeaveDraftCreateRequest;
+import com.haruon.groupware.application.draft.service.command.dto.updateDraft.CommonDraftUpdateRequest;
+import com.haruon.groupware.application.draft.service.command.dto.updateDraft.LeaveDraftUpdateRequest;
 import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
 import com.haruon.groupware.application.empInfo.leave.required.EmpLeaveRepository;
 import com.haruon.groupware.application.exception.ApplicationException;
@@ -305,11 +310,11 @@ record LeaveDraftManagementTest(
         LocalDateTime editedEndAt = endAt.plusDays(1);
 
         leaveDraftManagement.updateDraft(
+                drafter.getId(),
+                draft.getId(),
                 LeaveDraftUpdateRequest.builder()
                         .param(
                                 CommonDraftUpdateRequest.builder()
-                                        .drafterId(drafter.getId())
-                                        .draftId(draft.getId())
                                         .build()
                         )
                         .startAt(startAt)
@@ -350,11 +355,11 @@ record LeaveDraftManagementTest(
 
         assertThatThrownBy(() ->
                 leaveDraftManagement.updateDraft(
+                        drafter.getId(),
+                        targetDraft.getId(),
                         LeaveDraftUpdateRequest.builder()
                                 .param(
                                         CommonDraftUpdateRequest.builder()
-                                                .drafterId(drafter.getId())
-                                                .draftId(targetDraft.getId())
                                                 .build()
                                 )
                                 .startAt(startAt)
@@ -371,9 +376,9 @@ record LeaveDraftManagementTest(
         Emp drafter = saveApprovedEmp(empRepository, "202601001", "drafter");
 
         businessTripDraftManagement.createDraft(
+                drafter.getId(),
                 BusinessTripDraftCreateRequest.builder()
                         .param(CommonDraftCreateRequest.builder()
-                                .empId(drafter.getId())
                                 .title("test")
                                 .content("test")
                                 .build()
@@ -390,11 +395,11 @@ record LeaveDraftManagementTest(
 
         assertThatThrownBy(() ->
                 leaveDraftManagement.updateDraft(
+                        drafter.getId(),
+                        draft.getId(),
                         LeaveDraftUpdateRequest.builder()
                                 .param(
                                         CommonDraftUpdateRequest.builder()
-                                                .drafterId(drafter.getId())
-                                                .draftId(draft.getId())
                                                 .build()
                                 )
                                 .startAt(LocalDateTime.of(2026,5,1,9,0,0))
@@ -412,10 +417,10 @@ record LeaveDraftManagementTest(
             LeaveType leaveType
     ) {
         leaveDraftManagement.createDraft(
+                drafter.getId(),
                 LeaveDraftCreateRequest.builder()
                         .param(
                                 CommonDraftCreateRequest.builder()
-                                        .empId(drafter.getId())
                                         .title("test")
                                         .content("test")
                                 .build()
@@ -439,10 +444,10 @@ record LeaveDraftManagementTest(
             LeaveType leaveType
     ) {
         leaveDraftManagement.createSubmitted(
+                drafter.getId(),
                 LeaveDraftCreateRequest.builder()
                         .param(
                                 CommonDraftCreateRequest.builder()
-                                        .empId(drafter.getId())
                                         .title("test")
                                         .content("test")
                                         .approvers(List.of(

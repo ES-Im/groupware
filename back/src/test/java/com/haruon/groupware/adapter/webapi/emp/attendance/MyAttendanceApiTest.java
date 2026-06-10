@@ -16,6 +16,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
+import static com.haruon.groupware.application.utils.Utils.SEOUL_ZONE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -110,14 +111,13 @@ public class MyAttendanceApiTest extends IntegrationTestSupport {
         Emp emp = empRepository.findByLoginId(loginId).orElseThrow();
 
         String accessToken = loginByIdAndPw(loginId, password);
-        LocalDate attendanceDate = LocalDate.of(2026, 4, 5);
+        LocalDate attendanceDate = LocalDate.now(SEOUL_ZONE);
 
         mockMvc.perform(
                         post("/api/employees/attendances/me/check-in")
                                 .header("Authorization", BEARER + accessToken)
-                                .param("checkInAt", "2026-04-05T09:00:00")
                 ).andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         Attendance checkIn = attendanceRepository
                 .findByEmpIdAndAttendanceDate(emp.getId(), attendanceDate)
@@ -125,16 +125,15 @@ public class MyAttendanceApiTest extends IntegrationTestSupport {
                 .findFirst()
                 .orElseThrow();
 
-        assertThat(checkIn.getStartAt()).isEqualTo(LocalTime.of(9, 0));
+        assertThat(checkIn.getStartAt()).isNotNull();
         assertThat(checkIn.getEndAt()).isNull();
         assertThat(checkIn.getAttendanceStatus()).isNull();
 
         mockMvc.perform(
                         patch("/api/employees/attendances/me/check-out")
                                 .header("Authorization", BEARER + accessToken)
-                                .param("checkOutAt", "2026-04-05T18:00:00")
                 ).andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         Attendance checkOut = attendanceRepository
                 .findByEmpIdAndAttendanceDate(emp.getId(), attendanceDate)
@@ -142,8 +141,9 @@ public class MyAttendanceApiTest extends IntegrationTestSupport {
                 .findFirst()
                 .orElseThrow();
 
-        assertThat(checkOut.getStartAt()).isEqualTo(LocalTime.of(9, 0));
-        assertThat(checkOut.getEndAt()).isEqualTo(LocalTime.of(18, 0));
+        assertThat(checkOut.getStartAt()).isNotNull();
+        assertThat(checkOut.getEndAt()).isNotNull();
+        assertThat(checkOut.getEndAt()).isAfterOrEqualTo(checkOut.getStartAt());
     }
 
     private void saveAttendance(

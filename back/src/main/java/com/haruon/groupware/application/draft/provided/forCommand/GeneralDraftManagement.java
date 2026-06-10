@@ -1,8 +1,8 @@
 package com.haruon.groupware.application.draft.provided.forCommand;
 
 import com.haruon.groupware.application.draft.service.command.dto.ApproversRequest;
-import com.haruon.groupware.application.draft.service.command.dto.CommonDraftCreateRequest;
-import com.haruon.groupware.application.draft.service.command.dto.CommonDraftUpdateRequest;
+import com.haruon.groupware.application.draft.service.command.dto.createDraft.CommonDraftCreateRequest;
+import com.haruon.groupware.application.draft.service.command.dto.updateDraft.CommonDraftUpdateRequest;
 import org.jspecify.annotations.Nullable;
 
 import java.time.LocalDateTime;
@@ -14,11 +14,11 @@ import java.util.List;
 public interface GeneralDraftManagement {
 
     /** about general draft */
-    void createDraft(CommonDraftCreateRequest param);
+    Long createDraft(Long drafterId, CommonDraftCreateRequest param);
 
-    void createSubmitted(CommonDraftCreateRequest param);
+    Long createSubmitted(Long drafterId, CommonDraftCreateRequest param);
 
-    void updateDraft(CommonDraftUpdateRequest param);
+    void updateDraft(Long drafterEmpId, Long draftId, CommonDraftUpdateRequest param);
 
     /** about draft */
     void revertToDraft(long draftId, long drafterId);
@@ -36,6 +36,7 @@ public interface GeneralDraftManagement {
 
     void removeCirculatedEmp(long draftId, long drafterId, long circulatedEmpId);
 
-    //todo isReadableByCirculation -> 조회용, 공람자 리스트 출력시 사용할 것
+    void markReadByCirculation(long draftId, long viewerId, LocalDateTime readAt);
+
 
 }

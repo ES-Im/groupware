@@ -18,7 +18,6 @@ public class Category extends AbstractEntity {
 
     private boolean isVisible;
 
-
     public static Category create(String name) {
         Category category = new Category();
 

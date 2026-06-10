@@ -2,14 +2,13 @@ package com.haruon.groupware.application.draft.service.command;
 
 import com.haruon.groupware.application.draft.provided.forCommand.BusinessTripCancelDraftManagement;
 import com.haruon.groupware.application.draft.required.DraftRepository;
-import com.haruon.groupware.application.draft.service.command.dto.CancelDraftCreateRequest;
-import com.haruon.groupware.application.draft.service.command.dto.CommonDraftCreateRequest;
+import com.haruon.groupware.application.draft.service.command.dto.createDraft.CancelDraftCreateRequest;
+import com.haruon.groupware.application.draft.service.command.dto.createDraft.CommonDraftCreateRequest;
 import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import com.haruon.groupware.application.exception.draft.DraftNotApprovedException;
 import com.haruon.groupware.application.exception.draft.DraftNotFoundException;
 import com.haruon.groupware.application.exception.draft.DraftTypeMismatchException;
-import com.haruon.groupware.application.file.required.FileStorage;
 import com.haruon.groupware.domain.draft.BusinessTripCancelDraft;
 import com.haruon.groupware.domain.draft.BusinessTripDraft;
 import com.haruon.groupware.domain.draft.Draft;
@@ -30,19 +29,18 @@ public class BusinessTripCancelDraftService extends CommonDraftService implement
 
     public BusinessTripCancelDraftService(
             EmpRepository empRepository,
-            DraftRepository draftRepository,
-            FileStorage fileStorage
+            DraftRepository draftRepository
     ) {
-        super(empRepository, draftRepository, fileStorage);
+        super(empRepository, draftRepository);
         this.draftRepository = draftRepository;
     }
 
     @Override
-    public void createDraft(CancelDraftCreateRequest req) {
+    public Long createDraft(Long drafterId, CancelDraftCreateRequest req) {
         validateOriginalBusinessTripDraft(req.sourceKey());
 
         CommonDraftCreateRequest commonReq = req.param();
-        Emp drafter = findActiveEmpById(commonReq.empId());
+        Emp drafter = findActiveEmpById(drafterId);
         List<ApproversParam> approvers = toApproverParams(commonReq.approvers());
 
         BusinessTripCancelDraft draft = BusinessTripCancelDraft.createDraft(
@@ -54,15 +52,17 @@ public class BusinessTripCancelDraftService extends CommonDraftService implement
         );
 
         draftRepository.save(draft);
+
+        return draft.getId();
     }
 
     @Override
-    public void createSubmitted(CancelDraftCreateRequest req) {
+    public Long createSubmitted(Long drafterId, CancelDraftCreateRequest req) {
         if(req.param().submittedAt() == null) throw new RequiredValueMissingException();
         validateOriginalBusinessTripDraft(req.sourceKey());
 
         CommonDraftCreateRequest commonReq = req.param();
-        Emp drafter = findActiveEmpById(commonReq.empId());
+        Emp drafter = findActiveEmpById(drafterId);
         List<ApproversParam> approvers = requireApprovers(commonReq.approvers());
         LocalDateTime submittedAt = requireSubmittedAt(commonReq.submittedAt());
 
@@ -76,6 +76,8 @@ public class BusinessTripCancelDraftService extends CommonDraftService implement
         );
 
         draftRepository.save(draft);
+
+        return draft.getId();
     }
 
     @Override

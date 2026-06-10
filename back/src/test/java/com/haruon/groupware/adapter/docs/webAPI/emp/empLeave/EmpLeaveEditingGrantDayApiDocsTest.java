@@ -46,7 +46,7 @@ public class EmpLeaveEditingGrantDayApiDocsTest extends RestDocsSupport {
                                 .header("Authorization", "Bearer accessToken")
                                 .queryParam("plusMinusDays", "1.5")
                 )
-                .andExpect(status().isOk())
+                .andExpect(status().isNoContent())
                 .andDo(MockMvcResultHandlers.print())
                 .andDo(document("EMP_LEAVE_ADJUST_SPECIAL_GRANT_DAYS",
                         preprocessRequest(prettyPrint()),
@@ -79,7 +79,7 @@ public class EmpLeaveEditingGrantDayApiDocsTest extends RestDocsSupport {
                                 .header("Authorization", "Bearer accessToken")
                                 .queryParam("plusMinusDays", "1.5")
                 )
-                .andExpect(status().isOk())
+                .andExpect(status().isNoContent())
                 .andDo(MockMvcResultHandlers.print())
                 .andDo(document("EMP_LEAVE_ADJUST_COMPENSATORY_GRANT_DAYS",
                         preprocessRequest(prettyPrint()),

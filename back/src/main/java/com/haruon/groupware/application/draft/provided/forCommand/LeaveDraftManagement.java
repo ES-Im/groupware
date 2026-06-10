@@ -1,8 +1,8 @@
 package com.haruon.groupware.application.draft.provided.forCommand;
 
 import com.haruon.groupware.application.draft.service.command.dto.ApproversRequest;
-import com.haruon.groupware.application.draft.service.command.dto.LeaveDraftCreateRequest;
-import com.haruon.groupware.application.draft.service.command.dto.LeaveDraftUpdateRequest;
+import com.haruon.groupware.application.draft.service.command.dto.createDraft.LeaveDraftCreateRequest;
+import com.haruon.groupware.application.draft.service.command.dto.updateDraft.LeaveDraftUpdateRequest;
 import org.jspecify.annotations.Nullable;
 
 import java.time.LocalDateTime;
@@ -14,11 +14,11 @@ import java.util.List;
 public interface LeaveDraftManagement {
 
     /** about leave draft */
-    void createDraft(LeaveDraftCreateRequest param);
+    Long createDraft(Long drafterId, LeaveDraftCreateRequest param);
 
-    void createSubmitted(LeaveDraftCreateRequest param);
+    Long createSubmitted(Long drafterId, LeaveDraftCreateRequest param);
 
-    void updateDraft(LeaveDraftUpdateRequest param);
+    void updateDraft(Long drafterEmpId, Long draftId, LeaveDraftUpdateRequest param);
 
 
     /** about draft */
@@ -28,7 +28,6 @@ public interface LeaveDraftManagement {
 
     /** about approve */
     void approve(long draftId, long approverId, LocalDateTime approvedAt);
-    // -> 모든 승인 끝나면 markReadByCirculation 호출
 
     void reject(long draftId, long rejecterId, String reason, LocalDateTime rejectedAt);
 
@@ -36,7 +35,5 @@ public interface LeaveDraftManagement {
     void addCirculatedEmp(long draftId, long drafterId, long circulatedEmpId);
 
     void removeCirculatedEmp(long draftId, long drafterId, long circulatedEmpId);
-
-    //todo  isReadableByCirculation -> 조회용, 공람자 리스트 출력시 사용할 것
 
 }

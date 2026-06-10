@@ -6,7 +6,6 @@ import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import com.haruon.groupware.application.exception.draft.ApprovalLineRequiredException;
 import com.haruon.groupware.application.exception.draft.DraftNotFoundException;
-import com.haruon.groupware.application.file.required.FileStorage;
 import com.haruon.groupware.application.utils.AuthValidator;
 import com.haruon.groupware.application.utils.Utils;
 import com.haruon.groupware.domain.draft.Draft;
@@ -18,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -27,14 +27,10 @@ abstract class CommonDraftService {
 
     private final EmpRepository empRepository;
     private final DraftRepository draftRepository;
-    private final FileStorage fileStorage;
 
-    private static final String DRAFT_FILE_TYPE = "draft";
-
-    public CommonDraftService(EmpRepository empRepository, DraftRepository draftRepository, FileStorage fileStorage) {
+    public CommonDraftService(EmpRepository empRepository, DraftRepository draftRepository) {
         this.empRepository = empRepository;
         this.draftRepository = draftRepository;
-        this.fileStorage = fileStorage;
     }
 
     public void revertToDraft(long draftId, long drafterId) {
@@ -80,6 +76,13 @@ abstract class CommonDraftService {
         draft.removeCirculation(circulatedEmp);
     }
 
+    public void markReadByCirculation(long draftId, long viewerId, LocalDateTime readAt) {
+        Draft draft = findDraftByDraftId(draftId);
+        Emp viewer = findActiveEmpById(viewerId);
+
+        draft.markReadByCirculation(viewer, readAt);
+    }
+
 
     private boolean hasApprovers(@Nullable List<ApproversRequest> params, Draft draft) {
 
@@ -118,7 +121,7 @@ abstract class CommonDraftService {
                 .orElseThrow(DraftNotFoundException::new);
     }
 
-    protected List<ApproversParam> toApproverParams(@Nullable  List<ApproversRequest> approvers) {
+    protected List<ApproversParam> toApproverParams(@Nullable Collection<ApproversRequest> approvers) {
         if(approvers == null) return List.of();
 
         List<ApproversParam> approversParams = new ArrayList<>();

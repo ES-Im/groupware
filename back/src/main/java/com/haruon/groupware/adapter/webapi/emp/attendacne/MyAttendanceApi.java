@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 
-import static com.haruon.groupware.application.utils.Utils.ZONE_SEOUL;
+import static com.haruon.groupware.application.utils.Utils.SEOUL_ZONE;
 
 @Slf4j
 @RestController
@@ -69,27 +69,25 @@ public class MyAttendanceApi {
 
     @PostMapping("/check-in")
     public ResponseEntity<Void> checkIn(
-            @AuthenticationPrincipal EmpDetails details,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime checkInAt
+            @AuthenticationPrincipal EmpDetails details
     ) {
-        attendanceRecord.recordCheckIn(details.getEmpId(), checkInAt);
+        attendanceRecord.recordCheckIn(details.getEmpId(), LocalDateTime.now(SEOUL_ZONE));
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
 
     @PatchMapping("/check-out")
     public ResponseEntity<Void> checkOut(
-            @AuthenticationPrincipal EmpDetails details,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime checkOutAt
+            @AuthenticationPrincipal EmpDetails details
     ) {
-        attendanceRecord.recordCheckOut(details.getEmpId(), checkOutAt);
+        attendanceRecord.recordCheckOut(details.getEmpId(), LocalDateTime.now(SEOUL_ZONE));
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     private static YearMonth getYearMonth(@Nullable YearMonth yearMonth) {
-        return yearMonth != null ? yearMonth : YearMonth.now(ZONE_SEOUL);
+        return yearMonth != null ? yearMonth : YearMonth.now(SEOUL_ZONE);
     }
 
 }

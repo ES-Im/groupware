@@ -5,7 +5,7 @@ import com.haruon.groupware.application.dept.required.DeptRepository;
 import com.haruon.groupware.application.draft.provided.forCommand.GeneralDraftManagement;
 import com.haruon.groupware.application.draft.required.DraftRepository;
 import com.haruon.groupware.application.draft.service.command.dto.ApproversRequest;
-import com.haruon.groupware.application.draft.service.command.dto.CommonDraftCreateRequest;
+import com.haruon.groupware.application.draft.service.command.dto.createDraft.CommonDraftCreateRequest;
 import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import com.haruon.groupware.application.exception.draft.ApprovalLineRequiredException;
@@ -389,8 +389,8 @@ record CommonDraftTest(
         }
 
         generalDraftManagement.createDraft(
+                drafter.getId(),
                 CommonDraftCreateRequest.builder()
-                        .empId(drafter.getId())
                         .title(title)
                         .content(content)
                         .approvers(approversRequests)
@@ -414,8 +414,8 @@ record CommonDraftTest(
         }
 
         generalDraftManagement.createSubmitted(
+                drafter.getId(),
                 CommonDraftCreateRequest.builder()
-                        .empId(drafter.getId())
                         .title(title)
                         .content(content)
                         .approvers(approversRequests)

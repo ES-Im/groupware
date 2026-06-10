@@ -61,7 +61,7 @@ public class FileCommandApi {
         FileUpload<EmpFileUploadRequest> upload = getUploadImpl(FileDomain.EMP);
         upload.uploadResource(request);
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/employees/{empId}/files/{fileId}")
@@ -76,7 +76,7 @@ public class FileCommandApi {
 
         managerImpl.deleteStoredResource(toFileDeleteRequest(details.getEmpId(), empId, fileId));
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
 
@@ -92,7 +92,7 @@ public class FileCommandApi {
         FileUpload<DraftFileUploadRequest> upload = getUploadImpl(FileDomain.DRAFT);
         upload.uploadResource(request);
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/drafts/{draftId}/files/{fileId}")
@@ -104,7 +104,7 @@ public class FileCommandApi {
         FileDeletion managerImpl = getManagerImpl(FileDomain.DRAFT);
         managerImpl.deleteStoredResource(toFileDeleteRequest(details.getEmpId(), draftId, fileId));
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
 
@@ -120,7 +120,7 @@ public class FileCommandApi {
         FileUpload<BoardFileUploadRequest> upload = getUploadImpl(FileDomain.BOARD);
         upload.uploadResource(request);
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/boards/{boardId}/files/{fileId}")
@@ -132,7 +132,7 @@ public class FileCommandApi {
         FileDeletion managerImpl = getManagerImpl(FileDomain.BOARD);
         managerImpl.deleteStoredResource(toFileDeleteRequest(details.getEmpId(), boardId, fileId));
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
 
@@ -149,7 +149,7 @@ public class FileCommandApi {
         FileUpload<MessageFileUploadRequest> upload = getUploadImpl(FileDomain.MESSAGE);
         upload.uploadResource(request);
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/messages/{messageId}/files/{fileId}")
@@ -161,7 +161,7 @@ public class FileCommandApi {
         FileDeletion managerImpl = getManagerImpl(FileDomain.MESSAGE);
         managerImpl.deleteStoredResource(toFileDeleteRequest(empDetails.getEmpId(), messageId, fileId));
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
 
@@ -177,7 +177,7 @@ public class FileCommandApi {
         FileUpload<EducationFileUploadRequest> upload = getUploadImpl(FileDomain.EDUCATION);
         upload.uploadResource(request);
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/educations/{educationId}/files/{fileId}")
@@ -189,7 +189,7 @@ public class FileCommandApi {
         FileDeletion managerImpl = getManagerImpl(FileDomain.EDUCATION);
         managerImpl.deleteStoredResource(toFileDeleteRequest(details.getEmpId(), educationId, fileId));
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
 
@@ -206,7 +206,7 @@ public class FileCommandApi {
         FileUpload<MeetingRoomFileUploadRequest> upload = getUploadImpl(FileDomain.MEETING_ROOM);
         upload.uploadResource(request);
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/meeting-rooms/{meetingRoomId}/files/{fileId}")
@@ -218,6 +218,6 @@ public class FileCommandApi {
         FileDeletion managerImpl = getManagerImpl(FileDomain.MEETING_ROOM);
         managerImpl.deleteStoredResource(toFileDeleteRequest(details.getEmpId(), meetingRoomId, fileId));
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 }
