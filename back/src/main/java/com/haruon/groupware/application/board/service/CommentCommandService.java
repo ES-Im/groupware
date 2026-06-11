@@ -1,5 +1,6 @@
 package com.haruon.groupware.application.board.service;
 
+import com.haruon.groupware.application.board.provided.BoardReactionCounter;
 import com.haruon.groupware.application.board.provided.CommentManagement;
 import com.haruon.groupware.application.board.required.BoardCommentRepository;
 import com.haruon.groupware.application.board.required.BoardRepository;
@@ -25,6 +26,7 @@ public class CommentCommandService implements CommentManagement {
 
     private final BoardRepository boardRepository;
     private final BoardCommentRepository boardCommentRepository;
+    private final BoardReactionCounter boardReactionCounter;
     private final EmpRepository empRepository;
 
     @Override
@@ -33,7 +35,8 @@ public class CommentCommandService implements CommentManagement {
         Board board = findPublishedBoard(boardId);
 
         BoardComment comment = BoardComment.createComment(board, editor, content, registerAt);
-        board.increaseCommentCount(1);
+
+        boardReactionCounter.increaseCommentCount(boardId);
 
         return boardCommentRepository.save(comment).getId();
     }
@@ -47,7 +50,7 @@ public class CommentCommandService implements CommentManagement {
         BoardComment parentComment = findCommentInBoard(parentCommentId, board);
 
         BoardComment reply = BoardComment.createReply(board, editor, content, parentComment, registerAt);
-        board.increaseCommentCount(1);
+        boardReactionCounter.increaseCommentCount(boardId);
 
         return boardCommentRepository.save(reply).getId();
     }
@@ -70,7 +73,7 @@ public class CommentCommandService implements CommentManagement {
         BoardComment comment = findCommentInBoard(commentId, board);
 
         comment.deleteComment(editor);
-        board.decreaseCommentCount(1);
+        boardReactionCounter.decreaseCommentCount(boardId);
     }
 
     private Board findPublishedBoard(Long boardId) {

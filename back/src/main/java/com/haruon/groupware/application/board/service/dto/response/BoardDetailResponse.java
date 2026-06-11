@@ -1,5 +1,7 @@
 package com.haruon.groupware.application.board.service.dto.response;
 
+import com.haruon.groupware.application.board.service.dto.BoardReactionDelta;
+
 import java.time.LocalDateTime;
 
 /**
@@ -19,6 +21,32 @@ public record BoardDetailResponse(
         Long commentCount,
         Boolean isDraft
 ) {
+
+    public BoardDetailResponse applyDirtyReactionCounters(
+            BoardReactionDelta delta
+    ) {
+        return new BoardDetailResponse(
+                this.boardId,
+                this.categoryId,
+                this.empId,
+                this.authorName,
+                this.title,
+                this.content,
+                this.publishedAt,
+                this.modifiedAt,
+                applyCount(this.likeCount, delta.likeCount()),
+                applyCount(this.viewCount, delta.viewCount()),
+                applyCount(this.commentCount, delta.commentCount()),
+                this.isDraft
+        );
+    }
+
+    private Long applyCount(Long base, Long delta) {
+        long baseLong = base == null ? 0 : base;
+        long deltaLong = delta == null ? 0 : delta;
+
+        return baseLong + deltaLong;
+    }
 }
 
 

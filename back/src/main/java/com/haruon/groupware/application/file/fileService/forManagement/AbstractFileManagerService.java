@@ -42,7 +42,7 @@ public abstract class AbstractFileManagerService<T extends FileUploadRequest> im
                     uploadRequest,
                     new FilePathInfo(storedFile.storedPath(), storedFile.storedName())
             );
-        } catch(Exception e) {  //todo 예외를 어떻게 처리할 것인가 고민좀 해봐야할듯... 우선 메타데이터 저장안되면 파일 삭제토록함
+        } catch (RuntimeException e) {
             fileStorage.delete(storedFile.storedPath(), storedFile.storedName());
             throw e;
         }

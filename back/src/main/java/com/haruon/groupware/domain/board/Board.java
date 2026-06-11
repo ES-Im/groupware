@@ -107,7 +107,6 @@ public class Board extends AbstractEntity {
         this.publishedAt = requireNonNull(publishedAt);
     }
 
-    //todo - 여기서 증감 부분은 application 쪽에서 구현해야함. redis로 할 부분과 나눌 것
     public void increaseViewCount(int viewCount) {
         validatePublished();
         validateCount(viewCount);

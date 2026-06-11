@@ -1,8 +1,10 @@
 package com.haruon.groupware.application.board.service;
 
 import com.haruon.groupware.application.board.provided.BoardAndCommentRetriever;
+import com.haruon.groupware.application.board.provided.BoardReactionCounter;
 import com.haruon.groupware.application.board.required.BoardQueryRepository;
 import com.haruon.groupware.application.board.required.BoardRepository;
+import com.haruon.groupware.application.board.service.dto.BoardReactionDelta;
 import com.haruon.groupware.application.board.service.dto.response.*;
 import com.haruon.groupware.application.exception.board.BoardNotFoundException;
 import com.haruon.groupware.application.exception.board.EmpNotMatchAuthorException;
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Transactional(readOnly = true)
@@ -23,14 +26,30 @@ public class BoardAndCommentQueryService implements BoardAndCommentRetriever {
 
     private final BoardQueryRepository boardQueryRepository;
     private final BoardRepository boardRepository;
+    private final BoardReactionCounter boardReactionCounter;
 
     @Override
     public Page<BoardSummaryResponse> retrieveBoardSummaries(
             Long categoryId, @Nullable String boardTitleKeyword, Pageable pageable
     ) {
-        return boardQueryRepository.findBoardsByCategoryId(
+        Page<BoardSummaryResponse> pageResponse = boardQueryRepository.findBoardsByCategoryId(
                 categoryId, boardTitleKeyword, pageable
         );
+
+        List<Long> boardIds = pageResponse.stream()
+                .map(BoardSummaryResponse::boardId).toList();
+
+        Map<Long, BoardReactionDelta> deltas = boardReactionCounter.findDeltas(boardIds);
+
+        return pageResponse.map(res -> {
+            BoardReactionDelta delta = deltas.getOrDefault(
+                    res.boardId(),
+                    new BoardReactionDelta(0L, 0L, 0L)
+            );
+
+            return res.applyDirtyReactionCounters(delta);
+        });
+
     }
 
     @Override
@@ -45,7 +64,10 @@ public class BoardAndCommentQueryService implements BoardAndCommentRetriever {
         BoardDetailResponse board = boardQueryRepository.findBoardByIdAndIsDraftFalse(boardId);
         if(board == null) throw new BoardNotFoundException();
 
-        return board;
+        boardReactionCounter.increaseViewCount(boardId);
+        BoardReactionDelta delta = boardReactionCounter.findDelta(boardId);
+
+        return board.applyDirtyReactionCounters(delta);
     }
 
     @Override

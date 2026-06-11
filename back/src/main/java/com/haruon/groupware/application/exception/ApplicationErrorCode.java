@@ -33,6 +33,9 @@ public enum ApplicationErrorCode {
     BOARD_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND, "BOARD_003", "조회된 게시글이 없습니다"),
     EMP_NOT_MATCH_AUTHOR_EXCEPTION(HttpStatus.BAD_REQUEST, "BOARD_004", "해당 게시글에 대한 편집권한이 없습니다"),
     BOARD_COMMENT_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND, "BOARD_005", "조회된 댓글이 없습니다"),
+    ALREADY_LIKED_BOARD_EXCEPTION(HttpStatus.BAD_REQUEST, "BOARD_006", "이미 좋아요를 누른 게시글입니다"),
+    NOT_LIKED_BOARD_EXCEPTION(HttpStatus.BAD_REQUEST, "BOARD_007", "이미 좋아요를 취소하거나, 좋아요를 누르지 않은 게시글입니다"),
+
 
     // Chat
     CHATROOM_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND, "CHAT_001", "조회된 채팅방이 없습니다"),

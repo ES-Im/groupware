@@ -59,7 +59,9 @@ public class BoardCommandService implements BoardManagement {
         Emp author = findActiveEmpById(empRepository, authorId);
         Board board = findBoard(boardRepository, boardId);
         validateAuthor(author, board);
-        Category category = findVisableCategory(categoryRepository, request.categoryId());
+        Category category = request.categoryId() != null
+                ? findVisableCategory(categoryRepository, request.categoryId())
+                : null;
 
         board.changeBoard(
                 author, category, request.title(), request.content(), request.modifiedAt()
