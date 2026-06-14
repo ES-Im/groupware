@@ -19,10 +19,17 @@ public class Utils {
     public static final ZoneId ZONE_SEOUL = SEOUL_ZONE;
 
     public static LocalTime getEarlierTime(@Nullable LocalTime targetStartAt, @Nullable LocalTime baseTime) {
-        return (targetStartAt == null || (baseTime != null && targetStartAt.isAfter(baseTime) ))? baseTime : targetStartAt;
+        if(targetStartAt == null && baseTime == null) throw new RequiredValueMissingException();
+
+        return (targetStartAt == null
+                || (baseTime != null && targetStartAt.isAfter(baseTime) ))
+                ? baseTime
+                : targetStartAt;
     }
 
     public static LocalTime getLaterTime(@Nullable LocalTime targetStartAt, @Nullable LocalTime baseTime) {
+        if(targetStartAt == null && baseTime == null) throw new RequiredValueMissingException();
+
         return (targetStartAt == null || (baseTime != null && targetStartAt.isBefore(baseTime)))? baseTime : targetStartAt;
     }
 

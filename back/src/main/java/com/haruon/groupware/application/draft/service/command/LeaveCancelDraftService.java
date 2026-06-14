@@ -114,7 +114,7 @@ public class LeaveCancelDraftService extends CommonDraftService implements Leave
 
         cancelDraft.approve(findActiveEmpById(approverId), approvedAt);
 
-        if (cancelDraft.getApproval().getStatus().equals(ApprovalStatus.APPROVED)) {
+        if (cancelDraft.getApproval() != null && cancelDraft.getApproval().getStatus().equals(ApprovalStatus.APPROVED)) {
             reflectUsage(sourceDraft);
         }
 
@@ -160,7 +160,7 @@ public class LeaveCancelDraftService extends CommonDraftService implements Leave
                 .findFirst()
                 .orElseThrow(DraftTypeMismatchException::new);
 
-        if(!draft.getApproval().getStatus().equals(ApprovalStatus.APPROVED)) {
+        if(!(draft.getApproval() != null && draft.getApproval().getStatus().equals(ApprovalStatus.APPROVED))) {
             throw new DraftNotApprovedException();
         }
     }

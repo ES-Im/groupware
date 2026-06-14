@@ -169,7 +169,7 @@ public class LeaveDraftService extends CommonDraftService implements LeaveDraftM
 
         draft.approve(approver, approvedAt);
 
-        if (draft.getApproval().getStatus().equals(ApprovalStatus.APPROVED)) {
+        if (draft.getApproval() != null && draft.getApproval().getStatus().equals(ApprovalStatus.APPROVED)) {
             reflectUsage(draft);
         }
         leaveDraftRepository.save(draft);

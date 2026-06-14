@@ -85,8 +85,8 @@ abstract class CommonDraftService {
 
 
     private boolean hasApprovers(@Nullable List<ApproversRequest> params, Draft draft) {
-
-        return !draft.getApproval().getApprovers().isEmpty() || (params != null && !params.isEmpty());
+        return !(draft.getApproval() != null && draft.getApproval().getApprovers().isEmpty())
+                || (params != null && !params.isEmpty());
     }
 
     protected Emp findActiveEmpById(long empId) {

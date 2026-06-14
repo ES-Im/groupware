@@ -44,7 +44,7 @@ public class BoardComment extends AbstractEntity {
         requireNonNull(registerAt);
 
         state(board.isDraft() || board.getPublishedAt() != null, "발행 전 게시글에 댓글을 남길 수 없음");
-        state(board.getPublishedAt().isBefore(registerAt), "게시글 발행시간보다 댓글 작성시간이 이를 수 없음");
+        state(board.getPublishedAt() != null && board.getPublishedAt().isBefore(registerAt), "게시글 발행시간보다 댓글 작성시간이 이를 수 없음");
 
         BoardComment comment = new BoardComment();
 

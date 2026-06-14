@@ -114,7 +114,7 @@ public class BusinessTripCancelDraftService extends CommonDraftService implement
                 .findFirst()
                 .orElseThrow(DraftTypeMismatchException::new);
 
-        if(!draft.getApproval().getStatus().equals(ApprovalStatus.APPROVED)) {
+        if(!(draft.getApproval() != null && draft.getApproval().getStatus().equals(ApprovalStatus.APPROVED))) {
             throw new DraftNotApprovedException();
         }
     }

@@ -30,7 +30,7 @@ public interface BoardRepository extends Repository<Board, Long> {
                b.likeCount = b.likeCount + :likeCount
          where b.id = :boardId
     """)
-    int applyReactionDeltaToBoard(
+    int updateReactionDeltaToBoard(
             @Param("boardId") Long boardId,
             @Param("viewCount") Long viewCount,
             @Param("commentCount") Long commentCount,
