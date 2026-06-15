@@ -9,7 +9,7 @@ spring:
         show_sql: true
         use_sql_comments: true
 
-  # batch
+  # batch //todo jenkins 스케쥴링 연동 [ClosingAttendanceConfig, BoardReactionDeltaApplyConfig]
   batch:
     jdbc:
       initialize-schema: never

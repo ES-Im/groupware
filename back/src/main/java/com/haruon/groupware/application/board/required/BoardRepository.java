@@ -17,8 +17,6 @@ public interface BoardRepository extends Repository<Board, Long> {
 
     boolean existsBoardById(Long boardId);
 
-    //todo 배치 처리 대상 BoardRedis 관련
-
     /**
      * return 1 (DB 반영 성공) 0 (DB반영 실패)
      */

@@ -5,7 +5,7 @@ import com.haruon.groupware.application.dept.required.DeptRepository;
 import com.haruon.groupware.application.empInfo.attendance.provided.AttendanceEditing;
 import com.haruon.groupware.application.empInfo.attendance.provided.AttendanceRecord;
 import com.haruon.groupware.application.empInfo.attendance.required.AttendanceRepository;
-import com.haruon.groupware.application.empInfo.attendance.service.AttendanceClosing;
+import com.haruon.groupware.application.empInfo.attendance.service.AttendanceClosingService;
 import com.haruon.groupware.application.empInfo.attendance.service.dto.request.ApproveAttendanceByDeptManagerRequest;
 import com.haruon.groupware.application.empInfo.attendance.service.dto.request.AttendanceCloseRequest;
 import com.haruon.groupware.application.empInfo.attendance.service.dto.request.EditAttendanceByDeptManagerRequest;
@@ -53,7 +53,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @TestIntegrationConfig
 record AttendanceEditingTest(
         AttendanceEditing attendanceEditing,
-        AttendanceClosing attendanceClosing,
+        AttendanceClosingService attendanceClosing,
         AttendanceRecord attendanceRecord,
         AttendanceRepository attendanceRepository,
         ScheduleRepository scheduleRepository,

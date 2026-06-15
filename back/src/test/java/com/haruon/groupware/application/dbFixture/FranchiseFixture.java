@@ -2,9 +2,9 @@ package com.haruon.groupware.application.dbFixture;
 
 import com.haruon.groupware.application.dept.required.DeptRepository;
 import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
-import com.haruon.groupware.application.franchise.provided.FranchiseManagement;
+import com.haruon.groupware.application.franchise.provided.forCommand.FranchiseManagement;
 import com.haruon.groupware.application.franchise.required.FranchiseRepository;
-import com.haruon.groupware.application.franchise.service.dto.FranchiseCreateRequest;
+import com.haruon.groupware.application.franchise.service.command.dto.FranchiseCreateRequest;
 import com.haruon.groupware.domain.empInfo.Dept;
 import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.empInfo.enums.SystemRoleCode;

@@ -3,7 +3,7 @@ package com.haruon.groupware.application.empInfo.provided;
 import com.haruon.groupware.application.TestIntegrationConfig;
 import com.haruon.groupware.application.empInfo.attendance.provided.AttendanceRecord;
 import com.haruon.groupware.application.empInfo.attendance.required.AttendanceRepository;
-import com.haruon.groupware.application.empInfo.attendance.service.AttendanceClosing;
+import com.haruon.groupware.application.empInfo.attendance.service.AttendanceClosingService;
 import com.haruon.groupware.application.empInfo.attendance.service.dto.request.AttendanceCloseRequest;
 import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
 import com.haruon.groupware.application.schedule.required.ScheduleRepository;
@@ -36,7 +36,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestIntegrationConfig
 record AttendanceClosingTest(
-        AttendanceClosing attendanceClosing,
+        AttendanceClosingService attendanceClosing,
         AttendanceRecord attendanceRecord,
         AttendanceRepository attendanceRepository,
 

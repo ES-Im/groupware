@@ -46,8 +46,6 @@ public class AuthValidator {
         permissionCheck(repository.existsAdminOrCurrentDeptManagerByEmpIdAndDeptId(empId, deptId));
     }
 
-
-    // checkDeptManagerByIdAndEmpId 리팩터
     public static DeptManagerAndTargetEmpInfo checkSameDeptManagerByManagerIdAndEmpId (
             AuthorizationQueryRepository repository,
             Long managerId,

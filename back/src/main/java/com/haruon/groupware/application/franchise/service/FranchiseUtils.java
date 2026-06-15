@@ -6,6 +6,7 @@ import com.haruon.groupware.application.exception.franchise.EducationRegisterMis
 import com.haruon.groupware.application.exception.franchise.FranchiseNotFoundException;
 import com.haruon.groupware.application.franchise.required.EducationRepository;
 import com.haruon.groupware.application.franchise.required.FranchiseRepository;
+import com.haruon.groupware.application.utils.AuthValidator;
 import com.haruon.groupware.application.utils.required.AuthorizationQueryRepository;
 import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.franchise.Education;
@@ -44,7 +45,7 @@ public class FranchiseUtils {
             throw new EducationRegisterMismatchException();
     }
 
-    static Franchise findFranchiseById(FranchiseRepository franchiseRepository, long franchiseId) {
+    public static Franchise findFranchiseById(FranchiseRepository franchiseRepository, long franchiseId) {
         return franchiseRepository.findById(franchiseId)
                 .orElseThrow(FranchiseNotFoundException::new);
     }

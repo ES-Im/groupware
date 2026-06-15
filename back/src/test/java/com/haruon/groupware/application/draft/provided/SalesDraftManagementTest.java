@@ -10,7 +10,7 @@ import com.haruon.groupware.application.draft.service.command.dto.createDraft.Sa
 import com.haruon.groupware.application.draft.service.command.dto.updateDraft.CommonDraftUpdateRequest;
 import com.haruon.groupware.application.draft.service.command.dto.updateDraft.SalesDraftUpdateRequest;
 import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
-import com.haruon.groupware.application.franchise.provided.FranchiseManagement;
+import com.haruon.groupware.application.franchise.provided.forCommand.FranchiseManagement;
 import com.haruon.groupware.application.franchise.required.FranchiseRepository;
 import com.haruon.groupware.domain.draft.Draft;
 import com.haruon.groupware.domain.draft.SalesDraft;
