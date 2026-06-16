@@ -1,6 +1,5 @@
 package com.haruon.groupware.application.franchise.service.query.dto.sales;
 
-import java.time.YearMonth;
 import java.util.List;
 
 public record FranchiseYearlySalesResponse(
@@ -9,8 +8,8 @@ public record FranchiseYearlySalesResponse(
         Integer salesYear,
         Long totalSalesAmount,
         Long totalOrderCount,
-        Long averageSalesAmount,
-        Long averageOrderAmount,
+        Double averageSalesAmount,
+        Double averageOrderAmount,
         Integer salesMonths,
         List<MonthlySalesPoint> monthlySales
 ) {
@@ -28,7 +27,7 @@ public record FranchiseYearlySalesResponse(
     }
 
     public record MonthlySalesPoint(
-            YearMonth salesMonth,
+            Integer salesMonth, // YYYYMM
             Long salesAmount,
             Long orderCount
     ) {}
@@ -39,8 +38,8 @@ public record FranchiseYearlySalesResponse(
             Integer salesYear,
             Long totalSalesAmount,
             Long totalOrderCount,
-            Long averageSalesAmount,            // 연 일평균 매출
-            Long averageOrderAmount,            // 연 기준 일평균 거래 건수
+            Double averageSalesAmount,            // 연 일평균 매출
+            Double averageOrderAmount,            // 연 기준 일평균 거래 건수
             Integer salesMonths                 // 연 중 매출 데이터가 있는 월 수
     ) {}
 }

@@ -7,6 +7,7 @@ import com.haruon.groupware.application.franchise.service.query.dto.sales.Franch
 import com.haruon.groupware.domain.franchise.QFranchise;
 import com.haruon.groupware.domain.franchise.QFranchiseDailySales;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -25,7 +26,7 @@ public class FranchiseSalesQueryRepositoryAdapter implements FranchiseSalesQuery
     private final QFranchise franchise = QFranchise.franchise;
     private final QFranchiseDailySales dailySales = QFranchiseDailySales.franchiseDailySales;
 
-    /** 상관쿼리.... DTO 조립... > DTO 조립으로
+    /**
      *  List<MonthlySalesPoint> monthlySales 제외 DTO 필드
      * select f.id, f.name,
      *        year(d.salesDate),
@@ -62,8 +63,8 @@ public class FranchiseSalesQueryRepositoryAdapter implements FranchiseSalesQuery
                                 dailySales.salesDate.year(),
                                 dailySales.salesAmount.sumLong(),
                                 dailySales.orderCount.sumLong(),
-                                dailySales.salesAmount.sumLong().divide(dailySales.salesDate.countDistinct()),
-                                dailySales.orderCount.sumLong().divide(dailySales.salesDate.countDistinct()),
+                                dailySales.salesAmount.avg(),
+                                dailySales.orderCount.avg(),
                                 dailySales.salesDate.month().countDistinct().intValue()
                         ))
                         .from(dailySales)
@@ -97,11 +98,70 @@ public class FranchiseSalesQueryRepositoryAdapter implements FranchiseSalesQuery
 
     @Override
     public Optional<FranchiseMonthlySalesResponse> findMonthlySalesById(Long franchiseId, YearMonth yearMonth) {
-        return Optional.empty();
+        LocalDate startAt = LocalDate.of(yearMonth.getYear(), yearMonth.getMonth(), 1);
+        LocalDate endAt = LocalDate.of(yearMonth.getYear(), yearMonth.getMonth(), yearMonth.lengthOfMonth()).plusDays(1);
+
+        FranchiseMonthlySalesResponse.MonthlySalesSummary monthlySalesSummary = query
+                .select(Projections.constructor(
+                        FranchiseMonthlySalesResponse.MonthlySalesSummary.class,
+                        franchise.id, franchise.franchiseName,
+                        dailySales.salesDate.yearMonth(),
+                        dailySales.salesAmount.sumLong(),
+                        dailySales.orderCount.sumLong(),
+                        dailySales.orderCount.avg(),
+                        dailySales.salesAmount.avg(),
+                        dailySales.salesDate.countDistinct().intValue()
+                )).from(dailySales)
+                .join(dailySales.franchise, franchise)
+                .where(
+                        franchise.id.eq(franchiseId),
+                        dailySales.salesDate.goe(startAt),
+                        dailySales.salesDate.lt(endAt)
+                )
+                .groupBy(franchise.id, franchise.franchiseName, dailySales.salesDate.yearMonth())
+                .fetchOne();
+
+        if(monthlySalesSummary == null) return Optional.empty();
+
+        List<FranchiseMonthlySalesResponse.DailySalesPoint> pointList = query
+                .select(Projections.constructor(
+                        FranchiseMonthlySalesResponse.DailySalesPoint.class,
+                        salesDateAsInteger(), dailySales.salesAmount, dailySales.orderCount
+                ))
+                .from(dailySales)
+                .where(
+                        dailySales.franchise.id.eq(franchiseId),
+                        dailySales.salesDate.goe(startAt),
+                        dailySales.salesDate.lt(endAt)
+                )
+                .orderBy(dailySales.salesDate.asc())
+                .fetch();
+
+
+        return Optional.of(new FranchiseMonthlySalesResponse(monthlySalesSummary, pointList));
+    }
+
+    private NumberExpression<Integer> salesDateAsInteger() {
+        return dailySales.salesDate.year().multiply(10000)
+                .add(dailySales.salesDate.month().multiply(100))
+                .add(dailySales.salesDate.dayOfMonth());
     }
 
     @Override
     public Optional<FranchiseDailySalesResponse> findDailySalesById(Long franchiseId, LocalDate date) {
-        return Optional.empty();
+        return Optional.ofNullable(
+                query
+                        .select(Projections.constructor(
+                                FranchiseDailySalesResponse.class,
+                                franchise.id, franchise.franchiseName, dailySales.salesDate,
+                                dailySales.salesAmount, dailySales.orderCount
+                        )).from(dailySales)
+                        .join(dailySales.franchise, franchise)
+                        .where(
+                                franchise.id.eq(franchiseId),
+                                dailySales.salesDate.eq(date)
+                        )
+                        .fetchOne()
+        );
     }
 }

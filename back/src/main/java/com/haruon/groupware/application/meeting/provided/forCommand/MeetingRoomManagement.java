@@ -1,7 +1,7 @@
-package com.haruon.groupware.application.meeting.provided;
+package com.haruon.groupware.application.meeting.provided.forCommand;
 
-import com.haruon.groupware.application.meeting.service.dto.MeetingRoomCreateRequest;
-import com.haruon.groupware.application.meeting.service.dto.MeetingRoomUpdateRequest;
+import com.haruon.groupware.application.meeting.service.command.dto.MeetingRoomCreateRequest;
+import com.haruon.groupware.application.meeting.service.command.dto.MeetingRoomUpdateRequest;
 
 public interface MeetingRoomManagement {
     long createMeetingRoom(MeetingRoomCreateRequest request);

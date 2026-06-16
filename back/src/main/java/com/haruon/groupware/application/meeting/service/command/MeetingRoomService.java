@@ -1,13 +1,13 @@
-package com.haruon.groupware.application.meeting.service;
+package com.haruon.groupware.application.meeting.service.command;
 
 import com.haruon.groupware.application.exception.meeting.InactivatedMeetingRoomException;
 import com.haruon.groupware.application.exception.meeting.MeetingRoomNotFoundException;
 import com.haruon.groupware.application.exception.meeting.ReservedMeetingExistException;
-import com.haruon.groupware.application.meeting.provided.MeetingRoomManagement;
+import com.haruon.groupware.application.meeting.provided.forCommand.MeetingRoomManagement;
 import com.haruon.groupware.application.meeting.required.MeetingRepository;
 import com.haruon.groupware.application.meeting.required.MeetingRoomRepository;
-import com.haruon.groupware.application.meeting.service.dto.MeetingRoomCreateRequest;
-import com.haruon.groupware.application.meeting.service.dto.MeetingRoomUpdateRequest;
+import com.haruon.groupware.application.meeting.service.command.dto.MeetingRoomCreateRequest;
+import com.haruon.groupware.application.meeting.service.command.dto.MeetingRoomUpdateRequest;
 import com.haruon.groupware.application.utils.required.AuthorizationQueryRepository;
 import com.haruon.groupware.domain.meeting.Meeting;
 import com.haruon.groupware.domain.meeting.MeetingRoom;
@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-import static com.haruon.groupware.application.meeting.service.MeetingService.findReservedMeeting;
+import static com.haruon.groupware.application.meeting.service.command.MeetingService.findReservedMeeting;
 import static com.haruon.groupware.application.utils.AuthValidator.checkFacilityRoleEmp;
 
 @Transactional

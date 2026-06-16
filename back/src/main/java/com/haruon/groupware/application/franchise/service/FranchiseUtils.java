@@ -6,7 +6,6 @@ import com.haruon.groupware.application.exception.franchise.EducationRegisterMis
 import com.haruon.groupware.application.exception.franchise.FranchiseNotFoundException;
 import com.haruon.groupware.application.franchise.required.EducationRepository;
 import com.haruon.groupware.application.franchise.required.FranchiseRepository;
-import com.haruon.groupware.application.utils.AuthValidator;
 import com.haruon.groupware.application.utils.required.AuthorizationQueryRepository;
 import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.franchise.Education;

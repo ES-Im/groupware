@@ -50,7 +50,7 @@ record AnswerManagementTest(
         Emp franchiseEmp = getFranchiseEmp("202601101", "franchise101");
         FranchiseInquiry inquiry = getSavedInquiry();
 
-        answerManagement.assignEmpToAnswer(inquiry.getId(), franchiseEmp.getId());
+        answerManagement.assignEmpToAnswer(inquiry.getId(), franchiseEmp.getId(), franchiseEmp.getId());
 
         FranchiseInquiry foundInquiry
                 = inquiryRepository.findById(inquiry.getId()).orElseThrow();
@@ -64,7 +64,7 @@ record AnswerManagementTest(
         Emp franchiseEmp = getFranchiseEmp("202601101", "franchise101");
         FranchiseInquiry inquiry = getSavedInquiry();
 
-        answerManagement.assignEmpToAnswer(inquiry.getId(), franchiseEmp.getId());
+        answerManagement.assignEmpToAnswer(inquiry.getId(), franchiseEmp.getId(), franchiseEmp.getId());
 
         String answer = "test";
 
@@ -83,7 +83,7 @@ record AnswerManagementTest(
         Emp franchiseEmp = getFranchiseEmp("202601101", "franchise101");
         FranchiseInquiry inquiry = getSavedInquiry();
 
-        answerManagement.assignEmpToAnswer(inquiry.getId(), franchiseEmp.getId());
+        answerManagement.assignEmpToAnswer(inquiry.getId(), franchiseEmp.getId(), franchiseEmp.getId());
 
 
         answerManagement.createAnswerDraft(inquiry.getId(), franchiseEmp.getId(), "test");
@@ -102,7 +102,7 @@ record AnswerManagementTest(
     void send_answer_by_assigned_emp_success() {
         Emp franchiseEmp = getFranchiseEmp("202601101", "franchise101");
         FranchiseInquiry inquiry = getSavedInquiry();
-        answerManagement.assignEmpToAnswer(inquiry.getId(), franchiseEmp.getId());
+        answerManagement.assignEmpToAnswer(inquiry.getId(), franchiseEmp.getId(), franchiseEmp.getId());
         answerManagement.createAnswerDraft(inquiry.getId(), franchiseEmp.getId(), "test");
 
         LocalDateTime sentAt = LocalDateTime.of(2026, 5, 2, 0, 0, 0);

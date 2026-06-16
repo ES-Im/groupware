@@ -127,6 +127,37 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PATCH, "/api/drafts/sales/*").hasRole(SystemRoleCode.FRANCHISE.name())
                         .requestMatchers("/api/drafts/**").hasRole(SystemRoleCode.EMPLOYEE.name())
 
+                        /* Franchise API */
+                        .requestMatchers(
+                                "/api/franchises", "/api/franchises/**",
+                                "/api/franchise-educations", "/api/franchise-educations/**",
+                                "/api/franchise-inquiries", "/api/franchise-inquiries/**"
+                        )
+                                .hasAnyRole(SystemRoleCode.FRANCHISE.name(), SystemRoleCode.ADMIN.name())
+
+                        /* Meeting API */
+                        .requestMatchers(HttpMethod.GET,
+                                "/api/meetings",
+                                "/api/meeting-rooms/management"
+                        ).hasRole(SystemRoleCode.FACILITY.name())
+
+                        // 회의실 생성/수정/삭제와 회의실 파일 변경은 시설 담당자 관리 영역이다.
+                        .requestMatchers(HttpMethod.POST, "/api/meeting-rooms", "/api/meeting-rooms/**")
+                                .hasRole(SystemRoleCode.FACILITY.name())
+                        .requestMatchers(HttpMethod.PATCH, "/api/meeting-rooms", "/api/meeting-rooms/**")
+                                .hasRole(SystemRoleCode.FACILITY.name())
+                        .requestMatchers(HttpMethod.DELETE, "/api/meeting-rooms", "/api/meeting-rooms/**")
+                                .hasRole(SystemRoleCode.FACILITY.name())
+
+                        .requestMatchers(HttpMethod.GET,
+                                "/api/meetings/my/reservations",
+                                "/api/meetings/*",
+                                "/api/meeting-rooms/available",
+                                "/api/meeting-rooms/*",
+                                "/api/meeting-rooms/*/reservations",
+                                "/api/meeting-rooms/*/files"
+                        ).hasRole(SystemRoleCode.EMPLOYEE.name())
+
                         /* DocumentBox API */
                         .requestMatchers("/api/document-box/me/**").hasRole(SystemRoleCode.EMPLOYEE.name())
 

@@ -1,0 +1,1122 @@
+[[FRANCHISE_LIST]]
+=== 가맹점 목록 조회
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+
+include::{snippets}/FRANCHISE_LIST/http-request.adoc[]
+
+_Request header_
+
+include::{snippets}/FRANCHISE_LIST/request-headers.adoc[]
+
+_Query parameter_
+
+include::{snippets}/FRANCHISE_LIST/query-parameters.adoc[]
+--
+Response (200)::
++
+--
+_HTTP response_
+
+include::{snippets}/FRANCHISE_LIST/http-response.adoc[]
+
+_Response fields_
+
+include::{snippets}/FRANCHISE_LIST/response-fields.adoc[]
+--
+Exception ::
++
+--
+이 API에서 발생 가능한 에러:
+
+|===
+|Error Code
+
+|PERMISSION_DENIED_EXCEPTION
+|ACTIVE_EMPLOYEE_NOT_FOUND_EXCEPTION
+|===
+--
+====
+
+[[FRANCHISE_DETAIL]]
+=== 가맹점 상세 조회
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+
+include::{snippets}/FRANCHISE_DETAIL/http-request.adoc[]
+
+_Request header_
+
+include::{snippets}/FRANCHISE_DETAIL/request-headers.adoc[]
+
+_Path parameter_
+
+include::{snippets}/FRANCHISE_DETAIL/path-parameters.adoc[]
+--
+Response (200)::
++
+--
+_HTTP response_
+
+include::{snippets}/FRANCHISE_DETAIL/http-response.adoc[]
+
+_Response fields_
+
+include::{snippets}/FRANCHISE_DETAIL/response-fields.adoc[]
+--
+Exception ::
++
+--
+이 API에서 발생 가능한 에러:
+
+|===
+|Error Code
+
+|PERMISSION_DENIED_EXCEPTION
+|FRANCHISE_NOT_FOUND_EXCEPTION
+|===
+--
+====
+
+[[FRANCHISE_CREATE]]
+=== 가맹점 등록
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+
+include::{snippets}/FRANCHISE_CREATE/http-request.adoc[]
+
+_Request header_
+
+include::{snippets}/FRANCHISE_CREATE/request-headers.adoc[]
+
+_Request fields_
+
+include::{snippets}/FRANCHISE_CREATE/request-fields.adoc[]
+--
+Response (201)::
++
+--
+_HTTP response_
+
+include::{snippets}/FRANCHISE_CREATE/http-response.adoc[]
+
+_Response fields_
+
+include::{snippets}/FRANCHISE_CREATE/response-fields.adoc[]
+--
+Exception ::
++
+--
+이 API에서 발생 가능한 에러:
+
+|===
+|Error Code
+
+|PERMISSION_DENIED_EXCEPTION
+|REQUIRED_VALUE_MISSING_EXCEPTION
+|BLANK_VALUE_NOT_ALLOWED_EXCEPTION
+|===
+--
+====
+
+[[FRANCHISE_UPDATE]]
+=== 가맹점 기본 정보 수정
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+
+include::{snippets}/FRANCHISE_UPDATE/http-request.adoc[]
+
+_Request header_
+
+include::{snippets}/FRANCHISE_UPDATE/request-headers.adoc[]
+
+_Path parameter_
+
+include::{snippets}/FRANCHISE_UPDATE/path-parameters.adoc[]
+
+_Request fields_
+
+include::{snippets}/FRANCHISE_UPDATE/request-fields.adoc[]
+--
+Response (204)::
++
+--
+_HTTP response_
+
+include::{snippets}/FRANCHISE_UPDATE/http-response.adoc[]
+--
+Exception ::
++
+--
+이 API에서 발생 가능한 에러:
+
+|===
+|Error Code
+
+|PERMISSION_DENIED_EXCEPTION
+|FRANCHISE_NOT_FOUND_EXCEPTION
+|REQUIRED_VALUE_MISSING_EXCEPTION
+|BLANK_VALUE_NOT_ALLOWED_EXCEPTION
+|===
+--
+====
+
+[[FRANCHISE_STATUS_UPDATE]]
+=== 가맹점 영업 상태 변경
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+
+include::{snippets}/FRANCHISE_STATUS_UPDATE/http-request.adoc[]
+
+_Request header_
+
+include::{snippets}/FRANCHISE_STATUS_UPDATE/request-headers.adoc[]
+
+_Path parameter_
+
+include::{snippets}/FRANCHISE_STATUS_UPDATE/path-parameters.adoc[]
+
+_Query parameter_
+
+include::{snippets}/FRANCHISE_STATUS_UPDATE/query-parameters.adoc[]
+--
+Response (204)::
++
+--
+_HTTP response_
+
+include::{snippets}/FRANCHISE_STATUS_UPDATE/http-response.adoc[]
+--
+Exception ::
++
+--
+이 API에서 발생 가능한 에러:
+
+|===
+|Error Code
+
+|PERMISSION_DENIED_EXCEPTION
+|FRANCHISE_NOT_FOUND_EXCEPTION
+|===
+--
+====
+
+[[FRANCHISE_MANAGER_UPDATE]]
+=== 가맹점 담당자 변경
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+
+include::{snippets}/FRANCHISE_MANAGER_UPDATE/http-request.adoc[]
+
+_Request header_
+
+include::{snippets}/FRANCHISE_MANAGER_UPDATE/request-headers.adoc[]
+
+_Path parameter_
+
+include::{snippets}/FRANCHISE_MANAGER_UPDATE/path-parameters.adoc[]
+
+_Query parameter_
+
+include::{snippets}/FRANCHISE_MANAGER_UPDATE/query-parameters.adoc[]
+--
+Response (204)::
++
+--
+_HTTP response_
+
+include::{snippets}/FRANCHISE_MANAGER_UPDATE/http-response.adoc[]
+--
+Exception ::
++
+--
+이 API에서 발생 가능한 에러:
+
+|===
+|Error Code
+
+|PERMISSION_DENIED_EXCEPTION
+|FRANCHISE_NOT_FOUND_EXCEPTION
+|ACTIVE_EMPLOYEE_NOT_FOUND_EXCEPTION
+|===
+--
+====
+
+[[FRANCHISE_MEMO_UPDATE]]
+=== 가맹점 메모 수정
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+
+include::{snippets}/FRANCHISE_MEMO_UPDATE/http-request.adoc[]
+
+_Request header_
+
+include::{snippets}/FRANCHISE_MEMO_UPDATE/request-headers.adoc[]
+
+_Path parameter_
+
+include::{snippets}/FRANCHISE_MEMO_UPDATE/path-parameters.adoc[]
+
+_Request fields_
+
+include::{snippets}/FRANCHISE_MEMO_UPDATE/request-fields.adoc[]
+--
+Response (204)::
++
+--
+_HTTP response_
+
+include::{snippets}/FRANCHISE_MEMO_UPDATE/http-response.adoc[]
+--
+Exception ::
++
+--
+이 API에서 발생 가능한 에러:
+
+|===
+|Error Code
+
+|PERMISSION_DENIED_EXCEPTION
+|FRANCHISE_NOT_FOUND_EXCEPTION
+|===
+--
+====
+
+[[FRANCHISE_MEMO_CLEAR]]
+=== 가맹점 메모 삭제
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+
+include::{snippets}/FRANCHISE_MEMO_CLEAR/http-request.adoc[]
+
+_Request header_
+
+include::{snippets}/FRANCHISE_MEMO_CLEAR/request-headers.adoc[]
+
+_Path parameter_
+
+include::{snippets}/FRANCHISE_MEMO_CLEAR/path-parameters.adoc[]
+--
+Response (204)::
++
+--
+_HTTP response_
+
+include::{snippets}/FRANCHISE_MEMO_CLEAR/http-response.adoc[]
+--
+Exception ::
++
+--
+이 API에서 발생 가능한 에러:
+
+|===
+|Error Code
+
+|PERMISSION_DENIED_EXCEPTION
+|FRANCHISE_NOT_FOUND_EXCEPTION
+|===
+--
+====
+
+[[FRANCHISE_EDUCATION_CALENDAR]]
+=== 교육 캘린더 조회
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+
+include::{snippets}/FRANCHISE_EDUCATION_CALENDAR/http-request.adoc[]
+
+_Request header_
+
+include::{snippets}/FRANCHISE_EDUCATION_CALENDAR/request-headers.adoc[]
+
+_Query parameter_
+
+include::{snippets}/FRANCHISE_EDUCATION_CALENDAR/query-parameters.adoc[]
+--
+Response (200)::
++
+--
+_HTTP response_
+
+include::{snippets}/FRANCHISE_EDUCATION_CALENDAR/http-response.adoc[]
+
+_Response fields_
+
+include::{snippets}/FRANCHISE_EDUCATION_CALENDAR/response-fields.adoc[]
+--
+Exception ::
++
+--
+이 API에서 발생 가능한 에러:
+
+|===
+|Error Code
+
+|PERMISSION_DENIED_EXCEPTION
+|===
+--
+====
+
+[[FRANCHISE_EDUCATION_DETAIL]]
+=== 교육 상세 조회
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+
+include::{snippets}/FRANCHISE_EDUCATION_DETAIL/http-request.adoc[]
+
+_Request header_
+
+include::{snippets}/FRANCHISE_EDUCATION_DETAIL/request-headers.adoc[]
+
+_Path parameter_
+
+include::{snippets}/FRANCHISE_EDUCATION_DETAIL/path-parameters.adoc[]
+--
+Response (200)::
++
+--
+_HTTP response_
+
+include::{snippets}/FRANCHISE_EDUCATION_DETAIL/http-response.adoc[]
+
+_Response fields_
+
+include::{snippets}/FRANCHISE_EDUCATION_DETAIL/response-fields.adoc[]
+--
+Exception ::
++
+--
+이 API에서 발생 가능한 에러:
+
+|===
+|Error Code
+
+|PERMISSION_DENIED_EXCEPTION
+|EDUCATION_NOT_FOUND_EXCEPTION
+|===
+--
+====
+
+[[FRANCHISE_EDUCATION_APPLICANTS]]
+=== 교육 신청자 조회
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+
+include::{snippets}/FRANCHISE_EDUCATION_APPLICANTS/http-request.adoc[]
+
+_Request header_
+
+include::{snippets}/FRANCHISE_EDUCATION_APPLICANTS/request-headers.adoc[]
+
+_Path parameter_
+
+include::{snippets}/FRANCHISE_EDUCATION_APPLICANTS/path-parameters.adoc[]
+
+_Query parameter_
+
+include::{snippets}/FRANCHISE_EDUCATION_APPLICANTS/query-parameters.adoc[]
+--
+Response (200)::
++
+--
+_HTTP response_
+
+include::{snippets}/FRANCHISE_EDUCATION_APPLICANTS/http-response.adoc[]
+
+_Response fields_
+
+include::{snippets}/FRANCHISE_EDUCATION_APPLICANTS/response-fields.adoc[]
+--
+Exception ::
++
+--
+이 API에서 발생 가능한 에러:
+
+|===
+|Error Code
+
+|PERMISSION_DENIED_EXCEPTION
+|EDUCATION_NOT_FOUND_EXCEPTION
+|===
+--
+====
+
+[[FRANCHISE_EDUCATION_CREATE]]
+=== 교육 등록
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+
+include::{snippets}/FRANCHISE_EDUCATION_CREATE/http-request.adoc[]
+
+_Request header_
+
+include::{snippets}/FRANCHISE_EDUCATION_CREATE/request-headers.adoc[]
+
+_Request fields_
+
+include::{snippets}/FRANCHISE_EDUCATION_CREATE/request-fields.adoc[]
+--
+Response (201)::
++
+--
+_HTTP response_
+
+include::{snippets}/FRANCHISE_EDUCATION_CREATE/http-response.adoc[]
+
+_Response fields_
+
+include::{snippets}/FRANCHISE_EDUCATION_CREATE/response-fields.adoc[]
+--
+Exception ::
++
+--
+이 API에서 발생 가능한 에러:
+
+|===
+|Error Code
+
+|PERMISSION_DENIED_EXCEPTION
+|REQUIRED_VALUE_MISSING_EXCEPTION
+|BLANK_VALUE_NOT_ALLOWED_EXCEPTION
+|POSITIVE_VALUE_REQUIRED_EXCEPTION
+|===
+--
+====
+
+[[FRANCHISE_EDUCATION_UPDATE]]
+=== 교육 수정
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+
+include::{snippets}/FRANCHISE_EDUCATION_UPDATE/http-request.adoc[]
+
+_Request header_
+
+include::{snippets}/FRANCHISE_EDUCATION_UPDATE/request-headers.adoc[]
+
+_Path parameter_
+
+include::{snippets}/FRANCHISE_EDUCATION_UPDATE/path-parameters.adoc[]
+
+_Request fields_
+
+include::{snippets}/FRANCHISE_EDUCATION_UPDATE/request-fields.adoc[]
+--
+Response (204)::
++
+--
+_HTTP response_
+
+include::{snippets}/FRANCHISE_EDUCATION_UPDATE/http-response.adoc[]
+--
+Exception ::
++
+--
+이 API에서 발생 가능한 에러:
+
+|===
+|Error Code
+
+|PERMISSION_DENIED_EXCEPTION
+|EDUCATION_NOT_FOUND_EXCEPTION
+|REQUIRED_VALUE_MISSING_EXCEPTION
+|BLANK_VALUE_NOT_ALLOWED_EXCEPTION
+|POSITIVE_VALUE_REQUIRED_EXCEPTION
+|===
+--
+====
+
+[[FRANCHISE_EDUCATION_ACTIVATE]]
+=== 교육 활성화
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+
+include::{snippets}/FRANCHISE_EDUCATION_ACTIVATE/http-request.adoc[]
+
+_Request header_
+
+include::{snippets}/FRANCHISE_EDUCATION_ACTIVATE/request-headers.adoc[]
+
+_Path parameter_
+
+include::{snippets}/FRANCHISE_EDUCATION_ACTIVATE/path-parameters.adoc[]
+--
+Response (204)::
++
+--
+_HTTP response_
+
+include::{snippets}/FRANCHISE_EDUCATION_ACTIVATE/http-response.adoc[]
+--
+Exception ::
++
+--
+이 API에서 발생 가능한 에러:
+
+|===
+|Error Code
+
+|PERMISSION_DENIED_EXCEPTION
+|EDUCATION_NOT_FOUND_EXCEPTION
+|===
+--
+====
+
+[[FRANCHISE_EDUCATION_DEACTIVATE]]
+=== 교육 비활성화
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+
+include::{snippets}/FRANCHISE_EDUCATION_DEACTIVATE/http-request.adoc[]
+
+_Request header_
+
+include::{snippets}/FRANCHISE_EDUCATION_DEACTIVATE/request-headers.adoc[]
+
+_Path parameter_
+
+include::{snippets}/FRANCHISE_EDUCATION_DEACTIVATE/path-parameters.adoc[]
+--
+Response (204)::
++
+--
+_HTTP response_
+
+include::{snippets}/FRANCHISE_EDUCATION_DEACTIVATE/http-response.adoc[]
+--
+Exception ::
++
+--
+이 API에서 발생 가능한 에러:
+
+|===
+|Error Code
+
+|PERMISSION_DENIED_EXCEPTION
+|EDUCATION_NOT_FOUND_EXCEPTION
+|===
+--
+====
+
+[[FRANCHISE_INQUIRY_LIST]]
+=== 문의 목록 조회
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+
+include::{snippets}/FRANCHISE_INQUIRY_LIST/http-request.adoc[]
+
+_Request header_
+
+include::{snippets}/FRANCHISE_INQUIRY_LIST/request-headers.adoc[]
+
+_Query parameter_
+
+include::{snippets}/FRANCHISE_INQUIRY_LIST/query-parameters.adoc[]
+--
+Response (200)::
++
+--
+_HTTP response_
+
+include::{snippets}/FRANCHISE_INQUIRY_LIST/http-response.adoc[]
+
+_Response fields_
+
+include::{snippets}/FRANCHISE_INQUIRY_LIST/response-fields.adoc[]
+--
+Exception ::
++
+--
+이 API에서 발생 가능한 에러:
+
+|===
+|Error Code
+
+|PERMISSION_DENIED_EXCEPTION
+|===
+--
+====
+
+[[FRANCHISE_INQUIRY_DETAIL]]
+=== 문의 상세 조회
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+
+include::{snippets}/FRANCHISE_INQUIRY_DETAIL/http-request.adoc[]
+
+_Request header_
+
+include::{snippets}/FRANCHISE_INQUIRY_DETAIL/request-headers.adoc[]
+
+_Path parameter_
+
+include::{snippets}/FRANCHISE_INQUIRY_DETAIL/path-parameters.adoc[]
+--
+Response (200)::
++
+--
+_HTTP response_
+
+include::{snippets}/FRANCHISE_INQUIRY_DETAIL/http-response.adoc[]
+
+_Response fields_
+
+include::{snippets}/FRANCHISE_INQUIRY_DETAIL/response-fields.adoc[]
+--
+Exception ::
++
+--
+이 API에서 발생 가능한 에러:
+
+|===
+|Error Code
+
+|PERMISSION_DENIED_EXCEPTION
+|FRANCHISE_INQUIRY_NOT_FOUND_EXCEPTION
+|===
+--
+====
+
+[[FRANCHISE_INQUIRY_ANSWER_DETAIL]]
+=== 답변 조회
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+
+include::{snippets}/FRANCHISE_INQUIRY_ANSWER_DETAIL/http-request.adoc[]
+
+_Request header_
+
+include::{snippets}/FRANCHISE_INQUIRY_ANSWER_DETAIL/request-headers.adoc[]
+
+_Path parameter_
+
+include::{snippets}/FRANCHISE_INQUIRY_ANSWER_DETAIL/path-parameters.adoc[]
+--
+Response (200)::
++
+--
+_HTTP response_
+
+include::{snippets}/FRANCHISE_INQUIRY_ANSWER_DETAIL/http-response.adoc[]
+
+_Response fields_
+
+include::{snippets}/FRANCHISE_INQUIRY_ANSWER_DETAIL/response-fields.adoc[]
+--
+Exception ::
++
+--
+이 API에서 발생 가능한 에러:
+
+|===
+|Error Code
+
+|PERMISSION_DENIED_EXCEPTION
+|FRANCHISE_INQUIRY_NOT_FOUND_EXCEPTION
+|===
+--
+====
+
+[[FRANCHISE_INQUIRY_ASSIGN_ANSWER]]
+=== 답변 담당자 배정
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+
+include::{snippets}/FRANCHISE_INQUIRY_ASSIGN_ANSWER/http-request.adoc[]
+
+_Request header_
+
+include::{snippets}/FRANCHISE_INQUIRY_ASSIGN_ANSWER/request-headers.adoc[]
+
+_Path parameter_
+
+include::{snippets}/FRANCHISE_INQUIRY_ASSIGN_ANSWER/path-parameters.adoc[]
+
+_Query parameter_
+
+include::{snippets}/FRANCHISE_INQUIRY_ASSIGN_ANSWER/query-parameters.adoc[]
+--
+Response (204)::
++
+--
+_HTTP response_
+
+include::{snippets}/FRANCHISE_INQUIRY_ASSIGN_ANSWER/http-response.adoc[]
+--
+Exception ::
++
+--
+이 API에서 발생 가능한 에러:
+
+|===
+|Error Code
+
+|PERMISSION_DENIED_EXCEPTION
+|FRANCHISE_INQUIRY_NOT_FOUND_EXCEPTION
+|ACTIVE_EMPLOYEE_NOT_FOUND_EXCEPTION
+|===
+--
+====
+
+[[FRANCHISE_INQUIRY_ANSWER_CREATE]]
+=== 답변 초안 생성
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+
+include::{snippets}/FRANCHISE_INQUIRY_ANSWER_CREATE/http-request.adoc[]
+
+_Request header_
+
+include::{snippets}/FRANCHISE_INQUIRY_ANSWER_CREATE/request-headers.adoc[]
+
+_Path parameter_
+
+include::{snippets}/FRANCHISE_INQUIRY_ANSWER_CREATE/path-parameters.adoc[]
+
+_Request fields_
+
+include::{snippets}/FRANCHISE_INQUIRY_ANSWER_CREATE/request-fields.adoc[]
+--
+Response (201)::
++
+--
+_HTTP response_
+
+include::{snippets}/FRANCHISE_INQUIRY_ANSWER_CREATE/http-response.adoc[]
+--
+Exception ::
++
+--
+이 API에서 발생 가능한 에러:
+
+|===
+|Error Code
+
+|PERMISSION_DENIED_EXCEPTION
+|FRANCHISE_INQUIRY_NOT_FOUND_EXCEPTION
+|BLANK_VALUE_NOT_ALLOWED_EXCEPTION
+|===
+--
+====
+
+[[FRANCHISE_INQUIRY_ANSWER_UPDATE]]
+=== 답변 초안 수정
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+
+include::{snippets}/FRANCHISE_INQUIRY_ANSWER_UPDATE/http-request.adoc[]
+
+_Request header_
+
+include::{snippets}/FRANCHISE_INQUIRY_ANSWER_UPDATE/request-headers.adoc[]
+
+_Path parameter_
+
+include::{snippets}/FRANCHISE_INQUIRY_ANSWER_UPDATE/path-parameters.adoc[]
+
+_Request fields_
+
+include::{snippets}/FRANCHISE_INQUIRY_ANSWER_UPDATE/request-fields.adoc[]
+--
+Response (204)::
++
+--
+_HTTP response_
+
+include::{snippets}/FRANCHISE_INQUIRY_ANSWER_UPDATE/http-response.adoc[]
+--
+Exception ::
++
+--
+이 API에서 발생 가능한 에러:
+
+|===
+|Error Code
+
+|PERMISSION_DENIED_EXCEPTION
+|FRANCHISE_INQUIRY_NOT_FOUND_EXCEPTION
+|BLANK_VALUE_NOT_ALLOWED_EXCEPTION
+|===
+--
+====
+
+[[FRANCHISE_INQUIRY_ANSWER_SEND]]
+=== 답변 발송
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+
+include::{snippets}/FRANCHISE_INQUIRY_ANSWER_SEND/http-request.adoc[]
+
+_Request header_
+
+include::{snippets}/FRANCHISE_INQUIRY_ANSWER_SEND/request-headers.adoc[]
+
+_Path parameter_
+
+include::{snippets}/FRANCHISE_INQUIRY_ANSWER_SEND/path-parameters.adoc[]
+--
+Response (204)::
++
+--
+_HTTP response_
+
+include::{snippets}/FRANCHISE_INQUIRY_ANSWER_SEND/http-response.adoc[]
+--
+Exception ::
++
+--
+이 API에서 발생 가능한 에러:
+
+|===
+|Error Code
+
+|PERMISSION_DENIED_EXCEPTION
+|FRANCHISE_INQUIRY_NOT_FOUND_EXCEPTION
+|===
+--
+====
+
+[[FRANCHISE_SALES_YEARLY]]
+=== 연 매출 조회
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+
+include::{snippets}/FRANCHISE_SALES_YEARLY/http-request.adoc[]
+
+_Request header_
+
+include::{snippets}/FRANCHISE_SALES_YEARLY/request-headers.adoc[]
+
+_Path parameter_
+
+include::{snippets}/FRANCHISE_SALES_YEARLY/path-parameters.adoc[]
+--
+Response (200)::
++
+--
+_HTTP response_
+
+include::{snippets}/FRANCHISE_SALES_YEARLY/http-response.adoc[]
+
+_Response fields_
+
+include::{snippets}/FRANCHISE_SALES_YEARLY/response-fields.adoc[]
+--
+Exception ::
++
+--
+이 API에서 발생 가능한 에러:
+
+|===
+|Error Code
+
+|PERMISSION_DENIED_EXCEPTION
+|FRANCHISE_DAILY_SALES_NOT_FOUND_EXCEPTION
+|===
+--
+====
+
+[[FRANCHISE_SALES_MONTHLY]]
+=== 월 매출 조회
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+
+include::{snippets}/FRANCHISE_SALES_MONTHLY/http-request.adoc[]
+
+_Request header_
+
+include::{snippets}/FRANCHISE_SALES_MONTHLY/request-headers.adoc[]
+
+_Path parameter_
+
+include::{snippets}/FRANCHISE_SALES_MONTHLY/path-parameters.adoc[]
+--
+Response (200)::
++
+--
+_HTTP response_
+
+include::{snippets}/FRANCHISE_SALES_MONTHLY/http-response.adoc[]
+
+_Response fields_
+
+include::{snippets}/FRANCHISE_SALES_MONTHLY/response-fields.adoc[]
+--
+Exception ::
++
+--
+이 API에서 발생 가능한 에러:
+
+|===
+|Error Code
+
+|PERMISSION_DENIED_EXCEPTION
+|FRANCHISE_DAILY_SALES_NOT_FOUND_EXCEPTION
+|===
+--
+====
+
+[[FRANCHISE_SALES_DAILY]]
+=== 일 매출 조회
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+
+include::{snippets}/FRANCHISE_SALES_DAILY/http-request.adoc[]
+
+_Request header_
+
+include::{snippets}/FRANCHISE_SALES_DAILY/request-headers.adoc[]
+
+_Path parameter_
+
+include::{snippets}/FRANCHISE_SALES_DAILY/path-parameters.adoc[]
+--
+Response (200)::
++
+--
+_HTTP response_
+
+include::{snippets}/FRANCHISE_SALES_DAILY/http-response.adoc[]
+
+_Response fields_
+
+include::{snippets}/FRANCHISE_SALES_DAILY/response-fields.adoc[]
+--
+Exception ::
++
+--
+이 API에서 발생 가능한 에러:
+
+|===
+|Error Code
+
+|PERMISSION_DENIED_EXCEPTION
+|FRANCHISE_DAILY_SALES_NOT_FOUND_EXCEPTION
+|===
+--
+====

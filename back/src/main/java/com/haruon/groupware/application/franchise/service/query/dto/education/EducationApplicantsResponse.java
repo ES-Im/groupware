@@ -14,4 +14,5 @@ public record EducationApplicantsResponse(
         Long appliedCount,
         LocalDateTime appliedAt
 ) {
+
 }

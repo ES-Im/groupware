@@ -7,13 +7,13 @@ import java.time.LocalDateTime;
  */
 public interface AnswerManagement {
 
-    void assignEmpToAnswer(long inquiryId, long empId);
+    void assignEmpToAnswer(long inquiryId, long editorId, long empId);
 
-    void createAnswerDraft(long inquiryId, long empId, String answer);
+    void createAnswerDraft(long inquiryId, long editorId, String answer);
 
-    void updateAnswerDraft(long inquiryId, long empId, String answer);
+    void updateAnswerDraft(long inquiryId, long editorId, String answer);
 
-    void sendAnswer(long inquiryId, long empId, LocalDateTime sentAt);
+    void sendAnswer(long inquiryId, long editorId, LocalDateTime sentAt);
 
 
 

@@ -1,13 +1,13 @@
-package com.haruon.groupware.application.meeting.service;
+package com.haruon.groupware.application.meeting.service.command;
 
 import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
 import com.haruon.groupware.application.exception.meeting.MeetingNotFoundException;
 import com.haruon.groupware.application.exception.meeting.MeetingRoomNotFoundException;
-import com.haruon.groupware.application.meeting.provided.MeetingManagement;
+import com.haruon.groupware.application.meeting.provided.forCommand.MeetingManagement;
 import com.haruon.groupware.application.meeting.required.MeetingRepository;
 import com.haruon.groupware.application.meeting.required.MeetingRoomRepository;
-import com.haruon.groupware.application.meeting.service.dto.MeetingReserveRequest;
-import com.haruon.groupware.application.meeting.service.dto.MeetingUpdateRequest;
+import com.haruon.groupware.application.meeting.service.command.dto.MeetingReserveRequest;
+import com.haruon.groupware.application.meeting.service.command.dto.MeetingUpdateRequest;
 import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.meeting.Meeting;
 import com.haruon.groupware.domain.meeting.MeetingRoom;
@@ -21,7 +21,7 @@ import java.time.ZoneId;
 import java.util.List;
 import java.util.Set;
 
-import static com.haruon.groupware.application.meeting.service.MeetingRoomService.findActiveMeetingRoom;
+import static com.haruon.groupware.application.meeting.service.command.MeetingRoomService.findActiveMeetingRoom;
 import static com.haruon.groupware.application.utils.AuthValidator.findActiveEmpById;
 import static com.haruon.groupware.application.utils.Utils.findEmpListById;
 

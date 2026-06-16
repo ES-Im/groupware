@@ -19,9 +19,9 @@ import com.haruon.groupware.application.file.fileService.forRetriever.FileResour
 import com.haruon.groupware.application.franchise.provided.forCommand.EducationManagement;
 import com.haruon.groupware.application.franchise.required.EducationRepository;
 import com.haruon.groupware.application.franchise.service.command.dto.EducationCreateRequest;
-import com.haruon.groupware.application.meeting.provided.MeetingRoomManagement;
+import com.haruon.groupware.application.meeting.provided.forCommand.MeetingRoomManagement;
 import com.haruon.groupware.application.meeting.required.MeetingRoomRepository;
-import com.haruon.groupware.application.meeting.service.dto.MeetingRoomCreateRequest;
+import com.haruon.groupware.application.meeting.service.command.dto.MeetingRoomCreateRequest;
 import com.haruon.groupware.application.message.provided.MessageDraftManagement;
 import com.haruon.groupware.application.message.required.MessageRepository;
 import com.haruon.groupware.application.message.service.dto.MessageCreateRequest;

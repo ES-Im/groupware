@@ -1,6 +1,5 @@
 package com.haruon.groupware.application.franchise.service.query;
 
-import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
 import com.haruon.groupware.application.franchise.provided.forRetriever.FranchiseRetriever;
 import com.haruon.groupware.application.franchise.required.FranchiseQueryRepository;
 import com.haruon.groupware.application.franchise.service.query.dto.FranchisesDetailResponse;

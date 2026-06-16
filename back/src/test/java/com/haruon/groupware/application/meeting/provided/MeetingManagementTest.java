@@ -10,11 +10,13 @@ import com.haruon.groupware.application.exception.common.PastTimeNotAllowedExcep
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import com.haruon.groupware.application.exception.meeting.InactivatedMeetingRoomException;
 import com.haruon.groupware.application.exception.meeting.MeetingNotFoundException;
+import com.haruon.groupware.application.meeting.provided.forCommand.MeetingManagement;
+import com.haruon.groupware.application.meeting.provided.forCommand.MeetingRoomManagement;
 import com.haruon.groupware.application.meeting.required.MeetingRepository;
 import com.haruon.groupware.application.meeting.required.MeetingRoomRepository;
-import com.haruon.groupware.application.meeting.service.dto.MeetingReserveRequest;
-import com.haruon.groupware.application.meeting.service.dto.MeetingRoomCreateRequest;
-import com.haruon.groupware.application.meeting.service.dto.MeetingUpdateRequest;
+import com.haruon.groupware.application.meeting.service.command.dto.MeetingReserveRequest;
+import com.haruon.groupware.application.meeting.service.command.dto.MeetingRoomCreateRequest;
+import com.haruon.groupware.application.meeting.service.command.dto.MeetingUpdateRequest;
 import com.haruon.groupware.domain.empInfo.Dept;
 import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.empInfo.enums.SystemRoleCode;

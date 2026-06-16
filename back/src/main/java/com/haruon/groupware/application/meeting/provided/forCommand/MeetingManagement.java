@@ -1,7 +1,7 @@
-package com.haruon.groupware.application.meeting.provided;
+package com.haruon.groupware.application.meeting.provided.forCommand;
 
-import com.haruon.groupware.application.meeting.service.dto.MeetingReserveRequest;
-import com.haruon.groupware.application.meeting.service.dto.MeetingUpdateRequest;
+import com.haruon.groupware.application.meeting.service.command.dto.MeetingReserveRequest;
+import com.haruon.groupware.application.meeting.service.command.dto.MeetingUpdateRequest;
 
 import java.util.Set;
 

@@ -285,6 +285,11 @@ include::api/webapi/dept/Dept-End-Leader.adoc[]
 
 include::api/webapi/board/Board-API.adoc[]
 
+[[FRANCHISE_API]]
+== FRANCHISE API
+
+include::api/webapi/franchise/Franchise-API.adoc[]
+
 [[FILE_API]]
 == FILE API
 

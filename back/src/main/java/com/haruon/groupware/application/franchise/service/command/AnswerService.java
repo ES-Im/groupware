@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
+import static com.haruon.groupware.application.utils.AuthValidator.checkFranchiseRoleEmp;
+
 @Transactional
 @Service
 @RequiredArgsConstructor
@@ -24,7 +26,9 @@ public class AnswerService implements AnswerManagement {
     private final AuthorizationQueryRepository authorizationQueryRepository;
 
     @Override
-    public void assignEmpToAnswer(long inquiryId, long empId) {
+    public void assignEmpToAnswer(long inquiryId, long editorId, long empId) {
+        checkFranchiseRoleEmp(authorizationQueryRepository, editorId);
+
         FranchiseInquiry inquiry = findInquiry(inquiryId);
         Emp assignedEmp = getFranchiseRoleAssignedEmp(empId);
 
@@ -32,26 +36,28 @@ public class AnswerService implements AnswerManagement {
     }
 
     @Override
-    public void createAnswerDraft(long inquiryId, long empId, String answer) {
+    public void createAnswerDraft(long inquiryId, long editorId, String answer) {
         FranchiseInquiry inquiry = findInquiry(inquiryId);
-        Emp assignedEmp = getFranchiseRoleAssignedEmp(empId);
+        Emp assignedEmp = getFranchiseRoleAssignedEmp(editorId);
 
         inquiry.createAnswerDraft(answer, assignedEmp);
     }
 
 
     @Override
-    public void updateAnswerDraft(long inquiryId, long empId, String answer) {
+    public void updateAnswerDraft(long inquiryId, long editorId, String answer) {
         FranchiseInquiry inquiry = findInquiry(inquiryId);
-        Emp assignedEmp = getFranchiseRoleAssignedEmp(empId);
+        Emp assignedEmp = getFranchiseRoleAssignedEmp(editorId);
 
         inquiry.updateAnswerDraft(answer, assignedEmp);
     }
 
     @Override
-    public void sendAnswer(long inquiryId, long empId, LocalDateTime sentAt) {
+    public void sendAnswer(long inquiryId, long editorId, LocalDateTime sentAt) {
+        checkFranchiseRoleEmp(authorizationQueryRepository, editorId);
+
         FranchiseInquiry inquiry = findInquiry(inquiryId);
-        Emp assignedEmp = getFranchiseRoleAssignedEmp(empId);
+        Emp assignedEmp = getFranchiseRoleAssignedEmp(editorId);
 
         inquiry.submitAnswer(sentAt, assignedEmp);
     }

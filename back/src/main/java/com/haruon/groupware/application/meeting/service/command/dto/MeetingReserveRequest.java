@@ -1,4 +1,4 @@
-package com.haruon.groupware.application.meeting.service.dto;
+package com.haruon.groupware.application.meeting.service.command.dto;
 
 import com.haruon.groupware.application.exception.common.BlankValueNotAllowedException;
 import com.haruon.groupware.application.exception.common.EndTimeBeforeStartTimeException;
