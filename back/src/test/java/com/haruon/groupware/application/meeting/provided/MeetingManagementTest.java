@@ -9,6 +9,7 @@ import com.haruon.groupware.application.exception.common.EndTimeBeforeStartTimeE
 import com.haruon.groupware.application.exception.common.PastTimeNotAllowedException;
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import com.haruon.groupware.application.exception.meeting.InactivatedMeetingRoomException;
+import com.haruon.groupware.application.exception.meeting.MeetingParticipantRequiredException;
 import com.haruon.groupware.application.exception.meeting.MeetingNotFoundException;
 import com.haruon.groupware.application.meeting.provided.forCommand.MeetingManagement;
 import com.haruon.groupware.application.meeting.provided.forCommand.MeetingRoomManagement;
@@ -194,7 +195,7 @@ record MeetingManagementTest(
                                 .participantIds(participantIds)
                                 .build()
                 )
-        ).isInstanceOf(RequiredValueMissingException.class);
+        ).isInstanceOf(MeetingParticipantRequiredException.class);
     }
 
     @Transactional
@@ -279,9 +280,9 @@ record MeetingManagementTest(
         long otherRoomId = saveMeetingRoom("otherRoom");
 
         meetingManagement.changeReservationInfo(
+                reservationId,
+                emp.getId(),
                 MeetingUpdateRequest.builder()
-                        .meetingId(reservationId)
-                        .reserverId(emp.getId())
                         .meetingDate(editedMeetingDate)
                         .startAt(editedStartAt)
                         .endAt(editedEndAt)
@@ -314,9 +315,9 @@ record MeetingManagementTest(
 
         assertThatThrownBy(() ->
                 meetingManagement.changeReservationInfo(
+                        reservationId,
+                        emp.getId(),
                         MeetingUpdateRequest.builder()
-                                .meetingId(reservationId)
-                                .reserverId(emp.getId())
                                 .build()
                 )
         ).isInstanceOf(RequiredValueMissingException.class);
@@ -334,9 +335,9 @@ record MeetingManagementTest(
 
         assertThatThrownBy(() ->
                 meetingManagement.changeReservationInfo(
+                        reservationId,
+                        otherEmp.getId(),
                         MeetingUpdateRequest.builder()
-                                .meetingId(reservationId)
-                                .reserverId(otherEmp.getId())
                                 .meetingDate(LocalDate.now().plusDays(2))
                                 .startAt(LocalTime.of(12, 0))
                                 .endAt(LocalTime.of(15, 0))
@@ -357,9 +358,9 @@ record MeetingManagementTest(
         long notExistRoomId = 100L;
         assertThatThrownBy(() ->
                 meetingManagement.changeReservationInfo(
+                        reservationId,
+                        emp.getId(),
                         MeetingUpdateRequest.builder()
-                                .meetingId(reservationId)
-                                .reserverId(emp.getId())
                                 .meetingDate(LocalDate.now().plusDays(2))
                                 .startAt(LocalTime.of(12, 0))
                                 .endAt(LocalTime.of(15, 0))
@@ -400,8 +401,8 @@ record MeetingManagementTest(
         );
 
         return meetingRoomManagement.createMeetingRoom(
+                emp.getId(),
                 MeetingRoomCreateRequest.builder()
-                        .editorId(emp.getId())
                         .name("testRoom")
                         .description("testDescription")
                         .capacity(10)
@@ -417,8 +418,8 @@ record MeetingManagementTest(
         );
 
         return meetingRoomManagement.createMeetingRoom(
+                emp.getId(),
                 MeetingRoomCreateRequest.builder()
-                        .editorId(emp.getId())
                         .name(roomName)
                         .description("testDescription")
                         .capacity(10)
@@ -434,8 +435,8 @@ record MeetingManagementTest(
         );
 
         long meetingRoom = meetingRoomManagement.createMeetingRoom(
+                emp.getId(),
                 MeetingRoomCreateRequest.builder()
-                        .editorId(emp.getId())
                         .name("testRoom")
                         .description("testDescription")
                         .capacity(10)

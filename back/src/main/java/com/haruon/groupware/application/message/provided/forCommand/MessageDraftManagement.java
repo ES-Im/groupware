@@ -1,7 +1,7 @@
-package com.haruon.groupware.application.message.provided;
+package com.haruon.groupware.application.message.provided.forCommand;
 
-import com.haruon.groupware.application.message.service.dto.MessageCreateRequest;
-import com.haruon.groupware.application.message.service.dto.MessageUpdateRequest;
+import com.haruon.groupware.application.message.service.command.dto.MessageCreateRequest;
+import com.haruon.groupware.application.message.service.command.dto.MessageUpdateRequest;
 
 import java.time.LocalDateTime;
 import java.util.Set;

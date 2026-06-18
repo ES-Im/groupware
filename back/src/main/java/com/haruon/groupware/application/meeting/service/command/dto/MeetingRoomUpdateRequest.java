@@ -3,18 +3,17 @@ package com.haruon.groupware.application.meeting.service.command.dto;
 import com.haruon.groupware.application.exception.common.BlankValueNotAllowedException;
 import com.haruon.groupware.application.exception.common.PositiveValueRequiredException;
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import org.jspecify.annotations.Nullable;
 
 
 @Builder
 public record MeetingRoomUpdateRequest (
-        Long roomId,
-        Long editorId,
-
-        @Nullable String name,
+        @Nullable @Size(max = 50) String name,
         @Nullable String description,
-        @Nullable Integer capacity
+        @Nullable @Positive Integer capacity
 ) {
     public MeetingRoomUpdateRequest {
         if(name == null && description == null && capacity == null) throw new RequiredValueMissingException();

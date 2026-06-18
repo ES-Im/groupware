@@ -141,7 +141,11 @@ public class SecurityConfig {
                                 "/api/meeting-rooms/management"
                         ).hasRole(SystemRoleCode.FACILITY.name())
 
-                        // 회의실 생성/수정/삭제와 회의실 파일 변경은 시설 담당자 관리 영역이다.
+                        .requestMatchers(HttpMethod.POST, "/api/meetings")
+                                .hasRole(SystemRoleCode.EMPLOYEE.name())
+                        .requestMatchers(HttpMethod.PATCH, "/api/meetings/**")
+                                .hasRole(SystemRoleCode.EMPLOYEE.name())
+
                         .requestMatchers(HttpMethod.POST, "/api/meeting-rooms", "/api/meeting-rooms/**")
                                 .hasRole(SystemRoleCode.FACILITY.name())
                         .requestMatchers(HttpMethod.PATCH, "/api/meeting-rooms", "/api/meeting-rooms/**")
@@ -150,11 +154,11 @@ public class SecurityConfig {
                                 .hasRole(SystemRoleCode.FACILITY.name())
 
                         .requestMatchers(HttpMethod.GET,
-                                "/api/meetings/my/reservations",
+                                "/api/meetings/my/reservations/calendar",
                                 "/api/meetings/*",
                                 "/api/meeting-rooms/available",
                                 "/api/meeting-rooms/*",
-                                "/api/meeting-rooms/*/reservations",
+                                "/api/meeting-rooms/*/reservations/calendar",
                                 "/api/meeting-rooms/*/files"
                         ).hasRole(SystemRoleCode.EMPLOYEE.name())
 

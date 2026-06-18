@@ -206,6 +206,16 @@ include::api/webapi/documentBox/My-Document-Box-Summary.adoc[]
 === 내 조회 가능 문서 목록 조회
 include::api/webapi/documentBox/My-Accessible-Documents.adoc[]
 
+[[MEETING_API]]
+== MEETING API
+
+include::api/webapi/meeting/Meeting-API.adoc[]
+
+[[MEETING_ROOM_API]]
+== MEETING ROOM API
+
+include::api/webapi/meeting/MeetingRoom-API.adoc[]
+
 [[EMP_LEAVE_API]]
 == EMP LEAVE API
 

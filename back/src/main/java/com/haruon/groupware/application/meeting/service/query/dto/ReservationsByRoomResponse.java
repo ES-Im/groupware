@@ -1,6 +1,14 @@
 package com.haruon.groupware.application.meeting.service.query.dto;
 
-public record ReservationsByRoomResponse(
+import java.time.LocalDate;
+import java.time.LocalTime;
 
+public record ReservationsByRoomResponse(
+        String reserverDeptName,
+        String reserverEmpName,
+        Integer participantCount,
+        LocalDate meetingDate,
+        LocalTime startAt,
+        LocalTime endAt
 ) {
 }

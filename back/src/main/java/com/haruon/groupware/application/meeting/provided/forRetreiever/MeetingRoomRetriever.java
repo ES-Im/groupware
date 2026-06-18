@@ -15,12 +15,19 @@ import java.util.List;
 
 public interface MeetingRoomRetriever {
 
-    Page<MeetingRoomResponse> retrieveMeetingRooms(
-            LocalDate date, LocalTime startAt, LocalTime endAt, Integer capacity, Pageable pageable
+    Page<MeetingRoomResponse> retrieveAvailableMeetingRooms(
+            LocalDate date,
+            LocalTime startAt,
+            LocalTime endAt,
+            Integer capacity,
+            Pageable pageable
     );
 
     Page<MeetingRoomResponse> retrieveMeetingRooms(
-            Long empId, @Nullable Boolean available, @Nullable Boolean bookedInFuture, Pageable pageable
+            Long empId,
+            @Nullable Boolean available,
+            @Nullable Boolean bookedInFuture,
+            Pageable pageable
     );
 
 

@@ -64,8 +64,8 @@ record MeetingRoomManagementTest(
         int capacity = 10;
 
         long meetingRoomId = meetingRoomManagement.createMeetingRoom(
+                emp.getId(),
                 MeetingRoomCreateRequest.builder()
-                        .editorId(emp.getId())
                         .name(roomName)
                         .description(description)
                         .capacity(capacity)
@@ -96,9 +96,9 @@ record MeetingRoomManagementTest(
         long meetingRoom = saveMeetingRoom(emp);
 
         meetingRoomManagement.changeRoomInfo(
+                meetingRoom,
+                emp.getId(),
                 MeetingRoomUpdateRequest.builder()
-                        .roomId(meetingRoom)
-                        .editorId(emp.getId())
                         .name(editedRoomName)
                         .description(editedDescription)
                         .capacity(editedCapacity)
@@ -160,9 +160,9 @@ record MeetingRoomManagementTest(
 
         assertThatThrownBy(() ->
                 meetingRoomManagement.changeRoomInfo(
+                        roomId,
+                        emp.getId(),
                         MeetingRoomUpdateRequest.builder()
-                                .roomId(roomId)
-                                .editorId(emp.getId())
                                 .name("name")
                                 .build()
                 )
@@ -179,8 +179,8 @@ record MeetingRoomManagementTest(
         int capacity = 10;
 
         return meetingRoomManagement.createMeetingRoom(
+                emp.getId(),
                 MeetingRoomCreateRequest.builder()
-                        .editorId(emp.getId())
                         .name(roomName)
                         .description(description)
                         .capacity(capacity)

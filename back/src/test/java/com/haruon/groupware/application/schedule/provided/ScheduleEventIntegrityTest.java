@@ -362,8 +362,8 @@ record ScheduleEventIntegrityTest(
         );
 
         return meetingRoomManagement.createMeetingRoom(
+                emp.getId(),
                 MeetingRoomCreateRequest.builder()
-                        .editorId(emp.getId())
                         .name("testRoom")
                         .description("testDescription")
                         .capacity(10)

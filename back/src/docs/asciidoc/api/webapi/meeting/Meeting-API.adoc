@@ -1,0 +1,189 @@
+[[MY_MEETING_RESERVATIONS_CALENDAR]]
+=== 내 월별 회의 예약 조회
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/MY_MEETING_RESERVATIONS_CALENDAR/http-request.adoc[]
+
+_Request header_
+include::{snippets}/MY_MEETING_RESERVATIONS_CALENDAR/request-headers.adoc[]
+
+_Request param_
+include::{snippets}/MY_MEETING_RESERVATIONS_CALENDAR/query-parameters.adoc[]
+--
+Response (200)::
++
+--
+_HTTP response_
+include::{snippets}/MY_MEETING_RESERVATIONS_CALENDAR/http-response.adoc[]
+
+_Response fields_
+include::{snippets}/MY_MEETING_RESERVATIONS_CALENDAR/response-fields.adoc[]
+--
+====
+
+[[MEETING_RESERVATION_DETAIL]]
+=== 회의 예약 상세 조회
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/MEETING_RESERVATION_DETAIL/http-request.adoc[]
+
+_Request header_
+include::{snippets}/MEETING_RESERVATION_DETAIL/request-headers.adoc[]
+
+_Path parameters_
+include::{snippets}/MEETING_RESERVATION_DETAIL/path-parameters.adoc[]
+--
+Response (200)::
++
+--
+_HTTP response_
+include::{snippets}/MEETING_RESERVATION_DETAIL/http-response.adoc[]
+
+_Response fields_
+include::{snippets}/MEETING_RESERVATION_DETAIL/response-fields.adoc[]
+--
+====
+
+[[MEETING_RESERVATION_MANAGEMENT]]
+=== 시설 담당자 회의 예약 목록 조회
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/MEETING_RESERVATION_MANAGEMENT/http-request.adoc[]
+
+_Request header_
+include::{snippets}/MEETING_RESERVATION_MANAGEMENT/request-headers.adoc[]
+
+_Request param_
+include::{snippets}/MEETING_RESERVATION_MANAGEMENT/query-parameters.adoc[]
+--
+Response (200)::
++
+--
+_HTTP response_
+include::{snippets}/MEETING_RESERVATION_MANAGEMENT/http-response.adoc[]
+
+_Response fields_
+include::{snippets}/MEETING_RESERVATION_MANAGEMENT/response-fields.adoc[]
+--
+====
+
+[[MEETING_RESERVATION_CREATE]]
+=== 회의 예약 생성
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/MEETING_RESERVATION_CREATE/http-request.adoc[]
+
+_Request header_
+include::{snippets}/MEETING_RESERVATION_CREATE/request-headers.adoc[]
+
+_Request fields_
+include::{snippets}/MEETING_RESERVATION_CREATE/request-fields.adoc[]
+--
+Response (201)::
++
+--
+_HTTP response_
+include::{snippets}/MEETING_RESERVATION_CREATE/http-response.adoc[]
+--
+====
+
+[[MEETING_PARTICIPANTS_REPLACE]]
+=== 회의 참여자 교체
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/MEETING_PARTICIPANTS_REPLACE/http-request.adoc[]
+
+_Request header_
+include::{snippets}/MEETING_PARTICIPANTS_REPLACE/request-headers.adoc[]
+
+_Path parameters_
+include::{snippets}/MEETING_PARTICIPANTS_REPLACE/path-parameters.adoc[]
+
+_Request fields_
+include::{snippets}/MEETING_PARTICIPANTS_REPLACE/request-fields.adoc[]
+--
+Response (204)::
++
+--
+_HTTP response_
+include::{snippets}/MEETING_PARTICIPANTS_REPLACE/http-response.adoc[]
+--
+====
+
+[[MEETING_RESERVATION_CANCEL]]
+=== 회의 예약 취소
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/MEETING_RESERVATION_CANCEL/http-request.adoc[]
+
+_Request header_
+include::{snippets}/MEETING_RESERVATION_CANCEL/request-headers.adoc[]
+
+_Path parameters_
+include::{snippets}/MEETING_RESERVATION_CANCEL/path-parameters.adoc[]
+--
+Response (204)::
++
+--
+_HTTP response_
+include::{snippets}/MEETING_RESERVATION_CANCEL/http-response.adoc[]
+--
+====
+
+[[MEETING_RESERVATION_UPDATE]]
+=== 회의 예약 정보 수정
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/MEETING_RESERVATION_UPDATE/http-request.adoc[]
+
+_Request header_
+include::{snippets}/MEETING_RESERVATION_UPDATE/request-headers.adoc[]
+
+_Path parameters_
+include::{snippets}/MEETING_RESERVATION_UPDATE/path-parameters.adoc[]
+
+_Request fields_
+include::{snippets}/MEETING_RESERVATION_UPDATE/request-fields.adoc[]
+--
+Response (204)::
++
+--
+_HTTP response_
+include::{snippets}/MEETING_RESERVATION_UPDATE/http-response.adoc[]
+--
+====

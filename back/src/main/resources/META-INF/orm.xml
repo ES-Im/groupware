@@ -963,9 +963,9 @@
             <one-to-one name="message" fetch="LAZY">
                 <join-column name="message_id" nullable="false" updatable="false"/>
             </one-to-one>
-            <one-to-one name="emp" fetch="LAZY">
+            <many-to-one name="emp" fetch="LAZY">
                 <join-column name="sender_id" nullable="false" updatable="false"/>
-            </one-to-one>
+            </many-to-one>
         </attributes>
     </entity>
 
@@ -989,9 +989,9 @@
             <many-to-one name="message" fetch="LAZY">
                 <join-column name="message_id" nullable="false" updatable="false"/>
             </many-to-one>
-            <one-to-one name="emp" fetch="LAZY">
+            <many-to-one name="emp" fetch="LAZY">
                 <join-column name="receiver_id" nullable="false" updatable="false"/>
-            </one-to-one>
+            </many-to-one>
         </attributes>
     </entity>
 
@@ -1083,5 +1083,66 @@
             </basic>
         </attributes>
     </embeddable>
+
+    <entity class="com.haruon.groupware.adapter.persistence.message.view.MessageMailboxView"
+            access="FIELD">
+        <table name="message_mailbox_view"/>
+
+        <attributes>
+            <id name="mailboxKey">
+                <column name="mailbox_key"
+                        nullable="false"
+                        insertable="false"
+                        updatable="false"/>
+            </id>
+
+            <basic name="sourceId">
+                <column name="source_id"
+                        nullable="false"
+                        insertable="false"
+                        updatable="false"/>
+            </basic>
+
+            <basic name="boxType">
+                <column name="box_type"
+                        nullable="false"
+                        insertable="false"
+                        updatable="false"/>
+                <enumerated>STRING</enumerated>
+            </basic>
+
+            <basic name="readAt">
+                <column name="read_at"
+                        insertable="false"
+                        updatable="false"/>
+            </basic>
+
+            <basic name="trashedAt">
+                <column name="trashed_at"
+                        insertable="false"
+                        updatable="false"/>
+            </basic>
+
+            <basic name="deletedAt">
+                <column name="deleted_at"
+                        insertable="false"
+                        updatable="false"/>
+            </basic>
+
+            <many-to-one name="message" fetch="LAZY">
+                <join-column name="message_id"
+                             nullable="false"
+                             insertable="false"
+                             updatable="false"/>
+            </many-to-one>
+
+            <many-to-one name="owner" fetch="LAZY">
+                <join-column name="owner_emp_id"
+                             nullable="false"
+                             insertable="false"
+                             updatable="false"/>
+            </many-to-one>
+        </attributes>
+    </entity>
 </entity-mappings>
 

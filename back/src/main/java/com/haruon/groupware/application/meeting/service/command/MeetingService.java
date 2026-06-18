@@ -56,24 +56,24 @@ public class MeetingService implements MeetingManagement {
     public void replaceParticipants(long meetingId, long reserverId, Set<Long> participantIds) {
         Meeting meeting = findMeetingByIdAndReserverId(meetingId, reserverId);
 
-        log.info("request participantIds={}", participantIds); // request participantIds=[3329, 3330, 3331]
+//        log.info("request participantIds={}", participantIds); // request participantIds=[3329, 3330, 3331]
 
         List<Emp> participants = findEmpListById(empRepository, participantIds);
 
-        log.info("found participantIds={}",
-                participants.stream().map(Emp::getId).toList());    // found participantIds=[3329, 3330, 3331]
-
-        log.info("before meeting participantIds={}",
-                meeting.getMeetingParticipants().stream()   //  before meeting participantIds=[3330, 3329]
-                        .map(mp -> mp.getEmp().getId())
-                        .toList());
+//        log.info("found participantIds={}",
+//                participants.stream().map(Emp::getId).toList());    // found participantIds=[3329, 3330, 3331]
+//
+//        log.info("before meeting participantIds={}",
+//                meeting.getMeetingParticipants().stream()   //  before meeting participantIds=[3330, 3329]
+//                        .map(mp -> mp.getEmp().getId())
+//                        .toList());
 
         meeting.changeParticipants(participants);
-
-        log.info("after meeting participantIds={}",
-                meeting.getMeetingParticipants().stream()
-                        .map(mp -> mp.getEmp().getId())
-                        .toList()); // after meeting participantIds=[3330, 3329, 3331]
+//
+//        log.info("after meeting participantIds={}",
+//                meeting.getMeetingParticipants().stream()
+//                        .map(mp -> mp.getEmp().getId())
+//                        .toList()); // after meeting participantIds=[3330, 3329, 3331]
 
         meetingRepository.save(meeting);
     }
@@ -88,8 +88,8 @@ public class MeetingService implements MeetingManagement {
     }
 
     @Override
-    public void changeReservationInfo(MeetingUpdateRequest request) {
-        Meeting meeting = findMeetingByIdAndReserverId(request.meetingId(), request.reserverId());
+    public void changeReservationInfo(Long meetingId, Long reserverId, MeetingUpdateRequest request) {
+        Meeting meeting = findMeetingByIdAndReserverId(meetingId, reserverId);
         MeetingRoom meetingRoom = null;
 
         if(request.meetingRoomId() != null) {

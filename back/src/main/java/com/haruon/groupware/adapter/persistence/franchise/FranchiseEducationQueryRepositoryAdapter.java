@@ -24,6 +24,9 @@ import java.time.YearMonth;
 import java.util.List;
 import java.util.Optional;
 
+import static com.haruon.groupware.adapter.persistence.util.DateParseSupport.getFirstDateTimeOnNextMonth;
+import static com.haruon.groupware.adapter.persistence.util.DateParseSupport.getStartDateTimeByYearMonth;
+
 @Repository
 @RequiredArgsConstructor
 public class FranchiseEducationQueryRepositoryAdapter implements FranchiseEducationQueryRepository {
@@ -36,8 +39,8 @@ public class FranchiseEducationQueryRepositoryAdapter implements FranchiseEducat
 
     @Override
     public List<EducationsResponse> findEducationList(YearMonth targetMonth) {
-        LocalDateTime startDate = LocalDateTime.of(targetMonth.getYear(), targetMonth.getMonth(), 1, 0, 0, 0);
-        LocalDateTime endDate = LocalDateTime.of(targetMonth.getYear(), targetMonth.getMonth(), targetMonth.lengthOfMonth(), 0, 0, 0).plusDays(1);
+        LocalDateTime startDate = getStartDateTimeByYearMonth(targetMonth);
+        LocalDateTime endDate = getFirstDateTimeOnNextMonth(targetMonth);
         NumberExpression<Long> appliedCount = appliedCountSum();
 
         return query

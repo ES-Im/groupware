@@ -1,0 +1,248 @@
+[[AVAILABLE_MEETING_ROOMS]]
+=== 예약 가능 회의실 조회
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/AVAILABLE_MEETING_ROOMS/http-request.adoc[]
+
+_Request header_
+include::{snippets}/AVAILABLE_MEETING_ROOMS/request-headers.adoc[]
+
+_Request param_
+include::{snippets}/AVAILABLE_MEETING_ROOMS/query-parameters.adoc[]
+--
+Response (200)::
++
+--
+_HTTP response_
+include::{snippets}/AVAILABLE_MEETING_ROOMS/http-response.adoc[]
+
+_Response fields_
+include::{snippets}/AVAILABLE_MEETING_ROOMS/response-fields.adoc[]
+--
+====
+
+[[MEETING_ROOM_MANAGEMENT]]
+=== 관리용 회의실 조회
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/MEETING_ROOM_MANAGEMENT/http-request.adoc[]
+
+_Request header_
+include::{snippets}/MEETING_ROOM_MANAGEMENT/request-headers.adoc[]
+
+_Request param_
+include::{snippets}/MEETING_ROOM_MANAGEMENT/query-parameters.adoc[]
+--
+Response (200)::
++
+--
+_HTTP response_
+include::{snippets}/MEETING_ROOM_MANAGEMENT/http-response.adoc[]
+
+_Response fields_
+include::{snippets}/MEETING_ROOM_MANAGEMENT/response-fields.adoc[]
+--
+====
+
+[[MEETING_ROOM_RESERVATIONS_CALENDAR]]
+=== 회의실 월별 예약 조회
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/MEETING_ROOM_RESERVATIONS_CALENDAR/http-request.adoc[]
+
+_Request header_
+include::{snippets}/MEETING_ROOM_RESERVATIONS_CALENDAR/request-headers.adoc[]
+
+_Path parameters_
+include::{snippets}/MEETING_ROOM_RESERVATIONS_CALENDAR/path-parameters.adoc[]
+
+_Request param_
+include::{snippets}/MEETING_ROOM_RESERVATIONS_CALENDAR/query-parameters.adoc[]
+--
+Response (200)::
++
+--
+_HTTP response_
+include::{snippets}/MEETING_ROOM_RESERVATIONS_CALENDAR/http-response.adoc[]
+
+_Response fields_
+include::{snippets}/MEETING_ROOM_RESERVATIONS_CALENDAR/response-fields.adoc[]
+--
+====
+
+[[MEETING_ROOM_DETAIL]]
+=== 회의실 상세 조회
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/MEETING_ROOM_DETAIL/http-request.adoc[]
+
+_Request header_
+include::{snippets}/MEETING_ROOM_DETAIL/request-headers.adoc[]
+
+_Path parameters_
+include::{snippets}/MEETING_ROOM_DETAIL/path-parameters.adoc[]
+--
+Response (200)::
++
+--
+_HTTP response_
+include::{snippets}/MEETING_ROOM_DETAIL/http-response.adoc[]
+
+_Response fields_
+include::{snippets}/MEETING_ROOM_DETAIL/response-fields.adoc[]
+--
+====
+
+[[MEETING_ROOM_FILES]]
+=== 회의실 첨부파일 목록 조회
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/MEETING_ROOM_FILES/http-request.adoc[]
+
+_Request header_
+include::{snippets}/MEETING_ROOM_FILES/request-headers.adoc[]
+
+_Path parameters_
+include::{snippets}/MEETING_ROOM_FILES/path-parameters.adoc[]
+--
+Response (200)::
++
+--
+_HTTP response_
+include::{snippets}/MEETING_ROOM_FILES/http-response.adoc[]
+
+_Response fields_
+include::{snippets}/MEETING_ROOM_FILES/response-fields.adoc[]
+--
+====
+
+[[MEETING_ROOM_CREATE]]
+=== 회의실 생성
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/MEETING_ROOM_CREATE/http-request.adoc[]
+
+_Request header_
+include::{snippets}/MEETING_ROOM_CREATE/request-headers.adoc[]
+
+_Request fields_
+include::{snippets}/MEETING_ROOM_CREATE/request-fields.adoc[]
+--
+Response (201)::
++
+--
+_HTTP response_
+include::{snippets}/MEETING_ROOM_CREATE/http-response.adoc[]
+
+_Response fields_
+include::{snippets}/MEETING_ROOM_CREATE/response-fields.adoc[]
+--
+====
+
+[[MEETING_ROOM_UPDATE]]
+=== 회의실 정보 수정
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/MEETING_ROOM_UPDATE/http-request.adoc[]
+
+_Request header_
+include::{snippets}/MEETING_ROOM_UPDATE/request-headers.adoc[]
+
+_Path parameters_
+include::{snippets}/MEETING_ROOM_UPDATE/path-parameters.adoc[]
+
+_Request fields_
+include::{snippets}/MEETING_ROOM_UPDATE/request-fields.adoc[]
+--
+Response (204)::
++
+--
+_HTTP response_
+include::{snippets}/MEETING_ROOM_UPDATE/http-response.adoc[]
+--
+====
+
+[[MEETING_ROOM_ACTIVATE]]
+=== 회의실 활성화
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/MEETING_ROOM_ACTIVATE/http-request.adoc[]
+
+_Request header_
+include::{snippets}/MEETING_ROOM_ACTIVATE/request-headers.adoc[]
+
+_Path parameters_
+include::{snippets}/MEETING_ROOM_ACTIVATE/path-parameters.adoc[]
+--
+Response (204)::
++
+--
+_HTTP response_
+include::{snippets}/MEETING_ROOM_ACTIVATE/http-response.adoc[]
+--
+====
+
+[[MEETING_ROOM_DEACTIVATE]]
+=== 회의실 비활성화
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/MEETING_ROOM_DEACTIVATE/http-request.adoc[]
+
+_Request header_
+include::{snippets}/MEETING_ROOM_DEACTIVATE/request-headers.adoc[]
+
+_Path parameters_
+include::{snippets}/MEETING_ROOM_DEACTIVATE/path-parameters.adoc[]
+--
+Response (204)::
++
+--
+_HTTP response_
+include::{snippets}/MEETING_ROOM_DEACTIVATE/http-response.adoc[]
+--
+====

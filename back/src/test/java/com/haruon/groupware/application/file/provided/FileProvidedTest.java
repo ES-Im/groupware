@@ -22,9 +22,9 @@ import com.haruon.groupware.application.franchise.service.command.dto.EducationC
 import com.haruon.groupware.application.meeting.provided.forCommand.MeetingRoomManagement;
 import com.haruon.groupware.application.meeting.required.MeetingRoomRepository;
 import com.haruon.groupware.application.meeting.service.command.dto.MeetingRoomCreateRequest;
-import com.haruon.groupware.application.message.provided.MessageDraftManagement;
+import com.haruon.groupware.application.message.provided.forCommand.MessageDraftManagement;
 import com.haruon.groupware.application.message.required.MessageRepository;
-import com.haruon.groupware.application.message.service.dto.MessageCreateRequest;
+import com.haruon.groupware.application.message.service.command.dto.MessageCreateRequest;
 import com.haruon.groupware.domain.AbstractFileEntity;
 import com.haruon.groupware.domain.board.Board;
 import com.haruon.groupware.domain.board.BoardFile;
@@ -513,8 +513,8 @@ record FileProvidedTest(
 
     private Long createMeetingRoom(Emp facility) {
         return meetingRoomManagement.createMeetingRoom(
+                facility.getId(),
                 MeetingRoomCreateRequest.builder()
-                        .editorId(facility.getId())
                         .name(unique("meeting-room"))
                         .description("meeting room description")
                         .capacity(8)

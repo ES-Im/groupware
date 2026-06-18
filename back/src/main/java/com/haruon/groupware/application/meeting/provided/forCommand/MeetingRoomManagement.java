@@ -4,9 +4,9 @@ import com.haruon.groupware.application.meeting.service.command.dto.MeetingRoomC
 import com.haruon.groupware.application.meeting.service.command.dto.MeetingRoomUpdateRequest;
 
 public interface MeetingRoomManagement {
-    long createMeetingRoom(MeetingRoomCreateRequest request);
+    long createMeetingRoom(Long editorId, MeetingRoomCreateRequest request);
 
-    void changeRoomInfo(MeetingRoomUpdateRequest request);
+    void changeRoomInfo(Long roomId, Long editorId, MeetingRoomUpdateRequest request);
 
     void activate(Long roomId, Long empId);
 

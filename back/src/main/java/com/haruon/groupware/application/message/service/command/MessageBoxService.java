@@ -1,8 +1,8 @@
-package com.haruon.groupware.application.message.service;
+package com.haruon.groupware.application.message.service.command;
 
 import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
-import com.haruon.groupware.application.message.provided.ReceivedMessageManagement;
-import com.haruon.groupware.application.message.provided.SentMessageManagement;
+import com.haruon.groupware.application.message.provided.forCommand.ReceivedMessageManagement;
+import com.haruon.groupware.application.message.provided.forCommand.SentMessageManagement;
 import com.haruon.groupware.application.message.required.MessageRepository;
 import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.message.Message;

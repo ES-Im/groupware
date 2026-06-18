@@ -1,12 +1,12 @@
-package com.haruon.groupware.application.message.service;
+package com.haruon.groupware.application.message.service.command;
 
 import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import com.haruon.groupware.application.exception.message.MessageReceiverRequiredException;
-import com.haruon.groupware.application.message.provided.MessageDraftManagement;
+import com.haruon.groupware.application.message.provided.forCommand.MessageDraftManagement;
 import com.haruon.groupware.application.message.required.MessageRepository;
-import com.haruon.groupware.application.message.service.dto.MessageCreateRequest;
-import com.haruon.groupware.application.message.service.dto.MessageUpdateRequest;
+import com.haruon.groupware.application.message.service.command.dto.MessageCreateRequest;
+import com.haruon.groupware.application.message.service.command.dto.MessageUpdateRequest;
 import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.message.Message;
 import jakarta.transaction.Transactional;

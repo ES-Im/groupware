@@ -2,10 +2,16 @@ package com.haruon.groupware.adapter.webapi.meeting;
 
 import com.haruon.groupware.adapter.security.empDtails.EmpDetails;
 import com.haruon.groupware.application.file.dto.response.FileListInfo;
+import com.haruon.groupware.application.exception.common.EndTimeBeforeStartTimeException;
+import com.haruon.groupware.application.exception.common.PositiveValueRequiredException;
+import com.haruon.groupware.application.meeting.provided.forCommand.MeetingRoomManagement;
 import com.haruon.groupware.application.meeting.provided.forRetreiever.MeetingRoomRetriever;
+import com.haruon.groupware.application.meeting.service.command.dto.MeetingRoomCreateRequest;
+import com.haruon.groupware.application.meeting.service.command.dto.MeetingRoomUpdateRequest;
 import com.haruon.groupware.application.meeting.service.query.dto.MeetingRoomDetailResponse;
 import com.haruon.groupware.application.meeting.service.query.dto.MeetingRoomResponse;
 import com.haruon.groupware.application.meeting.service.query.dto.ReservationsByRoomResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,8 +33,9 @@ import static com.haruon.groupware.application.utils.Utils.SEOUL_ZONE;
 public class MeetingRoomApi {
 
     private final MeetingRoomRetriever meetingRoomRetriever;
+    private final MeetingRoomManagement meetingRoomManagement;
 
-    @GetMapping("/available")
+    @GetMapping("/available")   // 예약조건에 맞는 회의실 조회
     public ResponseEntity<Page<MeetingRoomResponse>> getAvailableMeetingRooms(
             @RequestParam LocalDate date,
             @RequestParam LocalTime startAt,
@@ -36,13 +43,16 @@ public class MeetingRoomApi {
             @RequestParam Integer capacity,
             @PageableDefault(size = 10, page = 0) Pageable pageable
     ) {
+        if(!endAt.isAfter(startAt)) throw new EndTimeBeforeStartTimeException();
+        if(capacity <= 0) throw new PositiveValueRequiredException();
+
         Page<MeetingRoomResponse> responses = meetingRoomRetriever
-                .retrieveMeetingRooms(date, startAt, endAt, capacity, pageable);
+                .retrieveAvailableMeetingRooms(date, startAt, endAt, capacity, pageable);
 
         return ResponseEntity.ok().body(responses);
     }
 
-    @GetMapping("/management")
+    @GetMapping("/management")  // 시설 담당자용 회의실 조회
     public ResponseEntity<Page<MeetingRoomResponse>> getMeetingRoomsForManagement(
             @AuthenticationPrincipal EmpDetails details,
             @RequestParam(required = false) Boolean available,
@@ -56,7 +66,7 @@ public class MeetingRoomApi {
         return ResponseEntity.ok().body(responses);
     }
 
-    @GetMapping("/{meetingRoomId}/reservations")
+    @GetMapping("/{meetingRoomId}/reservations/calendar")
     public ResponseEntity<List<ReservationsByRoomResponse>> getReservationsByRoom(
             @PathVariable Long meetingRoomId,
             @RequestParam(required = false) YearMonth yearMonth
@@ -87,6 +97,51 @@ public class MeetingRoomApi {
 
         return ResponseEntity.ok().body(responses);
     }
+
+    @PostMapping
+    public ResponseEntity<MeetingRoomIdResponse> createRoom(
+            @AuthenticationPrincipal EmpDetails details,
+            @RequestBody @Valid MeetingRoomCreateRequest request
+    ) {
+        long meetingRoomId = meetingRoomManagement.createMeetingRoom(details.getEmpId(), request);
+
+        return ResponseEntity.status(201).body(new MeetingRoomIdResponse(meetingRoomId));
+    }
+
+    @PatchMapping("/{meetingRoomId}")
+    public ResponseEntity<Void> changeInfo(
+            @AuthenticationPrincipal EmpDetails details,
+            @PathVariable Long meetingRoomId,
+            @RequestBody @Valid MeetingRoomUpdateRequest request
+    ) {
+        meetingRoomManagement.changeRoomInfo(meetingRoomId, details.getEmpId(), request);
+
+        return ResponseEntity.status(204).build();
+    }
+
+    @PatchMapping("/{meetingRoomId}/activate")
+    public ResponseEntity<Void> activateMeetingRoom(
+            @AuthenticationPrincipal EmpDetails details,
+            @PathVariable Long meetingRoomId
+    ) {
+        meetingRoomManagement.activate(meetingRoomId, details.getEmpId());
+
+        return ResponseEntity.status(204).build();
+    }
+
+    @PatchMapping("/{meetingRoomId}/deactivate")
+    public ResponseEntity<Void> deactivateMeetingRoom(
+            @AuthenticationPrincipal EmpDetails details,
+            @PathVariable Long meetingRoomId
+    ) {
+        meetingRoomManagement.deactivate(meetingRoomId, details.getEmpId());
+
+        return ResponseEntity.status(204).build();
+    }
+
+    public record MeetingRoomIdResponse(
+            Long meetingRoomId
+    ) {}
 
     private YearMonth getTargetYearMonth(YearMonth yearMonth) {
         return yearMonth == null

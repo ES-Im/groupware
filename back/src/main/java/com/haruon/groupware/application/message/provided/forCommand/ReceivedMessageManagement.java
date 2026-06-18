@@ -1,4 +1,4 @@
-package com.haruon.groupware.application.message.provided;
+package com.haruon.groupware.application.message.provided.forCommand;
 
 import java.time.LocalDateTime;
 

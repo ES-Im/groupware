@@ -30,8 +30,8 @@ public class MeetingRoomService implements MeetingRoomManagement {
     private final MeetingRoomRepository meetingRoomRepository;
 
     @Override
-    public long createMeetingRoom(MeetingRoomCreateRequest request) {
-        checkFacilityRoleEmp(authorizationQueryRepository, request.editorId());
+    public long createMeetingRoom(Long editorId, MeetingRoomCreateRequest request) {
+        checkFacilityRoleEmp(authorizationQueryRepository, editorId);
 
         MeetingRoom room = MeetingRoom.createMeetingRoom(
                 request.name(), request.description(), request.capacity()
@@ -41,11 +41,11 @@ public class MeetingRoomService implements MeetingRoomManagement {
     }
 
     @Override
-    public void changeRoomInfo(MeetingRoomUpdateRequest request) {
-        isEditable(request.roomId());
-        checkFacilityRoleEmp(authorizationQueryRepository, request.editorId());
+    public void changeRoomInfo(Long roomId, Long editorId, MeetingRoomUpdateRequest request) {
+        isEditable(roomId);
+        checkFacilityRoleEmp(authorizationQueryRepository, editorId);
 
-        MeetingRoom room = findActiveMeetingRoom(meetingRoomRepository, request.roomId());
+        MeetingRoom room = findActiveMeetingRoom(meetingRoomRepository, roomId);
 
         room.changeRoomInfo(
                 request.name(), request.description(), request.capacity()

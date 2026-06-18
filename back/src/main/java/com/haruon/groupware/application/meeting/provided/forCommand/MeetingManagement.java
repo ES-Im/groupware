@@ -15,7 +15,5 @@ public interface MeetingManagement {
 
     void cancelMeeting(long meetingId, long reserverId);
 
-    void changeReservationInfo(MeetingUpdateRequest request);
-
-
+    void changeReservationInfo(Long meetingId, Long reserverId, MeetingUpdateRequest request);
 }
