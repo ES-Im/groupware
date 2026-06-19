@@ -1084,9 +1084,7 @@
         </attributes>
     </embeddable>
 
-    <entity class="com.haruon.groupware.adapter.persistence.message.view.MessageMailboxView"
-            access="FIELD">
-        <table name="message_mailbox_view"/>
+    <entity class="com.haruon.groupware.adapter.persistence.message.readmodel.MessageMailboxReadModel" access="FIELD">
 
         <attributes>
             <id name="mailboxKey">
@@ -1095,13 +1093,6 @@
                         insertable="false"
                         updatable="false"/>
             </id>
-
-            <basic name="sourceId">
-                <column name="source_id"
-                        nullable="false"
-                        insertable="false"
-                        updatable="false"/>
-            </basic>
 
             <basic name="boxType">
                 <column name="box_type"

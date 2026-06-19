@@ -154,10 +154,9 @@ record MessageDraftManagementTest(
                 .title(title)
                 .content(content)
                 .receiverIds(receiverIds)
-                .sentAt(sentAt)
                 .build();
 
-        long messageId = messageDraftManagement.sendMessage(sender.getId(), request);
+        long messageId = messageDraftManagement.sendMessage(sender.getId(), request, sentAt);
 
         em.flush();
         em.clear();
@@ -194,7 +193,7 @@ record MessageDraftManagementTest(
                         .title("test title")
                         .content("test content")
                         .receiverIds(Set.of(receiver.getId()))
-                        .build())
+                        .build(), null)
         ).isInstanceOf(RequiredValueMissingException.class);
     }
 
@@ -208,8 +207,7 @@ record MessageDraftManagementTest(
                         .title("test title")
                         .content("test content")
                         .receiverIds(Set.of())
-                        .sentAt(LocalDateTime.of(2026, 1, 1, 10, 0))
-                        .build())
+                        .build(), LocalDateTime.of(2026, 1, 1, 10, 0))
         ).isInstanceOf(MessageReceiverRequiredException.class);
     }
 
@@ -285,10 +283,11 @@ record MessageDraftManagementTest(
                 .title("test title")
                 .content("test content")
                 .receiverIds(Set.of(receiver.getId()))
-                .sentAt(LocalDateTime.of(2026, 1, 1, 10, 0))
                 .build();
 
-        long messageId = messageDraftManagement.sendMessage(sender.getId(), request);
+        long messageId = messageDraftManagement.sendMessage(
+                sender.getId(), request, LocalDateTime.of(2026, 1, 1, 10, 0)
+        );
 
         assertThatThrownBy(() ->
                 messageDraftManagement.sendDraft(
@@ -399,10 +398,11 @@ record MessageDraftManagementTest(
                 .title("test title")
                 .content("test content")
                 .receiverIds(Set.of(receiver.getId()))
-                .sentAt(LocalDateTime.of(2026, 1, 1, 10, 0))
                 .build();
 
-        long messageId = messageDraftManagement.sendMessage(sender.getId(), request);
+        long messageId = messageDraftManagement.sendMessage(
+                sender.getId(), request, LocalDateTime.of(2026, 1, 1, 10, 0)
+        );
 
         assertThatThrownBy(() ->
                 messageDraftManagement.deleteDraft(sender.getId(), messageId)
@@ -486,10 +486,11 @@ record MessageDraftManagementTest(
                 .title("test title")
                 .content("test content")
                 .receiverIds(Set.of(receiver.getId()))
-                .sentAt(LocalDateTime.of(2026, 1, 1, 10, 0))
                 .build();
 
-        long messageId = messageDraftManagement.sendMessage(sender.getId(), createRequest);
+        long messageId = messageDraftManagement.sendMessage(
+                sender.getId(), createRequest, LocalDateTime.of(2026, 1, 1, 10, 0)
+        );
 
         MessageUpdateRequest updateRequest = new MessageUpdateRequest(
                 "new content",
@@ -605,10 +606,11 @@ record MessageDraftManagementTest(
                 .title("test title")
                 .content("test content")
                 .receiverIds(Set.of(receiver.getId()))
-                .sentAt(LocalDateTime.of(2026, 1, 1, 10, 0))
                 .build();
 
-        long messageId = messageDraftManagement.sendMessage(sender.getId(), createRequest);
+        long messageId = messageDraftManagement.sendMessage(
+                sender.getId(), createRequest, LocalDateTime.of(2026, 1, 1, 10, 0)
+        );
 
         assertThatThrownBy(() ->
                 messageDraftManagement.changeReceivers(

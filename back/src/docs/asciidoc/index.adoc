@@ -295,6 +295,11 @@ include::api/webapi/dept/Dept-End-Leader.adoc[]
 
 include::api/webapi/board/Board-API.adoc[]
 
+[[MESSAGE_API]]
+== MESSAGE API
+
+include::api/webapi/message/Message-API.adoc[]
+
 [[FRANCHISE_API]]
 == FRANCHISE API
 

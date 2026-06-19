@@ -1,7 +1,7 @@
 package com.haruon.groupware.application.message.service.query;
 
-import com.haruon.groupware.application.file.dto.response.FileListInfo;
 import com.haruon.groupware.application.exception.message.MessageNotFoundException;
+import com.haruon.groupware.application.file.dto.response.FileListInfo;
 import com.haruon.groupware.application.message.provided.forRetrieve.MessageRetriever;
 import com.haruon.groupware.application.message.required.MessageQueryRepository;
 import com.haruon.groupware.application.message.service.query.dto.MessageCountResponse;
@@ -22,8 +22,6 @@ import java.util.List;
 public class MessageQueryService implements MessageRetriever {
 
     private final MessageQueryRepository messageQueryRepository;
-
-    // 목록과 카운트 조회의 인가는 repository WHERE 절에서 현재 사원 관계를 제한하는 방식으로 처리
 
     @Override
     public Page<MessagesResponse> retrieveReceivedMessages(
@@ -64,12 +62,9 @@ public class MessageQueryService implements MessageRetriever {
 
     @Override
     public MessageDetailResponse retrieveMessage(Long empId, Long messageId) {
-        MessageDetailResponse response = messageQueryRepository
-                .findMessageById(empId, messageId);
-
-        if(response == null) throw new MessageNotFoundException();
-
-        return response;
+        return messageQueryRepository
+                .findMessageById(empId, messageId)
+                .orElseThrow(MessageNotFoundException::new);
     }
 
     @Override

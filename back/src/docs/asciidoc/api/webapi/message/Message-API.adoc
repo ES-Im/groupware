@@ -1,0 +1,336 @@
+[[MESSAGE_DRAFT_CREATE]]
+=== 임시 쪽지 저장
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/MESSAGE_DRAFT_CREATE/http-request.adoc[]
+
+_Request header_
+include::{snippets}/MESSAGE_DRAFT_CREATE/request-headers.adoc[]
+
+_Request fields_
+include::{snippets}/MESSAGE_DRAFT_CREATE/request-fields.adoc[]
+--
+Response (201)::
++
+--
+_HTTP response_
+include::{snippets}/MESSAGE_DRAFT_CREATE/http-response.adoc[]
+
+_Response fields_
+include::{snippets}/MESSAGE_DRAFT_CREATE/response-fields.adoc[]
+--
+====
+
+[[MESSAGE_SEND]]
+=== 쪽지 즉시 발송
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/MESSAGE_SEND/http-request.adoc[]
+
+_Request header_
+include::{snippets}/MESSAGE_SEND/request-headers.adoc[]
+
+_Request fields_
+include::{snippets}/MESSAGE_SEND/request-fields.adoc[]
+--
+Response (201)::
++
+--
+_HTTP response_
+include::{snippets}/MESSAGE_SEND/http-response.adoc[]
+
+_Response fields_
+include::{snippets}/MESSAGE_SEND/response-fields.adoc[]
+--
+====
+
+[[MESSAGE_DRAFT_SEND]]
+=== 임시 쪽지 발송
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/MESSAGE_DRAFT_SEND/http-request.adoc[]
+
+_Request header_
+include::{snippets}/MESSAGE_DRAFT_SEND/request-headers.adoc[]
+
+_Path parameters_
+include::{snippets}/MESSAGE_DRAFT_SEND/path-parameters.adoc[]
+--
+Response (204)::
++
+--
+_HTTP response_
+include::{snippets}/MESSAGE_DRAFT_SEND/http-response.adoc[]
+--
+====
+
+[[MESSAGE_DRAFT_DELETE]]
+=== 임시 쪽지 삭제
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/MESSAGE_DRAFT_DELETE/http-request.adoc[]
+
+_Request header_
+include::{snippets}/MESSAGE_DRAFT_DELETE/request-headers.adoc[]
+
+_Path parameters_
+include::{snippets}/MESSAGE_DRAFT_DELETE/path-parameters.adoc[]
+--
+Response (204)::
++
+--
+_HTTP response_
+include::{snippets}/MESSAGE_DRAFT_DELETE/http-response.adoc[]
+--
+====
+
+[[MESSAGE_DRAFT_UPDATE]]
+=== 임시 쪽지 수정
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/MESSAGE_DRAFT_UPDATE/http-request.adoc[]
+
+_Request header_
+include::{snippets}/MESSAGE_DRAFT_UPDATE/request-headers.adoc[]
+
+_Path parameters_
+include::{snippets}/MESSAGE_DRAFT_UPDATE/path-parameters.adoc[]
+
+_Request fields_
+include::{snippets}/MESSAGE_DRAFT_UPDATE/request-fields.adoc[]
+--
+Response (204)::
++
+--
+_HTTP response_
+include::{snippets}/MESSAGE_DRAFT_UPDATE/http-response.adoc[]
+--
+====
+
+[[MESSAGE_DRAFT_RECEIVERS_UPDATE]]
+=== 임시 쪽지 수신자 변경
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/MESSAGE_DRAFT_RECEIVERS_UPDATE/http-request.adoc[]
+
+_Request header_
+include::{snippets}/MESSAGE_DRAFT_RECEIVERS_UPDATE/request-headers.adoc[]
+
+_Path parameters_
+include::{snippets}/MESSAGE_DRAFT_RECEIVERS_UPDATE/path-parameters.adoc[]
+
+_Request fields_
+include::{snippets}/MESSAGE_DRAFT_RECEIVERS_UPDATE/request-fields.adoc[]
+--
+Response (204)::
++
+--
+_HTTP response_
+include::{snippets}/MESSAGE_DRAFT_RECEIVERS_UPDATE/http-response.adoc[]
+--
+====
+
+[[SENT_MESSAGE_TRASH]]
+=== 보낸 쪽지 휴지통 이동
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/SENT_MESSAGE_TRASH/http-request.adoc[]
+
+_Request header_
+include::{snippets}/SENT_MESSAGE_TRASH/request-headers.adoc[]
+
+_Path parameters_
+include::{snippets}/SENT_MESSAGE_TRASH/path-parameters.adoc[]
+--
+Response (204)::
++
+--
+_HTTP response_
+include::{snippets}/SENT_MESSAGE_TRASH/http-response.adoc[]
+--
+====
+
+[[SENT_MESSAGE_RESTORE]]
+=== 보낸 쪽지 휴지통 복구
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/SENT_MESSAGE_RESTORE/http-request.adoc[]
+
+_Request header_
+include::{snippets}/SENT_MESSAGE_RESTORE/request-headers.adoc[]
+
+_Path parameters_
+include::{snippets}/SENT_MESSAGE_RESTORE/path-parameters.adoc[]
+--
+Response (204)::
++
+--
+_HTTP response_
+include::{snippets}/SENT_MESSAGE_RESTORE/http-response.adoc[]
+--
+====
+
+[[SENT_MESSAGE_DELETE]]
+=== 보낸 쪽지 삭제
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/SENT_MESSAGE_DELETE/http-request.adoc[]
+
+_Request header_
+include::{snippets}/SENT_MESSAGE_DELETE/request-headers.adoc[]
+
+_Path parameters_
+include::{snippets}/SENT_MESSAGE_DELETE/path-parameters.adoc[]
+--
+Response (204)::
++
+--
+_HTTP response_
+include::{snippets}/SENT_MESSAGE_DELETE/http-response.adoc[]
+--
+====
+
+[[RECEIVED_MESSAGE_READ]]
+=== 받은 쪽지 읽음 처리
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/RECEIVED_MESSAGE_READ/http-request.adoc[]
+
+_Request header_
+include::{snippets}/RECEIVED_MESSAGE_READ/request-headers.adoc[]
+
+_Path parameters_
+include::{snippets}/RECEIVED_MESSAGE_READ/path-parameters.adoc[]
+--
+Response (204)::
++
+--
+_HTTP response_
+include::{snippets}/RECEIVED_MESSAGE_READ/http-response.adoc[]
+--
+====
+
+[[RECEIVED_MESSAGE_TRASH]]
+=== 받은 쪽지 휴지통 이동
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/RECEIVED_MESSAGE_TRASH/http-request.adoc[]
+
+_Request header_
+include::{snippets}/RECEIVED_MESSAGE_TRASH/request-headers.adoc[]
+
+_Path parameters_
+include::{snippets}/RECEIVED_MESSAGE_TRASH/path-parameters.adoc[]
+--
+Response (204)::
++
+--
+_HTTP response_
+include::{snippets}/RECEIVED_MESSAGE_TRASH/http-response.adoc[]
+--
+====
+
+[[RECEIVED_MESSAGE_RESTORE]]
+=== 받은 쪽지 휴지통 복구
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/RECEIVED_MESSAGE_RESTORE/http-request.adoc[]
+
+_Request header_
+include::{snippets}/RECEIVED_MESSAGE_RESTORE/request-headers.adoc[]
+
+_Path parameters_
+include::{snippets}/RECEIVED_MESSAGE_RESTORE/path-parameters.adoc[]
+--
+Response (204)::
++
+--
+_HTTP response_
+include::{snippets}/RECEIVED_MESSAGE_RESTORE/http-response.adoc[]
+--
+====
+
+[[RECEIVED_MESSAGE_DELETE]]
+=== 받은 쪽지 삭제
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/RECEIVED_MESSAGE_DELETE/http-request.adoc[]
+
+_Request header_
+include::{snippets}/RECEIVED_MESSAGE_DELETE/request-headers.adoc[]
+
+_Path parameters_
+include::{snippets}/RECEIVED_MESSAGE_DELETE/path-parameters.adoc[]
+--
+Response (204)::
++
+--
+_HTTP response_
+include::{snippets}/RECEIVED_MESSAGE_DELETE/http-response.adoc[]
+--
+====

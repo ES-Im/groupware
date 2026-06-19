@@ -49,15 +49,15 @@ public class MessageDraftService implements MessageDraftManagement {
     }
 
     @Override
-    public long sendMessage(Long senderId, MessageCreateRequest request) {
-        if(request.sentAt() == null) throw new RequiredValueMissingException();
+    public long sendMessage(Long senderId, MessageCreateRequest request, LocalDateTime sentAt) {
+        if(sentAt == null) throw new RequiredValueMissingException();
         if(request.receiverIds() == null || request.receiverIds().isEmpty()) throw new MessageReceiverRequiredException();
 
         Emp writer = findActiveEmpById(empRepository, senderId);
         List<Emp> recipientList = findEmpListById(empRepository, request.receiverIds());
 
         Message sentMsg = createSent(
-                writer, request.title(), request.content(), recipientList, request.sentAt()
+                writer, request.title(), request.content(), recipientList, sentAt
         );
 
         return messageRepository.save(sentMsg).getId();

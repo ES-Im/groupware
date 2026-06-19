@@ -2,22 +2,25 @@ package com.haruon.groupware.application.message.service.command.dto;
 
 import com.haruon.groupware.application.exception.common.BlankValueNotAllowedException;
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import org.jspecify.annotations.Nullable;
 
-import java.time.LocalDateTime;
 import java.util.Set;
 
 @Builder
 public record MessageCreateRequest(
 
+        @NotBlank
+        @Size(max = 50)
         String title,
 
+        @NotBlank
         String content,
 
-        @Nullable Set<Long> receiverIds,
+        @Nullable Set<Long> receiverIds
 
-        @Nullable LocalDateTime sentAt
 
 ) {
 
@@ -25,8 +28,6 @@ public record MessageCreateRequest(
         if(title == null || content == null) throw new RequiredValueMissingException();
 
         if(title.isBlank() || content.isBlank()) throw new BlankValueNotAllowedException();
-
-        if(sentAt != null && receiverIds == null) throw new RequiredValueMissingException();
 
     }
 

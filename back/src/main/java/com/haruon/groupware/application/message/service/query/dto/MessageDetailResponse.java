@@ -7,50 +7,49 @@ import java.util.List;
 
 public record MessageDetailResponse(
         Long messageId,
+        String title,
+        String content,
 
         Long senderId,
         @Nullable String senderDeptName,
         String senderName,
 
-        String title,
-        String content,
+        List<ReceiverInfo> receivers,
 
         @Nullable LocalDateTime sentAt,
-        @Nullable LocalDateTime readAt,
-        @Nullable LocalDateTime trashedAt,
         Boolean isSentByMe,
+        Boolean isTrashedByMe,
 
-        Integer fileCount,
-
-        List<ReceiverInfo> receivers
+        Integer fileCount
 ) {
     public MessageDetailResponse(
             MessageInfo messageInfo,
             List<ReceiverInfo> receiverInfo
     ) {
         this(
-                messageInfo.messageId,
+                messageInfo.messageId, messageInfo.title, messageInfo.content,
+
                 messageInfo.senderId, messageInfo.senderDeptName, messageInfo.senderName,
-                messageInfo.title, messageInfo.content,
-                messageInfo.sentAt, messageInfo.readAt, messageInfo.trashedAt, messageInfo.isSentByMe,
-                messageInfo.fileCount,
-                receiverInfo
+
+                receiverInfo,
+
+                messageInfo.sentAt, messageInfo.isSentByMe, messageInfo.isTrashedByMe,
+
+                messageInfo.fileCount
         );
     }
 
     public record MessageInfo(
             Long messageId,
+            String title,
+            String content,
 
             Long senderId,
             @Nullable String senderDeptName,
             String senderName,
 
-            String title,
-            String content,
-
             @Nullable LocalDateTime sentAt,
-            @Nullable LocalDateTime readAt,
-            @Nullable LocalDateTime trashedAt,
+            Boolean isTrashedByMe,
             Boolean isSentByMe,
 
             Integer fileCount
@@ -60,7 +59,7 @@ public record MessageDetailResponse(
             Long receiverId,
             @Nullable String receiverDeptName,
             String receiverName,
-            @Nullable LocalDateTime readAt
+            Boolean isRead
     ) {
     }
 }

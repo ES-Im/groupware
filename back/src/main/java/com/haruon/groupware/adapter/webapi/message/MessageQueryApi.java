@@ -19,7 +19,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/messages")
-public class MessageApi {
+public class MessageQueryApi {
 
     private final MessageRetriever messageRetreiver;
 
@@ -113,19 +113,3 @@ public class MessageApi {
 
 
 }
-
-/**
-     * // 2. 내가 수신자
-     *      SELECT *
-        *        FROM message_receiving mr
-     *        -- 나
-     *        JOIN mr.message, rMessage
-     *              ON rMessage.sentAt.isNotNull()
-     *        JOIN rMessage.emp, receiver
-     *        LEFT JOIN receiver.belogings, rBelongings
-     *             ON rBelongings.end_at IS NULL AND rBelongings.is_primary = TRUE
-     *        LEFT JOIN rBelongings.dept, rDept
-     *        -발신인
-     *        JOIN rMessage.sending, sending
-     *       WHERE mr.trashedAt.isNotNull() and mr.deletedAt.isNull() and receiver.id.eq(:empId)AND (keywordContains(:keyword)
- */

@@ -541,10 +541,11 @@ record ReceivedMessageManagementTest(
                 .title("test title")
                 .content("test content")
                 .receiverIds(Set.of(receiver.getId()))
-                .sentAt(LocalDateTime.of(2026, 1, 1, 9, 0))
                 .build();
 
-        return messageDraftManagement.sendMessage(sender.getId(), request);
+        return messageDraftManagement.sendMessage(
+                sender.getId(), request, LocalDateTime.of(2026, 1, 1, 9, 0)
+        );
     }
 
     private long createDraftMessage(Emp sender, Emp receiver) {

@@ -165,6 +165,9 @@ public class SecurityConfig {
                         /* DocumentBox API */
                         .requestMatchers("/api/document-box/me/**").hasRole(SystemRoleCode.EMPLOYEE.name())
 
+                        /* Message API */
+                        .requestMatchers("/api/messages", "/api/messages/**").hasRole(SystemRoleCode.EMPLOYEE.name())
+
                         /* File API */
                         .requestMatchers(HttpMethod.GET,
                                 "/api/drafts/*/files/**",

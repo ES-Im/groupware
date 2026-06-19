@@ -10,7 +10,7 @@ public interface MessageDraftManagement {
 
     long saveMessageBeforeSend(Long senderId, MessageCreateRequest request);
 
-    long sendMessage(Long senderId, MessageCreateRequest request);
+    long sendMessage(Long senderId, MessageCreateRequest request, LocalDateTime sentAt);
 
     void sendDraft(Long senderId, Long messageDraftId, LocalDateTime sentAt);
 

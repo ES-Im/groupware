@@ -2,6 +2,7 @@ package com.haruon.groupware.application.message.service.command.dto;
 
 import com.haruon.groupware.application.exception.common.BlankValueNotAllowedException;
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
+import jakarta.validation.constraints.Size;
 import org.jspecify.annotations.Nullable;
 
 
@@ -10,6 +11,7 @@ public record MessageUpdateRequest(
         String content,
 
         @Nullable
+        @Size(max = 50)
         String title
 ) {
 
