@@ -168,6 +168,9 @@ public class SecurityConfig {
                         /* Message API */
                         .requestMatchers("/api/messages", "/api/messages/**").hasRole(SystemRoleCode.EMPLOYEE.name())
 
+                        /* Schedule API */
+                        .requestMatchers("/api/schedules", "/api/schedules/**").hasRole(SystemRoleCode.EMPLOYEE.name())
+
                         /* File API */
                         .requestMatchers(HttpMethod.GET,
                                 "/api/drafts/*/files/**",

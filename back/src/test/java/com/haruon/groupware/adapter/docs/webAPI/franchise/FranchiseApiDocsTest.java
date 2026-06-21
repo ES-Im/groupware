@@ -274,21 +274,27 @@ public class FranchiseApiDocsTest extends RestDocsSupport {
     @Test
     @DisplayName("교육 캘린더 조회")
     void getEducations() throws Exception {
-        Mockito.when(franchiseEducationRetriever.retrieveEducations(eq(1L), eq(YearMonth.of(2026, 5))))
+        LocalDateTime start = LocalDateTime.of(2026, 5, 1, 0, 0);
+        LocalDateTime end = LocalDateTime.of(2026, 6, 1, 0, 0);
+        Mockito.when(franchiseEducationRetriever.retrieveEducations(eq(1L), eq(start), eq(end)))
                 .thenReturn(List.of(new EducationsResponse(1L, LocalDate.of(2026, 5, 1), "교육장", "교육 제목", false, true)));
 
         mockMvc.perform(
                 get(EDUCATION_MAPPING + "/calendar")
                         .with(franchiseAuthentication())
                         .header("Authorization", "Bearer accessToken")
-                        .queryParam("yearMonth", "2026-05")
+                        .queryParam("start", start.toString())
+                        .queryParam("end", end.toString())
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
                 .andDo(document("FRANCHISE_EDUCATION_CALENDAR",
                         preprocessRequest(prettyPrint()),
                         requestHeaders(headerWithName("Authorization").description("Bearer Access Token")),
-                        queryParameters(parameterWithName("yearMonth").optional().description("조회할 년월, yyyy-MM")),
+                        queryParameters(
+                                parameterWithName("start").optional().description("조회 시작 일시, yyyy-MM-dd'T'HH:mm:ss (포함), 미입력시, 당월 첫날의 0시 0분 0초"),
+                                parameterWithName("end").optional().description("조회 종료 일시, yyyy-MM-dd'T'HH:mm:ss (미포함), 미입력시, 익월 첫날의 0시 0분 0초")
+                        ),
                         responseFields(educationCalendarFields())
                 ));
     }

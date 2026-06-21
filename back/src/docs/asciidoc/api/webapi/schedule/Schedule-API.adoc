@@ -1,0 +1,204 @@
+[[SCHEDULE_CALENDAR]]
+=== 기간별 일정 조회
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/SCHEDULE_CALENDAR/http-request.adoc[]
+
+_Request header_
+include::{snippets}/SCHEDULE_CALENDAR/request-headers.adoc[]
+
+_Request param_
+include::{snippets}/SCHEDULE_CALENDAR/query-parameters.adoc[]
+--
+Response (200)::
++
+--
+_HTTP response_
+include::{snippets}/SCHEDULE_CALENDAR/http-response.adoc[]
+
+_Response fields_
+include::{snippets}/SCHEDULE_CALENDAR/response-fields.adoc[]
+--
+====
+
+[[SCHEDULE_DETAIL]]
+=== 일정 상세 조회
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/SCHEDULE_DETAIL/http-request.adoc[]
+
+_Request header_
+include::{snippets}/SCHEDULE_DETAIL/request-headers.adoc[]
+
+_Path parameters_
+include::{snippets}/SCHEDULE_DETAIL/path-parameters.adoc[]
+--
+Response (200)::
++
+--
+_HTTP response_
+include::{snippets}/SCHEDULE_DETAIL/http-response.adoc[]
+
+_Response fields_
+include::{snippets}/SCHEDULE_DETAIL/response-fields.adoc[]
+--
+====
+
+[[MANUAL_SCHEDULE_CREATE]]
+=== 수기 일정 등록
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/MANUAL_SCHEDULE_CREATE/http-request.adoc[]
+
+_Request header_
+include::{snippets}/MANUAL_SCHEDULE_CREATE/request-headers.adoc[]
+
+_Request fields_
+include::{snippets}/MANUAL_SCHEDULE_CREATE/request-fields.adoc[]
+--
+Response (201)::
++
+--
+_HTTP response_
+include::{snippets}/MANUAL_SCHEDULE_CREATE/http-response.adoc[]
+
+_Response fields_
+include::{snippets}/MANUAL_SCHEDULE_CREATE/response-fields.adoc[]
+--
+====
+
+[[SCHEDULE_PARTICIPANTS_ADD]]
+=== 일정 참여자 추가
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/SCHEDULE_PARTICIPANTS_ADD/http-request.adoc[]
+
+_Request header_
+include::{snippets}/SCHEDULE_PARTICIPANTS_ADD/request-headers.adoc[]
+
+_Path parameters_
+include::{snippets}/SCHEDULE_PARTICIPANTS_ADD/path-parameters.adoc[]
+
+_Request param_
+include::{snippets}/SCHEDULE_PARTICIPANTS_ADD/query-parameters.adoc[]
+
+_Request fields_
+include::{snippets}/SCHEDULE_PARTICIPANTS_ADD/request-fields.adoc[]
+--
+Response (201)::
++
+--
+_HTTP response_
+include::{snippets}/SCHEDULE_PARTICIPANTS_ADD/http-response.adoc[]
+--
+====
+
+[[SCHEDULE_PARTICIPANTS_REMOVE]]
+=== 일정 참여자 제외
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/SCHEDULE_PARTICIPANTS_REMOVE/http-request.adoc[]
+
+_Request header_
+include::{snippets}/SCHEDULE_PARTICIPANTS_REMOVE/request-headers.adoc[]
+
+_Path parameters_
+include::{snippets}/SCHEDULE_PARTICIPANTS_REMOVE/path-parameters.adoc[]
+
+_Request param_
+include::{snippets}/SCHEDULE_PARTICIPANTS_REMOVE/query-parameters.adoc[]
+
+_Request fields_
+include::{snippets}/SCHEDULE_PARTICIPANTS_REMOVE/request-fields.adoc[]
+--
+Response (204)::
++
+--
+_HTTP response_
+include::{snippets}/SCHEDULE_PARTICIPANTS_REMOVE/http-response.adoc[]
+--
+====
+
+[[SCHEDULE_CANCEL]]
+=== 일정 취소
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/SCHEDULE_CANCEL/http-request.adoc[]
+
+_Request header_
+include::{snippets}/SCHEDULE_CANCEL/request-headers.adoc[]
+
+_Path parameters_
+include::{snippets}/SCHEDULE_CANCEL/path-parameters.adoc[]
+
+_Request param_
+include::{snippets}/SCHEDULE_CANCEL/query-parameters.adoc[]
+--
+Response (204)::
++
+--
+_HTTP response_
+include::{snippets}/SCHEDULE_CANCEL/http-response.adoc[]
+--
+====
+
+[[MANUAL_SCHEDULE_UPDATE]]
+=== 수기 일정 수정
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/MANUAL_SCHEDULE_UPDATE/http-request.adoc[]
+
+_Request header_
+include::{snippets}/MANUAL_SCHEDULE_UPDATE/request-headers.adoc[]
+
+_Path parameters_
+include::{snippets}/MANUAL_SCHEDULE_UPDATE/path-parameters.adoc[]
+
+_Request param_
+include::{snippets}/MANUAL_SCHEDULE_UPDATE/query-parameters.adoc[]
+
+_Request fields_
+include::{snippets}/MANUAL_SCHEDULE_UPDATE/request-fields.adoc[]
+--
+Response (204)::
++
+--
+_HTTP response_
+include::{snippets}/MANUAL_SCHEDULE_UPDATE/http-response.adoc[]
+--
+====

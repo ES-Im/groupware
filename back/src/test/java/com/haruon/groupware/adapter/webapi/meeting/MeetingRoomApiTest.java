@@ -22,7 +22,6 @@ import org.springframework.http.MediaType;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.YearMonth;
 import java.util.Set;
 
 import static com.haruon.groupware.application.utils.Utils.SEOUL_ZONE;
@@ -96,7 +95,8 @@ class MeetingRoomApiTest extends IntegrationTestSupport {
 
         mockMvc.perform(get("/api/meeting-rooms/{meetingRoomId}/reservations/calendar", bookedRoom.getId())
                         .header("Authorization", BEARER + accessToken)
-                        .param("yearMonth", YearMonth.from(meetingDate).toString()))
+                        .param("start", meetingDate.atStartOfDay().toString())
+                        .param("end", meetingDate.plusDays(1).atStartOfDay().toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1));
 

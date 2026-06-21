@@ -1,6 +1,7 @@
 package com.haruon.groupware.adapter.webapi.meeting;
 
 import com.haruon.groupware.adapter.security.empDtails.EmpDetails;
+import com.haruon.groupware.adapter.webapi.DateSupport;
 import com.haruon.groupware.application.exception.meeting.MeetingParticipantRequiredException;
 import com.haruon.groupware.application.meeting.provided.forCommand.MeetingManagement;
 import com.haruon.groupware.application.meeting.provided.forRetreiever.MeetingRetriever;
@@ -13,14 +14,17 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.List;
 import java.util.Set;
 
+import static com.haruon.groupware.adapter.webapi.DateSupport.resolveSearchPeriod;
 import static com.haruon.groupware.application.utils.Utils.SEOUL_ZONE;
 
 @RestController
@@ -34,10 +38,13 @@ public class MeetingApi {
     @GetMapping("/my/reservations/calendar")
     public ResponseEntity<List<ReservationResponse>> getMyReservations(
             @AuthenticationPrincipal EmpDetails details,
-            @RequestParam(required = false) YearMonth yearMonth
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end
     ) {
+        DateSupport.SearchPeriod searchPeriod = resolveSearchPeriod(start, end);
+
         List<ReservationResponse> responses = meetingRetriever
-                .retrieveMyReservations(details.getEmpId(), getTargetYearMonth(yearMonth));
+                .retrieveMyReservations(details.getEmpId(), searchPeriod.startDateTime(), searchPeriod.endDateTime());
 
         return ResponseEntity.ok().body(responses);
     }
@@ -46,7 +53,6 @@ public class MeetingApi {
     public ResponseEntity<ReservationDetailResponse> getReservationResponse(
             @PathVariable Long meetingId
     ) {
-        // TODO: 참여자 정보가 포함되므로 예약자/참여자/시설 담당자만 조회하도록 서비스 권한 검증이 필요
         ReservationDetailResponse response = meetingRetriever
                 .retrieveReservationByMeetingId(meetingId);
 

@@ -107,7 +107,8 @@ public class FranchiseApiTest extends IntegrationTestSupport {
         mockMvc.perform(
                 get("/api/franchise-educations/calendar")
                         .header("Authorization", BEARER + accessToken)
-                        .param("yearMonth", "2026-05")
+                        .param("start", "2026-05-01T00:00:00")
+                        .param("end", "2026-06-01T00:00:00")
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk());

@@ -6,12 +6,13 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.List;
 
 public interface MeetingRetriever {
     List<ReservationResponse> retrieveMyReservations(
-            Long empId, YearMonth targetYearMonth);
+            Long empId, LocalDateTime start, LocalDateTime end);
 
     ReservationDetailResponse retrieveReservationByMeetingId(Long meetingId);
 

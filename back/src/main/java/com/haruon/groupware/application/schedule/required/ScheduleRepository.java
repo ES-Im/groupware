@@ -13,6 +13,8 @@ public interface ScheduleRepository extends Repository<Schedule, Long> {
 
     List<Schedule> findByEmp_IdAndScheduleDate(Long empId, LocalDate scheduleDate);
 
+    boolean existsScheduleByIdAndEmp_Id(Long id, Long emp_id);
+
     Optional<Schedule> findById(Long id);
 
     List<Schedule> findSchedulesBySourceKey(String sourceKey);

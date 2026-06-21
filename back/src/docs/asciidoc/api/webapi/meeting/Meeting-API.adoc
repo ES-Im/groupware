@@ -1,5 +1,5 @@
 [[MY_MEETING_RESERVATIONS_CALENDAR]]
-=== 내 월별 회의 예약 조회
+=== 내 기간별 회의 예약 조회
 
 [tabs%nosync]
 ====

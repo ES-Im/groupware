@@ -25,11 +25,7 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.YearMonth;
 import java.util.List;
-
-import static com.haruon.groupware.adapter.persistence.util.DateParseSupport.getFirstDateOnNextMonth;
-import static com.haruon.groupware.adapter.persistence.util.DateParseSupport.getStartDateByYearMonth;
 
 @Repository
 @RequiredArgsConstructor
@@ -167,10 +163,10 @@ public class MeetingRoomQueryRepositoryAdapter implements MeetingRoomQueryReposi
 
     @Override
     public List<ReservationsByRoomResponse> findMeetingsByMeetingRoomId(
-            Long meetingRoomId, YearMonth targetYearMonth
+            Long meetingRoomId, LocalDateTime start, LocalDateTime end
     ) {
-        LocalDate startDate = getStartDateByYearMonth(targetYearMonth);
-        LocalDate endDate = getFirstDateOnNextMonth(targetYearMonth);
+        LocalDate startDate = start.toLocalDate();
+        LocalDate endDate = end.toLocalDate();
 
         return query
                 .select(Projections.constructor(

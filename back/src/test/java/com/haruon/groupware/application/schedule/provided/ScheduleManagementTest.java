@@ -5,7 +5,8 @@ import com.haruon.groupware.application.dept.required.DeptRepository;
 import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
 import com.haruon.groupware.application.exception.common.role.ActiveEmployeeNotFoundException;
 import com.haruon.groupware.application.schedule.required.ScheduleRepository;
-import com.haruon.groupware.application.schedule.service.ManualScheduleParam;
+import com.haruon.groupware.application.schedule.service.command.request.ManualScheduleCreateRequest;
+import com.haruon.groupware.application.schedule.service.command.request.ManualScheduleUpdateRequest;
 import com.haruon.groupware.domain.empInfo.Emp;
 import com.haruon.groupware.domain.schedule.Schedule;
 import com.haruon.groupware.domain.schedule.ScheduleParticipant;
@@ -70,8 +71,8 @@ record ScheduleManagementTest(
         LocalDateTime endAt = LocalDateTime.of(BASE_DATE, END_TIME).plusDays(2);
 
         String getSourceKey = scheduleRegister.registerSchedules(
-                            ManualScheduleParam.builder()
-                                    .ownerId(ownerId)
+                            ownerId,
+                            ManualScheduleCreateRequest.builder()
                                     .title(title)
                                     .content(content)
                                     .startAt(startAt)
@@ -133,7 +134,7 @@ record ScheduleManagementTest(
         );
 
         assertThatThrownBy(() ->
-                scheduleRegister.addParticipants(manualSchedules.getFirst().getId(), Set.of(inactiveEmp.getId()), false)
+                scheduleRegister.addParticipants(manualSchedules.getFirst().getId(), manualSchedules.getFirst().getEmp().getId(), Set.of(inactiveEmp.getId()), false)
         ).isInstanceOf(ActiveEmployeeNotFoundException.class);
 
     }
@@ -152,7 +153,7 @@ record ScheduleManagementTest(
         );
 
         Schedule firstDayOfSchedule = manualSchedules.getFirst();
-        scheduleRegister.addParticipants(firstDayOfSchedule.getId(), Set.of(otherEmp.getId()), false);
+        scheduleRegister.addParticipants(firstDayOfSchedule.getId(), register.getId(), Set.of(otherEmp.getId()), false);
 
         Schedule updatedSchedule = scheduleRepository.findById(firstDayOfSchedule.getId()).orElseThrow();
 
@@ -188,7 +189,7 @@ record ScheduleManagementTest(
         );
 
         Schedule firstDayOfSchedule = manualSchedules.getFirst();
-        scheduleRegister.addParticipants(firstDayOfSchedule.getId(), Set.of(otherEmp.getId()), true);
+        scheduleRegister.addParticipants(firstDayOfSchedule.getId(), register.getId(), Set.of(otherEmp.getId()), true);
 
         List<Schedule> allDaysOfSchedule = scheduleRepository.findBySourceKey(firstDayOfSchedule.getSourceKey());
 
@@ -216,8 +217,8 @@ record ScheduleManagementTest(
         );
 
         Schedule firstDayOfSchedule = manualSchedules.getFirst();
-        scheduleRegister.addParticipants(firstDayOfSchedule.getId(), Set.of(otherEmp.getId()), true);
-        scheduleRegister.removeParticipants(firstDayOfSchedule.getId(), Set.of(otherEmp.getId()), false);
+        scheduleRegister.addParticipants(firstDayOfSchedule.getId(), register.getId(), Set.of(otherEmp.getId()), true);
+        scheduleRegister.removeParticipants(firstDayOfSchedule.getId(), register.getId(), Set.of(otherEmp.getId()), false);
         String sourceKey = firstDayOfSchedule.getSourceKey();
 
         entityManager.flush();
@@ -263,7 +264,7 @@ record ScheduleManagementTest(
         Schedule firstDayOfSchedule = manualSchedules.getFirst();
         String sourceKey = firstDayOfSchedule.getSourceKey();
 
-        scheduleRegister.addParticipants(firstDayOfSchedule.getId(), Set.of(otherEmp.getId()), true);
+        scheduleRegister.addParticipants(firstDayOfSchedule.getId(), register.getId(), Set.of(otherEmp.getId()), true);
 
         entityManager.flush();
         entityManager.clear();
@@ -273,7 +274,7 @@ record ScheduleManagementTest(
 //        log.info("before remove = {}", firstDayOfSchedule.getScheduleParticipants()
 //                .stream().map(p -> p.getEmp().getId()).toList());
 
-        scheduleRegister.removeParticipants(reloadedFirstDay.getId(), Set.of(otherEmp.getId()), true);
+        scheduleRegister.removeParticipants(reloadedFirstDay.getId(), register.getId(), Set.of(otherEmp.getId()), true);
 
         entityManager.flush();
         entityManager.clear();
@@ -333,7 +334,7 @@ record ScheduleManagementTest(
         entityManager.flush();
         entityManager.clear();
 
-        scheduleRegister.cancelSchedule(firstDayOfSchedule.getId(), false);
+        scheduleRegister.cancelSchedule(firstDayOfSchedule.getId(), register.getId(), false);
 
         entityManager.flush();
         entityManager.clear();
@@ -371,7 +372,7 @@ record ScheduleManagementTest(
         entityManager.flush();
         entityManager.clear();
 
-        scheduleRegister.cancelSchedule(firstDayOfSchedule.getId(), true);
+        scheduleRegister.cancelSchedule(firstDayOfSchedule.getId(), register.getId(), true);
 
         entityManager.flush();
         entityManager.clear();
@@ -405,12 +406,12 @@ record ScheduleManagementTest(
 
         String editedTitle = "editedTitle9";
         String editedContent = "editedContent9";
-        LocalDateTime editedStartAt = LocalDateTime.of(firstDayOfSchedule.getScheduleDate(), LocalTime.of(13, 0));
-        LocalDateTime editedEndAt = LocalDateTime.of(firstDayOfSchedule.getScheduleDate(), LocalTime.of(14, 0));
+        LocalTime editedStartAt = LocalTime.of(13, 0);
+        LocalTime editedEndAt = LocalTime.of(14, 0);
         scheduleRegister.updateManualSchedule(
-                firstDayOfSchedule.getId(), false, 
-                ManualScheduleParam.builder()
-                        .ownerId(register.getId()).title(editedTitle).content(editedContent).startAt(editedStartAt).endAt(editedEndAt)
+                firstDayOfSchedule.getId(), register.getId(), false,
+                ManualScheduleUpdateRequest.builder()
+                        .title(editedTitle).content(editedContent).startAt(editedStartAt).endAt(editedEndAt)
                 .build()
         );
 
@@ -424,7 +425,7 @@ record ScheduleManagementTest(
         assertThat(updatedSchedule).extracting(
                 Schedule::getTitle, Schedule::getContent, Schedule::getStartAt, Schedule::getEndAt
         ).containsExactly(
-                editedTitle, editedContent, editedStartAt.toLocalTime(), editedEndAt.toLocalTime()
+                editedTitle, editedContent, editedStartAt, editedEndAt
         );
 
         updatedSchedules.forEach(s -> {
@@ -456,13 +457,13 @@ record ScheduleManagementTest(
 
         String editedTitle = "editedTitle9";
         String editedContent = "editedContent9";
-        LocalDateTime editedStartAt = LocalDateTime.of(firstDayOfSchedule.getScheduleDate(), LocalTime.of(13, 0));
-        LocalDateTime editedEndAt = LocalDateTime.of(firstDayOfSchedule.getScheduleDate(), LocalTime.of(14, 0));
+        LocalTime editedStartAt = LocalTime.of(13, 0);
+        LocalTime editedEndAt = LocalTime.of(14, 0);
 
         scheduleRegister.updateManualSchedule(
-                firstDayOfSchedule.getId(), true,
-                ManualScheduleParam.builder()
-                        .ownerId(register.getId()).title(editedTitle).content(editedContent).startAt(editedStartAt).endAt(editedEndAt)
+                firstDayOfSchedule.getId(), register.getId(), true,
+                ManualScheduleUpdateRequest.builder()
+                        .title(editedTitle).content(editedContent).startAt(editedStartAt).endAt(editedEndAt)
                         .build()
         );
 
@@ -475,7 +476,7 @@ record ScheduleManagementTest(
             assertThat(s).extracting(
                     Schedule::getTitle, Schedule::getContent, Schedule::getStartAt, Schedule::getEndAt
             ).containsExactly(
-                    editedTitle, editedContent, editedStartAt.toLocalTime(), editedEndAt.toLocalTime()
+                    editedTitle, editedContent, editedStartAt, editedEndAt
             );
         });
     }
@@ -615,8 +616,8 @@ record ScheduleManagementTest(
         String content = "content";
 
         String getSourceKey = scheduleRegister.registerSchedules(
-                        ManualScheduleParam.builder()
-                                .ownerId(ownerId)
+                        ownerId,
+                        ManualScheduleCreateRequest.builder()
                                 .title(title)
                                 .content(content)
                                 .startAt(startAt)

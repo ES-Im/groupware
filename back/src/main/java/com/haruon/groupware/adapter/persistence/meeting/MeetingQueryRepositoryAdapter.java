@@ -21,6 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.List;
 
@@ -40,9 +41,9 @@ public class MeetingQueryRepositoryAdapter implements MeetingQueryRepository {
     private final QEmpBelongings belongings = QEmpBelongings.empBelongings;
 
     @Override
-    public List<ReservationResponse> findMeetingsByEmpId(Long empId, YearMonth targetMonth) {
-        LocalDate startDate = getStartDateByYearMonth(targetMonth);
-        LocalDate endDate = getFirstDateOnNextMonth(targetMonth);
+    public List<ReservationResponse> findMeetingsByEmpId(Long empId, LocalDateTime start, LocalDateTime end) {
+        LocalDate startDate = start.toLocalDate();
+        LocalDate endDate = end.toLocalDate();
 
         return query
                 .select(Projections.constructor(

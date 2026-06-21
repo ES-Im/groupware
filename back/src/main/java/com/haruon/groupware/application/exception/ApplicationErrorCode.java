@@ -104,10 +104,14 @@ public enum ApplicationErrorCode {
 
 
     // schedule
-    UNSUPPORTED_SCHEDULE_TYPE_EXCEPTION(HttpStatus.BAD_REQUEST, "SCHEDULE_001", "지원하지 않는 일정 타입"),
+    UNSUPPORTED_SCHEDULE_TYPE_EXCEPTION(HttpStatus.BAD_REQUEST, "SCHEDULE_001", "지원하지 않는 일정 타입입니다"),
     SCHEDULE_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND, "SCHEDULE_002", "조회된 일정이 없습니다"),
     NOT_MANUAL_SCHEDULE_EXCEPTION(HttpStatus.BAD_REQUEST, "SCHEDULE_003", "수기관리 대상 일정이 아닙니다"),
-    EDIT_FORBIDDEN_SCHEDULE_EXCEPTION(HttpStatus.BAD_REQUEST, "SCHEDULE_004", "수정가능한 일정이 아닙니다");
+    EDIT_FORBIDDEN_SCHEDULE_EXCEPTION(HttpStatus.BAD_REQUEST, "SCHEDULE_004", "수정 가능한 일정이 아닙니다"),
+    SCHEDULE_OWNER_NOT_MATCH_EXCEPTION(HttpStatus.FORBIDDEN, "SCHEDULE_005", "해당 일정에 대한 수정 권한이 없습니다"),
+    SCHEDULE_HAS_PARTICIPANTS_EXCEPTION(HttpStatus.BAD_REQUEST, "SCHEDULE_006", "해당 일정에 참여자가 있어 일정을 삭제할 수 없습니다"),
+    SCHEDULE_OWNER_REMOVAL_NOT_ALLOWED_EXCEPTION(HttpStatus.BAD_REQUEST, "SCHEDULE_007", "일정 소유자는 참여자에서 제외할 수 없습니다"),
+    SCHEDULE_TIME_OUTSIDE_COMPANY_HOURS_EXCEPTION(HttpStatus.BAD_REQUEST, "SCHEDULE_008", "다일 일정의 시작 또는 종료 시간이 회사 운영시간 범위를 벗어났습니다");
 
     private final HttpStatus status;
     private final String code;

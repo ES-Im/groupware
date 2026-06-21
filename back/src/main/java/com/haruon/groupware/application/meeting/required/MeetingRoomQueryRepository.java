@@ -11,7 +11,6 @@ import org.springframework.data.domain.Pageable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.YearMonth;
 import java.util.List;
 
 public interface MeetingRoomQueryRepository {
@@ -29,7 +28,8 @@ public interface MeetingRoomQueryRepository {
 
     List<ReservationsByRoomResponse> findMeetingsByMeetingRoomId(
             Long meetingRoomId,
-            YearMonth targetYearMonth
+            LocalDateTime start,
+            LocalDateTime end
     );
 
     MeetingRoomDetailResponse findMeetingRoomById(Long meetingRoomId);

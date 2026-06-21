@@ -68,7 +68,8 @@ class MeetingApiTest extends IntegrationTestSupport {
 
         mockMvc.perform(get("/api/meetings/my/reservations/calendar")
                         .header("Authorization", BEARER + accessToken)
-                        .param("yearMonth", YearMonth.from(meetingDate).toString()))
+                        .param("start", meetingDate.atStartOfDay().toString())
+                        .param("end", meetingDate.plusDays(1).atStartOfDay().toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].meetingId").value(meetingId));

@@ -20,12 +20,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
-import java.time.YearMonth;
 import java.util.List;
 import java.util.Optional;
-
-import static com.haruon.groupware.adapter.persistence.util.DateParseSupport.getFirstDateTimeOnNextMonth;
-import static com.haruon.groupware.adapter.persistence.util.DateParseSupport.getStartDateTimeByYearMonth;
 
 @Repository
 @RequiredArgsConstructor
@@ -38,9 +34,7 @@ public class FranchiseEducationQueryRepositoryAdapter implements FranchiseEducat
     private final QEducationFile educationFile = QEducationFile.educationFile;
 
     @Override
-    public List<EducationsResponse> findEducationList(YearMonth targetMonth) {
-        LocalDateTime startDate = getStartDateTimeByYearMonth(targetMonth);
-        LocalDateTime endDate = getFirstDateTimeOnNextMonth(targetMonth);
+    public List<EducationsResponse> findEducationList(LocalDateTime start, LocalDateTime end) {
         NumberExpression<Long> appliedCount = appliedCountSum();
 
         return query
@@ -51,8 +45,8 @@ public class FranchiseEducationQueryRepositoryAdapter implements FranchiseEducat
                 )).from(education)
                 .leftJoin(education.educationApplications, application)
                 .where(
-                        education.educationDate.goe(startDate),
-                        education.educationDate.lt(endDate)
+                        education.educationDate.goe(start),
+                        education.educationDate.lt(end)
                 )
                 .groupBy(education.id, education.educationDate, education.place, education.title, education.capacity, education.isActive)
                 .orderBy(education.educationDate.asc(), education.id.asc())

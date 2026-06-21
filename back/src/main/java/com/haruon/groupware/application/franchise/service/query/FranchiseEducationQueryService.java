@@ -14,7 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.YearMonth;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -26,10 +26,10 @@ public class FranchiseEducationQueryService implements FranchiseEducationRetriev
     private final AuthorizationQueryRepository authorizationQueryRepository;
 
     @Override
-    public List<EducationsResponse> retrieveEducations(Long empId, YearMonth targetMonth) {
+    public List<EducationsResponse> retrieveEducations(Long empId, LocalDateTime start, LocalDateTime end) {
         AuthValidator.checkFranchiseRoleEmp(authorizationQueryRepository, empId);
 
-        return franchiseEducationQueryRepository.findEducationList(targetMonth);
+        return franchiseEducationQueryRepository.findEducationList(start, end);
     }
 
     @Override

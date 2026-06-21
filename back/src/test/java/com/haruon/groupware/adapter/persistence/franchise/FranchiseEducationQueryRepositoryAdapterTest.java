@@ -22,7 +22,6 @@ import org.springframework.data.domain.PageRequest;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.YearMonth;
 import java.util.List;
 import java.util.UUID;
 
@@ -55,7 +54,10 @@ record FranchiseEducationQueryRepositoryAdapterTest(
         apply(fullEducation, saveFranchise(), "app-1", 10L);
         apply(fullEducation, saveFranchise(), "app-2", 20L);
 
-        List<EducationsResponse> responses = educationQueryRepository.findEducationList(YearMonth.of(2026, 5));
+        List<EducationsResponse> responses = educationQueryRepository.findEducationList(
+                LocalDateTime.of(2026, 5, 1, 0, 0),
+                LocalDateTime.of(2026, 6, 1, 0, 0)
+        );
 
         assertThat(responses).extracting(
                 EducationsResponse::id,

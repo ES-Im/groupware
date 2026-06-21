@@ -6,11 +6,11 @@ import com.haruon.groupware.application.franchise.service.query.dto.education.Ed
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.time.YearMonth;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface FranchiseEducationRetriever {
-    List<EducationsResponse> retrieveEducations(Long empId, YearMonth targetMonth);
+    List<EducationsResponse> retrieveEducations(Long empId, LocalDateTime start, LocalDateTime end);
 
     EducationDetailResponse retrieveEducation(Long empId, Long educationId);
 

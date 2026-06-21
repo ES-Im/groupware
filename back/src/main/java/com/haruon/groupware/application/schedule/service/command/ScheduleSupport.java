@@ -1,4 +1,4 @@
-package com.haruon.groupware.application.schedule.service;
+package com.haruon.groupware.application.schedule.service.command;
 
 import com.haruon.groupware.application.exception.schedule.ScheduleNotFoundException;
 import com.haruon.groupware.application.schedule.required.ScheduleRepository;

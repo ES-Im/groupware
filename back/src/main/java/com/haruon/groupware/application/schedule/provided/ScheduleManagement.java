@@ -1,6 +1,7 @@
 package com.haruon.groupware.application.schedule.provided;
 
-import com.haruon.groupware.application.schedule.service.ManualScheduleParam;
+import com.haruon.groupware.application.schedule.service.command.request.ManualScheduleCreateRequest;
+import com.haruon.groupware.application.schedule.service.command.request.ManualScheduleUpdateRequest;
 
 import java.util.Set;
 
@@ -9,14 +10,14 @@ import java.util.Set;
  */
 public interface ScheduleManagement {
 
-    String registerSchedules(ManualScheduleParam param);
+    String registerSchedules(Long ownerId, ManualScheduleCreateRequest param);
 
-    void addParticipants(Long scheduleId, Set<Long> empId, boolean isForBulkEdit);
+    void addParticipants(Long scheduleId, Long ownerId, Set<Long> participantEmpIds, boolean isForBulkEdit);
 
-    void removeParticipants(Long scheduleId, Set<Long> empId, boolean isForBulkEdit);
+    void removeParticipants(Long scheduleId, Long ownerId, Set<Long> participantEmpIds, boolean isForBulkEdit);
 
-    void cancelSchedule(Long scheduleId, boolean isForBulkEdit);
+    void cancelSchedule(Long scheduleId, Long ownerId, boolean isForBulkEdit);
 
-    void updateManualSchedule(Long scheduleId, boolean isForBulkEdit, ManualScheduleParam param);
+    void updateManualSchedule(Long scheduleId, Long ownerId, boolean isForBulkEdit, ManualScheduleUpdateRequest param);
 
 }

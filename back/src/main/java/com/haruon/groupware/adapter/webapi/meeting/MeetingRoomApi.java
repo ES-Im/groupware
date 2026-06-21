@@ -1,6 +1,7 @@
 package com.haruon.groupware.adapter.webapi.meeting;
 
 import com.haruon.groupware.adapter.security.empDtails.EmpDetails;
+import com.haruon.groupware.adapter.webapi.DateSupport;
 import com.haruon.groupware.application.exception.common.EndTimeBeforeStartTimeException;
 import com.haruon.groupware.application.exception.common.PositiveValueRequiredException;
 import com.haruon.groupware.application.file.dto.response.FileListInfo;
@@ -16,16 +17,17 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.YearMonth;
 import java.util.List;
 
-import static com.haruon.groupware.application.utils.Utils.SEOUL_ZONE;
+import static com.haruon.groupware.adapter.webapi.DateSupport.resolveSearchPeriod;
 
 @RestController
 @RequestMapping("/api/meeting-rooms")
@@ -69,10 +71,13 @@ public class MeetingRoomApi {
     @GetMapping("/{meetingRoomId}/reservations/calendar")
     public ResponseEntity<List<ReservationsByRoomResponse>> getReservationsByRoom(
             @PathVariable Long meetingRoomId,
-            @RequestParam(required = false) YearMonth yearMonth
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end
     ) {
+        DateSupport.SearchPeriod searchPeriod = resolveSearchPeriod(start, end);
+
         List<ReservationsByRoomResponse> responses = meetingRoomRetriever
-                .retrieveReservationsByRoomId(meetingRoomId, getTargetYearMonth(yearMonth));
+                .retrieveReservationsByRoomId(meetingRoomId, searchPeriod.startDateTime(), searchPeriod.endDateTime());
 
         return ResponseEntity.ok().body(responses);
     }
@@ -143,9 +148,4 @@ public class MeetingRoomApi {
             Long meetingRoomId
     ) {}
 
-    private YearMonth getTargetYearMonth(YearMonth yearMonth) {
-        return yearMonth == null
-                ? YearMonth.now(SEOUL_ZONE)
-                : yearMonth;
-    }
 }

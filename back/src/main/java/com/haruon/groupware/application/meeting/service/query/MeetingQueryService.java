@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.List;
 
@@ -27,9 +28,9 @@ public class MeetingQueryService implements MeetingRetriever {
 
     @Override
     public List<ReservationResponse> retrieveMyReservations(
-            Long empId, YearMonth targetYearMonth
+            Long empId, LocalDateTime start, LocalDateTime end
     ) {
-        return meetingQueryRepository.findMeetingsByEmpId(empId, targetYearMonth);
+        return meetingQueryRepository.findMeetingsByEmpId(empId, start, end);
     }
 
     @Override

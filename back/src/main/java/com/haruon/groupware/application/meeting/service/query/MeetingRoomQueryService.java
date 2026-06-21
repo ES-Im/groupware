@@ -19,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.YearMonth;
 import java.util.List;
 
 import static com.haruon.groupware.application.utils.Utils.SEOUL_ZONE;
@@ -64,10 +63,10 @@ public class MeetingRoomQueryService implements MeetingRoomRetriever {
     // 회의 예약자정보, 참여자 예약자 정보 외 n인으로 표시, 예약시간, 스케쥴만 출력 자세한 내용은 x
     @Override
     public List<ReservationsByRoomResponse> retrieveReservationsByRoomId(
-            Long meetingRoomId, YearMonth targetYearMonth
+            Long meetingRoomId, LocalDateTime start, LocalDateTime end
     ) {
         return meetingRoomQueryRepository.findMeetingsByMeetingRoomId(
-                meetingRoomId, targetYearMonth
+                meetingRoomId, start, end
         );
     }
 

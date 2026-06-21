@@ -9,8 +9,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.YearMonth;
 import java.util.List;
 
 public interface MeetingRoomRetriever {
@@ -31,7 +31,9 @@ public interface MeetingRoomRetriever {
     );
 
 
-    List<ReservationsByRoomResponse> retrieveReservationsByRoomId(Long meetingRoomId, YearMonth targetYearMonth);
+    List<ReservationsByRoomResponse> retrieveReservationsByRoomId(
+            Long meetingRoomId, LocalDateTime start, LocalDateTime end
+    );
 
     MeetingRoomDetailResponse retrieveMeetingRoomById(Long meetingRoomId);
 

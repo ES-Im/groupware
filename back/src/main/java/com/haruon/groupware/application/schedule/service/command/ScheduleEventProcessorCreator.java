@@ -1,4 +1,4 @@
-package com.haruon.groupware.application.schedule.service;
+package com.haruon.groupware.application.schedule.service.command;
 
 import com.haruon.groupware.application.draft.required.DraftRepository;
 import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
@@ -34,8 +34,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.haruon.groupware.application.schedule.service.ScheduleSupport.getSchedulesBySourceKey;
-import static com.haruon.groupware.application.schedule.service.ScheduleSupport.registerSchedule;
+import static com.haruon.groupware.application.schedule.service.command.ScheduleSupport.getSchedulesBySourceKey;
+import static com.haruon.groupware.application.schedule.service.command.ScheduleSupport.registerSchedule;
 import static com.haruon.groupware.application.utils.Utils.findEmpListById;
 
 @Slf4j

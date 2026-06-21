@@ -1,6 +1,7 @@
 package com.haruon.groupware.adapter.webapi.franchise;
 
 import com.haruon.groupware.adapter.security.empDtails.EmpDetails;
+import com.haruon.groupware.adapter.webapi.DateSupport;
 import com.haruon.groupware.application.franchise.provided.forCommand.EducationManagement;
 import com.haruon.groupware.application.franchise.provided.forRetriever.FranchiseEducationRetriever;
 import com.haruon.groupware.application.franchise.service.command.dto.EducationCreateRequest;
@@ -18,10 +19,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.YearMonth;
+import java.time.LocalDateTime;
 import java.util.List;
 
-import static com.haruon.groupware.application.utils.Utils.ZONE_SEOUL;
+import static com.haruon.groupware.adapter.webapi.DateSupport.resolveSearchPeriod;
 
 @RestController
 @RequestMapping("/api/franchise-educations")
@@ -34,12 +35,13 @@ public class FranchiseEducationApi {
     @GetMapping("/calendar")
     public ResponseEntity<List<EducationsResponse>> getEducations(
             @AuthenticationPrincipal EmpDetails details,
-            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM") YearMonth yearMonth
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end
     ) {
-        YearMonth targetMonth = yearMonth != null ? yearMonth : YearMonth.now(ZONE_SEOUL);
+        DateSupport.SearchPeriod searchPeriod = resolveSearchPeriod(start, end);
 
         List<EducationsResponse> responses = franchiseEducationRetriever
-                .retrieveEducations(details.getEmpId(), targetMonth);
+                .retrieveEducations(details.getEmpId(), searchPeriod.startDateTime(), searchPeriod.endDateTime());
 
         return ResponseEntity.ok().body(responses);
     }

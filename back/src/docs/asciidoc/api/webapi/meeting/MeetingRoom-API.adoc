@@ -55,7 +55,7 @@ include::{snippets}/MEETING_ROOM_MANAGEMENT/response-fields.adoc[]
 ====
 
 [[MEETING_ROOM_RESERVATIONS_CALENDAR]]
-=== 회의실 월별 예약 조회
+=== 회의실 기간별 예약 조회
 
 [tabs%nosync]
 ====

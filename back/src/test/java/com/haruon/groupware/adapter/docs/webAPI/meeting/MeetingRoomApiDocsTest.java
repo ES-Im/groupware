@@ -20,8 +20,8 @@ import org.springframework.restdocs.payload.FieldDescriptor;
 import org.springframework.restdocs.payload.JsonFieldType;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.YearMonth;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -113,9 +113,11 @@ class MeetingRoomApiDocsTest extends RestDocsSupport {
     }
 
     @Test
-    @DisplayName("회의실 월별 예약 조회 문서")
+    @DisplayName("회의실 기간별 예약 조회 문서")
     void getReservationsByRoom() throws Exception {
-        when(meetingRoomRetriever.retrieveReservationsByRoomId(3L, YearMonth.of(2026, 6)))
+        LocalDateTime start = LocalDateTime.of(2026, 6, 1, 0, 0);
+        LocalDateTime end = LocalDateTime.of(2026, 7, 1, 0, 0);
+        when(meetingRoomRetriever.retrieveReservationsByRoomId(3L, start, end))
                 .thenReturn(List.of(new ReservationsByRoomResponse(
                         "개발팀", "홍길동", 2, LocalDate.of(2026, 6, 19),
                         LocalTime.of(10, 0), LocalTime.of(11, 0)
@@ -124,14 +126,18 @@ class MeetingRoomApiDocsTest extends RestDocsSupport {
         mockMvc.perform(get(REQUEST_MAPPING_URL + "/{meetingRoomId}/reservations/calendar", 3L)
                         .with(employeeAuthentication())
                         .header("Authorization", "Bearer accessToken")
-                        .queryParam("yearMonth", "2026-06"))
+                        .queryParam("start", start.toString())
+                        .queryParam("end", end.toString()))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andDo(document("MEETING_ROOM_RESERVATIONS_CALENDAR",
                         preprocessRequest(prettyPrint()), preprocessResponse(prettyPrint()),
                         requestHeaders(headerWithName("Authorization").description("Bearer Access Token")),
                         pathParameters(parameterWithName("meetingRoomId").description("회의실 식별 번호")),
-                        queryParameters(parameterWithName("yearMonth").optional().description("조회 대상 월, yyyy-MM. 미입력 시 현재 월")),
+                        queryParameters(
+                                parameterWithName("start").optional().description("조회 시작 일시, yyyy-MM-dd'T'HH:mm:ss (포함), 미입력시 당월의 1일 0시 0분"),
+                                parameterWithName("end").optional().description("조회 종료 일시, yyyy-MM-dd'T'HH:mm:ss (미포함), 미입력시 익월의 1일 0시 0분")
+                        ),
                         responseFields(
                                 fieldWithPath("[]").type(JsonFieldType.ARRAY).description("회의실 예약 목록"),
                                 fieldWithPath("[].reserverDeptName").type(JsonFieldType.STRING).description("예약자 부서명"),
