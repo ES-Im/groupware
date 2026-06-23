@@ -102,6 +102,11 @@ dependencies {
     // mock
     mockitoAgent("org.mockito:mockito-core:5.20.0")
 
+    //websocket + storm
+    implementation("org.springframework.boot:spring-boot-starter-websocket")
+
+    // retry
+    implementation("org.springframework.retry:spring-retry")
 
 }
 

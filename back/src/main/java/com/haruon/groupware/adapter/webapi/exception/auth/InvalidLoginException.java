@@ -5,6 +5,6 @@ import com.haruon.groupware.adapter.webapi.exception.AdapterException;
 
 public class InvalidLoginException extends AdapterException {
     public InvalidLoginException() {
-        super(AdapterErrorCode.INVALIDLOGIN);
+        super(AdapterErrorCode.INVALID_LOGIN_EXCEPTION);
     }
 }

@@ -40,6 +40,8 @@ public enum ApplicationErrorCode {
     // Chat
     CHATROOM_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND, "CHAT_001", "조회된 채팅방이 없습니다"),
     CHAT_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND, "CHAT_002", "조회된 채팅이 없습니다"),
+    NOT_ALLOWED_CHAT_MEMBER_EXCEPTION(HttpStatus.FORBIDDEN, "CHAT_003", "채팅방 접근 권한 없습니다."),
+
 
     // draft & approval
     APPROVAL_LINE_REQUIRED_EXCEPTION(HttpStatus.BAD_REQUEST, "DRAFT_001", "결재선 설정은 필수입니다."),

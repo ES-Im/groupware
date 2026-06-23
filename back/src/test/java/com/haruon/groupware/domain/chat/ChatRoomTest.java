@@ -5,6 +5,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
+import java.util.Locale;
 import java.util.Set;
 
 import static com.haruon.groupware.domain.shared.EmpFixture.getApprovedEmp;
@@ -14,7 +15,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ChatRoomTest {
 
-
+    private static final String CLIENT_MESSAGE_ID =
+            "2f641962-29a9-4a44-8f9d-e815d37d3ee8";
 
     @Test
     @DisplayName("채팅방 생성 & 참여자 생성 테스트 - 참여자가 2명 이하라면 isGroup = false")
@@ -229,37 +231,6 @@ class ChatRoomTest {
         assertThat(chatMember.isBookMarked()).isFalse();
     }
 
-
-    @Test
-    @DisplayName("채팅창 삭제 조건 검증 테스트 - 채팅창 종료 후 30일이 지나면 물리삭제 (배치) 대상이다.")
-    void isDeletable_pass() {
-        Emp owner = getApprovedEmp("202601001","owner001");
-        Emp member1 = getApprovedEmp("202601002","member001");
-
-        ChatRoom chatRoom = createRoom(owner, Set.of(member1));
-        LocalDateTime closeAt = LocalDateTime.of(2026, 1, 1, 8, 19);
-        chatRoom.leaveRoomByMember(member1, LocalDateTime.of(2026, 1, 1, 8, 18));
-        chatRoom.leaveRoomByMember(owner, closeAt);
-
-
-        assertThat(chatRoom.isDeletable(closeAt.plusDays(30))).isTrue();
-    }
-
-    @Test
-    @DisplayName("채팅창 삭제 조건 검증 테스트 - 채팅창 종료 후 30일이 지나지 않음녀 물리삭제 (배치) 대상이 아니다.")
-    void isDeletable_unpass() {
-        Emp owner = getApprovedEmp("202601001","owner001");
-        Emp member1 = getApprovedEmp("202601002","member001");
-
-        ChatRoom chatRoom = createRoom(owner, Set.of(member1));
-        LocalDateTime closeAt = LocalDateTime.of(2026, 1, 1, 8, 19);
-        chatRoom.leaveRoomByMember(member1, LocalDateTime.of(2026, 1, 1, 8, 18));
-        chatRoom.leaveRoomByMember(owner, closeAt);
-
-
-        assertThat(chatRoom.isDeletable(closeAt.plusDays(29))).isFalse();
-    }
-
     @Test
     @DisplayName("채팅보내기 테스트 - 채팅을 보내면, 마지막 메세지 시각이 변한다.")
     void sendChat_success() {
@@ -268,7 +239,7 @@ class ChatRoomTest {
 
         ChatRoom chatRoom = createRoom(owner, Set.of(member1));
         LocalDateTime sentAt = LocalDateTime.of(2026, 1, 1, 8, 18);
-        chatRoom.sendChat(member1, "test", sentAt);
+        chatRoom.sendChat(member1, CLIENT_MESSAGE_ID, "test", sentAt);
 
         assertThat(chatRoom.getLastMessageAt()).isEqualTo(sentAt);
     }
@@ -287,7 +258,7 @@ class ChatRoomTest {
         LocalDateTime sentAt = chatMember.getJoinedAt().minusMinutes(1);
 
         assertThatThrownBy(() ->
-                chatRoom.sendChat(member1, "test", sentAt)
+                chatRoom.sendChat(member1, CLIENT_MESSAGE_ID, "test", sentAt)
         ).hasMessage(errorMsg);
     }
 
@@ -304,10 +275,10 @@ class ChatRoomTest {
 
         LocalDateTime sentAt = chatMember.getJoinedAt().plusHours(1);
         LocalDateTime sentSecondAt = sentAt.minusMinutes(1);
-        chatRoom.sendChat(member1, "test", sentAt);
+        chatRoom.sendChat(member1, CLIENT_MESSAGE_ID, "test", sentAt);
 
         assertThatThrownBy(() ->
-                chatRoom.sendChat(member1, "test2", sentSecondAt)
+                chatRoom.sendChat(member1, CLIENT_MESSAGE_ID, "test2", sentSecondAt)
         ).hasMessage(errorMsg);
     }
 
@@ -321,7 +292,12 @@ class ChatRoomTest {
         ChatMember chatMember = getChatMember(chatRoom, member1);
 
         LocalDateTime sentAt = chatMember.getJoinedAt().plusHours(1);
-        ChatMessage message = chatRoom.sendChat(member1, "test", sentAt);
+        ChatMessage message = chatRoom.sendChat(
+                member1,
+                CLIENT_MESSAGE_ID,
+                "test",
+                sentAt
+        );
 
         chatRoom.changeLastReadMessageByMember(owner, message);
         ChatMember chatOwner = getChatMember(chatRoom, owner);
@@ -358,13 +334,94 @@ class ChatRoomTest {
         ).as("참가자가 아니면 즐겨찾기를 할 수 없다").hasMessage(errorMsg);
 
         assertThatThrownBy(() -> {
-            ChatMessage message = chatRoom.sendChat(owner, "test", LocalDateTime.of(2026, 2, 1, 0, 0, 0));
+            ChatMessage message = chatRoom.sendChat(
+                    owner,
+                    CLIENT_MESSAGE_ID,
+                    "test",
+                    LocalDateTime.of(2026, 2, 1, 0, 0, 0)
+            );
             chatRoom.changeLastReadMessageByMember(notMember, message);
         }).as("참가자가 아니면 채팅 읽음 처리를 할 수 없다.").hasMessage(errorMsg);
 
         assertThatThrownBy(() ->
-                chatRoom.sendChat(notMember, "test", LocalDateTime.of(2026, 2, 1, 0, 0, 0))
+                chatRoom.sendChat(
+                        notMember,
+                        CLIENT_MESSAGE_ID,
+                        "test",
+                        LocalDateTime.of(2026, 2, 1, 0, 0, 0)
+                )
         ).as("참가자가 아니면 채팅을 보낼 수 없다.").hasMessage(errorMsg);
+    }
+
+    @Test
+    @DisplayName("공백 메시지는 보낼 수 없다")
+    void sendChat_fail_when_content_is_blank() {
+        Emp owner = getApprovedEmp("202601001", "owner001");
+        Emp member = getApprovedEmp("202601002", "member001");
+        ChatRoom chatRoom = createRoom(owner, Set.of(member));
+
+        assertThatThrownBy(() ->
+                chatRoom.sendChat(
+                        member,
+                        CLIENT_MESSAGE_ID,
+                        "   ",
+                        LocalDateTime.of(2026, 1, 1, 9, 0)
+                )
+        ).isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("채팅 내용은 공백일 수 없음");
+    }
+
+    @Test
+    @DisplayName("2000자를 초과한 메시지는 보낼 수 없다")
+    void sendChat_fail_when_content_exceeds_limit() {
+        Emp owner = getApprovedEmp("202601001", "owner001");
+        Emp member = getApprovedEmp("202601002", "member001");
+        ChatRoom chatRoom = createRoom(owner, Set.of(member));
+
+        assertThatThrownBy(() ->
+                chatRoom.sendChat(
+                        member,
+                        CLIENT_MESSAGE_ID,
+                        "a".repeat(2001),
+                        LocalDateTime.of(2026, 1, 1, 9, 0)
+                )
+        ).isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("채팅 내용은 2000자를 초과할 수 없음");
+    }
+
+    @Test
+    @DisplayName("clientMessageId는 UUID 문자열이어야 한다")
+    void sendChat_fail_when_client_message_id_is_invalid() {
+        Emp owner = getApprovedEmp("202601001", "owner001");
+        Emp member = getApprovedEmp("202601002", "member001");
+        ChatRoom chatRoom = createRoom(owner, Set.of(member));
+
+        assertThatThrownBy(() ->
+                chatRoom.sendChat(
+                        member,
+                        "invalid-id",
+                        "test",
+                        LocalDateTime.of(2026, 1, 1, 9, 0)
+                )
+        ).isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("올바르지 않은 clientMessageId UUID 형식");
+    }
+
+    @Test
+    @DisplayName("clientMessageId는 표준 소문자 UUID 문자열로 저장한다")
+    void sendChat_normalizes_client_message_id() {
+        Emp owner = getApprovedEmp("202601001", "owner001");
+        Emp member = getApprovedEmp("202601002", "member001");
+        ChatRoom chatRoom = createRoom(owner, Set.of(member));
+
+        ChatMessage message = chatRoom.sendChat(
+                member,
+                CLIENT_MESSAGE_ID.toUpperCase(Locale.ROOT),
+                "test",
+                LocalDateTime.of(2026, 1, 1, 9, 0)
+        );
+
+        assertThat(message.getClientMessageId()).isEqualTo(CLIENT_MESSAGE_ID);
     }
 
     private ChatRoom createRoom(Emp owner, Set<Emp> members) {

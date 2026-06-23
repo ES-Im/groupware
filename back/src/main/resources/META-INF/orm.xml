@@ -1060,7 +1060,16 @@
     </entity>
 
     <entity class="com.haruon.groupware.domain.chat.ChatMessage" access="FIELD">
+        <table>
+            <unique-constraint>
+                <column-name>sender_id</column-name>
+                <column-name>client_message_id</column-name>
+            </unique-constraint>
+        </table>
         <attributes>
+            <basic name="clientMessageId">
+                <column name="client_message_id" nullable="false" updatable="false" length="36"/>
+            </basic>
             <basic name="content">
                 <column name="content" nullable="false" updatable="false" length="16777215"/>
             </basic>

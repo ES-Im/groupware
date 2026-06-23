@@ -180,6 +180,9 @@ public class SecurityConfig {
                                 "/api/meeting-rooms/*/files/**"
                         ).hasAnyRole(SystemRoleCode.EMPLOYEE.name())
 
+                        /* chat - websocket */
+                        .requestMatchers("/ws-chat", "/ws-chat/**").permitAll()
+
                         .anyRequest().authenticated());
 
         http

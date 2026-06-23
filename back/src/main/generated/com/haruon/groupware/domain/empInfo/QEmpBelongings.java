@@ -68,7 +68,7 @@ public class QEmpBelongings extends EntityPathBase<EmpBelongings> {
 
     public QEmpBelongings(Class<? extends EmpBelongings> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.dept = inits.isInitialized("dept") ? new QDept(forProperty("dept")) : null;
+        this.dept = inits.isInitialized("dept") ? new QDept(forProperty("dept"), inits.get("dept")) : null;
         this.emp = inits.isInitialized("emp") ? new QEmp(forProperty("emp"), inits.get("emp")) : null;
     }
 

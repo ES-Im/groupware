@@ -1,4 +1,4 @@
-package com.haruon.groupware.application.chat.service;
+package com.haruon.groupware.application.chat.service.command;
 
 import com.haruon.groupware.application.chat.required.ChatRepository;
 import com.haruon.groupware.application.chat.required.ChatRoomRepository;

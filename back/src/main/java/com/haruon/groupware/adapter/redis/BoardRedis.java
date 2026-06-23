@@ -35,8 +35,8 @@ public class BoardRedis implements BoardReactionCounter {
             local deltaType = redis.call('TYPE', KEYS[1]).ok
             local dirtyType = redis.call('TYPE', KEYS[2]).ok
 
-            if deltaType ~= 'none' and deltaType ~= 'hash' then return redis.error_reply('delta key type is not hash') end
-            if dirtyType ~= 'none' and dirtyType ~= 'set' then return redis.error_reply('dirty key type is not set') end
+            if deltaType ~= 'none' and deltaType ~= 'hash' then return redis.error_reply('delta key destinationType is not hash') end
+            if dirtyType ~= 'none' and dirtyType ~= 'set' then return redis.error_reply('dirty key destinationType is not set') end
 
             redis.call('HINCRBY', KEYS[1], ARGV[1], ARGV[2])
             redis.call('SADD', KEYS[2], ARGV[3])

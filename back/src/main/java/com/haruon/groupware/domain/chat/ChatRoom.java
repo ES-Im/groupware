@@ -14,7 +14,7 @@ import java.util.List;
 
 import static com.haruon.groupware.domain.chat.ChatMessage.createMessage;
 import static java.util.Objects.requireNonNull;
-import static org.springframework.util.Assert.state;
+import static org.springframework.util.Assert.*;
 
 @Getter
 @Entity
@@ -130,13 +130,6 @@ public class ChatRoom extends AbstractEntity {
         chatMember.changeLastMessage(message);
     }
 
-    public boolean isDeletable(LocalDateTime currentTime) {
-        requireNonNull(currentTime);
-
-        return this.closedAt != null
-                && !currentTime.isBefore(this.closedAt.plusDays(30));
-    }
-
     public boolean isParticipating(Emp emp) {
         requireNonNull(emp);
 
@@ -147,12 +140,15 @@ public class ChatRoom extends AbstractEntity {
 
     public ChatMessage sendChat(
             Emp sender,
+            String clientMessageId,
             String content,
             LocalDateTime sentAt
     ) {
         requireNonNull(sender);
         requireNonNull(content);
         requireNonNull(sentAt);
+        hasText(content, "채팅 내용은 공백일 수 없음");
+        isTrue(content.length() <= 2000, "채팅 내용은 2000자를 초과할 수 없음");
 
         validateRoomOpen();
 
@@ -168,7 +164,7 @@ public class ChatRoom extends AbstractEntity {
 
         this.lastMessageAt = sentAt;
 
-        return createMessage(this, sender, content, sentAt);
+        return createMessage(this, sender, clientMessageId, content, sentAt);
     }
 
     private void updateGroupStatus() {

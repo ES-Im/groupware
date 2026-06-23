@@ -1,8 +1,9 @@
-package com.haruon.groupware.application.chat.service;
+package com.haruon.groupware.application.chat.service.command;
 
-import com.haruon.groupware.application.chat.provided.ChatRoomCleanup;
-import com.haruon.groupware.application.chat.provided.ChatRoomManagement;
+import com.haruon.groupware.application.chat.provided.forCommand.ChatRoomCleanup;
+import com.haruon.groupware.application.chat.provided.forCommand.ChatRoomManagement;
 import com.haruon.groupware.application.chat.required.ChatRepository;
+import com.haruon.groupware.application.chat.required.ChatRoomCleanupRepository;
 import com.haruon.groupware.application.chat.required.ChatRoomRepository;
 import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
 import com.haruon.groupware.domain.chat.ChatMessage;
@@ -16,8 +17,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
-import static com.haruon.groupware.application.chat.service.ChatUtils.findChat;
-import static com.haruon.groupware.application.chat.service.ChatUtils.findChatRoom;
+import static com.haruon.groupware.application.chat.service.command.ChatUtils.findChat;
+import static com.haruon.groupware.application.chat.service.command.ChatUtils.findChatRoom;
 import static com.haruon.groupware.application.utils.AuthValidator.findActiveEmpById;
 import static com.haruon.groupware.application.utils.Utils.findEmpListById;
 import static com.haruon.groupware.domain.chat.ChatRoom.createRoom;
@@ -28,6 +29,7 @@ import static com.haruon.groupware.domain.chat.ChatRoom.createRoom;
 public class ChatRoomService implements ChatRoomManagement, ChatRoomCleanup {
 
     private final ChatRoomRepository chatRoomRepository;
+    private final ChatRoomCleanupRepository chatRoomCleanupRepository;
     private final EmpRepository empRepository;
     private final ChatRepository chatRepository;
 
@@ -99,9 +101,11 @@ public class ChatRoomService implements ChatRoomManagement, ChatRoomCleanup {
     }
 
     @Override
-    public boolean deletableChatroomByBatch(Long roomId, LocalDateTime currentTime) {
-        ChatRoom room = findChatRoom(chatRoomRepository, roomId);
+    public void cleanupChatRooms(LocalDateTime currentTime) {
+        List<Long> roomIds = chatRoomCleanupRepository.findDeletableChatRoomId(currentTime);
 
-        return room.isDeletable(currentTime);
+        if (!roomIds.isEmpty()) {
+            chatRoomCleanupRepository.deleteAllByRoomIds(roomIds);
+        }
     }
 }

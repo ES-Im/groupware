@@ -1,4 +1,4 @@
-package com.haruon.groupware.application.chat.provided;
+package com.haruon.groupware.application.chat.provided.forCommand;
 
 import java.time.LocalDateTime;
 import java.util.Set;

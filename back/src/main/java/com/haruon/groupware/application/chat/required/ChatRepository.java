@@ -11,5 +11,10 @@ public interface ChatRepository extends Repository<ChatMessage, Long> {
 
     Optional<ChatMessage> findById(Long id);
 
+    Optional<ChatMessage> findByEmpIdAndClientMessageId(
+            Long senderId,
+            String clientMessageId
+    );
+
     void deleteAll();
 }

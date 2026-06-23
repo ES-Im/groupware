@@ -1,6 +1,9 @@
 package com.haruon.groupware.application.chat.provided;
 
 import com.haruon.groupware.application.TestIntegrationConfig;
+import com.haruon.groupware.application.chat.provided.forCommand.ChatRoomCleanup;
+import com.haruon.groupware.application.chat.provided.forCommand.ChatRoomManagement;
+import com.haruon.groupware.application.chat.provided.forCommand.ChatSender;
 import com.haruon.groupware.application.chat.required.ChatRepository;
 import com.haruon.groupware.application.chat.required.ChatRoomRepository;
 import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
@@ -27,11 +30,15 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 record ChatRoomManagementTest(
         ChatRoomManagement chatRoomManagement,
         ChatSender chatSender,
+        ChatRoomCleanup chatRoomCleanup,
         ChatRoomRepository chatRoomRepository,
         ChatRepository chatRepository,
         EmpRepository empRepository,
         EntityManager em
 ) {
+
+    private static final String CLIENT_MESSAGE_ID =
+            "2f641962-29a9-4a44-8f9d-e815d37d3ee8";
 
     @AfterEach
     void tearDrop() {
@@ -251,9 +258,10 @@ record ChatRoomManagementTest(
         long chatId = chatSender.send(
                 roomId,
                 owner.getId(),
+                CLIENT_MESSAGE_ID,
                 "test message",
                 of(2026, 5, 9, 10, 10)
-        );
+        ).chatId();
 
         chatRoomManagement.renewLatestReadChatByMember(
                 member.getId(),
@@ -269,6 +277,51 @@ record ChatRoomManagementTest(
         assertThat(room.getMembers())
                 .filteredOn(m -> m.getEmp().getId().equals(member.getId()))
                 .allMatch(m -> m.getLatestReadChats().getId().equals(chatId));
+    }
+
+    @Test
+    @DisplayName("종료 후 30일이 지난 채팅방과 메시지를 삭제한다")
+    void cleanupChatRooms_success() {
+        Emp owner = saveApprovedEmp(empRepository, "202601001", "owner");
+        Emp member = saveApprovedEmp(empRepository, "202601002", "member");
+
+        long deletableRoomId = chatRoomManagement.makeRoom(
+                owner.getId(), Set.of(member.getId()), of(2026, 1, 1, 8, 0)
+        );
+        long remainingRoomId = chatRoomManagement.makeRoom(
+                owner.getId(), Set.of(member.getId()), of(2026, 1, 2, 8, 0)
+        );
+        long chatId = chatSender.send(
+                deletableRoomId,
+                owner.getId(),
+                CLIENT_MESSAGE_ID,
+                "test message",
+                of(2026, 1, 1, 9, 0)
+        ).chatId();
+
+        chatRoomManagement.leaveRoomByMember(
+                deletableRoomId, member.getId(), of(2026, 1, 1, 10, 0)
+        );
+        chatRoomManagement.leaveRoomByMember(
+                deletableRoomId, owner.getId(), of(2026, 1, 1, 11, 0)
+        );
+        chatRoomManagement.leaveRoomByMember(
+                remainingRoomId, member.getId(), of(2026, 1, 2, 10, 0)
+        );
+        chatRoomManagement.leaveRoomByMember(
+                remainingRoomId, owner.getId(), of(2026, 1, 2, 11, 0)
+        );
+
+        em.flush();
+        em.clear();
+
+        chatRoomCleanup.cleanupChatRooms(of(2026, 1, 31, 11, 0));
+
+        em.clear();
+
+        assertThat(chatRoomRepository.findById(deletableRoomId)).isEmpty();
+        assertThat(chatRepository.findById(chatId)).isEmpty();
+        assertThat(chatRoomRepository.findById(remainingRoomId)).isPresent();
     }
 
 }

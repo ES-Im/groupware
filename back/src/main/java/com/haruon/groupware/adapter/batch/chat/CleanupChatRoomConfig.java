@@ -1,6 +1,6 @@
 package com.haruon.groupware.adapter.batch.chat;
 
-import com.haruon.groupware.application.chat.provided.ChatRoomCleanup;
+import com.haruon.groupware.application.chat.provided.forCommand.ChatRoomCleanup;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
@@ -38,15 +38,13 @@ public class CleanupChatRoomConfig {
     @JobScope
     Step cleanUpChatRoomStep(
             @Value("#{jobParameters['cleanUpDate']}") LocalDate cleanUpDate,
-            PlatformTransactionManager transactionManager) {
+            PlatformTransactionManager transactionManager
+    ) {
         return new StepBuilder("cleanUpChatRoomStep", jobRepository)
                 .tasklet(((contribution, chunkContext) -> {
                     log.info("cleanUpChatRoomStep - chatRoom 정리 시작");
 
-                    //todo ChatRoom -> 엔티티 isDeletable을 Repository에서 id들을 추출해서
-                    // deletableChatRoomByBatch실행
-                    // 그럼 판단다시 해야되는거 -> delete조건을 도메인 규칙이 아니라 jpqlDSL로 옳기면 더 효율적일거같은데
-                    // 도메인 규칙과 검증이 중복된다. 이를 어떻게 해야할지?
+                    chatRoomCleanup.cleanupChatRooms(cleanUpDate.atStartOfDay());
 
                     return RepeatStatus.FINISHED;
                 }), transactionManager).build();
