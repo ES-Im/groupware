@@ -1,11 +1,12 @@
 package com.haruon.groupware.application.chat.service.query.dto;
 
 import org.jspecify.annotations.Nullable;
+
 import java.util.List;
 
 public record ChatRoomDetailResponse(
         Long roomId,
-        String roomName,
+        @Nullable String roomName,
         Boolean isGroup,
         @Nullable Long lastReadMessageId,
 
@@ -33,7 +34,26 @@ public record ChatRoomDetailResponse(
         Long memberId,
         String deptName,
         String memberName,
-        @Nullable Long profileFileId,
         @Nullable String profileImageUrl
-    ) {}
+    ) {
+
+        public ChatRoomMember(
+                Long memberId,
+                String deptName,
+                String memberName,
+                @Nullable Long profileFileId) {
+
+            this(
+                    memberId, deptName, memberName,
+                    getProfileFileApi(memberId, profileFileId)
+            );
+        }
+
+    }
+
+    private static @Nullable String getProfileFileApi(Long memberId, @Nullable Long profileFileId) {
+        return profileFileId != null
+                ? "/api/employees/" + memberId + "/files/" + profileFileId + "/preview"
+                : null;
+    }
 }

@@ -117,7 +117,4 @@ public class ChatMember extends AbstractEntity {
         return this.leftAt == null;
     }
 
-    public ChatMessage getLatestReadChats() {
-        return this.lastReadMessage;
-    }
 }

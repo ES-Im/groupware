@@ -22,6 +22,7 @@ public class BoardFileResourceService extends AbstractFileResourceService {
         super(fileResourceQueryRepository, fileStorage);
     }
 
+    @Override
     protected FileResourceInfo getFileResourceInfo(Long boardId, Long fileId) {
         return  fileResourceQueryRepository
                 .findBoardFileInfoByBoardIdAndFileIdForResource(boardId, fileId)

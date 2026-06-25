@@ -17,12 +17,12 @@ public record FranchisesResponse(
             String name,
             String address,
             String ownerName,
-            BusinessStatus businessStatus,
+            BusinessStatus status,
             Long managerEmpId,
             String managerEmpName) {
         this(
                 id, name, address, ownerName,
-                businessStatus.getDescription(), managerEmpId, managerEmpName
+                status.getDescription(), managerEmpId, managerEmpName
         );
     }
 }

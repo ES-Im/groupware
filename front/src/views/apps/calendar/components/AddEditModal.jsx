@@ -1,9 +1,23 @@
-import { yupResolver } from '@hookform/resolvers/yup';
-import { useEffect } from 'react';
-import { Button, Col, Form, FormControl, FormGroup, FormLabel, FormSelect, Modal, ModalBody, ModalHeader, ModalTitle, Row } from 'react-bootstrap';
+import {yupResolver} from '@hookform/resolvers/yup';
+import {useEffect} from 'react';
+import {
+    Button,
+    Col,
+    Form,
+    FormControl,
+    FormGroup,
+    FormLabel,
+    FormSelect,
+    Modal,
+    ModalBody,
+    ModalHeader,
+    ModalTitle,
+    Row
+} from 'react-bootstrap';
 import Feedback from 'react-bootstrap/Feedback';
-import { useForm } from 'react-hook-form';
+import {useForm} from 'react-hook-form';
 import * as yup from 'yup';
+
 const AddEditModal = ({
   eventData,
   isEditable,

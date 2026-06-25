@@ -48,7 +48,7 @@ public class DeptApiDocsTest extends RestDocsSupport {
 
         List<DeptInfoResponse> responses = support.getDeptInfoListResponses();
 
-        Mockito.when(deptRetriever.retrieverDeptInfoList(anyBoolean(), anyString(), any(Pageable.class)))
+        Mockito.when(deptRetriever.retrieveDeptInfoList(anyBoolean(), anyString(), any(Pageable.class)))
                 .thenReturn(new PageImpl<>(responses, PageRequest.of(0, 10), responses.size()));
 
         mockMvc.perform(
@@ -120,7 +120,7 @@ public class DeptApiDocsTest extends RestDocsSupport {
                 support.getDeptMemberInfo(3L, "박영희", PositionCode.INTERN)
         );
 
-        Mockito.when(deptRetriever.retrieverDeptMemberList(anyLong(), anyString(), anyBoolean(), any(Pageable.class)))
+        Mockito.when(deptRetriever.retrieveDeptMemberList(anyLong(), anyString(), anyBoolean(), any(Pageable.class)))
                 .thenReturn(new PageImpl<>(
                         response,
                         PageRequest.of(0, 10),
@@ -191,7 +191,7 @@ public class DeptApiDocsTest extends RestDocsSupport {
         DeptInfoResponse response = support
                 .getDeptInfoResponse(1L, "IT", 1L, "김철수", PositionCode.ASSISTANT_MANAGER);
 
-        Mockito.when(deptRetriever.retrieverDeptInfo(eq(1L)))
+        Mockito.when(deptRetriever.retrieveDeptInfo(eq(1L)))
                 .thenReturn(response);
 
         mockMvc.perform(

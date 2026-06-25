@@ -171,6 +171,8 @@ public class SecurityConfig {
                         /* Schedule API */
                         .requestMatchers("/api/schedules", "/api/schedules/**").hasRole(SystemRoleCode.EMPLOYEE.name())
 
+                        .requestMatchers("/api/chat/rooms", "/api/chat/rooms/**").hasRole(SystemRoleCode.EMPLOYEE.name())
+
                         /* File API */
                         .requestMatchers(HttpMethod.GET,
                                 "/api/drafts/*/files/**",

@@ -22,6 +22,7 @@ public class MessageFileResourceService extends AbstractFileResourceService {
         super(fileResourceQueryRepository, fileStorage);
     }
 
+    @Override
     protected FileResourceInfo getFileResourceInfo(Long messageId, Long fileId) {
         return  fileResourceQueryRepository
                 .findMessageFileInfoByMessageIdAndFileIdForResource(messageId, fileId)

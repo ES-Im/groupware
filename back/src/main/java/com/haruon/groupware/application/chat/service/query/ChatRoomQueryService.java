@@ -2,7 +2,6 @@ package com.haruon.groupware.application.chat.service.query;
 
 import com.haruon.groupware.application.chat.provided.forRetrieve.ChatRoomRetriever;
 import com.haruon.groupware.application.chat.required.ChatRoomQueryRepository;
-import com.haruon.groupware.application.chat.required.ChatRoomRepository;
 import com.haruon.groupware.application.chat.service.query.dto.ChatRoomDetailResponse;
 import com.haruon.groupware.application.chat.service.query.dto.MyChatRoomsResponse;
 import com.haruon.groupware.application.exception.chat.NotAllowedChatMemberException;
@@ -19,7 +18,6 @@ import java.util.List;
 public class ChatRoomQueryService implements ChatRoomRetriever {
 
     private final ChatRoomQueryRepository chatRoomQueryRepository;
-    private final ChatRoomRepository chatRoomRepository;
 
     @Override
     public List<MyChatRoomsResponse> retrieveChatRooms(
@@ -31,13 +29,9 @@ public class ChatRoomQueryService implements ChatRoomRetriever {
 
     @Override
     public ChatRoomDetailResponse retrieveChatRoomDetail(Long empId, Long roomId) {
-        if(!isEmpJoinedChatRoom(empId, roomId)) throw new NotAllowedChatMemberException();
-
         return chatRoomQueryRepository
-                .findChatRoomByRoomId(roomId);
+                .findChatRoomByRoomId(empId, roomId)
+                .orElseThrow(NotAllowedChatMemberException::new);
     }
 
-    private boolean isEmpJoinedChatRoom(Long empId, Long roomId) {
-        return chatRoomQueryRepository.existRoomByIdAndEmpId(empId, roomId);
-    }
 }

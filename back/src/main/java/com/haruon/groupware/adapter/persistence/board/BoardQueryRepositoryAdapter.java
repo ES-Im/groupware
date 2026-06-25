@@ -6,7 +6,6 @@ import com.haruon.groupware.application.file.dto.response.FileListInfo;
 import com.haruon.groupware.domain.board.QBoard;
 import com.haruon.groupware.domain.board.QBoardComment;
 import com.haruon.groupware.domain.board.QBoardFile;
-import com.haruon.groupware.domain.board.QCategory;
 import com.haruon.groupware.domain.empInfo.QEmp;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -28,7 +27,6 @@ public class BoardQueryRepositoryAdapter implements BoardQueryRepository {
     private final QBoard board = QBoard.board;
     private final QBoardComment comment = QBoardComment.boardComment;
     private final QBoardFile boardFile = QBoardFile.boardFile;
-    private final QCategory category = QCategory.category;
     private final QEmp emp = QEmp.emp;
 
     @Override

@@ -305,6 +305,11 @@ include::api/webapi/board/Board-API.adoc[]
 
 include::api/webapi/message/Message-API.adoc[]
 
+[[CHAT_API]]
+== CHAT API
+
+include::api/webapi/chat/Chat-API.adoc[]
+
 [[FRANCHISE_API]]
 == FRANCHISE API
 

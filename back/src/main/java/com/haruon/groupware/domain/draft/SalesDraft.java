@@ -31,10 +31,18 @@ public class SalesDraft extends Draft {
 
     private long salesAmount;
 
-    private SalesDraft(String title, String content, Emp emp) {
+    private SalesDraft(
+            String title, String content, Emp emp,
+            YearMonth reportMonth, Long salesAmount, Franchise franchise
+    ) {
         super(title, content, emp);
         state(emp.getStatus().equals(EmpStatus.ACTIVE), "활성화된 사원이 아님");
         state(emp.getSystemRoles().contains(SystemRoleCode.FRANCHISE), "가맹점 권한이 없음");
+        validateSalesInitParam(reportMonth, salesAmount, franchise);
+
+        this.reportMonth = reportMonth;
+        this.salesAmount = salesAmount;
+        this.franchise = franchise;
     }
 
     public static SalesDraft createDraft(
@@ -46,9 +54,8 @@ public class SalesDraft extends Draft {
             Long salesAmount,
             @Nullable List<ApproversParam> approvers
     ) {
-        SalesDraft salesDraft = new SalesDraft(title, content, emp);
+        SalesDraft salesDraft = new SalesDraft(title, content, emp, reportMonth, salesAmount, franchise);
 
-        salesDraft.init(reportMonth, salesAmount, franchise);
         salesDraft.createDraftApproval(approvers);
 
         return salesDraft;
@@ -64,9 +71,8 @@ public class SalesDraft extends Draft {
             List<ApproversParam> approvers,
             LocalDateTime submittedAt
     ) {
-        SalesDraft salesDraft = new SalesDraft(title, content, emp);
+        SalesDraft salesDraft = new SalesDraft(title, content, emp, reportMonth, salesAmount, franchise);
 
-        salesDraft.init(reportMonth, salesAmount, franchise);
         salesDraft.createSubmittedApproval(approvers, submittedAt);
 
         return salesDraft;
@@ -91,16 +97,6 @@ public class SalesDraft extends Draft {
         this.franchise = editedFranchise;
         this.reportMonth = editedReportMonth;
         this.salesAmount = editedSalesAmount;
-    }
-
-    private void init(
-            YearMonth reportMonth, Long salesAmount, Franchise franchise
-    ) {
-        validateSalesInitParam(reportMonth, salesAmount, franchise);
-
-        this.reportMonth = reportMonth;
-        this.salesAmount = salesAmount;
-        this.franchise = franchise;
     }
 
     private static void validateSalesInitParam(YearMonth reportMonth, Long salesAmount, Franchise franchise) {

@@ -11,6 +11,7 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -39,7 +40,8 @@ public class FileStorageAdapter implements FileStorage {
 
             Path storedFilePath = storedPath.resolve(storedFileName);
 
-            Files.write(storedFilePath, fileDto.bytes());
+            InputStream inputStream = fileDto.resource().getInputStream();
+            Files.copy(inputStream, storedFilePath);
 
             return new StoreFile(
                     fileDto.originalFileName(),

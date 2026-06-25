@@ -5,7 +5,6 @@ plugins {
     java
     id("org.springframework.boot") version "3.5.8"
     id("io.spring.dependency-management") version "1.1.7"
-    id("com.github.spotbugs") version "6.4.8"
     id("org.asciidoctor.jvm.convert") version "4.0.5"
     id("net.ltgt.errorprone") version "5.1.0"
     id("net.ltgt.nullaway") version "3.0.0"
@@ -87,11 +86,6 @@ dependencies {
     add("asciidoctorExt", "org.springframework.restdocs:spring-restdocs-asciidoctor")
     testImplementation("org.springframework.restdocs:spring-restdocs-mockmvc")
 
-    // NullMarked
-    implementation("org.jspecify:jspecify:1.0.0")
-    errorprone("com.google.errorprone:error_prone_core:2.48.0")
-    errorprone("com.uber.nullaway:nullaway:0.13.1")
-
     // openFeign queryDSL(7.x)
     implementation("io.github.openfeign.querydsl:querydsl-jpa:${querydslVersion}")
     // Q-class generation
@@ -108,12 +102,40 @@ dependencies {
     // retry
     implementation("org.springframework.retry:spring-retry")
 
+    // NullMarked + errorprone
+    implementation("org.jspecify:jspecify:1.0.0")
+    errorprone("com.google.errorprone:error_prone_core:2.48.0")
+    errorprone("com.uber.nullaway:nullaway:0.13.1")
+
 }
 
+// nullaway + errorprone
 nullaway {
-    onlyNullMarked.set(true)
+    onlyNullMarked.set(false)
+    annotatedPackages.add("com.haruon.groupware.application")
+    annotatedPackages.add("com.haruon.groupware.domain")
 }
 
+tasks.withType<JavaCompile>().configureEach {
+    options.errorprone {
+        check("NullAway", CheckSeverity.ERROR)  // build 실패
+
+        option( // @Entity, @MappedSuperclass, @Embeddable는 필드 init 경고 완화
+            "NullAway:ExternalInitAnnotations",
+            "jakarta.persistence.Entity,jakarta.persistence.MappedSuperclass,jakarta.persistence.Embeddable"
+        )
+
+        excludedPaths.set(  // 빌드파일, JPQL 관련 클래스 무시
+            ".*/build/.*|.*/src/main/generated/.*"
+        )
+    }
+
+    if (name.lowercase().contains("test")) {    // 테스트 무시
+        options.errorprone.enabled = false
+    }
+}
+
+// test
 tasks.withType<Test> {
     useJUnitPlatform()
 
@@ -124,14 +146,7 @@ tasks.withType<Test> {
 }
 
 
-tasks.withType<JavaCompile>().configureEach {
-    options.errorprone {
-        check("NullAway", CheckSeverity.ERROR)
-        disable("UnusedVariable")       // 사용하지 않는 변수 미표시 (나중에 꺼서 확인해야함)
-    }
-}
-
-// snippets(코드 조각)의 Dir(디렉토리)를 전역변수로 선언
+// docs - snippets(코드 조각)의 Dir(디렉토리)를 전역변수로 선언
 val snippetsDir by extra { file("build/generated-snippets") }
 
 tasks {

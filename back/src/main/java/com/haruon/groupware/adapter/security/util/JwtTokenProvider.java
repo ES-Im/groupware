@@ -21,6 +21,7 @@ import java.util.List;
  * accesstoken과 refreshToken을 발행하고,
  * 해당 토큰의 loginId, roles 정보를 조회
  */
+@SuppressWarnings("JavaUtilDate")
 @Getter
 @Component
 public class JwtTokenProvider implements TokenIssuer, TokenParser {

@@ -41,13 +41,13 @@ public class CleanupChatRoomConfig {
             PlatformTransactionManager transactionManager
     ) {
         return new StepBuilder("cleanUpChatRoomStep", jobRepository)
-                .tasklet(((contribution, chunkContext) -> {
+                .tasklet((contribution, chunkContext) -> {
                     log.info("cleanUpChatRoomStep - chatRoom 정리 시작");
 
                     chatRoomCleanup.cleanupChatRooms(cleanUpDate.atStartOfDay());
 
                     return RepeatStatus.FINISHED;
-                }), transactionManager).build();
+                }, transactionManager).build();
     }
 
 

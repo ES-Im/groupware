@@ -30,9 +30,20 @@ public class LeaveDraft extends Draft {
 
     private long reservedHours;
 
-
-    private LeaveDraft(String title, String content, Emp emp) {
+    private LeaveDraft(
+            String title, String content, Emp emp,
+            LocalDateTime startAt,
+            LocalDateTime endAt,
+            LeaveType leaveType,
+            Long reservedHours
+    ) {
         super(title, content, emp);
+        validateLeaveInitParam(startAt, endAt, leaveType, reservedHours);
+
+        this.startAt = startAt;
+        this.endAt = endAt;
+        this.leaveType = leaveType;
+        this.reservedHours = reservedHours;
     }
 
     @Override
@@ -51,9 +62,7 @@ public class LeaveDraft extends Draft {
             LeaveType leaveType, List<ApproversParam> approvers,
             Long reservedHours
     ) {
-        LeaveDraft draft = new LeaveDraft(title, content, emp);
-
-        draft.init(startAt, endAt, leaveType, reservedHours);
+        LeaveDraft draft = new LeaveDraft(title, content, emp, startAt, endAt, leaveType, reservedHours);
         draft.createDraftApproval(approvers);
 
         return draft;
@@ -65,9 +74,8 @@ public class LeaveDraft extends Draft {
             LeaveType leaveType, List<ApproversParam> approvers, LocalDateTime submittedAt,
             Long reservedHours
     ) {
-        LeaveDraft submitted = new LeaveDraft(title, content, emp);
+        LeaveDraft submitted = new LeaveDraft(title, content, emp, startAt, endAt, leaveType, reservedHours);
 
-        submitted.init(startAt, endAt, leaveType, reservedHours);
         submitted.createSubmittedApproval(approvers, submittedAt);
 
         return submitted;
@@ -107,22 +115,5 @@ public class LeaveDraft extends Draft {
         requireNonNull(reservedHours, "휴가 사용시간은 null일 수 없음");
         validateTime(startAt, endAt);
     }
-
-    private void init(
-            LocalDateTime startAt,
-            LocalDateTime endAt,
-            LeaveType leaveType,
-            Long reservedHours
-    ) {
-
-        validateLeaveInitParam(startAt, endAt, leaveType, reservedHours);
-
-        this.startAt = startAt;
-        this.endAt = endAt;
-        this.leaveType = leaveType;
-        this.reservedHours = reservedHours;
-    }
-
-
 
 }

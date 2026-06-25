@@ -156,26 +156,20 @@ public class Emp extends AbstractEntity {
             @Nullable LocalDate endAt
     ) {
         ensureActive();
-        
-        boolean registerCase =
-                dept != null
-                        && position != null
-                        && isPrimary != null
-                        && startAt != null;
 
-        boolean updateCase =
-                dept == null
-                        && (position != null
-                        || isPrimary != null
-                        || startAt != null
-                        || endAt != null);
-
-        if (registerCase) {
+        if (dept != null
+                && position != null
+                && isPrimary != null
+                && startAt != null) {
             registerEmpBelonging(dept, position, startAt, isPrimary);
             return;
         }
 
-        if (updateCase) {
+        if (dept == null
+                && (position != null
+                || isPrimary != null
+                || startAt != null
+                || endAt != null)) {
             updateCurrentBelonging(position, isPrimary, startAt, endAt);
             return;
         }
@@ -269,10 +263,6 @@ public class Emp extends AbstractEntity {
 
     public boolean isAdmin() {
         return this.getSystemRoles().contains(SystemRoleCode.ADMIN);
-    }
-
-    private void changeEmpStatus(EmpStatus newEmpStatus) {
-        this.status = newEmpStatus;
     }
 
     private void changeEmpName(String newEmpName) {

@@ -29,7 +29,7 @@ public class CategoryQueryService implements CategoryRetriever {
 
     @Override
     public Page<CategoryResponse> retrieveCategoriesForManagement(
-            Long adminEmpId, String categoryNameKeyword, @Nullable Boolean isVisible, Pageable pageable
+            Long adminEmpId, @Nullable String categoryNameKeyword, @Nullable Boolean isVisible, Pageable pageable
     ) {
         AuthValidator.checkAdminById(authorizationQueryRepository, adminEmpId);
 

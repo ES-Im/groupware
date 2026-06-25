@@ -8,7 +8,6 @@ import com.haruon.groupware.application.empInfo.leave.service.LeaveCalculator;
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import com.haruon.groupware.application.exception.common.role.PermissionDeniedException;
 import com.haruon.groupware.application.exception.empInfo.emp.*;
-import com.haruon.groupware.application.file.required.FileStorage;
 import com.haruon.groupware.application.utils.projection.DeptManagerAndTargetEmpInfo;
 import com.haruon.groupware.application.utils.required.AuthorizationQueryRepository;
 import com.haruon.groupware.application.utils.required.CompanyPolicyPort;
@@ -40,7 +39,6 @@ public class EmpCommandService extends LeaveCalculator implements EmpAccountMana
     private final EmpRepository empRepository;
     private final EmpLeaveRepository empLeaveRepository;
     private final CompanyPolicyPort companyPolicy;
-    private final FileStorage fileStorage;
     private final AuthorizationQueryRepository authorizationQueryRepository;
 
 

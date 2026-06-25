@@ -76,6 +76,7 @@ public abstract class Draft extends AbstractEventAggregateRoot {
         this.content = editedContent;
     }
 
+    @SuppressWarnings("NullAway")
     public void changeApprovalLine(@Nullable List<ApproversParam> params) {
         state(isDraft(), "미상신 문서만 결재선 수정가능");
         state(hasApproval(), "결재 정보가 없음");
@@ -103,6 +104,7 @@ public abstract class Draft extends AbstractEventAggregateRoot {
 
 //    APPROVAL 공통 메서드
 
+    @SuppressWarnings("NullAway")
     public void submit(LocalDateTime submittedAt, @Nullable List<ApproversParam> params) {
         requireNonNull(submittedAt, "상신일시는 null일 수 없음");
         state(hasApproval(), "결재 정보가 없음");
@@ -125,7 +127,7 @@ public abstract class Draft extends AbstractEventAggregateRoot {
         requireNonNull(submittedAt, "상신일시는 필수");
         requireNonNull(approverParams, "결재선은 필수");
 
-        state(this.approval.getStatus() == ApprovalStatus.REJECTED,
+        state(this.approval != null && this.approval.getStatus() == ApprovalStatus.REJECTED,
                 "반려 상태에서만 재상신 가능");
         state(!approverParams.isEmpty(),
                 "재상신 시 결재선은 필수");
@@ -134,12 +136,14 @@ public abstract class Draft extends AbstractEventAggregateRoot {
         this.approval = Approval.createWaiting(this, approverParams);
     }
 
+    @SuppressWarnings("NullAway")
     public void approve(Emp approver, LocalDateTime approvedAt) {
         state(hasApproval(), "결재 정보가 없음");
 
         this.approval.approve(approver, approvedAt);
     }
 
+    @SuppressWarnings("NullAway")
     public void reject(Emp rejector, String reason, LocalDateTime rejectedAt) {
         state(hasApproval(), "결재 정보가 없음");
 

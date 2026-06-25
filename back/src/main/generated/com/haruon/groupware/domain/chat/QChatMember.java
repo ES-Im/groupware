@@ -43,8 +43,6 @@ public class QChatMember extends EntityPathBase<ChatMember> {
 
     public final QChatMessage lastReadMessage;
 
-    public final QChatMessage latestReadChats;
-
     public final DateTimePath<java.time.LocalDateTime> leftAt = createDateTime("leftAt", java.time.LocalDateTime.class);
 
     public final BooleanPath participating = createBoolean("participating");
@@ -76,7 +74,6 @@ public class QChatMember extends EntityPathBase<ChatMember> {
         super(type, metadata, inits);
         this.emp = inits.isInitialized("emp") ? new com.haruon.groupware.domain.empInfo.QEmp(forProperty("emp"), inits.get("emp")) : null;
         this.lastReadMessage = inits.isInitialized("lastReadMessage") ? new QChatMessage(forProperty("lastReadMessage"), inits.get("lastReadMessage")) : null;
-        this.latestReadChats = inits.isInitialized("latestReadChats") ? new QChatMessage(forProperty("latestReadChats"), inits.get("latestReadChats")) : null;
         this.room = inits.isInitialized("room") ? new QChatRoom(forProperty("room"), inits.get("room")) : null;
     }
 

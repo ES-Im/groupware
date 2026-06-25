@@ -15,6 +15,7 @@ import org.jspecify.annotations.Nullable;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -153,7 +154,7 @@ public class Meeting extends AbstractEventAggregateRoot {
     }
 
     private void isEditableDate() {
-        state(this.meetingDate.isAfter(LocalDate.now()), "익일 이후의 회의건만 수정가능");
+        state(this.meetingDate.isAfter(LocalDate.now(ZoneId.of("Asia/Seoul"))), "익일 이후의 회의건만 수정가능");
     }
 
     private void addParticipant(Emp emp) {

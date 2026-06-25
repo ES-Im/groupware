@@ -20,7 +20,7 @@ public class DeptQueryService implements DeptRetriever {
     private final DeptQueryRepository deptQueryRepository;
 
     @Override
-    public Page<DeptInfoResponse> retrieverDeptInfoList(
+    public Page<DeptInfoResponse> retrieveDeptInfoList(
             @Nullable Boolean isActive,
             @Nullable String keyword,
             Pageable pageable
@@ -31,7 +31,7 @@ public class DeptQueryService implements DeptRetriever {
     }
 
     @Override
-    public Page<DeptMemberInfo> retrieverDeptMemberList(
+    public Page<DeptMemberInfo> retrieveDeptMemberList(
             Long deptId,
             @Nullable String keyword,
             @Nullable Boolean isEmpActive,
@@ -43,8 +43,9 @@ public class DeptQueryService implements DeptRetriever {
     }
 
     @Override
-    public DeptInfoResponse retrieverDeptInfo(Long deptId) {
+    public DeptInfoResponse retrieveDeptInfo(Long deptId) {
         return deptQueryRepository.findDeptInfoByDeptId(deptId)
                 .orElseThrow(DeptNotFoundException::new);
     }
+
 }

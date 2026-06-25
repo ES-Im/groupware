@@ -24,13 +24,13 @@ public record FranchisesDetailResponse(
             String businessNumber,
             String contactNumber,
             String contactEmail,
-            BusinessStatus businessStatus,
+            BusinessStatus status,
             String memo,
             Long managerEmpId,
             String managerEmpName) {
         this(
                 id, name, address, ownerName, businessNumber, contactNumber, contactEmail,
-                businessStatus.getDescription(), memo, managerEmpId, managerEmpName
+                status.getDescription(), memo, managerEmpId, managerEmpName
         );
     }
 }

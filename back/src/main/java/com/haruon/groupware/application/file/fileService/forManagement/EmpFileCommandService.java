@@ -35,6 +35,8 @@ public class EmpFileCommandService extends AbstractFileManagerService<EmpFileUpl
 
     @Override
     protected FilePathInfo getStoredInfo(FileDeleteRequest request) {
+        if(request.requesterEmpId() == null) throw new RequiredValueMissingException();
+
         return fileStoredInfoQueryRepository
                 .findEmpFilePathInfoByStoredPath(request.requesterEmpId(), request.fileId())
                 .orElseThrow(FileNotFoundException::new);
@@ -42,8 +44,12 @@ public class EmpFileCommandService extends AbstractFileManagerService<EmpFileUpl
 
     @Override
     protected void deleteFileMetaData(FileDeleteRequest request) {
-        if(request.requesterEmpId() == null) throw new RequiredValueMissingException();
-        Emp emp = getEmpById(request.requesterEmpId());
+        Emp emp;
+        if(request.requesterEmpId() != null) {
+            emp = getEmpById(request.requesterEmpId());
+        } else {
+            throw new RequiredValueMissingException();
+        }
 
         emp.removeFile(request.fileId());
     }

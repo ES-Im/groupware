@@ -132,7 +132,7 @@ public class FranchiseInquiryQueryRepositoryAdapter implements FranchiseInquiryQ
     private BooleanExpression isAnswered(@Nullable Boolean isAnswered) {
         if(isAnswered == null) return null;
 
-        return isAnswered.equals(Boolean.TRUE)
+        return isAnswered.equals(true)
                 ? answer.answeredAt.isNotNull()
                 : answer.id.isNull().or(answer.answeredAt.isNull());
     }

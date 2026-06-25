@@ -45,6 +45,7 @@ import java.time.LocalDateTime;
         logical = false
 )
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@SuppressWarnings("unused")
 public class MessageMailboxReadModel {
 
     private String mailboxKey;

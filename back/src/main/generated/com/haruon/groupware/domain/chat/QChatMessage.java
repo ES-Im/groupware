@@ -29,6 +29,8 @@ public class QChatMessage extends EntityPathBase<ChatMessage> {
 
     public final QChatRoom chatRoom;
 
+    public final StringPath clientMessageId = createString("clientMessageId");
+
     public final StringPath content = createString("content");
 
     //inherited

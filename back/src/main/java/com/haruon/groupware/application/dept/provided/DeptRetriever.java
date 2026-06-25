@@ -8,14 +8,14 @@ import org.springframework.data.domain.Pageable;
 
 public interface DeptRetriever {
 
-    Page<DeptInfoResponse> retrieverDeptInfoList (
+    Page<DeptInfoResponse> retrieveDeptInfoList(
             @Nullable Boolean isActive, @Nullable String keyword, Pageable pageable
     );
 
-    Page<DeptMemberInfo> retrieverDeptMemberList (
+    Page<DeptMemberInfo> retrieveDeptMemberList(
             Long deptId, @Nullable String keyword, @Nullable Boolean isEmpActive, Pageable pageable
     );
 
-    DeptInfoResponse retrieverDeptInfo (Long deptId);
+    DeptInfoResponse retrieveDeptInfo(Long deptId);
 
 }

@@ -13,7 +13,7 @@ public interface CategoryQueryRepository {
 
     Page<CategoryResponse> findCategories(
             @Nullable String categoryNameKeyword,
-            Boolean isVisible,
+            @Nullable Boolean isVisible,
             Pageable pageable
     );
 }

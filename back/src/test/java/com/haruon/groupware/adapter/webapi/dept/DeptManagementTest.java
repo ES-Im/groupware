@@ -154,7 +154,7 @@ public class DeptManagementTest extends IntegrationTestSupport {
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isNoContent());
 
-        DeptInfoResponse deptInfoResponse = deptRetriever.retrieverDeptInfo(targetDeptId);
+        DeptInfoResponse deptInfoResponse = deptRetriever.retrieveDeptInfo(targetDeptId);
         assertEquals(targetEmpid, deptInfoResponse.deptLeader().empId());
 
     }
@@ -180,7 +180,7 @@ public class DeptManagementTest extends IntegrationTestSupport {
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isNoContent());
 
-        DeptInfoResponse deptInfoResponse = deptRetriever.retrieverDeptInfo(targetDeptId);
+        DeptInfoResponse deptInfoResponse = deptRetriever.retrieveDeptInfo(targetDeptId);
         assertNotEquals(targetEmpid, deptInfoResponse.deptLeader().empId());
 
     }

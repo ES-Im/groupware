@@ -502,7 +502,7 @@ public class MessageQueryRepositoryAdapter implements MessageQueryRepository {
 
                 .where(
                         message.id.eq(messageId),
-                        (sending.emp.id.eq(empId).and(sending.deletedAt.isNull()))
+                        sending.emp.id.eq(empId).and(sending.deletedAt.isNull())
                                 .or(receiving.id.isNotNull().and(receiving.deletedAt.isNull()))
                 )
                 .fetchOne();
@@ -624,7 +624,7 @@ public class MessageQueryRepositoryAdapter implements MessageQueryRepository {
                 .from(file)
                 .where(
                         file.message.id.eq(messageId),
-                        (JPAExpressions
+                        JPAExpressions
                                 .selectOne()
                                 .from(messageBox)
                                 .where(
@@ -632,7 +632,7 @@ public class MessageQueryRepositoryAdapter implements MessageQueryRepository {
                                         messageBox.message.id.eq(file.message.id),
                                         messageBox.deletedAt.isNull()
                                 ).exists()
-                        )
+
                 )
                 .orderBy(file.id.asc())
                 .fetch();

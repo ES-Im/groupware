@@ -11,7 +11,7 @@ import java.time.YearMonth;
 import java.util.List;
 
 public interface LeaveDraftQueryRepository {
-    List<LeaveRequestHistoryResponse> findLeaveRequestHistoriesByEmpIdAndYearMonth(Long empId, ApprovalStatus approvalStatus,YearMonth yearMonth);
+    List<LeaveRequestHistoryResponse> findLeaveRequestHistoriesByEmpIdAndYearMonth(Long empId, @Nullable ApprovalStatus approvalStatus,YearMonth yearMonth);
 
     Page<LeaveRequestHistoryAndEmpInfoResponse> findLeaveRequestHistoriesByDeptIdAndYearMonth(Long deptId, YearMonth yearMonth, @Nullable String keyword, @Nullable ApprovalStatus approvalStatus, Pageable pageable);
 }

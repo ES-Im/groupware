@@ -1,4 +1,4 @@
-package com.haruon.groupware.adapter.redis;
+package com.haruon.groupware.adapter.redis.auth;
 
 import com.haruon.groupware.application.auth.required.RefreshTokenStore;
 import lombok.RequiredArgsConstructor;

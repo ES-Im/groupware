@@ -35,9 +35,9 @@ public class Franchise extends AbstractEntity {
 
     private BusinessStatus businessStatus;
 
-    private String memo;
+    @Nullable private String memo;
 
-    private Emp emp;
+    @Nullable private Emp emp;
 
 
     public static Franchise create(

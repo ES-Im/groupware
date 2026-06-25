@@ -1,5 +1,6 @@
 package com.haruon.groupware.application.schedule.event;
 
+import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import com.haruon.groupware.application.schedule.provided.ScheduleEventProcessor;
 import com.haruon.groupware.domain.event.schedule.MeetingParticipantAdditionEvent;
 import com.haruon.groupware.domain.event.schedule.MeetingParticipantRemovalEvent;
@@ -32,11 +33,15 @@ public class ScheduleEventHandler {
 
     @TransactionalEventListener(phase = AFTER_COMMIT)
     public void handleApplyParticipantAddition(MeetingParticipantAdditionEvent event) {
+        if(event.targetParticipantIds() == null) throw new RequiredValueMissingException();
+
         scheduleEventProcessor.applyParticipantAddition(event.sourceKey(), event.targetParticipantIds());
     }
 
     @TransactionalEventListener(phase = AFTER_COMMIT)
     public void handleApplyParticipantRemoval(MeetingParticipantRemovalEvent event) {
+        if(event.targetParticipantIds() == null) throw new RequiredValueMissingException();
+
         scheduleEventProcessor.applyParticipantRemoval(event.sourceKey(), event.targetParticipantIds());
     }
 

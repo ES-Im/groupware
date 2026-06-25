@@ -44,14 +44,14 @@ public class CategoryQueryRepositoryAdapter implements CategoryQueryRepository {
 
     @Override
     public Page<CategoryResponse> findCategories(
-            @Nullable String categoryNameKeyword, Boolean isVisible, Pageable pageable
+            @Nullable String categoryNameKeyword, @Nullable Boolean isVisible, Pageable pageable
     ) {
         Long rows = query
                 .select(category.id.countDistinct())
                 .from(category)
                 .where(
                         isKeywordInCategoryName(categoryNameKeyword),
-                        category.isVisible.eq(isVisible)
+                        isVisibleCategory(isVisible)
                 )
                 .fetchOne();
 
@@ -63,7 +63,7 @@ public class CategoryQueryRepositoryAdapter implements CategoryQueryRepository {
                 .from(category)
                 .where(
                         isKeywordInCategoryName(categoryNameKeyword),
-                        category.isVisible.eq(isVisible)
+                        isVisibleCategory(isVisible)
                 )
                 .orderBy(category.id.asc())
                 .offset(pageable.getOffset())
@@ -77,6 +77,12 @@ public class CategoryQueryRepositoryAdapter implements CategoryQueryRepository {
         return keyword == null || keyword.isBlank()
                 ? null
                 : category.name.containsIgnoreCase(keyword);
+    }
+
+    private BooleanExpression isVisibleCategory(@Nullable Boolean isVisible) {
+        return isVisible == null
+                ? null
+                : category.isVisible.eq(isVisible);
     }
 
 }

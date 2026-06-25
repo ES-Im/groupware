@@ -278,7 +278,7 @@ public class LeaveDraftService extends CommonDraftService implements LeaveDraftM
 
         if(!REQUESTABLE_LEAVE_TYPES.contains(leaveType)) throw new UnrequestableLeaveTypeException();
 
-        validateLeaveTimes(startAt, endAt);
+        validateLeaveTimes(startAt);
 
         LocalDate startDate = startAt.toLocalDate();
         LocalDate endDate = endAt.toLocalDate();
@@ -302,8 +302,11 @@ public class LeaveDraftService extends CommonDraftService implements LeaveDraftM
         return startDayHours + (policyPort.getWorkHours() * middleDays) + endDayHours;
     }
 
-    private void validateLeaveTimes(LocalDateTime startAt, LocalDateTime endAt) {
-        if(!(startAt.getMinute() == 0 && startAt.getSecond() == 0 && startAt.getNano() == 0))  throw new LeaveTimeNotOnTheHourException();
+    private void validateLeaveTimes(LocalDateTime startAt) {
+        if(!(
+                startAt.getMinute() == 0 && startAt.getSecond() == 0 && startAt.getNano() == 0
+        ))
+            throw new LeaveTimeNotOnTheHourException();
     }
 
     private long calculateDailyUsedHours(

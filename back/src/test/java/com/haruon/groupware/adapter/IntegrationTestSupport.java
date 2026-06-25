@@ -1,7 +1,7 @@
 package com.haruon.groupware.adapter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.haruon.groupware.adapter.redis.RefreshTokenRedis;
+import com.haruon.groupware.adapter.redis.auth.RefreshTokenRedis;
 import com.haruon.groupware.adapter.security.JwtCookieManager;
 import com.haruon.groupware.application.auth.provided.AuthManagement;
 import com.haruon.groupware.application.auth.required.TokenParser;

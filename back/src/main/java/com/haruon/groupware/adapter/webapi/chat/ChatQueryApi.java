@@ -1,7 +1,9 @@
 package com.haruon.groupware.adapter.webapi.chat;
 
 import com.haruon.groupware.adapter.security.empDtails.EmpDetails;
+import com.haruon.groupware.application.chat.provided.forRetrieve.ChatMessageRetriever;
 import com.haruon.groupware.application.chat.provided.forRetrieve.ChatRoomRetriever;
+import com.haruon.groupware.application.chat.service.query.dto.ChatMessagesResponse;
 import com.haruon.groupware.application.chat.service.query.dto.ChatRoomDetailResponse;
 import com.haruon.groupware.application.chat.service.query.dto.MyChatRoomsResponse;
 import lombok.RequiredArgsConstructor;
@@ -14,11 +16,25 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/chat/rooms")
 @RequiredArgsConstructor
-public class ChatRoomApi {
+public class ChatQueryApi {
 
+    private final ChatMessageRetriever chatMessageRetriever;
     private final ChatRoomRetriever chatRoomRetriever;
 
-    // 내가 참여중인 채팅방 조회 - 오래된 채팅방 여부, 즐겨찾기 필드도 넣을 것
+    @GetMapping("/{roomId}/messages")
+    public ResponseEntity<ChatMessagesResponse> getChatMessages(
+            @AuthenticationPrincipal EmpDetails details,
+            @PathVariable Long roomId,
+            @RequestParam(required = false) Long cursor,
+            @RequestParam(defaultValue = "50") Integer size
+    ) {
+        ChatMessagesResponse response = chatMessageRetriever
+                .retrieveChatMessages(details.getEmpId(), roomId, cursor, size);
+
+        return ResponseEntity.ok().body(response);
+    }
+
+
     @GetMapping
     public ResponseEntity<List<MyChatRoomsResponse>> getMyJoinedChatRooms(
             @AuthenticationPrincipal EmpDetails details,
@@ -31,7 +47,6 @@ public class ChatRoomApi {
         return ResponseEntity.ok().body(responses);
     }
 
-    // 채팅방 상세 조회
     @GetMapping("/{roomId}")
     public ResponseEntity<ChatRoomDetailResponse> getRoomDetail(
             @AuthenticationPrincipal EmpDetails details,
@@ -42,7 +57,6 @@ public class ChatRoomApi {
 
         return ResponseEntity.ok().body(response);
     }
-
 
 
 

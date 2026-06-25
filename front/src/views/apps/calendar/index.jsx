@@ -1,16 +1,17 @@
 import AddEditModal from '@/views/apps/calendar/components/AddEditModal';
 import PageBreadcrumb from '@/components/PageBreadcrumb';
-import { useEffect, useRef } from 'react';
-import { Button, Card, CardBody, Container } from 'react-bootstrap';
+import {useEffect, useRef} from 'react';
+import {Button, Card, CardBody, Container} from 'react-bootstrap';
 import dayGridPlugin from '@fullcalendar/daygrid';
-import interactionPlugin, { Draggable } from '@fullcalendar/interaction';
+import interactionPlugin, {Draggable} from '@fullcalendar/interaction';
 import listPlugin from '@fullcalendar/list';
 import FullCalendar from '@fullcalendar/react';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import useCalendar from '@/hooks/useCalendar';
 import useViewPort from '@/hooks/useViewPort';
-import { TbCircleFilled, TbPlus } from 'react-icons/tb';
+import {TbCircleFilled, TbPlus} from 'react-icons/tb';
 import SimpleBar from "simplebar-react";
+
 const externalEvents = [{
   id: '11',
   title: 'Design Review',

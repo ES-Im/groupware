@@ -44,6 +44,7 @@ import com.haruon.groupware.domain.message.MessageFile;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StreamUtils;
 
@@ -535,7 +536,12 @@ record FileProvidedTest(
                 .mimeType(mimeType)
                 .originalFileFullName(fileName)
                 .fileSize((long) bytes.length)
-                .bytes(bytes)
+                .resource(new ByteArrayResource(bytes) {
+                    @Override
+                    public String getFilename() {
+                        return fileName;
+                    }
+                })
                 .build();
     }
 

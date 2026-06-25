@@ -110,13 +110,13 @@ public class Attendance extends AbstractEntity {
             @Nullable LocalTime startAt,
             @Nullable LocalTime endAt
     ) {
-        boolean timeIncluded = startAt != null && endAt != null;
-        if(timeIncluded) state(!endAt.isBefore(startAt), "종료시각은 시작시각보다 빠를 수 없음");
+        if(startAt != null && endAt != null
+                && endAt.isBefore(startAt)) throw new IllegalStateException("종료시각은 시작시각보다 빠를 수 없음");
 
         if(status.equals(AttendanceStatus.NORMAL) ||
                 status.equals(AttendanceStatus.LATE_EARLY) ||
                 status.equals(AttendanceStatus.HALF_DAY_LEAVE)) {
-            state(timeIncluded, "시간 정보가 필요한 근태상태");
+            state(startAt != null && endAt != null, "시간 정보가 필요한 근태상태");
         }
 
         Attendance attendance = new Attendance();
@@ -155,7 +155,7 @@ public class Attendance extends AbstractEntity {
         this.attendanceStatus = status;
     }
 
-    private boolean changeTime(LocalTime startAt, LocalTime endAt) {
+    private boolean changeTime(@Nullable LocalTime startAt, @Nullable LocalTime endAt) {
         boolean isTimeChanged = startAt != null || endAt != null;
 
         if (isTimeChanged) {

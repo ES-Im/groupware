@@ -25,7 +25,7 @@ public class DeptApi {
             @RequestParam(required = false) String keyword,
             @PageableDefault(page = 0, size = 10) Pageable pageable
     ) {
-        Page<DeptInfoResponse> responses = deptRetriever.retrieverDeptInfoList(isActive, keyword, pageable);
+        Page<DeptInfoResponse> responses = deptRetriever.retrieveDeptInfoList(isActive, keyword, pageable);
 
         return ResponseEntity.ok().body(responses);
     }
@@ -37,7 +37,7 @@ public class DeptApi {
             @RequestParam(required = false) Boolean isEmpActive,
             @PageableDefault(page = 0, size = 10) Pageable pageable
     ) {
-        Page<DeptMemberInfo> responses = deptRetriever.retrieverDeptMemberList(deptId, keyword, isEmpActive, pageable);
+        Page<DeptMemberInfo> responses = deptRetriever.retrieveDeptMemberList(deptId, keyword, isEmpActive, pageable);
 
         return ResponseEntity.ok().body(responses);
     }
@@ -46,10 +46,15 @@ public class DeptApi {
     public ResponseEntity<DeptInfoResponse> getDept(
             @PathVariable Long deptId
     ) {
-        DeptInfoResponse response = deptRetriever.retrieverDeptInfo(deptId);
+        DeptInfoResponse response = deptRetriever.retrieveDeptInfo(deptId);
 
         return ResponseEntity.ok().body(response);
     }
 
-    //todo - 조직도 : https://github.com/bumbeishvili/org-chart 프론트 작업시 참고하여 API 만들 것 이때 레퍼런스 보고 계층형 쿼리 같이 작업해얗ㄹ듯
+//    @GetMapping("/tree")
+//    public ResponseEntity<DeptTreeNodeResponse> getDeptTree() {
+//        DeptTreeNodeResponse response = deptRetriever.retrieveDeptTree();
+//
+//        return ResponseEntity.ok().body(response);
+//    }
 }

@@ -1,11 +1,13 @@
 package com.haruon.groupware.application.chat.service.query.dto;
 
+import org.jspecify.annotations.Nullable;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
 public record ChatMessagesResponse(
         List<ChatMessageResponse> messages,
-        Long nextCursor,    // 응답에 포함된 가장 오래된 메시지의 chatId
+        @Nullable Long nextCursor,
         boolean hasNext
 ) {
 
@@ -15,7 +17,31 @@ public record ChatMessagesResponse(
             String clientMessageId,
             String senderName,
             String content,
-            LocalDateTime sentAt
-    ) {}
+            LocalDateTime sentAt,
+            @Nullable String profileImageUrl
+    ) {
+
+        public ChatMessageResponse(
+                Long id,
+                Long senderId,
+                String clientMessageId,
+                String senderName,
+                String content,
+                LocalDateTime sentAt,
+                @Nullable Long profileFileId) {
+
+            this(
+                id, senderId, clientMessageId, senderName, content, sentAt,
+                    getProfileFileApi(senderId, profileFileId)
+            );
+
+        }
+
+        private static @Nullable String getProfileFileApi(Long memberId, @Nullable Long profileFileId) {
+            return profileFileId != null
+                    ? "/api/employees/" + memberId + "/files/" + profileFileId + "/preview"
+                    : null;
+        }
+    }
 
 }

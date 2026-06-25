@@ -1,4 +1,4 @@
-package com.haruon.groupware.adapter.redis;
+package com.haruon.groupware.adapter.redis.board;
 
 import com.haruon.groupware.application.board.provided.BoardReactionCounter;
 import com.haruon.groupware.application.board.service.dto.BoardReactionDelta;

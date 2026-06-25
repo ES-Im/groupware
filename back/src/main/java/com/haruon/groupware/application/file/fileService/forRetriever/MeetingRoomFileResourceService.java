@@ -22,6 +22,7 @@ public class MeetingRoomFileResourceService extends AbstractFileResourceService 
         super(fileResourceQueryRepository, fileStorage);
     }
 
+    @Override
     protected FileResourceInfo getFileResourceInfo(Long roomId, Long fileId) {
         return fileResourceQueryRepository
                 .findMeetingRoomFileInfoByMeetingRoomIdAndFileIdForResource(roomId, fileId)

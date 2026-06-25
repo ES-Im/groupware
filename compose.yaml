@@ -18,5 +18,14 @@ services:
 #    command:
 #      - redis-server --requirepass ${REDIS_PASSWORD}
 
+# https://stackoverflow.com/questions/73385880/mockoon-docker-compose-error-missing-required-flag/73386024#73386024
+  mock-server:
+    image: mockoon/cli:latest
+    command: ["--data", "/home/mockoon/data/franchise-api.json", "--port", "3000"]
+    ports:
+      - ${MOCKOON_PORT}
+    volumes:
+      - ./mockoon/franchise-api.json:/home/mockoon/data/franchise-api.json:readonly
+
 volumes:
   mysql_data:

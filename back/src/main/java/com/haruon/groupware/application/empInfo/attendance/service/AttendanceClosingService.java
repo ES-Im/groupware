@@ -75,6 +75,7 @@ public class AttendanceClosingService implements AttendanceClosing {
         return attendanceCnt;
     }
 
+    @SuppressWarnings("NullAway")
     private int confirmWithoutSchedule(Emp emp, LocalDate date) {
 
         Attendance attendance = findAttendanceByCloseParam(emp, date);
@@ -140,6 +141,7 @@ public class AttendanceClosingService implements AttendanceClosing {
         return 1;
     }
 
+    @SuppressWarnings("NullAway")
     private int closeDayPartialSchedule(Emp emp, LocalDate date, List<Schedule> schedules) {
         int result = 1;
 

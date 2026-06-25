@@ -6,16 +6,16 @@ import java.time.LocalDateTime;
 
 public record MyChatRoomsResponse(
         Long chatRoomId,
-        String roomName,
+        @Nullable String roomName,
 
         @Nullable String lastMessageContent,
         @Nullable LocalDateTime lastMessagedAt,
-        @Nullable Integer unreadMessageCount,
+        @Nullable Long unreadMessageCount,
 
         Boolean isGroup,
         Boolean isPastRoom,
         Boolean isBookmarked,
 
-        Integer joinedMemberCount
+        Long joinedMemberCount
 ) {
 }

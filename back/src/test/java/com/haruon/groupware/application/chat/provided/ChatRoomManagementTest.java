@@ -276,7 +276,7 @@ record ChatRoomManagementTest(
 
         assertThat(room.getMembers())
                 .filteredOn(m -> m.getEmp().getId().equals(member.getId()))
-                .allMatch(m -> m.getLatestReadChats().getId().equals(chatId));
+                .allMatch(m -> m.getLastReadMessage().getId().equals(chatId));
     }
 
     @Test

@@ -5,6 +5,9 @@ import com.haruon.groupware.application.draft.required.DocumentBoxQueryRepositor
 import com.haruon.groupware.application.draft.required.DraftRepository;
 import com.haruon.groupware.application.draft.service.query.dto.response.DocumentBoxResponse;
 import com.haruon.groupware.application.draft.service.query.dto.response.DraftDetailResponse;
+import com.haruon.groupware.application.draft.service.query.dto.response.DraftDetailResponse.BusinessTripDraftDetail;
+import com.haruon.groupware.application.draft.service.query.dto.response.DraftDetailResponse.LeaveDraftDetail;
+import com.haruon.groupware.application.draft.service.query.dto.response.DraftDetailResponse.SalesDraftDetail;
 import com.haruon.groupware.application.draft.service.query.dto.response.MyDocumentBoxSummaryResponse;
 import com.haruon.groupware.application.empInfo.emp.service.dto.response.BelongingInfo;
 import com.haruon.groupware.application.exception.common.role.PermissionDeniedException;
@@ -95,6 +98,10 @@ public class DocumentBoxQueryService implements DocumentBoxRetriever {
 
         Draft cancellationDraft = findCancellationDraft(draft);
 
+        String approvalStatusDescription = draft.getApproval() == null
+                ? "미상신"
+                : draft.getApproval().getStatus().getDescription();
+
         return new DraftDetailResponse(
                 draft.getId(),
                 draft.getClass().getSimpleName(),
@@ -102,7 +109,7 @@ public class DocumentBoxQueryService implements DocumentBoxRetriever {
                 draft.getTitle(),
                 draft.getContent(),
                 draft.getSubmittedAt(),
-                draft.getApproval().getStatus().getDescription(),
+                approvalStatusDescription,
                 toFileSummaries(draft),
                 toApproverSummaries(draft),
                 toCirculationSummaries(draft),
@@ -135,18 +142,22 @@ public class DocumentBoxQueryService implements DocumentBoxRetriever {
 
     private boolean canReadDraft(Long empId, List<Long> deptIds, Draft draft) {
         boolean isDrafter = draft.getEmp().getId().equals(empId);
+        boolean isApprover = false;
+        boolean isApprovedDeptDocument = false;
 
-        boolean isApprover = draft.getApproval().getApprovers().stream()
-                .anyMatch(approver -> approver.getApprover().getId().equals(empId));
+        if(draft.getApproval() != null) {
+            isApprover = draft.getApproval().getApprovers().stream()
+                    .anyMatch(approver -> approver.getApprover().getId().equals(empId));
+
+            isApprovedDeptDocument = draft.getApproval().getStatus().equals(ApprovalStatus.APPROVED)
+                    && draft.getEmp().getEmpBelongings().stream()
+                    .filter(belonging -> belonging.getEndAt() == null)
+                    .map(EmpBelongings::getDept)
+                    .anyMatch(dept -> deptIds.contains(dept.getId()));
+        }
 
         boolean isCirculated = draft.getCirculations().stream()
                 .anyMatch(circulation -> circulation.getViewer().getId().equals(empId));
-
-        boolean isApprovedDeptDocument = draft.getApproval().getStatus().equals(ApprovalStatus.APPROVED)
-                && draft.getEmp().getEmpBelongings().stream()
-                                                    .filter(belonging -> belonging.getEndAt() == null)
-                                                    .map(EmpBelongings::getDept)
-                                                    .anyMatch(dept -> deptIds.contains(dept.getId()));
 
         return isDrafter || isApprover || isCirculated || isApprovedDeptDocument;
     }
@@ -168,6 +179,8 @@ public class DocumentBoxQueryService implements DocumentBoxRetriever {
     }
 
     private List<DraftDetailResponse.ApproverSummary> toApproverSummaries(Draft draft) {
+        if(draft.getApproval() == null) return List.of();
+
         return draft.getApproval().getApprovers().stream()
                 .map(approver -> new DraftDetailResponse.ApproverSummary(
                         approver.getApprover().getId(),
@@ -182,6 +195,7 @@ public class DocumentBoxQueryService implements DocumentBoxRetriever {
     }
 
     private List<DraftDetailResponse.CirculationSummary> toCirculationSummaries(Draft draft) {
+
         return draft.getCirculations().stream()
                 .map(circulation -> new DraftDetailResponse.CirculationSummary(
                         circulation.getViewer().getId(),
@@ -191,7 +205,7 @@ public class DocumentBoxQueryService implements DocumentBoxRetriever {
                 .toList();
     }
 
-    private DraftDetailResponse.LeaveDraftDetail toLeaveDetail(Draft draft) {
+    private @Nullable LeaveDraftDetail toLeaveDetail(Draft draft) {
         if (!(draft instanceof LeaveDraft leaveDraft)) return null;
 
         return new DraftDetailResponse.LeaveDraftDetail(
@@ -202,7 +216,7 @@ public class DocumentBoxQueryService implements DocumentBoxRetriever {
         );
     }
 
-    private DraftDetailResponse.BusinessTripDraftDetail toBusinessTripDetail(Draft draft) {
+    private @Nullable BusinessTripDraftDetail toBusinessTripDetail(Draft draft) {
         if (!(draft instanceof BusinessTripDraft businessTripDraft)) return null;
 
         return new DraftDetailResponse.BusinessTripDraftDetail(
@@ -216,7 +230,7 @@ public class DocumentBoxQueryService implements DocumentBoxRetriever {
         );
     }
 
-    private DraftDetailResponse.SalesDraftDetail toSalesDetail(Draft draft) {
+    private @Nullable SalesDraftDetail toSalesDetail(Draft draft) {
         if (!(draft instanceof SalesDraft salesDraft)) return null;
 
         return new DraftDetailResponse.SalesDraftDetail(

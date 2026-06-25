@@ -22,6 +22,7 @@ public class DraftFileResourceService extends AbstractFileResourceService {
         super(fileResourceQueryRepository, fileStorage);
     }
 
+    @Override
     protected FileResourceInfo getFileResourceInfo(Long draftId, Long fileId) {
         return  fileResourceQueryRepository
                 .findDraftFileInfoByDraftIdAndFileIdForResource(draftId, fileId)

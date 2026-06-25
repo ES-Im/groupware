@@ -22,6 +22,7 @@ public class EducationFileResourceService extends AbstractFileResourceService {
         super(fileResourceQueryRepository, fileStorage);
     }
 
+    @Override
     protected FileResourceInfo getFileResourceInfo(Long educationId, Long fileId) {
         return fileResourceQueryRepository
                 .findEducationFileInfoByEducationIdAndFileIdForResource(educationId, fileId)

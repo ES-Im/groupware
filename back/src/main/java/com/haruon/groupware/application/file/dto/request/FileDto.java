@@ -5,6 +5,7 @@ import com.haruon.groupware.application.exception.common.PositiveValueRequiredEx
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import com.haruon.groupware.application.exception.file.InvalidFileNameException;
 import lombok.Builder;
+import org.springframework.core.io.Resource;
 
 import java.util.Locale;
 
@@ -20,16 +21,12 @@ public record FileDto(
 
         Long fileSize,
 
-        byte[] bytes
+        Resource resource
 
 ) {
     public FileDto {
-        if (mimeType == null || originalFileFullName == null || fileSize == null || bytes == null) {
+        if (mimeType == null || originalFileFullName == null || fileSize == null || resource == null) {
             throw new RequiredValueMissingException();
-        }
-
-        if (bytes.length == 0) {
-            throw new PositiveValueRequiredException();
         }
 
         if(mimeType.isBlank() || originalFileFullName.isBlank()) {

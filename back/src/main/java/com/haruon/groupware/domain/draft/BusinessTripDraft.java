@@ -36,18 +36,17 @@ public class BusinessTripDraft extends Draft {
 
     private List<BusinessTripParticipant> participants = new ArrayList<>();
 
-
-    private BusinessTripDraft(String title, String content, Emp emp) {
-        super(title, content, emp);
-    }
-
-    private void init (
+    private BusinessTripDraft (
+            String title,
+            String content,
+            Emp emp,
             LocalDateTime startAt,
             LocalDateTime endAt,
             String destination,
             String purpose,
             @Nullable List<Emp> participants
     ) {
+        super(title, content, emp);
         validateBusinessTripInitParam(startAt, endAt, destination, purpose);
 
         this.startAt = startAt;
@@ -55,7 +54,11 @@ public class BusinessTripDraft extends Draft {
         this.destination = destination;
         this.purpose = purpose;
 
-        if (participants!= null && !participants.isEmpty()) {
+        initParticipants(participants);
+    }
+
+    private void initParticipants(@Nullable List<Emp> participants) {
+        if (participants != null && !participants.isEmpty()) {
             participants.forEach(this::addParticipant);
         }
     }
@@ -71,8 +74,7 @@ public class BusinessTripDraft extends Draft {
             @Nullable List<Emp> participants,
             @Nullable List<ApproversParam> approvers
     ) {
-        BusinessTripDraft draft = new BusinessTripDraft(title, content, emp);
-        draft.init(startAt, endAt, destination, purpose, participants);
+        BusinessTripDraft draft = new BusinessTripDraft(title, content, emp, startAt, endAt, destination, purpose, participants);
         draft.createDraftApproval(approvers);
 
         return draft;
@@ -90,9 +92,7 @@ public class BusinessTripDraft extends Draft {
             List<ApproversParam> approvers,
             LocalDateTime submittedAt
     ) {
-        BusinessTripDraft submitted = new BusinessTripDraft(title, content, emp);
-
-        submitted.init(startAt, endAt, destination, purpose, participants);
+        BusinessTripDraft submitted = new BusinessTripDraft(title, content, emp, startAt, endAt, destination, purpose, participants);
         submitted.createSubmittedApproval(approvers, submittedAt);
 
         return submitted;
@@ -166,7 +166,7 @@ public class BusinessTripDraft extends Draft {
 
     @Override
     protected void validateBeforeSubmit(@Nullable List<ApproversParam> params) {
-        state(!participants.isEmpty(), "참가자가 0명이 될 수 없다.");
+        if(participants.isEmpty()) throw new IllegalStateException("참가자가 0명이 될 수 없다.");
 
         super.validateBeforeSubmit(params);
     }

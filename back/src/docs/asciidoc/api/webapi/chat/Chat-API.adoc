@@ -1,0 +1,273 @@
+[[CHAT_ROOM_LIST]]
+=== 내 채팅방 목록 조회
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/CHAT_ROOM_LIST/http-request.adoc[]
+
+_Request header_
+include::{snippets}/CHAT_ROOM_LIST/request-headers.adoc[]
+
+_Request param_
+include::{snippets}/CHAT_ROOM_LIST/query-parameters.adoc[]
+--
+Response (200)::
++
+--
+_HTTP response_
+include::{snippets}/CHAT_ROOM_LIST/http-response.adoc[]
+
+_Response fields_
+include::{snippets}/CHAT_ROOM_LIST/response-fields.adoc[]
+--
+====
+
+[[CHAT_ROOM_DETAIL]]
+=== 채팅방 상세 조회
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/CHAT_ROOM_DETAIL/http-request.adoc[]
+
+_Request header_
+include::{snippets}/CHAT_ROOM_DETAIL/request-headers.adoc[]
+
+_Path parameters_
+include::{snippets}/CHAT_ROOM_DETAIL/path-parameters.adoc[]
+--
+Response (200)::
++
+--
+_HTTP response_
+include::{snippets}/CHAT_ROOM_DETAIL/http-response.adoc[]
+
+_Response fields_
+include::{snippets}/CHAT_ROOM_DETAIL/response-fields.adoc[]
+--
+====
+
+[[CHAT_MESSAGES]]
+=== 채팅 메시지 목록 조회
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/CHAT_MESSAGES/http-request.adoc[]
+
+_Request header_
+include::{snippets}/CHAT_MESSAGES/request-headers.adoc[]
+
+_Path parameters_
+include::{snippets}/CHAT_MESSAGES/path-parameters.adoc[]
+
+_Request param_
+include::{snippets}/CHAT_MESSAGES/query-parameters.adoc[]
+--
+Response (200)::
++
+--
+_HTTP response_
+include::{snippets}/CHAT_MESSAGES/http-response.adoc[]
+
+_Response fields_
+include::{snippets}/CHAT_MESSAGES/response-fields.adoc[]
+--
+====
+
+[[CHAT_ROOM_CREATE]]
+=== 채팅방 생성
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/CHAT_ROOM_CREATE/http-request.adoc[]
+
+_Request header_
+include::{snippets}/CHAT_ROOM_CREATE/request-headers.adoc[]
+
+_Request fields_
+include::{snippets}/CHAT_ROOM_CREATE/request-fields.adoc[]
+--
+Response (200)::
++
+--
+_HTTP response_
+include::{snippets}/CHAT_ROOM_CREATE/http-response.adoc[]
+
+_Response fields_
+include::{snippets}/CHAT_ROOM_CREATE/response-fields.adoc[]
+--
+====
+
+[[CHAT_ROOM_INVITE]]
+=== 채팅방 멤버 초대
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/CHAT_ROOM_INVITE/http-request.adoc[]
+
+_Request header_
+include::{snippets}/CHAT_ROOM_INVITE/request-headers.adoc[]
+
+_Path parameters_
+include::{snippets}/CHAT_ROOM_INVITE/path-parameters.adoc[]
+
+_Request fields_
+include::{snippets}/CHAT_ROOM_INVITE/request-fields.adoc[]
+--
+Response (204)::
++
+--
+_HTTP response_
+include::{snippets}/CHAT_ROOM_INVITE/http-response.adoc[]
+--
+====
+
+[[CHAT_ROOM_NAME_UPDATE]]
+=== 채팅방 표시명 수정
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/CHAT_ROOM_NAME_UPDATE/http-request.adoc[]
+
+_Request header_
+include::{snippets}/CHAT_ROOM_NAME_UPDATE/request-headers.adoc[]
+
+_Path parameters_
+include::{snippets}/CHAT_ROOM_NAME_UPDATE/path-parameters.adoc[]
+
+_Request fields_
+include::{snippets}/CHAT_ROOM_NAME_UPDATE/request-fields.adoc[]
+--
+Response (204)::
++
+--
+_HTTP response_
+include::{snippets}/CHAT_ROOM_NAME_UPDATE/http-response.adoc[]
+--
+====
+
+[[CHAT_ROOM_LEAVE]]
+=== 채팅방 나가기
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/CHAT_ROOM_LEAVE/http-request.adoc[]
+
+_Request header_
+include::{snippets}/CHAT_ROOM_LEAVE/request-headers.adoc[]
+
+_Path parameters_
+include::{snippets}/CHAT_ROOM_LEAVE/path-parameters.adoc[]
+--
+Response (204)::
++
+--
+_HTTP response_
+include::{snippets}/CHAT_ROOM_LEAVE/http-response.adoc[]
+--
+====
+
+[[CHAT_ROOM_BOOKMARK]]
+=== 채팅방 즐겨찾기
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/CHAT_ROOM_BOOKMARK/http-request.adoc[]
+
+_Request header_
+include::{snippets}/CHAT_ROOM_BOOKMARK/request-headers.adoc[]
+
+_Path parameters_
+include::{snippets}/CHAT_ROOM_BOOKMARK/path-parameters.adoc[]
+--
+Response (204)::
++
+--
+_HTTP response_
+include::{snippets}/CHAT_ROOM_BOOKMARK/http-response.adoc[]
+--
+====
+
+[[CHAT_ROOM_UNBOOKMARK]]
+=== 채팅방 즐겨찾기 해제
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/CHAT_ROOM_UNBOOKMARK/http-request.adoc[]
+
+_Request header_
+include::{snippets}/CHAT_ROOM_UNBOOKMARK/request-headers.adoc[]
+
+_Path parameters_
+include::{snippets}/CHAT_ROOM_UNBOOKMARK/path-parameters.adoc[]
+--
+Response (204)::
++
+--
+_HTTP response_
+include::{snippets}/CHAT_ROOM_UNBOOKMARK/http-response.adoc[]
+--
+====
+
+[[CHAT_ROOM_READ_POSITION_UPDATE]]
+=== 채팅방 읽음 위치 갱신
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/CHAT_ROOM_READ_POSITION_UPDATE/http-request.adoc[]
+
+_Request header_
+include::{snippets}/CHAT_ROOM_READ_POSITION_UPDATE/request-headers.adoc[]
+
+_Path parameters_
+include::{snippets}/CHAT_ROOM_READ_POSITION_UPDATE/path-parameters.adoc[]
+
+_Request fields_
+include::{snippets}/CHAT_ROOM_READ_POSITION_UPDATE/request-fields.adoc[]
+--
+Response (204)::
++
+--
+_HTTP response_
+include::{snippets}/CHAT_ROOM_READ_POSITION_UPDATE/http-response.adoc[]
+--
+====

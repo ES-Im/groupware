@@ -5,6 +5,7 @@ import com.haruon.groupware.application.chat.service.query.dto.MyChatRoomsRespon
 import org.jspecify.annotations.Nullable;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ChatRoomQueryRepository {
     List<MyChatRoomsResponse> findJoinedChatRoomsByEmpId(
@@ -13,8 +14,7 @@ public interface ChatRoomQueryRepository {
             @Nullable Boolean isBookmark
     );
 
-    ChatRoomDetailResponse findChatRoomByRoomId(Long roomId);
+    Optional<ChatRoomDetailResponse> findChatRoomByRoomId(Long empId, Long roomId);
 
-    boolean existRoomByIdAndEmpId(Long empId, Long roomId);
 
 }
