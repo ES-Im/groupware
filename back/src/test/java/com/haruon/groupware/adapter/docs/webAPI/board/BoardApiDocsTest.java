@@ -1,14 +1,18 @@
-package com.haruon.groupware.adapter.docs.webAPI.board;
+package com.haruon.groupware.adapter.docs.webapi.board;
 
 import com.haruon.groupware.adapter.docs.RestDocsSupport;
 import com.haruon.groupware.adapter.webapi.board.*;
 import com.haruon.groupware.adapter.webapi.board.dto.CommandCategoryNameRequest;
 import com.haruon.groupware.adapter.webapi.board.dto.CommandCommentRequest;
-import com.haruon.groupware.application.board.provided.*;
-import com.haruon.groupware.application.board.service.dto.BoardCreateRequest;
-import com.haruon.groupware.application.board.service.dto.BoardUpdateRequest;
-import com.haruon.groupware.application.board.service.dto.response.*;
-import com.haruon.groupware.application.file.dto.response.FileListInfo;
+import com.haruon.groupware.application.board.provided.forCommand.BoardManagement;
+import com.haruon.groupware.application.board.provided.forCommand.CategoryManagement;
+import com.haruon.groupware.application.board.provided.forCommand.CommentManagement;
+import com.haruon.groupware.application.board.provided.forRetriever.BoardAndCommentRetriever;
+import com.haruon.groupware.application.board.provided.forRetriever.CategoryRetriever;
+import com.haruon.groupware.application.board.service.command.dto.BoardCreateRequest;
+import com.haruon.groupware.application.board.service.command.dto.BoardUpdateRequest;
+import com.haruon.groupware.application.board.service.query.dto.*;
+import com.haruon.groupware.application.file.service.query.dto.FileListInfo;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.PageImpl;
@@ -52,10 +56,10 @@ class BoardApiDocsTest extends RestDocsSupport {
     @Override
     protected Object[] initControllers() {
         return new Object[]{
-                new CategoryApi(categoryRetriever),
+                new CategoryQueryApi(categoryRetriever),
                 new CategoryCommandApi(categoryManagement),
                 new BoardCommandApi(boardManagement),
-                new BoardAndCommentApi(boardAndCommentRetriever),
+                new BoardQueryApi(boardAndCommentRetriever),
                 new CommentCommandApi(commentManagement)
         };
     }

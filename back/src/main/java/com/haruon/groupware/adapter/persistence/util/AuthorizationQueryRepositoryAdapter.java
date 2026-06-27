@@ -5,11 +5,11 @@ import com.haruon.groupware.application.exception.common.role.ActiveEmployeeNotF
 import com.haruon.groupware.application.exception.common.role.DepartmentMismatchException;
 import com.haruon.groupware.application.utils.projection.DeptManagerAndTargetEmpInfo;
 import com.haruon.groupware.application.utils.required.AuthorizationQueryRepository;
-import com.haruon.groupware.domain.empInfo.QDept;
-import com.haruon.groupware.domain.empInfo.QEmp;
-import com.haruon.groupware.domain.empInfo.QEmpBelongings;
-import com.haruon.groupware.domain.empInfo.enums.EmpStatus;
-import com.haruon.groupware.domain.empInfo.enums.SystemRoleCode;
+import com.haruon.groupware.domain.employee.QDept;
+import com.haruon.groupware.domain.employee.QEmp;
+import com.haruon.groupware.domain.employee.QEmpBelongings;
+import com.haruon.groupware.domain.employee.enums.EmpStatus;
+import com.haruon.groupware.domain.employee.enums.SystemRoleCode;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;

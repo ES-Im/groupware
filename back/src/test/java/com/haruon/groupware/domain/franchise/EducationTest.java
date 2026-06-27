@@ -1,6 +1,6 @@
 package com.haruon.groupware.domain.franchise;
 
-import com.haruon.groupware.domain.empInfo.Emp;
+import com.haruon.groupware.domain.employee.Emp;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

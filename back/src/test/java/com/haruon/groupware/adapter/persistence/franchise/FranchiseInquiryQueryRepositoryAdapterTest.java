@@ -2,14 +2,14 @@ package com.haruon.groupware.adapter.persistence.franchise;
 
 import com.haruon.groupware.application.TestIntegrationConfig;
 import com.haruon.groupware.application.dept.required.DeptRepository;
-import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
+import com.haruon.groupware.application.employee.account.required.EmpRepository;
 import com.haruon.groupware.application.franchise.required.FranchiseInquiryQueryRepository;
 import com.haruon.groupware.application.franchise.required.FranchiseInquiryRepository;
 import com.haruon.groupware.application.franchise.required.FranchiseRepository;
 import com.haruon.groupware.application.franchise.service.query.dto.inquiry.AnswerResponse;
 import com.haruon.groupware.application.franchise.service.query.dto.inquiry.InquireDetailResponse;
 import com.haruon.groupware.application.franchise.service.query.dto.inquiry.InquiriesResponse;
-import com.haruon.groupware.domain.empInfo.Emp;
+import com.haruon.groupware.domain.employee.Emp;
 import com.haruon.groupware.domain.franchise.Franchise;
 import com.haruon.groupware.domain.franchise.FranchiseInquiry;
 import jakarta.transaction.Transactional;

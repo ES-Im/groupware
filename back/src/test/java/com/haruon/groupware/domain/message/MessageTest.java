@@ -1,6 +1,6 @@
 package com.haruon.groupware.domain.message;
 
-import com.haruon.groupware.domain.empInfo.Emp;
+import com.haruon.groupware.domain.employee.Emp;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;

@@ -1,7 +1,7 @@
 package com.haruon.groupware.adapter.batch.attendance;
 
-import com.haruon.groupware.application.empInfo.attendance.provided.AttendanceClosing;
-import com.haruon.groupware.application.empInfo.attendance.service.dto.request.AttendanceCloseRequest;
+import com.haruon.groupware.application.employee.attendance.provided.forCommand.AttendanceClosing;
+import com.haruon.groupware.application.employee.attendance.service.command.dto.AttendanceCloseRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;

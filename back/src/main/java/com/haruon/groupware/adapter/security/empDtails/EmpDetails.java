@@ -1,9 +1,9 @@
 package com.haruon.groupware.adapter.security.empDtails;
 
-import com.haruon.groupware.application.empInfo.emp.service.dto.response.BelongingInfo;
-import com.haruon.groupware.domain.empInfo.Emp;
-import com.haruon.groupware.domain.empInfo.enums.EmpStatus;
-import com.haruon.groupware.domain.empInfo.enums.SystemRoleCode;
+import com.haruon.groupware.application.employee.account.service.query.dto.BelongingInfo;
+import com.haruon.groupware.domain.employee.Emp;
+import com.haruon.groupware.domain.employee.enums.EmpStatus;
+import com.haruon.groupware.domain.employee.enums.SystemRoleCode;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

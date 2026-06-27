@@ -1,8 +1,8 @@
 package com.haruon.groupware.adapter.security.util;
 
-import com.haruon.groupware.application.auth.dto.JwtResponse;
 import com.haruon.groupware.application.auth.required.TokenIssuer;
 import com.haruon.groupware.application.auth.required.TokenParser;
+import com.haruon.groupware.application.auth.service.command.dto.JwtResponse;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;

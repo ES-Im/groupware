@@ -1,7 +1,7 @@
 package com.haruon.groupware.adapter.webapi.board;
 
 import com.haruon.groupware.adapter.security.empDtails.EmpDetails;
-import com.haruon.groupware.application.board.provided.LikeManagement;
+import com.haruon.groupware.application.board.provided.forCommand.LikeManagement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

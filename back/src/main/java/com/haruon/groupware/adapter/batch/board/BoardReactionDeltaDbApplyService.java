@@ -1,7 +1,7 @@
 package com.haruon.groupware.adapter.batch.board;
 
 import com.haruon.groupware.application.board.required.BoardRepository;
-import com.haruon.groupware.application.board.service.dto.BoardReactionDelta;
+import com.haruon.groupware.application.board.service.command.dto.BoardReactionDelta;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;

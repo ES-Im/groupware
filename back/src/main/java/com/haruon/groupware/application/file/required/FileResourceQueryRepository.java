@@ -1,6 +1,6 @@
 package com.haruon.groupware.application.file.required;
 
-import com.haruon.groupware.application.file.dto.result.FileResourceInfo;
+import com.haruon.groupware.application.file.service.query.dto.FileResourceInfo;
 
 import java.util.Optional;
 

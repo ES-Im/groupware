@@ -4,7 +4,7 @@ import com.haruon.groupware.adapter.IntegrationTestSupport;
 import com.haruon.groupware.application.message.provided.forCommand.MessageDraftManagement;
 import com.haruon.groupware.application.message.required.MessageRepository;
 import com.haruon.groupware.application.message.service.command.dto.MessageCreateRequest;
-import com.haruon.groupware.domain.empInfo.Emp;
+import com.haruon.groupware.domain.employee.Emp;
 import com.haruon.groupware.domain.message.Message;
 import com.haruon.groupware.domain.message.MessageSending;
 import org.junit.jupiter.api.AfterEach;

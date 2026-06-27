@@ -2,7 +2,7 @@ package com.haruon.groupware.application.draft.service.command;
 
 import com.haruon.groupware.application.draft.required.DraftRepository;
 import com.haruon.groupware.application.draft.service.command.dto.ApproversRequest;
-import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
+import com.haruon.groupware.application.employee.account.required.EmpRepository;
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import com.haruon.groupware.application.exception.draft.ApprovalLineRequiredException;
 import com.haruon.groupware.application.exception.draft.DraftNotFoundException;
@@ -10,7 +10,7 @@ import com.haruon.groupware.application.utils.AuthValidator;
 import com.haruon.groupware.application.utils.Utils;
 import com.haruon.groupware.domain.draft.Draft;
 import com.haruon.groupware.domain.draft.sub.ApproversParam;
-import com.haruon.groupware.domain.empInfo.Emp;
+import com.haruon.groupware.domain.employee.Emp;
 import jakarta.transaction.Transactional;
 import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;

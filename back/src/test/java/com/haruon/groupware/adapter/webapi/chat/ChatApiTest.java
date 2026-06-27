@@ -3,7 +3,7 @@ package com.haruon.groupware.adapter.webapi.chat;
 import com.haruon.groupware.adapter.IntegrationTestSupport;
 import com.haruon.groupware.application.chat.provided.forCommand.ChatSender;
 import com.haruon.groupware.application.chat.service.command.dto.ChatMessageResponse;
-import com.haruon.groupware.domain.empInfo.Emp;
+import com.haruon.groupware.domain.employee.Emp;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

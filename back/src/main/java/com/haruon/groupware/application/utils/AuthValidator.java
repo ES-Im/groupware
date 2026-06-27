@@ -1,14 +1,14 @@
 package com.haruon.groupware.application.utils;
 
-import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
+import com.haruon.groupware.application.employee.account.required.EmpRepository;
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import com.haruon.groupware.application.exception.common.role.ActiveEmployeeNotFoundException;
 import com.haruon.groupware.application.exception.common.role.PermissionDeniedException;
 import com.haruon.groupware.application.utils.projection.DeptManagerAndTargetEmpInfo;
 import com.haruon.groupware.application.utils.required.AuthorizationQueryRepository;
-import com.haruon.groupware.domain.empInfo.Emp;
-import com.haruon.groupware.domain.empInfo.enums.EmpStatus;
-import com.haruon.groupware.domain.empInfo.enums.SystemRoleCode;
+import com.haruon.groupware.domain.employee.Emp;
+import com.haruon.groupware.domain.employee.enums.EmpStatus;
+import com.haruon.groupware.domain.employee.enums.SystemRoleCode;
 
 public class AuthValidator {
 

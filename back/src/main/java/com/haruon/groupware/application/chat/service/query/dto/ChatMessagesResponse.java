@@ -32,12 +32,12 @@ public record ChatMessagesResponse(
 
             this(
                 id, senderId, clientMessageId, senderName, content, sentAt,
-                    getProfileFileApi(senderId, profileFileId)
+                    getProfileFileQueryApi(senderId, profileFileId)
             );
 
         }
 
-        private static @Nullable String getProfileFileApi(Long memberId, @Nullable Long profileFileId) {
+        private static @Nullable String getProfileFileQueryApi(Long memberId, @Nullable Long profileFileId) {
             return profileFileId != null
                     ? "/api/employees/" + memberId + "/files/" + profileFileId + "/preview"
                     : null;

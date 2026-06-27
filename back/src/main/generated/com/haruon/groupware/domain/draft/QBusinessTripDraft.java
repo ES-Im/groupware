@@ -48,7 +48,7 @@ public class QBusinessTripDraft extends EntityPathBase<BusinessTripDraft> {
     public final ListPath<DraftFile, QDraftFile> draftFiles;
 
     // inherited
-    public final com.haruon.groupware.domain.empInfo.QEmp emp;
+    public final com.haruon.groupware.domain.employee.QEmp emp;
 
     public final DateTimePath<java.time.LocalDateTime> endAt = createDateTime("endAt", java.time.LocalDateTime.class);
 

@@ -2,9 +2,9 @@ package com.haruon.groupware.adapter.webapi.schedule;
 
 import com.haruon.groupware.adapter.security.empDtails.EmpDetails;
 import com.haruon.groupware.adapter.webapi.DateSupport;
-import com.haruon.groupware.application.schedule.provided.ScheduleRetriever;
-import com.haruon.groupware.application.schedule.service.query.response.ScheduleDetailResponse;
-import com.haruon.groupware.application.schedule.service.query.response.ScheduleResponse;
+import com.haruon.groupware.application.schedule.provided.forRetriever.ScheduleRetriever;
+import com.haruon.groupware.application.schedule.service.query.dto.ScheduleDetailResponse;
+import com.haruon.groupware.application.schedule.service.query.dto.ScheduleResponse;
 import com.haruon.groupware.domain.schedule.ScheduleType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;

@@ -15,7 +15,7 @@ import static java.util.Objects.requireNonNull;
 @MappedSuperclass
 public abstract class AbstractEventAggregateRoot extends AbstractEntity {
 
-    @Transient private transient final List<DomainEvent> domainEvents = new ArrayList<>();
+    @Transient private final List<DomainEvent> domainEvents = new ArrayList<>();
 
     protected <T extends DomainEvent> T registerEvent(T event) {
         requireNonNull(event, "등록할 이벤트가 없음");

@@ -1,7 +1,7 @@
 package com.haruon.groupware.adapter.redis.board;
 
-import com.haruon.groupware.application.board.provided.BoardReactionCounter;
-import com.haruon.groupware.application.board.service.dto.BoardReactionDelta;
+import com.haruon.groupware.application.board.provided.forCommand.BoardReactionCounter;
+import com.haruon.groupware.application.board.service.command.dto.BoardReactionDelta;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;

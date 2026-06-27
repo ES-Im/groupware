@@ -38,7 +38,7 @@ public class QBoardComment extends EntityPathBase<BoardComment> {
 
     public final DateTimePath<java.time.LocalDateTime> editedAt = createDateTime("editedAt", java.time.LocalDateTime.class);
 
-    public final com.haruon.groupware.domain.empInfo.QEmp emp;
+    public final com.haruon.groupware.domain.employee.QEmp emp;
 
     //inherited
     public final NumberPath<Long> id = _super.id;
@@ -73,7 +73,7 @@ public class QBoardComment extends EntityPathBase<BoardComment> {
     public QBoardComment(Class<? extends BoardComment> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.board = inits.isInitialized("board") ? new QBoard(forProperty("board"), inits.get("board")) : null;
-        this.emp = inits.isInitialized("emp") ? new com.haruon.groupware.domain.empInfo.QEmp(forProperty("emp"), inits.get("emp")) : null;
+        this.emp = inits.isInitialized("emp") ? new com.haruon.groupware.domain.employee.QEmp(forProperty("emp"), inits.get("emp")) : null;
         this.parentComment = inits.isInitialized("parentComment") ? new QBoardComment(forProperty("parentComment"), inits.get("parentComment")) : null;
     }
 

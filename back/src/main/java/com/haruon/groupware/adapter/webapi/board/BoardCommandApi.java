@@ -1,9 +1,9 @@
 package com.haruon.groupware.adapter.webapi.board;
 
 import com.haruon.groupware.adapter.security.empDtails.EmpDetails;
-import com.haruon.groupware.application.board.provided.BoardManagement;
-import com.haruon.groupware.application.board.service.dto.BoardCreateRequest;
-import com.haruon.groupware.application.board.service.dto.BoardUpdateRequest;
+import com.haruon.groupware.application.board.provided.forCommand.BoardManagement;
+import com.haruon.groupware.application.board.service.command.dto.BoardCreateRequest;
+import com.haruon.groupware.application.board.service.command.dto.BoardUpdateRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

@@ -1,6 +1,6 @@
 package com.haruon.groupware.application.utils.projection;
 
-import com.haruon.groupware.domain.empInfo.Emp;
+import com.haruon.groupware.domain.employee.Emp;
 
 /**
  * findDeptManagerInfoIfSameCurrentDeptOrAdmin

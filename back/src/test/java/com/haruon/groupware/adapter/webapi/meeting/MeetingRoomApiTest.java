@@ -8,10 +8,10 @@ import com.haruon.groupware.application.meeting.service.command.dto.MeetingReser
 import com.haruon.groupware.application.meeting.service.command.dto.MeetingRoomCreateRequest;
 import com.haruon.groupware.application.meeting.service.command.dto.MeetingRoomUpdateRequest;
 import com.haruon.groupware.application.schedule.required.ScheduleRepository;
-import com.haruon.groupware.domain.empInfo.Dept;
-import com.haruon.groupware.domain.empInfo.Emp;
-import com.haruon.groupware.domain.empInfo.enums.PositionCode;
-import com.haruon.groupware.domain.empInfo.enums.SystemRoleCode;
+import com.haruon.groupware.domain.employee.Dept;
+import com.haruon.groupware.domain.employee.Emp;
+import com.haruon.groupware.domain.employee.enums.PositionCode;
+import com.haruon.groupware.domain.employee.enums.SystemRoleCode;
 import com.haruon.groupware.domain.meeting.MeetingRoom;
 import com.haruon.groupware.domain.shared.Email;
 import org.junit.jupiter.api.AfterEach;

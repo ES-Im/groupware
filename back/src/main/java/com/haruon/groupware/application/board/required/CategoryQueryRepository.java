@@ -1,6 +1,6 @@
 package com.haruon.groupware.application.board.required;
 
-import com.haruon.groupware.application.board.service.dto.response.CategoryResponse;
+import com.haruon.groupware.application.board.service.query.dto.CategoryResponse;
 import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

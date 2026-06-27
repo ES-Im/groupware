@@ -36,7 +36,7 @@ public class QSchedule extends EntityPathBase<Schedule> {
     //inherited
     public final DateTimePath<java.time.Instant> createdAt = _super.createdAt;
 
-    public final com.haruon.groupware.domain.empInfo.QEmp emp;
+    public final com.haruon.groupware.domain.employee.QEmp emp;
 
     public final TimePath<java.time.LocalTime> endAt = createTime("endAt", java.time.LocalTime.class);
 
@@ -80,7 +80,7 @@ public class QSchedule extends EntityPathBase<Schedule> {
 
     public QSchedule(Class<? extends Schedule> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.emp = inits.isInitialized("emp") ? new com.haruon.groupware.domain.empInfo.QEmp(forProperty("emp"), inits.get("emp")) : null;
+        this.emp = inits.isInitialized("emp") ? new com.haruon.groupware.domain.employee.QEmp(forProperty("emp"), inits.get("emp")) : null;
     }
 
 }

@@ -2,9 +2,9 @@ package com.haruon.groupware.adapter.file;
 
 import com.haruon.groupware.adapter.webapi.exception.auth.FileStoreFailedException;
 import com.haruon.groupware.application.exception.file.FileNotFoundException;
-import com.haruon.groupware.application.file.dto.request.FileDto;
-import com.haruon.groupware.application.file.dto.result.StoreFile;
 import com.haruon.groupware.application.file.required.FileStorage;
+import com.haruon.groupware.application.file.service.command.dto.FileDto;
+import com.haruon.groupware.application.file.service.command.dto.StoreFile;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;

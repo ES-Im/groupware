@@ -1,8 +1,8 @@
 package com.haruon.groupware.application.meeting.service.query;
 
 import com.haruon.groupware.application.exception.meeting.MeetingRoomNotFoundException;
-import com.haruon.groupware.application.file.dto.response.FileListInfo;
-import com.haruon.groupware.application.meeting.provided.forRetreiever.MeetingRoomRetriever;
+import com.haruon.groupware.application.file.service.query.dto.FileListInfo;
+import com.haruon.groupware.application.meeting.provided.forRetriever.MeetingRoomRetriever;
 import com.haruon.groupware.application.meeting.required.MeetingRoomQueryRepository;
 import com.haruon.groupware.application.meeting.service.query.dto.MeetingRoomDetailResponse;
 import com.haruon.groupware.application.meeting.service.query.dto.MeetingRoomResponse;

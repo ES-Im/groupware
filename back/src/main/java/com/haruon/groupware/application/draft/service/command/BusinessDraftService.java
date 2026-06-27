@@ -6,12 +6,12 @@ import com.haruon.groupware.application.draft.service.command.dto.createDraft.Bu
 import com.haruon.groupware.application.draft.service.command.dto.createDraft.CommonDraftCreateRequest;
 import com.haruon.groupware.application.draft.service.command.dto.updateDraft.BusinessTripDraftUpdateRequest;
 import com.haruon.groupware.application.draft.service.command.dto.updateDraft.CommonDraftUpdateRequest;
-import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
+import com.haruon.groupware.application.employee.account.required.EmpRepository;
 import com.haruon.groupware.application.exception.draft.DraftTypeMismatchException;
 import com.haruon.groupware.domain.draft.BusinessTripDraft;
 import com.haruon.groupware.domain.draft.Draft;
 import com.haruon.groupware.domain.draft.sub.ApproversParam;
-import com.haruon.groupware.domain.empInfo.Emp;
+import com.haruon.groupware.domain.employee.Emp;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 

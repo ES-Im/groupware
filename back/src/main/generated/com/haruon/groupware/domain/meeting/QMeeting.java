@@ -34,7 +34,7 @@ public class QMeeting extends EntityPathBase<Meeting> {
 
     public final SimplePath<Object> editableDate = createSimple("editableDate", Object.class);
 
-    public final com.haruon.groupware.domain.empInfo.QEmp emp;
+    public final com.haruon.groupware.domain.employee.QEmp emp;
 
     public final TimePath<java.time.LocalTime> endAt = createTime("endAt", java.time.LocalTime.class);
 
@@ -80,7 +80,7 @@ public class QMeeting extends EntityPathBase<Meeting> {
 
     public QMeeting(Class<? extends Meeting> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.emp = inits.isInitialized("emp") ? new com.haruon.groupware.domain.empInfo.QEmp(forProperty("emp"), inits.get("emp")) : null;
+        this.emp = inits.isInitialized("emp") ? new com.haruon.groupware.domain.employee.QEmp(forProperty("emp"), inits.get("emp")) : null;
         this.meetingRoom = inits.isInitialized("meetingRoom") ? new QMeetingRoom(forProperty("meetingRoom")) : null;
     }
 

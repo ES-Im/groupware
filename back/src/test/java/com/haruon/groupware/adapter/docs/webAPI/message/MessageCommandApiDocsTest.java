@@ -1,4 +1,4 @@
-package com.haruon.groupware.adapter.docs.webAPI.message;
+package com.haruon.groupware.adapter.docs.webapi.message;
 
 import com.haruon.groupware.adapter.docs.RestDocsSupport;
 import com.haruon.groupware.adapter.webapi.message.MessageCommandApi;

@@ -1,14 +1,14 @@
 package com.haruon.groupware.adapter.persistence.message;
 
 import com.haruon.groupware.adapter.persistence.message.readmodel.QMessageMailboxReadModel;
-import com.haruon.groupware.application.file.dto.response.FileListInfo;
+import com.haruon.groupware.application.file.service.query.dto.FileListInfo;
 import com.haruon.groupware.application.message.required.MessageQueryRepository;
 import com.haruon.groupware.application.message.service.query.dto.MessageCountResponse;
 import com.haruon.groupware.application.message.service.query.dto.MessageDetailResponse;
 import com.haruon.groupware.application.message.service.query.dto.MessagesResponse;
-import com.haruon.groupware.domain.empInfo.QDept;
-import com.haruon.groupware.domain.empInfo.QEmp;
-import com.haruon.groupware.domain.empInfo.QEmpBelongings;
+import com.haruon.groupware.domain.employee.QDept;
+import com.haruon.groupware.domain.employee.QEmp;
+import com.haruon.groupware.domain.employee.QEmpBelongings;
 import com.haruon.groupware.domain.message.QMessage;
 import com.haruon.groupware.domain.message.QMessageFile;
 import com.haruon.groupware.domain.message.QMessageReceiving;

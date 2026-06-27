@@ -1,7 +1,7 @@
 package com.haruon.groupware.application.utils.required;
 
 import com.haruon.groupware.application.utils.projection.DeptManagerAndTargetEmpInfo;
-import com.haruon.groupware.domain.empInfo.enums.SystemRoleCode;
+import com.haruon.groupware.domain.employee.enums.SystemRoleCode;
 
 public interface AuthorizationQueryRepository {
 

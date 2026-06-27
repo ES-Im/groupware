@@ -1,10 +1,10 @@
 package com.haruon.groupware.application;
 
-import com.haruon.groupware.application.file.dto.request.FileDto;
-import com.haruon.groupware.application.file.dto.result.StoreFile;
 import com.haruon.groupware.application.file.required.FileStorage;
+import com.haruon.groupware.application.file.service.command.dto.FileDto;
+import com.haruon.groupware.application.file.service.command.dto.StoreFile;
 import com.haruon.groupware.application.utils.required.CompanyPolicyPort;
-import com.haruon.groupware.domain.empInfo.EmpPasswordEncoder;
+import com.haruon.groupware.domain.employee.EmpPasswordEncoder;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;

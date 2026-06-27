@@ -1,12 +1,12 @@
 package com.haruon.groupware.application.franchise.service.command;
 
-import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
+import com.haruon.groupware.application.employee.account.required.EmpRepository;
 import com.haruon.groupware.application.exception.franchise.FranchiseInquiryNotFoundException;
 import com.haruon.groupware.application.franchise.provided.forCommand.AnswerManagement;
 import com.haruon.groupware.application.franchise.required.FranchiseInquiryRepository;
-import com.haruon.groupware.application.franchise.service.FranchiseUtils;
+import com.haruon.groupware.application.franchise.service.support.FranchiseUtils;
 import com.haruon.groupware.application.utils.required.AuthorizationQueryRepository;
-import com.haruon.groupware.domain.empInfo.Emp;
+import com.haruon.groupware.domain.employee.Emp;
 import com.haruon.groupware.domain.franchise.FranchiseInquiry;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;

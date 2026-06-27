@@ -2,7 +2,7 @@ package com.haruon.groupware.adapter.webapi.board;
 
 import com.haruon.groupware.adapter.security.empDtails.EmpDetails;
 import com.haruon.groupware.adapter.webapi.board.dto.CommandCategoryNameRequest;
-import com.haruon.groupware.application.board.provided.CategoryManagement;
+import com.haruon.groupware.application.board.provided.forCommand.CategoryManagement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

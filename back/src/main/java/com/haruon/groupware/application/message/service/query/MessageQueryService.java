@@ -1,8 +1,8 @@
 package com.haruon.groupware.application.message.service.query;
 
 import com.haruon.groupware.application.exception.message.MessageNotFoundException;
-import com.haruon.groupware.application.file.dto.response.FileListInfo;
-import com.haruon.groupware.application.message.provided.forRetrieve.MessageRetriever;
+import com.haruon.groupware.application.file.service.query.dto.FileListInfo;
+import com.haruon.groupware.application.message.provided.forRetriever.MessageRetriever;
 import com.haruon.groupware.application.message.required.MessageQueryRepository;
 import com.haruon.groupware.application.message.service.query.dto.MessageCountResponse;
 import com.haruon.groupware.application.message.service.query.dto.MessageDetailResponse;

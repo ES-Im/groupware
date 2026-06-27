@@ -1,6 +1,6 @@
 package com.haruon.groupware.application.chat.service.query;
 
-import com.haruon.groupware.application.chat.provided.forRetrieve.ChatMessageRetriever;
+import com.haruon.groupware.application.chat.provided.forRetriever.ChatMessageRetriever;
 import com.haruon.groupware.application.chat.required.ChatMessageQueryRepository;
 import com.haruon.groupware.application.chat.service.query.dto.ChatMessagesResponse;
 import lombok.RequiredArgsConstructor;

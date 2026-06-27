@@ -34,7 +34,7 @@ public class QMessageReceiving extends EntityPathBase<MessageReceiving> {
 
     public final DateTimePath<java.time.LocalDateTime> deletedAt = createDateTime("deletedAt", java.time.LocalDateTime.class);
 
-    public final com.haruon.groupware.domain.empInfo.QEmp emp;
+    public final com.haruon.groupware.domain.employee.QEmp emp;
 
     //inherited
     public final NumberPath<Long> id = _super.id;
@@ -70,7 +70,7 @@ public class QMessageReceiving extends EntityPathBase<MessageReceiving> {
 
     public QMessageReceiving(Class<? extends MessageReceiving> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.emp = inits.isInitialized("emp") ? new com.haruon.groupware.domain.empInfo.QEmp(forProperty("emp"), inits.get("emp")) : null;
+        this.emp = inits.isInitialized("emp") ? new com.haruon.groupware.domain.employee.QEmp(forProperty("emp"), inits.get("emp")) : null;
         this.message = inits.isInitialized("message") ? new QMessage(forProperty("message"), inits.get("message")) : null;
     }
 

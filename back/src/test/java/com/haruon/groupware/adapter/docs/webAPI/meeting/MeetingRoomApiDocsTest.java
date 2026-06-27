@@ -1,10 +1,10 @@
-package com.haruon.groupware.adapter.docs.webAPI.meeting;
+package com.haruon.groupware.adapter.docs.webapi.meeting;
 
 import com.haruon.groupware.adapter.docs.RestDocsSupport;
 import com.haruon.groupware.adapter.webapi.meeting.MeetingRoomApi;
-import com.haruon.groupware.application.file.dto.response.FileListInfo;
+import com.haruon.groupware.application.file.service.query.dto.FileListInfo;
 import com.haruon.groupware.application.meeting.provided.forCommand.MeetingRoomManagement;
-import com.haruon.groupware.application.meeting.provided.forRetreiever.MeetingRoomRetriever;
+import com.haruon.groupware.application.meeting.provided.forRetriever.MeetingRoomRetriever;
 import com.haruon.groupware.application.meeting.service.command.dto.MeetingRoomCreateRequest;
 import com.haruon.groupware.application.meeting.service.command.dto.MeetingRoomUpdateRequest;
 import com.haruon.groupware.application.meeting.service.query.dto.MeetingRoomDetailResponse;

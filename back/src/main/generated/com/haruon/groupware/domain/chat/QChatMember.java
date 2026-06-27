@@ -32,7 +32,7 @@ public class QChatMember extends EntityPathBase<ChatMember> {
     //inherited
     public final DateTimePath<java.time.Instant> createdAt = _super.createdAt;
 
-    public final com.haruon.groupware.domain.empInfo.QEmp emp;
+    public final com.haruon.groupware.domain.employee.QEmp emp;
 
     //inherited
     public final NumberPath<Long> id = _super.id;
@@ -72,7 +72,7 @@ public class QChatMember extends EntityPathBase<ChatMember> {
 
     public QChatMember(Class<? extends ChatMember> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.emp = inits.isInitialized("emp") ? new com.haruon.groupware.domain.empInfo.QEmp(forProperty("emp"), inits.get("emp")) : null;
+        this.emp = inits.isInitialized("emp") ? new com.haruon.groupware.domain.employee.QEmp(forProperty("emp"), inits.get("emp")) : null;
         this.lastReadMessage = inits.isInitialized("lastReadMessage") ? new QChatMessage(forProperty("lastReadMessage"), inits.get("lastReadMessage")) : null;
         this.room = inits.isInitialized("room") ? new QChatRoom(forProperty("room"), inits.get("room")) : null;
     }

@@ -1,7 +1,7 @@
 package com.haruon.groupware.application.draft.required;
 
 import com.haruon.groupware.domain.draft.Draft;
-import com.haruon.groupware.domain.empInfo.Emp;
+import com.haruon.groupware.domain.employee.Emp;
 import org.springframework.data.repository.Repository;
 
 import java.util.List;

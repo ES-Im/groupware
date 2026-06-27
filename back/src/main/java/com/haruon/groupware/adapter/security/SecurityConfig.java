@@ -1,7 +1,7 @@
 package com.haruon.groupware.adapter.security;
 
 import com.haruon.groupware.adapter.security.filter.JwtAuthFilter;
-import com.haruon.groupware.domain.empInfo.enums.SystemRoleCode;
+import com.haruon.groupware.domain.employee.enums.SystemRoleCode;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -73,8 +73,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/employees").permitAll()
 
                         /* Company API */
-                        .requestMatchers(HttpMethod.GET, "/api/company").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/company", "/api/company/**").hasRole(SystemRoleCode.ADMIN.name())
+                        .requestMatchers(HttpMethod.GET, "/api/companies").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/companies", "/api/companies/**").hasRole(SystemRoleCode.ADMIN.name())
 
                         /* Dept API */
                         .requestMatchers(HttpMethod.GET, "/api/departments", "/api/departments/**").authenticated()
@@ -115,12 +115,12 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/departments/*/employees/leaves/usage-summary").hasRole(SystemRoleCode.DEPT_MANAGER.name())
 
                         /* leave API*/
-                        .requestMatchers("/api/leave/employees/me/**").hasRole(SystemRoleCode.EMPLOYEE.name())
-                        .requestMatchers("/api/leave/departments/*/request-history").hasRole(SystemRoleCode.DEPT_MANAGER.name())
+                        .requestMatchers("/api/leaves/employees/me/**").hasRole(SystemRoleCode.EMPLOYEE.name())
+                        .requestMatchers("/api/leaves/departments/*/request-history").hasRole(SystemRoleCode.DEPT_MANAGER.name())
 
                         /* BusinessTrip API */
-                        .requestMatchers("/api/businessTrip/employees/me/**").hasRole(SystemRoleCode.EMPLOYEE.name())
-                        .requestMatchers("/api/businessTrip/departments/*/request-history").hasRole(SystemRoleCode.DEPT_MANAGER.name())
+                        .requestMatchers("/api/business-trips/employees/me/**").hasRole(SystemRoleCode.EMPLOYEE.name())
+                        .requestMatchers("/api/business-trips/departments/*/request-history").hasRole(SystemRoleCode.DEPT_MANAGER.name())
 
                         /* Draft API */
                         .requestMatchers(HttpMethod.POST, "/api/drafts/sales", "/api/drafts/sales/submission").hasRole(SystemRoleCode.FRANCHISE.name())
@@ -163,7 +163,7 @@ public class SecurityConfig {
                         ).hasRole(SystemRoleCode.EMPLOYEE.name())
 
                         /* DocumentBox API */
-                        .requestMatchers("/api/document-box/me/**").hasRole(SystemRoleCode.EMPLOYEE.name())
+                        .requestMatchers("/api/document-boxes/me/**").hasRole(SystemRoleCode.EMPLOYEE.name())
 
                         /* Message API */
                         .requestMatchers("/api/messages", "/api/messages/**").hasRole(SystemRoleCode.EMPLOYEE.name())

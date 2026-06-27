@@ -1,7 +1,7 @@
 package com.haruon.groupware.application.message.provided;
 
 import com.haruon.groupware.application.TestIntegrationConfig;
-import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
+import com.haruon.groupware.application.employee.account.required.EmpRepository;
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import com.haruon.groupware.application.exception.common.role.ActiveEmployeeNotFoundException;
 import com.haruon.groupware.application.exception.message.MessageNotFoundException;
@@ -10,7 +10,7 @@ import com.haruon.groupware.application.message.provided.forCommand.MessageDraft
 import com.haruon.groupware.application.message.required.MessageRepository;
 import com.haruon.groupware.application.message.service.command.dto.MessageCreateRequest;
 import com.haruon.groupware.application.message.service.command.dto.MessageUpdateRequest;
-import com.haruon.groupware.domain.empInfo.Emp;
+import com.haruon.groupware.domain.employee.Emp;
 import com.haruon.groupware.domain.message.Message;
 import com.haruon.groupware.domain.message.MessageReceiving;
 import jakarta.persistence.EntityManager;

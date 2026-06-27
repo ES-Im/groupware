@@ -1,9 +1,9 @@
-package com.haruon.groupware.adapter.docs.webAPI.meeting;
+package com.haruon.groupware.adapter.docs.webapi.meeting;
 
 import com.haruon.groupware.adapter.docs.RestDocsSupport;
 import com.haruon.groupware.adapter.webapi.meeting.MeetingApi;
 import com.haruon.groupware.application.meeting.provided.forCommand.MeetingManagement;
-import com.haruon.groupware.application.meeting.provided.forRetreiever.MeetingRetriever;
+import com.haruon.groupware.application.meeting.provided.forRetriever.MeetingRetriever;
 import com.haruon.groupware.application.meeting.service.command.dto.MeetingReserveRequest;
 import com.haruon.groupware.application.meeting.service.command.dto.MeetingUpdateRequest;
 import com.haruon.groupware.application.meeting.service.query.dto.ReservationDetailResponse;

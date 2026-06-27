@@ -46,7 +46,7 @@ public class QSalesDraft extends EntityPathBase<SalesDraft> {
     public final ListPath<DraftFile, QDraftFile> draftFiles;
 
     // inherited
-    public final com.haruon.groupware.domain.empInfo.QEmp emp;
+    public final com.haruon.groupware.domain.employee.QEmp emp;
 
     public final com.haruon.groupware.domain.franchise.QFranchise franchise;
 

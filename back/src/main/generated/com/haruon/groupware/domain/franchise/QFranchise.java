@@ -40,7 +40,7 @@ public class QFranchise extends EntityPathBase<Franchise> {
     //inherited
     public final DateTimePath<java.time.Instant> createdAt = _super.createdAt;
 
-    public final com.haruon.groupware.domain.empInfo.QEmp emp;
+    public final com.haruon.groupware.domain.employee.QEmp emp;
 
     public final StringPath franchiseName = createString("franchiseName");
 
@@ -73,7 +73,7 @@ public class QFranchise extends EntityPathBase<Franchise> {
     public QFranchise(Class<? extends Franchise> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.contactEmail = inits.isInitialized("contactEmail") ? new com.haruon.groupware.domain.shared.QEmail(forProperty("contactEmail")) : null;
-        this.emp = inits.isInitialized("emp") ? new com.haruon.groupware.domain.empInfo.QEmp(forProperty("emp"), inits.get("emp")) : null;
+        this.emp = inits.isInitialized("emp") ? new com.haruon.groupware.domain.employee.QEmp(forProperty("emp"), inits.get("emp")) : null;
     }
 
 }

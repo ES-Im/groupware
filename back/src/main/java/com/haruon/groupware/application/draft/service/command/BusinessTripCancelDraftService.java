@@ -4,7 +4,7 @@ import com.haruon.groupware.application.draft.provided.forCommand.BusinessTripCa
 import com.haruon.groupware.application.draft.required.DraftRepository;
 import com.haruon.groupware.application.draft.service.command.dto.createDraft.CancelDraftCreateRequest;
 import com.haruon.groupware.application.draft.service.command.dto.createDraft.CommonDraftCreateRequest;
-import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
+import com.haruon.groupware.application.employee.account.required.EmpRepository;
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import com.haruon.groupware.application.exception.draft.DraftNotApprovedException;
 import com.haruon.groupware.application.exception.draft.DraftNotFoundException;
@@ -14,7 +14,7 @@ import com.haruon.groupware.domain.draft.BusinessTripDraft;
 import com.haruon.groupware.domain.draft.Draft;
 import com.haruon.groupware.domain.draft.sub.ApprovalStatus;
 import com.haruon.groupware.domain.draft.sub.ApproversParam;
-import com.haruon.groupware.domain.empInfo.Emp;
+import com.haruon.groupware.domain.employee.Emp;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 

@@ -1,7 +1,7 @@
 package com.haruon.groupware.application.meeting.service.query;
 
 import com.haruon.groupware.application.exception.meeting.MeetingNotFoundException;
-import com.haruon.groupware.application.meeting.provided.forRetreiever.MeetingRetriever;
+import com.haruon.groupware.application.meeting.provided.forRetriever.MeetingRetriever;
 import com.haruon.groupware.application.meeting.required.MeetingQueryRepository;
 import com.haruon.groupware.application.meeting.service.query.dto.ReservationDetailResponse;
 import com.haruon.groupware.application.meeting.service.query.dto.ReservationResponse;

@@ -1,15 +1,15 @@
 package com.haruon.groupware.adapter.persistence.emp;
 
-import com.haruon.groupware.application.empInfo.leave.required.LeaveQueryRepository;
-import com.haruon.groupware.application.empInfo.leave.service.dto.response.LeaveSummaryAndEmpInfoResponse;
-import com.haruon.groupware.application.empInfo.leave.service.dto.response.LeaveSummaryResponse;
-import com.haruon.groupware.application.empInfo.leave.service.dto.response.LeaveUsageSummaryResponse;
-import com.haruon.groupware.domain.empInfo.QDept;
-import com.haruon.groupware.domain.empInfo.QEmp;
-import com.haruon.groupware.domain.empInfo.QEmpBelongings;
-import com.haruon.groupware.domain.empInfo.QEmpLeave;
-import com.haruon.groupware.domain.empInfo.enums.EmpStatus;
-import com.haruon.groupware.domain.empInfo.enums.PositionCode;
+import com.haruon.groupware.application.employee.leave.required.LeaveQueryRepository;
+import com.haruon.groupware.application.employee.leave.service.query.dto.LeaveSummaryAndEmpInfoResponse;
+import com.haruon.groupware.application.employee.leave.service.query.dto.LeaveSummaryResponse;
+import com.haruon.groupware.application.employee.leave.service.query.dto.LeaveUsageSummaryResponse;
+import com.haruon.groupware.domain.employee.QDept;
+import com.haruon.groupware.domain.employee.QEmp;
+import com.haruon.groupware.domain.employee.QEmpBelongings;
+import com.haruon.groupware.domain.employee.QEmpLeave;
+import com.haruon.groupware.domain.employee.enums.EmpStatus;
+import com.haruon.groupware.domain.employee.enums.PositionCode;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.ConstructorExpression;
 import com.querydsl.core.types.Projections;

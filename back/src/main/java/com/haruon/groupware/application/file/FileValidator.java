@@ -5,7 +5,7 @@ import com.haruon.groupware.application.exception.common.RequiredValueMissingExc
 import com.haruon.groupware.application.exception.file.FileSizeLimitExceededException;
 import com.haruon.groupware.application.exception.file.UnsupportedFileExtensionException;
 import com.haruon.groupware.application.exception.file.UnsupportedMimeTypeException;
-import com.haruon.groupware.application.file.dto.request.FileDto;
+import com.haruon.groupware.application.file.service.command.dto.FileDto;
 
 import java.util.Locale;
 import java.util.Set;

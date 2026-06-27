@@ -33,7 +33,7 @@ public class QMessageMailboxReadModel extends EntityPathBase<MessageMailboxReadM
 
     public final com.haruon.groupware.domain.message.QMessage message;
 
-    public final com.haruon.groupware.domain.empInfo.QEmp owner;
+    public final com.haruon.groupware.domain.employee.QEmp owner;
 
     public final DateTimePath<java.time.LocalDateTime> readAt = createDateTime("readAt", java.time.LocalDateTime.class);
 
@@ -58,7 +58,7 @@ public class QMessageMailboxReadModel extends EntityPathBase<MessageMailboxReadM
     public QMessageMailboxReadModel(Class<? extends MessageMailboxReadModel> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.message = inits.isInitialized("message") ? new com.haruon.groupware.domain.message.QMessage(forProperty("message"), inits.get("message")) : null;
-        this.owner = inits.isInitialized("owner") ? new com.haruon.groupware.domain.empInfo.QEmp(forProperty("owner"), inits.get("owner")) : null;
+        this.owner = inits.isInitialized("owner") ? new com.haruon.groupware.domain.employee.QEmp(forProperty("owner"), inits.get("owner")) : null;
     }
 
 }

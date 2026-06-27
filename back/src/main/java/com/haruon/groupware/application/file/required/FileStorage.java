@@ -1,7 +1,7 @@
 package com.haruon.groupware.application.file.required;
 
-import com.haruon.groupware.application.file.dto.request.FileDto;
-import com.haruon.groupware.application.file.dto.result.StoreFile;
+import com.haruon.groupware.application.file.service.command.dto.FileDto;
+import com.haruon.groupware.application.file.service.command.dto.StoreFile;
 import org.springframework.core.io.Resource;
 
 

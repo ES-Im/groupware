@@ -1,6 +1,6 @@
 package com.haruon.groupware.application.file.required;
 
-import com.haruon.groupware.application.file.dto.result.FilePathInfo;
+import com.haruon.groupware.application.file.service.command.dto.FilePathInfo;
 
 import java.util.Optional;
 

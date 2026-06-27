@@ -1,8 +1,8 @@
 package com.haruon.groupware.adapter.security;
 
 import com.haruon.groupware.adapter.security.empDtails.EmpDetails;
-import com.haruon.groupware.application.auth.dto.AuthenticatedEmp;
 import com.haruon.groupware.application.auth.required.LoginAuthenticator;
+import com.haruon.groupware.application.auth.service.command.dto.AuthenticatedEmp;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

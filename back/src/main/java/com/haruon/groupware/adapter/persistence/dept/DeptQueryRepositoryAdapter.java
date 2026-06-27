@@ -1,15 +1,15 @@
 package com.haruon.groupware.adapter.persistence.dept;
 
-import com.haruon.groupware.application.dept.deptService.dto.response.DeptInfoResponse;
-import com.haruon.groupware.application.dept.deptService.dto.response.projection.DeptBasicInfo;
-import com.haruon.groupware.application.dept.deptService.dto.response.projection.DeptInfoFlat;
-import com.haruon.groupware.application.dept.deptService.dto.response.projection.DeptMemberInfo;
 import com.haruon.groupware.application.dept.required.DeptQueryRepository;
-import com.haruon.groupware.domain.empInfo.QDept;
-import com.haruon.groupware.domain.empInfo.QDeptLeader;
-import com.haruon.groupware.domain.empInfo.QEmp;
-import com.haruon.groupware.domain.empInfo.QEmpBelongings;
-import com.haruon.groupware.domain.empInfo.enums.EmpStatus;
+import com.haruon.groupware.application.dept.service.query.dto.DeptInfoResponse;
+import com.haruon.groupware.application.dept.service.query.dto.projection.DeptBasicInfo;
+import com.haruon.groupware.application.dept.service.query.dto.projection.DeptInfoFlat;
+import com.haruon.groupware.application.dept.service.query.dto.projection.DeptMemberInfo;
+import com.haruon.groupware.domain.employee.QDept;
+import com.haruon.groupware.domain.employee.QDeptLeader;
+import com.haruon.groupware.domain.employee.QEmp;
+import com.haruon.groupware.domain.employee.QEmpBelongings;
+import com.haruon.groupware.domain.employee.enums.EmpStatus;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;

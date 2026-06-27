@@ -40,7 +40,7 @@ public class QBoard extends EntityPathBase<Board> {
 
     public final BooleanPath draft = createBoolean("draft");
 
-    public final com.haruon.groupware.domain.empInfo.QEmp emp;
+    public final com.haruon.groupware.domain.employee.QEmp emp;
 
     //inherited
     public final NumberPath<Long> id = _super.id;
@@ -79,7 +79,7 @@ public class QBoard extends EntityPathBase<Board> {
     public QBoard(Class<? extends Board> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.category = inits.isInitialized("category") ? new QCategory(forProperty("category")) : null;
-        this.emp = inits.isInitialized("emp") ? new com.haruon.groupware.domain.empInfo.QEmp(forProperty("emp"), inits.get("emp")) : null;
+        this.emp = inits.isInitialized("emp") ? new com.haruon.groupware.domain.employee.QEmp(forProperty("emp"), inits.get("emp")) : null;
     }
 
 }

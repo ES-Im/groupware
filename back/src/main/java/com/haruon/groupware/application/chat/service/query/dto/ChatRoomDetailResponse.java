@@ -45,13 +45,13 @@ public record ChatRoomDetailResponse(
 
             this(
                     memberId, deptName, memberName,
-                    getProfileFileApi(memberId, profileFileId)
+                    getProfileFileQueryApi(memberId, profileFileId)
             );
         }
 
     }
 
-    private static @Nullable String getProfileFileApi(Long memberId, @Nullable Long profileFileId) {
+    private static @Nullable String getProfileFileQueryApi(Long memberId, @Nullable Long profileFileId) {
         return profileFileId != null
                 ? "/api/employees/" + memberId + "/files/" + profileFileId + "/preview"
                 : null;

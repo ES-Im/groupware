@@ -1,7 +1,7 @@
 package com.haruon.groupware.adapter.persistence.board;
 
 import com.haruon.groupware.application.board.required.CategoryQueryRepository;
-import com.haruon.groupware.application.board.service.dto.response.CategoryResponse;
+import com.haruon.groupware.application.board.service.query.dto.CategoryResponse;
 import com.haruon.groupware.domain.board.QCategory;
 import com.querydsl.core.types.ConstructorExpression;
 import com.querydsl.core.types.Projections;

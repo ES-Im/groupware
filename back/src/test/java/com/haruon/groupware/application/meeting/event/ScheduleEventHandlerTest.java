@@ -6,7 +6,7 @@ import com.haruon.groupware.application.draft.provided.forCommand.LeaveDraftMana
 import com.haruon.groupware.application.draft.required.BusinessTripDraftRepository;
 import com.haruon.groupware.application.draft.required.DraftRepository;
 import com.haruon.groupware.application.draft.required.LeaveDraftRepository;
-import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
+import com.haruon.groupware.application.employee.account.required.EmpRepository;
 import com.haruon.groupware.application.meeting.provided.forCommand.MeetingManagement;
 import com.haruon.groupware.application.meeting.required.MeetingRepository;
 import com.haruon.groupware.application.schedule.required.ScheduleRepository;

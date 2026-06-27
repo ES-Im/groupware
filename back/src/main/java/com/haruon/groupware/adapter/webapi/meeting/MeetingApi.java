@@ -4,7 +4,7 @@ import com.haruon.groupware.adapter.security.empDtails.EmpDetails;
 import com.haruon.groupware.adapter.webapi.DateSupport;
 import com.haruon.groupware.application.exception.meeting.MeetingParticipantRequiredException;
 import com.haruon.groupware.application.meeting.provided.forCommand.MeetingManagement;
-import com.haruon.groupware.application.meeting.provided.forRetreiever.MeetingRetriever;
+import com.haruon.groupware.application.meeting.provided.forRetriever.MeetingRetriever;
 import com.haruon.groupware.application.meeting.service.command.dto.MeetingReserveRequest;
 import com.haruon.groupware.application.meeting.service.command.dto.MeetingUpdateRequest;
 import com.haruon.groupware.application.meeting.service.query.dto.ReservationDetailResponse;

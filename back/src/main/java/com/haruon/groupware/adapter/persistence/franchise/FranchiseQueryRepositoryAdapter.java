@@ -3,7 +3,7 @@ package com.haruon.groupware.adapter.persistence.franchise;
 import com.haruon.groupware.application.franchise.required.FranchiseQueryRepository;
 import com.haruon.groupware.application.franchise.service.query.dto.FranchisesDetailResponse;
 import com.haruon.groupware.application.franchise.service.query.dto.FranchisesResponse;
-import com.haruon.groupware.domain.empInfo.QEmp;
+import com.haruon.groupware.domain.employee.QEmp;
 import com.haruon.groupware.domain.franchise.BusinessStatus;
 import com.haruon.groupware.domain.franchise.QFranchise;
 import com.querydsl.core.types.Projections;

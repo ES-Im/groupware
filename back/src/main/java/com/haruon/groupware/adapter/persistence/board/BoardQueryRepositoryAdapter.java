@@ -1,12 +1,12 @@
 package com.haruon.groupware.adapter.persistence.board;
 
 import com.haruon.groupware.application.board.required.BoardQueryRepository;
-import com.haruon.groupware.application.board.service.dto.response.*;
-import com.haruon.groupware.application.file.dto.response.FileListInfo;
+import com.haruon.groupware.application.board.service.query.dto.*;
+import com.haruon.groupware.application.file.service.query.dto.FileListInfo;
 import com.haruon.groupware.domain.board.QBoard;
 import com.haruon.groupware.domain.board.QBoardComment;
 import com.haruon.groupware.domain.board.QBoardFile;
-import com.haruon.groupware.domain.empInfo.QEmp;
+import com.haruon.groupware.domain.employee.QEmp;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;

@@ -1,16 +1,18 @@
 package com.haruon.groupware.application.board.provided;
 
 import com.haruon.groupware.application.TestIntegrationConfig;
+import com.haruon.groupware.application.board.provided.forCommand.BoardManagement;
+import com.haruon.groupware.application.board.provided.forCommand.CategoryManagement;
 import com.haruon.groupware.application.board.required.BoardRepository;
 import com.haruon.groupware.application.board.required.CategoryRepository;
-import com.haruon.groupware.application.board.service.dto.BoardCreateRequest;
-import com.haruon.groupware.application.board.service.dto.BoardUpdateRequest;
-import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
+import com.haruon.groupware.application.board.service.command.dto.BoardCreateRequest;
+import com.haruon.groupware.application.board.service.command.dto.BoardUpdateRequest;
+import com.haruon.groupware.application.employee.account.required.EmpRepository;
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import com.haruon.groupware.application.exception.common.role.PermissionDeniedException;
 import com.haruon.groupware.domain.board.Board;
 import com.haruon.groupware.domain.board.Category;
-import com.haruon.groupware.domain.empInfo.Emp;
+import com.haruon.groupware.domain.employee.Emp;
 import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;

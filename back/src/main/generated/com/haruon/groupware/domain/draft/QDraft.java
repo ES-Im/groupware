@@ -40,7 +40,7 @@ public class QDraft extends EntityPathBase<Draft> {
 
     public final ListPath<DraftFile, QDraftFile> draftFiles = this.<DraftFile, QDraftFile>createList("draftFiles", DraftFile.class, QDraftFile.class, PathInits.DIRECT2);
 
-    public final com.haruon.groupware.domain.empInfo.QEmp emp;
+    public final com.haruon.groupware.domain.employee.QEmp emp;
 
     //inherited
     public final NumberPath<Long> id = _super.id;
@@ -73,7 +73,7 @@ public class QDraft extends EntityPathBase<Draft> {
     public QDraft(Class<? extends Draft> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.approval = inits.isInitialized("approval") ? new QApproval(forProperty("approval"), inits.get("approval")) : null;
-        this.emp = inits.isInitialized("emp") ? new com.haruon.groupware.domain.empInfo.QEmp(forProperty("emp"), inits.get("emp")) : null;
+        this.emp = inits.isInitialized("emp") ? new com.haruon.groupware.domain.employee.QEmp(forProperty("emp"), inits.get("emp")) : null;
     }
 
 }

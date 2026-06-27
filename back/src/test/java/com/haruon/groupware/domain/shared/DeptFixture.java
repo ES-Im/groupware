@@ -1,6 +1,6 @@
 package com.haruon.groupware.domain.shared;
 
-import com.haruon.groupware.domain.empInfo.Dept;
+import com.haruon.groupware.domain.employee.Dept;
 
 public class DeptFixture {
 

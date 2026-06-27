@@ -1,6 +1,6 @@
 package com.haruon.groupware.application.franchise.service.query.dto.education;
 
-import com.haruon.groupware.application.file.dto.response.FileListInfo;
+import com.haruon.groupware.application.file.service.query.dto.FileListInfo;
 import org.jspecify.annotations.Nullable;
 
 import java.time.LocalDate;

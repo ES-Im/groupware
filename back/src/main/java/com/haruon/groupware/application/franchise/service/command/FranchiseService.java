@@ -1,12 +1,12 @@
 package com.haruon.groupware.application.franchise.service.command;
 
-import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
+import com.haruon.groupware.application.employee.account.required.EmpRepository;
 import com.haruon.groupware.application.franchise.provided.forCommand.FranchiseManagement;
 import com.haruon.groupware.application.franchise.required.FranchiseRepository;
 import com.haruon.groupware.application.franchise.service.command.dto.FranchiseCreateRequest;
 import com.haruon.groupware.application.franchise.service.command.dto.FranchiseUpdateRequest;
 import com.haruon.groupware.application.utils.required.AuthorizationQueryRepository;
-import com.haruon.groupware.domain.empInfo.Emp;
+import com.haruon.groupware.domain.employee.Emp;
 import com.haruon.groupware.domain.franchise.BusinessStatus;
 import com.haruon.groupware.domain.franchise.Franchise;
 import jakarta.transaction.Transactional;
@@ -14,8 +14,8 @@ import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
 
-import static com.haruon.groupware.application.franchise.service.FranchiseUtils.findFranchiseById;
-import static com.haruon.groupware.application.franchise.service.FranchiseUtils.getFranchiseRoleAssignedEmp;
+import static com.haruon.groupware.application.franchise.service.support.FranchiseUtils.findFranchiseById;
+import static com.haruon.groupware.application.franchise.service.support.FranchiseUtils.getFranchiseRoleAssignedEmp;
 import static com.haruon.groupware.application.utils.AuthValidator.checkFranchiseRoleEmp;
 
 @Service

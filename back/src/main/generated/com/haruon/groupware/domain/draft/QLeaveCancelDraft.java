@@ -46,7 +46,7 @@ public class QLeaveCancelDraft extends EntityPathBase<LeaveCancelDraft> {
     public final ListPath<DraftFile, QDraftFile> draftFiles;
 
     // inherited
-    public final com.haruon.groupware.domain.empInfo.QEmp emp;
+    public final com.haruon.groupware.domain.employee.QEmp emp;
 
     //inherited
     public final NumberPath<Long> id;

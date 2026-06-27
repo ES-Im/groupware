@@ -1,10 +1,10 @@
 package com.haruon.groupware.application.message.service.command;
 
-import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
+import com.haruon.groupware.application.employee.account.required.EmpRepository;
 import com.haruon.groupware.application.message.provided.forCommand.ReceivedMessageManagement;
 import com.haruon.groupware.application.message.provided.forCommand.SentMessageManagement;
 import com.haruon.groupware.application.message.required.MessageRepository;
-import com.haruon.groupware.domain.empInfo.Emp;
+import com.haruon.groupware.domain.employee.Emp;
 import com.haruon.groupware.domain.message.Message;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
-import static com.haruon.groupware.application.message.service.MessageUtils.findMessage;
+import static com.haruon.groupware.application.message.service.support.MessageUtils.findMessage;
 import static com.haruon.groupware.application.utils.Utils.findEmpById;
 
 @Transactional

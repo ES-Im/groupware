@@ -1,11 +1,11 @@
 package com.haruon.groupware.adapter.persistence.schedule;
 
 import com.haruon.groupware.application.schedule.required.ScheduleQueryRepository;
-import com.haruon.groupware.application.schedule.service.query.response.ScheduleDetailResponse;
-import com.haruon.groupware.application.schedule.service.query.response.ScheduleResponse;
-import com.haruon.groupware.domain.empInfo.QDept;
-import com.haruon.groupware.domain.empInfo.QEmp;
-import com.haruon.groupware.domain.empInfo.QEmpBelongings;
+import com.haruon.groupware.application.schedule.service.query.dto.ScheduleDetailResponse;
+import com.haruon.groupware.application.schedule.service.query.dto.ScheduleResponse;
+import com.haruon.groupware.domain.employee.QDept;
+import com.haruon.groupware.domain.employee.QEmp;
+import com.haruon.groupware.domain.employee.QEmpBelongings;
 import com.haruon.groupware.domain.schedule.QSchedule;
 import com.haruon.groupware.domain.schedule.QScheduleParticipant;
 import com.haruon.groupware.domain.schedule.ScheduleType;

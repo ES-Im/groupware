@@ -1,7 +1,9 @@
 package com.haruon.groupware.application.board.provided;
 
-import com.haruon.groupware.application.board.service.dto.BoardCreateRequest;
-import com.haruon.groupware.domain.empInfo.Emp;
+import com.haruon.groupware.application.board.provided.forCommand.BoardManagement;
+import com.haruon.groupware.application.board.provided.forCommand.CategoryManagement;
+import com.haruon.groupware.application.board.service.command.dto.BoardCreateRequest;
+import com.haruon.groupware.domain.employee.Emp;
 
 import java.time.LocalDateTime;
 

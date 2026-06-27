@@ -1,14 +1,14 @@
-package com.haruon.groupware.adapter.docs.webAPI.schedule;
+package com.haruon.groupware.adapter.docs.webapi.schedule;
 
 import com.haruon.groupware.adapter.docs.RestDocsSupport;
 import com.haruon.groupware.adapter.webapi.schedule.ScheduleCommandApi;
 import com.haruon.groupware.adapter.webapi.schedule.ScheduleQueryApi;
-import com.haruon.groupware.application.schedule.provided.ScheduleManagement;
-import com.haruon.groupware.application.schedule.provided.ScheduleRetriever;
-import com.haruon.groupware.application.schedule.service.command.request.ManualScheduleCreateRequest;
-import com.haruon.groupware.application.schedule.service.command.request.ManualScheduleUpdateRequest;
-import com.haruon.groupware.application.schedule.service.query.response.ScheduleDetailResponse;
-import com.haruon.groupware.application.schedule.service.query.response.ScheduleResponse;
+import com.haruon.groupware.application.schedule.provided.forCommand.ScheduleManagement;
+import com.haruon.groupware.application.schedule.provided.forRetriever.ScheduleRetriever;
+import com.haruon.groupware.application.schedule.service.command.dto.ManualScheduleCreateRequest;
+import com.haruon.groupware.application.schedule.service.command.dto.ManualScheduleUpdateRequest;
+import com.haruon.groupware.application.schedule.service.query.dto.ScheduleDetailResponse;
+import com.haruon.groupware.application.schedule.service.query.dto.ScheduleResponse;
 import com.haruon.groupware.domain.schedule.ScheduleType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

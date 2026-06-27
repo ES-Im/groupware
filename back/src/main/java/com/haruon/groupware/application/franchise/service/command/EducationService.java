@@ -1,18 +1,18 @@
 package com.haruon.groupware.application.franchise.service.command;
 
-import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
+import com.haruon.groupware.application.employee.account.required.EmpRepository;
 import com.haruon.groupware.application.franchise.provided.forCommand.EducationManagement;
 import com.haruon.groupware.application.franchise.required.EducationRepository;
 import com.haruon.groupware.application.franchise.service.command.dto.EducationCreateRequest;
 import com.haruon.groupware.application.franchise.service.command.dto.EducationUpdateRequest;
 import com.haruon.groupware.application.utils.required.AuthorizationQueryRepository;
-import com.haruon.groupware.domain.empInfo.Emp;
+import com.haruon.groupware.domain.employee.Emp;
 import com.haruon.groupware.domain.franchise.Education;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import static com.haruon.groupware.application.franchise.service.FranchiseUtils.*;
+import static com.haruon.groupware.application.franchise.service.support.FranchiseUtils.*;
 
 @Service
 @Transactional

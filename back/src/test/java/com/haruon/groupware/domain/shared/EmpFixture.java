@@ -1,11 +1,11 @@
 package com.haruon.groupware.domain.shared;
 
-import com.haruon.groupware.domain.empInfo.Emp;
-import com.haruon.groupware.domain.empInfo.EmpFile;
-import com.haruon.groupware.domain.empInfo.EmpPasswordEncoder;
-import com.haruon.groupware.domain.empInfo.enums.FileType;
-import com.haruon.groupware.domain.empInfo.enums.PositionCode;
-import com.haruon.groupware.domain.empInfo.enums.SystemRoleCode;
+import com.haruon.groupware.domain.employee.Emp;
+import com.haruon.groupware.domain.employee.EmpFile;
+import com.haruon.groupware.domain.employee.EmpPasswordEncoder;
+import com.haruon.groupware.domain.employee.enums.FileType;
+import com.haruon.groupware.domain.employee.enums.PositionCode;
+import com.haruon.groupware.domain.employee.enums.SystemRoleCode;
 
 import java.time.LocalDate;
 import java.util.Locale;

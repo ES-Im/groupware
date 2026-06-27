@@ -1,8 +1,8 @@
 package com.haruon.groupware.adapter.webapi.message;
 
 import com.haruon.groupware.adapter.security.empDtails.EmpDetails;
-import com.haruon.groupware.application.file.dto.response.FileListInfo;
-import com.haruon.groupware.application.message.provided.forRetrieve.MessageRetriever;
+import com.haruon.groupware.application.file.service.query.dto.FileListInfo;
+import com.haruon.groupware.application.message.provided.forRetriever.MessageRetriever;
 import com.haruon.groupware.application.message.service.query.dto.MessageCountResponse;
 import com.haruon.groupware.application.message.service.query.dto.MessageDetailResponse;
 import com.haruon.groupware.application.message.service.query.dto.MessagesResponse;

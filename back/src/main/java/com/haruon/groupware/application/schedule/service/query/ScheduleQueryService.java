@@ -2,10 +2,10 @@ package com.haruon.groupware.application.schedule.service.query;
 
 import com.haruon.groupware.application.exception.common.EndTimeBeforeStartTimeException;
 import com.haruon.groupware.application.exception.schedule.ScheduleNotFoundException;
-import com.haruon.groupware.application.schedule.provided.ScheduleRetriever;
+import com.haruon.groupware.application.schedule.provided.forRetriever.ScheduleRetriever;
 import com.haruon.groupware.application.schedule.required.ScheduleQueryRepository;
-import com.haruon.groupware.application.schedule.service.query.response.ScheduleDetailResponse;
-import com.haruon.groupware.application.schedule.service.query.response.ScheduleResponse;
+import com.haruon.groupware.application.schedule.service.query.dto.ScheduleDetailResponse;
+import com.haruon.groupware.application.schedule.service.query.dto.ScheduleResponse;
 import com.haruon.groupware.domain.schedule.ScheduleType;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.Nullable;

@@ -1,7 +1,7 @@
 package com.haruon.groupware.application.franchise.service.command;
 
 import com.haruon.groupware.application.exception.franchise.FranchiseInquiryNotFoundException;
-import com.haruon.groupware.application.franchise.provided.forImport.InquiryImporter;
+import com.haruon.groupware.application.franchise.provided.forCommand.InquiryImporter;
 import com.haruon.groupware.application.franchise.required.FranchiseInquiryRepository;
 import com.haruon.groupware.application.franchise.required.FranchiseRepository;
 import com.haruon.groupware.application.franchise.service.command.dto.InquiryRequest;
@@ -11,7 +11,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import static com.haruon.groupware.application.franchise.service.FranchiseUtils.findFranchiseById;
+import static com.haruon.groupware.application.franchise.service.support.FranchiseUtils.findFranchiseById;
 
 @Service
 @Transactional

@@ -9,13 +9,13 @@ import com.haruon.groupware.application.draft.service.query.dto.response.DraftDe
 import com.haruon.groupware.application.draft.service.query.dto.response.DraftDetailResponse.LeaveDraftDetail;
 import com.haruon.groupware.application.draft.service.query.dto.response.DraftDetailResponse.SalesDraftDetail;
 import com.haruon.groupware.application.draft.service.query.dto.response.MyDocumentBoxSummaryResponse;
-import com.haruon.groupware.application.empInfo.emp.service.dto.response.BelongingInfo;
+import com.haruon.groupware.application.employee.account.service.query.dto.BelongingInfo;
 import com.haruon.groupware.application.exception.common.role.PermissionDeniedException;
 import com.haruon.groupware.application.exception.draft.DraftNotFoundException;
 import com.haruon.groupware.domain.draft.*;
 import com.haruon.groupware.domain.draft.sub.ApprovalStatus;
-import com.haruon.groupware.domain.empInfo.Emp;
-import com.haruon.groupware.domain.empInfo.EmpBelongings;
+import com.haruon.groupware.domain.employee.Emp;
+import com.haruon.groupware.domain.employee.EmpBelongings;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.Page;

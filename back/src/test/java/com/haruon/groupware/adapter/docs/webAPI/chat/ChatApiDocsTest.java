@@ -1,11 +1,11 @@
-package com.haruon.groupware.adapter.docs.webAPI.chat;
+package com.haruon.groupware.adapter.docs.webapi.chat;
 
 import com.haruon.groupware.adapter.docs.RestDocsSupport;
 import com.haruon.groupware.adapter.webapi.chat.ChatCommandApi;
 import com.haruon.groupware.adapter.webapi.chat.ChatQueryApi;
 import com.haruon.groupware.application.chat.provided.forCommand.ChatRoomManagement;
-import com.haruon.groupware.application.chat.provided.forRetrieve.ChatMessageRetriever;
-import com.haruon.groupware.application.chat.provided.forRetrieve.ChatRoomRetriever;
+import com.haruon.groupware.application.chat.provided.forRetriever.ChatMessageRetriever;
+import com.haruon.groupware.application.chat.provided.forRetriever.ChatRoomRetriever;
 import com.haruon.groupware.application.chat.service.query.dto.ChatMessagesResponse;
 import com.haruon.groupware.application.chat.service.query.dto.ChatRoomDetailResponse;
 import com.haruon.groupware.application.chat.service.query.dto.MyChatRoomsResponse;

@@ -31,7 +31,7 @@ public class QApprover extends EntityPathBase<Approver> {
 
     public final DateTimePath<java.time.LocalDateTime> approvedAt = createDateTime("approvedAt", java.time.LocalDateTime.class);
 
-    public final com.haruon.groupware.domain.empInfo.QEmp approver;
+    public final com.haruon.groupware.domain.employee.QEmp approver;
 
     //inherited
     public final DateTimePath<java.time.Instant> createdAt = _super.createdAt;
@@ -71,7 +71,7 @@ public class QApprover extends EntityPathBase<Approver> {
     public QApprover(Class<? extends Approver> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.approval = inits.isInitialized("approval") ? new QApproval(forProperty("approval"), inits.get("approval")) : null;
-        this.approver = inits.isInitialized("approver") ? new com.haruon.groupware.domain.empInfo.QEmp(forProperty("approver"), inits.get("approver")) : null;
+        this.approver = inits.isInitialized("approver") ? new com.haruon.groupware.domain.employee.QEmp(forProperty("approver"), inits.get("approver")) : null;
     }
 
 }

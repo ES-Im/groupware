@@ -2,7 +2,7 @@ package com.haruon.groupware.application.meeting.provided;
 
 import com.haruon.groupware.application.TestIntegrationConfig;
 import com.haruon.groupware.application.dept.required.DeptRepository;
-import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
+import com.haruon.groupware.application.employee.account.required.EmpRepository;
 import com.haruon.groupware.application.exception.common.role.PermissionDeniedException;
 import com.haruon.groupware.application.exception.meeting.ReservedMeetingExistException;
 import com.haruon.groupware.application.meeting.provided.forCommand.MeetingManagement;
@@ -13,9 +13,9 @@ import com.haruon.groupware.application.meeting.service.command.dto.MeetingReser
 import com.haruon.groupware.application.meeting.service.command.dto.MeetingRoomCreateRequest;
 import com.haruon.groupware.application.meeting.service.command.dto.MeetingRoomUpdateRequest;
 import com.haruon.groupware.application.schedule.required.ScheduleRepository;
-import com.haruon.groupware.domain.empInfo.Dept;
-import com.haruon.groupware.domain.empInfo.Emp;
-import com.haruon.groupware.domain.empInfo.enums.SystemRoleCode;
+import com.haruon.groupware.domain.employee.Dept;
+import com.haruon.groupware.domain.employee.Emp;
+import com.haruon.groupware.domain.employee.enums.SystemRoleCode;
 import com.haruon.groupware.domain.meeting.MeetingRoom;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;

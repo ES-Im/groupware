@@ -1,13 +1,13 @@
 package com.haruon.groupware.adapter.persistence.meeting;
 
-import com.haruon.groupware.application.file.dto.response.FileListInfo;
+import com.haruon.groupware.application.file.service.query.dto.FileListInfo;
 import com.haruon.groupware.application.meeting.required.MeetingRoomQueryRepository;
 import com.haruon.groupware.application.meeting.service.query.dto.MeetingRoomDetailResponse;
 import com.haruon.groupware.application.meeting.service.query.dto.MeetingRoomResponse;
 import com.haruon.groupware.application.meeting.service.query.dto.ReservationsByRoomResponse;
-import com.haruon.groupware.domain.empInfo.QDept;
-import com.haruon.groupware.domain.empInfo.QEmp;
-import com.haruon.groupware.domain.empInfo.QEmpBelongings;
+import com.haruon.groupware.domain.employee.QDept;
+import com.haruon.groupware.domain.employee.QEmp;
+import com.haruon.groupware.domain.employee.QEmpBelongings;
 import com.haruon.groupware.domain.meeting.QMeeting;
 import com.haruon.groupware.domain.meeting.QMeetingRoom;
 import com.haruon.groupware.domain.meeting.QMeetingRoomFile;

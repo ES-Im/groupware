@@ -2,7 +2,7 @@ package com.haruon.groupware.domain.draft;
 
 import com.haruon.groupware.domain.draft.sub.ApprovalStatus;
 import com.haruon.groupware.domain.draft.sub.ApproversParam;
-import com.haruon.groupware.domain.empInfo.Emp;
+import com.haruon.groupware.domain.employee.Emp;
 import com.haruon.groupware.domain.event.AbstractEventAggregateRoot;
 import jakarta.persistence.Entity;
 import lombok.AccessLevel;

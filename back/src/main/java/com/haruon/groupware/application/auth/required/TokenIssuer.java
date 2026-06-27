@@ -1,6 +1,6 @@
 package com.haruon.groupware.application.auth.required;
 
-import com.haruon.groupware.application.auth.dto.JwtResponse;
+import com.haruon.groupware.application.auth.service.command.dto.JwtResponse;
 
 import java.util.List;
 

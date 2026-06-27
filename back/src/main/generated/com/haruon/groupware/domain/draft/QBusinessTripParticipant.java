@@ -32,7 +32,7 @@ public class QBusinessTripParticipant extends EntityPathBase<BusinessTripPartici
     //inherited
     public final DateTimePath<java.time.Instant> createdAt = _super.createdAt;
 
-    public final com.haruon.groupware.domain.empInfo.QEmp emp;
+    public final com.haruon.groupware.domain.employee.QEmp emp;
 
     //inherited
     public final NumberPath<Long> id = _super.id;
@@ -59,7 +59,7 @@ public class QBusinessTripParticipant extends EntityPathBase<BusinessTripPartici
     public QBusinessTripParticipant(Class<? extends BusinessTripParticipant> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.businessTripDraft = inits.isInitialized("businessTripDraft") ? new QBusinessTripDraft(forProperty("businessTripDraft"), inits.get("businessTripDraft")) : null;
-        this.emp = inits.isInitialized("emp") ? new com.haruon.groupware.domain.empInfo.QEmp(forProperty("emp"), inits.get("emp")) : null;
+        this.emp = inits.isInitialized("emp") ? new com.haruon.groupware.domain.employee.QEmp(forProperty("emp"), inits.get("emp")) : null;
     }
 
 }

@@ -1,8 +1,8 @@
 package com.haruon.groupware.adapter.security.empDtails;
 
-import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
-import com.haruon.groupware.domain.empInfo.Emp;
-import com.haruon.groupware.domain.empInfo.enums.EmpStatus;
+import com.haruon.groupware.application.employee.account.required.EmpRepository;
+import com.haruon.groupware.domain.employee.Emp;
+import com.haruon.groupware.domain.employee.enums.EmpStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

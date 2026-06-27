@@ -4,13 +4,13 @@ import com.haruon.groupware.application.draft.provided.forCommand.GeneralDraftMa
 import com.haruon.groupware.application.draft.required.GeneralDraftRepository;
 import com.haruon.groupware.application.draft.service.command.dto.createDraft.CommonDraftCreateRequest;
 import com.haruon.groupware.application.draft.service.command.dto.updateDraft.CommonDraftUpdateRequest;
-import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
+import com.haruon.groupware.application.employee.account.required.EmpRepository;
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import com.haruon.groupware.application.exception.draft.DraftTypeMismatchException;
 import com.haruon.groupware.domain.draft.Draft;
 import com.haruon.groupware.domain.draft.GeneralDraft;
 import com.haruon.groupware.domain.draft.sub.ApproversParam;
-import com.haruon.groupware.domain.empInfo.Emp;
+import com.haruon.groupware.domain.employee.Emp;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 

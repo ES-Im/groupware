@@ -3,12 +3,12 @@ package com.haruon.groupware.adapter.webapi.file;
 import com.haruon.groupware.adapter.file.MultipartFileConverter;
 import com.haruon.groupware.adapter.security.empDtails.EmpDetails;
 import com.haruon.groupware.application.exception.common.role.PermissionDeniedException;
-import com.haruon.groupware.application.file.dto.request.*;
-import com.haruon.groupware.application.file.fileService.FileDomain;
-import com.haruon.groupware.application.file.fileService.forManagement.FileManagerResolver;
-import com.haruon.groupware.application.file.provided.FileDeletion;
-import com.haruon.groupware.application.file.provided.FileUpload;
-import com.haruon.groupware.domain.empInfo.enums.FileType;
+import com.haruon.groupware.application.file.provided.forCommand.FileDeletion;
+import com.haruon.groupware.application.file.provided.forCommand.FileUpload;
+import com.haruon.groupware.application.file.service.command.FileManagerResolver;
+import com.haruon.groupware.application.file.service.command.dto.*;
+import com.haruon.groupware.application.file.service.support.FileDomain;
+import com.haruon.groupware.domain.employee.enums.FileType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -19,13 +19,13 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 
-import static com.haruon.groupware.application.file.dto.request.BoardFileUploadRequest.toBoardFileUploadRequest;
-import static com.haruon.groupware.application.file.dto.request.DraftFileUploadRequest.toDraftFileUploadRequest;
-import static com.haruon.groupware.application.file.dto.request.EducationFileUploadRequest.toEducationFileUploadRequest;
-import static com.haruon.groupware.application.file.dto.request.EmpFileUploadRequest.toEmpFileUploadRequest;
-import static com.haruon.groupware.application.file.dto.request.MeetingRoomFileUploadRequest.toMeetingRoomFileUploadRequest;
-import static com.haruon.groupware.application.file.dto.request.MessageFileUploadRequest.toMessageFileUploadRequest;
-import static com.haruon.groupware.application.file.fileService.forManagement.FileDeleteRequest.toFileDeleteRequest;
+import static com.haruon.groupware.application.file.service.command.FileDeleteRequest.toFileDeleteRequest;
+import static com.haruon.groupware.application.file.service.command.dto.BoardFileUploadRequest.toBoardFileUploadRequest;
+import static com.haruon.groupware.application.file.service.command.dto.DraftFileUploadRequest.toDraftFileUploadRequest;
+import static com.haruon.groupware.application.file.service.command.dto.EducationFileUploadRequest.toEducationFileUploadRequest;
+import static com.haruon.groupware.application.file.service.command.dto.EmpFileUploadRequest.toEmpFileUploadRequest;
+import static com.haruon.groupware.application.file.service.command.dto.MeetingRoomFileUploadRequest.toMeetingRoomFileUploadRequest;
+import static com.haruon.groupware.application.file.service.command.dto.MessageFileUploadRequest.toMessageFileUploadRequest;
 import static com.haruon.groupware.application.utils.Utils.ZONE_SEOUL;
 
 @Controller

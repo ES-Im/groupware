@@ -2,10 +2,10 @@ package com.haruon.groupware.adapter.webapi.schedule;
 
 import com.haruon.groupware.adapter.IntegrationTestSupport;
 import com.haruon.groupware.application.schedule.required.ScheduleRepository;
-import com.haruon.groupware.application.schedule.service.command.request.ManualScheduleCreateRequest;
-import com.haruon.groupware.application.schedule.service.command.request.ManualScheduleUpdateRequest;
+import com.haruon.groupware.application.schedule.service.command.dto.ManualScheduleCreateRequest;
+import com.haruon.groupware.application.schedule.service.command.dto.ManualScheduleUpdateRequest;
 import com.haruon.groupware.application.utils.required.CompanyPolicyPort;
-import com.haruon.groupware.domain.empInfo.Emp;
+import com.haruon.groupware.domain.employee.Emp;
 import com.haruon.groupware.domain.schedule.Schedule;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

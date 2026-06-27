@@ -1,6 +1,6 @@
 package com.haruon.groupware.domain.dept;
 
-import com.haruon.groupware.domain.empInfo.Dept;
+import com.haruon.groupware.domain.employee.Dept;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

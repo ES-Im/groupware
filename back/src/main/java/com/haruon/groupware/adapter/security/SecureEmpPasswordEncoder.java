@@ -1,6 +1,6 @@
 package com.haruon.groupware.adapter.security;
 
-import com.haruon.groupware.domain.empInfo.EmpPasswordEncoder;
+import com.haruon.groupware.domain.employee.EmpPasswordEncoder;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NullMarked;
 import org.springframework.security.crypto.password.PasswordEncoder;

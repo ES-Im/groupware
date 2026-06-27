@@ -1,11 +1,11 @@
 package com.haruon.groupware.adapter.persistence.file;
 
-import com.haruon.groupware.application.file.dto.result.FileResourceInfo;
 import com.haruon.groupware.application.file.required.FileResourceQueryRepository;
+import com.haruon.groupware.application.file.service.query.dto.FileResourceInfo;
 import com.haruon.groupware.domain.QAbstractFileEntity;
 import com.haruon.groupware.domain.board.QBoardFile;
 import com.haruon.groupware.domain.draft.QDraftFile;
-import com.haruon.groupware.domain.empInfo.QEmpFile;
+import com.haruon.groupware.domain.employee.QEmpFile;
 import com.haruon.groupware.domain.franchise.QEducationFile;
 import com.haruon.groupware.domain.meeting.QMeetingRoomFile;
 import com.haruon.groupware.domain.message.QMessageFile;

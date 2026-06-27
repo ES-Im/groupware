@@ -1,9 +1,9 @@
 package com.haruon.groupware.domain.draft;
 
 import com.haruon.groupware.domain.draft.sub.ApproversParam;
-import com.haruon.groupware.domain.empInfo.Emp;
-import com.haruon.groupware.domain.empInfo.enums.EmpStatus;
-import com.haruon.groupware.domain.empInfo.enums.SystemRoleCode;
+import com.haruon.groupware.domain.employee.Emp;
+import com.haruon.groupware.domain.employee.enums.EmpStatus;
+import com.haruon.groupware.domain.employee.enums.SystemRoleCode;
 import com.haruon.groupware.domain.franchise.Franchise;
 import jakarta.persistence.Entity;
 import lombok.AccessLevel;

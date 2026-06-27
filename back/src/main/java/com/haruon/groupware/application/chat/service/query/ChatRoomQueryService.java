@@ -1,6 +1,6 @@
 package com.haruon.groupware.application.chat.service.query;
 
-import com.haruon.groupware.application.chat.provided.forRetrieve.ChatRoomRetriever;
+import com.haruon.groupware.application.chat.provided.forRetriever.ChatRoomRetriever;
 import com.haruon.groupware.application.chat.required.ChatRoomQueryRepository;
 import com.haruon.groupware.application.chat.service.query.dto.ChatRoomDetailResponse;
 import com.haruon.groupware.application.chat.service.query.dto.MyChatRoomsResponse;

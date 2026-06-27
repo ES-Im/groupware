@@ -44,7 +44,7 @@ public class QEducation extends EntityPathBase<Education> {
 
     public final ListPath<EducationFile, QEducationFile> educationFiles = this.<EducationFile, QEducationFile>createList("educationFiles", EducationFile.class, QEducationFile.class, PathInits.DIRECT2);
 
-    public final com.haruon.groupware.domain.empInfo.QEmp emp;
+    public final com.haruon.groupware.domain.employee.QEmp emp;
 
     //inherited
     public final NumberPath<Long> id = _super.id;
@@ -76,7 +76,7 @@ public class QEducation extends EntityPathBase<Education> {
 
     public QEducation(Class<? extends Education> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.emp = inits.isInitialized("emp") ? new com.haruon.groupware.domain.empInfo.QEmp(forProperty("emp"), inits.get("emp")) : null;
+        this.emp = inits.isInitialized("emp") ? new com.haruon.groupware.domain.employee.QEmp(forProperty("emp"), inits.get("emp")) : null;
     }
 
 }

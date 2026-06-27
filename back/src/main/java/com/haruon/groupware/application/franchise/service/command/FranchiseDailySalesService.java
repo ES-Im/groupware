@@ -2,7 +2,7 @@ package com.haruon.groupware.application.franchise.service.command;
 
 import com.haruon.groupware.application.exception.franchise.FranchiseDailySalesNotFoundException;
 import com.haruon.groupware.application.exception.franchise.FranchiseNotFoundException;
-import com.haruon.groupware.application.franchise.provided.forImport.FranchiseDailySalesImporter;
+import com.haruon.groupware.application.franchise.provided.forCommand.FranchiseDailySalesImporter;
 import com.haruon.groupware.application.franchise.required.FranchiseDailySalesRepository;
 import com.haruon.groupware.application.franchise.required.FranchiseRepository;
 import com.haruon.groupware.application.franchise.service.command.dto.DailySalesRequest;

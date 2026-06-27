@@ -6,10 +6,10 @@ import com.haruon.groupware.application.chat.service.query.dto.MyChatRoomsRespon
 import com.haruon.groupware.domain.chat.QChatMember;
 import com.haruon.groupware.domain.chat.QChatMessage;
 import com.haruon.groupware.domain.chat.QChatRoom;
-import com.haruon.groupware.domain.empInfo.QDept;
-import com.haruon.groupware.domain.empInfo.QEmp;
-import com.haruon.groupware.domain.empInfo.QEmpBelongings;
-import com.haruon.groupware.domain.empInfo.QEmpFile;
+import com.haruon.groupware.domain.employee.QDept;
+import com.haruon.groupware.domain.employee.QEmp;
+import com.haruon.groupware.domain.employee.QEmpBelongings;
+import com.haruon.groupware.domain.employee.QEmpFile;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.haruon.groupware.application.utils.Utils.SEOUL_ZONE;
-import static com.haruon.groupware.domain.empInfo.enums.FileType.PROFILE_PICTURE;
+import static com.haruon.groupware.domain.employee.enums.FileType.PROFILE_PICTURE;
 
 @Repository
 @RequiredArgsConstructor

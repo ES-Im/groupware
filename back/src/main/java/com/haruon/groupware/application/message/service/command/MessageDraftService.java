@@ -1,13 +1,13 @@
 package com.haruon.groupware.application.message.service.command;
 
-import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
+import com.haruon.groupware.application.employee.account.required.EmpRepository;
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import com.haruon.groupware.application.exception.message.MessageReceiverRequiredException;
 import com.haruon.groupware.application.message.provided.forCommand.MessageDraftManagement;
 import com.haruon.groupware.application.message.required.MessageRepository;
 import com.haruon.groupware.application.message.service.command.dto.MessageCreateRequest;
 import com.haruon.groupware.application.message.service.command.dto.MessageUpdateRequest;
-import com.haruon.groupware.domain.empInfo.Emp;
+import com.haruon.groupware.domain.employee.Emp;
 import com.haruon.groupware.domain.message.Message;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
-import static com.haruon.groupware.application.message.service.MessageUtils.findMessage;
+import static com.haruon.groupware.application.message.service.support.MessageUtils.findMessage;
 import static com.haruon.groupware.application.utils.AuthValidator.findActiveEmpById;
 import static com.haruon.groupware.application.utils.Utils.findEmpListById;
 import static com.haruon.groupware.domain.message.Message.createDraft;

@@ -1,7 +1,7 @@
 package com.haruon.groupware.application.board.required;
 
-import com.haruon.groupware.application.board.service.dto.response.*;
-import com.haruon.groupware.application.file.dto.response.FileListInfo;
+import com.haruon.groupware.application.board.service.query.dto.*;
+import com.haruon.groupware.application.file.service.query.dto.FileListInfo;
 import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

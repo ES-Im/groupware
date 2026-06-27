@@ -5,9 +5,9 @@ import com.haruon.groupware.application.chat.service.query.dto.ChatMessagesRespo
 import com.haruon.groupware.domain.chat.QChatMember;
 import com.haruon.groupware.domain.chat.QChatMessage;
 import com.haruon.groupware.domain.chat.QChatRoom;
-import com.haruon.groupware.domain.empInfo.QEmp;
-import com.haruon.groupware.domain.empInfo.QEmpFile;
-import com.haruon.groupware.domain.empInfo.enums.FileType;
+import com.haruon.groupware.domain.employee.QEmp;
+import com.haruon.groupware.domain.employee.QEmpFile;
+import com.haruon.groupware.domain.employee.enums.FileType;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;

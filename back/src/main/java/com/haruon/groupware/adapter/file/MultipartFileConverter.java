@@ -1,6 +1,6 @@
 package com.haruon.groupware.adapter.file;
 
-import com.haruon.groupware.application.file.dto.request.FileDto;
+import com.haruon.groupware.application.file.service.command.dto.FileDto;
 import org.springframework.web.multipart.MultipartFile;
 
 public class MultipartFileConverter {

@@ -1,13 +1,13 @@
 package com.haruon.groupware.adapter.webapi.dept;
 
 import com.haruon.groupware.adapter.IntegrationTestSupport;
-import com.haruon.groupware.application.dept.deptService.dto.request.DeptRegisterRequest;
-import com.haruon.groupware.application.dept.deptService.dto.response.DeptInfoResponse;
-import com.haruon.groupware.application.dept.provided.DeptManagement;
-import com.haruon.groupware.application.dept.provided.DeptRetriever;
-import com.haruon.groupware.application.empInfo.emp.provided.EmpAccountRetriever;
-import com.haruon.groupware.application.empInfo.emp.service.dto.response.BelongingInfo;
-import com.haruon.groupware.domain.empInfo.Dept;
+import com.haruon.groupware.application.dept.provided.forCommand.DeptManagement;
+import com.haruon.groupware.application.dept.provided.forRetriever.DeptRetriever;
+import com.haruon.groupware.application.dept.service.command.dto.DeptRegisterRequest;
+import com.haruon.groupware.application.dept.service.query.dto.DeptInfoResponse;
+import com.haruon.groupware.application.employee.account.provided.forRetriever.EmpAccountRetriever;
+import com.haruon.groupware.application.employee.account.service.query.dto.BelongingInfo;
+import com.haruon.groupware.domain.employee.Dept;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

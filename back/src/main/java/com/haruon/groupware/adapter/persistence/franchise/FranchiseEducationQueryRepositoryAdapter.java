@@ -1,6 +1,6 @@
 package com.haruon.groupware.adapter.persistence.franchise;
 
-import com.haruon.groupware.application.file.dto.response.FileListInfo;
+import com.haruon.groupware.application.file.service.query.dto.FileListInfo;
 import com.haruon.groupware.application.franchise.required.FranchiseEducationQueryRepository;
 import com.haruon.groupware.application.franchise.service.query.dto.education.EducationApplicantsResponse;
 import com.haruon.groupware.application.franchise.service.query.dto.education.EducationDetailResponse;

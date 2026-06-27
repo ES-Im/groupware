@@ -4,7 +4,7 @@ import com.haruon.groupware.application.franchise.required.FranchiseInquiryQuery
 import com.haruon.groupware.application.franchise.service.query.dto.inquiry.AnswerResponse;
 import com.haruon.groupware.application.franchise.service.query.dto.inquiry.InquireDetailResponse;
 import com.haruon.groupware.application.franchise.service.query.dto.inquiry.InquiriesResponse;
-import com.haruon.groupware.domain.empInfo.QEmp;
+import com.haruon.groupware.domain.employee.QEmp;
 import com.haruon.groupware.domain.franchise.QFranchise;
 import com.haruon.groupware.domain.franchise.QFranchiseInquiry;
 import com.haruon.groupware.domain.franchise.QFranchiseInquiryAnswer;

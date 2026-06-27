@@ -9,8 +9,8 @@ import com.haruon.groupware.application.draft.service.command.dto.ApproversReque
 import com.haruon.groupware.application.draft.service.command.dto.createDraft.CancelDraftCreateRequest;
 import com.haruon.groupware.application.draft.service.command.dto.createDraft.CommonDraftCreateRequest;
 import com.haruon.groupware.application.draft.service.command.dto.createDraft.LeaveDraftCreateRequest;
-import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
-import com.haruon.groupware.application.empInfo.leave.required.EmpLeaveRepository;
+import com.haruon.groupware.application.employee.account.required.EmpRepository;
+import com.haruon.groupware.application.employee.leave.required.EmpLeaveRepository;
 import com.haruon.groupware.application.schedule.required.ScheduleQueryRepository;
 import com.haruon.groupware.application.schedule.required.ScheduleRepository;
 import com.haruon.groupware.domain.draft.Draft;
@@ -18,8 +18,8 @@ import com.haruon.groupware.domain.draft.LeaveCancelDraft;
 import com.haruon.groupware.domain.draft.sub.ApprovalRole;
 import com.haruon.groupware.domain.draft.sub.ApprovalStatus;
 import com.haruon.groupware.domain.draft.sub.LeaveType;
-import com.haruon.groupware.domain.empInfo.Emp;
-import com.haruon.groupware.domain.empInfo.EmpLeave;
+import com.haruon.groupware.domain.employee.Emp;
+import com.haruon.groupware.domain.employee.EmpLeave;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -32,7 +32,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import static com.haruon.groupware.application.dbFixture.EmpFixture.saveApprovedEmp;
-import static com.haruon.groupware.domain.empInfo.EmpLeave.createEmpLeave;
+import static com.haruon.groupware.domain.employee.EmpLeave.createEmpLeave;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Slf4j

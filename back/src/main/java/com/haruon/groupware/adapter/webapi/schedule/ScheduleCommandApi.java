@@ -1,9 +1,9 @@
 package com.haruon.groupware.adapter.webapi.schedule;
 
 import com.haruon.groupware.adapter.security.empDtails.EmpDetails;
-import com.haruon.groupware.application.schedule.provided.ScheduleManagement;
-import com.haruon.groupware.application.schedule.service.command.request.ManualScheduleCreateRequest;
-import com.haruon.groupware.application.schedule.service.command.request.ManualScheduleUpdateRequest;
+import com.haruon.groupware.application.schedule.provided.forCommand.ScheduleManagement;
+import com.haruon.groupware.application.schedule.service.command.dto.ManualScheduleCreateRequest;
+import com.haruon.groupware.application.schedule.service.command.dto.ManualScheduleUpdateRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;

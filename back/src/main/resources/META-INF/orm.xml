@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <entity-mappings xmlns="https://jakarta.ee/xml/ns/persistence/orm"
                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                  xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence/orm https://jakarta.ee/xml/ns/persistence/orm/orm_3_1.xsd"
@@ -52,6 +52,48 @@
         </attributes>
     </mapped-superclass>
 
+
+    <mapped-superclass class="com.haruon.groupware.domain.sync.SyncRequest" access="FIELD">
+        <attributes>
+
+            <basic name="status" optional="false">
+                <column name="status" nullable="false"/>
+                <enumerated>STRING</enumerated>
+            </basic>
+
+            <basic name="type" optional="false">
+                <column name="sync_type" nullable="false"/>
+                <enumerated>STRING</enumerated>
+            </basic>
+
+            <basic name="externalId" optional="false">
+                <column name="external_id" nullable="false"/>
+            </basic>
+
+            <basic name="endpointPath" optional="false">
+                <column name="endpoint_path" nullable="false"/>
+            </basic>
+
+            <basic name="retryCount" optional="false">
+                <column name="retry_count" nullable="false"/>
+            </basic>
+
+            <basic name="lastErrorMessage">
+                <column name="last_error_message"/>
+            </basic>
+
+            <basic name="startedAt">
+                <column name="started_at"/>
+            </basic>
+
+            <basic name="finishedAt">
+                <column name="finished_at"/>
+            </basic>
+
+        </attributes>
+    </mapped-superclass>
+
+
     <entity class="com.haruon.groupware.domain.Company" access="FIELD">
         <attributes>
             <basic name="companyName">
@@ -82,7 +124,7 @@
 
 
 <!-- ============================================= EMP - EMP INFO ============================================= -->
-    <entity class="com.haruon.groupware.domain.empInfo.Dept" access="FIELD">
+    <entity class="com.haruon.groupware.domain.employee.Dept" access="FIELD">
         <attributes>
             <basic name="deptCode">
                 <column name="dept_code" nullable="false" unique="true" length="3"/>
@@ -105,7 +147,7 @@
         </attributes>
     </entity>
 
-    <entity class="com.haruon.groupware.domain.empInfo.Emp" access="FIELD">
+    <entity class="com.haruon.groupware.domain.employee.Emp" access="FIELD">
         <table/>
         <attributes>
             <basic name="empNo">
@@ -143,7 +185,7 @@
                     <cascade-all/>
                 </cascade>
             </one-to-many>
-            <element-collection name="systemRoles" target-class="com.haruon.groupware.domain.empInfo.enums.SystemRoleCode">
+            <element-collection name="systemRoles" target-class="com.haruon.groupware.domain.employee.enums.SystemRoleCode">
                 <column name="role" nullable="false" length="20"/>
                 <enumerated>STRING</enumerated>
                 <collection-table name="system_roles">
@@ -158,7 +200,7 @@
         </attributes>
     </entity>
 
-    <entity class="com.haruon.groupware.domain.empInfo.EmpFile" access="FIELD">
+    <entity class="com.haruon.groupware.domain.employee.EmpFile" access="FIELD">
         <attributes>
             <basic name="fileType">
                 <column name="file_type" nullable="false" length="20"/>
@@ -173,7 +215,7 @@
         </attributes>
     </entity>
 
-    <entity class="com.haruon.groupware.domain.empInfo.EmpBelongings" access="FIELD">
+    <entity class="com.haruon.groupware.domain.employee.EmpBelongings" access="FIELD">
         <table>
             <unique-constraint>
                 <column-name>emp_id</column-name>
@@ -204,7 +246,7 @@
         </attributes>
     </entity>
 
-    <entity class="com.haruon.groupware.domain.empInfo.DeptLeader" access="FIELD">
+    <entity class="com.haruon.groupware.domain.employee.DeptLeader" access="FIELD">
         <table>
             <unique-constraint>
                 <column-name>dept_id</column-name>
@@ -228,7 +270,7 @@
         </attributes>
     </entity>
 
-    <entity class="com.haruon.groupware.domain.empInfo.Attendance" access="FIELD">
+    <entity class="com.haruon.groupware.domain.employee.Attendance" access="FIELD">
         <attributes>
             <basic name="attendanceStatus">
                 <column name="attendance_status" length="20"/>
@@ -264,7 +306,7 @@
         </attributes>
     </entity>
 
-    <entity class="com.haruon.groupware.domain.empInfo.EmpLeave" access="FIELD">
+    <entity class="com.haruon.groupware.domain.employee.EmpLeave" access="FIELD">
         <table>
             <unique-constraint>
                 <column-name>emp_id</column-name>
@@ -1085,6 +1127,37 @@
         </attributes>
     </entity>
 
+<!-- ============================================= SYNC ============================================= -->
+    <entity class="com.haruon.groupware.domain.sync.FranchiseSyncRequest" access="FIELD">
+        <table name="franchise_sync_request">
+            <unique-constraint>
+                <column-name>franchise_id</column-name>
+                <column-name>external_id</column-name>
+            </unique-constraint>
+        </table>
+
+        <attributes>
+
+            <many-to-one
+                    name="franchise"
+                    target-entity="com.haruon.groupware.domain.franchise.Franchise"
+                    fetch="LAZY"
+                    optional="false">
+                <join-column name="franchise_id" nullable="false"/>
+            </many-to-one>
+
+            <many-to-one
+                    name="education"
+                    target-entity="com.haruon.groupware.domain.franchise.Education"
+                    fetch="LAZY"
+                    optional="true">
+                <join-column name="education_id" nullable="true"/>
+            </many-to-one>
+
+        </attributes>
+    </entity>
+
+
     <embeddable class="com.haruon.groupware.domain.shared.Email" access="FIELD">
         <attributes>
             <basic name="email">
@@ -1144,5 +1217,6 @@
             </many-to-one>
         </attributes>
     </entity>
+
 </entity-mappings>
 

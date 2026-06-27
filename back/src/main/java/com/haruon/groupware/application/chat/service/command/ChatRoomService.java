@@ -5,10 +5,10 @@ import com.haruon.groupware.application.chat.provided.forCommand.ChatRoomManagem
 import com.haruon.groupware.application.chat.required.ChatRepository;
 import com.haruon.groupware.application.chat.required.ChatRoomCleanupRepository;
 import com.haruon.groupware.application.chat.required.ChatRoomRepository;
-import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
+import com.haruon.groupware.application.employee.account.required.EmpRepository;
 import com.haruon.groupware.domain.chat.ChatMessage;
 import com.haruon.groupware.domain.chat.ChatRoom;
-import com.haruon.groupware.domain.empInfo.Emp;
+import com.haruon.groupware.domain.employee.Emp;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,8 +17,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
-import static com.haruon.groupware.application.chat.service.command.ChatUtils.findChat;
-import static com.haruon.groupware.application.chat.service.command.ChatUtils.findChatRoom;
+import static com.haruon.groupware.application.chat.service.support.ChatUtils.findChat;
+import static com.haruon.groupware.application.chat.service.support.ChatUtils.findChatRoom;
 import static com.haruon.groupware.application.utils.AuthValidator.findActiveEmpById;
 import static com.haruon.groupware.application.utils.Utils.findEmpListById;
 import static com.haruon.groupware.domain.chat.ChatRoom.createRoom;

@@ -2,13 +2,13 @@ package com.haruon.groupware.application.franchise.provided;
 
 import com.haruon.groupware.application.TestIntegrationConfig;
 import com.haruon.groupware.application.dept.required.DeptRepository;
-import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
+import com.haruon.groupware.application.employee.account.required.EmpRepository;
 import com.haruon.groupware.application.exception.common.role.PermissionDeniedException;
 import com.haruon.groupware.application.franchise.provided.forCommand.FranchiseManagement;
 import com.haruon.groupware.application.franchise.required.FranchiseRepository;
 import com.haruon.groupware.application.franchise.service.command.dto.FranchiseCreateRequest;
 import com.haruon.groupware.application.franchise.service.command.dto.FranchiseUpdateRequest;
-import com.haruon.groupware.domain.empInfo.Emp;
+import com.haruon.groupware.domain.employee.Emp;
 import com.haruon.groupware.domain.franchise.BusinessStatus;
 import com.haruon.groupware.domain.franchise.Franchise;
 import com.haruon.groupware.domain.shared.Email;

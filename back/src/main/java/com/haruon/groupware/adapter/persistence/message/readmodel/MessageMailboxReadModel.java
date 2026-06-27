@@ -1,6 +1,6 @@
 package com.haruon.groupware.adapter.persistence.message.readmodel;
 
-import com.haruon.groupware.domain.empInfo.Emp;
+import com.haruon.groupware.domain.employee.Emp;
 import com.haruon.groupware.domain.message.Message;
 import jakarta.persistence.Entity;
 import lombok.AccessLevel;

@@ -1,4 +1,4 @@
-package com.haruon.groupware.adapter.docs.webAPI.franchise;
+package com.haruon.groupware.adapter.docs.webapi.franchise;
 
 import com.haruon.groupware.adapter.docs.RestDocsSupport;
 import com.haruon.groupware.adapter.webapi.franchise.FranchiseApi;

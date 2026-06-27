@@ -1,6 +1,6 @@
 package com.haruon.groupware.application.meeting.service.command;
 
-import com.haruon.groupware.application.empInfo.emp.required.EmpRepository;
+import com.haruon.groupware.application.employee.account.required.EmpRepository;
 import com.haruon.groupware.application.exception.meeting.MeetingNotFoundException;
 import com.haruon.groupware.application.exception.meeting.MeetingRoomNotFoundException;
 import com.haruon.groupware.application.meeting.provided.forCommand.MeetingManagement;
@@ -8,7 +8,7 @@ import com.haruon.groupware.application.meeting.required.MeetingRepository;
 import com.haruon.groupware.application.meeting.required.MeetingRoomRepository;
 import com.haruon.groupware.application.meeting.service.command.dto.MeetingReserveRequest;
 import com.haruon.groupware.application.meeting.service.command.dto.MeetingUpdateRequest;
-import com.haruon.groupware.domain.empInfo.Emp;
+import com.haruon.groupware.domain.employee.Emp;
 import com.haruon.groupware.domain.meeting.Meeting;
 import com.haruon.groupware.domain.meeting.MeetingRoom;
 import jakarta.transaction.Transactional;

@@ -1,7 +1,7 @@
 package com.haruon.groupware.application.schedule.required;
 
-import com.haruon.groupware.application.schedule.service.query.response.ScheduleDetailResponse;
-import com.haruon.groupware.application.schedule.service.query.response.ScheduleResponse;
+import com.haruon.groupware.application.schedule.service.query.dto.ScheduleDetailResponse;
+import com.haruon.groupware.application.schedule.service.query.dto.ScheduleResponse;
 import com.haruon.groupware.domain.schedule.ScheduleType;
 import org.jspecify.annotations.Nullable;
 

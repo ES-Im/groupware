@@ -1,7 +1,7 @@
 package com.haruon.groupware.application.dept.required;
 
-import com.haruon.groupware.application.dept.deptService.dto.response.DeptInfoResponse;
-import com.haruon.groupware.application.dept.deptService.dto.response.projection.DeptMemberInfo;
+import com.haruon.groupware.application.dept.service.query.dto.DeptInfoResponse;
+import com.haruon.groupware.application.dept.service.query.dto.projection.DeptMemberInfo;
 import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

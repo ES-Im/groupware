@@ -1,6 +1,6 @@
 package com.haruon.groupware.application.dept.required;
 
-import com.haruon.groupware.domain.empInfo.Dept;
+import com.haruon.groupware.domain.employee.Dept;
 import org.springframework.data.repository.Repository;
 
 import java.util.Optional;

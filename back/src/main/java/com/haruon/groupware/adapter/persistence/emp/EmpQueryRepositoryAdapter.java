@@ -1,12 +1,12 @@
 package com.haruon.groupware.adapter.persistence.emp;
 
-import com.haruon.groupware.application.empInfo.emp.required.EmpQueryRepository;
-import com.haruon.groupware.application.empInfo.emp.service.dto.response.*;
-import com.haruon.groupware.application.empInfo.emp.service.dto.response.projection.EmpInfoForManagementFlat;
-import com.haruon.groupware.domain.empInfo.*;
-import com.haruon.groupware.domain.empInfo.enums.EmpStatus;
-import com.haruon.groupware.domain.empInfo.enums.PositionCode;
-import com.haruon.groupware.domain.empInfo.enums.SystemRoleCode;
+import com.haruon.groupware.application.employee.account.required.EmpQueryRepository;
+import com.haruon.groupware.application.employee.account.service.query.dto.*;
+import com.haruon.groupware.application.employee.account.service.query.dto.projection.EmpInfoForManagementFlat;
+import com.haruon.groupware.domain.employee.*;
+import com.haruon.groupware.domain.employee.enums.EmpStatus;
+import com.haruon.groupware.domain.employee.enums.PositionCode;
+import com.haruon.groupware.domain.employee.enums.SystemRoleCode;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
