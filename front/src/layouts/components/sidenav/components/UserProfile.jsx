@@ -3,14 +3,14 @@ import {Link} from "react-router";
 import {Fragment} from 'react';
 import {Dropdown, DropdownDivider, DropdownItem, DropdownMenu, DropdownToggle} from 'react-bootstrap';
 import {TbSettings} from 'react-icons/tb';
-// import user3 from '@/assets/images/logo.png';
+import user3 from '@/assets/images/users/user-3.jpg';
 
 const UserProfile = () => {
   return <div className="sidenav-user">
       <div className="d-flex justify-content-between align-items-center">
         <div>
           <Link to="/" className="link-reset">
-            {/*<img src={user3} alt="user-image" width="36" height="36" className="rounded-circle mb-2 avatar-md" />*/}
+            <img src={user3} alt="user-image" width="36" height="36" className="rounded-circle mb-2 avatar-md" />
             <span className="sidenav-user-name fw-bold">Geneva K.</span>
             <span className="fs-12 fw-semibold" data-lang="user-role">
               Art Director

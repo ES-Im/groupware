@@ -12,6 +12,7 @@ import com.haruon.groupware.application.franchise.service.command.dto.EducationU
 import com.haruon.groupware.domain.employee.Emp;
 import com.haruon.groupware.domain.franchise.Education;
 import jakarta.persistence.EntityManager;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,6 +23,7 @@ import static com.haruon.groupware.application.dbFixture.FranchiseFixture.getSav
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+@Slf4j
 @TestIntegrationConfig
 record EducationManagementTest(
         FranchiseRepository franchiseRepository,
@@ -77,6 +79,19 @@ record EducationManagementTest(
         assertThat(foundEducation.isActive())
                 .as("교육 초기 활성화 여부는 false(비활성화) 이다")
                 .isFalse();
+
+        assertThat(foundEducation.getEducationCode())
+                .as("교육 생성시, education_code가 EDU-연월-id 형태로 생성된다.")
+                .isEqualTo(
+                        String.format(
+                                "EDU-%04d%02d-%04d",
+                                foundEducation.getEducationDate().getYear(),
+                                foundEducation.getEducationDate().getMonthValue(),
+                                foundEducation.getId()
+                        )
+                );
+
+        log.info(foundEducation.getEducationCode());
     }
 
     @Test

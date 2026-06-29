@@ -12,11 +12,11 @@ import {
     TbServerBolt,
     TbXboxXFilled
 } from 'react-icons/tb';
-import user1 from '@/assets/images/logo.png';
-import user2 from '@/assets/images/logo.png';
-import user4 from '@/assets/images/logo.png';
-import user5 from '@/assets/images/logo.png';
-import user6 from '@/assets/images/logo.png';
+import user1 from '@/assets/images/users/user-1.jpg';
+import user2 from '@/assets/images/users/user-2.jpg';
+import user4 from '@/assets/images/users/user-4.jpg';
+import user5 from '@/assets/images/users/user-5.jpg';
+import user6 from '@/assets/images/users/user-6.jpg';
 import SimpleBar from "simplebar-react";
 import {Link} from "react-router";
 

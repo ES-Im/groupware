@@ -27,6 +27,12 @@
 }
 
 // Auth Page Side Image
+.card-side-img {
+    background-image: url("../../images/auth.jpg");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
 
 .auth-overlay {
     background: linear-gradient(to top, #313a46, rgba(49,58,70, 0.8), rgba(49,58,70, 0.5));

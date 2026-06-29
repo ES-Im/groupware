@@ -40,6 +40,8 @@ public class QEducation extends EntityPathBase<Education> {
 
     public final ListPath<EducationApplication, QEducationApplication> educationApplications = this.<EducationApplication, QEducationApplication>createList("educationApplications", EducationApplication.class, QEducationApplication.class, PathInits.DIRECT2);
 
+    public final StringPath educationCode = createString("educationCode");
+
     public final DateTimePath<java.time.LocalDateTime> educationDate = createDateTime("educationDate", java.time.LocalDateTime.class);
 
     public final ListPath<EducationFile, QEducationFile> educationFiles = this.<EducationFile, QEducationFile>createList("educationFiles", EducationFile.class, QEducationFile.class, PathInits.DIRECT2);

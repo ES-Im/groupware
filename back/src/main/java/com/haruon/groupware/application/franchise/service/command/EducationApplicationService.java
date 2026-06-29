@@ -1,6 +1,6 @@
 package com.haruon.groupware.application.franchise.service.command;
 
-import com.haruon.groupware.application.franchise.provided.forCommand.EducationApplicationImporter;
+import com.haruon.groupware.application.franchise.provided.forImport.EducationApplicationImporter;
 import com.haruon.groupware.application.franchise.required.EducationRepository;
 import com.haruon.groupware.application.franchise.required.FranchiseRepository;
 import com.haruon.groupware.application.franchise.service.command.dto.ApplicationRequest;

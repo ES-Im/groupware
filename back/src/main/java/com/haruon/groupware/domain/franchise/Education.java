@@ -22,6 +22,9 @@ import static org.springframework.util.Assert.state;
 @ToString(callSuper = true, exclude = {"emp", "educationFiles", "educationApplications"})
 public class Education extends AbstractEntity {
 
+    @Nullable
+    private String educationCode;
+
     private Emp emp;
 
     private LocalDateTime educationDate;
@@ -61,6 +64,14 @@ public class Education extends AbstractEntity {
         education.isActive = false;
 
         return education;
+    }
+
+    public void generateEducationCode(
+            String code
+    ) {
+        requireNonNull(code);
+
+        this.educationCode = code;
     }
 
     public void changeEducationInfo(

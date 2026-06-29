@@ -4,8 +4,11 @@ import lombok.Getter;
 
 @Getter
 public enum SyncType {
+    // Franchise
     DAILY_SALES,
     INQUIRY,
     EDUCATION_APPLICATION,
     EDUCATION_APPLICATION_CANCEL
+
+
 }

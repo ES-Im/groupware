@@ -5,7 +5,7 @@ import com.haruon.groupware.application.dept.required.DeptRepository;
 import com.haruon.groupware.application.employee.account.required.EmpRepository;
 import com.haruon.groupware.application.franchise.provided.forCommand.AnswerManagement;
 import com.haruon.groupware.application.franchise.provided.forCommand.FranchiseManagement;
-import com.haruon.groupware.application.franchise.provided.forCommand.InquiryImporter;
+import com.haruon.groupware.application.franchise.provided.forImport.InquiryImporter;
 import com.haruon.groupware.application.franchise.required.FranchiseInquiryRepository;
 import com.haruon.groupware.application.franchise.required.FranchiseRepository;
 import com.haruon.groupware.application.franchise.service.command.dto.InquiryRequest;

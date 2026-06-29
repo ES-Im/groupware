@@ -1,0 +1,187 @@
+{
+  "generatedAt": "2026-06-29T10:00:00+09:00",
+  "codePattern": "EDU-%04d%02d-%04d",
+  "totalElements": 30,
+  "items": [
+    {
+      "educationCode": "EDU-202501-0001",
+      "educationDate": "2025-01-15",
+      "sequence": 1,
+      "periodGroup": "2025-01-01_TO_2026-06-29"
+    },
+    {
+      "educationCode": "EDU-202502-0002",
+      "educationDate": "2025-02-20",
+      "sequence": 2,
+      "periodGroup": "2025-01-01_TO_2026-06-29"
+    },
+    {
+      "educationCode": "EDU-202503-0003",
+      "educationDate": "2025-03-18",
+      "sequence": 3,
+      "periodGroup": "2025-01-01_TO_2026-06-29"
+    },
+    {
+      "educationCode": "EDU-202504-0004",
+      "educationDate": "2025-04-22",
+      "sequence": 4,
+      "periodGroup": "2025-01-01_TO_2026-06-29"
+    },
+    {
+      "educationCode": "EDU-202505-0005",
+      "educationDate": "2025-05-27",
+      "sequence": 5,
+      "periodGroup": "2025-01-01_TO_2026-06-29"
+    },
+    {
+      "educationCode": "EDU-202508-0006",
+      "educationDate": "2025-08-12",
+      "sequence": 6,
+      "periodGroup": "2025-01-01_TO_2026-06-29"
+    },
+    {
+      "educationCode": "EDU-202511-0007",
+      "educationDate": "2025-11-05",
+      "sequence": 7,
+      "periodGroup": "2025-01-01_TO_2026-06-29"
+    },
+    {
+      "educationCode": "EDU-202601-0008",
+      "educationDate": "2026-01-21",
+      "sequence": 8,
+      "periodGroup": "2025-01-01_TO_2026-06-29"
+    },
+    {
+      "educationCode": "EDU-202604-0009",
+      "educationDate": "2026-04-14",
+      "sequence": 9,
+      "periodGroup": "2025-01-01_TO_2026-06-29"
+    },
+    {
+      "educationCode": "EDU-202606-0010",
+      "educationDate": "2026-06-25",
+      "sequence": 10,
+      "periodGroup": "2025-01-01_TO_2026-06-29"
+    },
+    {
+      "educationCode": "EDU-202607-0011",
+      "educationDate": "2026-07-02",
+      "sequence": 11,
+      "periodGroup": "2026-06-30_TO_2026-12-31"
+    },
+    {
+      "educationCode": "EDU-202607-0012",
+      "educationDate": "2026-07-15",
+      "sequence": 12,
+      "periodGroup": "2026-06-30_TO_2026-12-31"
+    },
+    {
+      "educationCode": "EDU-202607-0013",
+      "educationDate": "2026-07-29",
+      "sequence": 13,
+      "periodGroup": "2026-06-30_TO_2026-12-31"
+    },
+    {
+      "educationCode": "EDU-202608-0014",
+      "educationDate": "2026-08-06",
+      "sequence": 14,
+      "periodGroup": "2026-06-30_TO_2026-12-31"
+    },
+    {
+      "educationCode": "EDU-202608-0015",
+      "educationDate": "2026-08-18",
+      "sequence": 15,
+      "periodGroup": "2026-06-30_TO_2026-12-31"
+    },
+    {
+      "educationCode": "EDU-202608-0016",
+      "educationDate": "2026-08-31",
+      "sequence": 16,
+      "periodGroup": "2026-06-30_TO_2026-12-31"
+    },
+    {
+      "educationCode": "EDU-202609-0017",
+      "educationDate": "2026-09-09",
+      "sequence": 17,
+      "periodGroup": "2026-06-30_TO_2026-12-31"
+    },
+    {
+      "educationCode": "EDU-202609-0018",
+      "educationDate": "2026-09-22",
+      "sequence": 18,
+      "periodGroup": "2026-06-30_TO_2026-12-31"
+    },
+    {
+      "educationCode": "EDU-202610-0019",
+      "educationDate": "2026-10-03",
+      "sequence": 19,
+      "periodGroup": "2026-06-30_TO_2026-12-31"
+    },
+    {
+      "educationCode": "EDU-202610-0020",
+      "educationDate": "2026-10-17",
+      "sequence": 20,
+      "periodGroup": "2026-06-30_TO_2026-12-31"
+    },
+    {
+      "educationCode": "EDU-202610-0021",
+      "educationDate": "2026-10-29",
+      "sequence": 21,
+      "periodGroup": "2026-06-30_TO_2026-12-31"
+    },
+    {
+      "educationCode": "EDU-202611-0022",
+      "educationDate": "2026-11-04",
+      "sequence": 22,
+      "periodGroup": "2026-06-30_TO_2026-12-31"
+    },
+    {
+      "educationCode": "EDU-202611-0023",
+      "educationDate": "2026-11-13",
+      "sequence": 23,
+      "periodGroup": "2026-06-30_TO_2026-12-31"
+    },
+    {
+      "educationCode": "EDU-202611-0024",
+      "educationDate": "2026-11-21",
+      "sequence": 24,
+      "periodGroup": "2026-06-30_TO_2026-12-31"
+    },
+    {
+      "educationCode": "EDU-202611-0025",
+      "educationDate": "2026-11-30",
+      "sequence": 25,
+      "periodGroup": "2026-06-30_TO_2026-12-31"
+    },
+    {
+      "educationCode": "EDU-202612-0026",
+      "educationDate": "2026-12-05",
+      "sequence": 26,
+      "periodGroup": "2026-06-30_TO_2026-12-31"
+    },
+    {
+      "educationCode": "EDU-202612-0027",
+      "educationDate": "2026-12-11",
+      "sequence": 27,
+      "periodGroup": "2026-06-30_TO_2026-12-31"
+    },
+    {
+      "educationCode": "EDU-202612-0028",
+      "educationDate": "2026-12-18",
+      "sequence": 28,
+      "periodGroup": "2026-06-30_TO_2026-12-31"
+    },
+    {
+      "educationCode": "EDU-202612-0029",
+      "educationDate": "2026-12-24",
+      "sequence": 29,
+      "periodGroup": "2026-06-30_TO_2026-12-31"
+    },
+    {
+      "educationCode": "EDU-202612-0030",
+      "educationDate": "2026-12-31",
+      "sequence": 30,
+      "periodGroup": "2026-06-30_TO_2026-12-31"
+    }
+  ]
+}

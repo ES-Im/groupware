@@ -752,6 +752,9 @@
 
     <entity class="com.haruon.groupware.domain.franchise.Education" access="FIELD">
         <attributes>
+            <basic name="educationCode">
+                <column name="education_code" nullable="true" unique="true" length="20"/>
+            </basic>
             <basic name="educationDate">
                 <column name="education_date" nullable="false"/>
             </basic>
@@ -1128,6 +1131,7 @@
     </entity>
 
 <!-- ============================================= SYNC ============================================= -->
+
     <entity class="com.haruon.groupware.domain.sync.FranchiseSyncRequest" access="FIELD">
         <table name="franchise_sync_request">
             <unique-constraint>
@@ -1219,4 +1223,3 @@
     </entity>
 
 </entity-mappings>
-

@@ -1,6 +1,6 @@
 import {useLayoutContext} from '@/context/useLayoutContext';
 import {scrollToElement} from '@/helpers/layout';
-import {menuItems} from '@/layouts/components/data';
+import {groupwareMenuItems as menuItems} from '@/layouts/components/groupwareMenu';
 import {Link, useLocation} from "react-router";
 import {useEffect, useState} from 'react';
 import {Collapse} from 'react-bootstrap';
@@ -55,7 +55,6 @@ const MenuItemWithChildren = ({
       </Collapse>
     </li>;
 };
-
 const MenuItem = ({
   item
 }) => {
@@ -82,7 +81,6 @@ const MenuItem = ({
       </Link>
     </li>;
 };
-
 const AppMenu = () => {
   const [openMenuKey, setOpenMenuKey] = useState(null);
   const scrollToActiveLink = () => {

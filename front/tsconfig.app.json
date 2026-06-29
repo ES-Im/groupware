@@ -15,6 +15,10 @@
     "noEmit": true,
     "jsx": "react-jsx",
 
+    /* 이 프로젝트는 JS(JSX) 전용이라 .ts/.tsx 입력이 없다. JS 파일을 입력으로 포함해 "No inputs found" 오류를 막는다. */
+    "allowJs": true,
+    "checkJs": false,
+
     /* Linting */
     "strict": true,
     "noUnusedLocals": true,
@@ -29,5 +33,5 @@
       ]
     }
   },
-  "include": ["src"]
+  "include": ["src/**/*.js", "src/**/*.jsx", "src/**/*.ts", "src/**/*.tsx"]
 }

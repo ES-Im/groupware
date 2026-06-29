@@ -36,7 +36,18 @@ public class EducationService implements EducationManagement {
                 request.capacity()
         );
 
-        return educationRepository.save(education).getId();
+        Education saved = educationRepository.save(education);
+
+        saved.generateEducationCode(
+                String.format(
+                        "EDU-%04d%02d-%04d",
+                        saved.getEducationDate().getYear(),
+                        saved.getEducationDate().getMonthValue(),
+                        saved.getId()
+                )
+        );
+
+        return saved.getId();
     }
 
     @Override

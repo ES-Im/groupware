@@ -1,14 +1,20 @@
 import {useLayoutContext} from '@/context/useLayoutContext';
-// import MessageDropdown from '@/layouts/components/topbar/components/MessageDropdown';
+import CustomizerToggler from '@/layouts/components/topbar/components/CustomizerToggler';
+import LanguageDropdown from '@/layouts/components/topbar/components/LanguageDropdown';
+import MegaMenu from '@/layouts/components/topbar/components/MegaMenu';
+import MessageDropdown from '@/layouts/components/topbar/components/MessageDropdown';
 import ThemeToggler from '@/layouts/components/topbar/components/ThemeToggler';
+import UserProfile from '@/layouts/components/topbar/components/UserProfile';
 import {Link} from "react-router";
-import {Container} from 'react-bootstrap';
+import {Container, FormControl} from 'react-bootstrap';
+import {LuSearch} from 'react-icons/lu';
 import {TbMenu4} from 'react-icons/tb';
 import logoDark from '@/assets/images/logo-black.png';
 import logoSm from '@/assets/images/logo-sm.png';
 import logo from '@/assets/images/logo.png';
+import ApplicationMenu from '@/layouts/components/topbar/components/ApplicationMenu';
 import FullscreenToggle from '@/layouts/components/topbar/components/FullscreenToggle';
-import UserProfile from "@/layouts/components/topbar/components/UserProfile.jsx";
+import MonochromeThemeModeToggler from '@/layouts/components/topbar/components/MonochromeThemeModeToggler';
 
 const Topbar = () => {
   const {
@@ -55,18 +61,30 @@ const Topbar = () => {
             <TbMenu4 className="fs-22" />
           </button>
 
+          <MegaMenu />
         </div>
 
         <div className="d-flex align-items-center gap-2">
+          <div className="app-search d-none d-xl-flex me-2">
+            <FormControl type="search" className="topbar-search rounded-pill" name="search" placeholder="Quick Search..." />
+            <LuSearch className="app-search-icon text-muted" />
+          </div>
 
-          {/*<MessageDropdown />*/}
+          <LanguageDropdown />
+
+          <MessageDropdown />
+
+          <ApplicationMenu />
 
           <ThemeToggler />
 
           <FullscreenToggle />
 
+          <MonochromeThemeModeToggler />
+
           <UserProfile />
 
+          <CustomizerToggler />
         </div>
       </Container>
     </header>;
