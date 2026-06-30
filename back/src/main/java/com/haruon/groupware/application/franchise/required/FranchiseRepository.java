@@ -12,4 +12,6 @@ public interface FranchiseRepository extends Repository<Franchise, Long>  {
     Optional<Franchise> findById(long attr0);
 
     void deleteAll();
+
+    Optional<Franchise> findByBusinessNumber(String businessNumber);
 }

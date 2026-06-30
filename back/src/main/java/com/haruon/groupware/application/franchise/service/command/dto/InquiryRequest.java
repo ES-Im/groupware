@@ -2,6 +2,7 @@ package com.haruon.groupware.application.franchise.service.command.dto;
 
 import com.haruon.groupware.application.exception.common.BlankValueNotAllowedException;
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
+import com.haruon.groupware.domain.franchise.InquiryType;
 import lombok.Builder;
 
 import java.time.LocalDateTime;
@@ -16,7 +17,9 @@ public record InquiryRequest(
 
         String inquiryTitle,
 
-        String inquiryContent
+        String inquiryContent,
+
+        InquiryType type
 ) {
     public InquiryRequest {
         if(externalId == null || inquirerContact == null || inquiryAt == null || inquiryTitle == null || inquiryContent == null) throw new RequiredValueMissingException();

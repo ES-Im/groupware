@@ -15,7 +15,7 @@ import static org.springframework.util.Assert.state;
 @ToString
 @MappedSuperclass
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public abstract class SyncRequest extends AbstractEntity {
+public abstract class SyncTask extends AbstractEntity {
 
     private static final int PROCESSING_TIMEOUT_MINUTES = 10;
 
@@ -38,7 +38,7 @@ public abstract class SyncRequest extends AbstractEntity {
     @Nullable
     private LocalDateTime finishedAt;
 
-    protected SyncRequest(
+    protected SyncTask(
             SyncType type,
             String externalId,
             String endpointPath

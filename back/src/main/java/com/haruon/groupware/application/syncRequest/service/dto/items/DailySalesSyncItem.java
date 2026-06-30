@@ -1,13 +1,14 @@
-package com.haruon.groupware.application.syncRequest.service.dto;
+package com.haruon.groupware.application.syncRequest.service.dto.items;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 
 import java.time.LocalDate;
 
-public record FranchiseExternalDailySalesRequest(
+public record DailySalesSyncItem(
+        @NotNull
+        @PositiveOrZero
+        Integer itemIdx,
+
         @NotBlank
         String externalId,
 
@@ -23,9 +24,11 @@ public record FranchiseExternalDailySalesRequest(
         LocalDate salesDate,
 
         @NotNull
+        @PositiveOrZero
         Long salesAmount,
 
         @NotNull
+        @PositiveOrZero
         Long orderCount
 ) {
 

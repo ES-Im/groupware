@@ -14,13 +14,15 @@ public record ApplicationRequest(
 
         Long franchiseId,
 
+        Long educationId,
+
         Long appliedCount,
 
         LocalDateTime appliedAt
 ) {
 
     public ApplicationRequest {
-        if(externalId == null || franchiseId == null || appliedCount == null || appliedAt == null) throw new RequiredValueMissingException();
+        if(externalId == null || franchiseId == null || educationId == null || appliedCount == null || appliedAt == null) throw new RequiredValueMissingException();
 
         if(externalId.isBlank()) throw new BlankValueNotAllowedException();
         if(appliedCount <= 0) throw new PositiveValueRequiredException();

@@ -61,6 +61,7 @@ public enum ApplicationErrorCode {
     EDUCATION_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND, "FRANCHISE_004", "조회된 교육 내역이 없습니다."),
     FRANCHISE_DAILY_SALES_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND, "FRANCHISE_005", "조회된 일매출 기록이 없습니다."),
     INQUIRY_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND, "FRANCHISE_006", "조회된 질의가 없습니다"),
+    UNSUPPORTED_INQUIRY_TYPE_EXCEPTION(HttpStatus.BAD_REQUEST, "FRANCHISE_007", "문의 타입은 NEW/EDIT/DELETE만 가능합니다"),
 
     // user-info
     EMPLOYEE_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND, "EMP_001", "해당 사원이 존재하지 않습니다"),

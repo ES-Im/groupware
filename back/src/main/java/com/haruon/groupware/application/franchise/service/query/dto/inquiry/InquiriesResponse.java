@@ -15,6 +15,8 @@ public record InquiriesResponse(
         Boolean isAnswered,
 
         Long assignedManagerId,
-        String assignedManagerName
+        String assignedManagerName,
+
+        Boolean isDeleted
 ) {
 }

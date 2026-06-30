@@ -442,7 +442,7 @@ public class FranchiseApiDocsTest extends RestDocsSupport {
     void getInquiries() throws Exception {
         Mockito.when(franchiseInquiryRetriever.retrieveInquiries(anyLong(), nullable(Boolean.class), nullable(Long.class), nullable(String.class), nullable(LocalDate.class), nullable(LocalDate.class), any(Pageable.class)))
                 .thenReturn(new PageImpl<>(
-                        List.of(new InquiriesResponse(1L, "inq-1", 1L, "테스트강남점", "문의 제목", LocalDateTime.of(2026, 5, 1, 10, 0), false, 1L, "김담당")),
+                        List.of(new InquiriesResponse(1L, "inq-1", 1L, "테스트강남점", "문의 제목", LocalDateTime.of(2026, 5, 1, 10, 0), false, 1L, "김담당", false)),
                         PageRequest.of(0, 10),
                         1
                 ));
@@ -479,7 +479,7 @@ public class FranchiseApiDocsTest extends RestDocsSupport {
     @DisplayName("문의 상세 조회")
     void getInquiry() throws Exception {
         Mockito.when(franchiseInquiryRetriever.retrieveInquiry(eq(1L), eq(1L)))
-                .thenReturn(new InquireDetailResponse(1L, "inq-1", 1L, "테스트강남점", "010-1234-5678", LocalDateTime.of(2026, 5, 1, 10, 0), "문의 제목", "문의 내용", 1L, "김담당"));
+                .thenReturn(new InquireDetailResponse(1L, "inq-1", 1L, "테스트강남점", "010-1234-5678", LocalDateTime.of(2026, 5, 1, 10, 0), "문의 제목", "문의 내용", 1L, "김담당", false));
 
         mockMvc.perform(
                 get(INQUIRY_MAPPING + "/{inquiryId}", 1L)
@@ -844,7 +844,8 @@ public class FranchiseApiDocsTest extends RestDocsSupport {
                 fieldWithPath("content[].inquiryAt").type(JsonFieldType.STRING).description("문의 일시"),
                 fieldWithPath("content[].isAnswered").type(JsonFieldType.BOOLEAN).description("답변 완료 여부"),
                 fieldWithPath("content[].assignedManagerId").type(JsonFieldType.NUMBER).description("담당 사원 식별 번호"),
-                fieldWithPath("content[].assignedManagerName").type(JsonFieldType.STRING).description("담당 사원명")
+                fieldWithPath("content[].assignedManagerName").type(JsonFieldType.STRING).description("담당 사원명"),
+                fieldWithPath("content[].isDeleted").type(JsonFieldType.BOOLEAN).description("삭제 요청 여부")
         }, pageMetadataFields());
     }
 
@@ -859,7 +860,8 @@ public class FranchiseApiDocsTest extends RestDocsSupport {
                 fieldWithPath("inquiryTitle").type(JsonFieldType.STRING).description("문의 제목"),
                 fieldWithPath("inquiryContent").type(JsonFieldType.STRING).description("문의 내용"),
                 fieldWithPath("assignedManagerId").type(JsonFieldType.NUMBER).description("담당 사원 식별 번호"),
-                fieldWithPath("assignedManagerName").type(JsonFieldType.STRING).description("담당 사원명")
+                fieldWithPath("assignedManagerName").type(JsonFieldType.STRING).description("담당 사원명"),
+                fieldWithPath("isDeleted").type(JsonFieldType.BOOLEAN).description("삭제 요청 여부")
         };
     }
 

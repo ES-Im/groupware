@@ -16,16 +16,19 @@ import static org.springframework.util.Assert.state;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @ToString(callSuper = true, exclude = {"franchise", "education"})
-public class FranchiseSyncRequest extends SyncRequest {
+public class FranchiseSyncTask extends SyncTask {
+
+    private int itemIdx;
 
     private Franchise franchise;
 
     @Nullable
     private Education education;
 
-    public FranchiseSyncRequest(
+    public FranchiseSyncTask(
             SyncType type,
             String externalId,
+            int itemIdx,
             String endpointPath,
             Franchise franchise,
             @Nullable Education education
@@ -34,6 +37,9 @@ public class FranchiseSyncRequest extends SyncRequest {
 
         validateEducation(type, education);
 
+        state(itemIdx >= 0, "itemIdx는 0 이상이어야 함");
+
+        this.itemIdx = itemIdx;
         this.franchise = requireNonNull(franchise);
         this.education = education;
     }

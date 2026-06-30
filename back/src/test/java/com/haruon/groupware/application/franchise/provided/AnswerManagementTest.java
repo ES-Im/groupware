@@ -12,6 +12,7 @@ import com.haruon.groupware.application.franchise.service.command.dto.InquiryReq
 import com.haruon.groupware.domain.employee.Emp;
 import com.haruon.groupware.domain.franchise.Franchise;
 import com.haruon.groupware.domain.franchise.FranchiseInquiry;
+import com.haruon.groupware.domain.franchise.InquiryType;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -128,6 +129,7 @@ record AnswerManagementTest(
                         .inquiryAt(LocalDateTime.of(2026,4,1,9,0,0))
                         .inquiryTitle("title")
                         .inquiryContent("content")
+                        .type(InquiryType.NEW)
                         .build()
         );
 

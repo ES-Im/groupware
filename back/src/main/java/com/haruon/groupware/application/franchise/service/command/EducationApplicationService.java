@@ -4,6 +4,7 @@ import com.haruon.groupware.application.franchise.provided.forImport.EducationAp
 import com.haruon.groupware.application.franchise.required.EducationRepository;
 import com.haruon.groupware.application.franchise.required.FranchiseRepository;
 import com.haruon.groupware.application.franchise.service.command.dto.ApplicationRequest;
+import com.haruon.groupware.application.franchise.service.command.dto.CancellationRequest;
 import com.haruon.groupware.domain.franchise.Education;
 import com.haruon.groupware.domain.franchise.Franchise;
 import jakarta.transaction.Transactional;
@@ -57,11 +58,11 @@ public class EducationApplicationService implements EducationApplicationImporter
 
 
     @Override
-    public void cancelEducationApplication(long educationId, long franchiseId, String externalId) {
+    public void cancelEducationApplication(long educationId, CancellationRequest request) {
         Education education = findEducation(educationRepository, educationId);
-        Franchise franchise = findFranchiseById(franchiseRepository, franchiseId);
+        Franchise franchise = findFranchiseById(franchiseRepository, request.franchiseId());
 
-        education.cancelApplication(externalId, franchise);
+        education.cancelApplication(request.externalId(), franchise);
     }
 
 

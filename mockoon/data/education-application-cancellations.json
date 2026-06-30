@@ -6,6 +6,7 @@
   "generatedAt": "2026-06-29T10:00:00+09:00",
   "items": [
     {
+      "itemIdx": 0,
       "externalId": "EDUAPP-6168512345-0004",
       "businessNumber": "6168512345",
       "franchiseName": "하루온 제주점",
@@ -13,6 +14,7 @@
       "canceledAt": "2026-08-23T14:11:00+09:00"
     },
     {
+      "itemIdx": 1,
       "externalId": "EDUAPP-1108167890-0018",
       "businessNumber": "1108167890",
       "franchiseName": "하루온 강남점",
@@ -20,6 +22,7 @@
       "canceledAt": "2025-06-29T11:27:00+09:00"
     },
     {
+      "itemIdx": 2,
       "externalId": "EDUAPP-2148705678-0003",
       "businessNumber": "2148705678",
       "franchiseName": "하루온 홍대점",
@@ -27,6 +30,7 @@
       "canceledAt": "2025-10-28T12:19:00+09:00"
     },
     {
+      "itemIdx": 3,
       "externalId": "EDUAPP-2208812345-0016",
       "businessNumber": "2208812345",
       "franchiseName": "하루온 판교점",
@@ -34,6 +38,7 @@
       "canceledAt": "2026-03-26T19:42:00+09:00"
     },
     {
+      "itemIdx": 4,
       "externalId": "EDUAPP-2148705678-0006",
       "businessNumber": "2148705678",
       "franchiseName": "하루온 홍대점",
@@ -41,6 +46,7 @@
       "canceledAt": "2025-02-17T17:48:00+09:00"
     },
     {
+      "itemIdx": 5,
       "externalId": "EDUAPP-6168512345-0001",
       "businessNumber": "6168512345",
       "franchiseName": "하루온 제주점",
@@ -48,6 +54,7 @@
       "canceledAt": "2026-07-23T09:49:00+09:00"
     },
     {
+      "itemIdx": 6,
       "externalId": "EDUAPP-2148705678-0007",
       "businessNumber": "2148705678",
       "franchiseName": "하루온 홍대점",
@@ -55,6 +62,7 @@
       "canceledAt": "2026-09-23T17:38:00+09:00"
     },
     {
+      "itemIdx": 7,
       "externalId": "EDUAPP-2148705678-0022",
       "businessNumber": "2148705678",
       "franchiseName": "하루온 홍대점",
@@ -62,6 +70,7 @@
       "canceledAt": "2025-05-14T13:32:00+09:00"
     },
     {
+      "itemIdx": 8,
       "externalId": "EDUAPP-2208812345-0008",
       "businessNumber": "2208812345",
       "franchiseName": "하루온 판교점",
@@ -69,6 +78,7 @@
       "canceledAt": "2026-11-25T21:43:00+09:00"
     },
     {
+      "itemIdx": 9,
       "externalId": "EDUAPP-2148705678-0001",
       "businessNumber": "2148705678",
       "franchiseName": "하루온 홍대점",
@@ -76,6 +86,7 @@
       "canceledAt": "2025-02-23T14:44:00+09:00"
     },
     {
+      "itemIdx": 10,
       "externalId": "EDUAPP-2208812345-0018",
       "businessNumber": "2208812345",
       "franchiseName": "하루온 판교점",
@@ -83,6 +94,7 @@
       "canceledAt": "2025-05-26T13:15:00+09:00"
     },
     {
+      "itemIdx": 11,
       "externalId": "EDUAPP-6168512345-0003",
       "businessNumber": "6168512345",
       "franchiseName": "하루온 제주점",
@@ -90,6 +102,7 @@
       "canceledAt": "2026-10-17T20:46:00+09:00"
     },
     {
+      "itemIdx": 12,
       "externalId": "EDUAPP-6168512345-0002",
       "businessNumber": "6168512345",
       "franchiseName": "하루온 제주점",
@@ -97,6 +110,7 @@
       "canceledAt": "2026-08-26T23:54:00+09:00"
     },
     {
+      "itemIdx": 13,
       "externalId": "EDUAPP-2208812345-0010",
       "businessNumber": "2208812345",
       "franchiseName": "하루온 판교점",
@@ -104,6 +118,7 @@
       "canceledAt": "2025-01-29T20:53:00+09:00"
     },
     {
+      "itemIdx": 14,
       "externalId": "EDUAPP-1108167890-0010",
       "businessNumber": "1108167890",
       "franchiseName": "하루온 강남점",
@@ -111,6 +126,7 @@
       "canceledAt": "2026-04-26T20:44:00+09:00"
     },
     {
+      "itemIdx": 15,
       "externalId": "EDUAPP-1108167890-0008",
       "businessNumber": "1108167890",
       "franchiseName": "하루온 강남점",
@@ -118,6 +134,7 @@
       "canceledAt": "2025-07-20T12:42:00+09:00"
     },
     {
+      "itemIdx": 16,
       "externalId": "EDUAPP-6178123456-0003",
       "businessNumber": "6178123456",
       "franchiseName": "하루온 부산점",

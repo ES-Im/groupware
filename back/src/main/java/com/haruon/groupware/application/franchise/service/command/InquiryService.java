@@ -1,12 +1,15 @@
 package com.haruon.groupware.application.franchise.service.command;
 
 import com.haruon.groupware.application.exception.franchise.FranchiseInquiryNotFoundException;
+import com.haruon.groupware.application.exception.franchise.InquiryNotFoundException;
+import com.haruon.groupware.application.exception.franchise.UnsupportedInquiryTypeException;
 import com.haruon.groupware.application.franchise.provided.forImport.InquiryImporter;
 import com.haruon.groupware.application.franchise.required.FranchiseInquiryRepository;
 import com.haruon.groupware.application.franchise.required.FranchiseRepository;
 import com.haruon.groupware.application.franchise.service.command.dto.InquiryRequest;
 import com.haruon.groupware.domain.franchise.Franchise;
 import com.haruon.groupware.domain.franchise.FranchiseInquiry;
+import com.haruon.groupware.domain.franchise.InquiryType;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,14 +27,33 @@ public class InquiryService implements InquiryImporter {
     @Override
     public long importInquiry(long franchiseId, InquiryRequest request) {
         Franchise franchise = findFranchiseById(franchiseRepository, franchiseId);
-
         String externalId = request.externalId();
-        boolean isForReplace = franchiseInquiryRepository.existsByExternalId(externalId);
 
-        if(isForReplace) return replaceInquiry(request);
+        switch (request.type()) {
+            case NEW -> {
+                return createInquiry(franchise, request);
+            }
 
-        return createInquiry(franchise, request);
+            case EDIT -> {
+                FranchiseInquiry inquiry = franchiseInquiryRepository.findByExternalId(externalId)
+                        .orElseThrow(InquiryNotFoundException::new);
+
+                inquiry.changeInquiryStatus(InquiryType.EDIT);
+                return replaceInquiry(request);
+            }
+
+            case DELETION -> {
+                FranchiseInquiry inquiry = franchiseInquiryRepository.findByExternalId(externalId)
+                        .orElseThrow(InquiryNotFoundException::new);
+
+                inquiry.changeInquiryStatus(InquiryType.DELETION);
+                return inquiry.getId();
+            }
+
+            default -> throw new UnsupportedInquiryTypeException();
+        }
     }
+
 
 
     private long createInquiry(Franchise franchise, InquiryRequest request) {

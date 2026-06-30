@@ -1,14 +1,15 @@
-package com.haruon.groupware.application.syncRequest.service.dto;
+package com.haruon.groupware.application.syncRequest.service.dto.items;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 
 import java.time.OffsetDateTime;
 
-public record EducationApplicationRequest(
+public record EducationApplicationSyncItem(
+        @NotNull
+        @PositiveOrZero
+        Integer itemIdx,
+
         @NotBlank
         String externalId,
 
@@ -25,6 +26,7 @@ public record EducationApplicationRequest(
         String educationCode,
 
         @NotNull
+        @Positive
         Long appliedCount,
 
         @NotNull

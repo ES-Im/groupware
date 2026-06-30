@@ -6,6 +6,7 @@
   "generatedAt": "2026-06-29T10:00:00+09:00",
   "items": [
     {
+      "itemIdx": 0,
       "externalId": "EDUAPP-1108167890-0001",
       "businessNumber": "1108167890",
       "franchiseName": "하루온 강남점",
@@ -14,6 +15,7 @@
       "appliedAt": "2026-02-24T16:31:00+09:00"
     },
     {
+      "itemIdx": 1,
       "externalId": "EDUAPP-1108167890-0002",
       "businessNumber": "1108167890",
       "franchiseName": "하루온 강남점",
@@ -22,6 +24,7 @@
       "appliedAt": "2025-12-04T15:49:00+09:00"
     },
     {
+      "itemIdx": 2,
       "externalId": "EDUAPP-1108167890-0003",
       "businessNumber": "1108167890",
       "franchiseName": "하루온 강남점",
@@ -30,6 +33,7 @@
       "appliedAt": "2025-10-01T10:55:00+09:00"
     },
     {
+      "itemIdx": 3,
       "externalId": "EDUAPP-1108167890-0004",
       "businessNumber": "1108167890",
       "franchiseName": "하루온 강남점",
@@ -38,6 +42,7 @@
       "appliedAt": "2025-06-24T16:17:00+09:00"
     },
     {
+      "itemIdx": 4,
       "externalId": "EDUAPP-1108167890-0005",
       "businessNumber": "1108167890",
       "franchiseName": "하루온 강남점",
@@ -46,6 +51,7 @@
       "appliedAt": "2026-03-27T17:30:00+09:00"
     },
     {
+      "itemIdx": 5,
       "externalId": "EDUAPP-1108167890-0006",
       "businessNumber": "1108167890",
       "franchiseName": "하루온 강남점",
@@ -54,6 +60,7 @@
       "appliedAt": "2025-04-02T11:27:00+09:00"
     },
     {
+      "itemIdx": 6,
       "externalId": "EDUAPP-1108167890-0007",
       "businessNumber": "1108167890",
       "franchiseName": "하루온 강남점",
@@ -62,6 +69,7 @@
       "appliedAt": "2025-09-22T17:30:00+09:00"
     },
     {
+      "itemIdx": 7,
       "externalId": "EDUAPP-1108167890-0008",
       "businessNumber": "1108167890",
       "franchiseName": "하루온 강남점",
@@ -70,6 +78,7 @@
       "appliedAt": "2025-06-23T09:42:00+09:00"
     },
     {
+      "itemIdx": 8,
       "externalId": "EDUAPP-1108167890-0009",
       "businessNumber": "1108167890",
       "franchiseName": "하루온 강남점",
@@ -78,6 +87,7 @@
       "appliedAt": "2025-03-19T11:05:00+09:00"
     },
     {
+      "itemIdx": 9,
       "externalId": "EDUAPP-1108167890-0010",
       "businessNumber": "1108167890",
       "franchiseName": "하루온 강남점",
@@ -86,6 +96,7 @@
       "appliedAt": "2026-04-04T17:44:00+09:00"
     },
     {
+      "itemIdx": 10,
       "externalId": "EDUAPP-1108167890-0011",
       "businessNumber": "1108167890",
       "franchiseName": "하루온 강남점",
@@ -94,6 +105,7 @@
       "appliedAt": "2026-08-23T11:42:00+09:00"
     },
     {
+      "itemIdx": 11,
       "externalId": "EDUAPP-1108167890-0012",
       "businessNumber": "1108167890",
       "franchiseName": "하루온 강남점",
@@ -102,6 +114,7 @@
       "appliedAt": "2025-02-05T12:49:00+09:00"
     },
     {
+      "itemIdx": 12,
       "externalId": "EDUAPP-1108167890-0013",
       "businessNumber": "1108167890",
       "franchiseName": "하루온 강남점",
@@ -110,6 +123,7 @@
       "appliedAt": "2025-07-03T14:04:00+09:00"
     },
     {
+      "itemIdx": 13,
       "externalId": "EDUAPP-1108167890-0014",
       "businessNumber": "1108167890",
       "franchiseName": "하루온 강남점",
@@ -118,6 +132,7 @@
       "appliedAt": "2026-07-08T08:44:00+09:00"
     },
     {
+      "itemIdx": 14,
       "externalId": "EDUAPP-1108167890-0015",
       "businessNumber": "1108167890",
       "franchiseName": "하루온 강남점",
@@ -126,6 +141,7 @@
       "appliedAt": "2025-03-02T08:03:00+09:00"
     },
     {
+      "itemIdx": 15,
       "externalId": "EDUAPP-1108167890-0016",
       "businessNumber": "1108167890",
       "franchiseName": "하루온 강남점",
@@ -134,6 +150,7 @@
       "appliedAt": "2025-06-18T11:26:00+09:00"
     },
     {
+      "itemIdx": 16,
       "externalId": "EDUAPP-1108167890-0017",
       "businessNumber": "1108167890",
       "franchiseName": "하루온 강남점",
@@ -142,6 +159,7 @@
       "appliedAt": "2025-01-31T14:10:00+09:00"
     },
     {
+      "itemIdx": 17,
       "externalId": "EDUAPP-1108167890-0018",
       "businessNumber": "1108167890",
       "franchiseName": "하루온 강남점",
@@ -150,6 +168,7 @@
       "appliedAt": "2025-06-04T08:27:00+09:00"
     },
     {
+      "itemIdx": 18,
       "externalId": "EDUAPP-1108167890-0019",
       "businessNumber": "1108167890",
       "franchiseName": "하루온 강남점",
@@ -158,6 +177,7 @@
       "appliedAt": "2026-09-25T08:53:00+09:00"
     },
     {
+      "itemIdx": 19,
       "externalId": "EDUAPP-1108167890-0020",
       "businessNumber": "1108167890",
       "franchiseName": "하루온 강남점",
@@ -166,6 +186,7 @@
       "appliedAt": "2025-03-01T16:06:00+09:00"
     },
     {
+      "itemIdx": 20,
       "externalId": "EDUAPP-1108167890-0021",
       "businessNumber": "1108167890",
       "franchiseName": "하루온 강남점",
@@ -174,6 +195,7 @@
       "appliedAt": "2025-04-11T15:44:00+09:00"
     },
     {
+      "itemIdx": 21,
       "externalId": "EDUAPP-1108167890-0022",
       "businessNumber": "1108167890",
       "franchiseName": "하루온 강남점",
@@ -182,6 +204,7 @@
       "appliedAt": "2025-08-03T16:25:00+09:00"
     },
     {
+      "itemIdx": 22,
       "externalId": "EDUAPP-1108167890-0023",
       "businessNumber": "1108167890",
       "franchiseName": "하루온 강남점",
@@ -190,6 +213,7 @@
       "appliedAt": "2026-02-19T14:01:00+09:00"
     },
     {
+      "itemIdx": 23,
       "externalId": "EDUAPP-1108167890-0024",
       "businessNumber": "1108167890",
       "franchiseName": "하루온 강남점",
@@ -198,6 +222,7 @@
       "appliedAt": "2025-07-31T11:48:00+09:00"
     },
     {
+      "itemIdx": 24,
       "externalId": "EDUAPP-1108167890-0025",
       "businessNumber": "1108167890",
       "franchiseName": "하루온 강남점",
@@ -206,6 +231,7 @@
       "appliedAt": "2025-03-10T13:31:00+09:00"
     },
     {
+      "itemIdx": 25,
       "externalId": "EDUAPP-1108167890-0026",
       "businessNumber": "1108167890",
       "franchiseName": "하루온 강남점",
@@ -214,6 +240,7 @@
       "appliedAt": "2025-04-08T17:30:00+09:00"
     },
     {
+      "itemIdx": 26,
       "externalId": "EDUAPP-1108167890-0027",
       "businessNumber": "1108167890",
       "franchiseName": "하루온 강남점",
@@ -222,6 +249,7 @@
       "appliedAt": "2025-06-26T18:36:00+09:00"
     },
     {
+      "itemIdx": 27,
       "externalId": "EDUAPP-1108167890-0028",
       "businessNumber": "1108167890",
       "franchiseName": "하루온 강남점",
@@ -230,6 +258,7 @@
       "appliedAt": "2026-04-01T15:45:00+09:00"
     },
     {
+      "itemIdx": 28,
       "externalId": "EDUAPP-1108167890-0029",
       "businessNumber": "1108167890",
       "franchiseName": "하루온 강남점",
@@ -238,6 +267,7 @@
       "appliedAt": "2026-08-17T14:26:00+09:00"
     },
     {
+      "itemIdx": 29,
       "externalId": "EDUAPP-1108167890-0030",
       "businessNumber": "1108167890",
       "franchiseName": "하루온 강남점",
@@ -246,6 +276,7 @@
       "appliedAt": "2026-05-24T15:42:00+09:00"
     },
     {
+      "itemIdx": 30,
       "externalId": "EDUAPP-2148705678-0001",
       "businessNumber": "2148705678",
       "franchiseName": "하루온 홍대점",
@@ -254,6 +285,7 @@
       "appliedAt": "2025-02-17T10:44:00+09:00"
     },
     {
+      "itemIdx": 31,
       "externalId": "EDUAPP-2148705678-0002",
       "businessNumber": "2148705678",
       "franchiseName": "하루온 홍대점",
@@ -262,6 +294,7 @@
       "appliedAt": "2025-05-06T15:07:00+09:00"
     },
     {
+      "itemIdx": 32,
       "externalId": "EDUAPP-2148705678-0003",
       "businessNumber": "2148705678",
       "franchiseName": "하루온 홍대점",
@@ -270,6 +303,7 @@
       "appliedAt": "2025-10-21T11:19:00+09:00"
     },
     {
+      "itemIdx": 33,
       "externalId": "EDUAPP-2148705678-0004",
       "businessNumber": "2148705678",
       "franchiseName": "하루온 홍대점",
@@ -278,6 +312,7 @@
       "appliedAt": "2026-05-20T19:49:00+09:00"
     },
     {
+      "itemIdx": 34,
       "externalId": "EDUAPP-2148705678-0005",
       "businessNumber": "2148705678",
       "franchiseName": "하루온 홍대점",
@@ -286,6 +321,7 @@
       "appliedAt": "2025-01-01T17:24:00+09:00"
     },
     {
+      "itemIdx": 35,
       "externalId": "EDUAPP-2148705678-0006",
       "businessNumber": "2148705678",
       "franchiseName": "하루온 홍대점",
@@ -294,6 +330,7 @@
       "appliedAt": "2025-02-11T12:48:00+09:00"
     },
     {
+      "itemIdx": 36,
       "externalId": "EDUAPP-2148705678-0007",
       "businessNumber": "2148705678",
       "franchiseName": "하루온 홍대점",
@@ -302,6 +339,7 @@
       "appliedAt": "2026-09-18T16:38:00+09:00"
     },
     {
+      "itemIdx": 37,
       "externalId": "EDUAPP-2148705678-0008",
       "businessNumber": "2148705678",
       "franchiseName": "하루온 홍대점",
@@ -310,6 +348,7 @@
       "appliedAt": "2026-06-12T17:15:00+09:00"
     },
     {
+      "itemIdx": 38,
       "externalId": "EDUAPP-2148705678-0009",
       "businessNumber": "2148705678",
       "franchiseName": "하루온 홍대점",
@@ -318,6 +357,7 @@
       "appliedAt": "2026-04-15T17:59:00+09:00"
     },
     {
+      "itemIdx": 39,
       "externalId": "EDUAPP-2148705678-0010",
       "businessNumber": "2148705678",
       "franchiseName": "하루온 홍대점",
@@ -326,6 +366,7 @@
       "appliedAt": "2026-02-21T13:09:00+09:00"
     },
     {
+      "itemIdx": 40,
       "externalId": "EDUAPP-2148705678-0011",
       "businessNumber": "2148705678",
       "franchiseName": "하루온 홍대점",
@@ -334,6 +375,7 @@
       "appliedAt": "2025-06-20T12:14:00+09:00"
     },
     {
+      "itemIdx": 41,
       "externalId": "EDUAPP-2148705678-0012",
       "businessNumber": "2148705678",
       "franchiseName": "하루온 홍대점",
@@ -342,6 +384,7 @@
       "appliedAt": "2025-12-03T19:46:00+09:00"
     },
     {
+      "itemIdx": 42,
       "externalId": "EDUAPP-2148705678-0013",
       "businessNumber": "2148705678",
       "franchiseName": "하루온 홍대점",
@@ -350,6 +393,7 @@
       "appliedAt": "2025-10-19T14:16:00+09:00"
     },
     {
+      "itemIdx": 43,
       "externalId": "EDUAPP-2148705678-0014",
       "businessNumber": "2148705678",
       "franchiseName": "하루온 홍대점",
@@ -358,6 +402,7 @@
       "appliedAt": "2025-01-08T19:46:00+09:00"
     },
     {
+      "itemIdx": 44,
       "externalId": "EDUAPP-2148705678-0015",
       "businessNumber": "2148705678",
       "franchiseName": "하루온 홍대점",
@@ -366,6 +411,7 @@
       "appliedAt": "2025-07-19T19:09:00+09:00"
     },
     {
+      "itemIdx": 45,
       "externalId": "EDUAPP-2148705678-0016",
       "businessNumber": "2148705678",
       "franchiseName": "하루온 홍대점",
@@ -374,6 +420,7 @@
       "appliedAt": "2026-03-22T13:11:00+09:00"
     },
     {
+      "itemIdx": 46,
       "externalId": "EDUAPP-2148705678-0017",
       "businessNumber": "2148705678",
       "franchiseName": "하루온 홍대점",
@@ -382,6 +429,7 @@
       "appliedAt": "2025-10-14T15:58:00+09:00"
     },
     {
+      "itemIdx": 47,
       "externalId": "EDUAPP-2148705678-0018",
       "businessNumber": "2148705678",
       "franchiseName": "하루온 홍대점",
@@ -390,6 +438,7 @@
       "appliedAt": "2025-07-14T09:07:00+09:00"
     },
     {
+      "itemIdx": 48,
       "externalId": "EDUAPP-2148705678-0019",
       "businessNumber": "2148705678",
       "franchiseName": "하루온 홍대점",
@@ -398,6 +447,7 @@
       "appliedAt": "2025-01-23T11:19:00+09:00"
     },
     {
+      "itemIdx": 49,
       "externalId": "EDUAPP-2148705678-0020",
       "businessNumber": "2148705678",
       "franchiseName": "하루온 홍대점",
@@ -406,6 +456,7 @@
       "appliedAt": "2025-02-24T15:10:00+09:00"
     },
     {
+      "itemIdx": 50,
       "externalId": "EDUAPP-2148705678-0021",
       "businessNumber": "2148705678",
       "franchiseName": "하루온 홍대점",
@@ -414,6 +465,7 @@
       "appliedAt": "2025-01-08T14:38:00+09:00"
     },
     {
+      "itemIdx": 51,
       "externalId": "EDUAPP-2148705678-0022",
       "businessNumber": "2148705678",
       "franchiseName": "하루온 홍대점",
@@ -422,6 +474,7 @@
       "appliedAt": "2025-04-26T12:32:00+09:00"
     },
     {
+      "itemIdx": 52,
       "externalId": "EDUAPP-2148705678-0023",
       "businessNumber": "2148705678",
       "franchiseName": "하루온 홍대점",
@@ -430,6 +483,7 @@
       "appliedAt": "2025-05-06T09:17:00+09:00"
     },
     {
+      "itemIdx": 53,
       "externalId": "EDUAPP-2148705678-0024",
       "businessNumber": "2148705678",
       "franchiseName": "하루온 홍대점",
@@ -438,6 +492,7 @@
       "appliedAt": "2025-02-21T13:00:00+09:00"
     },
     {
+      "itemIdx": 54,
       "externalId": "EDUAPP-2208812345-0001",
       "businessNumber": "2208812345",
       "franchiseName": "하루온 판교점",
@@ -446,6 +501,7 @@
       "appliedAt": "2025-12-02T17:21:00+09:00"
     },
     {
+      "itemIdx": 55,
       "externalId": "EDUAPP-2208812345-0002",
       "businessNumber": "2208812345",
       "franchiseName": "하루온 판교점",
@@ -454,6 +510,7 @@
       "appliedAt": "2025-01-25T17:41:00+09:00"
     },
     {
+      "itemIdx": 56,
       "externalId": "EDUAPP-2208812345-0003",
       "businessNumber": "2208812345",
       "franchiseName": "하루온 판교점",
@@ -462,6 +519,7 @@
       "appliedAt": "2026-09-07T18:05:00+09:00"
     },
     {
+      "itemIdx": 57,
       "externalId": "EDUAPP-2208812345-0004",
       "businessNumber": "2208812345",
       "franchiseName": "하루온 판교점",
@@ -470,6 +528,7 @@
       "appliedAt": "2025-03-09T09:17:00+09:00"
     },
     {
+      "itemIdx": 58,
       "externalId": "EDUAPP-2208812345-0005",
       "businessNumber": "2208812345",
       "franchiseName": "하루온 판교점",
@@ -478,6 +537,7 @@
       "appliedAt": "2025-03-28T08:24:00+09:00"
     },
     {
+      "itemIdx": 59,
       "externalId": "EDUAPP-2208812345-0006",
       "businessNumber": "2208812345",
       "franchiseName": "하루온 판교점",
@@ -486,6 +546,7 @@
       "appliedAt": "2025-04-04T14:29:00+09:00"
     },
     {
+      "itemIdx": 60,
       "externalId": "EDUAPP-2208812345-0007",
       "businessNumber": "2208812345",
       "franchiseName": "하루온 판교점",
@@ -494,6 +555,7 @@
       "appliedAt": "2026-06-14T12:48:00+09:00"
     },
     {
+      "itemIdx": 61,
       "externalId": "EDUAPP-2208812345-0008",
       "businessNumber": "2208812345",
       "franchiseName": "하루온 판교점",
@@ -502,6 +564,7 @@
       "appliedAt": "2026-11-01T19:43:00+09:00"
     },
     {
+      "itemIdx": 62,
       "externalId": "EDUAPP-2208812345-0009",
       "businessNumber": "2208812345",
       "franchiseName": "하루온 판교점",
@@ -510,6 +573,7 @@
       "appliedAt": "2025-05-12T19:12:00+09:00"
     },
     {
+      "itemIdx": 63,
       "externalId": "EDUAPP-2208812345-0010",
       "businessNumber": "2208812345",
       "franchiseName": "하루온 판교점",
@@ -518,6 +582,7 @@
       "appliedAt": "2025-01-28T16:53:00+09:00"
     },
     {
+      "itemIdx": 64,
       "externalId": "EDUAPP-2208812345-0011",
       "businessNumber": "2208812345",
       "franchiseName": "하루온 판교점",
@@ -526,6 +591,7 @@
       "appliedAt": "2025-10-26T08:29:00+09:00"
     },
     {
+      "itemIdx": 65,
       "externalId": "EDUAPP-2208812345-0012",
       "businessNumber": "2208812345",
       "franchiseName": "하루온 판교점",
@@ -534,6 +600,7 @@
       "appliedAt": "2025-11-01T10:48:00+09:00"
     },
     {
+      "itemIdx": 66,
       "externalId": "EDUAPP-2208812345-0013",
       "businessNumber": "2208812345",
       "franchiseName": "하루온 판교점",
@@ -542,6 +609,7 @@
       "appliedAt": "2025-03-28T17:52:00+09:00"
     },
     {
+      "itemIdx": 67,
       "externalId": "EDUAPP-2208812345-0014",
       "businessNumber": "2208812345",
       "franchiseName": "하루온 판교점",
@@ -550,6 +618,7 @@
       "appliedAt": "2025-09-15T12:26:00+09:00"
     },
     {
+      "itemIdx": 68,
       "externalId": "EDUAPP-2208812345-0015",
       "businessNumber": "2208812345",
       "franchiseName": "하루온 판교점",
@@ -558,6 +627,7 @@
       "appliedAt": "2025-11-07T09:49:00+09:00"
     },
     {
+      "itemIdx": 69,
       "externalId": "EDUAPP-2208812345-0016",
       "businessNumber": "2208812345",
       "franchiseName": "하루온 판교점",
@@ -566,6 +636,7 @@
       "appliedAt": "2026-03-08T17:42:00+09:00"
     },
     {
+      "itemIdx": 70,
       "externalId": "EDUAPP-2208812345-0017",
       "businessNumber": "2208812345",
       "franchiseName": "하루온 판교점",
@@ -574,6 +645,7 @@
       "appliedAt": "2025-10-08T15:04:00+09:00"
     },
     {
+      "itemIdx": 71,
       "externalId": "EDUAPP-2208812345-0018",
       "businessNumber": "2208812345",
       "franchiseName": "하루온 판교점",
@@ -582,6 +654,7 @@
       "appliedAt": "2025-04-30T08:15:00+09:00"
     },
     {
+      "itemIdx": 72,
       "externalId": "EDUAPP-6178123456-0001",
       "businessNumber": "6178123456",
       "franchiseName": "하루온 부산점",
@@ -590,6 +663,7 @@
       "appliedAt": "2025-01-19T08:54:00+09:00"
     },
     {
+      "itemIdx": 73,
       "externalId": "EDUAPP-6178123456-0002",
       "businessNumber": "6178123456",
       "franchiseName": "하루온 부산점",
@@ -598,6 +672,7 @@
       "appliedAt": "2025-02-06T09:51:00+09:00"
     },
     {
+      "itemIdx": 74,
       "externalId": "EDUAPP-6178123456-0003",
       "businessNumber": "6178123456",
       "franchiseName": "하루온 부산점",
@@ -606,6 +681,7 @@
       "appliedAt": "2025-01-06T13:45:00+09:00"
     },
     {
+      "itemIdx": 75,
       "externalId": "EDUAPP-6178123456-0004",
       "businessNumber": "6178123456",
       "franchiseName": "하루온 부산점",
@@ -614,6 +690,7 @@
       "appliedAt": "2025-03-15T16:37:00+09:00"
     },
     {
+      "itemIdx": 76,
       "externalId": "EDUAPP-6178123456-0005",
       "businessNumber": "6178123456",
       "franchiseName": "하루온 부산점",
@@ -622,6 +699,7 @@
       "appliedAt": "2025-01-22T18:59:00+09:00"
     },
     {
+      "itemIdx": 77,
       "externalId": "EDUAPP-6168512345-0001",
       "businessNumber": "6168512345",
       "franchiseName": "하루온 제주점",
@@ -630,6 +708,7 @@
       "appliedAt": "2026-07-13T08:49:00+09:00"
     },
     {
+      "itemIdx": 78,
       "externalId": "EDUAPP-6168512345-0002",
       "businessNumber": "6168512345",
       "franchiseName": "하루온 제주점",
@@ -638,6 +717,7 @@
       "appliedAt": "2026-08-12T18:54:00+09:00"
     },
     {
+      "itemIdx": 79,
       "externalId": "EDUAPP-6168512345-0003",
       "businessNumber": "6168512345",
       "franchiseName": "하루온 제주점",
@@ -646,6 +726,7 @@
       "appliedAt": "2026-09-29T16:46:00+09:00"
     },
     {
+      "itemIdx": 80,
       "externalId": "EDUAPP-6168512345-0004",
       "businessNumber": "6168512345",
       "franchiseName": "하루온 제주점",
@@ -654,6 +735,7 @@
       "appliedAt": "2026-08-04T12:11:00+09:00"
     },
     {
+      "itemIdx": 81,
       "externalId": "EDUAPP-6168512345-0005",
       "businessNumber": "6168512345",
       "franchiseName": "하루온 제주점",
@@ -662,6 +744,7 @@
       "appliedAt": "2026-09-07T14:00:00+09:00"
     },
     {
+      "itemIdx": 82,
       "externalId": "EDUAPP-6168512345-0006",
       "businessNumber": "6168512345",
       "franchiseName": "하루온 제주점",
@@ -670,6 +753,7 @@
       "appliedAt": "2026-07-13T11:15:00+09:00"
     },
     {
+      "itemIdx": 83,
       "externalId": "EDUAPP-9999999999-0001",
       "businessNumber": "9999999999",
       "franchiseName": "하루온 미등록점",
@@ -678,6 +762,7 @@
       "appliedAt": "2025-02-01T10:00:00+09:00"
     },
     {
+      "itemIdx": 84,
       "externalId": "EDUAPP-1108167890-INVALID-EDU",
       "businessNumber": "1108167890",
       "franchiseName": "하루온 강남점",
@@ -686,6 +771,7 @@
       "appliedAt": "2025-12-01T10:00:00+09:00"
     },
     {
+      "itemIdx": 85,
       "externalId": "EDUAPP-2148705678-NEGCOUNT",
       "businessNumber": "2148705678",
       "franchiseName": "하루온 홍대점",

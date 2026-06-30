@@ -39,6 +39,7 @@ public class FranchiseInquiry extends AbstractEntity {
 
     @Nullable private FranchiseInquiryAnswer answer;
 
+    private InquiryType inquiryStatus;
 
     public static FranchiseInquiry createInquiry(
             String externalId,
@@ -57,6 +58,7 @@ public class FranchiseInquiry extends AbstractEntity {
         inquiry.inquiryTitle = requireNonNull(inquiryTitle);
         inquiry.inquiryContent = requireNonNull(inquiryContent);
         inquiry.emp = franchise.getEmp();
+        inquiry.inquiryStatus = InquiryType.NEW;
 
         return inquiry;
     }
@@ -97,6 +99,10 @@ public class FranchiseInquiry extends AbstractEntity {
         state(this.answer != null, "답변 초안이 없음");
 
         this.answer.updateDraft(content);
+    }
+
+    public void changeInquiryStatus(InquiryType inquiryStatus) {
+        this.inquiryStatus = inquiryStatus;
     }
 
     public void submitAnswer(LocalDateTime answerAt, Emp emp) {

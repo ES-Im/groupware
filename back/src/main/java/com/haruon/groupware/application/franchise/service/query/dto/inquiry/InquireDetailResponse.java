@@ -14,6 +14,8 @@ public record InquireDetailResponse(
         String inquiryContent,
 
         Long assignedManagerId,
-        String assignedManagerName
+        String assignedManagerName,
+
+        Boolean isDeleted
 ) {
 }

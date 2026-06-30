@@ -10,6 +10,7 @@ import com.haruon.groupware.application.franchise.required.FranchiseRepository;
 import com.haruon.groupware.application.franchise.service.command.dto.InquiryRequest;
 import com.haruon.groupware.domain.franchise.Franchise;
 import com.haruon.groupware.domain.franchise.FranchiseInquiry;
+import com.haruon.groupware.domain.franchise.InquiryType;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -60,6 +61,7 @@ record InquiryImporterTest(
                         .inquiryAt(inquiryAt)
                         .inquiryTitle(inquiryTitle)
                         .inquiryContent(inquiryContent)
+                        .type(InquiryType.NEW)
                 .build()
         );
 
@@ -96,6 +98,7 @@ record InquiryImporterTest(
                         .inquiryAt(LocalDateTime.of(2026, 4, 1, 9, 0, 0))
                         .inquiryTitle("title")
                         .inquiryContent("content")
+                        .type(InquiryType.NEW)
                         .build()
         );
 
@@ -112,6 +115,7 @@ record InquiryImporterTest(
                         .inquiryAt(newInquiryAt)
                         .inquiryTitle(newInquiryTitle)
                         .inquiryContent(newInquiryContent)
+                        .type(InquiryType.EDIT)
                         .build()
         );
 

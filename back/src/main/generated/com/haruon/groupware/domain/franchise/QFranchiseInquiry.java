@@ -47,6 +47,8 @@ public class QFranchiseInquiry extends EntityPathBase<FranchiseInquiry> {
 
     public final StringPath inquiryContent = createString("inquiryContent");
 
+    public final EnumPath<InquiryType> inquiryStatus = createEnum("inquiryStatus", InquiryType.class);
+
     public final StringPath inquiryTitle = createString("inquiryTitle");
 
     //inherited

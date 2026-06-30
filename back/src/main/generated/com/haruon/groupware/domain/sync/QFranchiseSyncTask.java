@@ -13,19 +13,19 @@ import com.querydsl.core.types.dsl.PathInits;
 
 
 /**
- * QFranchiseSyncRequest is a Querydsl query type for FranchiseSyncRequest
+ * QFranchiseSyncTask is a Querydsl query type for FranchiseSyncTask
  */
 @SuppressWarnings("this-escape")
 @Generated("com.querydsl.codegen.DefaultEntitySerializer")
-public class QFranchiseSyncRequest extends EntityPathBase<FranchiseSyncRequest> {
+public class QFranchiseSyncTask extends EntityPathBase<FranchiseSyncTask> {
 
-    private static final long serialVersionUID = 2002379640L;
+    private static final long serialVersionUID = -1233251012L;
 
     private static final PathInits INITS = PathInits.DIRECT2;
 
-    public static final QFranchiseSyncRequest franchiseSyncRequest = new QFranchiseSyncRequest("franchiseSyncRequest");
+    public static final QFranchiseSyncTask franchiseSyncTask = new QFranchiseSyncTask("franchiseSyncTask");
 
-    public final QSyncRequest _super = new QSyncRequest(this);
+    public final QSyncTask _super = new QSyncTask(this);
 
     //inherited
     public final DateTimePath<java.time.Instant> createdAt = _super.createdAt;
@@ -45,6 +45,8 @@ public class QFranchiseSyncRequest extends EntityPathBase<FranchiseSyncRequest> 
 
     //inherited
     public final NumberPath<Long> id = _super.id;
+
+    public final NumberPath<Integer> itemIdx = createNumber("itemIdx", Integer.class);
 
     //inherited
     public final StringPath lastErrorMessage = _super.lastErrorMessage;
@@ -70,23 +72,23 @@ public class QFranchiseSyncRequest extends EntityPathBase<FranchiseSyncRequest> 
     //inherited
     public final DateTimePath<java.time.Instant> updatedAt = _super.updatedAt;
 
-    public QFranchiseSyncRequest(String variable) {
-        this(FranchiseSyncRequest.class, forVariable(variable), INITS);
+    public QFranchiseSyncTask(String variable) {
+        this(FranchiseSyncTask.class, forVariable(variable), INITS);
     }
 
-    public QFranchiseSyncRequest(Path<? extends FranchiseSyncRequest> path) {
+    public QFranchiseSyncTask(Path<? extends FranchiseSyncTask> path) {
         this(path.getType(), path.getMetadata(), PathInits.getFor(path.getMetadata(), INITS));
     }
 
-    public QFranchiseSyncRequest(PathMetadata metadata) {
+    public QFranchiseSyncTask(PathMetadata metadata) {
         this(metadata, PathInits.getFor(metadata, INITS));
     }
 
-    public QFranchiseSyncRequest(PathMetadata metadata, PathInits inits) {
-        this(FranchiseSyncRequest.class, metadata, inits);
+    public QFranchiseSyncTask(PathMetadata metadata, PathInits inits) {
+        this(FranchiseSyncTask.class, metadata, inits);
     }
 
-    public QFranchiseSyncRequest(Class<? extends FranchiseSyncRequest> type, PathMetadata metadata, PathInits inits) {
+    public QFranchiseSyncTask(Class<? extends FranchiseSyncTask> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.education = inits.isInitialized("education") ? new com.haruon.groupware.domain.franchise.QEducation(forProperty("education"), inits.get("education")) : null;
         this.franchise = inits.isInitialized("franchise") ? new com.haruon.groupware.domain.franchise.QFranchise(forProperty("franchise"), inits.get("franchise")) : null;

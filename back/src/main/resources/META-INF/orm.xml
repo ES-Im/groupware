@@ -53,7 +53,7 @@
     </mapped-superclass>
 
 
-    <mapped-superclass class="com.haruon.groupware.domain.sync.SyncRequest" access="FIELD">
+    <mapped-superclass class="com.haruon.groupware.domain.sync.SyncTask" access="FIELD">
         <attributes>
 
             <basic name="status" optional="false">
@@ -834,6 +834,10 @@
             <basic name="inquiryContent">
                 <column name="inquiry_content" nullable="false" length="16777215"/>
             </basic>
+            <basic name="inquiryStatus">
+                <column name="inquiry_status" nullable="false" />
+                <enumerated>STRING</enumerated>
+            </basic>
             <many-to-one name="franchise" fetch="LAZY">
                 <join-column name="franchise_id" nullable="false"/>
             </many-to-one>
@@ -1132,15 +1136,21 @@
 
 <!-- ============================================= SYNC ============================================= -->
 
-    <entity class="com.haruon.groupware.domain.sync.FranchiseSyncRequest" access="FIELD">
+    <entity class="com.haruon.groupware.domain.sync.FranchiseSyncTask" access="FIELD">
         <table name="franchise_sync_request">
             <unique-constraint>
                 <column-name>franchise_id</column-name>
+                <column-name>sync_type</column-name>
                 <column-name>external_id</column-name>
+                <column-name>item_idx</column-name>
             </unique-constraint>
         </table>
 
         <attributes>
+
+            <basic name="itemIdx" optional="false">
+                <column name="item_idx" nullable="false"/>
+            </basic>
 
             <many-to-one
                     name="franchise"

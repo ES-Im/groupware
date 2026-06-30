@@ -5,11 +5,10 @@ import com.haruon.groupware.application.franchise.service.query.dto.inquiry.Answ
 import com.haruon.groupware.application.franchise.service.query.dto.inquiry.InquireDetailResponse;
 import com.haruon.groupware.application.franchise.service.query.dto.inquiry.InquiriesResponse;
 import com.haruon.groupware.domain.employee.QEmp;
-import com.haruon.groupware.domain.franchise.QFranchise;
-import com.haruon.groupware.domain.franchise.QFranchiseInquiry;
-import com.haruon.groupware.domain.franchise.QFranchiseInquiryAnswer;
+import com.haruon.groupware.domain.franchise.*;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.Nullable;
@@ -31,6 +30,7 @@ public class FranchiseInquiryQueryRepositoryAdapter implements FranchiseInquiryQ
     private final JPAQueryFactory query;
     private final QFranchise franchise = QFranchise.franchise;
     private final QFranchiseInquiry inquiry = QFranchiseInquiry.franchiseInquiry;
+    private final PathBuilder<FranchiseInquiry> inquiryPath = new PathBuilder<>(FranchiseInquiry.class, inquiry.getMetadata());
     private final QFranchiseInquiryAnswer answer = QFranchiseInquiryAnswer.franchiseInquiryAnswer;
     private final QEmp emp = QEmp.emp;
 
@@ -68,7 +68,8 @@ public class FranchiseInquiryQueryRepositoryAdapter implements FranchiseInquiryQ
                         franchise.id, franchise.franchiseName,
                         inquiry.inquiryTitle, inquiry.inquiryAt,
                         answer.answeredAt.isNotNull(),
-                        emp.id, emp.empName
+                        emp.id, emp.empName,
+                        isDeleted()
                 ))
                 .from(inquiry)
                 .join(inquiry.franchise, franchise)
@@ -99,7 +100,8 @@ public class FranchiseInquiryQueryRepositoryAdapter implements FranchiseInquiryQ
                                 franchise.id, franchise.franchiseName,
                                 inquiry.inquirerContact, inquiry.inquiryAt,
                                 inquiry.inquiryTitle, inquiry.inquiryContent,
-                                emp.id, emp.empName
+                                emp.id, emp.empName,
+                                isDeleted()
                         )).from(inquiry)
                         .join(inquiry.franchise, franchise)
                         .leftJoin(inquiry.emp, emp)
@@ -135,6 +137,10 @@ public class FranchiseInquiryQueryRepositoryAdapter implements FranchiseInquiryQ
         return isAnswered.equals(true)
                 ? answer.answeredAt.isNotNull()
                 : answer.id.isNull().or(answer.answeredAt.isNull());
+    }
+
+    private BooleanExpression isDeleted() {
+        return inquiryPath.getEnum("inquiryStatus", InquiryType.class).eq(InquiryType.DELETION);
     }
 
     private BooleanExpression eqAssignedEmpId(@Nullable Long assignedManagerId) {

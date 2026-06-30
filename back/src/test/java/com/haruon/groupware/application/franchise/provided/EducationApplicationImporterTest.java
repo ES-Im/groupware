@@ -9,6 +9,7 @@ import com.haruon.groupware.application.franchise.provided.forImport.EducationAp
 import com.haruon.groupware.application.franchise.required.EducationRepository;
 import com.haruon.groupware.application.franchise.required.FranchiseRepository;
 import com.haruon.groupware.application.franchise.service.command.dto.ApplicationRequest;
+import com.haruon.groupware.application.franchise.service.command.dto.CancellationRequest;
 import com.haruon.groupware.application.franchise.service.command.dto.EducationCreateRequest;
 import com.haruon.groupware.domain.employee.Emp;
 import com.haruon.groupware.domain.franchise.Education;
@@ -68,6 +69,7 @@ record EducationApplicationImporterTest(
                 ApplicationRequest.builder()
                         .externalId(externalId)
                         .franchiseId(franchiseId)
+                        .educationId(educationId)
                         .appliedCount(appliedCount)
                         .appliedAt(appliedAt)
                 .build()
@@ -110,6 +112,7 @@ record EducationApplicationImporterTest(
             ApplicationRequest.builder()
                     .externalId(externalId)
                     .franchiseId(franchise.getId())
+                    .educationId(educationId)
                     .appliedCount(newAppliedCount)
                     .appliedAt(newAppliedAt)
                     .build()
@@ -142,8 +145,10 @@ record EducationApplicationImporterTest(
         entityManager.flush();
         entityManager.clear();
 
+
+
         educationApplicationImporter.cancelEducationApplication(
-                educationId, franchise.getId(), externalId
+                educationId, new CancellationRequest(franchise.getId(), educationId,externalId)
         );
 
         entityManager.flush();
@@ -166,6 +171,7 @@ record EducationApplicationImporterTest(
                 ApplicationRequest.builder()
                         .externalId(externalId)
                         .franchiseId(franchiseId)
+                        .educationId(educationId)
                         .appliedCount(appliedCount)
                         .appliedAt(appliedAt)
                         .build()

@@ -28,6 +28,29 @@ Postman 기본 URL은 `http://localhost:3001`입니다.
 | `EDUCATION_APPLICATION`        | GET    | `/api/education-applications`              |     86 | 교육 신청 데이터                    |
 | `EDUCATION_APPLICATION_CANCEL` | GET    | `/api/education-application-cancellations` |     17 | 교육 신청 취소 데이터                 |
 
+## Query Parameter 사용 규칙
+
+모든 수집 API는 아래 optional query parameter를 동일하게 지원합니다.
+
+| Parameter    | Required | 설명                                                                 |
+|--------------|----------|----------------------------------------------------------------------|
+| `externalId` | No       | 각 API row 자체의 외부 식별자입니다. 지정하면 해당 `externalId` item 목록만 반환합니다. |
+| `itemIdx`    | No       | fixture 배열 기준 0-based item index입니다. `externalId`와 함께 지정하면 단건 조회로 사용합니다. |
+
+호출 예시는 아래와 같습니다.
+
+```text
+GET /api/daily-sales
+GET /api/daily-sales?externalId=SALES-1108167890-20250206
+GET /api/daily-sales?externalId=SALES-1108167890-20250206&itemIdx=36
+```
+
+- query parameter를 생략하면 전체 `items`를 반환합니다.
+- `externalId`만 전달하면 해당 `externalId`를 가진 `items`를 배열로 반환합니다.
+- `externalId`와 `itemIdx`를 함께 전달하면 정확히 일치하는 item을 0건 또는 1건 배열로 반환합니다.
+- Postman에서 `externalId=&itemIdx=`처럼 빈 query parameter가 전송되면 query parameter가 없는 것으로 보고 전체 조회로 처리합니다.
+- Mockoon 템플릿에서 query parameter 존재 여부나 lookup key 판단에는 `queryParamRaw`를 사용합니다. `queryParam`은 응답 문자열 출력용으로만 사용합니다.
+
 ## 공통 응답 Envelope
 
 모든 수집 API는 아래 구조를 유지합니다.

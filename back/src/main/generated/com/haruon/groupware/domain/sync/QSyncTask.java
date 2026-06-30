@@ -12,15 +12,15 @@ import com.querydsl.core.types.Path;
 
 
 /**
- * QSyncRequest is a Querydsl query type for SyncRequest
+ * QSyncTask is a Querydsl query type for SyncTask
  */
 @SuppressWarnings("this-escape")
 @Generated("com.querydsl.codegen.DefaultSupertypeSerializer")
-public class QSyncRequest extends EntityPathBase<SyncRequest> {
+public class QSyncTask extends EntityPathBase<SyncTask> {
 
-    private static final long serialVersionUID = -907296141L;
+    private static final long serialVersionUID = 739905569L;
 
-    public static final QSyncRequest syncRequest = new QSyncRequest("syncRequest");
+    public static final QSyncTask syncTask = new QSyncTask("syncTask");
 
     public final com.haruon.groupware.domain.QAbstractEntity _super = new com.haruon.groupware.domain.QAbstractEntity(this);
 
@@ -53,16 +53,16 @@ public class QSyncRequest extends EntityPathBase<SyncRequest> {
     //inherited
     public final DateTimePath<java.time.Instant> updatedAt = _super.updatedAt;
 
-    public QSyncRequest(String variable) {
-        super(SyncRequest.class, forVariable(variable));
+    public QSyncTask(String variable) {
+        super(SyncTask.class, forVariable(variable));
     }
 
-    public QSyncRequest(Path<? extends SyncRequest> path) {
+    public QSyncTask(Path<? extends SyncTask> path) {
         super(path.getType(), path.getMetadata());
     }
 
-    public QSyncRequest(PathMetadata metadata) {
-        super(SyncRequest.class, metadata);
+    public QSyncTask(PathMetadata metadata) {
+        super(SyncTask.class, metadata);
     }
 
 }
