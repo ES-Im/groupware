@@ -3,6 +3,7 @@ package com.haruon.groupware.domain.sync;
 import com.haruon.groupware.domain.AbstractEntity;
 import jakarta.persistence.MappedSuperclass;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.jspecify.annotations.Nullable;
@@ -13,11 +14,12 @@ import static java.util.Objects.requireNonNull;
 import static org.springframework.util.Assert.state;
 
 @ToString
+@Getter
 @MappedSuperclass
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public abstract class SyncTask extends AbstractEntity {
 
-    private static final int PROCESSING_TIMEOUT_MINUTES = 10;
+    public static final int PROCESSING_TIMEOUT_MINUTES = 10;
 
     private SyncStatus status;
 

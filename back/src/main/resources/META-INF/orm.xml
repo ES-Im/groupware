@@ -1139,7 +1139,6 @@
     <entity class="com.haruon.groupware.domain.sync.FranchiseSyncTask" access="FIELD">
         <table name="franchise_sync_request">
             <unique-constraint>
-                <column-name>franchise_id</column-name>
                 <column-name>sync_type</column-name>
                 <column-name>external_id</column-name>
                 <column-name>item_idx</column-name>

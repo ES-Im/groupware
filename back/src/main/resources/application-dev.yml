@@ -53,4 +53,4 @@ app:
   frontend:
     base-url: ${FRONT_BASE_URL}
   franchise:
-    base-url: ${MOCKOON_API}
+    base-url: ${APP_FRANCHISE_BASE_URL}
