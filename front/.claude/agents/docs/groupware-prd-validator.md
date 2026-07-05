@@ -1,16 +1,19 @@
 ---
 name: groupware-prd-validator
-description: Use this agent when you need to validate a frontend PRD generated for the HARUON groupware monorepo. This agent verifies the PRD against the backend API contracts (@docs/backend-contract/ / api-endpoint.md / generated-snippets / @../docs/도메인모델.md) and CLAUDE.md rules, checking contract fidelity, cross-section consistency, permission model correctness, and scope violations. Use it after groupware-frontend-prd-generator produces a PRD, or before starting frontend development on a domain.
+description: |
+  Use this agent when you need to validate a frontend PRD generated for the HARUON groupware monorepo. This agent verifies the PRD against the backend API contracts (@docs/backend-contract/ / api-endpoint.md / generated-snippets / @../docs/도메인모델.md) and CLAUDE.md rules, checking contract fidelity, cross-section consistency, permission model correctness, and scope violations. Use it after groupware-frontend-prd-generator produces a PRD, or before starting frontend development on a domain.
 
-Examples:
+  <example>
+  Context: User wants to validate a generated frontend PRD
+  user: "생성된 근태 도메인 PRD를 검증해줘"
+  assistant: "PRD를 백엔드 계약과 CLAUDE.md 기준으로 검증하기 위해 groupware-prd-validator 에이전트를 실행하겠습니다."
+  </example>
 
-Context: User wants to validate a generated frontend PRD
-user: "생성된 근태 도메인 PRD를 검증해줘"
-assistant: "PRD를 백엔드 계약과 CLAUDE.md 기준으로 검증하기 위해 groupware-prd-validator 에이전트를 실행하겠습니다."
-
-Context: User wants to check if a PRD invented features not in the API
-user: "이 PRD에 백엔드에 없는 기능이 들어갔는지 확인해줘"
-assistant: "계약 근거 검증을 위해 groupware-prd-validator 에이전트를 사용하겠습니다."
+  <example>
+  Context: User wants to check if a PRD invented features not in the API
+  user: "이 PRD에 백엔드에 없는 기능이 들어갔는지 확인해줘"
+  assistant: "계약 근거 검증을 위해 groupware-prd-validator 에이전트를 사용하겠습니다."
+  </example>
 model: opus
 color: red
 ---
@@ -23,7 +26,7 @@ color: red
 이 프로젝트에서 "사실"의 원천은 아래 문서로 한정됩니다. 우선순위 순:
 
 1. **@docs/backend-contract/api-endpoint.md** — 기능ID 인덱스 (기능 존재 여부의 원천)
-2. **back/build/generated-snippets/<기능ID>/** — 필드 단위 계약 원본
+2. **@../back/build/generated-snippets/<기능ID>/** — 필드 단위 계약 원본
 3. **@docs/backend-contract/ (CLAUDE.md 7번 항목에서 인덱싱)** — 전역 규칙·권한 계층·에러 계약·인증 흐름
 4. **@../docs/도메인모델.md** — 도메인 규칙 (파일 정책, 회원가입 승인 플로우, 비즈니스 규칙)
 5. **groupware-frontend-prd-generator 생성 규약** — PRD가 지켜야 할 형식/범위

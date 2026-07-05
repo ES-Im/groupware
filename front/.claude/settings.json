@@ -2,6 +2,10 @@
     "language": "Korean",
     "permissions": {
         "allow": [
+        ],
+        "additionalDirectories": [
+            "../back/build/generated-snippets",
+            "../docs"
         ]
     },
     "hooks": {
