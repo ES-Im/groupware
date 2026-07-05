@@ -1,0 +1,8 @@
+# Claude Code 로컬 전용 설정 (민감정보 포함 — 커밋 금지)
+.claude/settings.local.json
+
+# Claude Code Hook 전용 환경변수 (Slack Webhook URL 등 민감정보 포함 — 커밋 금지)
+.claude/.env
+
+# MCP 서버 설정 (context7 API 키 등 민감정보 포함 — 커밋 금지)
+.mcp.json
