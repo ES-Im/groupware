@@ -6,7 +6,11 @@
       "mcp__sequential-thinking",
       "mcp__shadcn__search_items_in_registries",
       "mcp__context7__resolve-library-id",
-      "mcp__context7__get-library-docs"
+      "mcp__context7__get-library-docs",
+      "Read(//c/Users/eunse/localRep/groupware/back/.claude/**)",
+      "Read(//c/Users/eunse/localRep/groupware/docs/**)",
+      "Read(//c/Users/eunse/localRep/groupware/**)",
+      "Bash(git add *)"
     ]
   },
   "enabledMcpjsonServers": [
