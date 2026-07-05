@@ -25,7 +25,7 @@ public enum ApplicationErrorCode {
     // 권한
     ACTIVE_EMPLOYEE_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND, "ROLE_001", "해당 활성화된 사원이 존재하지 않습니다"),
     PERMISSION_DENIED_EXCEPTION(HttpStatus.UNAUTHORIZED, "ROLE_002", "권한이 없습니다"),
-    DEPARTMENT_MISMATCH_EXCEPTION(HttpStatus.UNAUTHORIZED, "ROLE_003", "부서 관리자는 같은 부서의 사원만 수정할 수 있습니다."),
+    DEPARTMENT_MISMATCH_EXCEPTION(HttpStatus.FORBIDDEN, "ROLE_003", "부서 관리자는 같은 부서의 사원만 수정할 수 있습니다."),
 
     // Board
     CATEGORY_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND, "BOARD_001", "조회된 카테고리가 없습니다"),

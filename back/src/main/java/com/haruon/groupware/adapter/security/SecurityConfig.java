@@ -219,7 +219,11 @@ public class SecurityConfig {
         return RoleHierarchyImpl.withRolePrefix("ROLE_")
                 .role(SystemRoleCode.ADMIN.name()).implies(SystemRoleCode.DEPT_MANAGER.name())
                 .role(SystemRoleCode.ADMIN.name()).implies(SystemRoleCode.HR.name())
+                .role(SystemRoleCode.ADMIN.name()).implies(SystemRoleCode.FACILITY.name())
+                .role(SystemRoleCode.ADMIN.name()).implies(SystemRoleCode.FRANCHISE.name())
+                .role(SystemRoleCode.ADMIN.name()).implies(SystemRoleCode.IT.name())
                 .role(SystemRoleCode.ADMIN.name()).implies(SystemRoleCode.EMPLOYEE.name())
+                
                 .role(SystemRoleCode.DEPT_MANAGER.name()).implies(SystemRoleCode.EMPLOYEE.name())
 
                 .role(SystemRoleCode.HR.name()).implies(SystemRoleCode.EMPLOYEE.name())
