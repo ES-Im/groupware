@@ -1,24 +1,18 @@
 {
   "permissions": {
     "allow": [
-      "PowerShell(npx eslint src/services 2>&1 | Select-Object -First 50; \"exit: $LASTEXITCODE\")",
-      "PowerShell(npx eslint src/routes src/views/groupware src/layouts/components/groupwareMenu.js src/layouts/components/sidenav/components/AppMenu.jsx 2>&1 | Select-Object -First 40; \"exit: $LASTEXITCODE\")",
-      "PowerShell(npx eslint \"src/routes/index.jsx\" \"src/routes/groupware.jsx\" \"src/views/groupware/PlaceholderPage.jsx\" \"src/layouts/components/groupwareMenu.js\" \"src/layouts/components/sidenav/components/AppMenu.jsx\" \"src/layouts/components/data.js\" 2>&1 | Select-Object -First 40; \"exit: $LASTEXITCODE\")",
-      "PowerShell(npx eslint \"src/routes/index.jsx\" \"src/routes/groupware.jsx\" \"src/views/groupware/PlaceholderPage.jsx\" \"src/layouts/components/groupwareMenu.js\" \"src/services\" 2>&1 | Select-Object -First 40; \"exit: $LASTEXITCODE\")",
-      "PowerShell(git stash *)",
-      "PowerShell(npm run *)",
-      "Bash(rm -rf ecommerce charts forms tables ui icons maps widgets miscellaneous pages other-pages landing)",
-      "Bash(rm -rf apps/crm apps/email apps/invoice apps/social-feed apps/support-center apps/api-key apps/users apps/file-manager)",
-      "Bash(rm -rf layouts)",
-      "Bash(npm run *)",
-      "Bash(rm -f NestableList.jsx CustomApexChart.jsx TouchSpinInput.jsx Spinner.jsx)",
-      "Bash(rm -rf maps)",
-      "Bash(rm -f plugins/_apexcharts.scss plugins/_choice.scss plugins/_colorpicker.scss plugins/_datatables.scss plugins/_daterangepicker.scss plugins/_filepond.scss plugins/_jvectormap.scss plugins/_noui-rangeslider.scss plugins/_prismjs.scss plugins/_react-select.scss plugins/_react-slider.scss plugins/_select2.scss plugins/_sortablejs.scss plugins/_summernote.scss plugins/_touchpin.scss plugins/_tour.scss plugins/_treeview.scss plugins/_typehead.scss plugins/_wizard.scss)",
-      "Bash(rm -f pages/_email.scss pages/_kanban-board.scss pages/_landing.scss pages/_outlook.scss pages/_sitemap.scss pages/_timeline.scss)",
-      "Bash(grep -rn \"globals.d\\\\|vite-env\" src tsconfig*.json vite.config.js index.html)",
-      "Bash(grep -n \"include\\\\|globals\" tsconfig.app.json)",
-      "Bash(npm install *)",
-      "PowerShell(npx tsc -p tsconfig.app.json --noEmit 2>&1 | Select-Object -First 30; \"exit: $LASTEXITCODE\")"
+      "mcp__shadcn",
+      "mcp__playwright",
+      "mcp__sequential-thinking",
+      "mcp__shadcn__search_items_in_registries",
+      "mcp__context7__resolve-library-id",
+      "mcp__context7__get-library-docs"
     ]
-  }
+  },
+  "enabledMcpjsonServers": [
+    "playwright",
+    "context7",
+    "sequential-thinking",
+    "shadcn"
+  ]
 }

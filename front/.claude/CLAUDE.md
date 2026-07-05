@@ -1,67 +1,124 @@
-## 현재 진행 목표
+## 1. 프로젝트 개요
 
-- backend : 완료, server에서 통신하는 endpoint 정리 완료
-- front : UBold admin 템플릿 기반 React 19 SPA (Vite, Bootstrap 5)
-  - REST API 기반 필수 컴포넌트만 선별 (Mock 데이터로 화면 구성)
-  - 네비게이션 정리 (192개 API 엔드포인트 → 메뉴 체계화)
-  - API 메서드 레이어 준비 (향후 실제 API 호출 시 바로 연동 가능)
+- 가맹점 프랜차이즈 본사 컨셉 **HARUON**이라는 가상 회사의 groupware 시스템.
+- 백엔드는 완성 상태이며, 프론트는 백엔드 REST/STOMP 계약에 맞춰 구성한다.
 
-### 현재 상태 (실제 디렉토리 기준)
+## 2. 윈도우 환경
 
-- 프로젝트 구조
+- Windows 11
+- 개발 포트: 백엔드 `localhost:8080`(IntelliJ), 프론트 `localhost:5173`(Cursor/Claude). CORS 정책상 프론트는 `5173` 고정.
+
+## 3. 언어 및 커뮤니케이션 규칙
+
+- 이 저장소에서 작업할 때는 사용자와의 모든 대화 응답을 **한국어**로 작성한다.
+- 커밋 메시지, 코드 주석(비즈니스 규칙 등 WHY 설명), 도메인 예외/에러 메시지, `docs/` 문서는 한국어로 작성한다.
+- 코드 식별자(클래스명·함수명·변수명)는 영문 네이밍 컨벤션을 따른다.
+
+## 4. 코딩 스타일
+
+- 들여쓰기 2칸.
+- 네이밍: `camelCase`, 컴포넌트는 `PascalCase`.
+
+---
+
+## 5. 저장소 구조 : 서로 독립적인 두 프로젝트로 구성된 모노레포
+
+- `back/` — Spring Boot 3.5 / Java 21 REST + WebSocket API (Gradle, Kotlin DSL)
+- `front/` — React 19 + Vite + TypeScript SPA (Tailwind + shadcn/ui). 백엔드 REST/STOMP 계약에 맞춰 신규 구성.
+
+---
+
+## 6. FRONT 기술 스택
+
+- 스택은 고정이다. 
+- 새 라이브러리 도입이 필요하다면, 임의로 추가하지 말고 먼저 논의한다.
+
+
+| 계층       | 선택                                                       |
+| -------- | -------------------------------------------------------- |
+| 런타임/빌드   | React 19 + Vite                                          |
+| 언어       | TypeScript                                               |
+| 라우팅      | React Router 7                                           |
+| UI/스타일   | Tailwind CSS + shadcn/ui                                 |
+| HTTP     | axios                                                    |
+| 서버 상태    | @tanstack/react-query                                    |
+| 클라이언트 상태 | zustand                                                  |
+| 폼 + 검증   | react-hook-form + zod (+ @hookform/resolvers)            |
+| 실시간(채팅)  | @stomp/stompjs (STOMP over native WebSocket, SockJS 미사용) |
+| 날짜       | dayjs                                                    |
+| 표/그리드    | @tanstack/react-table                                    |
+| 캘린더      | @fullcalendar/react                                      |
+| 차트       | Recharts                                                 |
+| 에디터      | Tiptap                                                   |
+| 알림/토스트   | sonner (+ shadcn AlertDialog)                            |
+
+
+---
+
+## 7. (IMPORTANT) 백엔드 계약
+
+### 서버·환경 계약
+
+- **Base URL**: `http://localhost:8080` (`server.port: 8080`)
+- **Context path 없음**: 모든 API는 `/api/...`로 시작한다. 별도 servlet context-path 설정 없음.
+- **CORS**: 프론트 오리진 `http://localhost:5173`만 허용된다.
+  - 허용 메서드: `GET, POST, PUT, PATCH, DELETE, OPTIONS`
+  - `allowCredentials: true` → **axios는** `withCredentials: true`**(fetch는** `credentials: 'include'`**) 전역 필수.** 빠뜨리면 refreshToken 쿠키가 전송/수신되지 않아 인증이 깨진다.
+  - 노출 헤더: `Authorization`, `Set-Cookie`
+
+
+
+### 백엔드 계약 문서
+
+> 백엔드 전역 계약(인증·에러·권한계층·날짜·페이징·CORS·파일·STOMP)의 원천은  디렉터리에 정리했다. 매 작업 시 관련 스펙이 필요하면 항상 원천을 확인한다. 
+
+
+| 목적             | 참조 문서                                      |
+| -------------- | ------------------------------------------ |
+| 에러 규칙          | `@docs/backend-contract/error-response.md` |
+| 엔드포인트 기능ID 인덱스 | `@docs/backend-contract/api-endpoint.md`   |
+| 권한 규칙          | `@docs/backend-contract/security.md`       |
+| 파일 업로드         | `@docs/backend-contract/file-upload.md`    |
+| STOMP          | `@docs/backend-contract/chat-stomp.md`     |
+| PAGE           | `@docs/backend-contract/page.md`           |
+| Glossary       | `@docs/backend-contract/DomainGlossary.md` |
+
+
+- 위 디렉토리는 backend-contract 요약정보가 기재되어있으며, 세부 스펙이 필요할 때만 항상 아래의 원천을 확인한다.
+
+
+| 목적                         | 참조 문서                                                                                                                                |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| 엔드포인트 필드 상세(REST Docs 산출물) | `@../back/build/generated-snippets/<기능ID>/`스니펫 원본(요청/응답 JSON·필드표): 예: `LOGIN/response-body.adoc`, `BOARD_LIST/response-fields.adoc` |
+| 도메인 규칙(파일 정책·비즈니스 규칙)      | `@../docs/도메인모델.md`                                                                                                                  |
+
+
+- **필드/요청·응답 스펙을 추측하지 않는다.** 기능ID로 인덱스를 확인하고, 필드는 스니펫을 읽는다.
+  - 기능ID는 `@docs/backend-contract/api-endpoint.md`의 `ID`컬럼과 일치한다.
+- **제공된 원천 외의 정보를 추측하지 않는다.** 모호하거나 자연스럽지 않은 부분이 있다면 사용자와 논의하고 결정한다.
+
+---
+
+## 8. 자주 사용하는 명령어
+
 ```
-groupware/front/
-├─ src/
-│  ├─ routes/           (현재 index.jsx 단일 — 도메인 라우트로 교체 필요)
-│  ├─ views/            (UBold 더미 다수 포함 — REST API 관련만 선별 유지)
-│  ├─ components/       (공통 컴포넌트 — 정리 필요)
-│  ├─ layouts/          (Base/Main/Horizontal/Vertical 존재 — MainLayout 중심으로 정리)
-│  ├─ services/         (신규 생성 — API 호출 레이어, 아직 없음)
-│  ├─ types/            (이미 존재, JS 모듈. 도메인 모델 정의는 여기 .js로)
-│  └─ hooks/            (use* 커스텀 훅 — 최소화)
-├─ package.json         (미사용 라이브러리 정리)
-└─ vite.config.js / eslint.config.js
+# 개발
+npm run dev         # 개발 서버 실행 (Turbopack)
+npm run build       # 프로덕션 빌드
+npm run check-all   # 모든 검사 통합 실행 (권장)
+
+# UI 컴포넌트
+npx shadcn@latest add button    # 새 컴포넌트 추가
 ```
 
-- API 호출 레이어 구조 (services/, 신규 생성)
-  - `src/services/` 하위에 도메인별 모듈로 분리한다 (예: `employee`, `draft`, `chat`, `meeting`, `franchise` …).
-  - 공통 HTTP 클라이언트(Authorization Bearer 토큰 주입, 401 시 `/reissue` 처리 등)를 두고 각 도메인 모듈이 이를 사용한다.
-  - 엔드포인트/메서드/권한은 `rules/api-endpoint.md`를 단일 출처로 삼는다.
-  - (참고: 기존 `src/api/http.js`는 제거됨 — `services/`로 재구성)
-
-- UBOLD 템플릿의 현재 문제점 (views/apps 기준 미사용 도메인 잔존)
-  - 192개 API와 무관한 더미 페이지 다수 (crm, email, invoice, social-feed, ecommerce, charts 등)
-  - 불필요한 npm 패키지 포함
-  - 라우트 구조가 마케팅/템플릿 중심
-
-#### 필요한 컴포넌트 선별 기준
+## **9. 작업 완료 체크리스트**
 
 ```
-필수:
-  ├─ MainLayout (Sidebar + Header + Content)
-  ├─ Sidebar (REST API 메뉴)
-  ├─ Header (로그인 정보, 알림)
-  ├─ Breadcrumb
-  └─ Modal/Alert (공통)
-
-페이지:
-  ├─ Authentication (Login, Logout)
-  ├─ Dashboard (메인 대시보드)
-  ├─ Employee (사원 정보)
-  ├─ Attendance (근태)
-  ├─ Document (기안서 목록/상세)
-  ├─ Schedule (일정)
-  ├─ Meeting (회의)
-  ├─ Board (게시판)
-  ├─ Message (쪽지)
-  ├─ Chat (채팅)
-  ├─ Department (부서)
-  └─ Admin (가맹점) [선택]
-
-Form:
-  ├─ 기안서 작성 (LEAVE, BUSINESS_TRIP, GENERAL)
-  ├─ 사원 정보 수정
-  ├─ 회의 예약
-  └─ 게시글 작성
+npm run check-all   # 모든 검사 통과 확인
+npm run build       # 빌드 성공 확인
 ```
+
+💡 **상세 규칙은 아래 개발 가이드 문서들을 참조한다.**
+
+## **10. 개발 가이드 문서**
 

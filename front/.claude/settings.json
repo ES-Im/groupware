@@ -1,0 +1,32 @@
+{
+    "permissions": {
+        "allow": [
+        ]
+    },
+    "hooks": {
+        "Notification": [
+            {
+                "matcher": "*",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"$CLAUDE_PROJECT_DIR/.claude/hooks/notify-slack.ps1\" -EventType Notification",
+                        "timeout": 10
+                    }
+                ]
+            }
+        ],
+        "Stop": [
+            {
+                "matcher": "*",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"$CLAUDE_PROJECT_DIR/.claude/hooks/notify-slack.ps1\" -EventType Stop",
+                        "timeout": 10
+                    }
+                ]
+            }
+        ]
+    }
+}
