@@ -2,6 +2,7 @@ package com.haruon.groupware.adapter.webapi.exception;
 
 import com.haruon.groupware.adapter.webapi.exception.auth.InvalidLoginException;
 import com.haruon.groupware.application.exception.ApplicationException;
+import com.haruon.groupware.application.exception.file.FileSizeLimitExceededException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +12,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 @Slf4j
 @RestControllerAdvice
@@ -50,12 +52,26 @@ public class GlobalExceptionHandler {
 
         log.warn("[BadCredentialsException] message={}, className={}",
                 ex.getMessage(),
-                ex.getClass().getName()
+                ex.getClass().getSimpleName()
         );
 
         return ResponseEntity
                 .status(e.getErrorCode().getStatus())
                 .body(ErrorResponse.from(e.getErrorCode()));
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ErrorResponse> handleMaxUploadSizeExceeds(MaxUploadSizeExceededException e) {
+        log.warn("[multipart max upload size exceeded] message={}, className={}",
+                e.getMessage(),
+                e.getClass().getSimpleName()
+        );
+
+        FileSizeLimitExceededException ex = new FileSizeLimitExceededException();
+
+        return ResponseEntity
+                .status(ex.getErrorCode().getStatus())
+                .body(ErrorResponse.from(ex.getErrorCode()));
     }
 
     //todo - 운영환경에서는 지우기
