@@ -8,6 +8,9 @@
 
 ## 🗺️ 개요
 
+**📅 최종 업데이트**: 2026-07-06
+**📊 진행 상황**: 7/17 Tasks 완료 (41%) — M0 ✅ / M1 대기 / M2 대기 / M3 대기
+
 - **전략**: walking-skeleton-first — 이 PRD 자체가 "정답 템플릿" 골격이므로, 배관(M0)을 먼저 세우고 그 위에 인증(M1)·조회(M2)·mutation(M3) 세로 슬라이스를 순서대로 관통시킨다.
 - **핵심 목표(PRD 재확인)**: login → 인터셉터(JWT 부착 / 401·`ROLE_002` → reissue → 원요청 재시도) → protected route → 레이아웃 셸 배관을, 대표 도메인 EMP(목록/상세/생성/mutation 1개)로 **실제 작동 증명**.
 - **범위 경계**: PRD "MVP 이후 기능(제외)"은 로드맵 범위 밖 → §📦 백로그 참조로만 표기(태스크화 금지).
@@ -33,20 +36,20 @@ M0 아키텍처 배관 (Walking Skeleton, §A·§B)
 
 ## 🚩 마일스톤 & 태스크
 
-### M0 — 아키텍처 배관 (Walking Skeleton) · 근거: PRD §A, §A-7
+### M0 — 아키텍처 배관 (Walking Skeleton) ✅ · 근거: PRD §A, §A-7
 
 > 목표: 이후 모든 도메인이 **그대로 복제**할 배관 확정(PRD가 명시한 "정답 템플릿").
 > 완료 정의: 빈 보호 라우트 하나가 인터셉터·가드·(가짜)토큰·셸을 실제로 통과해 렌더된다.
 
-| Task | 설명 | 근거(PRD) | Depends-on | Done 조건 |
-|---|---|---|---|---|
-| **T0.1** | `shared/api/client.ts` 단일 axios 인스턴스 + 인터셉터 배선(요청: 인메모리 토큰 시 `Authorization` 부착 / 응답: 401 && `ROLE_002` && 미재시도 && 비-reissue → reissue 1회 → 원요청 재시도, `_retried` 마킹, 단일 in-flight reissue 프라미스 공유) | §A-1 | — | 401·`ROLE_002`→reissue→원요청 재시도 경로 및 재귀 금지가 동작 |
-| **T0.2** | 에러 정규화 유틸 + 에러코드→UI 매핑 표준 헬퍼(폼 `setError` / 토스트 / 이동 분기를 호출부가 아닌 헬퍼가 담당) | §A-2 | T0.1 | `error-response.md` 구조 그대로 파싱, 표의 6개 분기 헬퍼 존재 |
-| **T0.3** | `QueryClient` 기본 방침(retry 최소화·401은 인터셉터 관할, staleTime 짧게) + feature별 `xxxKeys` queryKey 팩토리 컨벤션 | §A-3 | — (T0.1과 병렬) | QueryClient 프로바이더 마운트, `employeeKeys`/`departmentKeys` 팩토리 export |
-| **T0.4** | `features/auth/store/authStore.ts` zustand 스토어(`accessToken` 인메모리·영속 금지 / `user`·`roles`(ROLE_ 접두어 제거)·`status`) + 액션 `setToken/setUser/clear/bootstrap` | §A-4 | T0.1 | 토큰 인메모리 저장·clear·roles 정규화 동작(bootstrap 본체는 T1.4에서 완성) |
-| **T0.5** | Router 트리(`createBrowserRouter`) + `ProtectedRoute`(미인증→로그인 리디렉션, 복원 중 로딩) + role 전개 헬퍼 `hasRequiredRole(userRoles, minRole)` | §A-6 | T0.4 | 미인증 상태에서 보호 라우트 접근 시 로그인으로 리디렉션 |
-| **T0.6** | 폴더/피처 컨벤션 스캐폴딩(`app/`·`features/{auth,employee}/{api,components,pages,model}`·`shared/{api,lib,components,ui}`) | §A-7 | — (병렬) | PRD §A-7 트리 그대로 생성, 들여쓰기 2칸·네이밍 규약 적용 |
-| **T0.7** | 공통 레이아웃 셸(Sidebar/Header/Footer 3영역, shadcn 기본 토큰·커스텀 팔레트 없음)을 부모 라우트로 배치, 보호 페이지를 자식 라우트로 중첩 | §B, §A-6 | T0.5, T0.6 | 셸이 부모 라우트로 렌더, 빈 자식 라우트가 셸 안에 표시(사이드바 항목은 M1에서 실데이터로 연결) |
+| Task | 설명 | 근거(PRD) | Depends-on | Done 조건 | 중요도 | 복잡도 | 완료 여부 |
+|---|---|---|---|---|---|---|---|
+| **T0.1** | `shared/api/client.ts` 단일 axios 인스턴스 + 인터셉터 배선(요청: 인메모리 토큰 시 `Authorization` 부착 / 응답: 401 && `ROLE_002` && 미재시도 && 비-reissue → reissue 1회 → 원요청 재시도, `_retried` 마킹, 단일 in-flight reissue 프라미스 공유) | §A-1 | — | 401·`ROLE_002`→reissue→원요청 재시도 경로 및 재귀 금지가 동작 | | | ☑ |
+| **T0.2** | 에러 정규화 유틸 + 에러코드→UI 매핑 표준 헬퍼(폼 `setError` / 토스트 / 이동 분기를 호출부가 아닌 헬퍼가 담당) | §A-2 | T0.1 | `error-response.md` 구조 그대로 파싱, 표의 6개 분기 헬퍼 존재 | | | ☑ |
+| **T0.3** | `QueryClient` 기본 방침(retry 최소화·401은 인터셉터 관할, staleTime 짧게) + feature별 `xxxKeys` queryKey 팩토리 컨벤션 | §A-3 | — (T0.1과 병렬) | QueryClient 프로바이더 마운트, `employeeKeys`/`departmentKeys` 팩토리 export | | | ☑ |
+| **T0.4** | `features/auth/store/authStore.ts` zustand 스토어(`accessToken` 인메모리·영속 금지 / `user`·`roles`(ROLE_ 접두어 제거)·`status`) + 액션 `setToken/setUser/clear/bootstrap` | §A-4 | T0.1 | 토큰 인메모리 저장·clear·roles 정규화 동작(bootstrap 본체는 T1.4에서 완성) | | | ☑ |
+| **T0.5** | Router 트리(`createBrowserRouter`) + `ProtectedRoute`(미인증→로그인 리디렉션, 복원 중 로딩) + role 전개 헬퍼 `hasRequiredRole(userRoles, minRole)` | §A-6 | T0.4 | 미인증 상태에서 보호 라우트 접근 시 로그인으로 리디렉션 | | | ☑ |
+| **T0.6** | 폴더/피처 컨벤션 스캐폴딩(`app/`·`features/{auth,employee}/{api,components,pages,model}`·`shared/{api,lib,components,ui}`) | §A-7 | — (병렬) | PRD §A-7 트리 그대로 생성, 들여쓰기 2칸·네이밍 규약 적용 | | | ☑ |
+| **T0.7** | 공통 레이아웃 셸(Sidebar/Header/Footer 3영역, shadcn 기본 토큰·커스텀 팔레트 없음)을 부모 라우트로 배치, 보호 페이지를 자식 라우트로 중첩 | §B, §A-6 | T0.5, T0.6 | 셸이 부모 라우트로 렌더, 빈 자식 라우트가 셸 안에 표시(사이드바 항목은 M1에서 실데이터로 연결) | | | ☑ |
 
 > M0 병렬 지점: **T0.1 · T0.3 · T0.6** 은 상호 독립 → 동시 착수 가능.
 
@@ -57,16 +60,19 @@ M0 아키텍처 배관 (Walking Skeleton, §A·§B)
 > 목표: 로그인으로 실제 토큰을 획득해 보호 라우트·셸을 관통시키고, 부팅 세션 복원과 로그아웃까지 인증 생애주기를 닫는다. 여정 진입 순서(로그인 → 홈 셸)를 그대로 따른다.
 > 완료 정의: 로그인 → 홈 셸 진입 → 새로고침 후 세션 복원 → 로그아웃까지 왕복이 동작한다.
 
-| Task | 설명 | 근거(PRD) | Depends-on | Done 조건 |
-|---|---|---|---|---|
-| **T1.1** | RHF + `@hookform/resolvers/zod` 폼 표준 패턴 확립(클라 사전검증 → 서버 400 `VALIDATION_ERROR`/`COMMON_00x` `message`를 해당 필드 `setError` 매핑 → 특정 불가 시 폼 전역/토스트 폴백). 최초 소비처는 로그인 폼 | §A-5 | T0.2 | 표준 폼 훅/에러매핑 유틸이 로그인 폼에 적용됨 |
-| **T1.2** | 로그인 페이지: 로그인 폼(RHF+zod) + 로그인 mutation(`LOGIN`) → accessToken 인메모리 저장, 성공 시 홈 이동, `AUTH_001`(401) → **폼 에러**(reissue 미진입) | F010, 로그인 페이지 | T0.4, T1.1 | 성공→홈 리디렉션, `AUTH_001`→폼 에러 유지, "회원가입" 링크 노출 |
-| **T1.3** | 내 정보(me) 조회 훅 `useMeQuery()` → `employeeKeys.me()` / `RETRIEVE_ME_INFO`. 헤더 사용자 표시·세션 복원·M2 내 정보 조회가 공유하는 기반 훅 | F003, §A-3 | T0.3 | `RETRIEVE_ME_INFO` 호출로 본인 정보 반환, `employeeKeys.me()` 키 사용 |
-| **T1.4** | 세션 복원 완성: `authStore.bootstrap()` = 부팅/새로고침 시 reissue 1회(`REISSUE_TOKEN`) → 성공 시 `useMeQuery`로 사용자 복원·원래 페이지 유지 / 실패(`ROLE_002`) → 로그인 리디렉션. 앱 부팅 훅으로 전역 배선 | F011, §A-4, §A-6 | T0.4, T0.5, T1.3 | 새로고침 후 인메모리 토큰 소실 → reissue 1회로 복원, 실패 시 로그인 이동 |
-| **T1.5** | 회원가입 흐름(**단일 `REGISTER`** = F004 EMP create ≡ F013 auth 회원가입): 회원가입 페이지(RHF+zod, 서버검증 에러매핑) → 성공(204, 미승인) → 승인 대기 안내 화면(승인 전 이용 범위는 `@../docs/도메인모델.md` 참조, "로그인으로" 링크). 비인증 라우트(셸 밖) | F004/F013, 회원가입·승인 대기 페이지 | T0.5, T1.1 | 가입 성공→승인 대기 화면, 검증 실패→폼 필드 에러, 그 외→에러 토스트 |
-| **T1.6** | 셸 헤더 실연결: 로그인 사용자 표시(`useMeQuery`, 클릭→내 정보 조회) + **로그아웃 버튼**(`LOGOUT` → refreshToken 쿠키 만료 + 인메모리 clear → 로그인 이동). 홈(대시보드 셸) 진입점을 세션 복원 검증 지점으로 확정 | F012, F003, F011, §B, 홈 페이지 | T0.7, T1.3, T1.4 | 헤더에 사용자명·로그아웃 표시, 로그아웃 시 상태 clear+로그인 이동, 홈 렌더 |
+| Task | 설명 | 근거(PRD) | Depends-on | Done 조건 | 중요도 | 복잡도 | 완료 여부 |
+|---|---|---|---|---|---|---|---|
+| **T1.1** | RHF + `@hookform/resolvers/zod` 폼 표준 패턴 확립(클라 사전검증 → 서버 400 `VALIDATION_ERROR`/`COMMON_00x` `message`를 해당 필드 `setError` 매핑 → 특정 불가 시 폼 전역/토스트 폴백). 최초 소비처는 로그인 폼 | §A-5 | T0.2 | 표준 폼 훅/에러매핑 유틸이 로그인 폼에 적용됨 | 8 | 4 | ☐ |
+| **T1.2** | 로그인 페이지: 로그인 폼(RHF+zod) + 로그인 mutation(`LOGIN`) → accessToken 인메모리 저장, 성공 시 홈 이동, `AUTH_001`(401) → **폼 에러**(reissue 미진입) | F010, 로그인 페이지 | T0.4, T1.1 | 성공→홈 리디렉션, `AUTH_001`→폼 에러 유지, "회원가입" 링크 노출 | 7 | 5 | ☐ |
+| **T1.3** | 내 정보(me) 조회 훅 `useMeQuery()` → `employeeKeys.me()` / `RETRIEVE_ME_INFO`. 헤더 사용자 표시·세션 복원·M2 내 정보 조회가 공유하는 기반 훅 | F003, §A-3 | T0.3 | `RETRIEVE_ME_INFO` 호출로 본인 정보 반환, `employeeKeys.me()` 키 사용 | 9 | 3 | ☐ |
+| **T1.4** | 세션 복원 완성: `authStore.bootstrap()` = 부팅/새로고침 시 reissue 1회(`REISSUE_TOKEN`) → 성공 시 `useMeQuery`로 사용자 복원·원래 페이지 유지 / 실패(`ROLE_002`) → 로그인 리디렉션. 앱 부팅 훅으로 전역 배선 | F011, §A-4, §A-6 | T0.4, T0.5, T1.3 | 새로고침 후 인메모리 토큰 소실 → reissue 1회로 복원, 실패 시 로그인 이동 | 7 | 6 | ☐ |
+| **T1.5** | 회원가입 흐름(**단일 `REGISTER`** = F004 EMP create ≡ F013 auth 회원가입): 회원가입 페이지(RHF+zod, 서버검증 에러매핑) → 성공(204, 미승인) → 승인 대기 안내 화면(승인 전 이용 범위는 `@../docs/도메인모델.md` 참조, "로그인으로" 링크). 비인증 라우트(셸 밖) | F004/F013, 회원가입·승인 대기 페이지 | T0.5, T1.1 | 가입 성공→승인 대기 화면, 검증 실패→폼 필드 에러, 그 외→에러 토스트 | 3 | 5 | ☐ |
+| **T1.6** | 셸 헤더 실연결: 로그인 사용자 표시(`useMeQuery`, 클릭→내 정보 조회) + **로그아웃 버튼**(`LOGOUT` → refreshToken 쿠키 만료 + 인메모리 clear → 로그인 이동). 홈(대시보드 셸) 진입점을 세션 복원 검증 지점으로 확정 | F012, F003, F011, §B, 홈 페이지 | T0.7, T1.3, T1.4 | 헤더에 사용자명·로그아웃 표시, 로그아웃 시 상태 clear+로그인 이동, 홈 렌더 | 6 | 5 | ☐ |
 
 > M1 병렬 지점: **T1.5(회원가입, 비인증 라우트)** 는 T1.1 위에서 T1.2~T1.4(인증 라우트 체인)와 **독립 병렬** 가능.
+>
+> **M1 split 판단(복잡도·중요도)**: 전 태스크 복잡도 < 7 → **split 없음(전부 단일 task 유지)**. 근거는 각 태스크의 연관 기능ID 1개 이하(LOGIN·RETRIEVE_ME_INFO·REISSUE_TOKEN·REGISTER·LOGOUT)·auth 단일 도메인·실시간/파일 업로드 미포함.
+> **실행 순서(의존성 위상 + 중요도 우선순위)**: T1.3(중요도9) → T1.1(8) → T1.2(로그인) → T1.4(세션복원) → T1.6(헤더) → T1.5(회원가입, 리프·병렬 허용). T1.3·T1.1은 M0 배관 위에서 선착수, T1.5는 T1.1 이후 인증 체인과 병렬 착수 가능.
 
 ---
 
@@ -75,11 +81,11 @@ M0 아키텍처 배관 (Walking Skeleton, §A·§B)
 > 목표: 인증된 셸 위에서 목록→상세 조회 세로 슬라이스를 완성한다. 여정 순서(부서 멤버 목록 → 사원 상세 → 내 정보 조회)를 따른다.
 > 완료 정의: 사이드바 목록 → 행 클릭 상세 → 내 정보 조회까지 조회 동선이 동작한다.
 
-| Task | 설명 | 근거(PRD) | Depends-on | Done 조건 |
-|---|---|---|---|---|
-| **T2.1** | 부서 멤버 목록 페이지: `useDepartmentMembersQuery(deptId)` → `departmentKeys.members(deptId)` / `DEPT_MEMBERS`. `@tanstack/react-table`로 목록 렌더(**1페이지만·페이징 UI 제외**, 메타는 응답에 존재), 행 클릭→사원 상세, 조회 실패→토스트/`*_NOT_FOUND_*` not-found UX | F001, 부서 멤버 목록 페이지 | T0.3, T0.7, T1.6 | 부서 멤버 목록 렌더, 행 클릭 시 상세 라우트 이동 |
-| **T2.2** | 사원 상세 페이지(타 사원): `useEmployeeQuery(empId)` → `employeeKeys.detail(empId)` / `RETRIEVE_EMP_INFO`. `RETRIEVE_ME_INFO`와 **동일 응답 스키마** → 조회 컴포넌트·타입 재사용. 미존재(`EMP_001` 등 `*_NOT_FOUND_*`)→not-found UX, 403→권한 부족 UX. `activeFiles`는 필드만 존재·렌더링 최소화(파일 UI 제외) | F002, 사원 상세 페이지 | T2.1 | 상세 단건 조회 렌더, not-found·403 분기 UX 존재, me와 컴포넌트 재사용 |
-| **T2.3** | 내 정보 조회 페이지(본인 상세): `useMeQuery`(T1.3) 재사용으로 본인 상세 렌더, 사이드바 "내 정보"·헤더 사용자명에서 진입, "수정" 버튼(→ M3). 본인 상세는 `RETRIEVE_ME_INFO` 사용(`/api/auth/me` 미존재) | F003, 내 정보 조회 페이지 | T1.3, T2.2 | 본인 정보 렌더(상세와 동일 컴포넌트 재사용), "수정" 버튼 노출 |
+| Task | 설명 | 근거(PRD) | Depends-on | Done 조건 | 중요도 | 복잡도 | 완료 여부 |
+|---|---|---|---|---|---|---|---|
+| **T2.1** | 부서 멤버 목록 페이지: `useDepartmentMembersQuery(deptId)` → `departmentKeys.members(deptId)` / `DEPT_MEMBERS`. `@tanstack/react-table`로 목록 렌더(**1페이지만·페이징 UI 제외**, 메타는 응답에 존재), 행 클릭→사원 상세, 조회 실패→토스트/`*_NOT_FOUND_*` not-found UX | F001, 부서 멤버 목록 페이지 | T0.3, T0.7, T1.6 | 부서 멤버 목록 렌더, 행 클릭 시 상세 라우트 이동 | | | |
+| **T2.2** | 사원 상세 페이지(타 사원): `useEmployeeQuery(empId)` → `employeeKeys.detail(empId)` / `RETRIEVE_EMP_INFO`. `RETRIEVE_ME_INFO`와 **동일 응답 스키마** → 조회 컴포넌트·타입 재사용. 미존재(`EMP_001` 등 `*_NOT_FOUND_*`)→not-found UX, 403→권한 부족 UX. `activeFiles`는 필드만 존재·렌더링 최소화(파일 UI 제외) | F002, 사원 상세 페이지 | T2.1 | 상세 단건 조회 렌더, not-found·403 분기 UX 존재, me와 컴포넌트 재사용 | | | |
+| **T2.3** | 내 정보 조회 페이지(본인 상세): `useMeQuery`(T1.3) 재사용으로 본인 상세 렌더, 사이드바 "내 정보"·헤더 사용자명에서 진입, "수정" 버튼(→ M3). 본인 상세는 `RETRIEVE_ME_INFO` 사용(`/api/auth/me` 미존재) | F003, 내 정보 조회 페이지 | T1.3, T2.2 | 본인 정보 렌더(상세와 동일 컴포넌트 재사용), "수정" 버튼 노출 | | | |
 
 > M2 병렬 지점: T2.1과 T2.2는 데이터 동선상 T2.1 선행 권장이나, **상세 조회 컴포넌트/타입(T2.2 코어)** 은 목록과 독립 개발 가능 → 조회 컴포넌트 선개발 후 목록에서 연결하는 병렬도 허용.
 
@@ -90,9 +96,9 @@ M0 아키텍처 배관 (Walking Skeleton, §A·§B)
 > 목표: RHF+zod+**서버 검증 에러매핑**과 mutation 성공 invalidate를 관통 증명하는 대표 mutation 하나를 완성한다. 여정상 마지막(내 정보 조회 → 수정 → 재조회).
 > 완료 정의: 내 정보 수정 저장(204) → `employeeKeys.me()` invalidate → 내 정보 조회 재검증까지 동작한다.
 
-| Task | 설명 | 근거(PRD) | Depends-on | Done 조건 |
-|---|---|---|---|---|
-| **T3.1** | 내 정보 수정 페이지 + `useUpdateMeMutation()`(`UPDATE_SELF_INFO`): RHF+zod 폼, 저장 성공(204) → `onSuccess`에서 `employeeKeys.me()` invalidate → 내 정보 조회 재조회, 검증 실패(`VALIDATION_ERROR`/`COMMON_00x`)→폼 필드 에러, 그 외→에러 토스트 | F005, 내 정보 수정 페이지 | T1.1, T2.3 | 저장→204→me invalidate→조회 재검증, 서버 검증 에러가 해당 필드로 매핑 |
+| Task | 설명 | 근거(PRD) | Depends-on | Done 조건 | 중요도 | 복잡도 | 완료 여부 |
+|---|---|---|---|---|---|---|---|
+| **T3.1** | 내 정보 수정 페이지 + `useUpdateMeMutation()`(`UPDATE_SELF_INFO`): RHF+zod 폼, 저장 성공(204) → `onSuccess`에서 `employeeKeys.me()` invalidate → 내 정보 조회 재조회, 검증 실패(`VALIDATION_ERROR`/`COMMON_00x`)→폼 필드 에러, 그 외→에러 토스트 | F005, 내 정보 수정 페이지 | T1.1, T2.3 | 저장→204→me invalidate→조회 재검증, 서버 검증 에러가 해당 필드로 매핑 | | | |
 
 > 필드 상세(`UpdateSelfInfoRequest`의 `extensionNo` `NNN-NNNN`·`newRawPassword` 제약 등)는 PRD §참조 계약 매핑 및 `generated-snippets/UPDATE_SELF_INFO/`를 zod 스키마 근거로 사용(이 로드맵에서 재설계하지 않음).
 
