@@ -6,3 +6,32 @@
 
 # MCP 서버 설정 (context7 API 키 등 민감정보 포함 — 커밋 금지)
 .mcp.json
+
+# 빌드 산출물
+node_modules
+dist
+dist-ssr
+*.local
+
+# 에디터
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# 로그
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Playwright MCP 디버그 산출물 (콘솔 로그·스크린샷)
+.playwright-mcp/
