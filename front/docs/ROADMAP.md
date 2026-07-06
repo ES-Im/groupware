@@ -9,7 +9,7 @@
 ## 🗺️ 개요
 
 **📅 최종 업데이트**: 2026-07-06
-**📊 진행 상황**: 16/17 Tasks 완료 (94%) — M0 ✅ / M1 ✅ / M2 ✅ / M3 대기
+**📊 진행 상황**: 17/17 Tasks 완료 (100%) — M0 ✅ / M1 ✅ / M2 ✅ / M3 ✅
 
 - **전략**: walking-skeleton-first — 이 PRD 자체가 "정답 템플릿" 골격이므로, 배관(M0)을 먼저 세우고 그 위에 인증(M1)·조회(M2)·mutation(M3) 세로 슬라이스를 순서대로 관통시킨다.
 - **핵심 목표(PRD 재확인)**: login → 인터셉터(JWT 부착 / 401·`ROLE_002` → reissue → 원요청 재시도) → protected route → 레이아웃 셸 배관을, 대표 도메인 EMP(목록/상세/생성/mutation 1개)로 **실제 작동 증명**.
@@ -95,14 +95,14 @@ M0 아키텍처 배관 (Walking Skeleton, §A·§B)
 
 ---
 
-### M3 — 대표 mutation 슬라이스 · 근거: PRD F005, §A-3, §A-5
+### M3 — 대표 mutation 슬라이스 ✅ · 근거: PRD F005, §A-3, §A-5
 
 > 목표: RHF+zod+**서버 검증 에러매핑**과 mutation 성공 invalidate를 관통 증명하는 대표 mutation 하나를 완성한다. 여정상 마지막(내 정보 조회 → 수정 → 재조회).
 > 완료 정의: 내 정보 수정 저장(204) → `employeeKeys.me()` invalidate → 내 정보 조회 재검증까지 동작한다.
 
 | Task | 설명 | 근거(PRD) | Depends-on | Done 조건 | 중요도 | 복잡도 | 완료 여부 |
 |---|---|---|---|---|---|---|---|
-| **T3.1** | 내 정보 수정 페이지 + `useUpdateMeMutation()`(`UPDATE_SELF_INFO`): RHF+zod 폼, 저장 성공(204) → `onSuccess`에서 `employeeKeys.me()` invalidate → 내 정보 조회 재조회, 검증 실패(`VALIDATION_ERROR`/`COMMON_00x`)→폼 필드 에러, 그 외→에러 토스트 | F005, 내 정보 수정 페이지 | T1.1, T2.3 | 저장→204→me invalidate→조회 재검증, 서버 검증 에러가 해당 필드로 매핑 | 4 | 4 | ☐ |
+| **T3.1** | 내 정보 수정 페이지 + `useUpdateMeMutation()`(`UPDATE_SELF_INFO`): RHF+zod 폼, 저장 성공(204) → `onSuccess`에서 `employeeKeys.me()` invalidate → 내 정보 조회 재조회, 검증 실패(`VALIDATION_ERROR`/`COMMON_00x`)→폼 필드 에러, 그 외→에러 토스트 | F005, 내 정보 수정 페이지 | T1.1, T2.3 | 저장→204→me invalidate→조회 재검증, 서버 검증 에러가 해당 필드로 매핑 | 4 | 4 | ☑ |
 
 > **M3 split 판단(복잡도·중요도)**: T3.1은 연관 기능ID 1개(`UPDATE_SELF_INFO`, `generated-snippets/UPDATE_SELF_INFO/request-fields.adoc` 실측상 `extensionNo`·`newRawPassword` 2필드뿐)·단일 도메인(employee)·실시간(STOMP)/파일 업로드 미포함이며, 신규 산출물(zod 스키마·mutation 함수·폼 컴포넌트·페이지·라우트)이 전부 기존 인프라(T1.1의 `useZodForm`/`submitWithErrorMapping`, T0.2의 `handleApiError`, T0.3·T1.3의 `employeeKeys.me()`/`useMeQuery`, T1.5 `RegisterPage` 컨테이너+폼 분리 패턴, T2.2 `EmployeeInfoView`)를 얕게 복제하는 수준이라 복잡도 4(<7) → **split 없음(단일 task 유지)**. 중요도는 이 태스크를 Depends-on으로 참조하는 후행 태스크가 로드맵에 없는(§역참조 체크리스트상 최종 리프) 점을 근거로 4로 산정한다 — "여정상 마지막"이라는 서술은 Done 조건의 근거일 뿐 중요도(후행 의존) 산정 기준과는 별개다.
 > **실행 순서**: M3는 T3.1 단일 태스크. 선행(T1.1·T2.3) 완료 후 즉시 착수한다.
