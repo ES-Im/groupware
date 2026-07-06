@@ -10,7 +10,26 @@
       "Read(//c/Users/eunse/localRep/groupware/back/.claude/**)",
       "Read(//c/Users/eunse/localRep/groupware/docs/**)",
       "Read(//c/Users/eunse/localRep/groupware/**)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "mcp__shrimp-task-manager__plan_task",
+      "mcp__shrimp-task-manager__analyze_task",
+      "mcp__shrimp-task-manager__reflect_task",
+      "mcp__shrimp-task-manager__split_tasks",
+      "Bash(npm view *)",
+      "Bash(npm install *)",
+      "Bash(node *)",
+      "mcp__shrimp-task-manager__verify_task",
+      "mcp__shrimp-task-manager__get_task_detail",
+      "mcp__shrimp-task-manager__list_tasks",
+      "mcp__shrimp-task-manager__query_task",
+      "mcp__shrimp-task-manager__execute_task",
+      "Bash(npx tsc *)",
+      "Bash(npx shadcn *)",
+      "Bash(npm uninstall *)",
+      "Bash(rm -f src/App.tsx src/App.css src/assets/hero.png src/assets/react.svg src/assets/vite.svg)",
+      "Bash(rmdir src/assets)",
+      "Bash(npm run *)",
+      "mcp__shrimp-task-manager__process_thought"
     ]
   },
   "enabledMcpjsonServers": [
