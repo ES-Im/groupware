@@ -83,11 +83,15 @@ M0 아키텍처 배관 (Walking Skeleton, §A·§B)
 
 | Task | 설명 | 근거(PRD) | Depends-on | Done 조건 | 중요도 | 복잡도 | 완료 여부 |
 |---|---|---|---|---|---|---|---|
-| **T2.1** | 부서 멤버 목록 페이지: `useDepartmentMembersQuery(deptId)` → `departmentKeys.members(deptId)` / `DEPT_MEMBERS`. `@tanstack/react-table`로 목록 렌더(**1페이지만·페이징 UI 제외**, 메타는 응답에 존재), 행 클릭→사원 상세, 조회 실패→토스트/`*_NOT_FOUND_*` not-found UX | F001, 부서 멤버 목록 페이지 | T0.3, T0.7, T1.6 | 부서 멤버 목록 렌더, 행 클릭 시 상세 라우트 이동 | | | |
-| **T2.2** | 사원 상세 페이지(타 사원): `useEmployeeQuery(empId)` → `employeeKeys.detail(empId)` / `RETRIEVE_EMP_INFO`. `RETRIEVE_ME_INFO`와 **동일 응답 스키마** → 조회 컴포넌트·타입 재사용. 미존재(`EMP_001` 등 `*_NOT_FOUND_*`)→not-found UX, 403→권한 부족 UX. `activeFiles`는 필드만 존재·렌더링 최소화(파일 UI 제외) | F002, 사원 상세 페이지 | T2.1 | 상세 단건 조회 렌더, not-found·403 분기 UX 존재, me와 컴포넌트 재사용 | | | |
-| **T2.3** | 내 정보 조회 페이지(본인 상세): `useMeQuery`(T1.3) 재사용으로 본인 상세 렌더, 사이드바 "내 정보"·헤더 사용자명에서 진입, "수정" 버튼(→ M3). 본인 상세는 `RETRIEVE_ME_INFO` 사용(`/api/auth/me` 미존재) | F003, 내 정보 조회 페이지 | T1.3, T2.2 | 본인 정보 렌더(상세와 동일 컴포넌트 재사용), "수정" 버튼 노출 | | | |
+| **T2.1** | 부서 멤버 목록 페이지: `useDepartmentMembersQuery(deptId)` → `departmentKeys.members(deptId)` / `DEPT_MEMBERS`. **deptId는 본인 소속 부서 자동 진입**(`useMeQuery`의 `currentDepts`에서 도출, 별도 선택 UI 없음 — §⚠️ 리스크 5번 확정). `@tanstack/react-table`로 목록 렌더(**1페이지만·페이징 UI 제외**, 메타는 응답에 존재), 행 클릭→사원 상세, 조회 실패→토스트/`*_NOT_FOUND_*` not-found UX | F001, 부서 멤버 목록 페이지 | T0.3, T0.7, T1.6 | 부서 멤버 목록 렌더, 행 클릭 시 상세 라우트 이동 | 8 | 7 | ☐ |
+| T2.1-a | (데이터 계층) `departmentKeys` 팩토리·`getDepartmentMembers`·`useDepartmentMembersQuery` 신설 + `getPrimaryDeptId(currentDepts)`로 본인 소속 deptId 자동 도출(isPrimary 우선, 없으면 첫 항목 폴백) | F001, §A-3 | T0.3, T1.3 | 훅 호출 시 `DEPT_MEMBERS` 응답이 `departmentKeys.members(deptId)`에 캐시, deptId 도출 규칙 동작 | 7 | 4 | ☐ |
+| T2.1-b | (UI 계층) 목록 페이지(react-table 최초 도입) + router.tsx 라우트 신설(목록/`employees/:empId` placeholder) + `LayoutShell` 사이드바 3항목(홈/부서 멤버 목록/내 정보) 실배선 + 행 클릭 이동 + not-found/토스트 분기 | F001, §B | T2.1-a, T0.7, T1.6 | 목록 자동 렌더, 행 클릭 이동, 사이드바 3항목 동작, 에러 분기 노출 | 8 | 6 | ☐ |
+| **T2.2** | 사원 상세 페이지(타 사원): `useEmployeeQuery(empId)` → `employeeKeys.detail(empId)`(기존) / `RETRIEVE_EMP_INFO`. `RETRIEVE_ME_INFO`와 **동일 응답 스키마**(스니펫 실측 확인) → `model/me.ts`를 `EmployeeInfoResponse`로 일반화 후 공유 컴포넌트 `EmployeeInfoView` 신설. 미존재(`EMP_001` 등 `*_NOT_FOUND_*`)→not-found UX, 403→권한 부족 UX. `activeFiles`는 필드만 존재·렌더링 완전 숨김(파일 UI 제외) | F002, 사원 상세 페이지 | T2.1-b | 상세 단건 조회 렌더, not-found·403 분기 UX 존재, me와 컴포넌트 재사용 | 6 | 5 | ☐ |
+| **T2.3** | 내 정보 조회 페이지(본인 상세): `useMeQuery`(T1.3, 완료) + T2.2의 `EmployeeInfoView` 재사용으로 본인 상세 렌더, `/me` 라우트 실연결(사이드바·헤더 링크는 T2.1-b에서 배선 완료), "수정" 버튼 노출(→ M3, 페이지는 미구현). 본인 상세는 `RETRIEVE_ME_INFO` 사용(`/api/auth/me` 미존재) | F003, 내 정보 조회 페이지 | T1.3, T2.2 | 본인 정보 렌더(상세와 동일 컴포넌트 재사용), "수정" 버튼 노출 | 7 | 3 | ☐ |
 
-> M2 병렬 지점: T2.1과 T2.2는 데이터 동선상 T2.1 선행 권장이나, **상세 조회 컴포넌트/타입(T2.2 코어)** 은 목록과 독립 개발 가능 → 조회 컴포넌트 선개발 후 목록에서 연결하는 병렬도 허용.
+> **M2 split 판단(복잡도·중요도)**: T2.1은 신규 department 도메인 슬라이스 신설 + `@tanstack/react-table` 최초 도입 + `LayoutShell`(공유 셸) 사이드바 실배선 + `router.tsx` 라우트 신설이 겹쳐 복잡도 7로 판정 → **의존성 순서 축(데이터 계층 → UI 계층)으로 split**(T2.1-a/T2.1-b). T2.2·T2.3은 각각 연관 기능ID 1개(`RETRIEVE_EMP_INFO`/`RETRIEVE_ME_INFO`)·단일 도메인(employee)·실시간·파일 업로드 미포함이며 기존 훅/타입(`employeeKeys.detail`, `useMeQuery`) 재사용 비중이 커 복잡도 < 7 → **split 없음(단일 task 유지)**.
+> **실행 순서(의존성 위상 우선, 동순위 내 중요도)**: T2.1-a → T2.1-b → T2.2 → T2.3(단일 선형 체인이라 전 구간 위상 순서가 곧 실행 순서). T2.1-b(중요도8)가 T2.2·T2.3의 라우팅/셸 인프라를 함께 확정하므로 M2 내 최고 중요도.
+> M2 병렬 지점: 위 split로 인해 T2.1 내부는 직렬(a→b)로 확정되며, T2.2의 상세 조회 컴포넌트 코어를 목록과 완전 독립 개발하는 기존 병렬안은 T2.1-b가 라우트/셸 배선까지 겸하므로 채택하지 않는다(직렬 진행).
 
 ---
 
@@ -108,7 +112,7 @@ M0 아키텍처 배관 (Walking Skeleton, §A·§B)
 
 - **M0**: T0.1 · T0.3 · T0.6 상호 독립 → 동시 착수.
 - **M1**: T1.5(회원가입·비인증 라우트)는 T1.2~T1.4(인증 라우트 체인)와 독립 병렬.
-- **M2**: T2.2의 조회 컴포넌트/타입 코어는 목록(T2.1)과 독립 개발 후 연결 가능.
+- **M2**: 없음 — T2.1이 T2.1-a(데이터)/T2.1-b(UI+라우트+셸)로 split되며 T2.1-b가 라우트·셸 배선을 겸해 T2.2·T2.3까지 단일 선형 체인으로 직렬 진행(§M2 표 하단 참조).
 - 마일스톤 경계(M0→M1→M2→M3)는 배관 의존성상 **직렬 유지**를 권장한다(골격이 도메인에 선행).
 
 ---
@@ -121,7 +125,7 @@ PRD가 "구현 시 결정 / 추후 조정"으로 명시적으로 남긴 지점. 
 2. **zod 필드 상세** — 필드 이름 수준만 PRD에 정의. 실제 제약은 `generated-snippets/<기능ID>/` 스니펫 실측을 근거로 확정(추측 금지). 대상: `REGISTER`(empNo 9자리·loginId 8~20·name ≤20·password 규칙), `UPDATE_SELF_INFO`(extensionNo `NNN-NNNN`·newRawPassword 규칙). (T1.1, T1.5, T3.1)
 3. **레이아웃 셸 디자인** (§B) — 스크린샷 없이 텍스트 스펙으로 진행, 추후 디자인 조정 여지. 푸터는 회사명/카피라이트 placeholder. (T0.7, T1.6)
 4. **`activeFiles` 렌더링 범위** (§참조 계약 매핑 주의) — 응답에 필드 존재하나 이번 스코프는 파일 표시/업로드 UI 제외 → "렌더링 최소화"의 구체 수준(완전 숨김 vs 이름만 표기) 확정 필요. (T2.2)
-5. **부서 멤버 목록 `deptId` 출처** — `DEPT_MEMBERS`는 path `deptId` 필요. 이번 스코프에서 어떤 `deptId`로 진입하는지(본인 소속 부서 자동 vs 고정) PRD에 미명시 → 사용자 확인 필요. (T2.1)
+5. ~~**부서 멤버 목록 `deptId` 출처**~~ — **확정됨**: `DEPT_MEMBERS`는 path `deptId` 필요하며, 이번 스코프는 **"본인 소속 부서 자동 진입"** 방식으로 사용자 확인을 거쳐 결정했다. `useMeQuery`(T1.3) 조회 결과의 `currentDepts`에서 `isPrimary===true` 항목을 우선 선택(없으면 첫 항목 폴백)해 `deptId`를 자동 도출, `useDepartmentMembersQuery(deptId)`로 바로 진입한다. 별도 부서 선택 UI는 이번 스코프에 없다. (T2.1-a)
 6. **403(`ROLE_003`) 처리 경로** — 이번 스코프엔 부서 불일치 유발 기능이 없으나, PRD가 "인터셉터 배관 증명을 위해 403 처리 경로는 구현·표준화"를 요구 → T0.2 헬퍼에 403 권한부족 UX 분기를 실기능 없이도 포함. (T0.2, T2.2)
 
 ---
