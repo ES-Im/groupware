@@ -68,8 +68,13 @@ apiClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
  */
 let reissuePromise: Promise<string> | null = null
 
-/** refreshToken 쿠키로 새 accessToken을 재발급받는다(단일 in-flight 공유용). */
-function requestReissue(): Promise<string> {
+/**
+ * refreshToken 쿠키로 새 accessToken을 재발급받는다(단일 in-flight 공유용).
+ * export하는 이유: authStore.bootstrap()(T1.4, 부팅/새로고침 세션 복원)도 동일한 REISSUE_TOKEN
+ * 호출을 수행해야 하는데, 이 in-flight 프라미스를 공유해야 401 인터셉터 경로와 부팅 경로가
+ * 동시에 겹치더라도(이론상) reissue 네트워크 호출이 1회로만 나간다.
+ */
+export function requestReissue(): Promise<string> {
   reissuePromise ??= apiClient
     .post<ReissueResponse>(REISSUE_PATH)
     .then((res) => res.data.accessToken)

@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { requestReissue } from '@/shared/api/client'
 import { clearAccessToken, setAccessToken } from '@/shared/api/tokenStore'
 
 /**
@@ -46,7 +47,15 @@ interface AuthActions {
   setToken: (token: string) => void
   setUser: (user: AuthUser, rawRoles: string[]) => void
   clear: () => void
-  /** 시그니처만 정의한다. 본체(refreshToken 쿠키 기반 세션 복원)는 T1.4에서 구현한다. */
+  /**
+   * 부팅/새로고침 세션 복원(ROADMAP T1.4). REISSUE_TOKEN(`POST /api/auth/reissue`)을 1회
+   * 호출해 refreshToken 쿠키로 새 accessToken을 받아 setToken한다. 실패(주로 ROLE_002: 쿠키
+   * 없음/만료/무효)하면 clear()로 status를 unauthenticated로 확정한다.
+   *
+   * 사용자 정보 복원(useMeQuery)·status=authenticated 전이는 이 액션의 책임이 아니다 — 이
+   * 액션은 store 단독 모듈이라 React Query 훅을 쓸 수 없으므로, 호출부인 부팅 훅
+   * (features/auth/hooks/useBootstrapAuth.ts)이 이 액션 성공 후 이어서 처리한다.
+   */
   bootstrap: () => Promise<void>
 }
 
@@ -86,6 +95,14 @@ export const useAuthStore = create<AuthState & AuthActions>((set) => ({
     set({ ...initialState, status: 'unauthenticated' })
   },
   bootstrap: async () => {
-    // 본체는 T1.4(세션 복원)에서 구현한다.
+    try {
+      const accessToken = await requestReissue()
+      setAccessToken(accessToken)
+      set({ accessToken })
+    } catch {
+      // reissue 실패(대개 ROLE_002: refreshToken 쿠키 없음/만료/무효) → 세션 없음으로 확정.
+      clearAccessToken()
+      set({ ...initialState, status: 'unauthenticated' })
+    }
   },
 }))
