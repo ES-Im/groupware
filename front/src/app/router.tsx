@@ -1,6 +1,9 @@
 import { createBrowserRouter } from 'react-router'
 import { LoginPage } from '@/features/auth/pages/LoginPage'
 import { RegisterPage } from '@/features/auth/pages/RegisterPage'
+import { DepartmentMembersPage } from '@/features/department/pages/DepartmentMembersPage'
+import { EmployeeDetailPage } from '@/features/employee/pages/EmployeeDetailPage'
+import { MyInfoPage } from '@/features/employee/pages/MyInfoPage'
 import { ProtectedRoute } from '@/shared/components/ProtectedRoute'
 import { LayoutShell } from '@/shared/components/LayoutShell'
 
@@ -11,6 +14,9 @@ import { LayoutShell } from '@/shared/components/LayoutShell'
  * 태스크에서 element를 실제 페이지로 교체한다. /login은 T1.2에서 실제 LoginPage로 교체했다.
  * /register는 T1.5(회원가입)에서 RegisterPage로 연결했다 — LoginPage의 기존 링크가 실제로 동작한다.
  * 둘 다 비인증 라우트(셸 밖)이므로 ProtectedRoute로 감싸지 않는다.
+ * /department-members는 T2.1-b에서 DepartmentMembersPage로 연결했다. /employees/:empId는
+ * T2.2에서 EmployeeDetailPage(사원 상세 실페이지)로 교체했다. /me는 T2.3에서 MyInfoPage(내 정보
+ * 조회 페이지)로 연결했다.
  */
 export const router = createBrowserRouter([
   {
@@ -24,6 +30,18 @@ export const router = createBrowserRouter([
       {
         index: true,
         element: <div>홈(placeholder, 인증/사원 도메인 태스크에서 교체)</div>,
+      },
+      {
+        path: 'department-members',
+        element: <DepartmentMembersPage />,
+      },
+      {
+        path: 'employees/:empId',
+        element: <EmployeeDetailPage />,
+      },
+      {
+        path: 'me',
+        element: <MyInfoPage />,
       },
     ],
   },
