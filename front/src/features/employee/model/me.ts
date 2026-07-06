@@ -11,7 +11,7 @@ export interface EmpBasicInfo {
   name: string
   loginId: string
   email: string
-  extensionNo: string
+  extensionNo: string | null
 }
 
 /** 활성화된 프로필사진/전자서명 파일. 이번 스코프는 파일 UI를 만들지 않아 필드만 보존한다. */

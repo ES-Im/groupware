@@ -11,7 +11,7 @@ export interface AuthUser {
     name: string
     loginId: string
     email: string
-    extensionNo: string
+    extensionNo: string | null
   }
   activeFiles: Array<{
     file: {

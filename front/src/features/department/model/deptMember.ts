@@ -8,7 +8,7 @@ export interface DeptMemberResponse {
   empId: number
   empNo: string
   empName: string
-  extensionNo: string
+  extensionNo: string | null
   email: string
   position: string
 }
