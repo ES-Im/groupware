@@ -29,13 +29,17 @@ export function MyInfoPage() {
   }, [query.error])
 
   if (query.isLoading) {
-    return <p className="p-6 text-sm text-muted-foreground">불러오는 중...</p>
+    return (
+      <div className="mx-auto w-full max-w-3xl p-4 sm:p-6 lg:p-8">
+        <p className="text-sm text-muted-foreground">불러오는 중...</p>
+      </div>
+    )
   }
 
   if (query.error) {
     return (
-      <div className="p-6">
-        <h1 className="mb-2 text-lg font-semibold">내 정보</h1>
+      <div className="mx-auto w-full max-w-3xl p-4 sm:p-6 lg:p-8">
+        <h1 className="mb-2 text-xl font-semibold tracking-tight">내 정보</h1>
         <p className="text-sm text-muted-foreground">내 정보를 불러오지 못했습니다.</p>
       </div>
     )
@@ -46,13 +50,20 @@ export function MyInfoPage() {
   }
 
   return (
-    <div className="p-6">
-      <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-lg font-semibold">내 정보</h1>
+    <div className="mx-auto w-full max-w-3xl p-4 sm:p-6 lg:p-8">
+      <div className="mb-6 flex items-center justify-between gap-4">
+        <h1 className="text-xl font-semibold tracking-tight">내 정보</h1>
         <Button asChild variant="outline" size="sm">
           <Link to="/me/edit">수정</Link>
         </Button>
       </div>
+      {/*
+        empId를 전달하지 않는다 — RETRIEVE_ME_INFO 응답에 numeric empId가 없다(§리스크7 실측 확정,
+        empBasicInfo.empNo는 문자열). EmployeeInfoView의 BlobAvatar는 empId 미확정 시 이니셜
+        폴백으로 자연스럽게 전환된다.
+        //todo: 본인 preview용 numeric empId 소스 확정(서버가 me 전용 preview 기능 제공 or me
+        응답에 empId 추가) 필요
+      */}
       <EmployeeInfoView data={query.data} />
     </div>
   )

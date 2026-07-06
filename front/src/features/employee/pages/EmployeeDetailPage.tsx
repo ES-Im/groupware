@@ -32,39 +32,43 @@ export function EmployeeDetailPage() {
 
   if (!isValidEmpId) {
     return (
-      <div className="p-6">
-        <h1 className="mb-2 text-lg font-semibold">사원 상세</h1>
+      <div className="mx-auto w-full max-w-3xl p-4 sm:p-6 lg:p-8">
+        <h1 className="mb-2 text-xl font-semibold tracking-tight">사원 상세</h1>
         <p className="text-sm text-muted-foreground">잘못된 사원 식별자입니다.</p>
       </div>
     )
   }
 
   if (query.isLoading) {
-    return <p className="p-6 text-sm text-muted-foreground">불러오는 중...</p>
+    return (
+      <div className="mx-auto w-full max-w-3xl p-4 sm:p-6 lg:p-8">
+        <p className="text-sm text-muted-foreground">불러오는 중...</p>
+      </div>
+    )
   }
 
   if (query.error) {
     const apiError = normalizeApiError(query.error)
     if (isNotFound(apiError)) {
       return (
-        <div className="p-6">
-          <h1 className="mb-2 text-lg font-semibold">사원 상세</h1>
+        <div className="mx-auto w-full max-w-3xl p-4 sm:p-6 lg:p-8">
+          <h1 className="mb-2 text-xl font-semibold tracking-tight">사원 상세</h1>
           <p className="text-sm text-muted-foreground">사원 정보를 찾을 수 없습니다.</p>
         </div>
       )
     }
     if (isForbidden(apiError)) {
       return (
-        <div className="p-6">
-          <h1 className="mb-2 text-lg font-semibold">사원 상세</h1>
+        <div className="mx-auto w-full max-w-3xl p-4 sm:p-6 lg:p-8">
+          <h1 className="mb-2 text-xl font-semibold tracking-tight">사원 상세</h1>
           <p className="text-sm text-muted-foreground">이 사원 정보를 조회할 권한이 없습니다.</p>
         </div>
       )
     }
     // not-found/forbidden이 아닌 실패는 위 useEffect가 토스트로 알렸으므로 화면은 빈 상태로만 표시한다.
     return (
-      <div className="p-6">
-        <h1 className="mb-2 text-lg font-semibold">사원 상세</h1>
+      <div className="mx-auto w-full max-w-3xl p-4 sm:p-6 lg:p-8">
+        <h1 className="mb-2 text-xl font-semibold tracking-tight">사원 상세</h1>
         <p className="text-sm text-muted-foreground">사원 정보를 불러오지 못했습니다.</p>
       </div>
     )
@@ -75,9 +79,9 @@ export function EmployeeDetailPage() {
   }
 
   return (
-    <div className="p-6">
-      <h1 className="mb-4 text-lg font-semibold">사원 상세</h1>
-      <EmployeeInfoView data={query.data} />
+    <div className="mx-auto w-full max-w-3xl p-4 sm:p-6 lg:p-8">
+      <h1 className="mb-6 text-xl font-semibold tracking-tight">사원 상세</h1>
+      <EmployeeInfoView data={query.data} empId={parsedEmpId} />
     </div>
   )
 }

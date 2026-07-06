@@ -37,7 +37,11 @@ export function DepartmentMembersPage() {
   }
 
   if (meQuery.isLoading) {
-    return <p className="p-6 text-sm text-muted-foreground">불러오는 중...</p>
+    return (
+      <div className="mx-auto w-full max-w-4xl p-4 sm:p-6 lg:p-8">
+        <p className="text-sm text-muted-foreground">불러오는 중...</p>
+      </div>
+    )
   }
 
   // meQuery 자체의 실패(네트워크·500 등)는 "소속 부서 없음"과 원인이 다르므로 별도 메시지로 분기한다.
@@ -47,8 +51,8 @@ export function DepartmentMembersPage() {
   if (meQuery.isError) {
     const apiError = normalizeApiError(meQuery.error)
     return (
-      <div className="p-6">
-        <h1 className="mb-2 text-lg font-semibold">부서 멤버 목록</h1>
+      <div className="mx-auto w-full max-w-4xl p-4 sm:p-6 lg:p-8">
+        <h1 className="mb-2 text-xl font-semibold tracking-tight">부서 멤버 목록</h1>
         <p className="text-sm text-muted-foreground">
           내 정보를 불러오지 못해 부서 멤버 목록을 표시할 수 없습니다. {apiError.message}
         </p>
@@ -58,8 +62,8 @@ export function DepartmentMembersPage() {
 
   if (meQuery.data && deptId === undefined) {
     return (
-      <div className="p-6">
-        <h1 className="mb-2 text-lg font-semibold">부서 멤버 목록</h1>
+      <div className="mx-auto w-full max-w-4xl p-4 sm:p-6 lg:p-8">
+        <h1 className="mb-2 text-xl font-semibold tracking-tight">부서 멤버 목록</h1>
         <p className="text-sm text-muted-foreground">
           소속된 부서가 없어 부서 멤버 목록을 표시할 수 없습니다. 인사과에 문의해주세요.
         </p>
@@ -68,31 +72,35 @@ export function DepartmentMembersPage() {
   }
 
   if (membersQuery.isLoading) {
-    return <p className="p-6 text-sm text-muted-foreground">부서 멤버 목록을 불러오는 중...</p>
+    return (
+      <div className="mx-auto w-full max-w-4xl p-4 sm:p-6 lg:p-8">
+        <p className="text-sm text-muted-foreground">부서 멤버 목록을 불러오는 중...</p>
+      </div>
+    )
   }
 
   if (membersQuery.error) {
     const apiError = normalizeApiError(membersQuery.error)
     if (isNotFound(apiError)) {
       return (
-        <div className="p-6">
-          <h1 className="mb-2 text-lg font-semibold">부서 멤버 목록</h1>
+        <div className="mx-auto w-full max-w-4xl p-4 sm:p-6 lg:p-8">
+          <h1 className="mb-2 text-xl font-semibold tracking-tight">부서 멤버 목록</h1>
           <p className="text-sm text-muted-foreground">부서 정보를 찾을 수 없습니다.</p>
         </div>
       )
     }
     // not-found가 아닌 실패는 위 useEffect가 토스트로 알렸으므로, 화면은 빈 상태로만 표시한다.
     return (
-      <div className="p-6">
-        <h1 className="mb-2 text-lg font-semibold">부서 멤버 목록</h1>
+      <div className="mx-auto w-full max-w-4xl p-4 sm:p-6 lg:p-8">
+        <h1 className="mb-2 text-xl font-semibold tracking-tight">부서 멤버 목록</h1>
         <p className="text-sm text-muted-foreground">부서 멤버 목록을 불러오지 못했습니다.</p>
       </div>
     )
   }
 
   return (
-    <div className="p-6">
-      <h1 className="mb-4 text-lg font-semibold">부서 멤버 목록</h1>
+    <div className="mx-auto w-full max-w-4xl p-4 sm:p-6 lg:p-8">
+      <h1 className="mb-6 text-xl font-semibold tracking-tight">부서 멤버 목록</h1>
       <DepartmentMembersTable data={membersQuery.data?.content ?? []} onRowClick={handleRowClick} />
     </div>
   )

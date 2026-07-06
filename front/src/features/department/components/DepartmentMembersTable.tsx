@@ -42,43 +42,51 @@ export function DepartmentMembersTable({ data, onRowClick }: DepartmentMembersTa
   }
 
   return (
-    <table className="w-full border-collapse text-sm">
-      <thead>
-        {table.getHeaderGroups().map((headerGroup) => (
-          <tr key={headerGroup.id} className="border-b border-border">
-            {headerGroup.headers.map((header) => (
-              <th
-                key={header.id}
-                className="px-3 py-2 text-left font-medium text-muted-foreground"
-              >
-                {flexRender(header.column.columnDef.header, header.getContext())}
-              </th>
-            ))}
-          </tr>
-        ))}
-      </thead>
-      <tbody>
-        {table.getRowModel().rows.map((row) => (
-          <tr
-            key={row.id}
-            role="button"
-            tabIndex={0}
-            onClick={() => onRowClick(row.original.empId)}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter') {
-                onRowClick(row.original.empId)
-              }
-            }}
-            className="cursor-pointer border-b border-border last:border-0 hover:bg-muted"
-          >
-            {row.getVisibleCells().map((cell) => (
-              <td key={cell.id} className="px-3 py-2">
-                {flexRender(cell.column.columnDef.cell, cell.getContext())}
-              </td>
-            ))}
-          </tr>
-        ))}
-      </tbody>
-    </table>
+    // T5.4: 개선된 셸의 넓어진 콘텐츠 영역에서 표에 `w-full`을 주면 브라우저 auto 레이아웃이
+    // 남는 공간을 이메일 등 긴 컬럼에 과도하게 배분해, 직위처럼 짧은 마지막 컬럼이 화면 우측
+    // 끝까지 밀려나 보이는 어색한 여백이 생긴다. width 클래스를 없애 표 자체가 콘텐츠 폭만큼만
+    // shrink-wrap 되게 하고, max-w는 그 위에 상한선만 둔다(기능 변경 없음, 컬럼 구성·클릭·
+    // 에러 분기 동일). 래퍼는 표 폭에 맞춰 hug(w-fit)하는 카드형 표면(ring+rounded+bg-card)을
+    // 둘러 셸 카드 톤과 통일하고, 좁은 화면에서는 가로 스크롤로 오버플로를 흡수한다.
+    <div className="w-fit max-w-full overflow-x-auto rounded-xl bg-card ring-1 ring-foreground/10">
+      <table className="max-w-3xl border-collapse text-sm">
+        <thead>
+          {table.getHeaderGroups().map((headerGroup) => (
+            <tr key={headerGroup.id} className="border-b border-border bg-muted/50">
+              {headerGroup.headers.map((header) => (
+                <th
+                  key={header.id}
+                  className="px-4 py-2.5 text-left font-medium whitespace-nowrap text-muted-foreground"
+                >
+                  {flexRender(header.column.columnDef.header, header.getContext())}
+                </th>
+              ))}
+            </tr>
+          ))}
+        </thead>
+        <tbody>
+          {table.getRowModel().rows.map((row) => (
+            <tr
+              key={row.id}
+              role="button"
+              tabIndex={0}
+              onClick={() => onRowClick(row.original.empId)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') {
+                  onRowClick(row.original.empId)
+                }
+              }}
+              className="cursor-pointer border-b border-border transition-colors last:border-0 hover:bg-muted/60 focus-visible:bg-muted/60 focus-visible:outline-none"
+            >
+              {row.getVisibleCells().map((cell) => (
+                <td key={cell.id} className="px-4 py-3 whitespace-nowrap">
+                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   )
 }
