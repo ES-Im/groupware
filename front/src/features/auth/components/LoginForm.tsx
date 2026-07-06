@@ -74,7 +74,7 @@ export function LoginForm({ onSubmit }: LoginFormProps) {
         </p>
       )}
 
-      <Button type="submit" disabled={isSubmitting}>
+      <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
         로그인
       </Button>
     </form>

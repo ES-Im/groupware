@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { useNavigate } from 'react-router'
 import { toast } from 'sonner'
 import { normalizeApiError } from '@/shared/lib/apiError'
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
 import { useMeQuery } from '../api/useMeQuery'
 import { useUpdateMeMutation } from '../api/useUpdateMeMutation'
 import { UpdateMeForm } from '../components/UpdateMeForm'
@@ -41,13 +42,17 @@ export function UpdateMePage() {
   }
 
   if (meQuery.isLoading) {
-    return <p className="p-6 text-sm text-muted-foreground">불러오는 중...</p>
+    return (
+      <div className="mx-auto w-full max-w-lg p-4 sm:p-6 lg:p-8">
+        <p className="text-sm text-muted-foreground">불러오는 중...</p>
+      </div>
+    )
   }
 
   if (meQuery.error || !meQuery.data) {
     return (
-      <div className="p-6">
-        <h1 className="mb-2 text-lg font-semibold">내 정보 수정</h1>
+      <div className="mx-auto w-full max-w-lg p-4 sm:p-6 lg:p-8">
+        <h1 className="mb-2 text-xl font-semibold tracking-tight">내 정보 수정</h1>
         <p className="text-sm text-muted-foreground">
           내 정보를 불러오지 못해 수정할 수 없습니다.
         </p>
@@ -56,14 +61,19 @@ export function UpdateMePage() {
   }
 
   return (
-    <div className="p-6">
-      <h1 className="mb-4 text-lg font-semibold">내 정보 수정</h1>
-      <div className="max-w-sm">
-        <UpdateMeForm
-          defaultExtensionNo={meQuery.data.empBasicInfo.extensionNo ?? ''}
-          onSubmit={handleSubmit}
-        />
-      </div>
+    <div className="mx-auto w-full max-w-lg p-4 sm:p-6 lg:p-8">
+      <h1 className="mb-6 text-xl font-semibold tracking-tight">내 정보 수정</h1>
+      <Card>
+        <CardHeader className="border-b">
+          <CardTitle>계정 정보 수정</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <UpdateMeForm
+            defaultExtensionNo={meQuery.data.empBasicInfo.extensionNo ?? ''}
+            onSubmit={handleSubmit}
+          />
+        </CardContent>
+      </Card>
     </div>
   )
 }

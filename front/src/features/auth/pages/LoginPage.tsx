@@ -1,6 +1,7 @@
 import { useMutation } from '@tanstack/react-query'
 import { Link, useNavigate } from 'react-router'
 import { login } from '../api/login'
+import { AuthShell } from '../components/AuthShell'
 import { LoginForm } from '../components/LoginForm'
 import type { LoginFormValues } from '../model/loginSchema'
 import { useAuthStore } from '../store/authStore'
@@ -28,17 +29,22 @@ export function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-6 p-4">
-      <h1 className="text-xl font-semibold">HARUON 로그인</h1>
-      <div className="w-full max-w-sm">
-        <LoginForm onSubmit={handleLogin} />
-      </div>
-      <p className="text-sm text-muted-foreground">
-        계정이 없으신가요?{' '}
-        <Link to="/register" className="underline underline-offset-4">
-          회원가입
-        </Link>
-      </p>
-    </div>
+    <AuthShell
+      title="로그인"
+      description="HARUON 그룹웨어 계정으로 로그인하세요"
+      footer={
+        <>
+          계정이 없으신가요?{' '}
+          <Link
+            to="/register"
+            className="font-medium text-foreground underline underline-offset-4"
+          >
+            회원가입
+          </Link>
+        </>
+      }
+    >
+      <LoginForm onSubmit={handleLogin} />
+    </AuthShell>
   )
 }

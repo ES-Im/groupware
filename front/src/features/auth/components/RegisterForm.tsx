@@ -94,7 +94,7 @@ export function RegisterForm({ onSubmit }: RegisterFormProps) {
         </p>
       )}
 
-      <Button type="submit" disabled={isSubmitting}>
+      <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
         회원가입
       </Button>
     </form>
