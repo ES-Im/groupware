@@ -1,0 +1,159 @@
+import { renderHook, waitFor } from '@testing-library/react'
+import { http, HttpResponse } from 'msw'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import { BASE_URL } from '@/shared/api/client'
+import { server } from '@/test/mocks/server'
+import { useEmpFilePreviewUrl } from './useEmpFilePreview'
+
+/**
+ * useEmpFilePreviewUrl(ROADMAP T5.1) 실동작 검증: EMP_FILE_PREVIEW(GET
+ * /api/employees/{empId}/files/{fileId}/preview)를 blob으로 조회해 objectURL로 변환하고,
+ * 언마운트/의존성 변경 시 revokeObjectURL을 호출하는지, empId/fileId 미확정·조회 실패 시
+ * 폴백 상태(objectUrl undefined)를 반환하는지 확인한다.
+ */
+
+const PREVIEW_URL = (empId: number, fileId: number) =>
+  `${BASE_URL}/api/employees/${empId}/files/${fileId}/preview`
+
+afterEach(() => {
+  vi.restoreAllMocks()
+})
+
+describe('useEmpFilePreviewUrl', () => {
+  it('empId+fileId가 있으면 blob을 조회해 objectURL을 반환한다', async () => {
+    server.use(
+      http.get(PREVIEW_URL(1, 10), () =>
+        HttpResponse.arrayBuffer(new TextEncoder().encode('fake-image-bytes').buffer, {
+          headers: { 'Content-Type': 'image/png' },
+        }),
+      ),
+    )
+    const createObjectURLSpy = vi
+      .spyOn(URL, 'createObjectURL')
+      .mockReturnValue('blob:mock-url-1')
+
+    const { result } = renderHook(() => useEmpFilePreviewUrl(1, 10))
+
+    await waitFor(() => expect(result.current.objectUrl).toBe('blob:mock-url-1'))
+    expect(result.current.isError).toBe(false)
+    expect(createObjectURLSpy).toHaveBeenCalledTimes(1)
+  })
+
+  it('언마운트 시 revokeObjectURL을 호출해 objectURL을 해제한다', async () => {
+    server.use(
+      http.get(PREVIEW_URL(1, 10), () =>
+        HttpResponse.arrayBuffer(new TextEncoder().encode('fake-image-bytes').buffer, {
+          headers: { 'Content-Type': 'image/png' },
+        }),
+      ),
+    )
+    vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:mock-url-2')
+    const revokeObjectURLSpy = vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {})
+
+    const { result, unmount } = renderHook(() => useEmpFilePreviewUrl(1, 10))
+    await waitFor(() => expect(result.current.objectUrl).toBe('blob:mock-url-2'))
+
+    unmount()
+
+    expect(revokeObjectURLSpy).toHaveBeenCalledWith('blob:mock-url-2')
+  })
+
+  it('의존성(empId/fileId) 변경 시에도 이전 objectURL을 revoke한다', async () => {
+    server.use(
+      http.get(PREVIEW_URL(1, 10), () =>
+        HttpResponse.arrayBuffer(new TextEncoder().encode('first').buffer, {
+          headers: { 'Content-Type': 'image/png' },
+        }),
+      ),
+      http.get(PREVIEW_URL(1, 20), () =>
+        HttpResponse.arrayBuffer(new TextEncoder().encode('second').buffer, {
+          headers: { 'Content-Type': 'image/png' },
+        }),
+      ),
+    )
+    vi.spyOn(URL, 'createObjectURL').mockReturnValueOnce('blob:first').mockReturnValueOnce('blob:second')
+    const revokeObjectURLSpy = vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {})
+
+    const { result, rerender } = renderHook(
+      ({ empId, fileId }: { empId: number; fileId: number }) => useEmpFilePreviewUrl(empId, fileId),
+      { initialProps: { empId: 1, fileId: 10 } },
+    )
+    await waitFor(() => expect(result.current.objectUrl).toBe('blob:first'))
+
+    rerender({ empId: 1, fileId: 20 })
+
+    await waitFor(() => expect(result.current.objectUrl).toBe('blob:second'))
+    expect(revokeObjectURLSpy).toHaveBeenCalledWith('blob:first')
+  })
+
+  it('의존성 변경 시 새 blob이 도착하기 전까지 objectUrl을 즉시 undefined로 리셋한다(깨진 URL 노출 방지)', async () => {
+    let resolveSecondResponse: (() => void) | undefined
+    const secondResponseGate = new Promise<void>((resolve) => {
+      resolveSecondResponse = resolve
+    })
+
+    server.use(
+      http.get(PREVIEW_URL(1, 10), () =>
+        HttpResponse.arrayBuffer(new TextEncoder().encode('first').buffer, {
+          headers: { 'Content-Type': 'image/png' },
+        }),
+      ),
+      http.get(PREVIEW_URL(1, 20), async () => {
+        // 두 번째 요청 응답을 테스트가 제어하는 시점까지 지연시켜, 그 사이의 objectUrl 상태를 관찰한다.
+        await secondResponseGate
+        return HttpResponse.arrayBuffer(new TextEncoder().encode('second').buffer, {
+          headers: { 'Content-Type': 'image/png' },
+        })
+      }),
+    )
+    vi.spyOn(URL, 'createObjectURL').mockReturnValueOnce('blob:first').mockReturnValueOnce('blob:second')
+    vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {})
+
+    const { result, rerender } = renderHook(
+      ({ empId, fileId }: { empId: number; fileId: number }) => useEmpFilePreviewUrl(empId, fileId),
+      { initialProps: { empId: 1, fileId: 10 } },
+    )
+    await waitFor(() => expect(result.current.objectUrl).toBe('blob:first'))
+
+    rerender({ empId: 1, fileId: 20 })
+
+    // 새 blob이 아직 도착하지 않은 구간: 리셋 전 'blob:first'(이미 revoke된 URL)가 아니라
+    // 즉시 undefined여야 한다 — 그래야 BlobAvatar가 깨진 이미지 대신 이니셜 폴백을 보여준다.
+    await waitFor(() => expect(result.current.objectUrl).toBeUndefined())
+    expect(result.current.isLoading).toBe(true)
+
+    resolveSecondResponse?.()
+
+    await waitFor(() => expect(result.current.objectUrl).toBe('blob:second'))
+  })
+
+  it('empId가 미확정이면 조회하지 않고 objectUrl undefined를 반환한다(이니셜 폴백 경로)', () => {
+    const { result } = renderHook(() => useEmpFilePreviewUrl(undefined, 10))
+
+    expect(result.current.objectUrl).toBeUndefined()
+    expect(result.current.isLoading).toBe(false)
+    expect(result.current.isError).toBe(false)
+  })
+
+  it('fileId가 미확정이면 조회하지 않고 objectUrl undefined를 반환한다(이니셜 폴백 경로)', () => {
+    const { result } = renderHook(() => useEmpFilePreviewUrl(1, undefined))
+
+    expect(result.current.objectUrl).toBeUndefined()
+  })
+
+  it('조회 실패(404 등) 시 isError=true, objectUrl undefined를 반환한다', async () => {
+    server.use(
+      http.get(PREVIEW_URL(1, 999), () =>
+        HttpResponse.json(
+          { code: 'RESOURCE_001', name: 'NOT_FOUND', httpStatus: 404, message: '파일을 찾을 수 없습니다' },
+          { status: 404 },
+        ),
+      ),
+    )
+
+    const { result } = renderHook(() => useEmpFilePreviewUrl(1, 999))
+
+    await waitFor(() => expect(result.current.isError).toBe(true))
+    expect(result.current.objectUrl).toBeUndefined()
+  })
+})

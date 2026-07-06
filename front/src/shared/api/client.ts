@@ -40,6 +40,29 @@ interface ReissueResponse {
 }
 
 /**
+ * 에러 응답 바디에서 code를 안전하게 추출한다.
+ * WHY(ROADMAP T5.1 리뷰 보완): `responseType:'blob'`로 요청한 경우(예: EMP_FILE_PREVIEW) axios는
+ * 401 에러 응답 바디조차 Blob으로 파싱해버려 `response.data.code`가 항상 undefined가 된다.
+ * 그 결과 blob 요청은 ROLE_002를 만나도 재발급 경로를 타지 못하는 문제가 있었다. Blob이면 text()로
+ * 읽어 JSON 파싱해 code를 복원하고, 파싱 실패 시 undefined(=재발급 대상 아님)로 안전하게 폴백한다.
+ * 재발급 자체의 로직(단일 in-flight 공유, _retried 마킹)은 건드리지 않는다.
+ */
+async function extractErrorCode(data: unknown): Promise<string | undefined> {
+  if (typeof Blob !== 'undefined' && data instanceof Blob) {
+    try {
+      const parsed = JSON.parse(await data.text()) as Partial<ApiErrorBody>
+      return parsed.code
+    } catch {
+      return undefined
+    }
+  }
+  if (data && typeof data === 'object') {
+    return (data as Partial<ApiErrorBody>).code
+  }
+  return undefined
+}
+
+/**
  * 원요청 config에 부착하는 커스텀 플래그.
  * WHY: 재발급 후 재시도한 요청이 다시 401을 받았을 때 무한 재시도(재귀)를 막는다.
  */
@@ -91,10 +114,11 @@ apiClient.interceptors.response.use(
   async (error: AxiosError<ApiErrorBody>) => {
     const config = error.config as RetriableRequestConfig | undefined
     const response = error.response
+    const errorCode = response ? await extractErrorCode(response.data) : undefined
 
     const shouldReissue =
       response?.status === 401 &&
-      response.data?.code === REISSUE_TRIGGER_CODE &&
+      errorCode === REISSUE_TRIGGER_CODE &&
       config != null &&
       !config._retried &&
       !config.url?.includes(REISSUE_PATH)

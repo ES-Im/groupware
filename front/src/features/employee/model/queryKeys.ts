@@ -10,4 +10,10 @@ export const employeeKeys = {
   all: ['employee'] as const,
   me: () => [...employeeKeys.all, 'me'] as const,
   detail: (empId: number | undefined) => [...employeeKeys.all, 'detail', empId] as const,
+  /**
+   * 프로필사진/전자서명파일 전체 조회(`RETRIEVE_FILES_INFOS`, ROADMAP T5.3) 폴백 캐시 키.
+   * useMeQuery()의 activeFiles가 비어있는 예외 상황에서만 사용하는 대체 조회이므로 me()와
+   * 별도 키로 분리해 서로의 캐시를 오염시키지 않는다.
+   */
+  filesInfos: () => [...employeeKeys.all, 'filesInfos'] as const,
 }

@@ -14,6 +14,13 @@ export interface EmpBasicInfo {
   extensionNo: string | null
 }
 
+/**
+ * 파일 타입(back/.../domain/employee/enums/FileType.java 실측: PROFILE_PICTURE, SIGNATURE 2개뿐).
+ * `(string & {})`로 미지 값도 대입 가능하게 열어둬(하위호환) 백엔드가 값을 추가해도 타입 에러 없이
+ * 방어적으로 처리한다(ROADMAP T5.1, getActiveProfilePicture가 알려진 값만 선택).
+ */
+export type FileType = 'PROFILE_PICTURE' | 'SIGNATURE' | (string & {})
+
 /** 활성화된 프로필사진/전자서명 파일. 이번 스코프는 파일 UI를 만들지 않아 필드만 보존한다. */
 export interface ActiveFile {
   file: {
@@ -22,7 +29,7 @@ export interface ActiveFile {
     extension: string
     fileSize: number
   }
-  type: string
+  type: FileType
   isActive: boolean
 }
 
