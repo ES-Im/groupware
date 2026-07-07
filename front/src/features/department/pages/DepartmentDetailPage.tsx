@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router'
+import { Link, useNavigate, useParams } from 'react-router'
 import { toast } from 'sonner'
 import { useAuthStore } from '@/features/auth/store/authStore'
 import { handleApiError, isNotFound, normalizeApiError } from '@/shared/lib/apiError'
 import { hasRequiredRole } from '@/shared/lib/hasRequiredRole'
+import { usePageState } from '@/shared/lib/usePageState'
 import { useActivateDepartmentMutation } from '../api/useActivateDepartmentMutation'
 import { useDeactivateDepartmentMutation } from '../api/useDeactivateDepartmentMutation'
 import { useDepartmentInfoQuery } from '../api/useDepartmentInfoQuery'
@@ -42,8 +43,7 @@ export function DepartmentDetailPage() {
   const canManageDept = hasRequiredRole(roles, 'ADMIN')
 
   const [keyword, setKeyword] = useState('')
-  const [page, setPage] = useState(0)
-  const [size, setSize] = useState(10)
+  const { page, size, onPageChange, onSizeChange, resetPage } = usePageState()
   const [isRenameDialogOpen, setIsRenameDialogOpen] = useState(false)
   const [isUpdateParentDialogOpen, setIsUpdateParentDialogOpen] = useState(false)
   const [isAppointLeaderDialogOpen, setIsAppointLeaderDialogOpen] = useState(false)
@@ -63,6 +63,17 @@ export function DepartmentDetailPage() {
   const activateMutation = useActivateDepartmentMutation()
   const deactivateMutation = useDeactivateDepartmentMutation()
   const isTogglingActive = activateMutation.isPending || deactivateMutation.isPending
+
+  // 목록(/departments)으로 돌아가는 최소한의 텍스트 링크. 부서 상세는 목록의 행 클릭으로만
+  // 진입하는 화면이라 브라우저 뒤로가기 외의 명시적 복귀 동선이 없었다(UX 검토 지적 사항).
+  const backLink = (
+    <Link
+      to="/departments"
+      className="mb-4 inline-block text-sm text-muted-foreground hover:text-foreground"
+    >
+      ← 조직도
+    </Link>
+  )
 
   function handleToggleActive() {
     if (deptId === undefined) {
@@ -109,6 +120,7 @@ export function DepartmentDetailPage() {
   if (isInvalidDeptId) {
     return (
       <div className="w-full p-4 sm:p-6 lg:p-8">
+        {backLink}
         <h1 className="mb-2 text-xl font-semibold tracking-tight">부서 상세</h1>
         <p className="text-sm text-muted-foreground">부서 정보를 찾을 수 없습니다.</p>
       </div>
@@ -120,6 +132,7 @@ export function DepartmentDetailPage() {
   if (deptInfoQuery.isLoading) {
     return (
       <div className="w-full p-4 sm:p-6 lg:p-8">
+        {backLink}
         <p className="text-sm text-muted-foreground">부서 상세를 불러오는 중...</p>
       </div>
     )
@@ -130,6 +143,7 @@ export function DepartmentDetailPage() {
     if (isNotFound(apiError)) {
       return (
         <div className="w-full p-4 sm:p-6 lg:p-8">
+          {backLink}
           <h1 className="mb-2 text-xl font-semibold tracking-tight">부서 상세</h1>
           <p className="text-sm text-muted-foreground">부서 정보를 찾을 수 없습니다.</p>
         </div>
@@ -138,6 +152,7 @@ export function DepartmentDetailPage() {
     // not-found가 아닌 실패는 위 useEffect가 토스트로 알렸으므로, 화면은 안내 문구로만 표시한다.
     return (
       <div className="w-full p-4 sm:p-6 lg:p-8">
+        {backLink}
         <h1 className="mb-2 text-xl font-semibold tracking-tight">부서 상세</h1>
         <p className="text-sm text-muted-foreground">부서 정보를 불러오지 못했습니다.</p>
       </div>
@@ -155,6 +170,7 @@ export function DepartmentDetailPage() {
 
   return (
     <div className="w-full p-4 sm:p-6 lg:p-8">
+      {backLink}
       <h1 className="mb-6 text-xl font-semibold tracking-tight">부서 상세</h1>
       <DepartmentDetailView
         deptInfo={deptInfoQuery.data.deptInfoResponse}
@@ -185,15 +201,12 @@ export function DepartmentDetailPage() {
         keyword={keyword}
         onKeywordChange={(value) => {
           setKeyword(value)
-          setPage(0)
+          resetPage()
         }}
         page={page}
-        onPageChange={setPage}
+        onPageChange={onPageChange}
         size={size}
-        onSizeChange={(s) => {
-          setSize(s)
-          setPage(0)
-        }}
+        onSizeChange={onSizeChange}
         onRowClick={handleRowClick}
       />
 

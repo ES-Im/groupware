@@ -2,17 +2,21 @@ import { useEffect, useState } from 'react'
 import type { ComponentType, ReactNode, SVGProps } from 'react'
 import {
   Building2,
-  ChevronLeft,
-  ChevronRight,
   IdCard,
   Mail,
   Network,
+  Pencil,
   Phone,
+  Power,
+  PowerOff,
   Search,
   Settings2,
+  UserMinus,
+  UserPlus,
   Users,
 } from 'lucide-react'
 import { BlobAvatar } from '@/shared/components/BlobAvatar'
+import { PaginationControls } from '@/shared/components/PaginationControls'
 import { Button } from '@/shared/ui/button'
 import { Card, CardContent } from '@/shared/ui/card'
 import { Input } from '@/shared/ui/input'
@@ -172,11 +176,6 @@ export function DepartmentDetailView({
     return () => clearTimeout(timer)
   }, [searchInput, keyword, onKeywordChange])
 
-  // 페이지네이션 범위 문구용 계산. totalElements가 0이면 0을 표시한다.
-  const rangeStart = pageInfo.totalElements === 0 ? 0 : pageInfo.number * pageInfo.size + 1
-  const rangeEnd = pageInfo.number * pageInfo.size + members.length
-  const totalPages = pageInfo.totalPages || 1
-
   return (
     <div className="grid gap-6 lg:grid-cols-[320px_1fr]">
       {/* 좌측: 부서 요약 카드 */}
@@ -271,38 +270,14 @@ export function DepartmentDetailView({
           {canManageDept && (
             <div className="space-y-3 border-t pt-5">
               <SectionHeading icon={Settings2}>부서 관리</SectionHeading>
-              <div className="space-y-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="w-full justify-start"
-                  onClick={onOpenAppointLeaderDialog}
-                >
-                  부서장 지정
-                </Button>
-                {/* F209: 부서장이 공석(deptLeader===null)이면 종료할 대상이 없으므로 버튼 자체를 숨긴다. */}
-                {deptLeader !== null && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="w-full justify-start"
-                    onClick={onOpenEndLeaderDialog}
-                  >
-                    부서장 종료
-                  </Button>
-                )}
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="w-full justify-start"
-                  disabled={isTogglingActive}
-                  onClick={onToggleActive}
-                >
-                  {deptInfo.isActive ? '비활성화 전환' : '활성화 전환'}
-                </Button>
+              {/*
+                5개 관리 액션을 성격별로 3개 소그룹으로 정렬한다: (1) 부서 정보 변경(이름·상위부서),
+                (2) 부서장 관리(지정·종료), (3) 부서 활성 상태 토글. 소그룹 첫 버튼에 mt-2를 주어
+                별도 heading 없이 시각적 구분만 만든다. 각 액션에 의미 아이콘을 붙여 스캔성을 높이고,
+                되돌리기 어려운 '부서장 종료'만 destructive 톤으로 강조한다(나머지는 outline).
+              */}
+              <div className="flex flex-col gap-1.5">
+                {/* (1) 부서 정보 변경 */}
                 <Button
                   type="button"
                   variant="outline"
@@ -310,6 +285,7 @@ export function DepartmentDetailView({
                   className="w-full justify-start"
                   onClick={onOpenRenameDialog}
                 >
+                  <Pencil />
                   부서명 변경
                 </Button>
                 <Button
@@ -319,7 +295,46 @@ export function DepartmentDetailView({
                   className="w-full justify-start"
                   onClick={onOpenUpdateParentDialog}
                 >
+                  <Network />
                   상위 부서 변경
+                </Button>
+
+                {/* (2) 부서장 관리 */}
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="mt-2 w-full justify-start"
+                  onClick={onOpenAppointLeaderDialog}
+                >
+                  <UserPlus />
+                  부서장 지정
+                </Button>
+                {/* F209: 부서장이 공석(deptLeader===null)이면 종료할 대상이 없으므로 버튼 자체를 숨긴다. */}
+                {deptLeader !== null && (
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="sm"
+                    className="w-full justify-start"
+                    onClick={onOpenEndLeaderDialog}
+                  >
+                    <UserMinus />
+                    부서장 종료
+                  </Button>
+                )}
+
+                {/* (3) 부서 활성 상태 토글 */}
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="mt-2 w-full justify-start"
+                  disabled={isTogglingActive}
+                  onClick={onToggleActive}
+                >
+                  {deptInfo.isActive ? <PowerOff /> : <Power />}
+                  {deptInfo.isActive ? '비활성화 전환' : '활성화 전환'}
                 </Button>
               </div>
             </div>
@@ -373,7 +388,7 @@ export function DepartmentDetailView({
               <p className="py-8 text-center text-sm text-muted-foreground">{membersErrorMessage}</p>
             ) : members.length === 0 ? (
               <p className="py-8 text-center text-sm text-muted-foreground">
-                {keyword ? '검색 결과가 없습니다.' : '소속 부서 멤버가 없습니다.'}
+                {keyword ? '검색 결과가 없습니다.' : '부서 멤버가 없습니다.'}
               </p>
             ) : (
               <DepartmentMembersTable
@@ -383,37 +398,14 @@ export function DepartmentDetailView({
               />
             )}
 
-            {/* 하단 페이지네이션 */}
-            <div className="flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-xs text-muted-foreground">
-                총 {pageInfo.totalElements}명 중 {rangeStart}-{rangeEnd} 표시
-              </p>
-              <nav className="flex items-center gap-2" aria-label="페이지 이동">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  disabled={pageInfo.first}
-                  onClick={() => onPageChange(page - 1)}
-                >
-                  <ChevronLeft />
-                  이전
-                </Button>
-                <span className="min-w-16 text-center text-sm text-muted-foreground">
-                  {pageInfo.number + 1} / {totalPages}
-                </span>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  disabled={pageInfo.last}
-                  onClick={() => onPageChange(page + 1)}
-                >
-                  다음
-                  <ChevronRight />
-                </Button>
-              </nav>
-            </div>
+            {/* 하단 페이지네이션(ROADMAP T10.1, 공유 표준 컴포넌트) */}
+            <PaginationControls
+              className="border-t pt-4"
+              pageInfo={pageInfo}
+              page={page}
+              onPageChange={onPageChange}
+              unit="명"
+            />
           </CardContent>
         </Card>
       </section>

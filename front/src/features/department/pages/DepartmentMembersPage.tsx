@@ -5,6 +5,7 @@ import { useAuthStore } from '@/features/auth/store/authStore'
 import { useMeQuery } from '@/features/employee/api/useMeQuery'
 import { isNotFound, normalizeApiError } from '@/shared/lib/apiError'
 import { hasRequiredRole } from '@/shared/lib/hasRequiredRole'
+import { usePageState } from '@/shared/lib/usePageState'
 import { useDepartmentInfoQuery } from '../api/useDepartmentInfoQuery'
 import { useDepartmentMembersQuery } from '../api/useDepartmentMembersQuery'
 import { DepartmentDetailView } from '../components/DepartmentDetailView'
@@ -19,8 +20,9 @@ import { getPrimaryDeptId } from '../lib/getPrimaryDeptId'
  * 자체가 나가지 않아 무음 상태가 될 수 있으므로(T2.1-a 리뷰 지적) 아래에서 명시적으로 빈
  * 상태 UX를 노출한다.
  *
- * keyword/page/size: 부서 멤버 검색·페이징 로컬 상태. 검색어·페이지 크기 변경 시 페이지를
- * 0으로 리셋해 존재하지 않는 페이지를 조회하는 것을 방지한다.
+ * keyword/page/size: 부서 멤버 검색·페이징 로컬 상태. page/size는 공유 usePageState(ROADMAP
+ * T10.1)로 관리하며, 검색어 변경 시 resetPage()로 페이지를 0으로 리셋해 존재하지 않는 페이지를
+ * 조회하는 것을 방지한다(페이지 크기 변경 시 리셋은 usePageState 내부 onSizeChange가 처리).
  *
  * canManageMembers: dept-manager/admin 전용 "관리" 액션 컬럼 노출 여부. 이 목록 자체가 조회자
  * 본인 소속 부서원만 보여주므로(getPrimaryDeptId 기반 deptId) 별도 부서 일치 검증은 하지
@@ -40,8 +42,7 @@ export function DepartmentMembersPage() {
   //todo : [이 페이지는 getPrimaryDeptId로 deptId를 로그인 사용자의 소속 부서로 고정 도출하고 라우트 파라미터를 쓰지 않는다. 그러나 docs/prd/3.department-management-prd.md(F202/F203, "부서 상세 페이지")는 "부서 목록 페이지 행 클릭 → 부서 상세 페이지"로 임의 부서(deptId route param)를 열람하는 화면을 요구하는데, 이는 별도 페이지(DepartmentDetailPage, T7.1)로 이미 구현되어 있다. 두 페이지가 공존하는 것이 의도된 설계인지, 이 페이지(F104)를 그대로 유지할지 재확인 필요]
   const deptId = meQuery.data ? getPrimaryDeptId(meQuery.data.currentDepts) : undefined
   const [keyword, setKeyword] = useState('')
-  const [page, setPage] = useState(0)
-  const [size, setSize] = useState(10)
+  const { page, size, onPageChange, onSizeChange, resetPage } = usePageState()
   const deptInfoQuery = useDepartmentInfoQuery(deptId)
   const membersQuery = useDepartmentMembersQuery(deptId, { keyword, page, size })
 
@@ -183,15 +184,12 @@ export function DepartmentMembersPage() {
         keyword={keyword}
         onKeywordChange={(value) => {
           setKeyword(value)
-          setPage(0)
+          resetPage()
         }}
         page={page}
-        onPageChange={setPage}
+        onPageChange={onPageChange}
         size={size}
-        onSizeChange={(s) => {
-          setSize(s)
-          setPage(0)
-        }}
+        onSizeChange={onSizeChange}
         onRowClick={handleRowClick}
       />
     </div>

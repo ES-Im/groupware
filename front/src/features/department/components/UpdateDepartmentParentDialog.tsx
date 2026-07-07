@@ -5,6 +5,7 @@ import { submitWithErrorMapping, useZodForm } from '@/shared/lib/form'
 import { Button } from '@/shared/ui/button'
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -74,11 +75,34 @@ export function UpdateDepartmentParentDialog({
 
   // 열릴 때마다(재오픈 포함) 현재 상위 부서로 초기화한다 — 제어형 다이얼로그라 언마운트되지
   // 않으므로 이전 세션의 선택값/에러가 남지 않도록 한다(RenameDepartmentDialog와 동일 이유).
+  //
+  // candidatesQuery.isSuccess를 의존성에 포함하는 이유(race condition 수정): 다이얼로그가 열릴 때
+  // candidatesQuery가 아직 로딩 중이면 candidates=[]라 "현재 상위 부서(ID: N, 비활성 또는 목록
+  // 범위 밖)" 폴백 <option>이 먼저 렌더되고, reset()이 그 폴백 옵션 value(N)로 네이티브 select를
+  // 세팅한다. 이후 실제 후보 목록이 도착해 N이 정상 후보로 발견되면 폴백 옵션이 사라지고 동일 value의
+  // 실제 후보 옵션으로 교체되는데, 이 select는 React value prop으로 제어되지 않는(register 기반
+  // uncontrolled) 네이티브 엘리먼트라 선택된 <option> 노드가 제거되면 브라우저가 selectedIndex를
+  // 0("최상위로 이동")으로 되돌려버린다. isSuccess가 false→true로 바뀌는 시점에 한 번 더 reset을
+  // 실행해 후보 목록 도착 후에도 값을 재적용한다. isSuccess는 최초 성공 이후 계속 true로 유지되므로
+  // (재조회로 갱신되어도 다시 false가 되지 않음) 열려 있는 동안 반복 reset되어 사용자의 선택을
+  // 덮어쓰는 일은 없다.
+  //
+  // todo : 위 isSuccess 보정은 "사후 땜질"이라 완전한 수정이 아니다. 폴백 옵션이 실제 후보
+  // 옵션으로 교체되는 DOM 커밋 순간에는 여전히 selectedIndex가 0으로 잠깐 리셋되며(네이티브
+  // select가 선택된 option 노드 제거를 그렇게 처리함), 이 useEffect의 재실행은 그 다음에야
+  // 값을 되돌린다. React 테스트 환경(act 자동 플러시)에서는 이 재실행이 거의 항상 다음 assert
+  // 전에 끝나 우연히 감춰지지만, 실제 브라우저(effect가 페인트 이후 매크로태스크로 지연됨)에서는
+  // 관리자가 다이얼로그를 열 때마다 "최상위로 이동"이 잠깐 보였다가 올바른 부서로 바뀌는 시각적
+  // 깜빡임이 실제로 발생한다(UpdateDepartmentParentDialog.test.tsx의 회귀 케이스에서
+  // MutationObserver로 결정적으로 재현 검증함). 근본 수정 방향: (1) 폴백 옵션과 동일 value를
+  // 갖게 될 실제 후보 옵션에 동일한 key를 부여해 React가 같은 노드로 재조정하게 하거나,
+  // (2) register 기반 비제어(uncontrolled) select 대신 RHF Controller + value prop으로
+  // 완전히 제어되는 select로 전환해 DOM 옵션 노드 교체가 선택값에 영향을 주지 않도록 한다.
   useEffect(() => {
     if (open) {
       reset({ parentDeptId: currentParentDeptId !== null ? String(currentParentDeptId) : '' })
     }
-  }, [open, currentParentDeptId, reset])
+  }, [open, currentParentDeptId, candidatesQuery.isSuccess, reset])
 
   // 후보 조회 실패는 무음으로 두지 않고 토스트로 알린다 — 실패해도 select 자체는 "최상위로 이동" +
   // (있다면) 현재 상위 부서 옵션만으로 계속 동작하지만, 관리자가 후보 목록이 비정상임을 알아야 한다.
@@ -177,6 +201,13 @@ export function UpdateDepartmentParentDialog({
           )}
 
           <DialogFooter>
+            {/* 취소: DialogClose가 onOpenChange(false)를 호출하므로 상위 handleOpenChange의
+                in-flight 닫힘 가드를 그대로 탄다. 제출 중에는 명시적으로 비활성화한다. */}
+            <DialogClose asChild>
+              <Button type="button" variant="outline" disabled={isSubmitting}>
+                취소
+              </Button>
+            </DialogClose>
             <Button type="submit" disabled={isSubmitting}>
               변경
             </Button>

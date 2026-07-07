@@ -4,6 +4,7 @@ import { submitWithErrorMapping, useZodForm } from '@/shared/lib/form'
 import { Button } from '@/shared/ui/button'
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -118,6 +119,13 @@ export function EndDepartmentLeaderDialog({
           )}
 
           <DialogFooter>
+            {/* 취소: DialogClose가 onOpenChange(false)를 호출하므로 상위 handleOpenChange의
+                in-flight 닫힘 가드를 그대로 탄다. 제출 중에는 명시적으로 비활성화한다. */}
+            <DialogClose asChild>
+              <Button type="button" variant="outline" disabled={isSubmitting}>
+                취소
+              </Button>
+            </DialogClose>
             <Button type="submit" variant="destructive" disabled={isSubmitting}>
               종료
             </Button>
