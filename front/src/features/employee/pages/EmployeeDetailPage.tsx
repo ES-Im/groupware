@@ -32,7 +32,7 @@ export function EmployeeDetailPage() {
 
   if (!isValidEmpId) {
     return (
-      <div className="mx-auto w-full max-w-3xl p-4 sm:p-6 lg:p-8">
+      <div className="w-full p-4 sm:p-6 lg:p-8">
         <h1 className="mb-2 text-xl font-semibold tracking-tight">사원 상세</h1>
         <p className="text-sm text-muted-foreground">잘못된 사원 식별자입니다.</p>
       </div>
@@ -41,7 +41,7 @@ export function EmployeeDetailPage() {
 
   if (query.isLoading) {
     return (
-      <div className="mx-auto w-full max-w-3xl p-4 sm:p-6 lg:p-8">
+      <div className="w-full p-4 sm:p-6 lg:p-8">
         <p className="text-sm text-muted-foreground">불러오는 중...</p>
       </div>
     )
@@ -51,7 +51,7 @@ export function EmployeeDetailPage() {
     const apiError = normalizeApiError(query.error)
     if (isNotFound(apiError)) {
       return (
-        <div className="mx-auto w-full max-w-3xl p-4 sm:p-6 lg:p-8">
+        <div className="w-full p-4 sm:p-6 lg:p-8">
           <h1 className="mb-2 text-xl font-semibold tracking-tight">사원 상세</h1>
           <p className="text-sm text-muted-foreground">사원 정보를 찾을 수 없습니다.</p>
         </div>
@@ -59,7 +59,7 @@ export function EmployeeDetailPage() {
     }
     if (isForbidden(apiError)) {
       return (
-        <div className="mx-auto w-full max-w-3xl p-4 sm:p-6 lg:p-8">
+        <div className="w-full p-4 sm:p-6 lg:p-8">
           <h1 className="mb-2 text-xl font-semibold tracking-tight">사원 상세</h1>
           <p className="text-sm text-muted-foreground">이 사원 정보를 조회할 권한이 없습니다.</p>
         </div>
@@ -67,7 +67,7 @@ export function EmployeeDetailPage() {
     }
     // not-found/forbidden이 아닌 실패는 위 useEffect가 토스트로 알렸으므로 화면은 빈 상태로만 표시한다.
     return (
-      <div className="mx-auto w-full max-w-3xl p-4 sm:p-6 lg:p-8">
+      <div className="w-full p-4 sm:p-6 lg:p-8">
         <h1 className="mb-2 text-xl font-semibold tracking-tight">사원 상세</h1>
         <p className="text-sm text-muted-foreground">사원 정보를 불러오지 못했습니다.</p>
       </div>
@@ -79,9 +79,13 @@ export function EmployeeDetailPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-3xl p-4 sm:p-6 lg:p-8">
-      <h1 className="mb-6 text-xl font-semibold tracking-tight">사원 상세</h1>
-      <EmployeeInfoView data={query.data} empId={parsedEmpId} />
+    <div className="w-full p-4 sm:p-6 lg:p-8">
+      {/*
+        EmployeeInfoView의 좌측 요약 카드가 이름/사번을 직접 표시해 <h1> 제목 바가 불필요해졌다.
+        타 사원 조회이므로 viewerIsSelf={false}로 아이디(loginId)/파일 탭/활성 파일 섹션을
+        숨겨 개인정보 노출을 막는다(본인 조회 페이지인 MyInfoPage와의 핵심 차이점).
+      */}
+      <EmployeeInfoView data={query.data} empId={parsedEmpId} viewerIsSelf={false} />
     </div>
   )
 }
