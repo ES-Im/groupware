@@ -1,7 +1,9 @@
 import { createBrowserRouter } from 'react-router'
 import { LoginPage } from '@/features/auth/pages/LoginPage'
 import { RegisterPage } from '@/features/auth/pages/RegisterPage'
+import { DepartmentDetailPage } from '@/features/department/pages/DepartmentDetailPage'
 import { DepartmentMembersPage } from '@/features/department/pages/DepartmentMembersPage'
+import { DepartmentsPage } from '@/features/department/pages/DepartmentsPage'
 import { EmployeeDetailPage } from '@/features/employee/pages/EmployeeDetailPage'
 import { MyInfoPage } from '@/features/employee/pages/MyInfoPage'
 import { UpdateMePage } from '@/features/employee/pages/UpdateMePage'
@@ -18,6 +20,9 @@ import { LayoutShell } from '@/shared/components/LayoutShell'
  * /department-members는 T2.1-b에서 DepartmentMembersPage로 연결했다. /employees/:empId는
  * T2.2에서 EmployeeDetailPage(사원 상세 실페이지)로 교체했다. /me는 T2.3에서 MyInfoPage(내 정보
  * 조회 페이지)로 연결했다. /me/edit는 T3.1에서 UpdateMePage(내 정보 수정 페이지)로 연결했다.
+ * /departments는 T6.3에서 DepartmentsPage(전사 부서 목록/조직도 페이지)로 연결했다.
+ * /departments/:deptId는 T7.1에서 DepartmentDetailPage(부서 상세 컨테이너)로 연결했다.
+ * deptId 파라미터 유효성 검사·not-found 분기는 페이지 컴포넌트 내부에서 처리한다.
  */
 export const router = createBrowserRouter([
   {
@@ -31,6 +36,14 @@ export const router = createBrowserRouter([
       {
         index: true,
         element: <div>홈(placeholder, 인증/사원 도메인 태스크에서 교체)</div>,
+      },
+      {
+        path: 'departments',
+        element: <DepartmentsPage />,
+      },
+      {
+        path: 'departments/:deptId',
+        element: <DepartmentDetailPage />,
       },
       {
         path: 'department-members',
