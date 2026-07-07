@@ -1,6 +1,6 @@
 # HARUON Auth Walking Skeleton (EMP 대표 슬라이스) Frontend 개발 ROADMAP
 
-> 출처 PRD: `docs/prd/finish_1.auth-walking-skeleton-prd.md`(M0~M3) · `docs/prd/2.shell-and-employee-view-prd.md`(M4~M5, 공통 셸 재정비 + EMP 뷰 프로필사진)
+> 출처 PRD: `docs/prd/finish_1.auth-walking-skeleton-prd.md`(M0~M3) · `docs/prd/2.shell-and-employee-view-prd.md`(M4~M5, 공통 셸 재정비 + EMP 뷰 프로필사진) · `docs/prd/3.department-management-prd.md`(M6~M9, 부서(조직) 관리 — 목록/상세 열람 + ADMIN 관리 액션) · `docs/prd/4.board-slice-prd.md`(M10~M15, 게시판 세로 슬라이스 — 목록/상세/작성/수정/댓글/임시저장함 + 페이징·파일 첨부 표준 확정)
 > 이 로드맵은 PRD를 **실행 순서·의존성·태스크**로 전개한 것이다. 기능/계약의 사실 원천은 PRD와 백엔드 계약 문서이며, 여기서는 **무엇을 어떤 순서로 만들지**만 다룬다.
 > 계약·전역 규칙(reissue 로직, dayjs, 페이징 +1, ApiError 구조, withCredentials, 에러코드→UI 매핑)과 필드/DTO 상세는 재서술하지 않는다 — PRD 본문·§참조 계약 매핑·`generated-snippets`를 가리킨다.
 
@@ -9,8 +9,11 @@
 ## 🗺️ 개요
 
 **📅 최종 업데이트**: 2026-07-07
-**📊 진행 상황**: 24/24 Tasks 완료 (100%) — M0 ✅ / M1 ✅ / M2 ✅ / M3 ✅ / M4 ✅ / M5 ✅
+**📊 진행 상황**: 34/34 Tasks 완료 (부서 관리까지) — M0 ✅ / M1 ✅ / M2 ✅ / M3 ✅ / M4 ✅ / M5 ✅ / M6 ✅ / M7 ✅ / M8 ✅ / M9 ✅ (부서 관리 완료) · **M10~M15 계획 수립 — 착수 전(0/15, 게시판 슬라이스)**
 > M0~M3(auth 워킹 스켈레톤, 17/17)은 완료됐다. M4~M5는 그 완료된 배관 위에 얹는 **공통 셸 재정비 + EMP 뷰 프로필사진**(2번째 PRD) 스코프로, 배관을 재작업하지 않는다.
+> **M6~M9는 3번째 PRD(부서 관리) 스코프**다. §아키텍처 배관 섹션이 없는 PRD이므로(배관은 M0에서 확정) **배관 마일스톤 없이 곧바로 도메인 세로 슬라이스로 시작**한다 — 목록 조회(M6) → 상세 열람(M7) → 등록 mutation(M8) → 관리 mutation(M9). 완료된 M0~M5 배관·셸·EMP 뷰(react-table·`departmentKeys`·`DepartmentDetailView`·`hasRequiredRole`·blob-avatar)를 재작업 없이 소비·복제한다.
+> **M10~M15는 4번째 PRD(게시판 세로 슬라이스) 스코프**다. 역시 §아키텍처 배관 섹션이 없는 PRD(배관은 M0 확정)이므로 **별도 배관 마일스톤 없이 도메인 세로 슬라이스로 시작**하되, 이 PRD는 **이후 모든 목록형·파일 첨부 도메인이 복제할 두 표준을 최초 확정**하는 점이 특수하다 — (흡수①) **재사용 페이징 표준**(Spring `Page` 메타 기반 컨트롤·`DepartmentDetailView`의 인라인 페이징을 공유 훅/컴포넌트로 승격), (흡수②) **파일 업로드/다운로드/인라인 미리보기 표준**(M5 objectURL 생명주기 표준 재사용). 두 표준은 walking-skeleton 원칙에 따라 **별도 배관 마일스톤에 모아두지 않고 각 표준의 최초 소비처(페이징=M10 목록, 다운로드/미리보기=M11 상세, 업로드=M13 수정)에서 확립**한다(M5가 blob-avatar 표준을 T5.1 첫 소비처에서 세운 것과 동일 관행). 여정 순서: 목록(M10) → 상세(M11) → 작성+임시저장글 불러오기(M12) → 수정+첨부(M13) → 댓글(M14) → 내 임시저장함(M15). `boardKeys`·`categoryKeys` 팩토리 신설이 선행 배관 태스크다.
+> **복잡도·중요도·split 판단은 development-planner 산출물에 포함하지 않는다** — M6~M15 표의 `중요도`/`복잡도` 칸은 태스크 착수 시 `task-planner`(Shrimp)가 채운다(M0와 동일 관행). M10~M15는 아직 미착수라 값이 비어 있고 `완료 여부`는 ☐다.
 
 - **전략**: walking-skeleton-first — 이 PRD 자체가 "정답 템플릿" 골격이므로, 배관(M0)을 먼저 세우고 그 위에 인증(M1)·조회(M2)·mutation(M3) 세로 슬라이스를 순서대로 관통시킨다.
 - **핵심 목표(PRD 재확인)**: login → 인터셉터(JWT 부착 / 401·`ROLE_002` → reissue → 원요청 재시도) → protected route → 레이아웃 셸 배관을, 대표 도메인 EMP(목록/상세/생성/mutation 1개)로 **실제 작동 증명**.
@@ -32,7 +35,25 @@ M0 아키텍처 배관 (Walking Skeleton, §A·§B)
                                                                               ▼
 M4 공통 레이아웃 셸 재정비 (S2 선언적 권한 사이드바 표준 · S1 로고 · S3/S4 placeholder · S5 푸터)
   └→ M5 프로필사진 표시 슬라이스 (§B-4 blob-avatar 복제 표준 → F101 헤더 아바타 · F103 EMP 뷰 · F104 목록 정합)
+        └─ (여기까지 2번째 PRD · 이하 3번째 PRD: 부서(조직) 관리 스코프) ─┐
+                                                                        ▼
+M6 부서 목록 조회 슬라이스 (T6.1 부서장 wire 정합화 → DEPTS 조회 → "조직도" 메뉴·목록 페이지·상세로 이동)  [F201]
+  ├→ M7 부서 상세 열람 슬라이스 (route param deptId 신규 컨테이너 · 기존 F202/F203 조회 훅·DepartmentDetailView 재사용)
+  │     └→ M9 부서 관리 mutation 슬라이스 (F205~F209, 상세 페이지 ADMIN 액션: 3개 placeholder 실동작화 + F207/F209 신설)
+  └→ M8 부서 등록 mutation (F204, 목록 페이지 ADMIN 진입점)
+
+        └─ (M0~M9 완료 · 이하 4번째 PRD: 게시판 세로 슬라이스 스코프) ─┐
+                                                                       ▼
+M10 게시판 목록 슬라이스 (배관: boardKeys·categoryKeys 팩토리 · 페이징 표준 흡수① · F301/F302 · "게시판" 메뉴)
+  └→ M11 게시글 상세 슬라이스 (파일 다운로드/미리보기 표준 흡수② · F303/F304/F310/F311 · F306 발행 · likeCount 읽기표시)
+        ├→ M12 게시글 작성 슬라이스 (F305 텍스트전용 · 임시저장/발행 분기 · F308 "임시저장글 불러오기" 재사용)
+        │     └→ M13 게시글 수정+첨부 슬라이스 (파일 업로드 표준 흡수② · F307/F304/F309/F312)
+        │           └→ M15 내 임시저장함 슬라이스 (F308/F306 재사용)
+        └→ M14 댓글 슬라이스 (F313~F317 · 페이징 표준 재사용 · soft delete)
 ```
+
+- **M6~M9 원칙**: 배관/셸(M0~M5)은 재작업하지 않고 소비한다. 조회 계층(F202/F203: `useDepartmentInfoQuery`/`useDepartmentMembersQuery`/`DepartmentDetailView`)은 **이미 존재해 재사용**하되, 실측 wire와 어긋난 `DeptLeader` 타입 정합화(T6.1)가 선행이다. F201(목록)·F204(등록)·F205~F209(관리)는 API 함수·훅·화면이 **아직 없어 신규 구현**이다.
+- **기존 `DepartmentMembersPage`(§2 PRD F104, `/department-members`, 본인 소속 부서 고정 도출)는 이 3번째 PRD의 태스크 대상이 아니다.** M7의 "부서 상세" 컨테이너는 **라우트 파라미터 `deptId` 기반의 새 페이지**이며, 기존 본인 전용 페이지와 라우트·파일명이 겹치지 않게 분리한다(혼동·중복 배치 금지).
 
 - 원칙: **배관이 모든 도메인에 선행**한다. 각 도메인 마일스톤은 화면·훅·상태·에러를 관통하는 **작동하는 얇은 슬라이스** 하나를 완성한다.
 - me 조회 훅(F003)은 세션 복원(M1)에서 먼저 필요하므로 M1에 선행 배치하고, M2·M3가 이를 재소비한다.
@@ -153,6 +174,72 @@ M4 공통 레이아웃 셸 재정비 (S2 선언적 권한 사이드바 표준 ·
 
 ---
 
+### M6 — 부서 목록 조회 슬라이스 (조직도 진입 + 부서장 wire 정합화) ✅ · 근거: 3번째 PRD F201, §부서장 공석 wire 계약, 부서 목록 페이지
+
+> 목표: 사이드바 "조직도" 신규 메뉴 → 전사 부서 목록(부서장 요약 포함) 열람 → 부서 행 클릭으로 상세 라우트 진입까지 **읽기 세로 슬라이스**를 완성한다. 여정 진입점(조직도 메뉴)을 그대로 따른다. 이 과정에서 목록·상세가 공유하는 부서장 공석 판별의 근본(타입 정합화)을 먼저 세운다.
+> 완료 정의: "조직도" 메뉴 → 목록 렌더(검색·활성필터·페이징) → 행 클릭 시 `/departments/:deptId` 이동. 부서장 미지정 부서가 "미지정" 빈 상태로 표시된다(all-null 필드 미노출).
+
+| Task | 설명 | 근거(PRD) | Depends-on | Done 조건 | 중요도 | 복잡도 | 완료 여부 |
+|---|---|---|---|---|---|---|---|
+| **T6.1** | **부서장 wire 타입 정합화(선행 기반)**: 기존 `model/deptInfo.ts`의 `DeptLeader`가 non-null로 선언돼 실측 wire(부서장 공석 시 **전 필드 null인 객체**)와 불일치(`deptInfo.ts:15` `//todo`). **전 필드 nullable `DeptLeaderWire` 타입 신설 + `empName`(또는 `empId`) 유무로 공석 판별해 화면용 `DeptLeader \| null`로 정규화하는 헬퍼**를 데이터 계층에 배선하고, 기존 `getDepartmentInfo`의 타입 우회(`deptLeader.empId == null` 비교) 제거. **기존 F202/F203 조회 훅은 재사용하되 이 정합화가 선행**이며 목록(F201)·상세(F202) 양쪽 공석 렌더의 공통 근본 | F202, §부서장 공석 wire 계약 | — (M0 배관 완료) | 공석 부서가 정규화 후 `deptLeader===null`로 좁혀지고, 목록·상세 어디서도 all-null 필드(빈 문자열/"null")를 렌더하지 않음 | 8 | 4 | ☑ |
+| **T6.2** | (데이터 계층) **`DEPTS` 조회 신규**: `getDepartments` + `useDepartmentsQuery` + `departmentKeys.list(params)` 확장. query `keyword/isActive/page/size`(전부 optional). 응답 `Page<DeptSummary>`의 `deptLeader` 요약은 **T6.1 정규화 재사용**(공석 판별). 신규(기존 API/훅 없음) | F201, §참조 계약 매핑(DEPTS) | T6.1 | `DEPTS` 응답이 `departmentKeys.list`에 캐시, 부서장 요약 공석 판별 적용 | 7 | 4 | ☑ |
+| **T6.3** | (UI 계층) **부서 목록 페이지·"조직도" 메뉴·라우트 신규**: 목록 페이지(부서코드/부서명/활성여부/부서장 요약, `@tanstack/react-table` 재사용) + `router.tsx`에 `/departments` **신설**(현재 부재) + `sidebarMenuItems.ts`에 "조직도" 항목 **신설**(minRole `EMPLOYEE`, 기존 "부서 멤버 목록"과 별개 항목) + 부서명 검색·활성상태 필터·**페이징 UI 포함**(F201은 M2 목록과 달리 페이징 명시) + 행 클릭 → `/departments/:deptId` 이동, 조회 실패 → 토스트/`*_NOT_FOUND_*` not-found UX | F201, 부서 목록 페이지, 메뉴 구조 | T6.2, T4.1(선언적 사이드바 표준) | 조직도 메뉴→목록 렌더·검색/필터/페이징 동작, 행 클릭 시 상세 라우트 이동 | 8 | 6 | ☑ |
+
+> **M6 split 판단(복잡도·중요도)**: 전 태스크 복잡도 < 7 → **split 없음(전부 단일 task 유지)**. T6.1은 연관 기능ID 1개(`DEPT_INFO`)·단일 도메인(department)·실시간/파일 미포함이며 기존 `//todo` workaround(`deptInfo.ts:15`, `getDepartmentInfo.ts`의 `empId==null` 타입 우회)를 정식 타입·헬퍼로 정식화하는 국소 리팩터링이라 복잡도 4. T6.2는 연관 기능ID 1개(`DEPTS`)·단일 도메인·실시간/파일 미포함이며 신규 산출물(`getDepartments`/`useDepartmentsQuery`/`departmentKeys.list`)이 기존 `getDepartmentMembers`/`departmentKeys.members`와 동일한 "신규 조회 훅 1개" 규모(T2.1-a와 동형)라 복잡도 4. T6.3은 새 페이지+새 라우트+새 사이드바 항목+새 필터(`isActive`)+새 테이블 컬럼이 동시에 얽혀 T2.1-b(react-table+라우트+셸 최초 배선)와 동일한 복합 신규 배선 규모이나, react-table 컬럼 헬퍼 패턴(`DepartmentMembersTable`)·페이징 UI 패턴(`DepartmentDetailView`의 `PAGE_SIZE_OPTIONS`)·선언적 사이드바 표준(T4.1)을 그대로 재사용해 복잡도 6(<7). 중요도는 T6.1=8(T6.2·M7 T7.1·M9 T9.3까지 이어지는 공석 판별 계약의 공통 기반), T6.2=7(T6.3 직접 의존 + M9 T9.3이 `DEPTS` 재사용을 명시), T6.3=8(M7 T7.1·M8 T8.1이 이 태스크를 Depends-on으로 명시한 후행 두 마일스톤의 진입점)로 산정.
+> **실행 순서(의존성 위상 + 중요도)**: T6.1(정합화·기반, 중요도8) → T6.2(DEPTS 데이터, 중요도7) → T6.3(페이지·메뉴·라우트, 중요도8). 선형 의존 체인이라 위상 순서가 곧 실행 순서(T6.1은 기존 상세 조회 계층(M7이 재사용)에도 영향을 미치므로 최선행).
+
+---
+
+### M7 — 부서 상세 열람 슬라이스 (route param 컨테이너 신규) ✅ · 근거: 3번째 PRD F202/F203, 부서 상세 페이지
+
+> 목표: 목록에서 넘어온 **임의 deptId**를 라우트 파라미터로 받아 부서 기본정보·부서장·멤버 목록을 열람하는 **읽기 슬라이스**를 완성한다. 기존 조회 훅·프레젠테이션 컴포넌트를 재사용하고, **컨테이너만 신규**로 만든다.
+> 완료 정의: `/departments/:deptId`로 임의 부서 상세가 열리고, 멤버 검색·페이징이 좌측 기본정보 카드를 재로딩·깜빡이지 않으며, 존재하지 않는 deptId는 not-found로 분기한다.
+
+| Task | 설명 | 근거(PRD) | Depends-on | Done 조건 | 중요도 | 복잡도 | 완료 여부 |
+|---|---|---|---|---|---|---|---|
+| **T7.1** | **부서 상세 컨테이너 페이지 신규(route param `deptId`)**: 새 컨테이너 페이지 + 라우트 `/departments/:deptId` **신설**. `useParams`의 `deptId`로 **기존 `useDepartmentInfoQuery`(F202)·`useDepartmentMembersQuery`(F203) 재사용**(deptId 출처만 route param으로 교체) + **기존 프레젠테이션 `DepartmentDetailView` 재사용**(props가 이미 `deptInfo/deptLeader/members/pageInfo/canManageDept` 등으로 파라미터화). **기존 `DepartmentMembersPage`(§2 F104, `/department-members`, 본인 소속 고정)는 대상 아님 — 그대로 유지, 라우트·파일명 분리**. F202/F203 **독립 쿼리 유지**(멤버 검색·페이징이 좌측 기본정보 카드 재로딩·깜빡임을 유발하지 않도록 `keepPreviousData` 또는 초기 로딩만 게이트) + 기본정보 미도착 시 하위 필드 접근 금지(렌더 직전 data 가드, `data!` 단언 지양). 멤버 행 클릭 → 사원 상세(기존 재사용), 존재하지 않는 deptId(`*_NOT_FOUND_*`) → not-found UX | F202, F203, 부서 상세 페이지 | T6.1, T6.3 | 임의 deptId 라우트로 상세 열람, 멤버 검색/페이징 시 좌측 카드 미깜빡임, not-found 분기 동작 | 9 | 6 | ☑ |
+
+> **M7 split 판단(복잡도·중요도)**: T7.1은 연관 기능ID 2개(`DEPT_INFO`/F202, `DEPT_MEMBERS`/F203)이나 **둘 다 M6에서 완성된 조회 훅(`useDepartmentInfoQuery`/`useDepartmentMembersQuery`)·프레젠테이션(`DepartmentDetailView`)을 그대로 재사용**하고(신규 API·훅 없음), 단일 도메인(department)·실시간/파일 업로드 미포함이라 신규 산출물은 라우트 1개 + 컨테이너 페이지 1개뿐이다. 다만 기존 `DepartmentMembersPage`에 실측된 두 결함(멤버 검색·페이징 시 좌측 카드 전면 깜빡임, `deptInfoQuery.data!` 단언의 크래시 위험)을 그대로 복제하지 않고 `keepPreviousData`·렌더 직전 data 가드로 재설계해야 해 순수 복제보다 난이도가 소폭 높다. 사이드바 항목 신설·`react-table` 신규 도입·새 필터가 없어 T2.1-b/T6.3(복합 신규 배선, 복잡도 6)을 상회하지는 않는다 → 종합 복잡도 6(<7) → **split 없음(단일 task 유지)**. 중요도는 M9의 **T9.1·T9.2·T9.3 전부가 이 컨테이너를 Depends-on으로 명시**해(M9 전체 착수 전제) T6.3(중요도8, 후행 2개 마일스톤 진입점)보다 후행 의존 태스크 수가 많은 점을 근거로 9로 산정.
+> **실행 순서**: M7은 T7.1 단일 태스크. 선행(T6.1·T6.3) 완료 후 즉시 착수한다.
+>
+> M7 주의: 기존 상세 조회 계층(훅·`DepartmentDetailView`)은 재사용 가능하나 **컨테이너 배선은 신규**다. 본인 전용 페이지와의 중복/혼동을 피하기 위해 새 컨테이너는 별도 파일·별도 라우트로 둔다.
+
+---
+
+### M8 — 부서 등록 mutation 슬라이스 (ADMIN) ✅ · 근거: 3번째 PRD F204, 부서 목록 페이지
+
+> 목표: 목록 페이지에서 ADMIN이 신규 부서를 등록하는 mutation 슬라이스를 완성한다(RHF+zod+서버검증 에러매핑+성공 invalidate). 여정상 목록 위 ADMIN 진입점.
+> 완료 정의: ADMIN에게만 "부서 등록" 버튼 노출 → 다이얼로그 제출(204) → 목록 invalidate + 성공 토스트, 검증 실패 → 폼 필드 에러.
+
+| Task | 설명 | 근거(PRD) | Depends-on | Done 조건 | 중요도 | 복잡도 | 완료 여부 |
+|---|---|---|---|---|---|---|---|
+| **T8.1** | **부서 등록 신규**: 등록 다이얼로그 + `useRegisterDepartmentMutation`(`DEPT_REGISTER`). RHF+zod(부서코드 3자리 숫자·부서명 20자 이하, 필드 상세는 `generated-snippets/DEPT_REGISTER/` 실측 근거). **ADMIN 전용 노출**(`hasRequiredRole(roles,'ADMIN')`, 페이지 내 버튼 게이팅) + 성공(204) → 목록 `invalidate` + 성공 토스트, 검증 실패 → 폼 필드 에러(T0.2/T1.1 표준), 그 외 → 토스트. **부서 목록 페이지(M6)에 "부서 등록" 버튼 배선**. API 함수·훅 신규(기존 없음) | F204, 부서 목록 페이지 | T6.3, T1.1 | ADMIN에게만 버튼 노출, 등록 성공 시 다이얼로그 닫힘 + 목록 재조회 + 토스트 | 4 | 5 | ☑ |
+
+> **M8 split 판단(복잡도·중요도)**: T8.1은 연관 기능ID 1개(`DEPT_REGISTER`)·단일 도메인(department)·실시간(STOMP)/파일 업로드 미포함이라는 SKILL.md 저복잡도 조건에 해당하나, 신규 API 함수+mutation 훅·신규 zod 스키마·이 저장소 최초의 다이얼로그 UI 도입 가능성(기존 T3.1 `UpdateMePage`는 다이얼로그가 아닌 풀페이지 폼)·`hasRequiredRole` 기반 ADMIN 버튼 게이팅·기존 `DepartmentsPage`/`departmentKeys.list` 배선까지 5가지 신규/배선 산출물이 겹쳐 T3.1(복잡도4)보다 근소히 높고 T1.2(복잡도5, 신규 페이지+mutation+토큰저장+리디렉션)와 동등한 규모라 복잡도 5(<7) → **split 없음(단일 task 유지)**. 중요도는 로드맵 전체에서 T8.1을 Depends-on으로 명시하는 후행 태스크가 없어(M9 T9.1~T9.3은 T7.1·T6.2만 참조, M8은 M6에서 갈라진 리프 마일스톤) T3.1과 동일 근거로 4로 산정한다.
+> **실행 순서**: M8은 T8.1 단일 태스크. 선행(T6.3·T1.1) 완료 후 즉시 착수하며, M7(T7.1)과 서로 독립이라 병렬 착수 가능하다(§병렬화 참조).
+
+---
+
+### M9 — 부서 관리 mutation 슬라이스 (ADMIN, F205~F209) ✅ · 근거: 3번째 PRD F205/F206/F207/F208/F209, 부서 상세 페이지
+
+> 목표: 부서 상세 페이지의 ADMIN 관리 액션 5종을 완성한다. **기존 `DepartmentDetailView`의 3개 disabled placeholder(F205/F206/F208)를 실동작으로 전환**하고, **placeholder조차 없는 F207/F209를 신설**한다. 여정상 마지막(상세 열람 → 관리 → 재조회).
+> 완료 정의: 각 관리 액션 성공(204) → 부서 상세 재조회(invalidate) + 성공 토스트, 검증 실패 → 폼 필드 에러, 부서장 종료 후 공석 정규화 규칙(T6.1) 그대로 적용.
+
+| Task | 설명 | 근거(PRD) | Depends-on | Done 조건 | 중요도 | 복잡도 | 완료 여부 |
+|---|---|---|---|---|---|---|---|
+| **T9.1** | (데이터 계층) **관리 mutation 훅 6종 신규**: `DEPT_ACTIVATE`/`DEPT_DEACTIVATE`(body 없음)·`DEPT_UPDATE_NAME`(query `newName`)·`DEPT_UPDATE_PARENT`(query `parentDeptId` **optional**)·`DEPT_APPOINT_LEADER`(query `leaderEmpId`, `appointedAt` **`yyyy-MM-dd`**)·`DEPT_END_LEADER`(query `endAt` **`yyyy-MM-dd`**). 전부 204. 성공 시 상세 `invalidate`(`departmentKeys`). **기존 placeholder는 서버 호출이 전혀 연동돼 있지 않으므로**(disabled) 이 훅들이 실동작의 데이터 계층. 필드/포맷은 §참조 계약 매핑·스니펫 근거(재설계 금지) | F205, F206, F207, F208, F209, §참조 계약 매핑 | T7.1 | 6종 훅 호출 시 각 엔드포인트 204 처리 및 상세 invalidate 동작 | 7 | 8 | ☑ |
+| T9.1-a | (데이터 계층) `DEPT_ACTIVATE`/`DEPT_DEACTIVATE`(body 없음)·`DEPT_UPDATE_NAME`(query `newName`)·`DEPT_APPOINT_LEADER`(query `leaderEmpId`, `appointedAt` `yyyy-MM-dd`) mutation 훅 4종 신규. F205/F206/F208 소비용. 성공 시 상세 invalidate(`departmentKeys`) | F205, F206, F208, §참조 계약 매핑 | T7.1 | 4종 훅 호출 시 각 엔드포인트 204 처리 및 상세 invalidate 동작 | 6 | 5 | ☑ |
+| T9.1-b | (데이터 계층) `DEPT_UPDATE_PARENT`(query `parentDeptId` optional)·`DEPT_END_LEADER`(query `endAt` `yyyy-MM-dd`) mutation 훅 2종 신규. F207/F209 소비용. 성공 시 상세 invalidate(`departmentKeys`), 종료 후 공석 정규화는 T6.1이 재조회 시 자동 적용 | F207, F209, §참조 계약 매핑 | T7.1 | 2종 훅 호출 시 각 엔드포인트 204 처리 및 상세 invalidate 동작 | 5 | 4 | ☑ |
+| **T9.2** | **F205/F206/F208 placeholder → 실동작 전환**: `DepartmentDetailView`의 **기존 disabled placeholder 3개**("부서장 지정"·"활성화·비활성화 전환"·"부서명 변경", 현재 클릭 무동작)를 실 mutation UI로 전환 — 활성화/비활성화 토글(F205), 부서명 변경 다이얼로그(F206, RHF+zod), 부서장 지정 다이얼로그(F208, 멤버 중 1인 선택 + `appointedAt` `yyyy-MM-dd`). ADMIN 전용(기존 `canManageDept` prop). 성공 → 상세 재조회 + 토스트, 검증 실패 → 폼 에러 | F205, F206, F208, 부서 상세 페이지 | T9.1-a, T7.1 | 3개 액션이 실제 서버 호출로 동작, 성공 후 상세 재조회 + 토스트 | 4 | 6 | ☑ |
+| **T9.3** | **F207/F209 신규 UI 추가**: placeholder조차 없던 2개 액션 **신설** — 상위 부서 변경 다이얼로그(F207, 후보 목록 = `DEPTS` `isActive=true` 재조회(**T6.2 재사용**)·자기 자신 제외·**"최상위로 이동" 옵션**=`parentDeptId` 미전달, 순환 참조 등 심화 검증은 서버 위임), 현재 부서장 종료 버튼(F209, `endAt` `yyyy-MM-dd`, 종료 후 공석 정규화 T6.1 따름). ADMIN 전용. 성공 → 상세 재조회 + 토스트 | F207, F209, 부서 상세 페이지, §참조 계약 매핑 | T9.1-b, T7.1, T6.2 | 상위부서 변경(최상위 옵션 포함)·부서장 종료 동작, 성공 후 상세 재조회 + 토스트 | 4 | 6 | ☑ |
+
+> **M9 split 판단(복잡도·중요도)**: T9.1은 mutation 훅 6종·기능ID 5개(F205~F209)를 한 태스크에 결합해 로드맵 전체에서 가장 넓은 기능ID span을 가져 복잡도 8(≥7) → **의존성 순서(소비처) 축으로 split**: T9.1-a(F205/F206/F208 소비용 4종: activate/deactivate/updateName/appointLeader, 복잡도5)·T9.1-b(F207/F209 소비용 2종: updateParent/endLeader, 복잡도4). 코드 실측상 `DepartmentDetailPage.tsx`(T7.1 산출물)가 이미 존재하고 `DepartmentDetailView.tsx`의 "부서 관리" 섹션엔 disabled placeholder 3개(부서장 지정/활성화·비활성화 전환/부서명 변경, `DeptManagePlaceholderButton`)만 있어 서버 mutation과 전혀 연동돼 있지 않음을 확인했다(§리스크 9). T9.2(F205/F206/F208 실동작 전환)·T9.3(F207/F209 신설)은 각각 기능ID 2~3개·단일 도메인(department)·실시간/파일 업로드 미포함이며 T9.1-a/T9.1-b·T1.1(zod 폼 표준)·T0.2(에러매핑)·T6.2(`DEPTS` 후보 목록)를 재사용하는 수준이라 복잡도 6(<7) → **split 없음(단일 task 유지)**. 중요도는 후행 참조 여부만으로 산정: T9.1-a=6(T9.2 1개 후행), T9.1-b=5(T9.3 1개 후행, T9.3은 T6.2도 별도 참조), T9.2·T9.3=4(이 두 태스크를 Depends-on으로 참조하는 후행 태스크가 로드맵에 없는 리프 — T3.1·T8.1과 동일 근거).
+> **실행 순서(의존성 위상 + 중요도)**: T9.1-a → T9.1-b(서로 독립, 병렬 착수 가능) → T9.2·T9.3(T9.1-a/T9.1-b 완료 후 서로 독립, 병렬 착수 가능). T9.1-a(중요도6)가 T9.1-b(5)보다 근소히 우선하나 실질적으로 동시 착수 가능.
+>
+> Shrimp task-id: T9.1-a=`9cf37907-b420-4b2d-8301-064dbf713d72` · T9.1-b=`35e12bb4-0a6e-4d1c-9aad-3c6c26e387dc` · T9.2=`6664e372-11ac-4776-8f52-e9ca386304d9` · T9.3=`92c97d13-bd21-462f-a797-fe08c3f52a64`
+
+---
+
 ## 🔀 병렬화 가능 지점 (요약)
 
 - **M0**: T0.1 · T0.3 · T0.6 상호 독립 → 동시 착수.
@@ -161,6 +248,10 @@ M4 공통 레이아웃 셸 재정비 (S2 선언적 권한 사이드바 표준 ·
 - **M4**: T4.3(푸터)은 T4.1(사이드바 표준)·T4.2(헤더)와 독립 → 병렬 착수 가능.
 - **M5**: T5.1(blob 프리미티브) 완료 후 **T5.2(F103 EMP 뷰)와 T5.3(F101 헤더 아바타)은 서로 독립 → 병렬** 가능. 또한 M5의 T5.1·T5.2(EMP 뷰 계층)는 M2 위에만 의존하고 헤더(M4)에 의존하지 않으므로 **M4와 부분 병렬 착수 가능**(단, T5.3 헤더 아바타는 T4.2 슬롯에 의존).
 - 마일스톤 경계(M0→M1→M2→M3, 이어서 M4→M5)는 배관·셸 의존성상 **직렬 유지**를 권장한다(골격·셸이 도메인 뷰에 선행). M4~M5는 완료된 M0~M3 위에 얹으며 배관을 재작업하지 않는다.
+- **M6**: T6.1(정합화)→T6.2(DEPTS)→T6.3(페이지·메뉴)는 단일 선형 체인(직렬). 정합화가 데이터·UI에 선행.
+- **M7 ↔ M8**: 둘 다 M6 위에 얹히고 서로 독립(M7=상세 열람, M8=목록 위 등록) → **병렬 착수 가능**. 단 M9(관리)는 M7(상세 컨테이너) 완료에 의존.
+- **M9**: T9.1(관리 mutation 데이터 계층) 완료 후 **T9.2(3개 placeholder 실동작화)와 T9.3(F207/F209 신설)은 서로 독립 → 병렬** 가능. T9.3은 후보 목록에 T6.2(DEPTS)를 재사용하므로 M6 완료를 함께 전제.
+- 마일스톤 경계(M6→M7→{M8,M9})도 조회 계층·컨테이너가 mutation에 선행하므로 **직렬 유지**를 권장한다(M8/M7만 상호 병렬). M6~M9는 완료된 M0~M5 위에 얹으며 배관·셸을 재작업하지 않는다.
 
 ---
 
@@ -178,6 +269,15 @@ PRD가 "구현 시 결정 / 추후 조정"으로 명시적으로 남긴 지점. 
    - **이번 스코프 처리(로드맵 반영)**: 본인 아바타/내 정보 프로필사진은 **이니셜 폴백을 기본**으로 하고, `//todo: 본인 preview용 numeric empId 소스 확정(서버가 me 전용 preview 기능 제공 or me 응답에 empId 추가) 필요` 플래그를 남긴다. empId 소스가 확정되면 T5.1 프리미티브를 통해 이미지로 승격한다. **T5.3·T5.2(me 부분)의 Done 조건에 "empId 미확정 시 이니셜 폴백 동작"을 명시**했다. (T5.1, T5.2, T5.3)
    - **정상 케이스**: 타 사원 상세(F103)는 `DEPT_MEMBERS`/`RETRIEVE_EMP_INFO`·라우트로 numeric `empId`를 확보하므로 실 프로필사진이 정상 표시된다 — blob-avatar 표준을 **먼저 실증**하는 경로.
    - **추측 금지 준수**: 본인 전용 preview 기능ID·경로를 임의 발명하지 않는다. 확정 필요 시 사용자·백엔드와 논의.
+
+### M6~M9(3번째 PRD: 부서 관리) 리스크 & 선행 결정
+
+8. **⚠️ F202/F203 조회 계층 재사용 가능하나 `DeptLeader` 타입 정합화 선행 필요(§부서장 공석 wire 계약)** — 기존 `useDepartmentInfoQuery`/`useDepartmentMembersQuery`/`DepartmentDetailView`는 상세 열람(F202/F203)에 그대로 재사용 가능하지만, **`model/deptInfo.ts`의 `DeptLeader`가 non-null로 선언**돼 실측 wire(부서장 공석 시 전 필드 null 객체)와 불일치한다(`deptInfo.ts:15`·`DepartmentMembersPage.tsx:104,154` `//todo`). **wire 타입(전 필드 nullable) 신설 + `empName` 유무 공석 판별 정규화**가 T6.1로 선행돼야 목록(F201)·상세(F202)의 공석 렌더가 근본적으로 안전해진다. (T6.1)
+9. **⚠️ `DepartmentDetailView` ADMIN "부서 관리" 섹션 현황 — 3개 disabled placeholder + F207/F209 부재(코드 감사 확인)** — 현재 이 컴포넌트의 관리 섹션에는 **F205(활성화/비활성화)·F206(부서명변경)·F208(부서장지정) 3개만 disabled placeholder**로 존재하며 **서버 mutation과 전혀 연동돼 있지 않다**(클릭 무동작). **F207(상위부서변경)·F209(부서장종료)는 placeholder조차 없다**(`DepartmentDetailView.tsx` 내 `//todo` 확인). 따라서 M9는 (a) 3개 placeholder를 실동작으로 전환(T9.2) + (b) F207/F209 UI 신설(T9.3)의 두 갈래로 나뉜다. (T9.1~T9.3)
+10. **F207 상위 부서 변경 후보/최상위 옵션** — 후보 목록은 `DEPTS`(isActive=true) 재조회로 구성하고 **자기 자신은 후보에서 제외**하며, `parentDeptId`는 계약상 optional이라 **선택 해제 = "최상위로 이동"**(미전달)로 처리한다. 순환 참조 등 심화 검증은 **서버 위임**(프론트에서 재구현 금지). (T9.3)
+11. **부서장 지정/종료 날짜 포맷** — `appointedAt`/`endAt`는 스니펫 실측상 **`yyyy-MM-dd`**(전역 dayjs 규약 준수). 구체 UX(달력 vs 텍스트)는 구현 시 결정하되 포맷은 계약 고정. (T9.2, T9.3)
+12. **부서 목록 페이징 UI 포함(M2와 대비)** — M2 부서 멤버 목록은 페이징 UI를 제외했으나, **F201 부서 목록은 PRD가 keyword/isActive/page/size + 페이징을 명시**하므로 목록 페이지에 페이징 UI를 포함한다(백로그의 "페이징 UI 제외"는 EMP 스코프 한정). `staleTime`/`retry` 구체값은 §Open Question #1과 동일하게 구현 시 확정. (T6.3)
+13. **조직도 트리 시각화 제외** — 계약은 `parentDeptId` 평면 필드만 제공하고 트리 렌더 컴포넌트가 스택에 없어, MVP는 **목록(표) + 상위부서ID 텍스트 표기**로 대체한다(트리/그래프는 §백로그, 발명 금지). (T6.3, T7.1)
 
 ---
 
@@ -200,6 +300,14 @@ PRD가 "구현 시 결정 / 추후 조정"으로 명시적으로 남긴 지점. 
 - **전자서명(`SIGNATURE`) 파일 표시** — 프로필사진(`PROFILE_PICTURE`)만 표시, 서명은 계속 숨김.
 - **회사 정보 동적 조회/수정** — `GET /api/companies` 라우트는 존재하나 기능ID·필드 계약 미문서화(`api-endpoint.md` 인덱스 부재)로 확정 불가 → 푸터(S5) 정적 placeholder 유지.
 - **Layer 2 업무 도메인 페이지(HR/FRANCHISE/FACILITY/IT)** — 각 도메인 PRD 담당. 사이드바 노출 규칙(S2)만 M4가 확정, 실 항목은 배치하지 않음(고아 메뉴 방지).
+
+**M6~M9(3번째 PRD "3. MVP 이후 기능") 명시 제외 — 태스크화 금지:**
+
+- **조직도 트리/그래프 시각화** — 계약은 `parentDeptId` 평면 필드만 제공, 트리 렌더 컴포넌트는 현재 스택에 없음. MVP는 목록(표)+상위부서ID 텍스트로 대체(별도 논의 대상).
+- **부서 하드 삭제** — 계약에 없음(`DEPT_ACTIVATE`/`DEPT_DEACTIVATE` 비활성화로 대체).
+- **사원의 소속 부서 변경(전보)** — `employee` 도메인 기능(`DEPT_MANAGER_UPDATE_EMP_INFO`)이며 DEPT API 그룹 밖.
+- **부서 근태/휴가 조회**(`DEPT_ATTENDANCE_*`·`DEPT_LEAVE_REQUEST_HISTORY`·`DEPT_BUSINESS_TRIP_REQUEST_HISTORY`·`DEPT_EMP_LEAVE_*`) — 근태/휴가 도메인 PRD 담당(부서를 조회 축으로만 씀).
+- 테마/다크모드, 다국어(i18n), 프로필 커스터마이징.
 
 ---
 
@@ -269,3 +377,37 @@ PRD가 "구현 시 결정 / 추후 조정"으로 명시적으로 남긴 지점. 
 **🔍 열린 항목(고아 아님, 명시적 리스크): 본인 preview용 numeric empId 소스 공백(§리스크 7)** — 확정 전 이니셜 폴백 + `//todo`, T5.2(me)·T5.3 Done 조건에 반영. 타 사원 상세는 정상. 추측 경로 발명 금지 ✅
 
 **최종: M4~M5 6개 체크 전부 통과(열린 항목 1건 명시). 개발 착수 가능.**
+
+---
+
+### M6~M9(3번째 PRD: 부서(조직) 관리) 정합성 검증
+
+**🔍 커버리지: PRD 모든 F00x → 최소 1개 태스크 매핑 (제외 기능 제외)**
+- F201→T6.2·T6.3 ✅ / F202→T6.1·T7.1 ✅ / F203→T7.1 ✅ / F204→T8.1 ✅ / F205→T9.1·T9.2 ✅ / F206→T9.1·T9.2 ✅ / F207→T9.1·T9.3 ✅ / F208→T9.1·T9.2 ✅ / F209→T9.1·T9.3 ✅
+- **결과: 9개 기능ID(F201~F209) 전부 태스크 매핑. F202의 부서장 공석 wire 정합화는 T6.1로 선행 분리(중복 아님) ✅**
+
+**🔍 역참조: 모든 태스크가 PRD F00x/§섹션에 근거 (발명 태스크 없음)**
+- M6(T6.1~T6.3)→F201·F202·§부서장 공석 wire 계약·부서 목록 페이지·메뉴 구조 ✅ / M7(T7.1)→F202·F203·부서 상세 페이지 ✅ / M8(T8.1)→F204 ✅ / M9(T9.1~T9.3)→F205~F209·§참조 계약 매핑 ✅
+- **결과: 근거 없는 발명 태스크 없음. 기존 `DepartmentMembersPage`(§2 F104)는 대상 아님으로 명시 분리 ✅**
+
+**🔍 의존성: 위상 정렬(순환 없음) + 배관·셸·조회 선행**
+- M6(목록/정합화) → M7(상세 컨테이너) → {M8(등록, 실제로는 M6 위)·M9(관리)} 순. T6.1이 T6.2·T6.3·T7.1(공석 렌더)에 선행, T9.1(데이터)이 T9.2·T9.3(UI)에 선행 → depends-on이 앞선 태스크만 참조, **순환 없음** ✅
+- **완료된 M0~M5 배관·셸·EMP 뷰·`departmentKeys`·`DepartmentDetailView` 재작업 태스크 없음**(재사용/신규 배선만) ✅
+- **결과: 조회 계층·컨테이너가 mutation에 선행, 위상 정렬 성립 ✅**
+
+**🔍 여정 정합: 태스크 순서 ↔ PRD 사용자 여정**
+- 여정: 사이드바 "조직도" → 부서 목록(검색/필터/페이징, ADMIN 등록) → 행 클릭 → 부서 상세(기본정보·부서장·멤버) → (ADMIN) 관리 액션
+- 태스크 순서: T6.3(조직도 메뉴·목록)→T7.1(상세 열람)→T8.1(목록 위 등록)·T9.x(상세 관리)
+- **결과: 여정 진입 순서(메뉴→목록→상세→관리)와 모순 없음 ✅**
+
+**🔍 범위: PRD 제외 기능이 태스크로 유입되지 않음**
+- 조직도 트리 시각화·하드 삭제·전보(`DEPT_MANAGER_UPDATE_EMP_INFO`)·부서 근태/휴가 조회 → 전부 §백로그에만 존재, 태스크 없음 ✅
+- **결과: 범위 초과 없음 ✅**
+
+**🔍 규약: 계약/전역 규칙 재서술·필드 설계·URL·인프라·견적 강제 부재**
+- axios 인터셉터·QueryClient·authStore·에러매핑 등 배관은 M0~M5 근거로 **가리키기만** 함 ✅ / DTO·query 필드 상세 미설계(§참조 계약 매핑·`generated-snippets/<기능ID>/` 지시, 날짜 `yyyy-MM-dd`·`parentDeptId` optional 등은 계약 인용) ✅ / URL 경로 명세 없음(기능ID로만 표기) ✅ / 인프라·성능지표·페르소나 없음 ✅ / 날짜·시수 견적 강제 없음(상대 순서·의존성 중심) ✅
+- **결과: 규약 준수 ✅**
+
+**🔍 열린 항목(고아 아님, 명시적 리스크): §리스크 8~13** — DeptLeader 타입 정합화 선행(8)·3개 placeholder 실동작화 + F207/F209 신설(9)·F207 최상위 옵션/서버 위임(10)·날짜 포맷(11)·목록 페이징 포함(12)·트리 제외(13). 코드 감사 사실 그대로 반영, 추측 경로 발명 없음 ✅
+
+**최종: M6~M9 6개 체크 전부 통과(열린 항목 6건 명시). 개발 착수 가능(복잡도·중요도·split은 task-planner가 착수 시 확정).**
