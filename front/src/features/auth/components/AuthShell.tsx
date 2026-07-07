@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { Link } from 'react-router'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card'
 
 interface AuthShellProps {
@@ -14,31 +15,51 @@ interface AuthShellProps {
 
 /**
  * 비인증 라우트(로그인·회원가입·승인 대기) 공통 시각 셸(순수 프레젠테이셔널).
- * 셸(LayoutShell) 밖이라 헤더/사이드바가 없으므로, 중앙 정렬 카드 레이아웃으로 독립적이되
- * 다크 헤더에 쓰인 primary 톤을 워드마크에 반영해 같은 제품 톤을 유지한다.
+ * 좌(로고+폼, 30%) + 우(실사 이미지, 70%) 2단 레이아웃(3:7 비율, 사용자 확정).
+ * - 좌측: 모바일은 전체 폭, lg 이상은 30%. 상단 중앙에 로고, 남은 공간 중앙에 폼 카드를 배치.
+ * - 우측: lg 이상에서만 노출되는 실사 이미지(70%, `/login-cover.jpg`, object-cover 풀블리드).
+ *   lg 미만에서는 숨겨 좌측 컬럼만 전체 폭으로 보인다.
+ *
+ * 로고는 이 셸의 배경(bg-background)이 라이트/다크 테마에서 일반적인 방향(라이트: 밝음 →
+ * 다크: 어두움)으로 동작하므로, 헤더(bg-primary, 반전 토큰)와는 반대로 스왑한다 — 라이트
+ * 테마(밝은 배경)엔 검은 글자 로고, 다크 테마(어두운 배경)엔 흰 글자 로고.
+ *
  * 데이터/로직은 각 페이지 컨테이너가 주입하는 children으로만 받는다(로직 없음).
  */
 export function AuthShell({ title, description, children, footer }: AuthShellProps) {
   return (
-    <main className="flex min-h-svh flex-col items-center justify-center bg-muted/40 px-4 py-10">
-      <div className="w-full max-w-sm">
-        {/* 브랜드 워드마크: 다크 헤더(bg-primary)의 톤을 그대로 살린 포인트. */}
-        <div className="mb-6 flex justify-center">
-          <span className="inline-flex items-center rounded-lg bg-primary px-3.5 py-1.5 text-base font-semibold tracking-tight text-primary-foreground">
-            HARUON
-          </span>
-        </div>
-        <Card>
-          <CardHeader className="text-center">
-            <CardTitle className="text-lg">{title}</CardTitle>
-            {description && <CardDescription>{description}</CardDescription>}
-          </CardHeader>
-          <CardContent>{children}</CardContent>
-        </Card>
-        {footer && (
-          <p className="mt-6 text-center text-sm text-muted-foreground">{footer}</p>
-        )}
+    <div className="flex min-h-svh bg-background">
+      {/* 좌측: 로고(상단) + 폼(남은 공간 중앙). 모바일 전체 폭, lg 이상 30%. */}
+      <div className="flex w-full flex-col px-6 py-8 lg:w-[30%] lg:px-8 lg:py-10">
+        <Link to="/" className="mx-auto inline-flex w-fit shrink-0">
+          <img src="/haruon-logo-dark.svg" alt="HARUON" className="h-16 w-auto dark:hidden" />
+          <img
+            src="/haruon-logo.svg"
+            alt="HARUON"
+            className="hidden h-8 w-auto dark:block"
+          />
+        </Link>
+        <main className="flex flex-1 items-center justify-center py-10">
+          <div className="w-full max-w-sm">
+            <Card className="ring-0 shadow-none [--card-spacing:1.1rem]">
+              <CardHeader className="pb-8 text-center">
+                {/* 요청대로 기본 크기(text-lg, 1.125rem)의 3배(3.375rem) + bold로 로고와 폼 사이에서 존재감을 준다. */}
+                <CardTitle className="text-[3.375rem] leading-tight font-bold">{title}</CardTitle>
+                {description && <CardDescription>{description}</CardDescription>}
+              </CardHeader>
+              <CardContent>{children}</CardContent>
+            </Card>
+            {footer && (
+              <p className="mt-6 text-center text-sm text-muted-foreground">{footer}</p>
+            )}
+          </div>
+        </main>
       </div>
-    </main>
+
+      {/* 우측: 실사 이미지 70%. 모바일에서는 숨기고 lg 이상에서만 노출. */}
+      <div className="relative hidden overflow-hidden lg:block lg:w-[70%]">
+        <img src="/login-cover.jpg" alt="" className="size-full object-cover" />
+      </div>
+    </div>
   )
 }

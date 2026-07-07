@@ -30,7 +30,7 @@ export function LoginPage() {
 
   return (
     <AuthShell
-      title="로그인"
+      title="LOGIN"
       description="HARUON 그룹웨어 계정으로 로그인하세요"
       footer={
         <>

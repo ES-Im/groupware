@@ -40,8 +40,8 @@ describe('LoginForm (T1.1 표준 폼 패턴)', () => {
       .mockRejectedValue(fakeAxiosError(400, 'VALIDATION_ERROR', '아이디는 필수입니다'))
     render(<LoginForm onSubmit={onSubmit} />)
 
-    await user.type(screen.getByLabelText('아이디'), 'user01')
-    await user.type(screen.getByLabelText('비밀번호'), 'pw12345')
+    await user.type(screen.getByLabelText('ID *'), 'user01')
+    await user.type(screen.getByLabelText('Password *'), 'pw12345')
     await user.click(screen.getByRole('button', { name: '로그인' }))
 
     const rootError = await screen.findByText('아이디는 필수입니다')
@@ -61,8 +61,8 @@ describe('LoginForm (T1.1 표준 폼 패턴)', () => {
       .mockRejectedValue(fakeAxiosError(500, 'INTERNAL_SERVER_ERROR', '서버 오류입니다'))
     render(<LoginForm onSubmit={onSubmit} />)
 
-    await user.type(screen.getByLabelText('아이디'), 'user01')
-    await user.type(screen.getByLabelText('비밀번호'), 'pw12345')
+    await user.type(screen.getByLabelText('ID *'), 'user01')
+    await user.type(screen.getByLabelText('Password *'), 'pw12345')
     await user.click(screen.getByRole('button', { name: '로그인' }))
 
     await waitFor(() => expect(toast.error).toHaveBeenCalledWith('서버 오류입니다'))

@@ -1,3 +1,4 @@
+import { Lock, User } from 'lucide-react'
 import { useZodForm, submitWithErrorMapping } from '@/shared/lib/form'
 import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
@@ -38,13 +39,21 @@ export function LoginForm({ onSubmit }: LoginFormProps) {
       className="flex flex-col gap-4"
     >
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="loginId">아이디</Label>
-        <Input
-          id="loginId"
-          autoComplete="username"
-          aria-invalid={!!errors.loginId}
-          {...register('loginId')}
-        />
+        <Label htmlFor="loginId">
+          ID <span className="text-destructive">*</span>
+        </Label>
+        {/* 검색 입력 아이콘 패턴 복제 + 참고 스크린샷 비율에 맞춰 필드 높이/좌측 패딩 확대(h-11, pl-9). */}
+        <div className="relative">
+          <User className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            id="loginId"
+            className="h-11 pl-9"
+            placeholder="your ID"
+            autoComplete="username"
+            aria-invalid={!!errors.loginId}
+            {...register('loginId')}
+          />
+        </div>
         {errors.loginId && (
           <p role="alert" className="text-sm text-destructive">
             {errors.loginId.message}
@@ -53,14 +62,22 @@ export function LoginForm({ onSubmit }: LoginFormProps) {
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="password">비밀번호</Label>
-        <Input
-          id="password"
-          type="password"
-          autoComplete="current-password"
-          aria-invalid={!!errors.password}
-          {...register('password')}
-        />
+        <Label htmlFor="password">
+          Password <span className="text-destructive">*</span>
+        </Label>
+        {/* 검색 입력 아이콘 패턴 복제 + 참고 스크린샷 비율에 맞춰 필드 높이/좌측 패딩 확대(h-11, pl-9). */}
+        <div className="relative">
+          <Lock className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            id="password"
+            type="password"
+            className="h-11 pl-9"
+            placeholder="••••••••"
+            autoComplete="current-password"
+            aria-invalid={!!errors.password}
+            {...register('password')}
+          />
+        </div>
         {errors.password && (
           <p role="alert" className="text-sm text-destructive">
             {errors.password.message}

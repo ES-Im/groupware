@@ -1,0 +1,15 @@
+<svg width="162" height="172" viewBox="0 0 162 172" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="HARUON icon">
+  <defs>
+    <linearGradient id="haruonSmallBg" x1="9" y1="2" x2="152" y2="166" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#6D5CFF"/>
+      <stop offset="1" stop-color="#3D8DFF"/>
+    </linearGradient>
+    <linearGradient id="haruonSmallMark" x1="46" y1="43" x2="116" y2="133" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#BFFBF4"/>
+      <stop offset="1" stop-color="#5EE7F0"/>
+    </linearGradient>
+  </defs>
+  <rect x="1" y="2" width="160" height="168" rx="28" fill="url(#haruonSmallBg)"/>
+  <path d="M44 47C44 41.5 48.5 37 54 37H67C72.5 37 77 41.5 77 47V75H101V47C101 41.5 105.5 37 111 37H124C129.5 37 134 41.5 134 47V124C134 129.5 129.5 134 124 134H111C105.5 134 101 129.5 101 124V96H77V124C77 129.5 72.5 134 67 134H54C48.5 134 44 129.5 44 124V47Z" fill="url(#haruonSmallMark)"/>
+  <path d="M96 31C113 29 126 23 140 12V62C126 71 112 75 96 75V31Z" fill="#9AF6E9" fill-opacity="0.82"/>
+</svg>
