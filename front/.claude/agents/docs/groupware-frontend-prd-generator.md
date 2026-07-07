@@ -13,7 +13,8 @@ description: |
   Context: 특정 도메인 PRD
   user: "전자결재 도메인 프론트 PRD 정리해줘"
   assistant: "전자결재 백엔드 계약을 기반으로 해당 도메인 PRD를 생성하기 위해 groupware-frontend-prd-generator 에이전트를 사용하겠습니다."
-  </example>
+  </example> |
+
 model: opus
 ---
 

@@ -12,7 +12,7 @@ argument-hint: [task-name-or-id] [code-review: true|false, 기본 true] [ux-revi
 
 # 실행은 아래와 같이 단계별로 시행한다.
 
-# 1. `@task-executor` 위임 
+## 1. `@task-executor` 위임 
 
 `@task-executor` agent가 Shrimp Task Manager의 task를 실행한다.
 - `$1` = 대상 task (task-name-or-id)
