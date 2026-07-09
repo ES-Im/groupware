@@ -69,10 +69,12 @@ export const sidebarMenuItems: SidebarMenuItem[] = [
     // 문서함 홈은 M7(T7.3)에서 DocumentBoxHomePage(F715 요약 카드·F711 결재대기 강조)로 live 승격했다.
     // 결재대기함은 badgeKey('approvalPending')로 F711 결재대기 건수 뱃지 슬롯을 선언한다 — 실제
     // count는 LayoutShell이 useMyPendingApprovalDraftsCountQuery로 조회해 주입한다.
+    // 새 기안 작성은 DRAFT-COMMON에서 GeneralDraftCreatePage(F720) 진입점으로 그룹 최상단에 추가했다.
     label: '전자결재',
     minRole: 'EMPLOYEE',
     icon: FileSignature,
     children: [
+      { label: '새 기안 작성', to: '/approval/drafts/new', minRole: 'EMPLOYEE' },
       { label: '문서함 홈', to: '/approval/box/home', minRole: 'EMPLOYEE' },
       { label: '상신함', to: '/approval/box/submitted', minRole: 'EMPLOYEE' },
       { label: '임시저장함', to: '/approval/box/unsubmitted', minRole: 'EMPLOYEE' },

@@ -1,10 +1,12 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router'
 import { toast } from 'sonner'
 import { handleApiError } from '@/shared/lib/apiError'
 import { Button } from '@/shared/ui/button'
 import { useMeQuery } from '@/features/employee/api/useMeQuery'
 import { useDraftSubmissionWithdrawalMutation } from '../../api/useDraftSubmissionWithdrawalMutation'
 import { useDraftSubmitMutation } from '../../api/useDraftSubmitMutation'
+import { isGeneralDraft } from '../../lib/isGeneralDraft'
 import { resolveDrafterActions } from '../../lib/resolveDrafterActions'
 import { CancellationDraftDialog } from './CancellationDraftDialog'
 import type { DraftDetailSectionProps } from './types'
@@ -27,6 +29,7 @@ import type { DraftDetailSectionProps } from './types'
  * props는 `{ draft }` 고정 계약을 유지한다(types.ts DraftDetailSectionProps).
  */
 export function DrafterActions({ draft }: DraftDetailSectionProps) {
+  const navigate = useNavigate()
   const [cancelOpen, setCancelOpen] = useState(false)
   const meQuery = useMeQuery()
   const submitMutation = useDraftSubmitMutation()
@@ -58,9 +61,14 @@ export function DrafterActions({ draft }: DraftDetailSectionProps) {
     })
   }
 
-  // [수정]은 유형별 작성 페이지 라우팅이나 이번 공통 범위에서 미구현이다(Open Q#3) — 실제 이동 없이
-  // "해당 유형 화면 준비 중" 안내만 한다.
+  // [수정] 배선(②일반 기안 T2.4): 일반 기안(슬롯-null 술어 isGeneralDraft)이면 일반 기안 수정
+  // 페이지로 이동한다. 나머지 유형 슬롯 있는 기안(휴가/출장/매출)은 각 유형 작성 PRD 착수 전까지
+  // 기존 "준비 중" 폴백 토스트를 유지한다(Open Q#5 — GENERAL 분기만 배선).
   function handleEdit() {
+    if (isGeneralDraft(draft)) {
+      navigate(`/approval/drafts/${draft.draftId}/edit`)
+      return
+    }
     toast.info('해당 유형 작성 화면은 준비 중입니다')
   }
 

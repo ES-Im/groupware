@@ -9,6 +9,8 @@ import { UnsubmittedDraftsPage } from '@/features/approval/pages/UnsubmittedDraf
 import { PendingApprovalDraftsPage } from '@/features/approval/pages/PendingApprovalDraftsPage'
 import { AccessibleDocumentsPage } from '@/features/approval/pages/AccessibleDocumentsPage'
 import { DraftDetailPage } from '@/features/approval/pages/DraftDetailPage'
+import { GeneralDraftCreatePage } from '@/features/approval/pages/GeneralDraftCreatePage'
+import { GeneralDraftEditPage } from '@/features/approval/pages/GeneralDraftEditPage'
 import { BoardCreatePage } from '@/features/board/pages/BoardCreatePage'
 import { BoardDetailPage } from '@/features/board/pages/BoardDetailPage'
 import { BoardDraftsPage } from '@/features/board/pages/BoardDraftsPage'
@@ -54,6 +56,13 @@ import { LayoutShell } from '@/shared/components/LayoutShell'
  * 연결했다 — 4종 문서함 페이지의 행 클릭 이동이 실제 상세 화면으로 이어진다. draftId 파라미터
  * 유효성 검사·403/404 분기는 DraftDetailPage 내부에서 처리하므로 minRole EMPLOYEE 기준
  * ProtectedRoute(인증 가드)만으로 충분하다.
+ * /approval/drafts/new는 일반 기안 작성(DRAFT-COMMON)에서 GeneralDraftCreatePage(F720)로 연결했다.
+ * /approval/drafts/:draftId/edit는 일반 기안 수정(DRAFT-COMMON)에서 GeneralDraftEditPage(F721)로
+ * 연결했다 — 상세 페이지의 [수정] 액션(resolveDrafterActions.canEdit)이 실제 이동 목적지로 이어진다.
+ * 정적 세그먼트 'new'는 React Router 7 랭킹 규칙상 동적 ':draftId'보다 항상 우선 매칭되지만,
+ * 명시적으로도 ':draftId'보다 앞에 등록해 둔다. draftId 파라미터 유효성 검사(10진 양의 정수 가드)·
+ * 403/404·유형(isGeneralDraft)·권한(canEdit) 분기는 두 페이지 내부에서 처리하므로 minRole EMPLOYEE
+ * 기준 ProtectedRoute(인증 가드)만으로 충분하다.
  */
 export const router = createBrowserRouter([
   {
@@ -151,10 +160,23 @@ export const router = createBrowserRouter([
         element: <AccessibleDocumentsPage />,
       },
       {
+        // 일반 기안 작성 페이지: DRAFT-COMMON에서 GeneralDraftCreatePage(F720)로 연결했다.
+        // 정적 세그먼트라 동적 approval/drafts/:draftId보다 항상 우선 매칭되지만(React Router 7
+        // 랭킹 규칙), 명시적으로도 :draftId보다 앞에 등록해 둔다.
+        path: 'approval/drafts/new',
+        element: <GeneralDraftCreatePage />,
+      },
+      {
         // 기안서 상세 페이지: M2(T2.5)에서 DraftDetailPage(F701)로 연결했다. 4종 문서함 페이지의
         // 행 클릭 이동이 실제 상세 화면으로 이어진다.
         path: 'approval/drafts/:draftId',
         element: <DraftDetailPage />,
+      },
+      {
+        // 일반 기안 수정 페이지: DRAFT-COMMON에서 GeneralDraftEditPage(F721)로 연결했다. 상세
+        // 페이지의 [수정] 액션이 실제 이동 목적지로 이어진다.
+        path: 'approval/drafts/:draftId/edit',
+        element: <GeneralDraftEditPage />,
       },
     ],
   },
