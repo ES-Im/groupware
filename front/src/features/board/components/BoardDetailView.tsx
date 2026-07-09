@@ -254,7 +254,7 @@ export function BoardDetailView({ boardId, onBack }: BoardDetailViewProps) {
           {/* 카테고리 표기(목록 pill 필터와 동일한 폴더 아이콘 언어의 CategoryBadge) — 이름을
               해석했을 때만 노출한다. */}
           {categoryName && <CategoryBadge name={categoryName} className="mb-2" />}
-          <CardTitle className="text-xl">{board.title}</CardTitle>
+          <CardTitle className="text-xl font-semibold">{board.title}</CardTitle>
           <p className="mt-1 text-sm text-muted-foreground">
             {board.authorName} · 발행 {dayjs(board.publishedAt).format('YYYY-MM-DD HH:mm')}
             {showModifiedAt && ` · 수정 ${dayjs(board.modifiedAt).format('YYYY-MM-DD HH:mm')}`}

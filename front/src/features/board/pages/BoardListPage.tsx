@@ -148,8 +148,11 @@ export function BoardListPage() {
 
       {/* 좌: 카테고리 사이드바 카드 / 우: 게시글 목록 카드. DepartmentDetailView와 동일한 2열 그리드
           패턴을 재사용해 lg 미만에서는 세로 스택(카테고리 카드가 위)으로 떨어진다. lg에서는 남는
-          높이를 그리드가 채우고(min-h-0로 자식 스크롤 허용), 우측 목록/상세 카드가 그 높이를 물려받는다. */}
-      <div className="grid gap-6 lg:min-h-0 lg:flex-1 lg:grid-cols-[320px_1fr]">
+          높이를 그리드가 채우고(min-h-0로 자식 스크롤 허용), 우측 목록/상세 카드가 그 높이를 물려받는다.
+          모바일에서 grid-cols-1(=minmax(0,1fr))을 명시해야 한다 — 생략하면 암묵 auto 트랙이 max-content로
+          커져 자식이 뷰포트 밖으로 넘치고, LayoutShell이 h-svh로 바뀌며 main이 overflow-y-auto가 된 뒤로는
+          그 오버플로가 가로 스크롤바로 드러난다(자식 min-content는 작아 정상 축소 가능). lg 값은 불변. */}
+      <div className="grid grid-cols-1 gap-6 lg:min-h-0 lg:flex-1 lg:grid-cols-[320px_1fr]">
         {/* 좌측: 카테고리 필터 카드(레퍼런스 좌측 사이드바) */}
         <Card className="h-fit">
           <CardHeader className="border-b">

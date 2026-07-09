@@ -296,7 +296,7 @@ export function BoardCreateForm({ onSuccess }: BoardCreateFormProps) {
           <Button
             type="button"
             size="lg"
-            className="px-5"
+            className="px-5 font-semibold"
             disabled={isSubmitting}
             onClick={() => void submitPublish()}
           >

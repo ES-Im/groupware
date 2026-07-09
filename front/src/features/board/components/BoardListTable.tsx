@@ -61,7 +61,11 @@ export function BoardListTable({ data, onRowClick }: BoardListTableProps) {
         header: '제목',
         cell: (info) => (
           <div className="flex min-w-0 flex-col gap-1">
-            <span className="truncate font-medium text-foreground">{info.getValue()}</span>
+            {/* 제목이 메타(작성자·날짜)·지표보다 확실히 두드러지도록 semibold로 올리고, 행이 클릭
+                가능함을 알리는 hover 밑줄 피드백을 준다(행 <tr>의 group-hover에 연동). */}
+            <span className="truncate font-semibold text-foreground group-hover:underline">
+              {info.getValue()}
+            </span>
             {/* 레퍼런스의 회색 요약 2줄 슬롯을 실데이터(조회·좋아요·댓글)로 채워 2줄 리듬을 유지한다. */}
             <span className="flex items-center gap-3 text-xs text-muted-foreground">
               <MetricStat icon={Eye} value={info.row.original.viewCount} />
@@ -135,7 +139,7 @@ export function BoardListTable({ data, onRowClick }: BoardListTableProps) {
                   onRowClick(row.original.boardId)
                 }
               }}
-              className="cursor-pointer border-b border-border transition-colors last:border-0 hover:bg-muted/50 focus-visible:bg-muted/50 focus-visible:outline-none"
+              className="group cursor-pointer border-b border-border transition-colors last:border-0 hover:bg-muted focus-visible:bg-muted focus-visible:outline-none"
             >
               {row.getVisibleCells().map((cell) => (
                 <td

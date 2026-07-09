@@ -42,11 +42,14 @@ export function BoardCategoryFilter({
                 aria-pressed={isSelected}
                 onClick={() => onSelect(category.categoryId)}
                 className={cn(
-                  'flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors',
+                  'flex w-full items-center gap-2 rounded-md px-3 py-2.5 text-sm transition-colors',
                   'focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50',
+                  // 선택 상태를 채움(bg-primary)으로 또렷이 구분한다 — 이 테마는 muted/accent/secondary가
+                  // 전부 같은 옅은 회색이라 기존 bg-accent 선택은 hover와 사실상 구별되지 않았다(가시성
+                  // 저하). 활성 표시는 페이지네이션 현재 페이지 버튼(bg-primary)과 동일 언어로 맞춘다.
                   isSelected
-                    ? 'bg-accent font-medium text-accent-foreground'
-                    : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
+                    ? 'bg-primary font-medium text-primary-foreground'
+                    : 'text-muted-foreground hover:bg-muted hover:text-foreground',
                 )}
               >
                 <Folder className="size-4 shrink-0" aria-hidden="true" />
