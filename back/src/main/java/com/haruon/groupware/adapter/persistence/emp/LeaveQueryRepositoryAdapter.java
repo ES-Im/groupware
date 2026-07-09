@@ -119,6 +119,7 @@ public class LeaveQueryRepositoryAdapter implements LeaveQueryRepository {
     }
 
     public record LeaveSummaryListFlat(
+            Long empId,
             String empNo,
             String empName,
             String deptName,
@@ -143,7 +144,7 @@ public class LeaveQueryRepositoryAdapter implements LeaveQueryRepository {
 
         private LeaveSummaryAndEmpInfoResponse toSummaryAndEmpInfoResponse() {
             return new LeaveSummaryAndEmpInfoResponse(
-                    empNo, empName, deptName, positionName.getDescription(),
+                    empId, empNo, empName, deptName, positionName.getDescription(),
                     toLeaveSummaryResponse()
             );
         }
@@ -163,6 +164,7 @@ public class LeaveQueryRepositoryAdapter implements LeaveQueryRepository {
     private ConstructorExpression<LeaveSummaryListFlat> leaveSummaryListFlatProjections() {
         return Projections.constructor(
                 LeaveSummaryListFlat.class,
+                emp.id,
                 emp.empNo,
                 emp.empName,
                 dept.deptName,

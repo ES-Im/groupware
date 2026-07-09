@@ -256,6 +256,7 @@ public class EmployeeLeaveQueryApiDocsTest extends RestDocsSupport {
 
     private Page<LeaveSummaryAndEmpInfoResponse> leaveSummaryPage() {
         LeaveSummaryAndEmpInfoResponse content = new LeaveSummaryAndEmpInfoResponse(
+                2L,
                 "202604001",
                 "홍길동",
                 "IT",
@@ -295,6 +296,7 @@ public class EmployeeLeaveQueryApiDocsTest extends RestDocsSupport {
     private FieldDescriptor[] leaveSummaryPageFields() {
         return concat(new FieldDescriptor[] {
                 fieldWithPath("content").type(JsonFieldType.ARRAY).description("사원 휴가 요약 목록"),
+                fieldWithPath("content[].empId").type(JsonFieldType.NUMBER).description("사원 식별 번호"),
                 fieldWithPath("content[].empNo").type(JsonFieldType.STRING).description("사원 번호"),
                 fieldWithPath("content[].empName").type(JsonFieldType.STRING).description("사원 이름"),
                 fieldWithPath("content[].deptName").type(JsonFieldType.STRING).description("부서 이름"),
