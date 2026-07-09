@@ -2,6 +2,7 @@ import {
   CalendarDays,
   ClipboardList,
   Clock,
+  Ellipsis,
   FileSignature,
   Home,
   Mail,
@@ -65,16 +66,16 @@ export const sidebarMenuItems: SidebarMenuItem[] = [
     ],
   },
   {
-    // 전자결재 그룹: M1(T1.7)에서 문서함 4종(상신/임시저장/결재대기/결재함) 실 라우트로 교체했다.
-    // 문서함 홈은 M7(T7.3)에서 DocumentBoxHomePage(F715 요약 카드·F711 결재대기 강조)로 live 승격했다.
-    // 결재대기함은 badgeKey('approvalPending')로 F711 결재대기 건수 뱃지 슬롯을 선언한다 — 실제
-    // count는 LayoutShell이 useMyPendingApprovalDraftsCountQuery로 조회해 주입한다.
+    // 전자결재 그룹: 상신함/임시저장함/결재대기함/결재함 4종 리프는 문서함 UI 통합 작업에서 단일
+    // '문서함' 항목(/approval/box → 결재대기 탭으로 리다이렉트)으로 합쳤다 — 4종 목록은 이제
+    // DocumentBoxHomePage 내부 탭 전환으로 대체된다. 결재대기함이 갖던 badgeKey('approvalPending',
+    // F711 결재대기 건수 뱃지)는 '문서함' 항목으로 그대로 이전한다 — 실제 count는 LayoutShell이
+    // useMyPendingApprovalDraftsCountQuery로 조회해 주입한다.
     // 새 기안 작성은 DRAFT-COMMON에서 GeneralDraftCreatePage(F720) 진입점으로 그룹 최상단에 추가했다.
-    // 출장 기안 작성은 ROADMAP(DRAFT-BUSINESSTRIP) T1.4에서 새 기안 작성 옆에, 내/부서 출장 이력은
-    // T4.3·T5.3에서 문서함 항목들 뒤에 추가했다(§메뉴 구조 권고). 부서 출장 이력은 minRole
-    // DEPT_MANAGER(hasRequiredRole가 ADMIN 자동 포함 게이팅).
+    // 출장 기안 작성은 ROADMAP(DRAFT-BUSINESSTRIP) T1.4에서 새 기안 작성 옆에 추가했다.
     // 매출 기안 작성은 ROADMAP(SALES) M4(T4.1)에서 출장 기안 작성 옆에 추가했다. minRole
     // FRANCHISE(hasRequiredRole가 ADMIN 자동 포함 게이팅).
+    // 내/부서 출장 이력은 문서함 UI 통합 작업에서 '[미배치]' 그룹으로 이동했다(아래 그룹 주석 참고).
     label: '전자결재',
     minRole: 'EMPLOYEE',
     icon: FileSignature,
@@ -90,16 +91,22 @@ export const sidebarMenuItems: SidebarMenuItem[] = [
         to: '/approval/drafts/sales/new',
         minRole: 'FRANCHISE',
       },
-      { label: '문서함 홈', to: '/approval/box/home', minRole: 'EMPLOYEE' },
-      { label: '상신함', to: '/approval/box/submitted', minRole: 'EMPLOYEE' },
-      { label: '임시저장함', to: '/approval/box/unsubmitted', minRole: 'EMPLOYEE' },
       {
-        label: '결재대기함',
-        to: '/approval/box/pending',
+        label: '문서함',
+        to: '/approval/box',
         minRole: 'EMPLOYEE',
         badgeKey: 'approvalPending',
       },
-      { label: '결재함', to: '/approval/box/accessible', minRole: 'EMPLOYEE' },
+    ],
+  },
+  {
+    // [미배치] 그룹: 결재함(공람류)과 출장 이력류는 추후 별도 '부서관리' 탭으로 옮길 예정이라
+    // 정식 그룹에 배치하지 않고 임시로 이 그룹에 둔다(문서함 UI 통합 작업). 전자결재 그룹의 형제로
+    // 최상위 트리에 둔다.
+    label: '[미배치]',
+    minRole: 'EMPLOYEE',
+    icon: Ellipsis,
+    children: [
       {
         label: '내 출장 이력',
         to: '/approval/business-trips/me/history',

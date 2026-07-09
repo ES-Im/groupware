@@ -1,13 +1,9 @@
-import { createBrowserRouter } from 'react-router'
+import { createBrowserRouter, Navigate } from 'react-router'
 import { LoginPage } from '@/features/auth/pages/LoginPage'
 import { RegisterPage } from '@/features/auth/pages/RegisterPage'
 import { MyAttendancePage } from '@/features/attendance/pages/MyAttendancePage'
 import { DeptAttendancePage } from '@/features/attendance/pages/DeptAttendancePage'
 import { DocumentBoxHomePage } from '@/features/approval/pages/DocumentBoxHomePage'
-import { SubmittedDraftsPage } from '@/features/approval/pages/SubmittedDraftsPage'
-import { UnsubmittedDraftsPage } from '@/features/approval/pages/UnsubmittedDraftsPage'
-import { PendingApprovalDraftsPage } from '@/features/approval/pages/PendingApprovalDraftsPage'
-import { AccessibleDocumentsPage } from '@/features/approval/pages/AccessibleDocumentsPage'
 import { DraftDetailPage } from '@/features/approval/pages/DraftDetailPage'
 import { GeneralDraftCreatePage } from '@/features/approval/pages/GeneralDraftCreatePage'
 import { GeneralDraftEditPage } from '@/features/approval/pages/GeneralDraftEditPage'
@@ -57,12 +53,16 @@ import { LayoutShell } from '@/shared/components/LayoutShell'
  * /boards/drafts는 T15.1에서 BoardDraftsPage(내 임시저장함 페이지)로 연결했다.
  * /attendance/me는 T1.6에서 MyAttendancePage(내 근태 조회 페이지)로 연결했다.
  * /attendance/dept는 T3.5에서 DeptAttendancePage(부서 근태 승인 페이지)로 연결했다.
- * /approval/box/submitted, /approval/box/unsubmitted, /approval/box/pending,
- * /approval/box/accessible은 전자결재 공통 도메인 M1(T1.7)에서 4종 문서함 페이지
- * (SubmittedDraftsPage/UnsubmittedDraftsPage/PendingApprovalDraftsPage/AccessibleDocumentsPage)로
- * 연결했다. 전 항목 minRole EMPLOYEE라 별도 RoleGuard 없이 ProtectedRoute(인증 가드)만으로 충분하다.
- * 문서함 홈(/approval/box/home)은 M7(T7.3)에서 DocumentBoxHomePage(F715 요약 카드·F711 결재대기
- * 강조)로 연결했다 — minRole EMPLOYEE라 위 4종 문서함과 동일하게 ProtectedRoute만으로 충분하다.
+ * /approval/box/:tab(상신함/결재대기함/결재함/임시저장함 4탭 통합)은 문서함 UI 통합 작업에서
+ * 기존 5개 개별 라우트(/approval/box/home, /approval/box/submitted, /approval/box/unsubmitted,
+ * /approval/box/pending, /approval/box/accessible — M1/T1.7·M7/T7.3에서 SubmittedDraftsPage/
+ * UnsubmittedDraftsPage/PendingApprovalDraftsPage/AccessibleDocumentsPage/DocumentBoxHomePage로
+ * 각각 연결했던 것)를 하나의 동적 라우트로 통합한 것이다. tab 값 해석(submitted/unsubmitted/pending/
+ * accessible)·유효성 검사는 DocumentBoxHomePage 내부에서 처리한다(라우트 자체는 단순 동적 세그먼트).
+ * 4개 페이지 컴포넌트 파일은 DocumentBoxHomePage가 탭별 로직을 흡수하는 후속 UI 작업 전까지 그대로
+ * 남겨둔다. /approval/box(세그먼트 없음)는 결재대기함(pending)으로 리다이렉트한다 — 결재 대기가
+ * 사용자가 가장 먼저 처리해야 할 액션 문서라 기본 진입 탭으로 삼는다. 전 항목 minRole EMPLOYEE라
+ * 별도 RoleGuard 없이 ProtectedRoute(인증 가드)만으로 충분하다.
  * /approval/drafts/:draftId는 M2(T2.5)에서 DraftDetailPage(기안서 상세 read-only 페이지)로
  * 연결했다 — 4종 문서함 페이지의 행 클릭 이동이 실제 상세 화면으로 이어진다. draftId 파라미터
  * 유효성 검사·403/404 분기는 DraftDetailPage 내부에서 처리하므로 minRole EMPLOYEE 기준
@@ -181,29 +181,15 @@ export const router = createBrowserRouter([
         element: <DeptAttendancePage />,
       },
       {
-        // 문서함 홈 페이지: M7(T7.3)에서 DocumentBoxHomePage(F715·F711)로 연결했다.
-        path: 'approval/box/home',
+        // 문서함 인덱스: 세그먼트 없이 접근 시 기본 탭(결재대기함)으로 리다이렉트한다.
+        path: 'approval/box',
+        element: <Navigate to="/approval/box/pending" replace />,
+      },
+      {
+        // 문서함 통합 페이지: 상신함/임시저장함/결재대기함/결재함 4탭을 DocumentBoxHomePage 하나로
+        // 통합했다(탭 딥링크). tab 유효성 검사·해석은 컴포넌트 내부에서 처리한다.
+        path: 'approval/box/:tab',
         element: <DocumentBoxHomePage />,
-      },
-      {
-        // 상신함 페이지: M1(T1.7)에서 SubmittedDraftsPage(F712)로 연결했다.
-        path: 'approval/box/submitted',
-        element: <SubmittedDraftsPage />,
-      },
-      {
-        // 임시저장함 페이지: M1(T1.7)에서 UnsubmittedDraftsPage(F713)로 연결했다.
-        path: 'approval/box/unsubmitted',
-        element: <UnsubmittedDraftsPage />,
-      },
-      {
-        // 결재대기함 페이지: M1(T1.7)에서 PendingApprovalDraftsPage(F710)로 연결했다.
-        path: 'approval/box/pending',
-        element: <PendingApprovalDraftsPage />,
-      },
-      {
-        // 결재함(조회 가능 문서) 페이지: M1(T1.7)에서 AccessibleDocumentsPage(F714)로 연결했다.
-        path: 'approval/box/accessible',
-        element: <AccessibleDocumentsPage />,
       },
       {
         // 일반 기안 작성 페이지: DRAFT-COMMON에서 GeneralDraftCreatePage(F720)로 연결했다.
