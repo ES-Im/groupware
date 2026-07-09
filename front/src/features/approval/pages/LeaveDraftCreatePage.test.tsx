@@ -88,15 +88,18 @@ function renderPage() {
 
 async function fillValidForm(user: ReturnType<typeof userEvent.setup>) {
   await user.type(screen.getByLabelText(/^제목/), '연차 신청')
-  await user.type(screen.getByLabelText(/^본문/), '개인 사정으로 연차를 신청합니다')
+  await user.type(screen.getByLabelText(/^기안 내용/), '개인 사정으로 연차를 신청합니다')
   await user.selectOptions(screen.getByLabelText(/휴가 유형/), '연차')
   fireEvent.change(screen.getByLabelText(/휴가 시작 일시/), { target: { value: '2026-07-10T09:00' } })
   fireEvent.change(screen.getByLabelText(/휴가 종료 일시/), { target: { value: '2026-07-10T18:00' } })
 }
 
+/** 결재선 "추가" 버튼으로 Dialog를 연 뒤 부서→부서원을 선택하고 "완료"로 닫는다. */
 async function selectOneApprover(user: ReturnType<typeof userEvent.setup>) {
+  await user.click(screen.getByRole('button', { name: '추가' }))
   await user.click(await screen.findByRole('button', { name: '개발팀' }))
   await user.click(await screen.findByRole('button', { name: /김철수/ }))
+  await user.click(screen.getByRole('button', { name: '완료' }))
 }
 
 describe('LeaveDraftCreatePage (F740) - zod 사전검증(빈 값)', () => {
@@ -121,12 +124,12 @@ describe('LeaveDraftCreatePage (F740) - zod 사전검증(빈 값)', () => {
     const user = userEvent.setup()
     renderPage()
 
-    await user.click(screen.getByRole('button', { name: '생성 후 상신' }))
+    await user.click(screen.getByRole('button', { name: '상신' }))
 
     const alerts = await screen.findAllByRole('alert')
     const alertTexts = alerts.map((el) => el.textContent)
     expect(alertTexts).toContain('제목을 입력해주세요')
-    expect(alertTexts).toContain('본문을 입력해주세요')
+    expect(alertTexts).toContain('기안 내용을 입력해주세요')
     expect(alertTexts).toContain('휴가 유형을 선택해주세요')
     expect(alertTexts).toContain('휴가 시작 일시를 입력해주세요')
     expect(alertTexts).toContain('휴가 종료 일시를 입력해주세요')
@@ -146,7 +149,7 @@ describe('LeaveDraftCreatePage (F740) - zod 사전검증(빈 값)', () => {
     const user = userEvent.setup()
     renderPage()
 
-    await user.click(screen.getByRole('button', { name: '임시저장으로 생성' }))
+    await user.click(screen.getByRole('button', { name: '임시저장' }))
 
     const alerts = await screen.findAllByRole('alert')
     expect(alerts.map((el) => el.textContent)).toContain('제목을 입력해주세요')
@@ -177,7 +180,7 @@ describe('LeaveDraftCreatePage (F740) - [생성 후 상신] 결재선 0명 클�
     renderPage()
 
     await fillValidForm(user)
-    await user.click(screen.getByRole('button', { name: '생성 후 상신' }))
+    await user.click(screen.getByRole('button', { name: '상신' }))
 
     expect(
       await screen.findByText('상신하려면 결재선에 최소 1명을 지정해주세요'),
@@ -206,7 +209,7 @@ describe('LeaveDraftCreatePage (F740) - 정상 입력 + 결재선 1명 + [임시
 
     await fillValidForm(user)
     await selectOneApprover(user)
-    await user.click(screen.getByRole('button', { name: '임시저장으로 생성' }))
+    await user.click(screen.getByRole('button', { name: '임시저장' }))
 
     await waitFor(() =>
       expect(registeredBody).toEqual({

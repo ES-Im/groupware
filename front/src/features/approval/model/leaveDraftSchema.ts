@@ -49,7 +49,7 @@ export const leaveTypeOptions = LEAVE_TYPES.map((value) => ({
 export const leaveDraftSchema = z
   .object({
     title: z.string().trim().min(1, '제목을 입력해주세요'),
-    content: z.string().trim().min(1, '본문을 입력해주세요'),
+    content: z.string().trim().min(1, '기안 내용을 입력해주세요'),
     leaveType: z.enum(LEAVE_TYPES, { error: '휴가 유형을 선택해주세요' }),
     startAt: z.string().min(1, '휴가 시작 일시를 입력해주세요'),
     endAt: z.string().min(1, '휴가 종료 일시를 입력해주세요'),

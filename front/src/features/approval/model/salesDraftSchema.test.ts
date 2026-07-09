@@ -31,12 +31,12 @@ describe('salesDraftSchema - title/content 필수(공백 trim)', () => {
     }
   })
 
-  it('content가 공백만 있으면 실패한다("본문을 입력해주세요")', () => {
+  it('content가 공백만 있으면 실패한다("기안 내용을 입력해주세요")', () => {
     const result = salesDraftSchema.safeParse(validPayload({ content: '   ' }))
     expect(result.success).toBe(false)
     if (!result.success) {
       const issue = result.error.issues.find((i) => i.path[0] === 'content')
-      expect(issue?.message).toBe('본문을 입력해주세요')
+      expect(issue?.message).toBe('기안 내용을 입력해주세요')
     }
   })
 

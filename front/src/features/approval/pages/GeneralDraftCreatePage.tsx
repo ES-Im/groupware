@@ -1,15 +1,16 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router'
-import { Save, Send, SquarePen } from 'lucide-react'
+import { useNavigate } from 'react-router'
 import { toast } from 'sonner'
 import { submitWithErrorMapping, useZodForm } from '@/shared/lib/form'
-import { Button } from '@/shared/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card'
 import { Input } from '@/shared/ui/input'
 import { Label } from '@/shared/ui/label'
 import { Textarea } from '@/shared/ui/textarea'
 import { useGeneralDraftCreateMutation } from '../api/useGeneralDraftCreateMutation'
-import { EmployeePicker, type EmployeePickerEmployee } from '../components/EmployeePicker'
+import { DraftCreateFrame } from '../components/DraftCreateFrame'
+import { DraftFormActions } from '../components/DraftFormActions'
+import { DraftPreviewDialog, type DraftPreviewField } from '../components/DraftPreviewDialog'
+import { EmployeeSelectField } from '../components/EmployeeSelectField'
+import { type EmployeePickerEmployee } from '../components/EmployeePicker'
 import type { ApproverParam } from '../model/approverParam'
 import { generalDraftSchema, type GeneralDraftFormValues } from '../model/generalDraftSchema'
 
@@ -19,8 +20,8 @@ import { generalDraftSchema, type GeneralDraftFormValues } from '../model/genera
  *
  * ①공통 `CancellationDraftDialog`의 폼 로직(제목·본문 RHF+zod + EmployeePicker 결재선 + 2버튼 +
  * approverSelection→ApproverParam[] 매핑 + 성공 후 상세 이동)을 페이지로 이식한 것이다.
- * 레이아웃은 BoardCreatePage(back-link + Card) 톤을 따른다. 첨부 UI는 없다(Minor m3 — 첨부는
- * 생성 후 상세 AttachmentSection에서 관리).
+ * 레이아웃은 공통 `DraftCreateFrame`(좌측 종류 선택 카드 + 우측 폼 카드)을 따른다. 첨부 UI는
+ * 없다(Minor m3 — 첨부는 생성 후 상세 AttachmentSection에서 관리).
  *
  * 결재선은 EmployeePicker 로컬 선택 상태(zod 스키마 밖)라 선택 순서를 order(1-base)로, role은
  * APPROVER 고정으로 매핑한다(협조 결재자 지정은 범위 밖). 두 버튼:
@@ -34,12 +35,14 @@ export function GeneralDraftCreatePage() {
   const navigate = useNavigate()
   const mutation = useGeneralDraftCreateMutation()
   const [approverSelection, setApproverSelection] = useState<EmployeePickerEmployee[]>([])
+  const [previewOpen, setPreviewOpen] = useState(false)
 
   const form = useZodForm(generalDraftSchema, {
     defaultValues: { title: '', content: '' },
   })
   const {
     register,
+    getValues,
     setError,
     clearErrors,
     formState: { errors, isSubmitting },
@@ -72,101 +75,91 @@ export function GeneralDraftCreatePage() {
   const handleCreate = submitWithErrorMapping(form, (values) => onValid(values, false))
   const handleCreateAndSubmit = submitWithErrorMapping(form, (values) => onValid(values, true))
 
+  // 미리보기용 스냅샷: 모달 열림 토글이 리렌더를 유발하므로 그 시점의 getValues()가 최신값이다.
+  const previewValues = getValues()
+  const previewFields: DraftPreviewField[] = [
+    { label: '제목', value: previewValues.title },
+    { label: '기안 내용', value: previewValues.content },
+  ]
+
   return (
-    <div className="mx-auto w-full max-w-2xl p-4 sm:p-6 lg:p-8">
-      {/* 문서함 홈으로 복귀하는 back-link(BoardCreatePage back-link 컨벤션). */}
-      <Link
-        to="/approval/box/home"
-        className="mb-4 inline-block text-sm text-muted-foreground hover:text-foreground"
-      >
-        ← 전자결재
-      </Link>
-      <h1 className="mb-6 text-xl font-semibold tracking-tight">새 기안 작성</h1>
+    <DraftCreateFrame currentType="general">
+      {/* form onSubmit은 기본 액션([생성 후 상신])으로 둔다. [임시저장]은 type=button으로 분리. */}
+      <form noValidate onSubmit={handleCreateAndSubmit} className="flex flex-col gap-4">
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="general-draft-title">
+            제목 <span className="text-destructive">*</span>
+          </Label>
+          <Input
+            id="general-draft-title"
+            placeholder="제목을 입력해주세요"
+            aria-invalid={!!errors.title}
+            {...register('title')}
+          />
+          {errors.title && (
+            <p role="alert" className="text-sm text-destructive">
+              {errors.title.message}
+            </p>
+          )}
+        </div>
 
-      <Card>
-        <CardHeader className="border-b">
-          <CardTitle className="flex items-center gap-1.5">
-            <SquarePen className="size-4" />
-            일반 기안서
-          </CardTitle>
-          <CardDescription>제목·본문·결재선을 작성해 임시저장하거나 바로 상신합니다.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {/* form onSubmit은 기본 액션([생성 후 상신])으로 둔다. [임시저장]은 type=button으로 분리. */}
-          <form noValidate onSubmit={handleCreateAndSubmit} className="flex flex-col gap-4">
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="general-draft-title">
-                제목 <span className="text-destructive">*</span>
-              </Label>
-              <Input
-                id="general-draft-title"
-                placeholder="제목을 입력해주세요"
-                aria-invalid={!!errors.title}
-                {...register('title')}
-              />
-              {errors.title && (
-                <p role="alert" className="text-sm text-destructive">
-                  {errors.title.message}
-                </p>
-              )}
-            </div>
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="general-draft-content">
+            기안 내용 <span className="text-destructive">*</span>
+          </Label>
+          <Textarea
+            id="general-draft-content"
+            placeholder="기안 내용을 입력해주세요"
+            className="min-h-48"
+            aria-invalid={!!errors.content}
+            {...register('content')}
+          />
+          {errors.content && (
+            <p role="alert" className="text-sm text-destructive">
+              {errors.content.message}
+            </p>
+          )}
+        </div>
 
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="general-draft-content">
-                본문 <span className="text-destructive">*</span>
-              </Label>
-              <Textarea
-                id="general-draft-content"
-                placeholder="본문을 입력해주세요"
-                className="min-h-48"
-                aria-invalid={!!errors.content}
-                {...register('content')}
-              />
-              {errors.content && (
-                <p role="alert" className="text-sm text-destructive">
-                  {errors.content.message}
-                </p>
-              )}
-            </div>
+        <div className="border-t pt-4">
+          {/* 선택이 바뀌면 결재선 미지정 root 에러를 즉시 해제해 상신 재시도를 막지 않는다. */}
+          <EmployeeSelectField
+            label="결재선"
+            description="결재 순서대로 처리됩니다."
+            ordered
+            roleBadge="결재"
+            emptyText="결재선에 지정된 결재자가 없습니다."
+            selected={approverSelection}
+            onChange={(next) => {
+              setApproverSelection(next)
+              if (next.length > 0) {
+                clearErrors('root')
+              }
+            }}
+          />
+        </div>
 
-            <div className="flex flex-col gap-1.5">
-              <Label>결재선</Label>
-              {/* 선택이 바뀌면 결재선 미지정 root 에러를 즉시 해제해 상신 재시도를 막지 않는다. */}
-              <EmployeePicker
-                selected={approverSelection}
-                onChange={(next) => {
-                  setApproverSelection(next)
-                  if (next.length > 0) {
-                    clearErrors('root')
-                  }
-                }}
-              />
-            </div>
+        {errors.root && (
+          <p role="alert" className="text-sm text-destructive">
+            {errors.root.message}
+          </p>
+        )}
 
-            {errors.root && (
-              <p role="alert" className="text-sm text-destructive">
-                {errors.root.message}
-              </p>
-            )}
+        <DraftFormActions
+          isSubmitting={isSubmitting}
+          onCancel={() => navigate('/approval/box')}
+          onPreview={() => setPreviewOpen(true)}
+          onSaveDraft={() => void handleCreate()}
+        />
+      </form>
 
-            <div className="flex flex-col-reverse gap-2 border-t pt-4 sm:flex-row sm:justify-end">
-              <Button
-                type="button"
-                variant="outline"
-                disabled={isSubmitting}
-                onClick={() => void handleCreate()}
-              >
-                <Save />
-                임시저장으로 생성
-              </Button>
-              <Button type="submit" disabled={isSubmitting}>
-                <Send />
-                생성 후 상신
-              </Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
-    </div>
+      <DraftPreviewDialog
+        open={previewOpen}
+        onOpenChange={setPreviewOpen}
+        typeLabel="일반기안서"
+        fields={previewFields}
+        approvers={approverSelection}
+      />
+    </DraftCreateFrame>
   )
 }

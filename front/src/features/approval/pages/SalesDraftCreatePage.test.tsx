@@ -125,7 +125,7 @@ function renderPage() {
 
 async function fillValidFormWithoutFranchise(user: ReturnType<typeof userEvent.setup>) {
   await user.type(screen.getByLabelText(/^제목/), '7월 매출 보고')
-  await user.type(screen.getByLabelText(/^본문/), '7월 매출 실적을 보고합니다')
+  await user.type(screen.getByLabelText(/^기안 내용/), '7월 매출 실적을 보고합니다')
   fireEvent.change(screen.getByLabelText(/매출 보고월/), { target: { value: '2026-07' } })
   fireEvent.change(screen.getByLabelText(/매출액/), { target: { value: '10000000' } })
 }
@@ -134,9 +134,12 @@ async function selectFranchise(user: ReturnType<typeof userEvent.setup>) {
   await user.click(await screen.findByRole('button', { name: /테스트강남점/ }))
 }
 
+/** 결재선 "추가" 버튼으로 Dialog를 연 뒤 부서→부서원을 선택하고 "완료"로 닫는다. */
 async function selectOneApprover(user: ReturnType<typeof userEvent.setup>) {
+  await user.click(screen.getByRole('button', { name: '추가' }))
   await user.click(await screen.findByRole('button', { name: '개발팀' }))
   await user.click(await screen.findByRole('button', { name: /김철수/ }))
+  await user.click(screen.getByRole('button', { name: '완료' }))
 }
 
 describe('SalesDraftCreatePage (F760) - zod 사전검증(빈 값)', () => {
@@ -161,12 +164,12 @@ describe('SalesDraftCreatePage (F760) - zod 사전검증(빈 값)', () => {
     const user = userEvent.setup()
     renderPage()
 
-    await user.click(screen.getByRole('button', { name: '생성 후 상신' }))
+    await user.click(screen.getByRole('button', { name: '상신' }))
 
     const alerts = await screen.findAllByRole('alert')
     const alertTexts = alerts.map((el) => el.textContent)
     expect(alertTexts).toContain('제목을 입력해주세요')
-    expect(alertTexts).toContain('본문을 입력해주세요')
+    expect(alertTexts).toContain('기안 내용을 입력해주세요')
     expect(alertTexts).toContain('대상 가맹점을 선택해주세요')
     expect(alertTexts).toContain('매출 보고월을 선택해주세요')
     expect(alertTexts).toContain('매출액을 입력해주세요')
@@ -186,7 +189,7 @@ describe('SalesDraftCreatePage (F760) - zod 사전검증(빈 값)', () => {
     const user = userEvent.setup()
     renderPage()
 
-    await user.click(screen.getByRole('button', { name: '임시저장으로 생성' }))
+    await user.click(screen.getByRole('button', { name: '임시저장' }))
 
     const alerts = await screen.findAllByRole('alert')
     expect(alerts.map((el) => el.textContent)).toContain('제목을 입력해주세요')
@@ -218,7 +221,7 @@ describe('SalesDraftCreatePage (F760) - FranchisePicker 선택 시 franchiseId �
 
     await fillValidFormWithoutFranchise(user)
     await selectFranchise(user)
-    await user.click(screen.getByRole('button', { name: '생성 후 상신' }))
+    await user.click(screen.getByRole('button', { name: '상신' }))
 
     // franchiseId 관련 인라인 에러("대상 가맹점을 선택해주세요")는 더 이상 뜨지 않아야 한다.
     await waitFor(() => {
@@ -256,7 +259,7 @@ describe('SalesDraftCreatePage (F760) - [생성 후 상신] 결재선 0명 클�
 
     await fillValidFormWithoutFranchise(user)
     await selectFranchise(user)
-    await user.click(screen.getByRole('button', { name: '생성 후 상신' }))
+    await user.click(screen.getByRole('button', { name: '상신' }))
 
     expect(
       await screen.findByText('상신하려면 결재선에 최소 1명을 지정해주세요'),
@@ -279,7 +282,7 @@ describe('SalesDraftCreatePage (F760) - [생성 후 상신] 결재선 0명 클�
 
     await fillValidFormWithoutFranchise(user)
     await selectFranchise(user)
-    await user.click(screen.getByRole('button', { name: '임시저장으로 생성' }))
+    await user.click(screen.getByRole('button', { name: '임시저장' }))
 
     expect(
       screen.queryByText('상신하려면 결재선에 최소 1명을 지정해주세요'),
@@ -313,7 +316,7 @@ describe('SalesDraftCreatePage (F760) - 정상 입력 + 결재선 1명 + [임시
     await fillValidFormWithoutFranchise(user)
     await selectFranchise(user)
     await selectOneApprover(user)
-    await user.click(screen.getByRole('button', { name: '임시저장으로 생성' }))
+    await user.click(screen.getByRole('button', { name: '임시저장' }))
 
     await waitFor(() =>
       expect(registeredBody).toEqual({
