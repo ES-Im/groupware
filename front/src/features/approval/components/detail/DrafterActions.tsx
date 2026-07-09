@@ -9,6 +9,7 @@ import { useDraftSubmitMutation } from '../../api/useDraftSubmitMutation'
 import { isBusinessTripDraft } from '../../lib/isBusinessTripDraft'
 import { isGeneralDraft } from '../../lib/isGeneralDraft'
 import { isLeaveDraft } from '../../lib/isLeaveDraft'
+import { isSalesDraft } from '../../lib/isSalesDraft'
 import { resolveDrafterActions } from '../../lib/resolveDrafterActions'
 import { CancellationDraftDialog } from './CancellationDraftDialog'
 import type { DraftDetailSectionProps } from './types'
@@ -63,11 +64,11 @@ export function DrafterActions({ draft }: DraftDetailSectionProps) {
     })
   }
 
-  // [수정] 배선(②일반 기안 T2.4 + ③출장 기안 T2.4 + ④연가 M6 T6.1): 일반 기안(슬롯-null 술어
-  // isGeneralDraft)이면 일반 기안 수정 페이지로, 출장 기안(슬롯-null 술어 isBusinessTripDraft)이면
-  // 출장 기안 수정 페이지로, 휴가 기안(슬롯-null 술어 isLeaveDraft)이면 휴가 기안 수정 페이지로
-  // 이동한다. 나머지 유형 슬롯 있는 기안(매출)은 해당 유형 작성 PRD 착수 전까지 기존 "준비 중" 폴백
-  // 토스트를 유지한다(Open Q#5 — GENERAL·출장·휴가 분기만 배선).
+  // [수정] 배선(②일반 기안 T2.4 + ③출장 기안 T2.4 + ④연가 M6 T6.1 + ⑤매출 ROADMAP(SALES) M4 T4.1):
+  // 일반 기안(슬롯-null 술어 isGeneralDraft)이면 일반 기안 수정 페이지로, 출장 기안(슬롯-null 술어
+  // isBusinessTripDraft)이면 출장 기안 수정 페이지로, 휴가 기안(슬롯-null 술어 isLeaveDraft)이면
+  // 휴가 기안 수정 페이지로, 매출 기안(슬롯-null 술어 isSalesDraft)이면 매출 기안 수정 페이지로
+  // 이동한다. 전 유형 분기 완료라 폴백 토스트는 미분류 상태를 대비한 안전망으로만 남긴다.
   function handleEdit() {
     if (isGeneralDraft(draft)) {
       navigate(`/approval/drafts/${draft.draftId}/edit`)
@@ -79,6 +80,10 @@ export function DrafterActions({ draft }: DraftDetailSectionProps) {
     }
     if (isLeaveDraft(draft)) {
       navigate(`/approval/drafts/leaves/${draft.draftId}/edit`)
+      return
+    }
+    if (isSalesDraft(draft)) {
+      navigate(`/approval/drafts/sales/${draft.draftId}/edit`)
       return
     }
     toast.info('해당 유형 작성 화면은 준비 중입니다')

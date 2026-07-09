@@ -17,6 +17,8 @@ import { MyBusinessTripHistoryPage } from '@/features/approval/pages/MyBusinessT
 import { DeptBusinessTripHistoryPage } from '@/features/approval/pages/DeptBusinessTripHistoryPage'
 import { LeaveDraftCreatePage } from '@/features/approval/pages/LeaveDraftCreatePage'
 import { LeaveDraftEditPage } from '@/features/approval/pages/LeaveDraftEditPage'
+import { SalesDraftCreatePage } from '@/features/approval/pages/SalesDraftCreatePage'
+import { SalesDraftEditPage } from '@/features/approval/pages/SalesDraftEditPage'
 import { MyLeavePage } from '@/features/leave/pages/MyLeavePage'
 import { DeptLeavePage } from '@/features/leave/pages/DeptLeavePage'
 import { AdminLeavePage } from '@/features/leave/pages/AdminLeavePage'
@@ -98,6 +100,14 @@ import { ChatRoomDetailPage } from '@/features/chat/pages/ChatRoomDetailPage'
  * EMPLOYEE, 부서 휴가 관리 DEPT_MANAGER, 관리자 휴가 현황 ADMIN) 근태 /attendance/dept·출장 이력
  * 컨벤션과 동일하게 라우트 자체는 ProtectedRoute(인증 가드)만 적용하고 최종 권한 판단은 서버(403
  * ROLE_003)에 위임한다 — role 게이팅은 사이드바(minRole)에서만 처리한다.
+ * /approval/drafts/sales/new, /approval/drafts/sales/:draftId/edit는 ROADMAP(SALES) M4(T4.1)에서
+ * 매출 기안 2종 페이지(SalesDraftCreatePage/F760, SalesDraftEditPage/F761)로 연결했다.
+ * 'drafts/sales/new'는 ②'drafts/new'·③'drafts/business-trips/new'·④'drafts/leaves/new'와 동일
+ * 근거로 정적 세그먼트를 동적 ':draftId'보다 앞에 등록해 둔다. 'drafts/sales/:draftId/edit'는
+ * 'drafts/:draftId/edit'(일반 기안 수정, 4세그먼트)와는 세그먼트 깊이가 달라,
+ * 'drafts/business-trips/:draftId/edit'·'drafts/leaves/:draftId/edit'(각 5세그먼트)와는 3번째
+ * 리터럴 세그먼트('sales' vs 'business-trips'/'leaves')로 구분되어 랭킹 충돌이 없다 — 상세 페이지
+ * DrafterActions.handleEdit의 isSalesDraft 분기가 실제 이동 목적지로 이어진다.
  * /chat, /chat/rooms/:roomId는 ROADMAP(CHAT) T0.1에서 신설했다 — 채팅은 메인 셸의 패널이 아니라
  * 헤더 아이콘 클릭 시 window.open으로 뜨는 완전히 독립된 팝업 창("별도 서비스인 척" UX)이라,
  * ProtectedRoute·LayoutShell 트리의 자식이 아닌 그 트리와 형제인 최상위 라우트로 등록했다.
@@ -224,6 +234,13 @@ export const router = createBrowserRouter([
         element: <LeaveDraftCreatePage />,
       },
       {
+        // 매출 기안 작성 페이지: ROADMAP(SALES) M2(T2.3)에서 SalesDraftCreatePage(F760)로 연결했다.
+        // ②'drafts/new'·③'drafts/business-trips/new'·④'drafts/leaves/new'와 동일 근거로 정적
+        // 세그먼트 'sales/new'를 동적 ':draftId'보다 앞에 등록해 둔다.
+        path: 'approval/drafts/sales/new',
+        element: <SalesDraftCreatePage />,
+      },
+      {
         // 기안서 상세 페이지: M2(T2.5)에서 DraftDetailPage(F701)로 연결했다. 4종 문서함 페이지의
         // 행 클릭 이동이 실제 상세 화면으로 이어진다.
         path: 'approval/drafts/:draftId',
@@ -251,6 +268,15 @@ export const router = createBrowserRouter([
         // 세그먼트('leaves' vs 'business-trips')로 구분되어 랭킹 충돌이 없다.
         path: 'approval/drafts/leaves/:draftId/edit',
         element: <LeaveDraftEditPage />,
+      },
+      {
+        // 매출 기안 수정 페이지: ROADMAP(SALES) M3(T3.4)에서 SalesDraftEditPage(F761)로 연결했다.
+        // 상세 DrafterActions.handleEdit의 isSalesDraft 분기가 실제 이동 목적지로 이어진다. 위
+        // 'drafts/:draftId/edit'(일반 기안 수정, 4세그먼트)와는 세그먼트 깊이가 달라,
+        // 'drafts/business-trips/:draftId/edit'·'drafts/leaves/:draftId/edit'(각 5세그먼트)와는
+        // 3번째 리터럴 세그먼트('sales' vs 'business-trips'/'leaves')로 구분되어 랭킹 충돌이 없다.
+        path: 'approval/drafts/sales/:draftId/edit',
+        element: <SalesDraftEditPage />,
       },
       {
         // 내 출장 이력 페이지: ROADMAP(DRAFT-BUSINESSTRIP) M4(T4.3)에서

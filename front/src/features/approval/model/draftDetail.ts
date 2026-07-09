@@ -74,10 +74,19 @@ export interface LeaveSlot {
 }
 
 /**
- * 매출기안 유형 슬롯(`sales`). leave와 동일 사유로 하위필드 미확정(Open Q#5). 실제 하위필드
- * (매출 작성 request-fields 추정: franchiseId/reportMonth/salesAmount)는 ⑤매출 작성 PRD가 소유한다.
+ * 매출기안 유형 슬롯(`sales`). 백엔드 DTO(`DraftDetailResponse.SalesDraftDetail`) 소스 대조로
+ * 하위필드를 확정했다(ROADMAP(SALES) T3.1, Open Q#5 해결): `record SalesDraftDetail(Long
+ * franchiseId, String franchiseName, YearMonth reportMonth, Long salesAmount)`. `reportMonth`는
+ * JSON 직렬화 시 `"yyyy-MM"` 문자열로 내려온다. `franchiseName`은 상세조회에만 존재(요청 body엔
+ * 없음, 표시용·수정 프리필 시 `FranchisePicker` 선택 상태 복원용). 본문 렌더(`SalesDraftBody`)·
+ * 수정 프리필(`SalesDraftEditPage`)·판별(`isSalesDraft`)이 소비한다.
  */
-export type SalesSlot = Record<string, unknown>
+export interface SalesSlot {
+  franchiseId: number
+  franchiseName: string
+  reportMonth: string
+  salesAmount: number
+}
 
 export interface DraftDetailResponse {
   draftId: number

@@ -75,7 +75,13 @@ describe('isGeneralDraft', () => {
   })
 
   it('sales 슬롯 non-null(매출) → false', () => {
-    expect(isGeneralDraft(draft({ sales: {} }))).toBe(false)
+    expect(
+      isGeneralDraft(
+        draft({
+          sales: { franchiseId: 1, franchiseName: '강남점', reportMonth: '2026-07', salesAmount: 1000000 },
+        }),
+      ),
+    ).toBe(false)
   })
 
   it('sourceDraftId non-null(취소기안) → false', () => {

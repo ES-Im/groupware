@@ -68,7 +68,7 @@ describe('isBusinessTripDraft', () => {
             leaveType: 'ANNUAL',
             reservedHours: 8,
           },
-          sales: {},
+          sales: { franchiseId: 1, franchiseName: '강남점', reportMonth: '2026-07', salesAmount: 1000000 },
         }),
       ),
     ).toBe(false)

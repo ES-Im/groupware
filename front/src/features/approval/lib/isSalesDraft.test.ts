@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import type { DraftDetailResponse } from '../model/draftDetail'
-import { isLeaveDraft } from './isLeaveDraft'
+import { isSalesDraft } from './isSalesDraft'
 
 /**
- * isLeaveDraft(ROADMAP(LEAVE) T2.1) 슬롯-null 판별 술어 단위 테스트.
+ * isSalesDraft(ROADMAP(SALES) T3.1) 슬롯-null 판별 술어 단위 테스트.
  *
- * 판별 규칙(isLeaveDraft.ts 주석 · DraftTypeBody 동형):
- *   - leave 슬롯 non-null → 휴가 기안(true).
- *   - leave 슬롯 null → false(일반/출장/매출 등).
+ * 판별 규칙(isSalesDraft.ts 주석 · DraftTypeBody 동형):
+ *   - sales 슬롯 non-null → 매출 기안(true).
+ *   - sales 슬롯 null → false(일반/출장/휴가 등).
  * draftType 문자열은 판별에 쓰지 않는다(실측 outdated).
  */
 
@@ -33,10 +33,33 @@ function draft(overrides: Partial<DraftDetailResponse> = {}): DraftDetailRespons
   }
 }
 
-describe('isLeaveDraft', () => {
-  it('leave 슬롯 non-null → 휴가 기안(true)', () => {
+describe('isSalesDraft', () => {
+  it('sales 슬롯 non-null → 매출 기안(true)', () => {
     expect(
-      isLeaveDraft(
+      isSalesDraft(
+        draft({
+          sales: {
+            franchiseId: 1,
+            franchiseName: '강남점',
+            reportMonth: '2026-07',
+            salesAmount: 1000000,
+          },
+        }),
+      ),
+    ).toBe(true)
+  })
+
+  it('sales 슬롯 null → false', () => {
+    expect(isSalesDraft(draft())).toBe(false)
+  })
+
+  it('draftType 문자열이 "SALES"여도 슬롯이 null이면 false', () => {
+    expect(isSalesDraft(draft({ draftType: 'SALES' }))).toBe(false)
+  })
+
+  it('leave/businessTrip 슬롯 non-null이어도 sales가 null이면 false', () => {
+    expect(
+      isSalesDraft(
         draft({
           leave: {
             startAt: '2026-07-01T09:00:00',
@@ -44,23 +67,6 @@ describe('isLeaveDraft', () => {
             leaveType: 'ANNUAL',
             reservedHours: 8,
           },
-        }),
-      ),
-    ).toBe(true)
-  })
-
-  it('leave 슬롯 null → false', () => {
-    expect(isLeaveDraft(draft())).toBe(false)
-  })
-
-  it('draftType 문자열이 "LEAVE"여도 슬롯이 null이면 false', () => {
-    expect(isLeaveDraft(draft({ draftType: 'LEAVE' }))).toBe(false)
-  })
-
-  it('businessTrip/sales 슬롯 non-null이어도 leave가 null이면 false', () => {
-    expect(
-      isLeaveDraft(
-        draft({
           businessTrip: {
             startAt: '2026-07-01T09:00:00',
             endAt: '2026-07-02T18:00:00',
@@ -68,7 +74,6 @@ describe('isLeaveDraft', () => {
             purpose: '점검',
             participants: [],
           },
-          sales: { franchiseId: 1, franchiseName: '강남점', reportMonth: '2026-07', salesAmount: 1000000 },
         }),
       ),
     ).toBe(false)
