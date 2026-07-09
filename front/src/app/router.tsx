@@ -15,6 +15,11 @@ import { BusinessTripDraftCreatePage } from '@/features/approval/pages/BusinessT
 import { BusinessTripDraftEditPage } from '@/features/approval/pages/BusinessTripDraftEditPage'
 import { MyBusinessTripHistoryPage } from '@/features/approval/pages/MyBusinessTripHistoryPage'
 import { DeptBusinessTripHistoryPage } from '@/features/approval/pages/DeptBusinessTripHistoryPage'
+import { LeaveDraftCreatePage } from '@/features/approval/pages/LeaveDraftCreatePage'
+import { LeaveDraftEditPage } from '@/features/approval/pages/LeaveDraftEditPage'
+import { MyLeavePage } from '@/features/leave/pages/MyLeavePage'
+import { DeptLeavePage } from '@/features/leave/pages/DeptLeavePage'
+import { AdminLeavePage } from '@/features/leave/pages/AdminLeavePage'
 import { BoardCreatePage } from '@/features/board/pages/BoardCreatePage'
 import { BoardDetailPage } from '@/features/board/pages/BoardDetailPage'
 import { BoardDraftsPage } from '@/features/board/pages/BoardDraftsPage'
@@ -78,6 +83,18 @@ import { LayoutShell } from '@/shared/components/LayoutShell'
  * minRole만 다를 뿐(내 이력 EMPLOYEE, 부서 이력 DEPT_MANAGER) 근태 /attendance/dept 컨벤션과 동일하게
  * 라우트 자체는 ProtectedRoute(인증 가드)만 적용하고 최종 권한 판단은 서버(403 ROLE_003)에 위임한다 —
  * role 게이팅은 사이드바(minRole)에서만 처리한다.
+ * /approval/drafts/leaves/new, /approval/drafts/leaves/:draftId/edit, /leaves/me, /leaves/dept,
+ * /leaves/admin은 ROADMAP(LEAVE) M6(T6.1)에서 연가(휴가) 기안 4종 페이지(LeaveDraftCreatePage/F740,
+ * LeaveDraftEditPage/F741, MyLeavePage/F742·F743, DeptLeavePage/F744~F746, AdminLeavePage/F747~F750)로
+ * 연결했다. 'drafts/leaves/new'는 ②'drafts/new'·③'drafts/business-trips/new'와 동일 근거로 정적
+ * 세그먼트를 동적 ':draftId'보다 앞에 등록해 둔다. 'drafts/leaves/:draftId/edit'는 'drafts/:draftId/edit'
+ * (일반 기안 수정, 4세그먼트)와는 세그먼트 깊이가 달라, 'drafts/business-trips/:draftId/edit'(출장 기안
+ * 수정, 동일 5세그먼트)와는 3번째 리터럴 세그먼트('leaves' vs 'business-trips')로 구분되어 랭킹 충돌이
+ * 없다 — 상세 페이지 DrafterActions.handleEdit의 isLeaveDraft 분기가 실제
+ * 이동 목적지로 이어진다. 'leaves/me'·'leaves/dept'·'leaves/admin'은 minRole만 다를 뿐(내 휴가
+ * EMPLOYEE, 부서 휴가 관리 DEPT_MANAGER, 관리자 휴가 현황 ADMIN) 근태 /attendance/dept·출장 이력
+ * 컨벤션과 동일하게 라우트 자체는 ProtectedRoute(인증 가드)만 적용하고 최종 권한 판단은 서버(403
+ * ROLE_003)에 위임한다 — role 게이팅은 사이드바(minRole)에서만 처리한다.
  */
 export const router = createBrowserRouter([
   {
@@ -189,6 +206,13 @@ export const router = createBrowserRouter([
         element: <BusinessTripDraftCreatePage />,
       },
       {
+        // 휴가 기안 작성 페이지: ROADMAP(LEAVE) M1(T1.3)에서 LeaveDraftCreatePage(F740)로 연결했다.
+        // ②'drafts/new'·③'drafts/business-trips/new'와 동일 근거로 정적 세그먼트 'leaves/new'를
+        // 동적 ':draftId'보다 앞에 등록해 둔다.
+        path: 'approval/drafts/leaves/new',
+        element: <LeaveDraftCreatePage />,
+      },
+      {
         // 기안서 상세 페이지: M2(T2.5)에서 DraftDetailPage(F701)로 연결했다. 4종 문서함 페이지의
         // 행 클릭 이동이 실제 상세 화면으로 이어진다.
         path: 'approval/drafts/:draftId',
@@ -209,6 +233,15 @@ export const router = createBrowserRouter([
         element: <BusinessTripDraftEditPage />,
       },
       {
+        // 휴가 기안 수정 페이지: ROADMAP(LEAVE) M2(T2.4)에서 LeaveDraftEditPage(F741)로 연결했다.
+        // 상세 DrafterActions.handleEdit의 isLeaveDraft 분기가 실제 이동 목적지로 이어진다. 위
+        // 'drafts/:draftId/edit'(일반 기안 수정, 4세그먼트)와는 세그먼트 깊이가 달라,
+        // 'drafts/business-trips/:draftId/edit'(출장 기안 수정, 동일 5세그먼트)와는 3번째 리터럴
+        // 세그먼트('leaves' vs 'business-trips')로 구분되어 랭킹 충돌이 없다.
+        path: 'approval/drafts/leaves/:draftId/edit',
+        element: <LeaveDraftEditPage />,
+      },
+      {
         // 내 출장 이력 페이지: ROADMAP(DRAFT-BUSINESSTRIP) M4(T4.3)에서
         // MyBusinessTripHistoryPage(F733)로 연결했다. minRole EMPLOYEE라 ProtectedRoute(인증
         // 가드)만으로 충분하다.
@@ -222,6 +255,26 @@ export const router = createBrowserRouter([
         // 적용한다 — 최종 권한 판단은 서버(403 ROLE_003).
         path: 'approval/business-trips/dept/history',
         element: <DeptBusinessTripHistoryPage />,
+      },
+      {
+        // 내 휴가 페이지: ROADMAP(LEAVE) M3(T3.2)에서 MyLeavePage(F742·F743)로 연결했다. minRole
+        // EMPLOYEE라 ProtectedRoute(인증 가드)만으로 충분하다.
+        path: 'leaves/me',
+        element: <MyLeavePage />,
+      },
+      {
+        // 부서 휴가 관리 페이지: ROADMAP(LEAVE) M4(T4.3)에서 DeptLeavePage(F744~F746)로 연결했다.
+        // minRole DEPT_MANAGER 게이팅은 사이드바에서 처리하고(근태 /attendance/dept 컨벤션 동일),
+        // 라우트 자체는 ProtectedRoute(인증 가드)만 적용한다 — 최종 권한 판단은 서버(403 ROLE_003).
+        path: 'leaves/dept',
+        element: <DeptLeavePage />,
+      },
+      {
+        // 관리자 휴가 현황 페이지: ROADMAP(LEAVE) M5(T5.3)에서 AdminLeavePage(F747~F750)로 연결했다.
+        // minRole ADMIN 게이팅은 사이드바에서 처리하고, 라우트 자체는 ProtectedRoute(인증 가드)만
+        // 적용한다(ADMIN 단일 게이트, 서버 최종 판단 없음).
+        path: 'leaves/admin',
+        element: <AdminLeavePage />,
       },
     ],
   },

@@ -59,12 +59,19 @@ export interface BusinessTripSlot {
 }
 
 /**
- * 휴가기안 유형 슬롯(`leave`). DRAFT_DETAIL 스니펫 예시가 BUSINESS_TRIP이라 하위필드가 노출되지
- * 않았다(Open Q#5). 이번 공통 M2는 GENERAL만 렌더하고 이 슬롯은 "준비 중" 폴백으로 처리하므로
- * 하위필드를 확정하지 않는다(non-null 여부만으로 유형 분기 — Open Q#2 회피). 실제 하위필드
- * (휴가 PRD 추정: startAt/endAt/leaveType/reservedHours)는 ④연가 작성 PRD가 소유·확정한다.
+ * 휴가기안 유형 슬롯(`leave`). 백엔드 DTO(`DraftDetailResponse.LeaveDraftDetail`) 소스 대조로
+ * 하위필드를 확정했다(ROADMAP(LEAVE) T2.1, Open Q#4 해결): `record LeaveDraftDetail(LocalDateTime
+ * startAt, LocalDateTime endAt, LeaveType leaveType, Long reservedHours)`. `leaveType`은
+ * `LeaveType.java`에 `@JsonValue`가 없어 **enum 코드 그대로**("ANNUAL" 등) 내려온다(이력 목록
+ * `MY_/DEPT_LEAVE_REQUEST_HISTORY`의 표시명 문자열과 다르므로 혼동 주의). 본문 렌더(`LeaveDraftBody`)·
+ * 수정 프리필(`LeaveDraftEditPage`)·판별(`isLeaveDraft`)이 소비한다.
  */
-export type LeaveSlot = Record<string, unknown>
+export interface LeaveSlot {
+  startAt: string
+  endAt: string
+  leaveType: string
+  reservedHours: number
+}
 
 /**
  * 매출기안 유형 슬롯(`sales`). leave와 동일 사유로 하위필드 미확정(Open Q#5). 실제 하위필드

@@ -59,6 +59,18 @@ describe('isBusinessTripDraft', () => {
   })
 
   it('leave/sales 슬롯 non-null이어도 businessTrip이 null이면 false', () => {
-    expect(isBusinessTripDraft(draft({ leave: {}, sales: {} }))).toBe(false)
+    expect(
+      isBusinessTripDraft(
+        draft({
+          leave: {
+            startAt: '2026-07-01T09:00:00',
+            endAt: '2026-07-01T18:00:00',
+            leaveType: 'ANNUAL',
+            reservedHours: 8,
+          },
+          sales: {},
+        }),
+      ),
+    ).toBe(false)
   })
 })

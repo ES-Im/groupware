@@ -125,12 +125,16 @@ export const sidebarMenuItems: SidebarMenuItem[] = [
     ],
   },
   {
+    // 휴가 관리 그룹: ROADMAP(LEAVE) M6(T6.1)에서 placeholder 2개를 실 라우트로 승격하고 관리자
+    // 휴가 현황 항목을 신규 추가했다. '내 휴가 요약'은 잔여+이력을 함께 다루므로 라벨을 '내 휴가'로
+    // 조정했다. 결재대기함은 이미 '전자결재' 그룹에 있으므로 여기 추가하지 않는다(PRD §메뉴 구조).
     label: '휴가 관리',
     minRole: 'EMPLOYEE',
     icon: Palmtree,
     children: [
-      { label: '내 휴가 요약', minRole: 'EMPLOYEE', implemented: false },
-      { label: '부서 휴가 관리', minRole: 'DEPT_MANAGER', implemented: false },
+      { label: '내 휴가', to: '/leaves/me', minRole: 'EMPLOYEE' },
+      { label: '부서 휴가 관리', to: '/leaves/dept', minRole: 'DEPT_MANAGER' },
+      { label: '관리자 휴가 현황', to: '/leaves/admin', minRole: 'ADMIN' },
     ],
   },
   {

@@ -44,7 +44,18 @@ describe('isGeneralDraft', () => {
   })
 
   it('leave 슬롯 non-null(휴가) → false', () => {
-    expect(isGeneralDraft(draft({ leave: {} }))).toBe(false)
+    expect(
+      isGeneralDraft(
+        draft({
+          leave: {
+            startAt: '2026-07-01T09:00:00',
+            endAt: '2026-07-01T18:00:00',
+            leaveType: 'ANNUAL',
+            reservedHours: 8,
+          },
+        }),
+      ),
+    ).toBe(false)
   })
 
   it('businessTrip 슬롯 non-null(출장) → false', () => {
