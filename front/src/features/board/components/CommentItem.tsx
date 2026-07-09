@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { Pencil, Reply as ReplyIcon, Trash2 } from 'lucide-react'
+import { CornerDownRight, Pencil, Reply as ReplyIcon, Trash2 } from 'lucide-react'
 import dayjs from 'dayjs'
 import { toast } from 'sonner'
+import { BlobAvatar } from '@/shared/components/BlobAvatar'
 import { handleApiError } from '@/shared/lib/apiError'
 import { cn } from '@/shared/lib/utils'
 import {
@@ -83,110 +84,139 @@ export function CommentItem({ boardId, comment, allowReply, indented }: CommentI
     )
   }
 
+  // 대댓글(indented)은 좌측 들여쓰기 + muted 배경 + 연결 아이콘(CornerDownRight)으로 부모와의
+  // 종속 관계를 시각적으로 드러낸다. 최상위 댓글은 카드 배경(bg-card)으로 또렷하게 구분한다.
+  const containerClass = cn(
+    'rounded-lg border border-border p-3',
+    indented ? 'ml-6 border-border/60 bg-muted/30 sm:ml-10' : 'bg-card',
+  )
+
   if (comment.isDeleted) {
     return (
-      <div className={cn('rounded-lg border p-3', indented && 'ml-8 bg-muted/30')}>
-        <p className="text-sm text-muted-foreground italic">삭제된 댓글입니다.</p>
-      </div>
+      <article className={containerClass}>
+        <div className="flex items-center gap-2 text-sm text-muted-foreground italic">
+          {indented && <CornerDownRight className="size-4 shrink-0 not-italic" aria-hidden="true" />}
+          삭제된 댓글입니다.
+        </div>
+      </article>
     )
   }
 
   return (
-    <div className={cn('rounded-lg border p-3', indented && 'ml-8 bg-muted/30')}>
-      <div className="flex items-start justify-between gap-2">
-        <div className="flex flex-wrap items-center gap-2 text-sm">
-          <span className="font-medium text-foreground">{comment.writerEmpName}</span>
-          {comment.registerAt && (
-            <span className="text-xs text-muted-foreground">
-              {dayjs(comment.registerAt).format('YYYY-MM-DD HH:mm')}
-            </span>
-          )}
-          {comment.isEdited && (
-            <span className="rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">
-              수정됨
-            </span>
-          )}
-        </div>
+    <article className={containerClass}>
+      <div className="flex gap-3">
+        {/* 답글임을 나타내는 연결 아이콘(대댓글에만). */}
+        {indented && (
+          <CornerDownRight className="mt-1.5 size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+        )}
+        {/* 작성자 아바타 — writerEmpId만 넘기고 fileId는 미전달해 이니셜 폴백을 쓴다(부서장 행과
+            동일 패턴, 별도 파일 조회 없음). 대댓글은 한 단계 작은 아바타로 위계를 표현한다. */}
+        <BlobAvatar
+          empId={comment.writerEmpId ?? undefined}
+          fileId={undefined}
+          fallbackText={comment.writerEmpName ?? '?'}
+          className={cn('size-8', indented && 'size-7 text-[11px]')}
+        />
 
-        <div className="flex shrink-0 items-center gap-1">
-          {allowReply && (
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-sm"
-              onClick={() => setIsReplying((prev) => !prev)}
-              aria-pressed={isReplying}
-              title="답글"
-            >
-              <ReplyIcon />
-              <span className="sr-only">답글</span>
-            </Button>
-          )}
-          {/* isOwner는 위 //todo 사유로 현재 항상 false — 이 두 버튼은 사실상 아직 노출되지 않는다. */}
-          {isOwner && (
-            <>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon-sm"
-                onClick={() => setIsEditing((prev) => !prev)}
-                aria-pressed={isEditing}
-                title="수정"
-              >
-                <Pencil />
-                <span className="sr-only">수정</span>
-              </Button>
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button type="button" variant="ghost" size="icon-sm" title="삭제">
-                    <Trash2 />
-                    <span className="sr-only">삭제</span>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-sm">
+              <span className="font-medium text-foreground">{comment.writerEmpName}</span>
+              {comment.registerAt && (
+                <span className="text-xs text-muted-foreground">
+                  {dayjs(comment.registerAt).format('YYYY-MM-DD HH:mm')}
+                </span>
+              )}
+              {comment.isEdited && (
+                <span className="rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">
+                  수정됨
+                </span>
+              )}
+            </div>
+
+            <div className="flex shrink-0 items-center gap-1">
+              {allowReply && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={() => setIsReplying((prev) => !prev)}
+                  aria-pressed={isReplying}
+                  title="답글"
+                >
+                  <ReplyIcon />
+                  <span className="sr-only">답글</span>
+                </Button>
+              )}
+              {/* isOwner는 위 //todo 사유로 현재 항상 false — 이 두 버튼은 사실상 아직 노출되지 않는다. */}
+              {isOwner && (
+                <>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    onClick={() => setIsEditing((prev) => !prev)}
+                    aria-pressed={isEditing}
+                    title="수정"
+                  >
+                    <Pencil />
+                    <span className="sr-only">수정</span>
                   </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>댓글을 삭제하시겠습니까?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      삭제한 댓글은 되돌릴 수 없습니다. 화면에는 &quot;삭제된 댓글입니다.&quot;로
-                      표시됩니다.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>취소</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleDelete}>삭제</AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button type="button" variant="ghost" size="icon-sm" title="삭제">
+                        <Trash2 />
+                        <span className="sr-only">삭제</span>
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>댓글을 삭제하시겠습니까?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          삭제한 댓글은 되돌릴 수 없습니다. 화면에는 &quot;삭제된 댓글입니다.&quot;로
+                          표시됩니다.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>취소</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleDelete}>삭제</AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </>
+              )}
+            </div>
+          </div>
+
+          {isEditing ? (
+            <div className="mt-2">
+              <CommentForm
+                initialContent={comment.content ?? ''}
+                submitLabel="수정"
+                onCancel={() => setIsEditing(false)}
+                onSubmit={handleEditSubmit}
+                autoFocus
+              />
+            </div>
+          ) : (
+            <p className="mt-1.5 text-sm leading-relaxed whitespace-pre-wrap text-foreground">
+              {comment.content}
+            </p>
+          )}
+
+          {isReplying && (
+            <div className="mt-3 border-t pt-3">
+              <CommentForm
+                submitLabel="답글 등록"
+                placeholder="답글을 입력해주세요"
+                onCancel={() => setIsReplying(false)}
+                onSubmit={handleReplySubmit}
+                autoFocus
+              />
+            </div>
           )}
         </div>
       </div>
-
-      {isEditing ? (
-        <div className="mt-2">
-          <CommentForm
-            initialContent={comment.content ?? ''}
-            submitLabel="수정"
-            onCancel={() => setIsEditing(false)}
-            onSubmit={handleEditSubmit}
-            autoFocus
-          />
-        </div>
-      ) : (
-        <p className="mt-2 text-sm whitespace-pre-wrap text-foreground">{comment.content}</p>
-      )}
-
-      {isReplying && (
-        <div className="mt-3 border-t pt-3">
-          <CommentForm
-            submitLabel="답글 등록"
-            placeholder="답글을 입력해주세요"
-            onCancel={() => setIsReplying(false)}
-            onSubmit={handleReplySubmit}
-            autoFocus
-          />
-        </div>
-      )}
-    </div>
+    </article>
   )
 }

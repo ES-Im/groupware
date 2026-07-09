@@ -1,12 +1,12 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router'
 import { useQueryClient } from '@tanstack/react-query'
-import { Send } from 'lucide-react'
+import { Archive, FileText, Inbox, Send } from 'lucide-react'
 import dayjs from 'dayjs'
 import { toast } from 'sonner'
 import { normalizeApiError } from '@/shared/lib/apiError'
 import { Button } from '@/shared/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card'
 import { boardKeys } from '../model/queryKeys'
 import { useBoardDraftsQuery } from '../api/useBoardDraftsQuery'
 import { useBoardPublishMutation } from '../api/useBoardPublishMutation'
@@ -76,7 +76,11 @@ export function BoardDraftsPage() {
 
       <Card>
         <CardHeader className="border-b">
-          <CardTitle>내 임시저장 글</CardTitle>
+          <CardTitle className="flex items-center gap-1.5">
+            <Archive className="size-4" />
+            내 임시저장 글
+          </CardTitle>
+          <CardDescription>제목을 눌러 이어서 작성하거나, 바로 발행할 수 있습니다.</CardDescription>
         </CardHeader>
         <CardContent>
           {draftsQuery.isLoading ? (
@@ -89,26 +93,31 @@ export function BoardDraftsPage() {
               임시저장 글 목록을 불러오지 못했습니다.
             </p>
           ) : drafts.length === 0 ? (
-            <p className="py-8 text-center text-sm text-muted-foreground">
-              임시저장한 글이 없습니다.
-            </p>
+            // 빈 상태: 아이콘 + 안내 문구로 "실패"가 아닌 "아직 없음"임을 시각적으로 분명히 한다.
+            <div className="flex flex-col items-center gap-2 py-10 text-center">
+              <Inbox className="size-8 text-muted-foreground/60" />
+              <p className="text-sm text-muted-foreground">임시저장한 글이 없습니다.</p>
+            </div>
           ) : (
-            <div className="flex flex-col divide-y">
+            <ul className="flex flex-col divide-y">
               {drafts.map((draft) => {
                 const isPublishingThis =
                   publishMutation.isPending && publishMutation.variables === draft.boardId
 
                 return (
-                  <div key={draft.boardId} className="flex items-center gap-3 py-3">
+                  <li key={draft.boardId} className="flex items-center gap-3 py-3">
                     <button
                       type="button"
                       onClick={() => handleRowClick(draft.boardId)}
-                      className="min-w-0 flex-1 rounded-lg px-2.5 py-1.5 text-left transition-colors hover:bg-muted/60 focus-visible:bg-muted/60 focus-visible:outline-none"
+                      className="flex min-w-0 flex-1 items-center gap-3 rounded-lg px-2.5 py-1.5 text-left transition-colors hover:bg-muted/60 focus-visible:bg-muted/60 focus-visible:outline-none"
                     >
-                      <p className="truncate text-sm font-medium">{draft.title}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {dayjs(draft.updatedAt).format('YYYY-MM-DD HH:mm')}
-                      </p>
+                      <FileText className="size-4 shrink-0 text-muted-foreground" />
+                      <span className="min-w-0">
+                        <span className="block truncate text-sm font-medium">{draft.title}</span>
+                        <span className="block text-xs text-muted-foreground">
+                          {dayjs(draft.updatedAt).format('YYYY-MM-DD HH:mm')}
+                        </span>
+                      </span>
                     </button>
                     <Button
                       type="button"
@@ -119,10 +128,10 @@ export function BoardDraftsPage() {
                       <Send />
                       발행
                     </Button>
-                  </div>
+                  </li>
                 )
               })}
-            </div>
+            </ul>
           )}
         </CardContent>
       </Card>

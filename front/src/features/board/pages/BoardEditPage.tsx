@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
-import { Paperclip, Plus, Trash2 } from 'lucide-react'
+import { Loader2, Paperclip, Plus, Save, SquarePen, Trash2 } from 'lucide-react'
 import dayjs from 'dayjs'
 import { toast } from 'sonner'
 import { isForbidden, isNotFound, normalizeApiError } from '@/shared/lib/apiError'
 import { submitWithErrorMapping, useZodForm } from '@/shared/lib/form'
 import { Button } from '@/shared/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card'
 import { Input } from '@/shared/ui/input'
 import { Label } from '@/shared/ui/label'
 import { Textarea } from '@/shared/ui/textarea'
@@ -151,7 +151,7 @@ function BoardEditForm({
         </p>
       )}
 
-      <div className="flex justify-end gap-2">
+      <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
         {/* cancelPath는 부모(BoardEditPage)가 detail 404(=초안) 신호로 계산해 내려준다 —
             발행 글이면 상세로, 초안이면 목록으로 보내 BoardDetailPage의 상시 404를 피한다
             (아래 resolveEditTargetPath 주석 참조, 저장 성공 후 이동과 동일한 분기). */}
@@ -163,6 +163,7 @@ function BoardEditForm({
           disabled={isSubmitting || !isModifiedAtReady}
           onClick={() => void submitEdit()}
         >
+          <Save />
           저장
         </Button>
       </div>
@@ -277,7 +278,7 @@ function BoardEditAttachments({ boardId }: { boardId: number }) {
             disabled={uploadMutation.isPending}
             onClick={() => fileInputRef.current?.click()}
           >
-            <Plus />
+            {uploadMutation.isPending ? <Loader2 className="animate-spin" /> : <Plus />}
             {uploadMutation.isPending ? '업로드 중...' : '파일 추가'}
           </Button>
         </div>
@@ -311,7 +312,9 @@ function BoardEditAttachments({ boardId }: { boardId: number }) {
                       onClick={() => handleDelete(file.fileId)}
                       aria-label={`${file.originalName} 삭제`}
                     >
-                      <Trash2 />
+                      {/* 파일별 삭제 진행 상태(deletingFileIds)를 개별 스피너로 표시한다 —
+                          동시 삭제 시 각 행이 독립적으로 진행 표시되도록 로컬 상태를 그대로 소비한다. */}
+                      {isDeleting ? <Loader2 className="animate-spin" /> : <Trash2 />}
                     </Button>
                   </div>
                 </li>
@@ -508,7 +511,11 @@ export function BoardEditPage() {
 
       <Card>
         <CardHeader className="border-b">
-          <CardTitle>게시글 정보</CardTitle>
+          <CardTitle className="flex items-center gap-1.5">
+            <SquarePen className="size-4" />
+            게시글 정보
+          </CardTitle>
+          <CardDescription>카테고리·제목·본문을 수정한 뒤 저장합니다.</CardDescription>
         </CardHeader>
         <CardContent>
           {/* //todo : [minor] cancelPath는 매 렌더 계산되는데 detailQuery는 editMode 성공 후에야 발화한다 — detail 로딩 창에서는 초안이어도 detailQuery.error가 없어 /boards/:boardId(상세)로 계산돼, 그 사이 "취소"를 누른 초안은 여전히 상세 404에 착지한다(저장은 isModifiedAtReady로 게이팅되나 취소 Link는 항상 활성이라 비대칭). detail이 resolve될 때까지 취소도 함께 게이팅/보류하는 방향 검토 */}

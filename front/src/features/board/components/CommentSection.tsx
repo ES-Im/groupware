@@ -99,7 +99,7 @@ export function CommentSection({ boardId }: CommentSectionProps) {
         ) : comments.length === 0 ? (
           <p className="py-4 text-center text-sm text-muted-foreground">등록된 댓글이 없습니다.</p>
         ) : (
-          <div className="space-y-2 border-t pt-4">
+          <div className="space-y-3 border-t pt-4">
             {comments.map((comment) => (
               <CommentItem
                 key={comment.commentId}

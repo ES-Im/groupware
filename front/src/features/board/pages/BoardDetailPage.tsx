@@ -8,6 +8,8 @@ import { isForbidden, isNotFound, normalizeApiError } from '@/shared/lib/apiErro
 import { hasRequiredRole } from '@/shared/lib/hasRequiredRole'
 import { Button } from '@/shared/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
+import { useCategoriesQuery } from '@/features/category/api/useCategoriesQuery'
+import { CategoryBadge } from '../components/CategoryBadge'
 import { downloadBoardFile } from '../api/downloadBoardFile'
 import { useBoardDetailQuery } from '../api/useBoardDetailQuery'
 import { useBoardFilePreviewUrl } from '../api/useBoardFilePreviewUrl'
@@ -121,6 +123,11 @@ export function BoardDetailPage() {
   const detailQuery = useBoardDetailQuery(isInvalidBoardId ? undefined : boardId)
   const filesQuery = useBoardFilesQuery(isInvalidBoardId ? undefined : boardId)
   const publishMutation = useBoardPublishMutation()
+
+  // 카테고리 표기를 목록(pill 필터·CategoryBadge)과 일관되게 맞추기 위해, 상세 응답의 categoryId를
+  // 이름으로 해석한다(F302 useCategoriesQuery 재사용 — 신규 API/로직 발명 없음). 이름을 아직 못
+  // 구했으면(로딩/실패) 배지를 생략한다(본문 렌더에는 영향 없음).
+  const categoriesQuery = useCategoriesQuery()
 
   const backLink = (
     <Link
@@ -243,6 +250,9 @@ export function BoardDetailPage() {
   const board = detailQuery.data
   const files = filesQuery.data ?? []
   const showModifiedAt = board.modifiedAt && board.modifiedAt !== board.publishedAt
+  const categoryName = categoriesQuery.data?.find(
+    (category) => category.categoryId === board.categoryId,
+  )?.categoryName
 
   return (
     <div className="w-full p-4 sm:p-6 lg:p-8">
@@ -252,6 +262,9 @@ export function BoardDetailPage() {
         <CardHeader className="border-b">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0">
+              {/* 카테고리 표기(목록 pill 필터와 동일한 폴더 아이콘 언어의 CategoryBadge) — 이름을
+                  해석했을 때만 노출한다. */}
+              {categoryName && <CategoryBadge name={categoryName} className="mb-2" />}
               <CardTitle className="text-xl">{board.title}</CardTitle>
               <p className="mt-1 text-sm text-muted-foreground">
                 {board.authorName} · 발행 {dayjs(board.publishedAt).format('YYYY-MM-DD HH:mm')}
@@ -288,8 +301,12 @@ export function BoardDetailPage() {
 
         <CardContent className="space-y-6">
           {/* longtext 본문. 작성 폼(BoardCreatePage)이 Textarea로 받은 순수 텍스트이므로
-              dangerouslySetInnerHTML 없이 whitespace-pre-wrap으로만 줄바꿈을 보존한다. */}
-          <p className="text-sm whitespace-pre-wrap text-foreground">{board.content}</p>
+              dangerouslySetInnerHTML 없이 whitespace-pre-wrap으로만 줄바꿈을 보존한다.
+              긴 본문 가독성을 위해 leading-relaxed로 행간을 넓히고, 짧은 글도 본문 영역이
+              허전하지 않도록 최소 높이를 준다. */}
+          <p className="min-h-24 text-sm leading-relaxed whitespace-pre-wrap text-foreground">
+            {board.content}
+          </p>
 
           {/* 첨부 목록(F304): 이미지 확장자는 인라인 미리보기(F311), 그 외는 다운로드(F310). */}
           {filesQuery.isLoading ? (

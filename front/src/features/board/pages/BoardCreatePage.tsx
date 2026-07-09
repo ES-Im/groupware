@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router'
-import { ChevronDown, ChevronUp } from 'lucide-react'
+import { Link, useNavigate } from 'react-router'
+import { Archive, ChevronDown, ChevronUp, FileText, Save, Send, SquarePen } from 'lucide-react'
 import dayjs from 'dayjs'
 import { toast } from 'sonner'
 import { normalizeApiError } from '@/shared/lib/apiError'
 import { submitWithErrorMapping, useZodForm } from '@/shared/lib/form'
 import { Button } from '@/shared/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card'
 import { Input } from '@/shared/ui/input'
 import { Label } from '@/shared/ui/label'
 import { Textarea } from '@/shared/ui/textarea'
@@ -98,11 +98,22 @@ export function BoardCreatePage() {
 
   return (
     <div className="mx-auto w-full max-w-2xl p-4 sm:p-6 lg:p-8">
+      {/* 상세 페이지(BoardDetailPage)와 동일한 back-link 컨벤션으로 목록 복귀 동선을 맞춘다. */}
+      <Link
+        to="/boards"
+        className="mb-4 inline-block text-sm text-muted-foreground hover:text-foreground"
+      >
+        ← 게시판
+      </Link>
       <h1 className="mb-6 text-xl font-semibold tracking-tight">게시글 작성</h1>
 
       <Card>
         <CardHeader className="border-b">
-          <CardTitle>새 게시글</CardTitle>
+          <CardTitle className="flex items-center gap-1.5">
+            <SquarePen className="size-4" />
+            새 게시글
+          </CardTitle>
+          <CardDescription>카테고리·제목·본문을 작성해 임시저장하거나 발행합니다.</CardDescription>
         </CardHeader>
         <CardContent>
           <form noValidate onSubmit={(event) => event.preventDefault()} className="flex flex-col gap-4">
@@ -173,65 +184,79 @@ export function BoardCreatePage() {
               </p>
             )}
 
-            <div className="flex justify-end gap-2">
+            {/* 액션 행(레퍼런스 배치): 좌측 임시저장·발행 그룹 + 우측 "임시저장글" 토글.
+                토글은 아래 임시저장글 패널(isDraftsOpen)을 펼친다 — 상태/제출 로직은 그대로 유지한다. */}
+            <div className="flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex flex-col-reverse gap-2 sm:flex-row">
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={isSubmitting}
+                  onClick={() => void submitDraft()}
+                >
+                  <Save />
+                  임시저장
+                </Button>
+                <Button type="button" disabled={isSubmitting} onClick={() => void submitPublish()}>
+                  <Send />
+                  발행
+                </Button>
+              </div>
               <Button
                 type="button"
                 variant="outline"
-                disabled={isSubmitting}
-                onClick={() => void submitDraft()}
+                aria-expanded={isDraftsOpen}
+                onClick={() => setIsDraftsOpen((prev) => !prev)}
               >
-                임시저장
-              </Button>
-              <Button type="button" disabled={isSubmitting} onClick={() => void submitPublish()}>
-                발행
+                <Archive />
+                임시저장글
+                {isDraftsOpen ? <ChevronUp /> : <ChevronDown />}
               </Button>
             </div>
           </form>
         </CardContent>
       </Card>
 
-      <Card className="mt-4">
-        <CardContent>
-          <button
-            type="button"
-            onClick={() => setIsDraftsOpen((prev) => !prev)}
-            aria-expanded={isDraftsOpen}
-            className="flex w-full items-center justify-between text-sm font-medium"
-          >
-            <span>임시저장글 불러오기</span>
-            {isDraftsOpen ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
-          </button>
-
-          {isDraftsOpen && (
-            <div className="mt-3 flex flex-col gap-1 border-t pt-3">
-              <p className="mb-1 text-xs text-muted-foreground">
-                첨부가 필요한 글은 아래에서 직접 선택해 수정 페이지로 이어갑니다.
+      {/* 임시저장글 불러오기 패널: 토글이 켜졌을 때만 노출한다(첨부가 필요한 글의 이어쓰기 경로). */}
+      {isDraftsOpen && (
+        <Card className="mt-4">
+          <CardHeader className="border-b">
+            <CardTitle className="flex items-center gap-1.5">
+              <Archive className="size-4" />
+              임시저장글 불러오기
+            </CardTitle>
+            <CardDescription>
+              첨부가 필요한 글은 아래에서 직접 선택해 수정 페이지로 이어갑니다.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {draftsQuery.isLoading ? (
+              <p className="py-4 text-center text-sm text-muted-foreground">불러오는 중...</p>
+            ) : drafts.length === 0 ? (
+              <p className="py-4 text-center text-sm text-muted-foreground">
+                임시저장한 글이 없습니다.
               </p>
-              {draftsQuery.isLoading ? (
-                <p className="py-4 text-center text-sm text-muted-foreground">불러오는 중...</p>
-              ) : drafts.length === 0 ? (
-                <p className="py-4 text-center text-sm text-muted-foreground">
-                  임시저장한 글이 없습니다.
-                </p>
-              ) : (
-                drafts.map((draft) => (
+            ) : (
+              <div className="flex flex-col gap-1">
+                {drafts.map((draft) => (
                   <button
                     key={draft.boardId}
                     type="button"
                     onClick={() => handleSelectDraft(draft.boardId)}
-                    className="flex items-center justify-between rounded-lg px-2.5 py-2 text-left text-sm transition-colors hover:bg-muted/60 focus-visible:bg-muted/60 focus-visible:outline-none"
+                    className="flex items-center gap-3 rounded-lg px-2.5 py-2 text-left text-sm transition-colors hover:bg-muted/60 focus-visible:bg-muted/60 focus-visible:outline-none"
                   >
-                    <span className="truncate">{draft.title}</span>
-                    <span className="ml-3 shrink-0 text-xs text-muted-foreground">
+                    <FileText className="size-4 shrink-0 text-muted-foreground" />
+                    <span className="min-w-0 flex-1 truncate">{draft.title}</span>
+                    <span className="shrink-0 text-xs text-muted-foreground">
                       {dayjs(draft.updatedAt).format('YYYY-MM-DD HH:mm')}
                     </span>
                   </button>
-                ))
-              )}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
 }

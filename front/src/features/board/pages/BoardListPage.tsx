@@ -6,11 +6,20 @@ import { isNotFound, normalizeApiError } from '@/shared/lib/apiError'
 import { usePageState } from '@/shared/lib/usePageState'
 import type { PageMeta } from '@/shared/components/PaginationControls'
 import { PaginationControls } from '@/shared/components/PaginationControls'
+import { Badge } from '@/shared/ui/badge'
 import { Button } from '@/shared/ui/button'
-import { Card, CardContent } from '@/shared/ui/card'
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/shared/ui/card'
 import { Input } from '@/shared/ui/input'
 import { useCategoriesQuery } from '@/features/category/api/useCategoriesQuery'
 import { useBoardListQuery } from '../api/useBoardListQuery'
+import { BoardCategoryFilter } from '../components/BoardCategoryFilter'
 import { BoardListTable } from '../components/BoardListTable'
 
 /** 검색 디바운스 지연(ms). DepartmentsPage(T6.3)와 동일한 값을 재사용한다. */
@@ -19,10 +28,12 @@ const SEARCH_DEBOUNCE_MS = 300
 /**
  * 게시판 목록 페이지(F301, ROADMAP T10.3, docs/prd/4.board-slice-prd.md §게시판 목록 페이지).
  *
- * 카테고리 셀렉트(F302 `useCategoriesQuery`)로 조회 대상 카테고리를 고르고, 그 categoryId로
- * `useBoardListQuery`(F301)를 호출한다. 카테고리 목록이 도착하면 첫 항목을 기본 선택한다(그
- * 이후에는 사용자가 직접 바꾸기 전까지 유지). 제목 keyword 검색은 DepartmentsPage와 동일하게
- * 로컬 입력값을 300ms 디바운스한 뒤에만 쿼리 파라미터로 반영한다.
+ * 카테고리 pill 필터(F302 `useCategoriesQuery`, 레퍼런스 목업의 카테고리 버튼 그룹을 재해석한
+ * `BoardCategoryFilter`)로 조회 대상 카테고리를 고르고, 그 categoryId로 `useBoardListQuery`(F301)를
+ * 호출한다. pill은 순수 시각/인터랙션 패턴만 기존 `<select>`에서 바꾼 것으로, 바인딩되는 상태/로직
+ * (selectedCategoryId·handleCategoryChange·categoriesQuery)은 그대로 유지한다. 카테고리 목록이
+ * 도착하면 첫 항목을 기본 선택한다(그 이후에는 사용자가 직접 바꾸기 전까지 유지). 제목 keyword
+ * 검색은 DepartmentsPage와 동일하게 로컬 입력값을 300ms 디바운스한 뒤에만 쿼리 파라미터로 반영한다.
  *
  * 페이징은 신규 UI를 만들지 않고 T10.1이 확립한 공유 표준(`usePageState` + `PaginationControls`)을
  * 그대로 소비한다. 카테고리 변경·검색어 확정 시 모두 페이지를 0으로 리셋해 존재하지 않는 페이지를
@@ -122,27 +133,26 @@ export function BoardListPage() {
       </div>
 
       <Card className="h-fit">
+        <CardHeader className="border-b">
+          <CardTitle>게시글 목록</CardTitle>
+          <CardDescription>카테고리별 게시글을 페이징 목록으로 표시합니다.</CardDescription>
+          {/* 우측 카운트 배지(레퍼런스의 "N건") — 현재 필터 기준 총 게시글 수를 표기한다. */}
+          <CardAction>
+            <Badge variant="secondary" className="tabular-nums">
+              {pageInfo.totalElements}건
+            </Badge>
+          </CardAction>
+        </CardHeader>
         <CardContent className="space-y-4">
-          {/* 툴바: 카테고리 셀렉트 + 제목 검색 */}
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-2">
-              <label htmlFor="board-category-select" className="sr-only">
-                카테고리 선택
-              </label>
-              <select
-                id="board-category-select"
-                value={selectedCategoryId ?? ''}
-                onChange={(event) => handleCategoryChange(Number(event.target.value))}
-                disabled={categories.length === 0}
-                className="h-8 rounded-lg border border-input bg-transparent px-2.5 text-sm text-foreground transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
-              >
-                {categories.map((category) => (
-                  <option key={category.categoryId} value={category.categoryId}>
-                    {category.categoryName}
-                  </option>
-                ))}
-              </select>
-            </div>
+          {/* 툴바: 카테고리 pill 필터 + 제목 검색. 카테고리가 있을 때만 pill을 노출한다. */}
+          {categories.length > 0 && (
+            <BoardCategoryFilter
+              categories={categories}
+              selectedCategoryId={selectedCategoryId}
+              onSelect={handleCategoryChange}
+            />
+          )}
+          <div className="sm:flex sm:justify-end">
             <div className="relative w-full sm:max-w-xs">
               <Search className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
               <label htmlFor="board-search" className="sr-only">
@@ -153,7 +163,7 @@ export function BoardListPage() {
                 type="search"
                 value={searchInput}
                 onChange={(event) => setSearchInput(event.target.value)}
-                placeholder="제목 검색..."
+                placeholder="게시글 검색"
                 className="pl-8"
               />
             </div>
