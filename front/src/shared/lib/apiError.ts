@@ -72,7 +72,11 @@ export const isAuthFailure = (error: ApiError): boolean => error.code === 'AUTH_
 
 export const isTokenInvalid = (error: ApiError): boolean => error.code === 'ROLE_002'
 
-export const isForbidden = (error: ApiError): boolean => error.code === 'ROLE_003'
+/**
+ * 403은 도메인마다 별도 코드(ROLE_003·CHAT_003 등)로 내려오므로, isNotFound와 동일하게
+ * httpStatus 기준으로 판별한다(특정 코드로 좁히면 신규 도메인 403 코드를 놓친다).
+ */
+export const isForbidden = (error: ApiError): boolean => error.httpStatus === 403
 
 export const isNotFound = (error: ApiError): boolean => error.httpStatus === 404
 

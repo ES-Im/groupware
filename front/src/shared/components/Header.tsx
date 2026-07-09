@@ -49,6 +49,19 @@ interface HeaderProps {
 const chromeIconButtonClass =
   'inline-flex size-8 items-center justify-center rounded-md text-primary-foreground/70 transition-colors hover:bg-primary-foreground/10 hover:text-primary-foreground focus-visible:ring-2 focus-visible:ring-primary-foreground/40 focus-visible:outline-none dark:text-card-foreground/70 dark:hover:bg-card-foreground/10 dark:hover:text-card-foreground dark:focus-visible:ring-card-foreground/40'
 
+/**
+ * 채팅 창 열기(ROADMAP(CHAT) T0.2 / PRD §🪟-1): `/chat`을 별도 팝업 창으로 띄운다. 창 이름을
+ * `haruon-chat`으로 고정해 두면, 이미 열려 있는 채팅 창이 있을 때 브라우저가 새 창을 만들지 않고
+ * 동일 이름의 기존 창을 재사용하므로 재클릭 시 다중 창 난립 없이 `focus()`만으로 기존 창을
+ * 앞으로 가져온다. 순수 UI 내비게이션(백엔드 호출 없음)이라 상위(LayoutShell)에서 props로
+ * 주입하지 않고 Header가 직접 소유한다.
+ */
+// todo: 팝업 차단으로 window.open이 null을 반환하는 경우의 폴백(새 탭 안내/토스트 등)과
+// 새 창(popup) vs 새 탭 정책은 ROADMAP(CHAT) §🪟 //todo·Open Questions로 미확정 — 임의 확정 금지
+function openChatWindow() {
+  window.open('/chat', 'haruon-chat', 'popup,width=420,height=760')?.focus()
+}
+
 export function Header({
   collapsed,
   onToggleSidebar,
@@ -94,9 +107,13 @@ export function Header({
         <button type="button" aria-label="알림" className={chromeIconButtonClass}>
           <Bell className="size-4" aria-hidden="true" />
         </button>
-        {/* 채팅 버튼(S4): 채팅 도메인 PRD가 아직 확정되지 않아 무동작 슬롯만 배치한다. */}
-        {/* todo: 채팅 도메인 PRD 확정 시 연결 */}
-        <button type="button" aria-label="채팅" className={chromeIconButtonClass}>
+        {/* 채팅 버튼(S4, ROADMAP(CHAT) T0.2): haruon-chat 팝업 창으로 /chat을 연다. */}
+        <button
+          type="button"
+          onClick={openChatWindow}
+          aria-label="채팅"
+          className={chromeIconButtonClass}
+        >
           <MessageSquare className="size-4" aria-hidden="true" />
         </button>
         {/* 다크모드 on/off 토글: 참고 스크린샷의 태양 아이콘 위치(알림/채팅 옆) 재현. */}

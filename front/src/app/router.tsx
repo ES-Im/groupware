@@ -33,6 +33,9 @@ import { MyInfoPage } from '@/features/employee/pages/MyInfoPage'
 import { UpdateMePage } from '@/features/employee/pages/UpdateMePage'
 import { ProtectedRoute } from '@/shared/components/ProtectedRoute'
 import { LayoutShell } from '@/shared/components/LayoutShell'
+import { ChatWindowLayout } from '@/shared/components/ChatWindowLayout'
+import { ChatRoomListPage } from '@/features/chat/pages/ChatRoomListPage'
+import { ChatRoomDetailPage } from '@/features/chat/pages/ChatRoomDetailPage'
 
 /**
  * Router 트리(ROADMAP T0.5·T0.7 / §A-5, §B).
@@ -95,6 +98,14 @@ import { LayoutShell } from '@/shared/components/LayoutShell'
  * EMPLOYEE, 부서 휴가 관리 DEPT_MANAGER, 관리자 휴가 현황 ADMIN) 근태 /attendance/dept·출장 이력
  * 컨벤션과 동일하게 라우트 자체는 ProtectedRoute(인증 가드)만 적용하고 최종 권한 판단은 서버(403
  * ROLE_003)에 위임한다 — role 게이팅은 사이드바(minRole)에서만 처리한다.
+ * /chat, /chat/rooms/:roomId는 ROADMAP(CHAT) T0.1에서 신설했다 — 채팅은 메인 셸의 패널이 아니라
+ * 헤더 아이콘 클릭 시 window.open으로 뜨는 완전히 독립된 팝업 창("별도 서비스인 척" UX)이라,
+ * ProtectedRoute·LayoutShell 트리의 자식이 아닌 그 트리와 형제인 최상위 라우트로 등록했다.
+ * ChatWindowLayout(사이드바/헤더 없는 최소 크롬)을 부모로 두며, 인증 게이트는 T0.3에서 채팅 창
+ * 자체 부팅 시퀀스로 별도 처리할 예정이라 지금은 감싸지 않는다. index(`/chat`)는 ROADMAP(CHAT)
+ * T1.2에서 ChatRoomListPage(F901 목록 패널)로 교체했다. `/chat/rooms/:roomId`는 T2.1에서
+ * ChatRoomDetailPage(F902 상세+헤더)로 교체했다 — roomId 파라미터 유효성 검사와 403/404 분기는
+ * 페이지 컴포넌트 내부에서 처리하므로 다른 채팅 라우트와 동일하게 별도 가드 없이 element로 연결한다.
  */
 export const router = createBrowserRouter([
   {
@@ -285,5 +296,19 @@ export const router = createBrowserRouter([
   {
     path: '/register',
     element: <RegisterPage />,
+  },
+  {
+    path: '/chat',
+    element: <ChatWindowLayout />,
+    children: [
+      {
+        index: true,
+        element: <ChatRoomListPage />,
+      },
+      {
+        path: 'rooms/:roomId',
+        element: <ChatRoomDetailPage />,
+      },
+    ],
   },
 ])
