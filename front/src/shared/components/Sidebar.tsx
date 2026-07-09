@@ -134,7 +134,12 @@ export function Sidebar({
           메뉴
         </p>
       )}
-      {renderMenuNav(collapsed)}
+      {/* LayoutShell이 셸 높이를 뷰포트에 고정(h-svh)하면서 aside 높이도 함께 유한해졌다 — 그룹을
+          여러 개 펼쳐 메뉴 전체 길이가 남은 높이를 넘으면 이 내부 스크롤이 없으면 하단 메뉴가
+          overflow-hidden에 잘려 완전히 접근 불가능해진다. min-h-0로 flex 자식이 부모 높이를
+          넘지 않게 하고 그 안에서만 세로 스크롤한다(overflow-hidden은 가로 width 전환 애니메이션
+          클리핑용으로 그대로 두고, 세로는 이 래퍼가 담당). */}
+      <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">{renderMenuNav(collapsed)}</div>
     </aside>
   )
 }

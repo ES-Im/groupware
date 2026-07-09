@@ -114,7 +114,11 @@ export function LayoutShell() {
   }
 
   return (
-    <div className="flex min-h-svh flex-col bg-background">
+    // 셸 높이를 뷰포트에 고정한다(h-svh) — main(flex-1 overflow-y-auto)이 헤더~푸터 사이 높이에
+    // 실제로 바운딩되는 스크롤 컨테이너가 되어, 각 페이지가 h-full/flex-1로 내부 스크롤 영역을 구성할
+    // 수 있다(BoardListPage 고정 높이 목록 등). 과거 min-h-svh는 콘텐츠가 길면 셸 자체가 늘어나
+    // body가 스크롤되고 main의 overflow-y-auto가 무효화됐다(공유 셸 보정).
+    <div className="flex h-svh flex-col bg-background">
       {/* 헤더: 사이드바 포함 페이지 전체 폭, 최상단. */}
       <Header
         collapsed={collapsed}
@@ -139,7 +143,9 @@ export function LayoutShell() {
           onCloseMobileSidebar={closeMobileSidebar}
           badgeCounts={badgeCounts}
         />
-        <div className="flex min-w-0 flex-1 flex-col">
+        {/* min-h-0으로 본문 컬럼이 콘텐츠 min-content에 밀려 늘어나지 않게 해, main이 남는 높이에
+            정확히 바운딩되고 내부에서만 스크롤되도록 한다(푸터는 항상 뷰포트 하단 고정). */}
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
           <main className="flex-1 overflow-y-auto bg-muted/30">
             <Outlet />
           </main>

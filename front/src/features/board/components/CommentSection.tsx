@@ -14,6 +14,15 @@ import { CommentItem } from './CommentItem'
 
 interface CommentSectionProps {
   boardId: number
+  /**
+   * 렌더 방식. `standalone`(기본)은 자체 `<Card>`로 감싸 상위 요소와 여백을 두고 분리한다(전용
+   * 상세 페이지 BoardDetailPage). `embedded`는 바깥 Card 없이 헤더/본문만 렌더해, 상위(BoardDetailView
+   * 인라인 전환)의 같은 Card 안에 이어 붙일 수 있게 한다 — 사용자 요청("게시글 목록 카드 안에
+   * 상세+댓글이 한 뭉텅이로 보여야 한다")에 따라 카드 경계가 아닌 구분선(border-t)만으로 나뉜다.
+   * Card/CardHeader/CardContent가 공유하는 `--card-spacing` CSS 변수는 상위 Card가 이미 정의해
+   * 상속되므로, 바깥 Card를 생략해도 내부 여백은 동일하게 유지된다.
+   */
+  variant?: 'standalone' | 'embedded'
 }
 
 /**
@@ -36,7 +45,7 @@ interface CommentSectionProps {
  * `boardKeys.comments(...)`를 invalidate하고 `boardKeys.detail(boardId)`의 `commentCount`를
  * 로컬 델타로 갱신하므로, 이 컴포넌트는 별도로 commentCount를 계산/갱신하지 않는다.
  */
-export function CommentSection({ boardId }: CommentSectionProps) {
+export function CommentSection({ boardId, variant = 'standalone' }: CommentSectionProps) {
   const { page, size, onPageChange } = usePageState()
   const commentsQuery = useBoardCommentsQuery(boardId, { page, size })
   const registerMutation = useCommentRegisterMutation()
@@ -70,9 +79,11 @@ export function CommentSection({ boardId }: CommentSectionProps) {
     last: true,
   }
 
-  return (
-    <Card className="mt-6">
-      <CardHeader className="border-b">
+  const body = (
+    <>
+      {/* embedded일 때는 카드 경계 대신 구분선(border-t)만으로 상세 본문과 나눈다(사용자 요청:
+          "한 뭉텅이"처럼 보이되 hr 같은 선으로만 구별). standalone은 기존 border-b 헤더 그대로. */}
+      <CardHeader className={variant === 'embedded' ? 'border-t pt-(--card-spacing)' : 'border-b'}>
         <CardTitle className="flex items-center gap-1.5 text-base">
           <MessageCircle className="size-4" />
           댓글 {pageInfo.totalElements}
@@ -120,6 +131,12 @@ export function CommentSection({ boardId }: CommentSectionProps) {
           unit="개"
         />
       </CardContent>
-    </Card>
+    </>
   )
+
+  if (variant === 'embedded') {
+    return body
+  }
+
+  return <Card className="mt-6">{body}</Card>
 }

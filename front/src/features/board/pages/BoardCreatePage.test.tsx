@@ -176,26 +176,45 @@ describe('BoardCreatePage (F305) - 임시저장/발행 제출 페이로드', () 
   })
 })
 
-describe('BoardCreatePage (F308) - 임시저장글 불러오기', () => {
+describe('BoardCreatePage (F308) - 임시저장글 인라인 편집', () => {
   afterEach(() => {
     vi.clearAllMocks()
   })
 
-  it('토글을 펼치면 임시저장 목록을 보여주고, 항목을 클릭하면 해당 글의 수정 페이지로 이동한다', async () => {
+  it('"임시저장글"에 마우스를 올리면 목록을 보여주고, 항목을 클릭하면 라우트 이동 없이 인라인 편집 폼으로 전환한다', async () => {
+    // 임시저장글 드롭다운은 클릭 토글이 아니라 HoverCard(마우스 오버)이며, 항목 선택 시 라우트 이동
+    // (수정 페이지) 대신 같은 카드 자리에서 인라인 편집(BoardEditForm+BoardEditAttachments)으로 전환한다.
     mockCategoriesAndDrafts([
       { boardId: 42, title: '이어쓰던 초안', updatedAt: '2026-07-01T09:00:00' },
     ])
+    server.use(
+      http.get(`${BASE_URL}/api/boards/42/edit-mode`, () =>
+        HttpResponse.json({ boardId: 42, categoryId: 1, title: '이어쓰던 초안', content: '이어쓰던 본문' }),
+      ),
+      // 초안은 BOARD_DETAIL에서 항상 404 — modifiedAt 폴백 신호로 소비된다(정상 경로).
+      http.get(`${BASE_URL}/api/boards/42`, () =>
+        HttpResponse.json(
+          { code: 'RESOURCE_001', name: 'NOT_FOUND', httpStatus: 404, message: '게시글을 찾을 수 없습니다' },
+          { status: 404 },
+        ),
+      ),
+      http.get(`${BASE_URL}/api/boards/42/files`, () => HttpResponse.json([])),
+    )
     const user = userEvent.setup()
     renderPage()
 
     await screen.findByRole('option', { name: '공지' })
-    await user.click(screen.getByRole('button', { name: '임시저장글' }))
+    await user.hover(screen.getByRole('button', { name: '임시저장글' }))
 
     expect(await screen.findByText('이어쓰던 초안')).toBeInTheDocument()
 
     await user.click(screen.getByText('이어쓰던 초안'))
 
-    expect(await screen.findByText('게시글 수정 화면')).toBeInTheDocument()
+    // 라우트 이동(수정 페이지) 대신 인라인 편집 폼이 뜬다: 편집 초기값이 채워지고 저장 버튼/첨부 섹션이 보인다.
+    expect(await screen.findByRole('button', { name: '저장' })).toBeInTheDocument()
+    expect(await screen.findByText('첨부파일이 없습니다.')).toBeInTheDocument()
+    expect(screen.getByLabelText(/제목/)).toHaveValue('이어쓰던 초안')
+    expect(screen.queryByText('게시글 수정 화면')).not.toBeInTheDocument()
   })
 
   it('임시저장 목록이 비어 있으면 "임시저장한 글이 없습니다."를 보여준다', async () => {
@@ -204,7 +223,7 @@ describe('BoardCreatePage (F308) - 임시저장글 불러오기', () => {
     renderPage()
 
     await screen.findByRole('option', { name: '공지' })
-    await user.click(screen.getByRole('button', { name: '임시저장글' }))
+    await user.hover(screen.getByRole('button', { name: '임시저장글' }))
 
     expect(await screen.findByText('임시저장한 글이 없습니다.')).toBeInTheDocument()
   })
