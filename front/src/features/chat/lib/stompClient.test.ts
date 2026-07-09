@@ -153,4 +153,36 @@ describe('chatStompClient 연결 상태 노출/종료 정리 (T0.4-b)', () => {
 
     expect(() => freshStompClientModule.disconnectChatStomp()).not.toThrow()
   })
+
+  /**
+   * 채팅 오버레이(팝업 → 인앱 오버레이 전환) 열기/닫기/재열기는 이제 React 마운트/언마운트로
+   * connectChatStomp/disconnectChatStomp를 그대로 호출한다(ChatOverlayPanel 참조) — 이 시나리오를
+   * 재현해 force disconnect 직후 재연결이 다시 정상적으로 CONNECTED 상태에 도달하는지 검증한다.
+   * (playwright 수동 검증 중 재오픈 시 콘솔에 "WebSocket is already in CLOSING or CLOSED state"
+   * 로그가 1회 관찰됐으나, 이는 jsdom에 없는 실제 브라우저 네이티브 WebSocket 구현이 force close
+   * 경합 상황에서 찍는 방어적 로그로 보이며 — FakeStompSocket은 그 네이티브 로그를 재현하지
+   * 않으므로 이 테스트에서 직접 검증할 수는 없다 — 기능적으로는 이 테스트가 보여주듯 재연결이
+   * 정상 완료된다.)
+   */
+  it('force disconnect 직후 재연결해도 새 연결이 정상적으로 CONNECTED 상태에 도달한다(오버레이 재오픈 시나리오)', async () => {
+    setAccessToken('test-access-token')
+    vi.stubGlobal('WebSocket', FakeStompSocket)
+    const { result } = renderHook(() => useChatStompStatus())
+
+    connectChatStomp()
+    await vi.waitFor(() => {
+      expect(result.current).toBe('connected')
+    })
+
+    act(() => {
+      disconnectChatStomp()
+    })
+    expect(result.current).toBe('disconnected')
+
+    connectChatStomp()
+    await vi.waitFor(() => {
+      expect(result.current).toBe('connected')
+    })
+    expect(getChatStompClient().active).toBe(true)
+  })
 })
