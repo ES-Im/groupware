@@ -1,6 +1,6 @@
 ---
 description: 'shrimp task manager - task execute'
-argument-hint: [task-name-or-id] [code-review: true|false, 기본 true] [ux-review: true|false, 기본 true]
+argument-hint: [task-name-or-id] [code-review: true|false, 기본 true] [ux-review: true|false, 기본 true] [roadmap-file: 기본 docs/ROADMAP.md]
 ---
 
 ## 실행 규칙
@@ -9,6 +9,7 @@ argument-hint: [task-name-or-id] [code-review: true|false, 기본 true] [ux-revi
 - `$1`이 특정되었으면, Shrimp Task Manager의 execute_task 도구로 해당 task를 실행한다.
 - `$2`가 false면 실행 후 위임 없이 작업을 종료한다.
 - `$2`가 true이거나 미지정이면 아래 `task execute 후 위임` 문단을 참고하여 실행한다.
+- `$4`(roadmap-file)가 지정되지 않았으면 `docs/ROADMAP.md`를 대상으로 한다.
 
 # 실행은 아래와 같이 단계별로 시행한다.
 
@@ -37,5 +38,6 @@ argument-hint: [task-name-or-id] [code-review: true|false, 기본 true] [ux-revi
 - 문제 발견 시 사용자에게 보고한다. "미적 개선 제안"이 아니라 "작동 여부"를 본다.
 
 
-## 4. ROADMAP.md 문서 완료 표기
-- @docs/ROADMAP.md 에서 작업이 완료된 항목의 `완료 여부` 필드 값을 ☑로 변경한다.
+## 4. 로드맵 문서 완료 표기
+- `$4`(미지정 시 `docs/ROADMAP.md`) 파일에서 작업이 완료된 항목의 `완료 여부` 필드 값을 ☑로 변경한다.
+- 지정된 로드맵 파일이 존재하지 않으면 표기를 건너뛰고 그 사실을 보고한다. (다른 로드맵 파일을 임의로 만들거나 덮어쓰지 않는다.)

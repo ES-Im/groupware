@@ -128,16 +128,14 @@ npm run check-all   # 모든 검사 통과 확인
 npm run build       # 빌드 성공 확인
 ```
 
-💡 **상세 규칙은 아래 개발 가이드 문서들을 참조한다.**
+
 
 ## **10. 테스트 계정**
 
 - ADMIN  
 - id : test1234 / pw : test!1234
-
 - DEPT-MANAGER  
 - id : test2345 / pw : test!2345
-
 - EMPLOYEE  
 - id : test3456 / pw : test!3456
 
