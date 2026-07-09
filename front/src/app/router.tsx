@@ -11,6 +11,10 @@ import { AccessibleDocumentsPage } from '@/features/approval/pages/AccessibleDoc
 import { DraftDetailPage } from '@/features/approval/pages/DraftDetailPage'
 import { GeneralDraftCreatePage } from '@/features/approval/pages/GeneralDraftCreatePage'
 import { GeneralDraftEditPage } from '@/features/approval/pages/GeneralDraftEditPage'
+import { BusinessTripDraftCreatePage } from '@/features/approval/pages/BusinessTripDraftCreatePage'
+import { BusinessTripDraftEditPage } from '@/features/approval/pages/BusinessTripDraftEditPage'
+import { MyBusinessTripHistoryPage } from '@/features/approval/pages/MyBusinessTripHistoryPage'
+import { DeptBusinessTripHistoryPage } from '@/features/approval/pages/DeptBusinessTripHistoryPage'
 import { BoardCreatePage } from '@/features/board/pages/BoardCreatePage'
 import { BoardDetailPage } from '@/features/board/pages/BoardDetailPage'
 import { BoardDraftsPage } from '@/features/board/pages/BoardDraftsPage'
@@ -63,6 +67,17 @@ import { LayoutShell } from '@/shared/components/LayoutShell'
  * 명시적으로도 ':draftId'보다 앞에 등록해 둔다. draftId 파라미터 유효성 검사(10진 양의 정수 가드)·
  * 403/404·유형(isGeneralDraft)·권한(canEdit) 분기는 두 페이지 내부에서 처리하므로 minRole EMPLOYEE
  * 기준 ProtectedRoute(인증 가드)만으로 충분하다.
+ * /approval/drafts/business-trips/new, /approval/drafts/business-trips/:draftId/edit,
+ * /approval/business-trips/me/history, /approval/business-trips/dept/history는
+ * ROADMAP(DRAFT-BUSINESSTRIP) T1.4·T2.4·T4.3·T5.3에서 출장 기안 4종 페이지
+ * (BusinessTripDraftCreatePage/F730, BusinessTripDraftEditPage/F731, MyBusinessTripHistoryPage/F733,
+ * DeptBusinessTripHistoryPage/F734)로 연결했다. 'business-trips/new'는 ②'drafts/new'와 동일 근거로
+ * ':draftId'보다 앞에 등록한다. 'business-trips/:draftId/edit'는 'drafts/:draftId/edit'(일반 기안
+ * 수정)와 세그먼트 깊이가 달라(리터럴 'business-trips' 포함) 랭킹 충돌이 없다 — 상세 페이지
+ * DrafterActions.handleEdit의 isBusinessTripDraft 분기가 실제 이동 목적지로 이어진다. 이력 2종은
+ * minRole만 다를 뿐(내 이력 EMPLOYEE, 부서 이력 DEPT_MANAGER) 근태 /attendance/dept 컨벤션과 동일하게
+ * 라우트 자체는 ProtectedRoute(인증 가드)만 적용하고 최종 권한 판단은 서버(403 ROLE_003)에 위임한다 —
+ * role 게이팅은 사이드바(minRole)에서만 처리한다.
  */
 export const router = createBrowserRouter([
   {
@@ -167,6 +182,13 @@ export const router = createBrowserRouter([
         element: <GeneralDraftCreatePage />,
       },
       {
+        // 출장 기안 작성 페이지: ROADMAP(DRAFT-BUSINESSTRIP) M1(T1.4)에서
+        // BusinessTripDraftCreatePage(F730)로 연결했다. ②'drafts/new'와 동일 근거로 정적 세그먼트
+        // 'business-trips/new'를 동적 ':draftId'보다 앞에 등록해 둔다.
+        path: 'approval/drafts/business-trips/new',
+        element: <BusinessTripDraftCreatePage />,
+      },
+      {
         // 기안서 상세 페이지: M2(T2.5)에서 DraftDetailPage(F701)로 연결했다. 4종 문서함 페이지의
         // 행 클릭 이동이 실제 상세 화면으로 이어진다.
         path: 'approval/drafts/:draftId',
@@ -177,6 +199,29 @@ export const router = createBrowserRouter([
         // 페이지의 [수정] 액션이 실제 이동 목적지로 이어진다.
         path: 'approval/drafts/:draftId/edit',
         element: <GeneralDraftEditPage />,
+      },
+      {
+        // 출장 기안 수정 페이지: ROADMAP(DRAFT-BUSINESSTRIP) M2(T2.4)에서
+        // BusinessTripDraftEditPage(F731)로 연결했다. 상세 DrafterActions.handleEdit의
+        // isBusinessTripDraft 분기가 실제 이동 목적지로 이어진다. 위 'drafts/:draftId/edit'(일반
+        // 기안 수정)와 세그먼트 깊이가 달라(리터럴 'business-trips' 포함) 랭킹 충돌이 없다.
+        path: 'approval/drafts/business-trips/:draftId/edit',
+        element: <BusinessTripDraftEditPage />,
+      },
+      {
+        // 내 출장 이력 페이지: ROADMAP(DRAFT-BUSINESSTRIP) M4(T4.3)에서
+        // MyBusinessTripHistoryPage(F733)로 연결했다. minRole EMPLOYEE라 ProtectedRoute(인증
+        // 가드)만으로 충분하다.
+        path: 'approval/business-trips/me/history',
+        element: <MyBusinessTripHistoryPage />,
+      },
+      {
+        // 부서 출장 이력 페이지: ROADMAP(DRAFT-BUSINESSTRIP) M5(T5.3)에서
+        // DeptBusinessTripHistoryPage(F734)로 연결했다. minRole DEPT_MANAGER 게이팅은 사이드바에서
+        // 처리하고(근태 /attendance/dept 컨벤션 동일), 라우트 자체는 ProtectedRoute(인증 가드)만
+        // 적용한다 — 최종 권한 판단은 서버(403 ROLE_003).
+        path: 'approval/business-trips/dept/history',
+        element: <DeptBusinessTripHistoryPage />,
       },
     ],
   },

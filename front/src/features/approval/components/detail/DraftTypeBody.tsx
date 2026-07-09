@@ -1,14 +1,16 @@
+import { BusinessTripDraftBody } from './BusinessTripDraftBody'
 import type { DraftDetailSectionProps } from './types'
 
 /**
- * 유형별 본문 슬롯 분기(ROADMAP(DRAFT) T2.4).
+ * 유형별 본문 슬롯 분기(ROADMAP(DRAFT) T2.4, ROADMAP(DRAFT-BUSINESSTRIP) T3.1).
  *
  * 유형 판별은 `draftType` enum 값이 아니라 **`leave`/`businessTrip`/`sales` non-null 슬롯 체크**로
  * 한다(Open Q#2 회피 — draftType 정규 enum 값 집합 미확정). 슬롯 계약:
  * - 셋 다 null(GENERAL) → 공통 `content`만 렌더.
- * - non-null 슬롯 존재(LEAVE/BUSINESS_TRIP/SALES) → 본문은 해당 유형 작성 PRD가 소유하므로, 이번
- *   공통 M2는 "해당 유형 화면 준비 중" 폴백으로 처리한다(Open Q#3). 각 유형 본문 컴포넌트가
- *   준비되면 이 분기에서 해당 컴포넌트를 렌더하도록 교체한다(확장 포인트).
+ * - `businessTrip` non-null(출장) → `BusinessTripDraftBody`(③출장 PRD 소유)가 실제 본문을 렌더한다.
+ * - leave/sales non-null → 본문은 각 유형 작성 PRD가 소유하므로, 아직은 "해당 유형 화면 준비 중"
+ *   폴백으로 처리한다(Open Q#3). 각 유형 본문 컴포넌트가 준비되면 이 분기에서 해당 컴포넌트를
+ *   렌더하도록 교체한다(확장 포인트).
  *
  * 취소기안 여부(sourceDraftId)는 본문 분기에 영향을 주지 않는다 — 원본 링크는 DraftDetailHeader가
  * 표시하고, 취소기안의 본문도 위 슬롯 규칙(대개 GENERAL=content)을 그대로 따른다.
@@ -28,7 +30,7 @@ export function DraftTypeBody({ draft }: DraftDetailSectionProps) {
     return <TypeSlotFallback typeName="휴가" />
   }
   if (draft.businessTrip != null) {
-    return <TypeSlotFallback typeName="출장" />
+    return <BusinessTripDraftBody draft={draft} />
   }
   if (draft.sales != null) {
     return <TypeSlotFallback typeName="매출" />

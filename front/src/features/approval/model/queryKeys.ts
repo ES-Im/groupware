@@ -1,4 +1,5 @@
 import type { DocumentBoxQueryParams } from './approval'
+import type { DeptBusinessTripHistoryParams, MyBusinessTripHistoryParams } from './businessTripHistory'
 
 /**
  * approval(전자결재 공통) 도메인 queryKey 팩토리(ROADMAP(DRAFT) T1.2 / §참조 계약 매핑).
@@ -35,4 +36,12 @@ export const approvalKeys = {
   // invalidate로 둘 다 함께 갱신된다.
   summary: () => [...approvalKeys.all, 'summary'] as const,
   pendingCount: () => [...approvalKeys.all, 'pendingCount'] as const,
+  // 부서 출장 이력 축(M5 T5.1, F734). deptId가 아직 확정되지 않은 상태(usePrimaryDeptId strict)에서도
+  // 소비 훅이 enabled:false로 대기하며 키를 구성할 수 있도록 number | undefined를 받는다(draftDetail 동형).
+  deptBusinessTripHistory: (deptId: number | undefined, params?: DeptBusinessTripHistoryParams) =>
+    [...approvalKeys.all, 'deptBusinessTripHistory', deptId, params] as const,
+  // 내 출장 이력 축(M4 T4.1, F733). 배열 응답(페이징 없음)이라 deptBusinessTripHistory와 달리 deptId
+  // 파라미터가 없다 — approvalStatus/yearMonth 필터만 키에 반영한다.
+  myBusinessTripHistory: (params?: MyBusinessTripHistoryParams) =>
+    [...approvalKeys.all, 'myBusinessTripHistory', params] as const,
 }

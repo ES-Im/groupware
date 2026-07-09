@@ -70,11 +70,19 @@ export const sidebarMenuItems: SidebarMenuItem[] = [
     // 결재대기함은 badgeKey('approvalPending')로 F711 결재대기 건수 뱃지 슬롯을 선언한다 — 실제
     // count는 LayoutShell이 useMyPendingApprovalDraftsCountQuery로 조회해 주입한다.
     // 새 기안 작성은 DRAFT-COMMON에서 GeneralDraftCreatePage(F720) 진입점으로 그룹 최상단에 추가했다.
+    // 출장 기안 작성은 ROADMAP(DRAFT-BUSINESSTRIP) T1.4에서 새 기안 작성 옆에, 내/부서 출장 이력은
+    // T4.3·T5.3에서 문서함 항목들 뒤에 추가했다(§메뉴 구조 권고). 부서 출장 이력은 minRole
+    // DEPT_MANAGER(hasRequiredRole가 ADMIN 자동 포함 게이팅).
     label: '전자결재',
     minRole: 'EMPLOYEE',
     icon: FileSignature,
     children: [
       { label: '새 기안 작성', to: '/approval/drafts/new', minRole: 'EMPLOYEE' },
+      {
+        label: '출장 기안 작성',
+        to: '/approval/drafts/business-trips/new',
+        minRole: 'EMPLOYEE',
+      },
       { label: '문서함 홈', to: '/approval/box/home', minRole: 'EMPLOYEE' },
       { label: '상신함', to: '/approval/box/submitted', minRole: 'EMPLOYEE' },
       { label: '임시저장함', to: '/approval/box/unsubmitted', minRole: 'EMPLOYEE' },
@@ -85,6 +93,16 @@ export const sidebarMenuItems: SidebarMenuItem[] = [
         badgeKey: 'approvalPending',
       },
       { label: '결재함', to: '/approval/box/accessible', minRole: 'EMPLOYEE' },
+      {
+        label: '내 출장 이력',
+        to: '/approval/business-trips/me/history',
+        minRole: 'EMPLOYEE',
+      },
+      {
+        label: '부서 출장 이력',
+        to: '/approval/business-trips/dept/history',
+        minRole: 'DEPT_MANAGER',
+      },
     ],
   },
   {
