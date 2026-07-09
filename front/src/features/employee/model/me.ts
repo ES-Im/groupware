@@ -5,8 +5,14 @@
  * EmployeeInfoResponse로 일반화해 me 조회(T1.3)와 타 사원 상세 조회(T2.2)가 타입을 공유한다.
  */
 
-/** 사원 기본정보. */
+/**
+ * 사원 기본정보.
+ * empId는 전자결재 본인 판정(기안자/결재자/공람 대상 여부)·사원 식별에 쓰는 numeric 사원 PK다.
+ * 백엔드 me/사원상세 응답(RETRIEVE_ME_INFO·RETRIEVE_EMP_INFO)의 empBasicInfo에 보강 추가되었다
+ * (기존 empNo는 사번 문자열이라 approvers[].empId 등과 매칭 불가 — numeric empId가 유일한 식별 키).
+ */
 export interface EmpBasicInfo {
+  empId: number
   empNo: string
   name: string
   loginId: string

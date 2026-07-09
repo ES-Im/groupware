@@ -60,6 +60,7 @@ public class AttendanceManagementDocsTest extends RestDocsSupport {
     void retrieve_dept_monthly_attendance() throws Exception {
         List<AttendanceInfoResponse> attendanceInfos = List.of(
                 new AttendanceInfoResponse(
+                        100L,
                         AttendanceStatus.NORMAL,
                         LocalDate.of(2026, 4, 1),
                         LocalTime.of(9, 0),
@@ -68,6 +69,7 @@ public class AttendanceManagementDocsTest extends RestDocsSupport {
                         null
                 ),
                 new AttendanceInfoResponse(
+                        101L,
                         AttendanceStatus.LATE_EARLY,
                         LocalDate.of(2026, 4, 2),
                         LocalTime.of(10, 0),
@@ -139,6 +141,7 @@ public class AttendanceManagementDocsTest extends RestDocsSupport {
         DeptPendingAttendanceResponse pendingAttendance = new DeptPendingAttendanceResponse(
                 deptAttendanceEmpInfo(),
                 new AttendanceInfoResponse(
+                        102L,
                         AttendanceStatus.LATE_EARLY,
                         LocalDate.of(2026, 4, 2),
                         LocalTime.of(10, 0),
@@ -322,6 +325,7 @@ public class AttendanceManagementDocsTest extends RestDocsSupport {
                 fieldWithPath("content[].summary.overtimeMinutes").type(JsonFieldType.NUMBER).description("초과 근무 시간 합계, 분 단위"),
 
                 fieldWithPath("content[].attendanceInfo").type(JsonFieldType.ARRAY).description("근태 상세 목록"),
+                fieldWithPath("content[].attendanceInfo[].attendanceId").type(JsonFieldType.NUMBER).description("근태 식별 번호"),
                 fieldWithPath("content[].attendanceInfo[].attendanceStatus").type(JsonFieldType.STRING).description("근태 상태"),
                 fieldWithPath("content[].attendanceInfo[].attendanceDate").type(JsonFieldType.STRING).description("근태 일자, yyyy-MM-dd"),
                 fieldWithPath("content[].attendanceInfo[].startAt").type(JsonFieldType.STRING).description("출근/근무 시작 시각, HH:mm:ss").optional(),
@@ -342,6 +346,7 @@ public class AttendanceManagementDocsTest extends RestDocsSupport {
                 fieldWithPath("content[].empInfo.positionName").type(JsonFieldType.STRING).description("직급"),
 
                 fieldWithPath("content[].attendanceInfo").type(JsonFieldType.OBJECT).description("승인 대기 근태 상세"),
+                fieldWithPath("content[].attendanceInfo.attendanceId").type(JsonFieldType.NUMBER).description("근태 식별 번호"),
                 fieldWithPath("content[].attendanceInfo.attendanceStatus").type(JsonFieldType.STRING).description("근태 상태"),
                 fieldWithPath("content[].attendanceInfo.attendanceDate").type(JsonFieldType.STRING).description("근태 일자, yyyy-MM-dd"),
                 fieldWithPath("content[].attendanceInfo.startAt").type(JsonFieldType.STRING).description("출근/근무 시작 시각, HH:mm:ss").optional(),

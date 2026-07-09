@@ -32,13 +32,45 @@ interface PaginationControlsProps {
   className?: string
 }
 
+/** 페이지 번호 창(window) 항목: 실제 1-base 페이지 번호이거나, 생략 구간을 뜻하는 말줄임표. */
+type PageWindowItem = number | 'ellipsis'
+
+/**
+ * 표시할 1-base 페이지 번호 창을 계산한다. 전체 페이지가 적으면(≤7) 모두 나열하고, 많으면
+ * 현재 페이지 주변(±1)과 첫/끝 페이지만 남기고 사이를 말줄임표로 접는다. 순수 파생 계산이라
+ * 상태/로직에 영향을 주지 않는다(부서·근태·댓글 등 공유 소비처 전반에서 동일하게 동작).
+ */
+function buildPageWindow(current: number, total: number): PageWindowItem[] {
+  if (total <= 7) {
+    return Array.from({ length: total }, (_, index) => index + 1)
+  }
+
+  const items: PageWindowItem[] = [1]
+  const start = Math.max(2, current - 1)
+  const end = Math.min(total - 1, current + 1)
+
+  if (start > 2) {
+    items.push('ellipsis')
+  }
+  for (let page = start; page <= end; page += 1) {
+    items.push(page)
+  }
+  if (end < total - 1) {
+    items.push('ellipsis')
+  }
+  items.push(total)
+  return items
+}
+
 /**
  * Page 메타 기반 공유 페이징 컨트롤(ROADMAP T10.1).
- * 이전/다음 버튼(disabled은 pageInfo.first/last) + 'N / totalPages' + '총 X{unit} 중
- * A-B 표시' 범위 문구로 구성된다.
+ * 좌측 'A-B / 총계{unit}' 범위 요약 + 우측 컴팩트 페이저(이전 아이콘 · 번호 버튼 · 다음 아이콘)로
+ * 구성된다. 번호 버튼은 현재 페이지만 채운(default) 상태로 강조하고 나머지는 ghost로 두며,
+ * 페이지가 많을 때는 buildPageWindow가 첫/끝과 현재 주변만 남기고 말줄임표로 접는다.
  *
- * 최초 추출 지점은 DepartmentDetailView(부서 상세 멤버 페이징, 기존 인라인 JSX를 그대로
- * 이전한 것 — 시각적/동작적 변경 없음)이며, 이후 목록형 도메인이 그대로 복제해 사용한다.
+ * 최초 추출 지점은 DepartmentDetailView(부서 상세 멤버 페이징)이며, 이후 목록형 도메인이 그대로
+ * 복제해 사용한다 — props 구조(pageInfo/page/onPageChange/unit/className)는 소비처 전반의 계약이라
+ * 유지하고, 이 리파인에서는 시각 표현만 컴팩트하게 다듬었다.
  */
 export function PaginationControls({
   pageInfo,
@@ -52,43 +84,68 @@ export function PaginationControls({
   const rangeEnd = pageInfo.number * pageInfo.size + pageInfo.numberOfElements
   // totalPages가 0(빈 목록)이어도 'N / 0'이 아니라 'N / 1'로 표시한다(기존 동작 유지).
   const totalPages = pageInfo.totalPages || 1
+  const currentPage = pageInfo.number + 1
+  const pageWindow = buildPageWindow(currentPage, totalPages)
 
   return (
-    <div
+    <nav
       className={cn(
         'flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between',
         className,
       )}
+      aria-label="페이지 이동"
     >
-      <p className="text-xs text-muted-foreground">
-        총 {pageInfo.totalElements}
-        {unit} 중 {rangeStart}-{rangeEnd} 표시
+      <p className="text-xs text-muted-foreground tabular-nums">
+        {rangeStart}-{rangeEnd} / {pageInfo.totalElements}
+        {unit}
       </p>
-      <nav className="flex items-center gap-2" aria-label="페이지 이동">
+      <div className="flex items-center gap-1">
         <Button
           type="button"
-          variant="outline"
-          size="sm"
+          variant="ghost"
+          size="icon-sm"
           disabled={pageInfo.first}
           onClick={() => onPageChange(page - 1)}
+          aria-label="이전 페이지"
         >
           <ChevronLeft />
-          이전
         </Button>
-        <span className="min-w-16 text-center text-sm text-muted-foreground">
-          {pageInfo.number + 1} / {totalPages}
-        </span>
+        {pageWindow.map((item, index) =>
+          item === 'ellipsis' ? (
+            <span
+              key={`ellipsis-${index}`}
+              className="px-1 text-sm text-muted-foreground select-none"
+              aria-hidden="true"
+            >
+              …
+            </span>
+          ) : (
+            <Button
+              key={item}
+              type="button"
+              variant={item === currentPage ? 'default' : 'ghost'}
+              size="icon-sm"
+              className="tabular-nums"
+              aria-label={`${item} 페이지`}
+              aria-current={item === currentPage ? 'page' : undefined}
+              // 0-base로 환산해 콜백에 넘긴다(호출부는 0-base 상태를 유지).
+              onClick={() => onPageChange(item - 1)}
+            >
+              {item}
+            </Button>
+          ),
+        )}
         <Button
           type="button"
-          variant="outline"
-          size="sm"
+          variant="ghost"
+          size="icon-sm"
           disabled={pageInfo.last}
           onClick={() => onPageChange(page + 1)}
+          aria-label="다음 페이지"
         >
-          다음
           <ChevronRight />
         </Button>
-      </nav>
-    </div>
+      </div>
+    </nav>
   )
 }

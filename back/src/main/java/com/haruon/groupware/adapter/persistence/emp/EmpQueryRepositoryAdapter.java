@@ -57,7 +57,7 @@ public class EmpQueryRepositoryAdapter implements EmpQueryRepository {
         EmpBasicInfo basicInfo = query
                 .select(Projections.constructor(
                         EmpBasicInfo.class,
-                        qEmp.empNo, qEmp.empName, qEmp.loginId, qEmp.email.email, qEmp.extensionNo
+                        qEmp.id, qEmp.empNo, qEmp.empName, qEmp.loginId, qEmp.email.email, qEmp.extensionNo
                 )).from(qEmp)
                 .where(qEmp.id.eq(empId), qEmp.status.eq(EmpStatus.ACTIVE))
                 .fetchOne();
@@ -205,7 +205,7 @@ public class EmpQueryRepositoryAdapter implements EmpQueryRepository {
         List<EmpBasicInfo> newEmpList = query
                 .select(Projections.constructor(
                         EmpBasicInfo.class,
-                        qEmp.empNo, qEmp.empName, qEmp.loginId, qEmp.email.email, blankValue()
+                        qEmp.id, qEmp.empNo, qEmp.empName, qEmp.loginId, qEmp.email.email, blankValue()
                 )).from(qEmp)
                 .where(qEmp.status.eq(EmpStatus.PENDING), keywordContains(keyword))
                 .offset(pageable.getOffset())

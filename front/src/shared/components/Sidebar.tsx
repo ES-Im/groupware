@@ -20,6 +20,9 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/shared/ui/sheet'
  * - 데스크톱(!isMobile): 아래 `<aside>`를 flex 레이아웃 안에 인라인으로 렌더(기존 동작 그대로).
  * - 모바일(isMobile): 같은 메뉴 트리를 shadcn Sheet(좌측 오버레이 드로어)로 감싸 렌더한다. 모바일에는
  *   "아이콘 전용 레일" 개념이 없으므로 항상 펼침(라벨 노출) 상태로 보여준다(collapsed는 데스크톱 전용).
+ *
+ * 메뉴 뱃지(ROADMAP(DRAFT) T7.3, F711): LayoutShell이 주입한 badgeCounts 맵을 그대로
+ * SidebarMenuGroup/SidebarMenuLink에 내려보내기만 한다(이 컴포넌트는 어떤 도메인 훅도 호출하지 않는다).
  */
 interface SidebarProps {
   collapsed: boolean
@@ -34,6 +37,11 @@ interface SidebarProps {
   mobileOpen: boolean
   /** 모바일 드로어 닫기 핸들러. Sheet의 onOpenChange(false) 시 호출될 콜백. */
   onCloseMobileSidebar: () => void
+  /**
+   * 메뉴 뱃지 count 맵(badgeKey → count, ROADMAP(DRAFT) T7.3, F711). LayoutShell이 도메인 훅으로
+   * 조회한 값을 주입한다 — 이 컴포넌트는 순수 presentational이라 어떤 feature 훅도 직접 호출하지 않는다.
+   */
+  badgeCounts?: Record<string, number | undefined>
 }
 
 export function Sidebar({
@@ -43,6 +51,7 @@ export function Sidebar({
   isMobile,
   mobileOpen,
   onCloseMobileSidebar,
+  badgeCounts,
 }: SidebarProps) {
   /**
    * 메뉴 트리 렌더(데스크톱·모바일 공용). collapsedView(아이콘 전용 여부)만 파라미터로 받아
@@ -67,11 +76,17 @@ export function Sidebar({
                 roles={roles}
                 collapsed={collapsedView}
                 onExpandSidebar={onExpandSidebar}
+                badgeCounts={badgeCounts}
               />
             )
           }
           return item.implemented !== false ? (
-            <SidebarMenuLink key={item.label} item={item} collapsed={collapsedView} />
+            <SidebarMenuLink
+              key={item.label}
+              item={item}
+              collapsed={collapsedView}
+              badgeCounts={badgeCounts}
+            />
           ) : (
             <SidebarMenuPlaceholder key={item.label} item={item} collapsed={collapsedView} />
           )

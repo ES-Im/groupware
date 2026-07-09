@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router'
 import type { SidebarMenuItem } from '@/shared/components/sidebarMenuItems'
 import { cn } from '@/shared/lib/utils'
+import { Badge } from '@/shared/ui/badge'
 
 /**
  * 구현된 리프 메뉴 항목(실 라우트 보유)을 NavLink로 렌더한다(순수 시각 요소).
@@ -9,18 +10,26 @@ import { cn } from '@/shared/lib/utils'
  * collapsed(어두운 레일: 라이트=bg-primary, 다크=bg-card)일 때는 sidebar 토큰 대신 밝은 전경 계열
  * (라이트=primary-foreground, 다크=card-foreground)로 색을 스왑해 어두운 배경 위에서도 또렷이
  * 보이게 한다(토글-off 참고 스크린샷).
+ *
+ * 메뉴 뱃지(ROADMAP(DRAFT) T7.3, F711): item.badgeKey가 있고 badgeCounts[item.badgeKey]가 0 초과일
+ * 때만 라벨 옆에 shadcn Badge를 렌더한다(0·undefined·NaN은 미표시). collapsed(아이콘 전용)에서는
+ * 라벨 자체가 숨어 뱃지를 붙일 자리가 없으므로 렌더하지 않는다(아이콘 옆 점 표시 등은 도입하지 않음).
  */
 interface SidebarMenuLinkProps {
   item: SidebarMenuItem
   collapsed: boolean
+  /** 메뉴 뱃지 count 맵(badgeKey → count, T7.3). Sidebar → SidebarMenuGroup을 거쳐 전달된다. */
+  badgeCounts?: Record<string, number | undefined>
 }
 
-export function SidebarMenuLink({ item, collapsed }: SidebarMenuLinkProps) {
+export function SidebarMenuLink({ item, collapsed, badgeCounts }: SidebarMenuLinkProps) {
   // 구현된 리프는 항상 to를 보유하지만, 타입 안전을 위해 방어적으로 가드한다.
   if (!item.to) return null
 
   const Icon = item.icon
   const to = item.to
+  const badgeCount = item.badgeKey ? badgeCounts?.[item.badgeKey] : undefined
+  const showBadge = !collapsed && typeof badgeCount === 'number' && badgeCount > 0
 
   return (
     <NavLink
@@ -69,6 +78,11 @@ export function SidebarMenuLink({ item, collapsed }: SidebarMenuLinkProps) {
           />
           {Icon ? <Icon className="size-4 shrink-0" aria-hidden="true" /> : null}
           {!collapsed && <span className="truncate">{item.label}</span>}
+          {showBadge && (
+            <Badge variant="secondary" className="ml-auto shrink-0 tabular-nums">
+              {badgeCount}
+            </Badge>
+          )}
         </>
       )}
     </NavLink>

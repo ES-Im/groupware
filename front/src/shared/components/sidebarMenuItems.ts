@@ -37,6 +37,12 @@ export interface SidebarMenuItem {
   children?: SidebarMenuItem[]
   /** 기본 true. false면 비활성 placeholder("준비중")로 렌더한다. */
   implemented?: boolean
+  /**
+   * 뱃지 식별자(ROADMAP(DRAFT) T7.3). 정적 메뉴 트리에는 라이브 건수를 담을 수 없으므로,
+   * 트리에는 이 식별자만 두고 실제 count는 LayoutShell이 도메인 훅으로 조회해
+   * badgeCounts 맵(예 `{ approvalPending: 3 }`)으로 Sidebar에 주입한다(SidebarMenuLink가 조회해 렌더).
+   */
+  badgeKey?: string
 }
 
 export const sidebarMenuItems: SidebarMenuItem[] = [
@@ -54,18 +60,29 @@ export const sidebarMenuItems: SidebarMenuItem[] = [
     minRole: 'EMPLOYEE',
     icon: Clock,
     children: [
-      { label: '내 근태', minRole: 'EMPLOYEE', implemented: false },
-      { label: '부서 근태 승인', minRole: 'DEPT_MANAGER', implemented: false },
+      { label: '내 근태', to: '/attendance/me', minRole: 'EMPLOYEE' },
+      { label: '부서 근태 승인', to: '/attendance/dept', minRole: 'DEPT_MANAGER' },
     ],
   },
   {
+    // 전자결재 그룹: M1(T1.7)에서 문서함 4종(상신/임시저장/결재대기/결재함) 실 라우트로 교체했다.
+    // 문서함 홈은 M7(T7.3)에서 DocumentBoxHomePage(F715 요약 카드·F711 결재대기 강조)로 live 승격했다.
+    // 결재대기함은 badgeKey('approvalPending')로 F711 결재대기 건수 뱃지 슬롯을 선언한다 — 실제
+    // count는 LayoutShell이 useMyPendingApprovalDraftsCountQuery로 조회해 주입한다.
     label: '전자결재',
     minRole: 'EMPLOYEE',
     icon: FileSignature,
     children: [
-      { label: '기안함', minRole: 'EMPLOYEE', implemented: false },
-      { label: '결재함', minRole: 'EMPLOYEE', implemented: false },
-      { label: '공람함', minRole: 'EMPLOYEE', implemented: false },
+      { label: '문서함 홈', to: '/approval/box/home', minRole: 'EMPLOYEE' },
+      { label: '상신함', to: '/approval/box/submitted', minRole: 'EMPLOYEE' },
+      { label: '임시저장함', to: '/approval/box/unsubmitted', minRole: 'EMPLOYEE' },
+      {
+        label: '결재대기함',
+        to: '/approval/box/pending',
+        minRole: 'EMPLOYEE',
+        badgeKey: 'approvalPending',
+      },
+      { label: '결재함', to: '/approval/box/accessible', minRole: 'EMPLOYEE' },
     ],
   },
   {

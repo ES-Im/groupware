@@ -167,6 +167,7 @@ public class EmpApiDocsTest extends RestDocsSupport {
 
                         responseFields(
                                 fieldWithPath("empBasicInfo").type(JsonFieldType.OBJECT).description("사원의 기본정보"),
+                                fieldWithPath("empBasicInfo.empId").type(JsonFieldType.NUMBER).description("사원 식별 번호(PK)"),
                                 fieldWithPath("empBasicInfo.empNo").type(JsonFieldType.STRING).description("사원 번호"),
                                 fieldWithPath("empBasicInfo.name").type(JsonFieldType.STRING).description("사원 이름"),
                                 fieldWithPath("empBasicInfo.loginId").type(JsonFieldType.STRING).description("아이디"),

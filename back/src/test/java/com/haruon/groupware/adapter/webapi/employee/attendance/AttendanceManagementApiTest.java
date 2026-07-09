@@ -38,7 +38,7 @@ public class AttendanceManagementApiTest extends IntegrationTestSupport {
     @DisplayName("부서 월별 근태 조회 - 부서 매니저는 같은 부서 사원의 근태를 조회할 수 있다")
     void deptAttendances_success() throws Exception {
         AttendanceFixture fixture = prepareDeptAttendanceFixture();
-        saveAttendance(fixture.targetEmp(), LocalDate.of(2026, 4, 1), AttendanceStatus.NORMAL, LocalTime.of(9, 0), LocalTime.of(18, 0));
+        Attendance first = saveAttendance(fixture.targetEmp(), LocalDate.of(2026, 4, 1), AttendanceStatus.NORMAL, LocalTime.of(9, 0), LocalTime.of(18, 0));
         saveAttendance(fixture.targetEmp(), LocalDate.of(2026, 4, 2), AttendanceStatus.LATE_EARLY, LocalTime.of(10, 0), LocalTime.of(15, 0));
 
         mockMvc.perform(
@@ -56,6 +56,7 @@ public class AttendanceManagementApiTest extends IntegrationTestSupport {
                 .andExpect(jsonPath("$.content[0].empInfo.empId").value(fixture.targetEmp().getId()))
                 .andExpect(jsonPath("$.content[0].empInfo.deptName").value("IT"))
                 .andExpect(jsonPath("$.content[0].summary.totalAttendanceCount").value(1))
+                .andExpect(jsonPath("$.content[0].attendanceInfo[0].attendanceId").value(first.getId()))
                 .andExpect(jsonPath("$.content[0].attendanceInfo[0].attendanceStatus").value("NORMAL"))
                 .andExpect(jsonPath("$.totalElements").value(1));
     }
@@ -74,7 +75,7 @@ public class AttendanceManagementApiTest extends IntegrationTestSupport {
         approved.approveAttendance(fixture.managerEmp(), LocalDateTime.of(2026, 4, 30, 9, 0));
         attendanceRepository.save(approved);
 
-        saveAttendance(fixture.targetEmp(), LocalDate.of(2026, 4, 2), AttendanceStatus.LATE_EARLY, LocalTime.of(10, 0), LocalTime.of(15, 0));
+        Attendance pending = saveAttendance(fixture.targetEmp(), LocalDate.of(2026, 4, 2), AttendanceStatus.LATE_EARLY, LocalTime.of(10, 0), LocalTime.of(15, 0));
 
         mockMvc.perform(
                         get("/api/employees/attendances/{deptId}/monthly/pending", fixture.dept().getId())
@@ -86,6 +87,7 @@ public class AttendanceManagementApiTest extends IntegrationTestSupport {
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.content.length()").value(1))
                 .andExpect(jsonPath("$.content[0].empInfo.empId").value(fixture.targetEmp().getId()))
+                .andExpect(jsonPath("$.content[0].attendanceInfo.attendanceId").value(pending.getId()))
                 .andExpect(jsonPath("$.content[0].attendanceInfo.attendanceStatus").value("LATE_EARLY"))
                 .andExpect(jsonPath("$.content[0].attendanceInfo.isApproved").value(false))
                 .andExpect(jsonPath("$.totalElements").value(1));

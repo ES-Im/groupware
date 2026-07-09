@@ -14,7 +14,7 @@ public class empApiSupport {
 
     public static EmpInfoResponse getEmpInfoResponse() {
         return new EmpInfoResponse(
-                new EmpBasicInfo("사원번호", "사원명", "아이디", "이메일", "직통번호"),
+                new EmpBasicInfo(1L, "사원번호", "사원명", "아이디", "이메일", "직통번호"),
                 List.of(
                         new EmpFileListInfo(1L, "storedFile1", "jpg", 1024L * 1024, true, FileType.SIGNATURE),
                         new EmpFileListInfo(2L, "storedFile2", "jpg", 1024 * 1024L, true, FileType.PROFILE_PICTURE)

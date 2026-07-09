@@ -1,6 +1,7 @@
 import { useMutation } from '@tanstack/react-query'
 import { useEffect } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router'
+import { useMyPendingApprovalDraftsCountQuery } from '@/features/approval/api/useMyPendingApprovalDraftsCountQuery'
 import { logout } from '@/features/auth/api/logout'
 import { useAuthStore } from '@/features/auth/store/authStore'
 import { useFilesInfosQuery } from '@/features/employee/api/useFilesInfosQuery'
@@ -27,6 +28,11 @@ import { useSidebarCollapsed } from '@/shared/lib/useSidebarCollapsed'
  * 사이드바 메뉴는 선언적 트리(sidebarMenuItems, ROADMAP T4.1)를 Sidebar 내부에서 hasRequiredRole로
  * 게이팅해 렌더링한다(신규 메뉴는 트리 추가만으로 자동 노출 제어).
  *
+ * 사이드바 메뉴 뱃지(ROADMAP(DRAFT) T7.3, F711): 정적 메뉴 트리는 라이브 건수를 담을 수 없으므로,
+ * 이 컨테이너가 도메인 훅(useMyPendingApprovalDraftsCountQuery)으로 결재대기 건수를 조회해
+ * badgeKey → count의 badgeCounts 맵을 만들어 Sidebar에 주입한다. 이렇게 하면 shared Sidebar/링크
+ * 컴포넌트는 approval feature를 직접 import하지 않고 순수 presentational로 유지된다.
+ *
  * 모바일(뷰포트 < lg=1024px, useIsMobile)에서는 사이드바를 인라인이 아닌 오버레이 드로어로 여닫는다
  * (열림 상태는 useMobileSidebarOpen, 비영속). 헤더의 토글 버튼 하나가 뷰포트에 따라 서로 다른 상태를
  * 토글하도록 이 컨테이너에서 분기하고, 라우트 이동 시에는 드로어를 자동으로 닫는다(아래 useEffect).
@@ -37,6 +43,7 @@ export function LayoutShell() {
   const navigate = useNavigate()
   const location = useLocation()
   const { data: me } = useMeQuery()
+  const { data: pendingApprovalDraftsCount } = useMyPendingApprovalDraftsCountQuery()
   const clearAuth = useAuthStore((state) => state.clear)
   const roles = useAuthStore((state) => state.roles)
   const logoutMutation = useMutation({ mutationFn: logout })
@@ -81,6 +88,14 @@ export function LayoutShell() {
     getActiveProfilePicture(meActiveFiles ?? []) ?? getActiveProfilePicture(filesInfos ?? [])
 
   /**
+   * 사이드바 뱃지 count 맵(F711, T7.3): sidebarMenuItems의 badgeKey('approvalPending')와
+   * 짝을 맞춘 식별자로 키를 구성한다. 도메인이 늘어나면 이 맵에 항목만 추가하면 된다.
+   */
+  const badgeCounts: Record<string, number | undefined> = {
+    approvalPending: pendingApprovalDraftsCount,
+  }
+
+  /**
    * 로그아웃(F012): LOGOUT 호출로 서버가 refreshToken 쿠키를 만료시키면, 성공 여부와 무관하게
    * 인메모리 상태(clear)·쿼리 캐시(queryClient.clear, 다음 로그인 사용자에게 이전 사용자의 me
    * 캐시가 노출되지 않도록)를 정리하고 로그인 페이지로 보낸다. 네트워크 실패로 서버 쪽 쿠키
@@ -122,6 +137,7 @@ export function LayoutShell() {
           isMobile={isMobile}
           mobileOpen={mobileSidebarOpen}
           onCloseMobileSidebar={closeMobileSidebar}
+          badgeCounts={badgeCounts}
         />
         <div className="flex min-w-0 flex-1 flex-col">
           <main className="flex-1 overflow-y-auto bg-muted/30">

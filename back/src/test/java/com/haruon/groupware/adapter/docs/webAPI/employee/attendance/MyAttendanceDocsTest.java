@@ -55,6 +55,7 @@ public class MyAttendanceDocsTest extends RestDocsSupport {
     void retrieve_my_monthly_attendance() throws Exception {
         List<AttendanceInfoResponse> content = List.of(
                 new AttendanceInfoResponse(
+                        100L,
                         AttendanceStatus.NORMAL,
                         LocalDate.of(2026, 4, 1),
                         LocalTime.of(9, 0),
@@ -63,6 +64,7 @@ public class MyAttendanceDocsTest extends RestDocsSupport {
                         null
                 ),
                 new AttendanceInfoResponse(
+                        101L,
                         AttendanceStatus.NORMAL,
                         LocalDate.of(2026, 4, 2),
                         LocalTime.of(9, 0),
@@ -205,6 +207,7 @@ public class MyAttendanceDocsTest extends RestDocsSupport {
     private org.springframework.restdocs.payload.FieldDescriptor[] pageFieldsWithAttendanceContent(String contentDescription) {
         return new org.springframework.restdocs.payload.FieldDescriptor[] {
                 fieldWithPath("content").type(JsonFieldType.ARRAY).description(contentDescription),
+                fieldWithPath("content[].attendanceId").type(JsonFieldType.NUMBER).description("근태 식별 번호"),
                 fieldWithPath("content[].attendanceStatus").type(JsonFieldType.STRING).description("근태 상태"),
                 fieldWithPath("content[].attendanceDate").type(JsonFieldType.STRING).description("근태 일자, yyyy-MM-dd"),
                 fieldWithPath("content[].startAt").type(JsonFieldType.STRING).description("출근/근무 시작 시각, HH:mm:ss").optional(),

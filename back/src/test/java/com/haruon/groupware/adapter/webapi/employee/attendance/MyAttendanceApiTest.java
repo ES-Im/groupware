@@ -44,7 +44,7 @@ public class MyAttendanceApiTest extends IntegrationTestSupport {
         activatedEmp(otherLoginId, password);
         Emp otherEmp = empRepository.findByLoginId(otherLoginId).orElseThrow();
 
-        saveAttendance(emp, LocalDate.of(2026, 4, 1), AttendanceStatus.NORMAL, LocalTime.of(9, 0), LocalTime.of(18, 0));
+        Attendance mine = saveAttendance(emp, LocalDate.of(2026, 4, 1), AttendanceStatus.NORMAL, LocalTime.of(9, 0), LocalTime.of(18, 0));
         saveAttendance(emp, LocalDate.of(2026, 4, 2), AttendanceStatus.LATE_EARLY, LocalTime.of(10, 0), LocalTime.of(15, 0));
         saveAttendance(otherEmp, LocalDate.of(2026, 4, 1), AttendanceStatus.NORMAL, LocalTime.of(9, 0), LocalTime.of(18, 0));
 
@@ -61,6 +61,7 @@ public class MyAttendanceApiTest extends IntegrationTestSupport {
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.content.length()").value(1))
+                .andExpect(jsonPath("$.content[0].attendanceId").value(mine.getId()))
                 .andExpect(jsonPath("$.content[0].attendanceStatus").value("NORMAL"))
                 .andExpect(jsonPath("$.content[0].attendanceDate").value("2026-04-01"))
                 .andExpect(jsonPath("$.totalElements").value(1));
@@ -146,14 +147,14 @@ public class MyAttendanceApiTest extends IntegrationTestSupport {
         assertThat(checkOut.getEndAt()).isAfterOrEqualTo(checkOut.getStartAt());
     }
 
-    private void saveAttendance(
+    private Attendance saveAttendance(
             Emp emp,
             LocalDate attendanceDate,
             AttendanceStatus attendanceStatus,
             LocalTime startAt,
             LocalTime endAt
     ) {
-        attendanceRepository.save(
+        return attendanceRepository.save(
                 Attendance.registerAttendance(
                         emp,
                         attendanceDate,

@@ -192,7 +192,7 @@ public class EmpManagementApiDocsTest extends RestDocsSupport {
         log.info("details = {}", details.getEmpId());
 
         EmpBasicInfo empBasicInfo = new EmpBasicInfo(
-                "202605001", "신규사원", "newLoginId123", "newLoginId123@haruon.com", ""
+                2L, "202605001", "신규사원", "newLoginId123", "newLoginId123@haruon.com", ""
         );
         Page<EmpBasicInfo> page = new PageImpl<>(
                 List.of(empBasicInfo),
@@ -237,6 +237,7 @@ public class EmpManagementApiDocsTest extends RestDocsSupport {
 
                         responseFields(
                                 fieldWithPath("content").type(JsonFieldType.ARRAY).description("신규 사원 목록"),
+                                fieldWithPath("content[].empId").type(JsonFieldType.NUMBER).description("사원 식별 번호(PK)"),
                                 fieldWithPath("content[].empNo").type(JsonFieldType.STRING).description("사원 번호"),
                                 fieldWithPath("content[].name").type(JsonFieldType.STRING).description("사원 이름"),
                                 fieldWithPath("content[].loginId").type(JsonFieldType.STRING).description("로그인 ID"),

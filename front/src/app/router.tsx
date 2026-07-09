@@ -1,6 +1,14 @@
 import { createBrowserRouter } from 'react-router'
 import { LoginPage } from '@/features/auth/pages/LoginPage'
 import { RegisterPage } from '@/features/auth/pages/RegisterPage'
+import { MyAttendancePage } from '@/features/attendance/pages/MyAttendancePage'
+import { DeptAttendancePage } from '@/features/attendance/pages/DeptAttendancePage'
+import { DocumentBoxHomePage } from '@/features/approval/pages/DocumentBoxHomePage'
+import { SubmittedDraftsPage } from '@/features/approval/pages/SubmittedDraftsPage'
+import { UnsubmittedDraftsPage } from '@/features/approval/pages/UnsubmittedDraftsPage'
+import { PendingApprovalDraftsPage } from '@/features/approval/pages/PendingApprovalDraftsPage'
+import { AccessibleDocumentsPage } from '@/features/approval/pages/AccessibleDocumentsPage'
+import { DraftDetailPage } from '@/features/approval/pages/DraftDetailPage'
 import { BoardCreatePage } from '@/features/board/pages/BoardCreatePage'
 import { BoardDetailPage } from '@/features/board/pages/BoardDetailPage'
 import { BoardDraftsPage } from '@/features/board/pages/BoardDraftsPage'
@@ -34,6 +42,18 @@ import { LayoutShell } from '@/shared/components/LayoutShell'
  * T13.3-a에서 BoardEditPage(게시글 수정 페이지)로 연결했다 — BoardCreatePage의 "임시저장글
  * 불러오기"에서 사용자가 draft를 선택했을 때의 이동 목적지이기도 하다.
  * /boards/drafts는 T15.1에서 BoardDraftsPage(내 임시저장함 페이지)로 연결했다.
+ * /attendance/me는 T1.6에서 MyAttendancePage(내 근태 조회 페이지)로 연결했다.
+ * /attendance/dept는 T3.5에서 DeptAttendancePage(부서 근태 승인 페이지)로 연결했다.
+ * /approval/box/submitted, /approval/box/unsubmitted, /approval/box/pending,
+ * /approval/box/accessible은 전자결재 공통 도메인 M1(T1.7)에서 4종 문서함 페이지
+ * (SubmittedDraftsPage/UnsubmittedDraftsPage/PendingApprovalDraftsPage/AccessibleDocumentsPage)로
+ * 연결했다. 전 항목 minRole EMPLOYEE라 별도 RoleGuard 없이 ProtectedRoute(인증 가드)만으로 충분하다.
+ * 문서함 홈(/approval/box/home)은 M7(T7.3)에서 DocumentBoxHomePage(F715 요약 카드·F711 결재대기
+ * 강조)로 연결했다 — minRole EMPLOYEE라 위 4종 문서함과 동일하게 ProtectedRoute만으로 충분하다.
+ * /approval/drafts/:draftId는 M2(T2.5)에서 DraftDetailPage(기안서 상세 read-only 페이지)로
+ * 연결했다 — 4종 문서함 페이지의 행 클릭 이동이 실제 상세 화면으로 이어진다. draftId 파라미터
+ * 유효성 검사·403/404 분기는 DraftDetailPage 내부에서 처리하므로 minRole EMPLOYEE 기준
+ * ProtectedRoute(인증 가드)만으로 충분하다.
  */
 export const router = createBrowserRouter([
   {
@@ -96,6 +116,45 @@ export const router = createBrowserRouter([
       {
         path: 'me/edit',
         element: <UpdateMePage />,
+      },
+      {
+        path: 'attendance/me',
+        element: <MyAttendancePage />,
+      },
+      {
+        path: 'attendance/dept',
+        element: <DeptAttendancePage />,
+      },
+      {
+        // 문서함 홈 페이지: M7(T7.3)에서 DocumentBoxHomePage(F715·F711)로 연결했다.
+        path: 'approval/box/home',
+        element: <DocumentBoxHomePage />,
+      },
+      {
+        // 상신함 페이지: M1(T1.7)에서 SubmittedDraftsPage(F712)로 연결했다.
+        path: 'approval/box/submitted',
+        element: <SubmittedDraftsPage />,
+      },
+      {
+        // 임시저장함 페이지: M1(T1.7)에서 UnsubmittedDraftsPage(F713)로 연결했다.
+        path: 'approval/box/unsubmitted',
+        element: <UnsubmittedDraftsPage />,
+      },
+      {
+        // 결재대기함 페이지: M1(T1.7)에서 PendingApprovalDraftsPage(F710)로 연결했다.
+        path: 'approval/box/pending',
+        element: <PendingApprovalDraftsPage />,
+      },
+      {
+        // 결재함(조회 가능 문서) 페이지: M1(T1.7)에서 AccessibleDocumentsPage(F714)로 연결했다.
+        path: 'approval/box/accessible',
+        element: <AccessibleDocumentsPage />,
+      },
+      {
+        // 기안서 상세 페이지: M2(T2.5)에서 DraftDetailPage(F701)로 연결했다. 4종 문서함 페이지의
+        // 행 클릭 이동이 실제 상세 화면으로 이어진다.
+        path: 'approval/drafts/:draftId',
+        element: <DraftDetailPage />,
       },
     ],
   },

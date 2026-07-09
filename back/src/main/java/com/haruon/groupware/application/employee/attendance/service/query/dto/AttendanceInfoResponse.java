@@ -8,6 +8,8 @@ import java.time.LocalTime;
 
 public record AttendanceInfoResponse(
 
+        Long attendanceId,
+
         AttendanceStatus attendanceStatus,
 
         LocalDate attendanceDate,

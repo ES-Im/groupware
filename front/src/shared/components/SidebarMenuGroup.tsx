@@ -19,6 +19,8 @@ interface SidebarMenuGroupProps {
   roles: string[]
   collapsed: boolean
   onExpandSidebar: () => void
+  /** 메뉴 뱃지 count 맵(badgeKey → count, T7.3). 그대로 자식 SidebarMenuLink로 내려보낸다. */
+  badgeCounts?: Record<string, number | undefined>
 }
 
 export function SidebarMenuGroup({
@@ -26,6 +28,7 @@ export function SidebarMenuGroup({
   roles,
   collapsed,
   onExpandSidebar,
+  badgeCounts,
 }: SidebarMenuGroupProps) {
   const [open, setOpen] = useState(false)
 
@@ -74,7 +77,12 @@ export function SidebarMenuGroup({
         <div className="mt-0.5 flex flex-col gap-0.5 pl-4">
           {visibleChildren.map((child) =>
             child.implemented !== false ? (
-              <SidebarMenuLink key={child.label} item={child} collapsed={false} />
+              <SidebarMenuLink
+                key={child.label}
+                item={child}
+                collapsed={false}
+                badgeCounts={badgeCounts}
+              />
             ) : (
               <SidebarMenuPlaceholder key={child.label} item={child} collapsed={false} />
             ),

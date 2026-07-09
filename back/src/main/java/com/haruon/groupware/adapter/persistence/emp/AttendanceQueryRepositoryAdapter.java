@@ -206,6 +206,7 @@ public class AttendanceQueryRepositoryAdapter implements AttendanceQueryReposito
                         qEmp.empName,
                         qEmpBelongings.dept.deptName,
                         qEmpBelongings.position.stringValue(),
+                        qAttendance.id,
                         qAttendance.attendanceStatus,
                         qAttendance.attendanceDate,
                         qAttendance.startAt,
@@ -231,6 +232,7 @@ public class AttendanceQueryRepositoryAdapter implements AttendanceQueryReposito
     private Expression<AttendanceInfoResponse> attendanceInfoExpression() {
         return Projections.constructor(
                 AttendanceInfoResponse.class,
+                qAttendance.id,
                 qAttendance.attendanceStatus,
                 qAttendance.attendanceDate,
                 qAttendance.startAt,
@@ -337,6 +339,7 @@ public class AttendanceQueryRepositoryAdapter implements AttendanceQueryReposito
             String empName,
             String deptName,
             String positionName,
+            Long attendanceId,
             AttendanceStatus attendanceStatus,
             LocalDate attendanceDate,
             @Nullable LocalTime startAt,
@@ -346,6 +349,7 @@ public class AttendanceQueryRepositoryAdapter implements AttendanceQueryReposito
 
         private AttendanceInfoResponse toAttendanceInfoResponse() {
             return new AttendanceInfoResponse(
+                    attendanceId,
                     attendanceStatus,
                     attendanceDate,
                     startAt,
