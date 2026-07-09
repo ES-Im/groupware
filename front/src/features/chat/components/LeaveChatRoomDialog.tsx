@@ -1,4 +1,3 @@
-import { useNavigate } from 'react-router'
 import { toast } from 'sonner'
 import { handleApiError } from '@/shared/lib/apiError'
 import {
@@ -12,6 +11,7 @@ import {
   AlertDialogTitle,
 } from '@/shared/ui/alert-dialog'
 import { useLeaveChatRoomMutation } from '../api/useLeaveChatRoomMutation'
+import { useChatOverlayStore } from '../lib/chatOverlayStore'
 
 interface LeaveChatRoomDialogProps {
   roomId: number
@@ -29,19 +29,20 @@ interface LeaveChatRoomDialogProps {
  * mutate를 fire-and-forget으로 호출해 성공/실패를 이후 토스트로만 알린다(제출 중 닫기 방지
  * 같은 별도 가드를 두지 않음 — 저장소 기존 AlertDialog 확인 패턴 복제).
  *
- * 성공(204) 시 목록 invalidate는 `useLeaveChatRoomMutation`이 담당하고, 이 컴포넌트는
- * `/chat` 목록으로 이동한다(`useCreateChatRoomMutation`/`CreateChatRoomDialog`와 동일하게
- * mutation 훅은 캐시 갱신만, 라우팅은 호출부 책임). 실패는 `handleApiError`로 sonner
- * 토스트만 띄운다(다이얼로그는 이미 닫힌 상태 — 재시도는 설정 메뉴에서 다시 연다).
+ * 성공(204) 시 목록 invalidate는 `useLeaveChatRoomMutation`이 담당하고, 이 컴포넌트는 오버레이
+ * 스토어의 `backToList`로 목록 패널로 되돌아간다(`useCreateChatRoomMutation`/
+ * `CreateChatRoomDialog`와 동일하게 mutation 훅은 캐시 갱신만, 화면 전환은 호출부 책임). 실패는
+ * `handleApiError`로 sonner 토스트만 띄운다(다이얼로그는 이미 닫힌 상태 — 재시도는 설정 메뉴에서
+ * 다시 연다).
  */
 export function LeaveChatRoomDialog({ roomId, open, onOpenChange }: LeaveChatRoomDialogProps) {
-  const navigate = useNavigate()
+  const backToList = useChatOverlayStore((state) => state.backToList)
   const mutation = useLeaveChatRoomMutation(roomId)
 
   function handleLeave() {
     mutation.mutate(undefined, {
       onSuccess: () => {
-        navigate('/chat')
+        backToList()
         toast.success('채팅방에서 나갔습니다.')
       },
       onError: (error) => handleApiError(error, { toast }),

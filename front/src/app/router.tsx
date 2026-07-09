@@ -35,9 +35,6 @@ import { MyInfoPage } from '@/features/employee/pages/MyInfoPage'
 import { UpdateMePage } from '@/features/employee/pages/UpdateMePage'
 import { ProtectedRoute } from '@/shared/components/ProtectedRoute'
 import { LayoutShell } from '@/shared/components/LayoutShell'
-import { ChatWindowLayout } from '@/shared/components/ChatWindowLayout'
-import { ChatRoomListPage } from '@/features/chat/pages/ChatRoomListPage'
-import { ChatRoomDetailPage } from '@/features/chat/pages/ChatRoomDetailPage'
 
 /**
  * Router 트리(ROADMAP T0.5·T0.7 / §A-5, §B).
@@ -108,14 +105,10 @@ import { ChatRoomDetailPage } from '@/features/chat/pages/ChatRoomDetailPage'
  * 'drafts/business-trips/:draftId/edit'·'drafts/leaves/:draftId/edit'(각 5세그먼트)와는 3번째
  * 리터럴 세그먼트('sales' vs 'business-trips'/'leaves')로 구분되어 랭킹 충돌이 없다 — 상세 페이지
  * DrafterActions.handleEdit의 isSalesDraft 분기가 실제 이동 목적지로 이어진다.
- * /chat, /chat/rooms/:roomId는 ROADMAP(CHAT) T0.1에서 신설했다 — 채팅은 메인 셸의 패널이 아니라
- * 헤더 아이콘 클릭 시 window.open으로 뜨는 완전히 독립된 팝업 창("별도 서비스인 척" UX)이라,
- * ProtectedRoute·LayoutShell 트리의 자식이 아닌 그 트리와 형제인 최상위 라우트로 등록했다.
- * ChatWindowLayout(사이드바/헤더 없는 최소 크롬)을 부모로 두며, 인증 게이트는 T0.3에서 채팅 창
- * 자체 부팅 시퀀스로 별도 처리할 예정이라 지금은 감싸지 않는다. index(`/chat`)는 ROADMAP(CHAT)
- * T1.2에서 ChatRoomListPage(F901 목록 패널)로 교체했다. `/chat/rooms/:roomId`는 T2.1에서
- * ChatRoomDetailPage(F902 상세+헤더)로 교체했다 — roomId 파라미터 유효성 검사와 403/404 분기는
- * 페이지 컴포넌트 내부에서 처리하므로 다른 채팅 라우트와 동일하게 별도 가드 없이 element로 연결한다.
+ * 채팅은 더 이상 별도 라우트가 아니다 — 헤더 아이콘 클릭 시 LayoutShell 내부에 조건부로
+ * 마운트되는 오버레이 패널(ChatOverlayPanel, src/shared/components/LayoutShell.tsx)로
+ * 전환됐다(팝업 창 → 인앱 오버레이 구조 변경). 목록/상세 패널 전환은 chatOverlayStore의
+ * selectedRoomId로 처리하므로 라우터 트리에는 chat 관련 라우트가 없다.
  */
 export const router = createBrowserRouter([
   {
@@ -322,19 +315,5 @@ export const router = createBrowserRouter([
   {
     path: '/register',
     element: <RegisterPage />,
-  },
-  {
-    path: '/chat',
-    element: <ChatWindowLayout />,
-    children: [
-      {
-        index: true,
-        element: <ChatRoomListPage />,
-      },
-      {
-        path: 'rooms/:roomId',
-        element: <ChatRoomDetailPage />,
-      },
-    ],
   },
 ])

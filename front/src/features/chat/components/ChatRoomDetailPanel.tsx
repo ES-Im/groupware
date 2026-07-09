@@ -1,19 +1,21 @@
 import { useEffect, useLayoutEffect, useRef } from 'react'
 import type { UIEvent } from 'react'
-import { useNavigate, useParams } from 'react-router'
 import dayjs from 'dayjs'
+import { ChevronLeft } from 'lucide-react'
 import { toast } from 'sonner'
 import { BlobAvatar } from '@/shared/components/BlobAvatar'
 import { isForbidden, isNotFound, normalizeApiError } from '@/shared/lib/apiError'
 import { Button } from '@/shared/ui/button'
 import { useChatMessagesQuery } from '../api/useChatMessagesQuery'
 import { useChatRoomDetailQuery } from '../api/useChatRoomDetailQuery'
-import { ChatMessageInput } from '../components/ChatMessageInput'
-import { ChatRoomSettingsMenu } from '../components/ChatRoomSettingsMenu'
 import { useChatRoomSubscription } from '../hooks/useChatRoomSubscription'
 import { useReadPositionSync } from '../hooks/useReadPositionSync'
+import { useChatOverlayStore } from '../lib/chatOverlayStore'
 import { parseEmpFilePreviewFileId } from '../lib/parseEmpFilePreviewFileId'
 import type { ChatMessage } from '../model/chatMessage'
+import { ChatMessageInput } from './ChatMessageInput'
+import { ChatRoomAvatar } from './ChatRoomAvatar'
+import { ChatRoomSettingsMenu } from './ChatRoomSettingsMenu'
 
 /** 상단 스크롤 도달 판정 여유값(px). 정확히 0에서만 반응하면 관성 스크롤 끝에서 씹힐 수 있다. */
 const SCROLL_TOP_THRESHOLD = 24
@@ -21,31 +23,30 @@ const SCROLL_TOP_THRESHOLD = 24
 /**
  * 채팅방 대화 화면(F902, ROADMAP(CHAT) T2.1, docs/prd/9.chat-prd.md §페이지별 상세(대화 화면)).
  *
- * `/chat/rooms/:roomId` 진입 시 `useChatRoomDetailQuery`(CHAT_ROOM_DETAIL)로 상세를 조회해
- * 헤더(방 표시명·isGroup 파생 문구)와 참여자 목록(BlobAvatar)을 렌더하고, `ChatMessageArea`
- * (F903, T2.2)가 과거 메시지 cursor 무한스크롤 본문을 담당한다. `useChatRoomSubscription`
- * (F904, T2.3-a·T2.3-b)이 방 토픽 SUBSCRIBE/UNSUBSCRIBE lifecycle과 수신 메시지 append/dedup을,
+ * 채팅 오버레이(`ChatOverlayPanel`)에서 `selectedRoomId`가 정해지면 그 값을 `roomId` prop으로
+ * 받아 렌더된다. `useChatRoomDetailQuery`(CHAT_ROOM_DETAIL)로 상세를 조회해 헤더(방 표시명·
+ * isGroup 파생 문구)와 참여자 목록(BlobAvatar)을 렌더하고, `ChatMessageArea`(F903, T2.2)가
+ * 과거 메시지 cursor 무한스크롤 본문을 담당한다. `useChatRoomSubscription`(F904, T2.3-a·
+ * T2.3-b)이 방 토픽 SUBSCRIBE/UNSUBSCRIBE lifecycle과 수신 메시지 append/dedup을,
  * `ChatMessageInput`(F905, T2.4)이 발신(낙관 렌더+SEND)을 담당한다. `useReadPositionSync`
  * (F911, T2.5)가 방 진입·실시간 수신 시 읽음 위치를 갱신해 목록의 unreadMessageCount를
  * 해소한다(ChatMessageArea 내부에서 호출 — 최신 확정 메시지 id를 이미 그 컴포넌트가 계산해
  * 두었다). `ChatRoomSettingsMenu`(T4.1)가 헤더에 방 설정 메뉴(초대/표시명 수정/나가기 진입점 +
  * 즐겨찾기 토글 재사용)를 담당한다.
  *
- * 이 UI는 이후 adapt-ui 스킬로 비주얼이 교체될 예정이라, ChatRoomListPage(T1.2)와 동일하게
+ * roomId는 오버레이 스토어(`chatOverlayStore`)가 이미 number 타입만 담으므로, 과거 라우트
+ * param 시절의 10진 양의 정수 형식 가드(route param은 신뢰 불가 문자열이었다)는 죽은 코드라
+ * 제거했다.
+ *
+ * 이 UI는 이후 adapt-ui 스킬로 비주얼이 교체될 예정이라, ChatRoomListPanel(T1.2)과 동일하게
  * shadcn 컴포넌트 기본형만 사용하고 레이아웃/비주얼 디테일에는 투자하지 않는다.
  *
  * 조회 실패 처리(apiError 매핑 소비·reissue 금지): 비멤버 접근은 서버가 403 또는 `CHAT_*`
  * 도메인 에러(404 계열)로 거부하므로, not-found(404)·forbidden(403)은 전용 안내 UX로 렌더하고
  * 그 외 실패만 토스트로 알린다(DraftDetailPage/BoardDetailPage 컨벤션 복제).
  */
-export function ChatRoomDetailPage() {
-  const navigate = useNavigate()
-  const { roomId: roomIdParam } = useParams()
-  // route param은 신뢰 불가 입력이다(DraftDetailPage/BoardDetailPage와 동일 가드): 순수 10진
-  // 양의 정수 형식만 허용해 지수/16진수/음수 표기가 다른 채팅방으로 오매핑되는 것을 막는다.
-  const isDecimalPositiveInteger = roomIdParam !== undefined && /^[1-9][0-9]*$/.test(roomIdParam)
-  const roomId = isDecimalPositiveInteger ? Number(roomIdParam) : undefined
-  const isInvalidRoomId = roomId === undefined
+export function ChatRoomDetailPanel({ roomId }: { roomId: number }) {
+  const backToList = useChatOverlayStore((state) => state.backToList)
 
   const detailQuery = useChatRoomDetailQuery(roomId)
   // 방 진입 시 방 토픽 SUBSCRIBE, 방 이탈/전환·연결 끊김 시 UNSUBSCRIBE(ROADMAP(CHAT) T2.3-a).
@@ -64,29 +65,21 @@ export function ChatRoomDetailPage() {
   }, [detailQuery.error])
 
   function handleBack() {
-    navigate('/chat')
+    backToList()
   }
 
   const backButton = (
     <Button
       type="button"
       variant="ghost"
-      size="sm"
-      className="-ml-2 text-muted-foreground hover:text-foreground"
+      size="icon-sm"
+      className="shrink-0 text-muted-foreground hover:text-foreground"
+      aria-label="목록으로"
       onClick={handleBack}
     >
-      ← 목록으로
+      <ChevronLeft aria-hidden="true" />
     </Button>
   )
-
-  if (isInvalidRoomId) {
-    return (
-      <div className="flex h-full flex-col gap-4 p-4">
-        {backButton}
-        <p className="text-sm text-muted-foreground">채팅방을 찾을 수 없습니다.</p>
-      </div>
-    )
-  }
 
   if (detailQuery.isLoading) {
     return (
@@ -136,34 +129,35 @@ export function ChatRoomDetailPage() {
 
   return (
     <div className="flex h-full flex-col">
-      <header className="flex items-center gap-3 border-b p-3">
+      <header className="flex shrink-0 items-center gap-2 border-b border-border px-3 py-2.5">
         {backButton}
+        <ChatRoomAvatar isGroup={room.isGroup} className="size-9" />
         <div className="min-w-0 flex-1">
           {/* todo: Open Q#3(PRD §❓, chatRoomDetail.ts 동일 주석) roomName null 가능 여부/폴백
               구성 미확정 — 서버 응답 문자열을 그대로 표시하고 members[] 기반 폴백을 임의로
               발명하지 않는다. */}
-          <h1 className="truncate text-base font-semibold">{room.roomName}</h1>
-          <p className="text-xs text-muted-foreground">
-            {room.isGroup ? `그룹 · 참여 ${room.members.length}명` : '1:1 대화'}
+          <h1 className="truncate text-sm font-semibold">{room.roomName}</h1>
+          <p className="truncate text-xs text-muted-foreground">
+            {room.isGroup ? `참여 ${room.members.length}명` : '1:1 대화'}
           </p>
         </div>
         <ChatRoomSettingsMenu roomId={room.roomId} />
       </header>
 
-      <div className="flex items-center gap-3 overflow-x-auto border-b p-3">
+      <div className="flex shrink-0 items-start gap-3 overflow-x-auto border-b border-border px-3 py-2.5">
         {room.members.map((member) => (
           <div
             key={member.memberId}
-            className="flex shrink-0 flex-col items-center gap-1 text-center"
+            className="flex w-14 shrink-0 flex-col items-center gap-1 text-center"
           >
             <BlobAvatar
               empId={member.memberId}
               fileId={parseEmpFilePreviewFileId(member.profileImageUrl)}
               fallbackText={member.memberName}
             />
-            <span className="max-w-16 truncate text-xs font-medium">{member.memberName}</span>
+            <span className="max-w-full truncate text-xs font-medium">{member.memberName}</span>
             {member.deptName && (
-              <span className="max-w-16 truncate text-[10px] text-muted-foreground">
+              <span className="max-w-full truncate text-[10px] text-muted-foreground">
                 {member.deptName}
               </span>
             )}
@@ -206,7 +200,7 @@ function ChatMessageArea({ roomId }: { roomId: number }) {
   const prevScrollHeightRef = useRef<number | null>(null)
 
   // not-found/forbidden은 아래에서 전용 문구로 렌더하므로, 그 외 실패만 토스트로 알린다
-  // (ChatRoomDetailPage 본문 useEffect와 동일 패턴).
+  // (ChatRoomDetailPanel 본문 useEffect와 동일 패턴).
   useEffect(() => {
     if (!messagesQuery.error) {
       return
@@ -282,7 +276,11 @@ function ChatMessageArea({ roomId }: { roomId: number }) {
   }
 
   return (
-    <div ref={containerRef} onScroll={handleScroll} className="flex-1 overflow-y-auto p-4">
+    <div
+      ref={containerRef}
+      onScroll={handleScroll}
+      className="min-h-0 flex-1 overflow-y-auto px-3 py-4"
+    >
       {messagesQuery.isFetchingNextPage && (
         <p className="pb-2 text-center text-xs text-muted-foreground">이전 메시지를 불러오는 중...</p>
       )}
@@ -308,20 +306,24 @@ function ChatMessageRow({ message }: { message: ChatMessage }) {
   // 최소한으로 구분한다(스타일 투자 최소화 — 이후 adapt-ui에서 교체될 수 있는 임시 표기).
   const isPending = message.id < 0
   return (
-    <li className={`flex items-start gap-2 ${isPending ? 'opacity-60' : ''}`}>
+    <li className={`flex items-start gap-2.5 ${isPending ? 'opacity-60' : ''}`}>
       <BlobAvatar
         empId={message.senderId}
         fileId={parseEmpFilePreviewFileId(message.profileImageUrl)}
         fallbackText={message.senderName}
       />
-      <div className="min-w-0">
+      <div className="flex min-w-0 flex-col gap-1">
         <div className="flex items-baseline gap-2">
-          <span className="text-sm font-medium">{message.senderName}</span>
+          <span className="text-xs font-medium">{message.senderName}</span>
           <span className="text-[10px] text-muted-foreground">
             {isPending ? '전송 중...' : dayjs(message.sentAt).format('MM-DD HH:mm')}
           </span>
         </div>
-        <p className="whitespace-pre-wrap text-sm">{message.content}</p>
+        {/* 수신/발신을 발신자 empId로 구분해 좌우 정렬하려면 useMeQuery 같은 데이터 계층이 필요해
+            이 시각 계층 범위 밖이다 — 모든 메시지를 아바타+이름+muted 버블의 좌측 정렬로 통일한다. */}
+        <p className="w-fit max-w-full whitespace-pre-wrap rounded-2xl rounded-tl-sm bg-muted px-3 py-2 text-sm">
+          {message.content}
+        </p>
       </div>
     </li>
   )

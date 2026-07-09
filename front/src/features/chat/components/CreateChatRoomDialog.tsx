@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router'
 import { toast } from 'sonner'
 import { useMeQuery } from '@/features/employee/api/useMeQuery'
 import { handleApiError } from '@/shared/lib/apiError'
@@ -14,9 +13,10 @@ import {
 } from '@/shared/ui/dialog'
 import { EmployeePicker, type EmployeePickerEmployee } from '@/features/approval/components/EmployeePicker'
 import { useCreateChatRoomMutation } from '../api/useCreateChatRoomMutation'
+import { useChatOverlayStore } from '../lib/chatOverlayStore'
 
 interface CreateChatRoomDialogProps {
-  /** 다이얼로그 열림 상태(제어형, ChatRoomListPage 소유). */
+  /** 다이얼로그 열림 상태(제어형, ChatRoomListPanel 소유). */
   open: boolean
   onOpenChange: (open: boolean) => void
 }
@@ -45,16 +45,16 @@ interface CreateChatRoomDialogProps {
  * 로딩 중이면 `disabledEmpIds`가 빈 배열이 되어 방어가 일시적으로 느슨해질 수 있다(최종 방어는
  * 서버 응답에 위임).
  *
- * 성공(`200 { roomId }`, **201 아님**) 시 다이얼로그를 닫고 해당 방 대화 화면
- * (`/chat/rooms/{roomId}`)으로 이동한다 — 목록 invalidate는 `useCreateChatRoomMutation`의
- * onSuccess가 담당한다. 실패는 `handleApiError`로 sonner 토스트만 띄우고 다이얼로그는 열린 채로
- * 유지해 재시도할 수 있게 한다.
+ * 성공(`200 { roomId }`, **201 아님**) 시 다이얼로그를 닫고 오버레이 스토어의 `selectRoom`으로
+ * 해당 방 대화 패널을 연다 — 목록 invalidate는 `useCreateChatRoomMutation`의 onSuccess가
+ * 담당한다. 실패는 `handleApiError`로 sonner 토스트만 띄우고 다이얼로그는 열린 채로 유지해
+ * 재시도할 수 있게 한다.
  */
 export function CreateChatRoomDialog({ open, onOpenChange }: CreateChatRoomDialogProps) {
   const [selected, setSelected] = useState<EmployeePickerEmployee[]>([])
   const meQuery = useMeQuery()
   const myEmpId = meQuery.data?.empBasicInfo.empId
-  const navigate = useNavigate()
+  const selectRoom = useChatOverlayStore((state) => state.selectRoom)
   const mutation = useCreateChatRoomMutation()
 
   useEffect(() => {
@@ -75,7 +75,7 @@ export function CreateChatRoomDialog({ open, onOpenChange }: CreateChatRoomDialo
         // 닫히면 useEffect(!open)가 선택을 리셋하므로 여기서 별도 setSelected는 두지 않는다.
         onSuccess: (result) => {
           onOpenChange(false)
-          navigate(`/chat/rooms/${result.roomId}`)
+          selectRoom(result.roomId)
         },
         onError: (error) => handleApiError(error, { toast }),
       },

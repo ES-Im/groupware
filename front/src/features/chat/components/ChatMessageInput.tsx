@@ -1,4 +1,5 @@
 import { useState, type KeyboardEvent } from 'react'
+import { Send } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
 import { Textarea } from '@/shared/ui/textarea'
 import { useSendChatMessage } from '../hooks/useSendChatMessage'
@@ -42,7 +43,7 @@ export function ChatMessageInput({ roomId }: { roomId: number }) {
         event.preventDefault()
         handleSend()
       }}
-      className="flex items-end gap-2 border-t p-3"
+      className="flex shrink-0 items-end gap-2 border-t border-border p-3"
     >
       <label htmlFor="chat-message-input" className="sr-only">
         메시지 입력
@@ -53,10 +54,10 @@ export function ChatMessageInput({ roomId }: { roomId: number }) {
         onChange={(event) => setContent(event.target.value)}
         onKeyDown={handleKeyDown}
         placeholder="메시지를 입력하세요"
-        className="min-h-10 flex-1 resize-none"
+        className="max-h-32 min-h-10 flex-1 resize-none rounded-2xl bg-muted/40"
       />
-      <Button type="submit" size="sm">
-        전송
+      <Button type="submit" size="icon" className="rounded-full" aria-label="전송">
+        <Send aria-hidden="true" />
       </Button>
     </form>
   )

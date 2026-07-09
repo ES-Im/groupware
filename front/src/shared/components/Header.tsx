@@ -1,5 +1,6 @@
 import { Bell, ChevronDown, LogOut, MessageSquare, Moon, Sun, UserRound } from 'lucide-react'
 import { Link } from 'react-router'
+import { useChatOverlayStore } from '@/features/chat/lib/chatOverlayStore'
 import { BlobAvatar } from '@/shared/components/BlobAvatar'
 import { SidebarToggleButton } from '@/shared/components/SidebarToggleButton'
 import {
@@ -49,19 +50,6 @@ interface HeaderProps {
 const chromeIconButtonClass =
   'inline-flex size-8 items-center justify-center rounded-md text-primary-foreground/70 transition-colors hover:bg-primary-foreground/10 hover:text-primary-foreground focus-visible:ring-2 focus-visible:ring-primary-foreground/40 focus-visible:outline-none dark:text-card-foreground/70 dark:hover:bg-card-foreground/10 dark:hover:text-card-foreground dark:focus-visible:ring-card-foreground/40'
 
-/**
- * 채팅 창 열기(ROADMAP(CHAT) T0.2 / PRD §🪟-1): `/chat`을 별도 팝업 창으로 띄운다. 창 이름을
- * `haruon-chat`으로 고정해 두면, 이미 열려 있는 채팅 창이 있을 때 브라우저가 새 창을 만들지 않고
- * 동일 이름의 기존 창을 재사용하므로 재클릭 시 다중 창 난립 없이 `focus()`만으로 기존 창을
- * 앞으로 가져온다. 순수 UI 내비게이션(백엔드 호출 없음)이라 상위(LayoutShell)에서 props로
- * 주입하지 않고 Header가 직접 소유한다.
- */
-// todo: 팝업 차단으로 window.open이 null을 반환하는 경우의 폴백(새 탭 안내/토스트 등)과
-// 새 창(popup) vs 새 탭 정책은 ROADMAP(CHAT) §🪟 //todo·Open Questions로 미확정 — 임의 확정 금지
-function openChatWindow() {
-  window.open('/chat', 'haruon-chat', 'popup,width=420,height=760')?.focus()
-}
-
 export function Header({
   collapsed,
   onToggleSidebar,
@@ -74,6 +62,8 @@ export function Header({
   onLogout,
   logoutPending,
 }: HeaderProps) {
+  const toggleChatOverlay = useChatOverlayStore((state) => state.toggle)
+
   return (
     // 헤더는 라이트·다크 모두 어두운 크롬 스트립을 유지한다: 라이트=bg-primary, 다크=bg-card.
     // (다크에서 bg-primary는 near-white로 반전돼 과하게 밝으므로, 실존 다크 표면 토큰 card로 스왑)
@@ -107,10 +97,12 @@ export function Header({
         <button type="button" aria-label="알림" className={chromeIconButtonClass}>
           <Bell className="size-4" aria-hidden="true" />
         </button>
-        {/* 채팅 버튼(S4, ROADMAP(CHAT) T0.2): haruon-chat 팝업 창으로 /chat을 연다. */}
+        {/* 채팅 버튼(S4): 클릭 시 채팅 오버레이 패널을 토글한다(재클릭하면 닫힘). 순수 UI
+            내비게이션 상태(chatOverlayStore)라 상위(LayoutShell)에서 props로 주입하지 않고
+            Header가 훅으로 직접 구독한다. */}
         <button
           type="button"
-          onClick={openChatWindow}
+          onClick={toggleChatOverlay}
           aria-label="채팅"
           className={chromeIconButtonClass}
         >

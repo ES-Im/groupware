@@ -4,6 +4,7 @@ import { Outlet, useLocation, useNavigate } from 'react-router'
 import { useMyPendingApprovalDraftsCountQuery } from '@/features/approval/api/useMyPendingApprovalDraftsCountQuery'
 import { logout } from '@/features/auth/api/logout'
 import { useAuthStore } from '@/features/auth/store/authStore'
+import { ChatOverlayPanel } from '@/features/chat/components/ChatOverlayPanel'
 import { useFilesInfosQuery } from '@/features/employee/api/useFilesInfosQuery'
 import { useMeQuery } from '@/features/employee/api/useMeQuery'
 import { queryClient } from '@/shared/api/queryClient'
@@ -152,6 +153,9 @@ export function LayoutShell() {
           <Footer />
         </div>
       </div>
+      {/* 채팅 오버레이(팝업 창 → 인앱 오버레이 전환): 라우트 전환에 언마운트되지 않도록 최상위
+          div의 직계 자식으로 둔다. isOpen이 false면 스스로 null을 반환한다(ChatOverlayPanel). */}
+      <ChatOverlayPanel />
     </div>
   )
 }
