@@ -30,6 +30,13 @@ import { CompanyInfoPage } from '@/features/company/pages/CompanyInfoPage'
 import { EmployeeDetailPage } from '@/features/employee/pages/EmployeeDetailPage'
 import { MyInfoPage } from '@/features/employee/pages/MyInfoPage'
 import { UpdateMePage } from '@/features/employee/pages/UpdateMePage'
+import { MyMeetingCalendarPage } from '@/features/meeting/pages/MyMeetingCalendarPage'
+import { MeetingReservationCreatePage } from '@/features/meeting/pages/MeetingReservationCreatePage'
+import { MeetingReservationManagementPage } from '@/features/meeting/pages/MeetingReservationManagementPage'
+import { MeetingReservationDetailPage } from '@/features/meeting/pages/MeetingReservationDetailPage'
+import { MeetingRoomManagementPage } from '@/features/meeting/pages/MeetingRoomManagementPage'
+import { MeetingRoomDetailPage } from '@/features/meeting/pages/MeetingRoomDetailPage'
+import { MeetingRoomManagementDetailPage } from '@/features/meeting/pages/MeetingRoomManagementDetailPage'
 import { ProtectedRoute } from '@/shared/components/ProtectedRoute'
 import { LayoutShell } from '@/shared/components/LayoutShell'
 
@@ -113,6 +120,21 @@ import { LayoutShell } from '@/shared/components/LayoutShell'
  * /settings/company는 ROADMAP(COMPANY) T1.3에서 CompanyInfoPage(F1401)로 연결했다. 사이드바
  * 노출은 minRole ADMIN이지만, 조회 API가 permitAll이라 라우트 가드는 의도적으로 EMPLOYEE
  * 수준(ProtectedRoute만)으로 둔다 — URL 직접 접근 시에도 읽기 전용 뷰가 정상 렌더되어야 한다.
+ * /meetings·/meetings/new·/meetings/management·/meetings/:meetingId·/meeting-rooms/:meetingRoomId·
+ * /meeting-rooms/management·/meeting-rooms/management/:meetingRoomId는 ROADMAP(MEETING-ROOMS)
+ * M8(T8.1)에서 회의/회의실 페이지 7종(MyMeetingCalendarPage/F800, MeetingReservationCreatePage/
+ * F802·F803, MeetingReservationDetailPage/F801·F804~F806, MeetingRoomDetailPage/F807~F809,
+ * MeetingReservationManagementPage/F810, MeetingRoomManagementPage/F811·F812·F814,
+ * MeetingRoomManagementDetailPage/F813·F815·F816·F814)로 연결했다. 'meetings/new'·
+ * 'meetings/management'는 정적 세그먼트라 React Router 7 랭킹 규칙상 동적 'meetings/:meetingId'보다
+ * 항상 우선 매칭되지만(위 기안 라우트들과 동일 근거), 명시적으로도 ':meetingId'보다 앞에 등록해 둔다.
+ * 'meeting-rooms/management'도 동일 근거로 'meeting-rooms/:meetingRoomId'보다 앞에 둔다.
+ * 'meeting-rooms/management/:meetingRoomId'는 3세그먼트라 'meeting-rooms/management'(2세그먼트)와
+ * 랭킹 충돌이 없다. 예약 계열(meetings/new·meetings/:meetingId)은 minRole EMPLOYEE, 관리 계열
+ * (meetings/management·meeting-rooms/management·meeting-rooms/management/:meetingRoomId)·열람
+ * (meeting-rooms/:meetingRoomId)은 각각 FACILITY/EMPLOYEE이지만, 근태 /attendance/dept·전자결재·휴가
+ * 컨벤션과 동일하게 role 게이팅은 사이드바(minRole)에서만 처리하고 라우트 자체는 전부
+ * ProtectedRoute(인증 가드)만 적용한다 — 최종 권한 판단은 서버(403 ROLE_003)에 위임한다.
  */
 export const router = createBrowserRouter([
   {
@@ -302,6 +324,63 @@ export const router = createBrowserRouter([
         // (인증 가드)만 적용한다 — 비-ADMIN이 URL을 직접 입력해도 읽기 전용 뷰가 정상 렌더되어야 한다.
         path: 'settings/company',
         element: <CompanyInfoPage />,
+      },
+      {
+        // 내 예약 캘린더 페이지(P1): ROADMAP(MEETING-ROOMS) M1(T1.4)에서
+        // MyMeetingCalendarPage(F800)로 연결했다. minRole EMPLOYEE라 ProtectedRoute(인증 가드)만으로
+        // 충분하다. 사이드바 "회의실 예약" 항목의 실제 진입점이다.
+        path: 'meetings',
+        element: <MyMeetingCalendarPage />,
+      },
+      {
+        // 회의 예약 생성 페이지(P2): ROADMAP(MEETING-ROOMS) M3(T3.3-b)에서
+        // MeetingReservationCreatePage(F802·F803)로 연결했다. 정적 세그먼트라 동적
+        // 'meetings/:meetingId'보다 항상 우선 매칭되지만(위 기안 라우트들과 동일 근거), 명시적으로도
+        // ':meetingId'보다 앞에 등록해 둔다.
+        path: 'meetings/new',
+        element: <MeetingReservationCreatePage />,
+      },
+      {
+        // 회의 예약 관리 페이지(P5, FACILITY 조회 전용): ROADMAP(MEETING-ROOMS) M5(T5.2)에서
+        // MeetingReservationManagementPage(F810)로 연결했다. ①'meetings/new'와 동일 근거로 정적
+        // 세그먼트를 동적 'meetings/:meetingId'보다 앞에 등록해 둔다. minRole FACILITY 게이팅은
+        // 사이드바에서 처리하고(근태 /attendance/dept 컨벤션 동일), 라우트 자체는 ProtectedRoute(인증
+        // 가드)만 적용한다 — 최종 권한 판단은 서버(403 ROLE_003).
+        path: 'meetings/management',
+        element: <MeetingReservationManagementPage />,
+      },
+      {
+        // 회의 예약 상세·수정·참여자교체·취소 페이지(P3): ROADMAP(MEETING-ROOMS) M4(T4.3-c)에서
+        // MeetingReservationDetailPage(F801·F804~F806)로 연결했다. 위 'meetings/new'·
+        // 'meetings/management'(둘 다 정적 세그먼트)보다 뒤에 등록해 랭킹 충돌을 피한다.
+        path: 'meetings/:meetingId',
+        element: <MeetingReservationDetailPage />,
+      },
+      {
+        // 회의실 관리 목록 페이지(P6, FACILITY): ROADMAP(MEETING-ROOMS) M6(T6.3-b)에서
+        // MeetingRoomManagementPage(F811·F812·F814)로 연결했다. 정적 세그먼트라 동적
+        // 'meeting-rooms/:meetingRoomId'보다 항상 우선 매칭되지만, 명시적으로도 앞에 등록해 둔다.
+        // minRole FACILITY 게이팅은 사이드바에서 처리하고, 라우트 자체는 ProtectedRoute(인증 가드)만
+        // 적용한다 — 최종 권한 판단은 서버(403 ROLE_003).
+        path: 'meeting-rooms/management',
+        element: <MeetingRoomManagementPage />,
+      },
+      {
+        // 회의실 상세(열람) 페이지(P4): ROADMAP(MEETING-ROOMS) M2(T2.4-b)에서
+        // MeetingRoomDetailPage(F807~F809)로 연결했다. 위 'meeting-rooms/management'(정적 세그먼트)
+        // 보다 뒤에 등록해 랭킹 충돌을 피한다. minRole EMPLOYEE라 ProtectedRoute(인증 가드)만으로
+        // 충분하다.
+        path: 'meeting-rooms/:meetingRoomId',
+        element: <MeetingRoomDetailPage />,
+      },
+      {
+        // 회의실 관리 상세 페이지(P7, FACILITY): ROADMAP(MEETING-ROOMS) M7(T7.2-c)에서
+        // MeetingRoomManagementDetailPage(F813·F815·F816·F814)로 연결했다. 3세그먼트라
+        // 'meeting-rooms/management'(2세그먼트)와 랭킹 충돌이 없다. minRole FACILITY 게이팅은
+        // 사이드바에서 처리하고, 라우트 자체는 ProtectedRoute(인증 가드)만 적용한다 — 최종 권한
+        // 판단은 서버(403 ROLE_003).
+        path: 'meeting-rooms/management/:meetingRoomId',
+        element: <MeetingRoomManagementDetailPage />,
       },
     ],
   },
