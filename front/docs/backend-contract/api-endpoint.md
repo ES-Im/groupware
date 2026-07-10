@@ -5,6 +5,18 @@
 | LOGOUT | `LOGOUT` | `POST` | `/api/auth/logout` | Empty | `204` Empty | 예 | EMPLOYEE |
 | Access Token 재발급 | `REISSUE_TOKEN` | `POST` | `/api/auth/reissue` | Empty | `200` JSON Body | 아니오 | Refresh Token |
 
+### COMPANY API
+
+> ⚠️ 이 섹션은 원래 인덱스에 누락되어 있었다(2026-07-10, COMPANY 도메인 build-domain 착수 시 보강). `COMPANY_INFO`는 백엔드 REST Docs 스니펫이 아직 없다(`CompanyQueryApiDocsTest`에 `@Test` 미작성) — 필드는 `CompanyInfoResponse.java`(응답 DTO)와 `CompanyQueryApiTest.java`(jsonPath 단언)로 소스 대조 확정했다. 나머지 3개(`COMPANY_REGISTER`/`COMPANY_UPDATE_INFO`/`COMPANY_UPDATE_CONTACT`/`COMPANY_UPDATE_HOME_PAGE_URL`)는 `back/build/generated-snippets/<기능ID>/`에 정식 스니펫이 존재한다.
+
+| 기능 | ID | Method | Endpoint | Request | Response | 권한필요여부 | 필요한 권한 |
+|---|---|---|---|---|---|---|---|
+| 회사 정보 조회 | `COMPANY_INFO` | `GET` | `/api/companies` | Empty | `200` JSON Body | 아니오 | 공개(인증 불요, `permitAll`) |
+| 회사 정보 최초 등록 | `COMPANY_REGISTER` | `POST` | `/api/companies/new` | JSON Body | `204` Empty | 예 | ADMIN |
+| 회사 기본 정보 수정(이력 생성) | `COMPANY_UPDATE_INFO` | `POST` | `/api/companies/info` | JSON Body | `204` Empty | 예 | ADMIN |
+| 회사 대표 연락처 수정(이력 생성) | `COMPANY_UPDATE_CONTACT` | `POST` | `/api/companies/contact` | JSON Body | `204` Empty | 예 | ADMIN |
+| 회사 홈페이지 URL 수정(이력 생성) | `COMPANY_UPDATE_HOME_PAGE_URL` | `POST` | `/api/companies/home-page-url` | JSON Body | `204` Empty | 예 | ADMIN |
+
 ### EMP_ACCOUNT API
 | 기능                     | ID                             | Method | Endpoint | Request | Response | 권한필요여부 | 필요한 권한 |
 |---|---|---|---|---|---|---|---|

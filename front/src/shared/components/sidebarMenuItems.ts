@@ -9,6 +9,7 @@ import {
   Network,
   Notebook,
   Palmtree,
+  Settings,
   Store,
   UserCog,
   UserRound,
@@ -170,5 +171,15 @@ export const sidebarMenuItems: SidebarMenuItem[] = [
       { label: '가맹점 문의', minRole: 'FRANCHISE', implemented: false },
       { label: '가맹점 매출', minRole: 'FRANCHISE', implemented: false },
     ],
+  },
+  {
+    // 설정 그룹: ROADMAP(COMPANY) T1.3에서 신규 추가. 그룹·리프 모두 minRole ADMIN이라 사이드바에는
+    // ADMIN에게만 노출되지만, 실제 라우트(/settings/company) 가드는 EMPLOYEE 수준이다 — 조회 API가
+    // permitAll이라 비-ADMIN이 URL을 직접 입력해도 읽기 전용 뷰가 정상 렌더되어야 하므로 의도된
+    // 비대칭이다(router.tsx 주석 참고).
+    label: '설정',
+    minRole: 'ADMIN',
+    icon: Settings,
+    children: [{ label: '회사 정보', to: '/settings/company', minRole: 'ADMIN' }],
   },
 ]

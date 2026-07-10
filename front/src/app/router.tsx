@@ -26,6 +26,7 @@ import { BoardListPage } from '@/features/board/pages/BoardListPage'
 import { DepartmentDetailPage } from '@/features/department/pages/DepartmentDetailPage'
 import { DepartmentMembersPage } from '@/features/department/pages/DepartmentMembersPage'
 import { DepartmentsPage } from '@/features/department/pages/DepartmentsPage'
+import { CompanyInfoPage } from '@/features/company/pages/CompanyInfoPage'
 import { EmployeeDetailPage } from '@/features/employee/pages/EmployeeDetailPage'
 import { MyInfoPage } from '@/features/employee/pages/MyInfoPage'
 import { UpdateMePage } from '@/features/employee/pages/UpdateMePage'
@@ -109,6 +110,9 @@ import { LayoutShell } from '@/shared/components/LayoutShell'
  * 마운트되는 오버레이 패널(ChatOverlayPanel, src/shared/components/LayoutShell.tsx)로
  * 전환됐다(팝업 창 → 인앱 오버레이 구조 변경). 목록/상세 패널 전환은 chatOverlayStore의
  * selectedRoomId로 처리하므로 라우터 트리에는 chat 관련 라우트가 없다.
+ * /settings/company는 ROADMAP(COMPANY) T1.3에서 CompanyInfoPage(F1401)로 연결했다. 사이드바
+ * 노출은 minRole ADMIN이지만, 조회 API가 permitAll이라 라우트 가드는 의도적으로 EMPLOYEE
+ * 수준(ProtectedRoute만)으로 둔다 — URL 직접 접근 시에도 읽기 전용 뷰가 정상 렌더되어야 한다.
  */
 export const router = createBrowserRouter([
   {
@@ -291,6 +295,13 @@ export const router = createBrowserRouter([
         // 적용한다(ADMIN 단일 게이트, 서버 최종 판단 없음).
         path: 'leaves/admin',
         element: <AdminLeavePage />,
+      },
+      {
+        // 회사 정보 페이지: ROADMAP(COMPANY) T1.3에서 CompanyInfoPage(F1401)로 연결했다. 조회 API가
+        // permitAll이라 사이드바(minRole ADMIN)와 달리 라우트 자체는 EMPLOYEE 기준 ProtectedRoute
+        // (인증 가드)만 적용한다 — 비-ADMIN이 URL을 직접 입력해도 읽기 전용 뷰가 정상 렌더되어야 한다.
+        path: 'settings/company',
+        element: <CompanyInfoPage />,
       },
     ],
   },
