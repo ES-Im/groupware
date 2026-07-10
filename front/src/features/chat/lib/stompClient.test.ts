@@ -185,4 +185,39 @@ describe('chatStompClient 연결 상태 노출/종료 정리 (T0.4-b)', () => {
     })
     expect(getChatStompClient().active).toBe(true)
   })
+
+  /**
+   * 실사용 중 발견된 회귀: 모듈 스코프 싱글턴(chatStompClient)의 connectHeaders가 최초 생성
+   * 시점 토큰으로 고정돼, 같은 브라우저 탭에서 로그아웃 후 다른 사용자로 재로그인해도 그
+   * 이전 사용자의 토큰으로 재연결되던 문제(beforeConnect 도입으로 수정, stompClient.ts 참조).
+   */
+  it('연결 종료 후 accessToken이 바뀐 상태로 재연결하면 새 토큰으로 CONNECT한다(계정 전환 시나리오)', async () => {
+    setAccessToken('user-a-token')
+    vi.stubGlobal('WebSocket', FakeStompSocket)
+    const { result } = renderHook(() => useChatStompStatus())
+
+    connectChatStomp()
+    await vi.waitFor(() => {
+      expect(result.current).toBe('connected')
+    })
+    const firstSocket = getChatStompClient().webSocket as unknown as FakeStompSocket
+    const firstConnectFrame = firstSocket.sentFrames.find((frame) => frame.startsWith('CONNECT\n'))
+    expect(firstConnectFrame).toContain('Authorization:Bearer user-a-token')
+
+    act(() => {
+      disconnectChatStomp()
+    })
+    expect(result.current).toBe('disconnected')
+
+    // 로그아웃 → 다른 사용자로 재로그인 시나리오: 같은 탭에서 accessToken만 교체된다.
+    setAccessToken('user-b-token')
+
+    connectChatStomp()
+    await vi.waitFor(() => {
+      expect(result.current).toBe('connected')
+    })
+    const secondSocket = getChatStompClient().webSocket as unknown as FakeStompSocket
+    const secondConnectFrame = secondSocket.sentFrames.find((frame) => frame.startsWith('CONNECT\n'))
+    expect(secondConnectFrame).toContain('Authorization:Bearer user-b-token')
+  })
 })

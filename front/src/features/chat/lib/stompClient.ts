@@ -41,6 +41,17 @@ export function getChatStompClient(): Client {
   chatStompClient ??= new Client({
     brokerURL: CHAT_WS_URL,
     connectHeaders: { Authorization: `Bearer ${getAccessToken() ?? ''}` },
+    // WHY beforeConnect로 매 CONNECT 시도 직전 헤더를 다시 읽는다: 위 connectHeaders는 최초
+    // 생성 시점 값으로 고정되는데, 이 클라이언트는 모듈 스코프 싱글턴이라 로그아웃 후 같은 탭에서
+    // 다른 사용자로 재로그인해도 재생성되지 않는다(disconnectChatStomp는 deactivate만 하고
+    // 인스턴스를 없애지 않는다). connectHeaders를 고정값으로만 두면 재연결(오버레이 재오픈) 시
+    // 이전 사용자의 토큰으로 CONNECT돼, 실제로는 다른 계정으로 보낸 메시지가 서버에는 이전
+    // 계정이 보낸 것으로 기록되는 버그가 된다(실사용 중 발견: 계정 전환 후 발신자 오귀속).
+    // beforeConnect(라이브러리가 매 activate() 시도 직전 호출)에서 그 시점의 실제 accessToken으로
+    // connectHeaders를 다시 조립해 막는다.
+    beforeConnect: (client) => {
+      client.connectHeaders = { Authorization: `Bearer ${getAccessToken() ?? ''}` }
+    },
     // 자동 재연결 명시 비활성화(위 WHY 참조) — 재연결 정책은 이 파일이 직접 제어한다.
     reconnectDelay: 0,
     onConnect: () => {
