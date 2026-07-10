@@ -82,4 +82,46 @@ describe('upsertChatMessage', () => {
     expect(result?.pages[0]?.messages).toEqual(data.pages[0]?.messages)
     expect(result?.pages[1]?.messages).toEqual([confirmed])
   })
+
+  it('서버 확정 순서(id)와 다른 순서로 브로드캐스트가 도착해도 id 오름차순으로 재정렬한다(실사용 재현: 두 사용자 화면 메시지 순서 엇갈림 버그)', () => {
+    const first = message({ id: 10, clientMessageId: 'first' })
+    const data: InfiniteData<ChatMessagesPage> = { pages: [page([first])], pageParams: [undefined] }
+
+    // 다음 메시지(id 11)가 그다음 메시지(id 12)보다 늦게 도착한 상황을 흉내낸다.
+    const laterButArrivedSecond = message({ id: 12, clientMessageId: 'later' })
+    const step1 = upsertChatMessage(data, laterButArrivedSecond)
+    const earlierButArrivedFirst = message({ id: 11, clientMessageId: 'earlier' })
+    const result = upsertChatMessage(step1, earlierButArrivedFirst)
+
+    expect(result?.pages[0]?.messages.map((m) => m.id)).toEqual([10, 11, 12])
+  })
+
+  it('미확정(낙관) 메시지는 도착 순서와 무관하게 항상 확정 메시지들보다 뒤에 위치한다', () => {
+    const confirmed = message({ id: 5, clientMessageId: 'confirmed-1' })
+    const pending = message({ id: -1, clientMessageId: 'pending-1', content: '전송 중...' })
+    const data: InfiniteData<ChatMessagesPage> = {
+      pages: [page([pending])],
+      pageParams: [undefined],
+    }
+
+    const result = upsertChatMessage(data, confirmed)
+
+    expect(result?.pages[0]?.messages).toEqual([confirmed, pending])
+  })
+
+  it('미확정(낙관) 메시지끼리는 생성 순서(먼저 만든 쪽이 0에 더 가까운 id)를 유지한다', () => {
+    const firstPending = message({ id: -1, clientMessageId: 'pending-first' })
+    const data: InfiniteData<ChatMessagesPage> = {
+      pages: [page([firstPending])],
+      pageParams: [undefined],
+    }
+    const secondPending = message({ id: -2, clientMessageId: 'pending-second' })
+
+    const result = upsertChatMessage(data, secondPending)
+
+    expect(result?.pages[0]?.messages.map((m) => m.clientMessageId)).toEqual([
+      'pending-first',
+      'pending-second',
+    ])
+  })
 })
