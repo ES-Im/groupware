@@ -16,7 +16,7 @@ import { inviteChatRoomMembers } from './inviteChatRoomMembers'
  *
  * 성공 토스트는 `useCirculationAddMutation`(approval, 공람자 추가)과 동일한 하우스 스타일로 이
  * 훅의 onSuccess에서 띄운다. 실패는 폼 필드가 없어 setError 대상이 없으므로 handleApiError 처리는
- * 호출부(ChatRoomInviteDialog)의 mutate onError에 맡긴다(createChatRoom/toggleBookmark 등 chat
+ * 호출부(ChatEmployeeListPanel)의 mutate onError에 맡긴다(createChatRoom/toggleBookmark 등 chat
  * 도메인 자체 컨벤션 — 훅은 에러를 그대로 던진다).
  */
 export function useInviteChatRoomMembersMutation(roomId: number) {

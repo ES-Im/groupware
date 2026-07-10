@@ -1,8 +1,9 @@
-import { useEffect, useLayoutEffect, useRef } from 'react'
+import { Fragment, useEffect, useLayoutEffect, useRef } from 'react'
 import type { UIEvent } from 'react'
 import dayjs from 'dayjs'
-import { ChevronLeft } from 'lucide-react'
+import { ChevronLeft, UserPlus } from 'lucide-react'
 import { toast } from 'sonner'
+import { useMeQuery } from '@/features/employee/api/useMeQuery'
 import { BlobAvatar } from '@/shared/components/BlobAvatar'
 import { isForbidden, isNotFound, normalizeApiError } from '@/shared/lib/apiError'
 import { Button } from '@/shared/ui/button'
@@ -47,6 +48,7 @@ const SCROLL_TOP_THRESHOLD = 24
  */
 export function ChatRoomDetailPanel({ roomId }: { roomId: number }) {
   const backToList = useChatOverlayStore((state) => state.backToList)
+  const startInviteFlow = useChatOverlayStore((state) => state.startInviteFlow)
 
   const detailQuery = useChatRoomDetailQuery(roomId)
   // 방 진입 시 방 토픽 SUBSCRIBE, 방 이탈/전환·연결 끊김 시 UNSUBSCRIBE(ROADMAP(CHAT) T2.3-a).
@@ -141,6 +143,16 @@ export function ChatRoomDetailPanel({ roomId }: { roomId: number }) {
             {room.isGroup ? `참여 ${room.members.length}명` : '1:1 대화'}
           </p>
         </div>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-sm"
+          className="shrink-0 text-muted-foreground hover:text-foreground"
+          aria-label="멤버 초대"
+          onClick={() => startInviteFlow(room.roomId)}
+        >
+          <UserPlus aria-hidden="true" />
+        </Button>
         <ChatRoomSettingsMenu roomId={room.roomId} />
       </header>
 
@@ -172,8 +184,14 @@ export function ChatRoomDetailPanel({ roomId }: { roomId: number }) {
           않는다. 이미 최신까지 읽은 상태에서도 방 진입 시 PATCH가 한 번 발생하지만(멱등),
           ROADMAP(CHAT) T2.5 요구사항이 허용하는 두 트리거 시점(방 진입 직후·새 메시지 도달
           시) 중 하나라 과도한 호출로 보지 않는다(과잉 설계 금지 — 굳이 이전 값과 비교해
-          스킵하는 최적화까지는 하지 않는다). */}
-      <ChatMessageArea roomId={room.roomId} />
+          스킵하는 최적화까지는 하지 않는다).
+
+          lastReadMessageId는 "안 읽은 메시지" 구분선 위치 계산에만 쓴다(별도 prop으로 전달) —
+          useUpdateReadPositionMutation(T2.5)의 onSuccess는 rooms 목록 쿼리만 invalidate하고
+          chatKeys.detail(roomId)는 건드리지 않으므로(그 훅 파일 상단 주석 참조), 방을 보는 동안
+          room.lastReadMessageId 값은 읽음 위치 갱신 자체로는 바뀌지 않는다 — 진입 시점 값을 그대로
+          구분선 기준점으로 써도 방문 중 사라지지 않는다. */}
+      <ChatMessageArea roomId={room.roomId} lastReadMessageId={room.lastReadMessageId} />
       <ChatMessageInput roomId={room.roomId} />
     </div>
   )
@@ -190,9 +208,26 @@ export function ChatRoomDetailPanel({ roomId }: { roomId: number }) {
  * 읽음 위치 갱신(F911, ROADMAP(CHAT) T2.5)도 여기서 트리거한다: 아래에서 계산하는 `messages`가
  * "방 진입 시 초기 로드 결과"와 "이후 실시간 수신으로 늘어난 결과"를 모두 반영하는 단일 소스라,
  * `useReadPositionSync`에 그대로 넘기면 두 트리거 시점을 별도 구현 없이 함께 커버한다.
+ *
+ * "안 읽은 메시지" 구분선: `lastReadMessageId`(방 진입 시점 값, ChatRoomDetailPanel 참조)보다
+ * id가 큰 첫 확정 메시지(id>0 — 낙관 발신 중인 음수 id는 항상 본인 메시지라 대상에서 제외) 앞에
+ * 렌더한다. `lastReadMessageId`가 null(아직 아무것도 읽은 적 없는 신규 참여 등)이면 "읽은 지점"
+ * 자체가 없어 구분선을 임의로 어디에 둘지 추측할 근거가 없으므로 렌더하지 않는다.
+ *
+ * 구분선의 위치·개수는 방 진입 시점(최초 메시지 로드 완료 시점)에 한 번만 계산해 고정한다(요청
+ * 사항) — 방에 머무는 동안 실시간으로 도착하는 새 메시지는 이 구분선 계산에 반영되지 않는다.
+ * unreadSnapshotRef 참조.
  */
-function ChatMessageArea({ roomId }: { roomId: number }) {
+function ChatMessageArea({
+  roomId,
+  lastReadMessageId,
+}: {
+  roomId: number
+  lastReadMessageId: number | null
+}) {
   const messagesQuery = useChatMessagesQuery(roomId)
+  const meQuery = useMeQuery()
+  const myEmpId = meQuery.data?.empBasicInfo.empId
   const containerRef = useRef<HTMLDivElement>(null)
   // 과거 페이지 fetch 직전의 scrollHeight를 기억해둔다(용도 1: prepend 보정, 용도 2: 아래
   // 스크롤 effect가 "과거 페이지 prepend로 인한 messages 변화"와 "최신 페이지 끝 append로 인한
@@ -221,6 +256,35 @@ function ChatMessageArea({ roomId }: { roomId: number }) {
   // 방 진입(초기 로드)·실시간 수신(T2.3-b) 모두로 인한 messages 변화를 감지해 읽음 위치를
   // 갱신한다(ROADMAP(CHAT) T2.5, F911). 자세한 트리거 통합 근거는 useReadPositionSync 참조.
   useReadPositionSync(roomId, messages)
+
+  // "안 읽은 메시지" 구분선은 방 입장 시점(최초 메시지 로드 완료 시점)에 한 번만 계산해 고정한다
+  // (요청 사항: 방에 머무는 동안은 갱신하지 않는다) — 실시간으로 도착하는 새 메시지는 이미
+  // "보고 있는" 상태라 안 읽은 메시지로 취급하지 않는다. clientMessageId로 위치를 저장하는
+  // 이유: 과거 페이지를 prepend해도(무한스크롤) 배열 인덱스가 밀리므로 인덱스 자체는 저장할 수
+  // 없다. roomId가 바뀌면(방 전환) 다시 계산한다.
+  const unreadSnapshotRef = useRef<{
+    roomId: number
+    firstUnreadClientMessageId: string | null
+    count: number
+  } | null>(null)
+  if (!messagesQuery.isLoading && unreadSnapshotRef.current?.roomId !== roomId) {
+    const unreadAtEntry =
+      lastReadMessageId == null
+        ? []
+        : messages.filter((message) => message.id > 0 && message.id > lastReadMessageId)
+    unreadSnapshotRef.current = {
+      roomId,
+      firstUnreadClientMessageId: unreadAtEntry[0]?.clientMessageId ?? null,
+      count: unreadAtEntry.length,
+    }
+  }
+  const unreadSnapshot =
+    unreadSnapshotRef.current?.roomId === roomId ? unreadSnapshotRef.current : null
+  const firstUnreadIndex =
+    unreadSnapshot?.firstUnreadClientMessageId == null
+      ? -1
+      : messages.findIndex((message) => message.clientMessageId === unreadSnapshot.firstUnreadClientMessageId)
+  const unreadCount = unreadSnapshot?.count ?? 0
 
   function handleScroll(event: UIEvent<HTMLDivElement>) {
     const el = event.currentTarget
@@ -288,11 +352,22 @@ function ChatMessageArea({ roomId }: { roomId: number }) {
         <p className="text-sm text-muted-foreground">메시지가 없습니다.</p>
       ) : (
         <ul className="flex flex-col gap-3">
-          {messages.map((message) => (
+          {messages.map((message, index) => (
             // key는 message.id가 아니라 clientMessageId를 쓴다 — T2.4 낙관 메시지는 서버 확정
             // 전까지 임시 음수 id(useSendChatMessage 참조)를 쓰는 반면 clientMessageId는 생성
             // 시점부터 항상 고유해 낙관→확정 전환 중에도 React key가 안정적으로 유지된다.
-            <ChatMessageRow key={message.clientMessageId} message={message} />
+            <Fragment key={message.clientMessageId}>
+              {index === firstUnreadIndex && (
+                <li aria-hidden="true" className="flex items-center gap-2 py-1">
+                  <span className="h-px flex-1 bg-border" />
+                  <span className="shrink-0 text-xs text-muted-foreground">
+                    안 읽은 메시지 {unreadCount}개
+                  </span>
+                  <span className="h-px flex-1 bg-border" />
+                </li>
+              )}
+              <ChatMessageRow message={message} isMine={message.senderId === myEmpId} />
+            </Fragment>
           ))}
         </ul>
       )}
@@ -300,28 +375,34 @@ function ChatMessageArea({ roomId }: { roomId: number }) {
   )
 }
 
-function ChatMessageRow({ message }: { message: ChatMessage }) {
+function ChatMessageRow({ message, isMine }: { message: ChatMessage; isMine: boolean }) {
   // 서버 확정 메시지의 id는 항상 양의 정수(DB PK)다 — 음수면 아직 브로드캐스트 echo로 확정되지
   // 않은 T2.4 낙관 메시지라는 뜻이라(useSendChatMessage 참조), 옅게 표시해 "전송 중" 상태를
   // 최소한으로 구분한다(스타일 투자 최소화 — 이후 adapt-ui에서 교체될 수 있는 임시 표기).
   const isPending = message.id < 0
   return (
-    <li className={`flex items-start gap-2.5 ${isPending ? 'opacity-60' : ''}`}>
+    <li
+      className={`flex items-start gap-2.5 ${isMine ? 'flex-row-reverse' : ''} ${isPending ? 'opacity-60' : ''}`}
+    >
       <BlobAvatar
         empId={message.senderId}
         fileId={parseEmpFilePreviewFileId(message.profileImageUrl)}
         fallbackText={message.senderName}
       />
-      <div className="flex min-w-0 flex-col gap-1">
-        <div className="flex items-baseline gap-2">
+      <div className={`flex min-w-0 flex-col gap-1 ${isMine ? 'items-end' : ''}`}>
+        <div className={`flex items-baseline gap-2 ${isMine ? 'flex-row-reverse' : ''}`}>
           <span className="text-xs font-medium">{message.senderName}</span>
           <span className="text-[10px] text-muted-foreground">
             {isPending ? '전송 중...' : dayjs(message.sentAt).format('MM-DD HH:mm')}
           </span>
         </div>
-        {/* 수신/발신을 발신자 empId로 구분해 좌우 정렬하려면 useMeQuery 같은 데이터 계층이 필요해
-            이 시각 계층 범위 밖이다 — 모든 메시지를 아바타+이름+muted 버블의 좌측 정렬로 통일한다. */}
-        <p className="w-fit max-w-full whitespace-pre-wrap rounded-2xl rounded-tl-sm bg-muted px-3 py-2 text-sm">
+        <p
+          className={`w-fit max-w-full whitespace-pre-wrap rounded-2xl px-3 py-2 text-sm ${
+            isMine
+              ? 'rounded-tr-sm bg-primary text-primary-foreground'
+              : 'rounded-tl-sm bg-muted'
+          }`}
+        >
           {message.content}
         </p>
       </div>

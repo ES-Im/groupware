@@ -11,7 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/shared/ui/dialog'
-import { EmployeePicker, type EmployeePickerEmployee } from '@/features/approval/components/EmployeePicker'
+import { EmployeePicker, type EmployeePickerEmployee } from '@/shared/components/EmployeePicker'
 import { useCreateChatRoomMutation } from '../api/useCreateChatRoomMutation'
 import { useChatOverlayStore } from '../lib/chatOverlayStore'
 

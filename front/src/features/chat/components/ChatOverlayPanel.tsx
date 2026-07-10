@@ -3,8 +3,8 @@ import { MessageSquare, X } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
 import { connectChatStomp, disconnectChatStomp } from '../lib/stompClient'
 import { useChatOverlayStore } from '../lib/chatOverlayStore'
+import { ChatHomeScreen } from './ChatHomeScreen'
 import { ChatRoomDetailPanel } from './ChatRoomDetailPanel'
-import { ChatRoomListPanel } from './ChatRoomListPanel'
 
 /**
  * 채팅 오버레이 진입점(팝업 → 인앱 오버레이 전환). `LayoutShell` 최상위의 고정 자식으로 항상
@@ -29,6 +29,7 @@ export function ChatOverlayPanel() {
 }
 
 function ChatOverlayPanelContent() {
+  const screen = useChatOverlayStore((state) => state.screen)
   const selectedRoomId = useChatOverlayStore((state) => state.selectedRoomId)
   const close = useChatOverlayStore((state) => state.close)
 
@@ -58,8 +59,10 @@ function ChatOverlayPanelContent() {
         </Button>
       </div>
       <div className="flex min-h-0 flex-1 flex-col">
-        {selectedRoomId === null ? (
-          <ChatRoomListPanel />
+        {/* screen==='room'인데 selectedRoomId가 없는 상태는 정상 흐름에서 발생하지 않는다
+            (모든 room 진입 경로가 selectRoom을 거쳐 둘을 함께 세팅) — 방어적으로 홈 화면 폴백한다. */}
+        {screen === 'home' || selectedRoomId === null ? (
+          <ChatHomeScreen />
         ) : (
           <ChatRoomDetailPanel roomId={selectedRoomId} />
         )}

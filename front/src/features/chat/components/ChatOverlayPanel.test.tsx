@@ -22,10 +22,11 @@ import { ChatOverlayPanel } from './ChatOverlayPanel'
  * "마운트/언마운트가 정확히 connect/disconnect 호출로 이어지는가"라는 이 컴포넌트 자신의
  * 배선만 검증한다 — lib/stompClient 모듈 자체를 vi.mock으로 대체한다.
  *
- * isOpen=true일 때 실제로 렌더되는 ChatOverlayPanelContent는 selectedRoomId===null이면
- * ChatRoomListPanel(useChatRoomsQuery + 항상 마운트되는 CreateChatRoomDialog의 useMeQuery)을
- * 그린다 — 이 컴포넌트 자신의 배선(mount/unmount → connect/disconnect)만 보려는 목적이라, 그
- * 하위 조회는 최소 MSW 목으로만 흘려보낸다(QueryClient도 매 렌더 함께 주입).
+ * isOpen=true일 때 실제로 렌더되는 ChatOverlayPanelContent는 screen==='home'(또는
+ * selectedRoomId===null 방어 폴백)이면 ChatHomeScreen(기본 활성 탭인 채팅창목록 →
+ * ChatRoomListPanel + useMeQuery)을, screen==='room'이면 ChatRoomDetailPanel을 그린다 — 이
+ * 컴포넌트 자신의 배선(mount/unmount → connect/disconnect)만 보려는 목적이라, 그 하위 조회는
+ * 최소 MSW 목으로만 흘려보낸다(QueryClient도 매 렌더 함께 주입).
  */
 
 vi.mock('../lib/stompClient', () => ({
@@ -161,7 +162,7 @@ function NavShell() {
 
 describe('ChatOverlayPanel 배경 라우팅 독립성', () => {
   it('오버레이가 열린 상태에서 배경 라우트가 바뀌어도 오버레이 상태가 유지되고 재연결이 발생하지 않는다', async () => {
-    useChatOverlayStore.setState({ isOpen: true, selectedRoomId: 42 })
+    useChatOverlayStore.setState({ isOpen: true, selectedRoomId: 42, screen: 'room' })
     const { unmount } = renderWithProviders(
       <MemoryRouter initialEntries={['/a']}>
         <NavShell />
