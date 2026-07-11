@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { ActiveFile } from '@/features/employee/model/me'
-import { getActiveProfilePicture } from './activeFiles'
+import { getActiveProfilePicture, getActiveSignature } from './activeFiles'
 
 /**
  * getActiveProfilePicture(ROADMAP T5.1) 순수 함수 검증.
@@ -45,5 +45,32 @@ describe('getActiveProfilePicture', () => {
       makeFile({ file: { fileId: 99, originalName: 'p.png', extension: 'png', fileSize: 1 } }),
     ]
     expect(getActiveProfilePicture(files)).toBe(99)
+  })
+})
+
+/** getActiveSignature: getActiveProfilePicture와 동형 로직, type만 SIGNATURE로 대상 전환. */
+describe('getActiveSignature', () => {
+  it('활성 SIGNATURE의 fileId를 반환한다', () => {
+    const files = [
+      makeFile({
+        type: 'SIGNATURE',
+        file: { fileId: 7, originalName: 's.png', extension: 'png', fileSize: 1 },
+      }),
+    ]
+    expect(getActiveSignature(files)).toBe(7)
+  })
+
+  it('SIGNATURE가 비활성(isActive=false)이면 undefined를 반환한다', () => {
+    const files = [makeFile({ type: 'SIGNATURE', isActive: false })]
+    expect(getActiveSignature(files)).toBeUndefined()
+  })
+
+  it('SIGNATURE가 없으면(PROFILE_PICTURE만 존재) undefined를 반환한다', () => {
+    const files = [makeFile({ type: 'PROFILE_PICTURE' })]
+    expect(getActiveSignature(files)).toBeUndefined()
+  })
+
+  it('빈 배열이면 undefined를 반환한다', () => {
+    expect(getActiveSignature([])).toBeUndefined()
   })
 })

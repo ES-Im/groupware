@@ -22,9 +22,16 @@ export type AttendanceStatus =
  * path 파라미터로 그대로 재사용된다.
  * draftId는 연동 기안서(전자결재 도메인) 식별 번호로 표시 전용 참조이며, 연동 기안서가 없으면 null이다.
  */
+/**
+ * attendanceStatus는 항상 채워져 있지 않다 — 도메인모델.md §근태 생성 규칙: 직원 출근 기록으로
+ * 근태가 생성될 때 필수값은 `emp`/`attendanceDate`/`startAt`뿐이고 attendanceStatus는 없다
+ * (마감/관리자 등록 때만 필수). 즉 "출근만 하고 아직 퇴근·마감 전"인 진행 중 근태는 실제로
+ * attendanceStatus=null로 내려온다(운영 데이터 실측 확인) — null 가드 없이 배지 맵에 바로
+ * 인덱싱하면 크래시한다(getAttendanceStatusBadge가 이 케이스를 처리).
+ */
 export interface AttendanceItem {
   attendanceId: number
-  attendanceStatus: AttendanceStatus
+  attendanceStatus: AttendanceStatus | null
   attendanceDate: string
   startAt: string | null
   endAt: string | null

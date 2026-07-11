@@ -28,7 +28,14 @@ export const attendanceStatusBadgeMap: Record<AttendanceStatus, AttendanceStatus
   ABSENT: { label: '결근', variant: 'destructive' },
 }
 
-/** attendanceStatusBadgeMap 조회 헬퍼(존재하지 않는 상태값 방어는 타입 시스템이 보장). */
-export function getAttendanceStatusBadge(status: AttendanceStatus): AttendanceStatusBadgeInfo {
+/**
+ * attendanceStatusBadgeMap 조회 헬퍼. status가 null이면 "출근만 하고 아직 퇴근·마감 전"인
+ * 진행 중 근태다(AttendanceItem.attendanceStatus JSDoc 참조, 도메인모델.md §근태 생성 규칙 실측) —
+ * 이 경우 outline 톤의 "진행 중" 배지로 대체한다.
+ */
+export function getAttendanceStatusBadge(status: AttendanceStatus | null): AttendanceStatusBadgeInfo {
+  if (status === null) {
+    return { label: '진행 중', variant: 'outline' }
+  }
   return attendanceStatusBadgeMap[status]
 }

@@ -1,23 +1,40 @@
 import { useEffect } from 'react'
 import { Link } from 'react-router'
 import { toast } from 'sonner'
+import { getFileTypeLabel } from '@/shared/lib/activeFiles'
 import { normalizeApiError } from '@/shared/lib/apiError'
+import { Badge } from '@/shared/ui/badge'
 import { Button } from '@/shared/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
 import { useMeQuery } from '../api/useMeQuery'
-import { EmployeeInfoView } from '../components/EmployeeInfoView'
+import { EmployeeProfileTabs } from '../components/EmployeeProfileTabs'
+import { EmployeeSummaryCard } from '../components/EmployeeSummaryCard'
+import { PersonalRecordsWidget } from '../components/PersonalRecordsWidget'
+import { SignatureCard } from '../components/SignatureCard'
+
+function formatFileSizeMb(bytes: number): string {
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
 
 /**
- * 내 정보 조회 페이지(본인 상세, F003 RETRIEVE_ME_INFO, ROADMAP T2.3).
- * useMeQuery(T1.3, 이미 완성)와 EmployeeInfoView(T2.2에서 뽑아낸 공유 표시 컴포넌트)를 그대로
- * 재사용하는 얇은 컨테이너다 — 신규 API/훅을 만들지 않는다(/api/auth/me 미존재, RETRIEVE_ME_INFO만 사용).
+ * 내 정보 조회 페이지(본인 상세, F003 RETRIEVE_ME_INFO, adapt-ui 리디자인).
  *
- * 조회 실패 시 에러 처리는 EmployeeDetailPage(T2.2)와 동일한 컨벤션을 따른다: 렌더 중 side
- * effect를 피하기 위해 useEffect에서 1회성 토스트로 알린다. 본인 조회이므로 not-found/forbidden
- * 분기는 의미가 없어(항상 본인 계정) 그 외 실패와 동일하게 일반 오류로 취급한다.
+ * Ubold 레퍼런스(localhost:5174/apps/groupware/my-info)의 카드 배치를 이식한다 — 좌측에
+ * 요약 카드(EmployeeSummaryCard)·전자서명 카드(SignatureCard)·활성 파일 카드(이 페이지 인라인)를
+ * 쌓고, 우측에 사원 프로필 탭(EmployeeProfileTabs, 기본정보/부서이력/파일관리)과 개인 기록 조회
+ * 위젯(PersonalRecordsWidget)을 배치한다. 공통 레이아웃(헤더/사이드바/푸터)은 우리 프로젝트
+ * 것을 그대로 쓰고, 레퍼런스는 콘텐츠 프레임(카드 구성)만 참고했다.
  *
- * "수정" 버튼은 `/me/edit`로 향하는 Link만 노출한다 — 해당 라우트/페이지는 M3(T3.1) 몫이라
- * 이번 태스크에서 구현하지 않는다(클릭 시 아직 매칭 라우트가 없어도 정상). 커버 배너 리디자인 후에는
- * EmployeeInfoView의 `actions` 슬롯(배너 우측 상단)에 이 버튼을 전달한다.
+ * 레퍼런스에는 백엔드 계약에 없는 목업 요소가 섞여 있어 제거했다: "상태 메모"(RETRIEVE_ME_INFO
+ * 응답에 없는 필드), "보관 파일"(사원 FileType은 PROFILE_PICTURE/SIGNATURE 2종뿐), 파일
+ * 업로드 일시(activeFiles/filesInfos 응답에 날짜 필드 없음). 반대로 전자서명 노출·업로드·
+ * 활성화·삭제, 개인 기록 조회(근태/연차/출장 요약)는 계약이 존재해 새로 구현했다(사용자 확인 완료).
+ *
+ * empId는 RETRIEVE_ME_INFO.empBasicInfo.empId(Number, PK)로 항상 내려오므로(스니펫 실측),
+ * 아바타·서명 미리보기(EMP_FILE_PREVIEW)와 파일 삭제(경로 파라미터)에 그대로 사용한다.
+ *
+ * activeFiles는 이 페이지에서 SIGNATURE/PROFILE_PICTURE 구분 없이 전체를 보여준다(레퍼런스와
+ * 동일 — 기존에는 SIGNATURE를 의도적으로 숨겼으나 이번 adapt-ui에서 노출하기로 확정했다).
  */
 export function MyInfoPage() {
   const query = useMeQuery()
@@ -50,29 +67,60 @@ export function MyInfoPage() {
     return null
   }
 
+  const { empBasicInfo, activeFiles } = query.data
+  const empId = empBasicInfo.empId
+
   return (
     <div className="w-full p-4 sm:p-6 lg:p-8">
-      {/*
-        empId를 전달하지 않는다 — RETRIEVE_ME_INFO 응답에 numeric empId가 없다(§리스크7 실측 확정,
-        empBasicInfo.empNo는 문자열). EmployeeInfoView의 BlobAvatar는 empId 미확정 시 이니셜
-        폴백으로 자연스럽게 전환된다.
-        //todo: 본인 preview용 numeric empId 소스 확정(서버가 me 전용 preview 기능 제공 or me
-        응답에 empId 추가) 필요
+      <div className="grid gap-6 lg:grid-cols-[320px_1fr]">
+        {/* 좌측 컬럼: 요약 카드 + 전자서명 카드 + 활성 파일 카드(전체 타입, 읽기 전용) */}
+        <div className="space-y-6">
+          <EmployeeSummaryCard data={query.data} empId={empId} viewerIsSelf />
+          <SignatureCard empId={empId} activeFiles={activeFiles} />
+          <Card className="h-fit">
+            <CardHeader className="border-b">
+              <CardTitle>현재 활성 파일</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {activeFiles.length === 0 ? (
+                <p className="text-sm text-muted-foreground">활성화된 파일이 없습니다.</p>
+              ) : (
+                <ul className="space-y-2">
+                  {activeFiles.map((file) => (
+                    <li key={file.file.fileId} className="rounded-lg border border-border p-3">
+                      {/* 레퍼런스처럼 제목은 좌측, "활성" 배지는 우측 상단에 정렬(top-align). */}
+                      <div className="flex items-start justify-between gap-2">
+                        <p className="min-w-0 truncate text-sm font-medium text-foreground">
+                          {getFileTypeLabel(file.type)}
+                        </p>
+                        <Badge className="shrink-0">활성</Badge>
+                      </div>
+                      <p className="mt-1 truncate text-xs text-muted-foreground">
+                        {file.file.originalName} · {formatFileSizeMb(file.file.fileSize)}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </CardContent>
+          </Card>
+        </div>
 
-        기존에는 별도 제목 바에 "수정" 버튼을 배치했으나, EmployeeInfoView의 좌측 요약 카드가
-        이름/사번을 직접 표시해 <h1> 제목 바가 불필요해졌다. "수정" 버튼은 우측 "사원 프로필"
-        카드 상단 액션 슬롯(actions)으로 이전하고, viewerIsSelf(본인 조회)로 아이디/파일 탭/
-        활성 파일 섹션을 노출한다.
-      */}
-      <EmployeeInfoView
-        data={query.data}
-        viewerIsSelf
-        actions={
-          <Button asChild variant="outline" size="sm">
-            <Link to="/me/edit">수정</Link>
-          </Button>
-        }
-      />
+        {/* 우측 컬럼: 사원 프로필 탭(기본정보/부서이력/파일관리) + 개인 기록 조회 위젯 */}
+        <div className="space-y-6">
+          <EmployeeProfileTabs
+            data={query.data}
+            empId={empId}
+            viewerIsSelf
+            actions={
+              <Button asChild variant="outline" size="sm">
+                <Link to="/me/edit">수정</Link>
+              </Button>
+            }
+          />
+          <PersonalRecordsWidget />
+        </div>
+      </div>
     </div>
   )
 }

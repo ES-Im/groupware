@@ -26,4 +26,8 @@ describe('attendanceStatusBadgeMap / getAttendanceStatusBadge', () => {
   it('attendanceStatusBadgeMap은 정확히 6개 키만 갖는다', () => {
     expect(Object.keys(attendanceStatusBadgeMap)).toHaveLength(6)
   })
+
+  it('status가 null이면(출근만 하고 아직 퇴근·마감 전) "진행 중"/outline 배지를 반환한다', () => {
+    expect(getAttendanceStatusBadge(null)).toEqual({ label: '진행 중', variant: 'outline' })
+  })
 })
