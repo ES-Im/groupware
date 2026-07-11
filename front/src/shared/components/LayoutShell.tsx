@@ -7,6 +7,7 @@ import { useAuthStore } from '@/features/auth/store/authStore'
 import { ChatOverlayPanel } from '@/features/chat/components/ChatOverlayPanel'
 import { useFilesInfosQuery } from '@/features/employee/api/useFilesInfosQuery'
 import { useMeQuery } from '@/features/employee/api/useMeQuery'
+import { useMailboxCountsQuery } from '@/features/message/api/useMailboxCountsQuery'
 import { queryClient } from '@/shared/api/queryClient'
 import { Footer } from '@/shared/components/Footer'
 import { Header } from '@/shared/components/Header'
@@ -45,6 +46,7 @@ export function LayoutShell() {
   const location = useLocation()
   const { data: me } = useMeQuery()
   const { data: pendingApprovalDraftsCount } = useMyPendingApprovalDraftsCountQuery()
+  const { data: mailboxCounts } = useMailboxCountsQuery()
   const clearAuth = useAuthStore((state) => state.clear)
   const roles = useAuthStore((state) => state.roles)
   const logoutMutation = useMutation({ mutationFn: logout })
@@ -91,9 +93,11 @@ export function LayoutShell() {
   /**
    * 사이드바 뱃지 count 맵(F711, T7.3): sidebarMenuItems의 badgeKey('approvalPending')와
    * 짝을 맞춘 식별자로 키를 구성한다. 도메인이 늘어나면 이 맵에 항목만 추가하면 된다.
+   * messageUnread(F1510, ROADMAP(MESSAGE) T1.4)가 그 소비 사례 — 쪽지함 안읽음 건수를 주입한다.
    */
   const badgeCounts: Record<string, number | undefined> = {
     approvalPending: pendingApprovalDraftsCount,
+    messageUnread: mailboxCounts?.unreadReceivedCount,
   }
 
   /**

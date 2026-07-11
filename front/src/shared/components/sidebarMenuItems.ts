@@ -1,6 +1,5 @@
 import {
   CalendarDays,
-  ClipboardList,
   Clock,
   Ellipsis,
   FileSignature,
@@ -54,6 +53,10 @@ export const sidebarMenuItems: SidebarMenuItem[] = [
   { label: '조직도', to: '/departments', minRole: 'EMPLOYEE', icon: Network },
   { label: '부서 멤버 목록', to: '/department-members', minRole: 'EMPLOYEE', icon: Users },
   { label: '내 정보', to: '/me', minRole: 'EMPLOYEE', icon: UserRound },
+  // 쪽지함: ROADMAP(MESSAGE) T1.3에서 placeholder 없이 최상위 항목으로 신규 추가했다. badgeKey만
+  // 선언하고 실제 미확인 건수 조회·주입은 LayoutShell(T1.4)이 담당한다(전자결재 결재대기 배지와
+  // 동일 컨벤션 — 위 badgeKey 필드 주석 참고).
+  { label: '쪽지함', to: '/messages', minRole: 'EMPLOYEE', icon: Mail, badgeKey: 'messageUnread' },
 
   // Layer 2 — 업무 도메인 그룹. 하위 항목은 아직 프론트 미구현이라 전부 placeholder("준비중").
   // IT 관리 그룹과 채팅은 제외한다(IT는 백엔드 계약 없음, 채팅은 ROADMAP 완전 제외).
@@ -136,15 +139,10 @@ export const sidebarMenuItems: SidebarMenuItem[] = [
       { label: '회의 예약 관리', to: '/meetings/management', minRole: 'FACILITY' },
     ],
   },
-  {
-    label: '게시판/쪽지',
-    minRole: 'EMPLOYEE',
-    icon: Notebook,
-    children: [
-      { label: '게시판', to: '/boards', minRole: 'EMPLOYEE', icon: ClipboardList },
-      { label: '쪽지함', minRole: 'EMPLOYEE', icon: Mail, implemented: false },
-    ],
-  },
+  // 게시판: 원래 '게시판/쪽지' 그룹이었으나 쪽지함이 최상위로 승격되며 자식이 게시판 하나만
+  // 남아, 자식 1개짜리 그룹(불필요한 펼침/접힘 계층)을 최상위 단일 링크로 평탄화했다
+  // (ux-ui-stylist, 2026-07-11). 아이콘은 그룹이 쓰던 Notebook을 그대로 유지한다.
+  { label: '게시판', to: '/boards', minRole: 'EMPLOYEE', icon: Notebook },
   {
     // 휴가 관리 그룹: ROADMAP(LEAVE) M6(T6.1)에서 placeholder 2개를 실 라우트로 승격하고 관리자
     // 휴가 현황 항목을 신규 추가했다. '내 휴가 요약'은 잔여+이력을 함께 다루므로 라벨을 '내 휴가'로

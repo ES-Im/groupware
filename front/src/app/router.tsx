@@ -27,6 +27,7 @@ import { DepartmentDetailPage } from '@/features/department/pages/DepartmentDeta
 import { DepartmentMembersPage } from '@/features/department/pages/DepartmentMembersPage'
 import { DepartmentsPage } from '@/features/department/pages/DepartmentsPage'
 import { CompanyInfoPage } from '@/features/company/pages/CompanyInfoPage'
+import { MessageBoxPage } from '@/features/message/pages/MessageBoxPage'
 import { EmployeeDetailPage } from '@/features/employee/pages/EmployeeDetailPage'
 import { MyInfoPage } from '@/features/employee/pages/MyInfoPage'
 import { UpdateMePage } from '@/features/employee/pages/UpdateMePage'
@@ -135,6 +136,14 @@ import { LayoutShell } from '@/shared/components/LayoutShell'
  * (meeting-rooms/:meetingRoomId)은 각각 FACILITY/EMPLOYEE이지만, 근태 /attendance/dept·전자결재·휴가
  * 컨벤션과 동일하게 role 게이팅은 사이드바(minRole)에서만 처리하고 라우트 자체는 전부
  * ProtectedRoute(인증 가드)만 적용한다 — 최종 권한 판단은 서버(403 ROLE_003)에 위임한다.
+ * /messages·/messages/:box는 ROADMAP(MESSAGE) T1.3에서 MessageBoxPage 셸로 연결했다. /messages
+ * (세그먼트 없음)는 받은 쪽지함(received)으로 리다이렉트한다 — 받은 쪽지함이 사용자가 가장 먼저
+ * 확인해야 할 기본 진입 박스라 문서함 '/approval/box' → pending 리다이렉트와 동일 근거다.
+ * /messages/:box(received·sent·drafts·trash 4종)는 단일 동적 라우트이며, box 값 파싱·유효성
+ * 검사는 문서함 tab 컨벤션과 동일하게 MessageBoxPage 내부(T2.2)에서 처리하므로 라우트 자체는
+ * 게이팅하지 않는다. 상세/작성은 별도 라우트가 아니다 — 카드 내 뷰 전환으로 처리한다(채팅 오버레이와
+ * 동일 철학). 'messages'(1세그먼트)와 'messages/:box'(2세그먼트)는 세그먼트 깊이가 달라 랭킹 충돌이
+ * 없다. 전 항목 minRole EMPLOYEE라 별도 RoleGuard 없이 ProtectedRoute(인증 가드)만으로 충분하다.
  */
 export const router = createBrowserRouter([
   {
@@ -381,6 +390,19 @@ export const router = createBrowserRouter([
         // 판단은 서버(403 ROLE_003).
         path: 'meeting-rooms/management/:meetingRoomId',
         element: <MeetingRoomManagementDetailPage />,
+      },
+      {
+        // 쪽지함 인덱스: 세그먼트 없이 접근 시 기본 박스(받은 쪽지함)로 리다이렉트한다. 문서함
+        // '/approval/box' 인덱스 리다이렉트(위 참고)와 동일 컨벤션이다.
+        path: 'messages',
+        element: <Navigate to="/messages/received" replace />,
+      },
+      {
+        // 쪽지함 통합 페이지: 받은/보낸/임시저장/휴지통 4박스를 MessageBoxPage 하나로 통합한
+        // 단일 동적 라우트다(ROADMAP(MESSAGE) T1.3). box 값 파싱·유효성 검사는 문서함 tab 컨벤션과
+        // 동일하게 컴포넌트 내부(T2.2)에서 처리하므로 라우트는 게이팅하지 않는다.
+        path: 'messages/:box',
+        element: <MessageBoxPage />,
       },
     ],
   },

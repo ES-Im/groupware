@@ -101,10 +101,20 @@ public class Message extends AbstractEntity {
         validateSender(emp);
         validateDraft();
 
-        this.receivings.clear();
+        // clear() 후 동일 수신자를 재추가하면 Hibernate flush 순서(Insertions가 Collection removals보다
+        // 먼저 실행됨)상 기존 행이 지워지기 전에 동일 (message_id, receiver_id) INSERT가 시도돼
+        // 유니크 제약을 위반한다. 실제로 바뀐 수신자만 제거/추가하는 diff로 처리해
+        // 유지되는 수신자는 삭제·재삽입을 아예 겪지 않게 한다.
+        List<Emp> currentReceivers = this.receivings.stream()
+                .map(MessageReceiving::getEmp)
+                .toList();
 
-        for(Emp receiver : receivers) {
-            this.receivings.add(MessageReceiving.create(this, receiver));
+        this.receivings.removeIf(receiving -> !receivers.contains(receiving.getEmp()));
+
+        for (Emp receiver : receivers) {
+            if (!currentReceivers.contains(receiver)) {
+                this.receivings.add(MessageReceiving.create(this, receiver));
+            }
         }
     }
 
