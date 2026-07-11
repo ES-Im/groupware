@@ -23,7 +23,7 @@ interface EmpManagementSectionProps {
 }
 
 /**
- * 사원 상세(EmployeeDetailPage)의 관리 섹션(adapt-ui 신규).
+ * 사원 상세(EmployeeDetailPage)의 관리 섹션(adapt-ui 신규 → 2차 수정으로 컴팩트화).
  *
  * EMPS_FOR_MANAGEMENT 단건 조회(useEmpForManagementQuery)로 status/입사일/시스템 권한을
  * 읽기 전용으로 표시하고, "정보 수정" 버튼으로 역할에 맞는 다이얼로그(HrManagedInfoDialog
@@ -36,6 +36,10 @@ interface EmpManagementSectionProps {
  * (EmployeeDetailPage가 canManage일 때만 이 섹션 자체를 렌더하기로 확정) — 그래도 방어적으로
  * useEmpForManagementQuery의 enabled를 두 값의 OR로 게이팅해 잘못 렌더돼도 불필요한 403 요청을
  * 만들지 않는다.
+ *
+ * 2차 수정(사용자 스크린샷 지시): 좌측 사이드바 컬럼(320px)으로 배치가 좁아져 컴팩트화했다.
+ * "정보 수정" 버튼을 CardHeader 우측 상단으로 옮기고 크기/강조를 키워 가시성을 높였고(레퍼런스
+ * 화살표 지시), 근무상태/입사일자 정보는 sm:grid-cols-2 반응형 분할 없이 항상 1열로 쌓는다.
  */
 export function EmpManagementSection({
   empId,
@@ -51,10 +55,17 @@ export function EmpManagementSection({
   return (
     <Card className="h-fit">
       <CardHeader className="border-b">
-        <CardTitle className="flex items-center gap-1.5">
-          <ShieldCheck className="size-4" />
-          사원 관리
-        </CardTitle>
+        <div className="flex items-center justify-between gap-2">
+          <CardTitle className="flex items-center gap-1.5">
+            <ShieldCheck className="size-4" />
+            사원 관리
+          </CardTitle>
+          {record && (
+            <Button type="button" size="default" onClick={() => setDialogOpen(true)}>
+              정보 수정
+            </Button>
+          )}
+        </div>
       </CardHeader>
       <CardContent className="space-y-4">
         {query.isLoading ? (
@@ -63,7 +74,7 @@ export function EmpManagementSection({
           <p className="py-4 text-center text-sm text-muted-foreground">관리 정보를 불러오지 못했습니다.</p>
         ) : (
           <>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-3">
               <div className="rounded-lg border border-border p-3">
                 <p className="text-xs text-muted-foreground">근무 상태</p>
                 <p className="mt-1 text-sm font-medium text-foreground">
@@ -85,9 +96,6 @@ export function EmpManagementSection({
                 ))}
               </div>
             </div>
-            <Button type="button" variant="outline" size="sm" onClick={() => setDialogOpen(true)}>
-              정보 수정
-            </Button>
 
             {canManageAsHr ? (
               <HrManagedInfoDialog
