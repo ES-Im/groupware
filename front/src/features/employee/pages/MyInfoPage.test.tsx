@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { render, screen, waitFor, within } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { http, HttpResponse } from 'msw'
 import { MemoryRouter } from 'react-router'
 import { describe, expect, it, vi } from 'vitest'
@@ -8,11 +9,13 @@ import { server } from '@/test/mocks/server'
 import { MyInfoPage } from './MyInfoPage'
 
 /**
- * MyInfoPage(F003 RETRIEVE_ME_INFO, adapt-ui 리디자인) 조합 스모크 테스트.
+ * MyInfoPage(F003 RETRIEVE_ME_INFO, adapt-ui 리디자인 2차) 조합 스모크 테스트.
  *
- * 하위 컴포넌트(EmployeeSummaryCard/SignatureCard/EmployeeProfileTabs/PersonalRecordsWidget)의
- * 세부 분기는 각자의 .test.tsx가 이미 담당하므로, 이 페이지는 로딩/에러/성공 렌더와 페이지
- * 레벨 조합(현재 활성 파일 카드, 수정 버튼 링크)만 검증한다.
+ * 하위 컴포넌트(EmployeeSummaryCard/SignatureCard/EmployeeProfileTabs/PersonalRecordsWidget/
+ * UpdateMeDialog)의 세부 분기는 각자의 .test.tsx가 이미 담당하므로, 이 페이지는 로딩/에러/성공
+ * 렌더와 페이지 레벨 조합("수정" 버튼 → UpdateMeDialog 오픈, "현재 활성 파일" 카드 제거)만
+ * 검증한다. "수정" 버튼은 2차 수정으로 `/me/edit` 페이지 링크에서 다이얼로그 오픈 버튼으로
+ * 전환됐고, "현재 활성 파일" 카드는 완전히 제거됐다(파일관리 탭에서 이미 확인 가능).
  *
  * activeFiles에 PROFILE_PICTURE/SIGNATURE를 모두 활성으로 두면 EmployeeSummaryCard의
  * BlobAvatar·SignatureCard가 각각 EMP_FILE_PREVIEW(GET /api/employees/{empId}/files/{fileId}/preview)를
@@ -128,18 +131,50 @@ describe('MyInfoPage - 에러 상태', () => {
 })
 
 describe('MyInfoPage - 성공 렌더', () => {
-  it('사원 기본정보와 "수정" 버튼(→ /me/edit)이 렌더된다', async () => {
+  it('사원 기본정보가 렌더되고 "수정" 버튼 클릭 시 UpdateMeDialog(내 정보 수정)가 열린다', async () => {
     server.use(http.get(ME_URL, () => HttpResponse.json(makeMeResponse())))
     mockAttendanceWidgetDefaults()
+    const user = userEvent.setup()
 
     renderPage()
 
     expect(await screen.findAllByText('홍길동')).not.toHaveLength(0)
-    const editLink = screen.getByRole('link', { name: '수정' })
-    expect(editLink).toHaveAttribute('href', '/me/edit')
+    // 2차 수정: "수정"은 이제 /me/edit 링크가 아니라 UpdateMeDialog를 여는 버튼이다.
+    expect(screen.queryByRole('link', { name: '수정' })).not.toBeInTheDocument()
+    const editButton = screen.getByRole('button', { name: '수정' })
+
+    await user.click(editButton)
+
+    expect(await screen.findByRole('heading', { name: '내 정보 수정' })).toBeInTheDocument()
+    expect(screen.getByLabelText('내선번호')).toHaveValue('000-1234')
+    expect(screen.getByLabelText('새 비밀번호')).toBeInTheDocument()
   })
 
-  it('"현재 활성 파일" 카드가 PROFILE_PICTURE·SIGNATURE 활성 파일 전체를 파일명·크기만으로 보여준다', async () => {
+  it('UpdateMeDialog 제출 성공 시 성공 토스트가 뜨고 다이얼로그가 닫힌다', async () => {
+    server.use(
+      http.get(ME_URL, () => HttpResponse.json(makeMeResponse())),
+      http.patch(`${BASE_URL}/api/employees/me`, () => new HttpResponse(null, { status: 204 })),
+    )
+    mockAttendanceWidgetDefaults()
+    const user = userEvent.setup()
+
+    renderPage()
+
+    await user.click(await screen.findByRole('button', { name: '수정' }))
+    expect(await screen.findByRole('heading', { name: '내 정보 수정' })).toBeInTheDocument()
+
+    await user.clear(screen.getByLabelText('새 비밀번호'))
+    await user.type(screen.getByLabelText('새 비밀번호'), 'newPass1!')
+    await user.click(screen.getByRole('button', { name: '저장' }))
+
+    const { toast } = await import('sonner')
+    await waitFor(() => expect(toast.success).toHaveBeenCalledWith('내 정보를 수정했습니다'))
+    await waitFor(() =>
+      expect(screen.queryByRole('heading', { name: '내 정보 수정' })).not.toBeInTheDocument(),
+    )
+  })
+
+  it('활성 파일이 있어도 "현재 활성 파일" 카드는 더 이상 렌더되지 않는다(2차 수정으로 제거)', async () => {
     const activeFiles = [
       { file: { fileId: 11, originalName: 'profile.png', extension: 'png', fileSize: 2 * 1024 * 1024 }, type: 'PROFILE_PICTURE', isActive: true },
       { file: { fileId: 12, originalName: 'sign.png', extension: 'png', fileSize: 1024 * 512 }, type: 'SIGNATURE', isActive: true },
@@ -151,24 +186,8 @@ describe('MyInfoPage - 성공 렌더', () => {
 
     renderPage()
 
-    const heading = await screen.findByText('현재 활성 파일')
-    const card = heading.closest('div[data-slot="card"]') as HTMLElement
-    expect(card).toBeTruthy()
-
-    expect(within(card).getByText('프로필 사진')).toBeInTheDocument()
-    expect(within(card).getByText('전자서명')).toBeInTheDocument()
-    expect(within(card).getByText('profile.png · 2.0 MB')).toBeInTheDocument()
-    expect(within(card).getByText('sign.png · 0.5 MB')).toBeInTheDocument()
-    // 활성 파일 카드는 날짜 필드를 표시하지 않는다(activeFiles/filesInfos 응답에 날짜 필드가 없음).
-    expect(within(card).queryByText(/\d{4}-\d{2}-\d{2}/)).not.toBeInTheDocument()
-  })
-
-  it('활성화된 파일이 없으면 "활성화된 파일이 없습니다."가 노출된다', async () => {
-    server.use(http.get(ME_URL, () => HttpResponse.json(makeMeResponse([]))))
-    mockAttendanceWidgetDefaults()
-
-    renderPage()
-
-    expect(await screen.findByText('활성화된 파일이 없습니다.')).toBeInTheDocument()
+    expect(await screen.findAllByText('홍길동')).not.toHaveLength(0)
+    expect(screen.queryByText('현재 활성 파일')).not.toBeInTheDocument()
+    expect(screen.queryByText('활성화된 파일이 없습니다.')).not.toBeInTheDocument()
   })
 })
