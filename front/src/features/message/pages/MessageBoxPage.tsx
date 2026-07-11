@@ -1,15 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Navigate, useNavigate, useParams } from 'react-router'
-import {
-  ArrowLeft,
-  FilePen,
-  Inbox,
-  MailPlus,
-  Send,
-  Trash2,
-  type LucideIcon,
-} from 'lucide-react'
+import { ArrowLeft, MailPlus } from 'lucide-react'
 import { toast } from 'sonner'
+import { useMeQuery } from '@/features/employee/api/useMeQuery'
 import { handleApiError } from '@/shared/lib/apiError'
 import { Badge } from '@/shared/ui/badge'
 import { Button } from '@/shared/ui/button'
@@ -22,10 +15,12 @@ import { useMessageDetailQuery } from '../api/useMessageDetailQuery'
 import { useMessageRestoreMutation } from '../api/useMessageRestoreMutation'
 import { useMessageTrashMutation } from '../api/useMessageTrashMutation'
 import { useSendDraftMutation } from '../api/useSendDraftMutation'
+import { MailboxNav } from '../components/MailboxNav'
 import { MessageBoxTable } from '../components/MessageBoxTable'
 import { MessageComposeView, type MessageComposeInitialValues } from '../components/MessageComposeView'
 import { MessageDetailView } from '../components/MessageDetailView'
-import type { MailBox, MessageCountResponse } from '../model/messageTypes'
+import { BOX_ORDER, BOX_TABS, isMailBox } from '../lib/mailboxConfig'
+import type { MailBox } from '../model/messageTypes'
 
 /**
  * 카드 내 뷰 전환 상태. 상세/작성은 별도 라우트가 아니라 이 카드 안에서 전환한다
@@ -33,61 +28,6 @@ import type { MailBox, MessageCountResponse } from '../model/messageTypes'
  * 충분해 zustand는 도입하지 않는다(PRD §기술스택 "필요 시" 조건 미해당).
  */
 type MessageBoxView = 'list' | 'detail' | 'compose'
-
-interface MailboxTabConfig {
-  /** URL 세그먼트 겸 탭 value. */
-  key: MailBox
-  /** 탭 트리거 라벨(받은 쪽지함 등). */
-  navLabel: string
-  /** 탭 아이콘(모노크롬 톤). */
-  icon: LucideIcon
-  /** 탭 건수 배지 selector(F1510 MessageCountResponse). */
-  getBadge: (counts: MessageCountResponse) => number
-  /** 강조 배지 selector — 받은함 안읽음(unreadReceivedCount)만 사용한다. */
-  getEmphasizedBadge?: (counts: MessageCountResponse) => number
-}
-
-/**
- * 메일박스 탭 4종 정의(F1501~F1504·F1510). box 값(received/sent/drafts/trash)은 URL 세그먼트이자
- * Tabs value다(문서함 BOX_TABS Record 컨벤션과 동형). 건수 배지는 T1.4 useMailboxCountsQuery를
- * 단일 소스로 소비한다 — 받은함은 전체 건수(receivedCount)에 더해 안읽음(unreadReceivedCount)을
- * 별도 강조 배지로 표기한다.
- */
-const BOX_TABS: Record<MailBox, MailboxTabConfig> = {
-  received: {
-    key: 'received',
-    navLabel: '받은 쪽지함',
-    icon: Inbox,
-    getBadge: (c) => c.receivedCount,
-    getEmphasizedBadge: (c) => c.unreadReceivedCount,
-  },
-  sent: {
-    key: 'sent',
-    navLabel: '보낸 쪽지함',
-    icon: Send,
-    getBadge: (c) => c.sentCount,
-  },
-  drafts: {
-    key: 'drafts',
-    navLabel: '임시보관함',
-    icon: FilePen,
-    getBadge: (c) => c.draftCount,
-  },
-  trash: {
-    key: 'trash',
-    navLabel: '휴지통',
-    icon: Trash2,
-    getBadge: (c) => c.trashCount,
-  },
-}
-
-/** 탭 노출 순서(받은 → 보낸 → 임시보관 → 휴지통). */
-const BOX_ORDER = ['received', 'sent', 'drafts', 'trash'] as const
-
-/** :box URL 세그먼트가 4종 메일박스 값인지 판별한다(문서함 tab 검증 컨벤션). */
-function isMailBox(value: string | undefined): value is MailBox {
-  return value != null && value in BOX_TABS
-}
 
 interface MessageViewPlaceholderProps {
   view: 'detail' | 'compose'
@@ -132,6 +72,8 @@ export function MessageBoxPage() {
   const navigate = useNavigate()
   const { box } = useParams<{ box: string }>()
   const countsQuery = useMailboxCountsQuery()
+  // 좌측 박스 네비 사용자 카드 표시용(기존 me 캐시 재사용 — 신규 데이터 로직 아님).
+  const meQuery = useMeQuery()
   const [activeView, setActiveView] = useState<MessageBoxView>('list')
   const [activeMessageId, setActiveMessageId] = useState<number | undefined>(undefined)
   const [isEditMode, setIsEditMode] = useState(false)
@@ -170,6 +112,17 @@ export function MessageBoxPage() {
   }
 
   const counts = countsQuery.data
+  const me = meQuery.data
+  // 사용자 카드 보조 라벨: 주 소속(isPrimary) 우선, 없으면 첫 소속의 "부서명 · 직급".
+  const primaryDept = me?.currentDepts.find((dept) => dept.isPrimary) ?? me?.currentDepts[0]
+  const userDept = primaryDept ? `${primaryDept.deptName} · ${primaryDept.positionName}` : undefined
+  // 활성 박스 메타(메인 헤더 3요소: 박스명·부제·건수 배지).
+  const activeConfig = BOX_TABS[box]
+
+  function selectBox(next: MailBox) {
+    backToList() // 박스 전환 시 상세/작성 뷰를 닫고 목록으로 복귀한다
+    navigate(`/messages/${next}`)
+  }
 
   function openDetail(messageId: number) {
     setActiveMessageId(messageId)
@@ -285,7 +238,8 @@ export function MessageBoxPage() {
     // min-h-full 플렉스 컬럼: 콘텐츠가 짧아도 탭 카드(flex-1)가 남는 높이를 흡수해
     // 카드 하단과 푸터 사이 간격이 페이지 인셋(p-3)만 남는다(문서함 레이아웃 컨벤션).
     <div className="flex min-h-full w-full flex-col p-3">
-      {/* 헤더: 페이지 타이틀 + 새 쪽지 작성 진입(카드 내 작성 뷰 전환) */}
+      {/* 헤더: 페이지 타이틀 + 새 쪽지 작성 진입. xl 이상에서는 좌측 박스 네비의 [새 쪽지 작성]
+          버튼이 이 역할을 대체하므로 여기서는 숨긴다(xl:hidden). */}
       <header className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
           <h1 className="text-xl font-semibold tracking-tight">쪽지함</h1>
@@ -294,54 +248,95 @@ export function MessageBoxPage() {
           type="button"
           size="sm"
           onClick={() => openCompose()}
-          className="w-full sm:w-auto"
+          className="w-full sm:w-auto xl:hidden"
         >
           <MailPlus />
           새 쪽지
         </Button>
       </header>
 
-      {/* 탭 + 활성 탭 목록(또는 상세/작성 뷰)을 하나의 카드로 묶는다. 탭·뷰를 바꿔도 카드
-          높이가 출렁이지 않도록 최소 높이를 두고, flex-1로 페이지의 남는 높이까지 흡수한다. */}
-      <Card className="flex min-h-[540px] flex-1 flex-col gap-0 py-0">
-        <Tabs
-          value={box}
-          onValueChange={(value) => {
-            backToList() // 탭 전환 시 상세/작성 뷰를 닫고 목록으로 복귀한다
-            navigate(`/messages/${value}`)
-          }}
-          className="flex flex-1 flex-col gap-0"
-        >
-          <div className="border-b border-border px-4 py-3">
-            <div className="min-w-0 overflow-x-auto">
-              <TabsList variant="line" className="justify-start">
-                {BOX_ORDER.map((key) => {
-                  const tabConfig = BOX_TABS[key]
-                  const Icon = tabConfig.icon
-                  const badge = counts ? tabConfig.getBadge(counts) : 0
-                  const emphasizedBadge =
-                    counts && tabConfig.getEmphasizedBadge ? tabConfig.getEmphasizedBadge(counts) : 0
-                  return (
-                    <TabsTrigger key={key} value={key} className="flex-none">
-                      <Icon />
-                      {tabConfig.navLabel}
-                      {badge > 0 && (
-                        <Badge variant="secondary" className="ml-1 tabular-nums">
-                          {badge}
-                        </Badge>
-                      )}
-                      {/* 받은함 안읽음 강조 배지: 전체 건수와 구분되는 primary 톤으로 표기 */}
-                      {emphasizedBadge > 0 && (
-                        <Badge className="ml-0.5 tabular-nums" aria-label={`안읽음 ${emphasizedBadge}건`}>
-                          {emphasizedBadge}
-                        </Badge>
-                      )}
-                    </TabsTrigger>
-                  )
-                })}
-              </TabsList>
+      {/* 2단 레이아웃(옵션 B): xl 이상에서만 좌측 박스 네비(MailboxNav) + 메인 카드를 좌우로 놓고,
+          xl 미만에서는 박스 네비를 숨기고 메인 카드 상단의 폴백 탭으로 박스를 전환한다. 전역
+          사이드바(w-56~64)에 더해 서브사이드바(w-52)까지 놓으면 1280 미만에서 리스트 폭이 과하게
+          눌리므로, 2단 강화는 xl(1280) 이상으로 한정한다(폭 실측 근거). */}
+      <div className="flex min-h-0 flex-1 flex-col gap-4 xl:flex-row">
+        <MailboxNav
+          box={box}
+          counts={counts}
+          userName={me?.empBasicInfo.name}
+          userDept={userDept}
+          onCompose={() => openCompose()}
+          onSelectBox={selectBox}
+          className="sticky top-3 hidden w-52 shrink-0 self-start xl:flex"
+        />
+
+        {/* 메인 카드: 폴백 탭(또는 박스 네비) + 활성 박스 목록(또는 상세/작성 뷰)을 묶는다.
+            탭·뷰를 바꿔도 카드 높이가 출렁이지 않도록 최소 높이를 두고, flex-1로 남는 높이를 흡수한다. */}
+        <Card className="flex min-h-[540px] min-w-0 flex-1 flex-col gap-0 py-0">
+          <Tabs
+            value={box}
+            onValueChange={(value) => {
+              backToList() // 탭 전환 시 상세/작성 뷰를 닫고 목록으로 복귀한다
+              navigate(`/messages/${value}`)
+            }}
+            className="flex flex-1 flex-col gap-0"
+          >
+            {/* 폴백 탭(xl 미만 전용): xl 이상에서는 좌측 박스 네비가 이 역할을 대체한다. */}
+            <div className="border-b border-border px-4 py-3 xl:hidden">
+              <div className="min-w-0 overflow-x-auto">
+                <TabsList variant="line" className="justify-start">
+                  {BOX_ORDER.map((key) => {
+                    const tabConfig = BOX_TABS[key]
+                    const Icon = tabConfig.icon
+                    const badge = counts ? tabConfig.getBadge(counts) : 0
+                    const emphasizedBadge =
+                      counts && tabConfig.getEmphasizedBadge
+                        ? tabConfig.getEmphasizedBadge(counts)
+                        : 0
+                    return (
+                      <TabsTrigger key={key} value={key} className="flex-none">
+                        <Icon />
+                        {tabConfig.navLabel}
+                        {badge > 0 && (
+                          <Badge variant="secondary" className="ml-1 tabular-nums">
+                            {badge}
+                          </Badge>
+                        )}
+                        {/* 받은함 안읽음 강조 배지: 전체 건수와 구분되는 primary 톤으로 표기 */}
+                        {emphasizedBadge > 0 && (
+                          <Badge
+                            className="ml-0.5 tabular-nums"
+                            aria-label={`안읽음 ${emphasizedBadge}건`}
+                          >
+                            {emphasizedBadge}
+                          </Badge>
+                        )}
+                      </TabsTrigger>
+                    )
+                  })}
+                </TabsList>
+              </div>
             </div>
-          </div>
+
+            {/* 메인 헤더 3요소(활성 박스명 + 부제 + 건수 배지): 목록 뷰에서만 노출한다
+                (상세/작성 뷰는 자체 헤더가 있어 중복을 피한다). */}
+            {activeView === 'list' && (
+              <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
+                <div className="min-w-0">
+                  <h2 className="truncate text-base font-semibold tracking-tight text-foreground">
+                    {activeConfig.navLabel}
+                  </h2>
+                  <p className="truncate text-xs text-muted-foreground">
+                    {activeConfig.description}
+                  </p>
+                </div>
+                {counts && (
+                  <Badge variant="secondary" className="shrink-0 tabular-nums">
+                    {activeConfig.getBadge(counts)}건
+                  </Badge>
+                )}
+              </div>
+            )}
 
           {/* 패널을 박스별 4개로 나누지 않고 value={box}인 단일 TabsContent로 둔다: Radix는
               비활성 패널을 언마운트하므로 4개로 나누면 탭 전환마다 테이블이 리마운트돼,
@@ -387,8 +382,9 @@ export function MessageBoxPage() {
               />
             )}
           </TabsContent>
-        </Tabs>
-      </Card>
+          </Tabs>
+        </Card>
+      </div>
     </div>
   )
 }
