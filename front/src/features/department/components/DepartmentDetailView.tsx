@@ -18,7 +18,7 @@ import {
 import { BlobAvatar } from '@/shared/components/BlobAvatar'
 import { PaginationControls } from '@/shared/components/PaginationControls'
 import { Button } from '@/shared/ui/button'
-import { Card, CardContent } from '@/shared/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card'
 import { Input } from '@/shared/ui/input'
 import type { DeptInfoResponse, DeptLeader } from '../model/deptInfo'
 import type { DeptMemberResponse, Page } from '../model/deptMember'
@@ -356,13 +356,11 @@ export function DepartmentDetailView({
       {/* 우측: 부서 멤버 영역. min-w-0으로 1fr 트랙을 축소 허용해 멤버 표의 자연폭이 트랙을
           밀어내(페이지 가로 스크롤 유발) 넘치지 않게 하고, 오버플로는 표 자체의 overflow-x-auto가 흡수한다. */}
       <section className="min-w-0 space-y-3">
-        <div className="space-y-1">
-          <h2 className="text-lg font-semibold tracking-tight">부서 멤버 목록</h2>
-          <p className="text-sm text-muted-foreground">
-            부서 현황을 확인하고 필요한 멤버를 상세 화면에서 관리합니다.
-          </p>
-        </div>
         <Card className="h-fit">
+          <CardHeader className="border-b">
+            <CardTitle>부서 멤버 목록</CardTitle>
+            <CardDescription>부서 현황을 확인하고 필요한 멤버를 상세 화면에서 관리합니다.</CardDescription>
+          </CardHeader>
           <CardContent className="space-y-4">
             {/* 툴바: 검색 + 총원 배지 + 페이지 크기 select */}
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
