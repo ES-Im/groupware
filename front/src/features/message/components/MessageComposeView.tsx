@@ -2,6 +2,7 @@ import { useEffect, useId, useRef, useState, type ChangeEvent } from 'react'
 import { useNavigate } from 'react-router'
 import {
   ArrowLeft,
+  Download,
   FileText,
   FileUp,
   Loader2,
@@ -10,6 +11,7 @@ import {
   Save,
   Send,
   Trash2,
+  UserPlus,
   X,
 } from 'lucide-react'
 import { toast } from 'sonner'
@@ -29,9 +31,18 @@ import {
 } from '@/shared/ui/alert-dialog'
 import { Button } from '@/shared/ui/button'
 import { Card, CardContent } from '@/shared/ui/card'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/shared/ui/dialog'
 import { Input } from '@/shared/ui/input'
 import { Label } from '@/shared/ui/label'
 import { Textarea } from '@/shared/ui/textarea'
+import { downloadMessageFile } from '../api/downloadMessageFile'
 import type { MessageCreateRequest } from '../api/sendMessage'
 import { useCreateDraftMutation } from '../api/useCreateDraftMutation'
 import { useDeleteMessageFileMutation } from '../api/useDeleteMessageFileMutation'
@@ -43,8 +54,10 @@ import { useSendDraftMutation } from '../api/useSendDraftMutation'
 import { useSendMessageMutation } from '../api/useSendMessageMutation'
 import { useUploadMessageFilesMutation } from '../api/useUploadMessageFilesMutation'
 import { MessageFileValidationError, validateMessageFileUpload } from '../lib/messageFileValidation'
+import { isMessageImageExtension } from '../lib/messageImageExtension'
 import { messageDraftSchema } from '../model/messageDraftSchema'
 import type { FileListInfo } from '../model/messageTypes'
+import { MessageFilePreviewDialog } from './MessageFilePreviewDialog'
 
 /** 첨부파일 크기 표기(approval DraftAttachmentsCard formatFileSize 이식 — B/KB/MB 3단). */
 function formatFileSize(size: number): string {
@@ -81,6 +94,7 @@ function buildQuotedContent(quoted?: string): string {
  */
 function DeletableFileItem({ messageId, file }: { messageId: number; file: FileListInfo }) {
   const deleteMutation = useDeleteMessageFileMutation()
+  const isImage = isMessageImageExtension(file.extension)
 
   function handleDelete() {
     deleteMutation.mutate(
@@ -90,6 +104,13 @@ function DeletableFileItem({ messageId, file }: { messageId: number; file: FileL
         onError: (error) => toast.error(normalizeApiError(error).message),
       },
     )
+  }
+
+  // 이미 서버에 올라간 첨부(fileId 보유)만 다운로드 대상 — 편집 모드 기존 첨부는 전부 해당한다.
+  function handleDownload() {
+    downloadMessageFile(messageId, file.fileId, file.originalName).catch((error: unknown) => {
+      toast.error(normalizeApiError(error).message)
+    })
   }
 
   return (
@@ -105,6 +126,18 @@ function DeletableFileItem({ messageId, file }: { messageId: number; file: FileL
           {file.extension.toUpperCase()} · {formatFileSize(file.fileSize)}
         </span>
       </span>
+      {/* 이미지 첨부만 미리보기 모달(비이미지는 다운로드만). 버튼이 여러 개라 아이콘 전용(compact). */}
+      {isImage && <MessageFilePreviewDialog messageId={messageId} file={file} compact />}
+      <Button
+        type="button"
+        variant="outline"
+        size="icon-sm"
+        className="shrink-0"
+        onClick={handleDownload}
+        aria-label={`${file.originalName} 다운로드`}
+      >
+        <Download />
+      </Button>
       <Button
         type="button"
         variant="destructive"
@@ -286,6 +319,10 @@ export function MessageComposeView({
       : [],
   )
   const [attachments, setAttachments] = useState<File[]>([])
+  // 수신자 선택 모달 열림 상태: 부서/검색 브라우징(EmployeePicker)은 모달 안에 두고, 폼에는
+  // 선택된 수신자 칩만 표기한다. 모달 안 EmployeePicker는 selectedEmployees에 직접 바인딩해
+  // 선택이 즉시 폼 칩에 반영된다(별도 staging 없음 — 답장/편집 프리필 초기값도 그대로 노출).
+  const [receiverDialogOpen, setReceiverDialogOpen] = useState(false)
   // draft-first 오케스트레이션 중 createDraft가 발급한 messageId. 중간 단계(업로드/발송) 실패 후
   // 재시도 시 이 값이 남아 있으면 createDraft를 재호출하지 않고 실패 지점부터 재개한다.
   const [resumeMessageId, setResumeMessageId] = useState<number | undefined>(undefined)
@@ -459,18 +496,27 @@ export function MessageComposeView({
 
   return (
     <div className="flex flex-1 flex-col gap-4">
-      <div className="flex flex-wrap items-center justify-between gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <Button type="button" variant="outline" size="sm" onClick={onBack}>
           <ArrowLeft />
           목록으로
         </Button>
-        <h2 className="text-sm font-semibold text-muted-foreground">
-          {isEditMode ? '쪽지 수정' : '새 쪽지 작성'}
-        </h2>
       </div>
 
-      <Card className="min-w-0">
-        <CardContent>
+      {/* 작성 헤더(쪽지함 메인 헤더 3요소와 톤 통일): 제목 + 부제(레퍼런스 메일함 작성 화면 참고). */}
+      <div className="min-w-0">
+        <h2 className="text-base font-semibold tracking-tight text-foreground">
+          {isEditMode ? '쪽지 수정' : '새 쪽지 작성'}
+        </h2>
+        <p className="text-xs text-muted-foreground">
+          {isEditMode
+            ? '임시 저장한 쪽지를 이어서 수정합니다.'
+            : '여러 사원에게 동시에 쪽지를 보낼 수 있습니다.'}
+        </p>
+      </div>
+
+      <Card className="flex min-h-0 min-w-0 flex-1 flex-col">
+        <CardContent className="flex min-h-0 flex-1 flex-col">
           <form
             noValidate
             // 편집모드는 [저장] 버튼이 type=button으로 handleSave를 직접 트리거한다(발송 전용
@@ -480,8 +526,69 @@ export function MessageComposeView({
             className="flex flex-1 flex-col gap-4"
           >
             <div className="flex flex-col gap-1.5">
-              <Label>받는 사람</Label>
-              <EmployeePicker selected={selectedEmployees} onChange={setSelectedEmployees} />
+              <div className="flex items-center justify-between gap-2">
+                <Label>받는 사람</Label>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setReceiverDialogOpen(true)}
+                >
+                  <UserPlus />
+                  수신자 선택
+                </Button>
+              </div>
+
+              {/* 선택된 수신자 칩(EmployeePicker 내부 칩과 동일 톤). 개별 X로 제거한다 —
+                  모달이 닫혀 EmployeePicker가 언마운트돼도 폼에서 선택을 확인/해제할 수 있다. */}
+              {selectedEmployees.length > 0 ? (
+                <div className="flex flex-wrap gap-1.5">
+                  {selectedEmployees.map((emp) => (
+                    <span
+                      key={emp.empId}
+                      className="inline-flex items-center gap-1 rounded-full border bg-muted px-2.5 py-1 text-xs text-foreground"
+                    >
+                      {emp.empName}
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setSelectedEmployees((prev) =>
+                            prev.filter((item) => item.empId !== emp.empId),
+                          )
+                        }
+                        className="text-muted-foreground hover:text-foreground"
+                        aria-label={`${emp.empName} 선택 해제`}
+                      >
+                        <X className="size-3.5" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <p className="rounded-lg border border-dashed px-3 py-2 text-xs text-muted-foreground">
+                  선택된 수신자가 없습니다. [수신자 선택]으로 추가해주세요.
+                </p>
+              )}
+
+              {/* 수신자 브라우징 모달: 부서/검색 UI(EmployeePicker)를 모달 안으로 옮겨 폼 세로 공간을
+                  절약한다(CirculationAddDialog 패턴). 선택은 selectedEmployees에 즉시 반영된다. */}
+              <Dialog open={receiverDialogOpen} onOpenChange={setReceiverDialogOpen}>
+                <DialogContent className="sm:max-w-lg">
+                  <DialogHeader>
+                    <DialogTitle>수신자 선택</DialogTitle>
+                    <DialogDescription>
+                      부서를 선택하고 부서원을 검색해 수신자를 추가하세요. 여러 명을 선택할 수 있습니다.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <EmployeePicker selected={selectedEmployees} onChange={setSelectedEmployees} />
+                  <DialogFooter>
+                    <Button type="button" onClick={() => setReceiverDialogOpen(false)}>
+                      완료
+                      {selectedEmployees.length > 0 ? ` (${selectedEmployees.length})` : ''}
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             </div>
 
             <div className="flex flex-col gap-1.5">
@@ -501,14 +608,15 @@ export function MessageComposeView({
               )}
             </div>
 
-            <div className="flex flex-col gap-1.5">
+            <div className="flex min-h-0 flex-1 flex-col gap-1.5">
               <Label htmlFor="message-compose-content">
                 내용 <span className="text-destructive">*</span>
               </Label>
+              {/* 받는 사람 필드가 모달로 빠져 절약된 세로 공간을 내용 입력이 flex-1로 흡수한다. */}
               <Textarea
                 id="message-compose-content"
                 placeholder="내용을 입력해주세요"
-                className="min-h-48"
+                className="min-h-32 flex-1 resize-none"
                 aria-invalid={!!errors.content}
                 {...register('content')}
               />

@@ -69,10 +69,15 @@ function mockEmployeePicker() {
   )
 }
 
-/** 결재선 대상 사원 선택: 부서 → 부서원 순서로 클릭한다(EmployeePicker는 모달 없이 인라인 2단 UI). */
+/**
+ * 수신자 선택: [수신자 선택]으로 모달을 열고 부서 → 부서원 순서로 클릭한 뒤 [완료]로 닫는다.
+ * (EmployeePicker의 부서/검색 브라우징이 인라인에서 모달 안으로 이동함.)
+ */
 async function selectReceiver(user: ReturnType<typeof userEvent.setup>) {
+  await user.click(screen.getByRole('button', { name: '수신자 선택' }))
   await user.click(await screen.findByRole('button', { name: '개발팀' }))
   await user.click(await screen.findByRole('button', { name: /김철수/ }))
+  await user.click(screen.getByRole('button', { name: /완료/ }))
 }
 
 function makeFile(name: string, size = 10): File {

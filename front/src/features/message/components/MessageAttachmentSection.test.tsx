@@ -13,7 +13,7 @@ import { MessageAttachmentSection } from './MessageAttachmentSection'
  *
  * approval AttachmentSection의 read-only 축소 이식이라 검증 축도 동형이다:
  *   - 목록 로딩/에러/빈목록/정상 렌더(파일명·용량 MB 표기).
- *   - 이미지 확장자는 인라인 미리보기(objectURL), 비이미지는 다운로드 버튼.
+ *   - 이미지 확장자는 미리보기 모달(objectURL) + 다운로드, 비이미지는 다운로드 버튼만.
  *   - 다운로드 버튼 클릭 시 다운로드 엔드포인트를 호출한다.
  */
 
@@ -111,7 +111,7 @@ describe('MessageAttachmentSection (F1522) - 이미지/비이미지 분기', () 
     await waitFor(() => expect(downloadCalled).toBe(true))
   })
 
-  it('이미지 첨부(png)는 다운로드 버튼 대신 인라인 미리보기를 렌더한다', async () => {
+  it('이미지 첨부(png)는 다운로드 버튼과 [미리보기] 버튼을 렌더하고, 미리보기 클릭 시 모달에 이미지를 보여준다', async () => {
     server.use(
       http.get(`${BASE_URL}/api/messages/1/files`, () =>
         HttpResponse.json([makeFile({ fileId: 2, originalName: '사진.png', extension: 'png' })]),
@@ -120,10 +120,15 @@ describe('MessageAttachmentSection (F1522) - 이미지/비이미지 분기', () 
         HttpResponse.arrayBuffer(new ArrayBuffer(4), { headers: { 'Content-Type': 'image/png' } }),
       ),
     )
+    const user = userEvent.setup()
     renderSection(1)
 
     await screen.findByText('사진.png')
-    expect(screen.queryByRole('button', { name: '사진.png 다운로드' })).not.toBeInTheDocument()
+    // 구조 변경: 이미지 첨부도 다운로드 버튼을 노출한다(이미지/비이미지 모두 다운로드 가능).
+    expect(screen.getByRole('button', { name: '사진.png 다운로드' })).toBeInTheDocument()
+    // 인라인이 아니라 미리보기 모달 — 버튼을 누르기 전에는 이미지가 렌더되지 않는다.
+    expect(screen.queryByAltText('사진.png')).not.toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: '미리보기' }))
     expect(await screen.findByAltText('사진.png')).toBeInTheDocument()
   })
 })
