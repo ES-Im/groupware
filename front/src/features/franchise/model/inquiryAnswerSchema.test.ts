@@ -1,0 +1,36 @@
+import { describe, expect, it } from 'vitest'
+import { inquiryAnswerSchema } from './inquiryAnswerSchema'
+
+/**
+ * inquiryAnswerSchema(FRANCHISE_INQUIRY_ANSWER_CREATE/_UPDATE, ROADMAP(FRANCHISE) T5.4, F1621·F1622)
+ * 단위 테스트. franchiseMemoSchema와 동일 "공백 불가" refine 패턴이라 franchiseEducationUpdateSchema
+ * .test.ts의 content 필드 검증 방식을 그대로 복제한다(safeParse + issues[0].message 단언).
+ */
+
+describe('inquiryAnswerSchema', () => {
+  it('빈 문자열이면 실패한다', () => {
+    const result = inquiryAnswerSchema.safeParse({ answer: '' })
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      expect(result.error.issues[0].message).toBe('답변 내용을 입력해주세요')
+    }
+  })
+
+  it('공백만으로 이루어지면 실패한다', () => {
+    const result = inquiryAnswerSchema.safeParse({ answer: '   ' })
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      expect(result.error.issues[0].message).toBe('답변은 공백만으로 입력할 수 없습니다')
+    }
+  })
+
+  it('내용이 있으면 성공한다', () => {
+    const result = inquiryAnswerSchema.safeParse({ answer: '환불 처리 완료했습니다' })
+    expect(result.success).toBe(true)
+  })
+
+  it('answer 필드가 없으면 실패한다', () => {
+    const result = inquiryAnswerSchema.safeParse({})
+    expect(result.success).toBe(false)
+  })
+})

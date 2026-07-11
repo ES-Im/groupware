@@ -38,6 +38,13 @@ import { MeetingReservationDetailPage } from '@/features/meeting/pages/MeetingRe
 import { MeetingRoomManagementPage } from '@/features/meeting/pages/MeetingRoomManagementPage'
 import { MeetingRoomDetailPage } from '@/features/meeting/pages/MeetingRoomDetailPage'
 import { MeetingRoomManagementDetailPage } from '@/features/meeting/pages/MeetingRoomManagementDetailPage'
+import { FranchiseListPage } from '@/features/franchise/pages/FranchiseListPage'
+import { FranchiseDetailPage } from '@/features/franchise/pages/FranchiseDetailPage'
+import { FranchiseSalesPage } from '@/features/franchise/pages/FranchiseSalesPage'
+import { FranchiseEducationCalendarPage } from '@/features/franchise/pages/FranchiseEducationCalendarPage'
+import { FranchiseEducationDetailPage } from '@/features/franchise/pages/FranchiseEducationDetailPage'
+import { FranchiseInquiryListPage } from '@/features/franchise/pages/FranchiseInquiryListPage'
+import { FranchiseInquiryDetailPage } from '@/features/franchise/pages/FranchiseInquiryDetailPage'
 import { ProtectedRoute } from '@/shared/components/ProtectedRoute'
 import { LayoutShell } from '@/shared/components/LayoutShell'
 
@@ -144,6 +151,25 @@ import { LayoutShell } from '@/shared/components/LayoutShell'
  * 게이팅하지 않는다. 상세/작성은 별도 라우트가 아니다 — 카드 내 뷰 전환으로 처리한다(채팅 오버레이와
  * 동일 철학). 'messages'(1세그먼트)와 'messages/:box'(2세그먼트)는 세그먼트 깊이가 달라 랭킹 충돌이
  * 없다. 전 항목 minRole EMPLOYEE라 별도 RoleGuard 없이 ProtectedRoute(인증 가드)만으로 충분하다.
+ * /franchises·/franchises/:franchiseId·/franchise-sales·/franchise-educations·
+ * /franchise-educations/:educationId·/franchise-inquiries·/franchise-inquiries/:inquiryId는
+ * ROADMAP(FRANCHISE) T1.2에서 franchise 도메인 페이지 7종(FranchiseListPage/P1·F1601·F1603,
+ * FranchiseDetailPage/P2·F1602·F1604~F1608, FranchiseSalesPage/P3·F1624~F1626,
+ * FranchiseEducationCalendarPage/P4·F1609·F1612, FranchiseEducationDetailPage/P5·F1610·F1611·
+ * F1613~F1616, FranchiseInquiryListPage/P6·F1617, FranchiseInquiryDetailPage/P7·F1618~F1623)로
+ * 연결했다(근거: PRD docs/prd/16.franchise-prd.md §메뉴 구조·§페이지별 상세). 'franchises'·
+ * 'franchise-educations'·'franchise-inquiries'는 각각 1세그먼트 정적 라우트이고 대응하는
+ * ':franchiseId'·':educationId'·':inquiryId' 동적 라우트는 2세그먼트라 세그먼트 깊이가 달라 랭킹
+ * 충돌이 없지만, 위 기안·회의 라우트들과 동일 컨벤션으로 정적 세그먼트를 각자의 동적 페어보다 앞에
+ * 등록해 둔다(가독성·명시성 목적). 'franchise-sales'는 대응하는 동적 페어가 없는 단일 정적 라우트다
+ * (P3, 가맹점은 페이지 내부의 FranchisePicker로 선택하되 `?franchiseId=` 쿼리 프리필도 소비한다 —
+ * T2.3이 확정한 계약, FranchiseDetailPage [매출 조회] 버튼 참조). 전 7개
+ * 라우트는 최소 요구 role이 FRANCHISE(ADMIN 자동 포함, RoleHierarchy)이지만, meeting FACILITY 그룹·
+ * leaves/dept DEPT_MANAGER 컨벤션과 동일하게 role 게이팅은 사이드바(minRole)에서만 처리하고 라우트
+ * 자체는 ProtectedRoute(인증 가드)만 적용한다 — 최종 권한 판단은 서버(403)에 위임한다. 각 상세
+ * 페이지 내부의 소유자/상태 조건(교육 등록자·비활성+신청자 0, 답변 담당자 등)도 서버 최종 판단이며
+ * 라우트 가드 범위 밖이다(PRD §권한 분기점). 7개 페이지는 전부 T2~T5 후속 태스크가 실 UI/데이터
+ * 로직을 채우는 셸 상태다.
  */
 export const router = createBrowserRouter([
   {
@@ -403,6 +429,55 @@ export const router = createBrowserRouter([
         // 동일하게 컴포넌트 내부(T2.2)에서 처리하므로 라우트는 게이팅하지 않는다.
         path: 'messages/:box',
         element: <MessageBoxPage />,
+      },
+      {
+        // 가맹점 목록 페이지(P1): ROADMAP(FRANCHISE) T1.2에서 FranchiseListPage(F1601·F1603)로
+        // 연결했다. 사이드바 "가맹점 > 가맹점 관리" 항목의 실제 진입점이다.
+        path: 'franchises',
+        element: <FranchiseListPage />,
+      },
+      {
+        // 가맹점 상세 페이지(P2): ROADMAP(FRANCHISE) T1.2에서 FranchiseDetailPage(F1602·
+        // F1604~F1608)로 연결했다. 위 'franchises'(1세그먼트, 정적)보다 뒤에 등록해 랭킹 충돌을
+        // 피한다. 목록 페이지의 행 클릭 이동이 실제 상세 화면으로 이어진다.
+        path: 'franchises/:franchiseId',
+        element: <FranchiseDetailPage />,
+      },
+      {
+        // 가맹점 매출 조회 페이지(P3): ROADMAP(FRANCHISE) T1.2에서 FranchiseSalesPage(F1624~F1626)로
+        // 연결했다. 대응하는 동적 페어 없는 단일 정적 라우트다. 사이드바 "가맹점 > 가맹점 매출"
+        // 항목·가맹점 상세(P2) [매출 조회] 액션의 진입점이다.
+        path: 'franchise-sales',
+        element: <FranchiseSalesPage />,
+      },
+      {
+        // 가맹점 교육 캘린더 페이지(P4): ROADMAP(FRANCHISE) T1.2에서
+        // FranchiseEducationCalendarPage(F1609·F1612)로 연결했다. 사이드바 "가맹점 > 가맹점 교육"
+        // 항목의 실제 진입점이다.
+        path: 'franchise-educations',
+        element: <FranchiseEducationCalendarPage />,
+      },
+      {
+        // 가맹점 교육 상세 페이지(P5): ROADMAP(FRANCHISE) T1.2에서
+        // FranchiseEducationDetailPage(F1610·F1611·F1613~F1616)로 연결했다. 위
+        // 'franchise-educations'(1세그먼트, 정적)보다 뒤에 등록해 랭킹 충돌을 피한다. 캘린더 이벤트
+        // 클릭·교육 등록 성공 직후의 이동 목적지다.
+        path: 'franchise-educations/:educationId',
+        element: <FranchiseEducationDetailPage />,
+      },
+      {
+        // 가맹점 문의 목록 페이지(P6): ROADMAP(FRANCHISE) T1.2에서 FranchiseInquiryListPage(F1617)로
+        // 연결했다. 사이드바 "가맹점 > 가맹점 문의" 항목의 실제 진입점이다.
+        path: 'franchise-inquiries',
+        element: <FranchiseInquiryListPage />,
+      },
+      {
+        // 가맹점 문의 상세 페이지(P7): ROADMAP(FRANCHISE) T1.2에서
+        // FranchiseInquiryDetailPage(F1618~F1623)로 연결했다. 위 'franchise-inquiries'(1세그먼트,
+        // 정적)보다 뒤에 등록해 랭킹 충돌을 피한다. 목록 페이지의 행 클릭 이동이 실제 상세 화면으로
+        // 이어진다.
+        path: 'franchise-inquiries/:inquiryId',
+        element: <FranchiseInquiryDetailPage />,
       },
     ],
   },
