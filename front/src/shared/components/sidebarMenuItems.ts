@@ -124,16 +124,16 @@ export const sidebarMenuItems: SidebarMenuItem[] = [
     ],
   },
   {
-    // 일정/회의 그룹: '일정 캘린더'는 이 로드맵 범위 밖이라 placeholder를 유지한다(미터치).
-    // '회의실 예약'·'회의실 관리'는 ROADMAP(MEETING-ROOMS) M8(T8.1)에서 placeholder→실 라우트로
-    // 승격했고, '회의 예약 관리'(FACILITY 조회 전용, F810)를 신규 추가했다. franchise 그룹의
+    // 일정/회의 그룹: '일정 캘린더'는 ROADMAP(SCHEDULE) T1.5에서 ScheduleCalendarPage로 실 라우트
+    // 승격했다. '회의실 예약'·'회의실 관리'는 ROADMAP(MEETING-ROOMS) M8(T8.1)에서 placeholder→실
+    // 라우트로 승격했고, '회의 예약 관리'(FACILITY 조회 전용, F810)를 신규 추가했다. franchise 그룹의
     // minRole:'FRANCHISE' 게이팅 선례와 동일하게 minRole:'FACILITY'도 hasRequiredRole이 ADMIN을
     // 자동 포함한다.
     label: '일정/회의',
     minRole: 'EMPLOYEE',
     icon: CalendarDays,
     children: [
-      { label: '일정 캘린더', minRole: 'EMPLOYEE', implemented: false },
+      { label: '일정 캘린더', to: '/schedules', minRole: 'EMPLOYEE' },
       { label: '회의실 예약', to: '/meetings', minRole: 'EMPLOYEE' },
       { label: '회의실 관리', to: '/meeting-rooms/management', minRole: 'FACILITY' },
       { label: '회의 예약 관리', to: '/meetings/management', minRole: 'FACILITY' },

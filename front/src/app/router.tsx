@@ -44,6 +44,7 @@ import { FranchiseEducationCalendarPage } from '@/features/franchise/pages/Franc
 import { FranchiseEducationDetailPage } from '@/features/franchise/pages/FranchiseEducationDetailPage'
 import { FranchiseInquiryListPage } from '@/features/franchise/pages/FranchiseInquiryListPage'
 import { FranchiseInquiryDetailPage } from '@/features/franchise/pages/FranchiseInquiryDetailPage'
+import { ScheduleCalendarPage } from '@/features/schedule/pages/ScheduleCalendarPage'
 import { ProtectedRoute } from '@/shared/components/ProtectedRoute'
 import { LayoutShell } from '@/shared/components/LayoutShell'
 
@@ -170,6 +171,8 @@ import { LayoutShell } from '@/shared/components/LayoutShell'
  * 페이지 내부의 소유자/상태 조건(교육 등록자·비활성+신청자 0, 답변 담당자 등)도 서버 최종 판단이며
  * 라우트 가드 범위 밖이다(PRD §권한 분기점). 7개 페이지는 전부 T2~T5 후속 태스크가 실 UI/데이터
  * 로직을 채우는 셸 상태다.
+ * /schedules는 ROADMAP(SCHEDULE) T1.5에서 ScheduleCalendarPage(일정 캘린더 조회 페이지)로
+ * 연결했다. minRole EMPLOYEE라 별도 RoleGuard 없이 ProtectedRoute(인증 가드)만으로 충분하다.
  */
 export const router = createBrowserRouter([
   {
@@ -412,6 +415,13 @@ export const router = createBrowserRouter([
         // 판단은 서버(403 ROLE_003).
         path: 'meeting-rooms/management/:meetingRoomId',
         element: <MeetingRoomManagementDetailPage />,
+      },
+      {
+        // 일정 캘린더 페이지: ROADMAP(SCHEDULE) T1.5에서 ScheduleCalendarPage로 연결했다. minRole
+        // EMPLOYEE라 별도 RoleGuard 없이 ProtectedRoute(인증 가드)만으로 충분하다 — 사이드바
+        // "일정/회의 > 일정 캘린더" 항목의 실제 진입점이다.
+        path: 'schedules',
+        element: <ScheduleCalendarPage />,
       },
       {
         // 쪽지함 인덱스: 세그먼트 없이 접근 시 기본 박스(받은 쪽지함)로 리다이렉트한다. 문서함
