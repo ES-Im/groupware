@@ -1,5 +1,6 @@
 package com.haruon.groupware.adapter.persistence.franchise;
 
+import com.haruon.groupware.application.exception.franchise.FranchiseNotFoundException;
 import com.haruon.groupware.application.franchise.required.FranchiseQueryRepository;
 import com.haruon.groupware.application.franchise.service.query.dto.FranchisesDetailResponse;
 import com.haruon.groupware.application.franchise.service.query.dto.FranchisesResponse;
@@ -27,19 +28,23 @@ public class FranchiseQueryRepositoryAdapter implements FranchiseQueryRepository
 
     @Override
     public FranchisesDetailResponse findFranchiseById(Long franchiseId) {
-        return query
+        FranchisesDetailResponse response = query
                 .select(Projections.constructor(
                         FranchisesDetailResponse.class,
                         franchise.id, franchise.franchiseName, franchise.address,
                         franchise.ownerName, franchise.businessNumber, franchise.contactNumber,
-                        franchise.contactEmail, franchise.businessStatus, franchise.memo,
+                        franchise.contactEmail.email, franchise.businessStatus, franchise.memo,
                         franchise.emp.id, emp.empName
                 ))
                 .from(franchise)
-                .join(franchise.emp, emp)
+                .leftJoin(franchise.emp, emp)
                 .where(
                         franchise.id.eq(franchiseId)
                 ).fetchOne();
+
+        if (response == null) throw new FranchiseNotFoundException();
+
+        return response;
     }
 
     @Override
@@ -73,7 +78,7 @@ public class FranchiseQueryRepositoryAdapter implements FranchiseQueryRepository
                         emp.empName
                 ))
                 .from(franchise)
-                .join(franchise.emp, emp)
+                .leftJoin(franchise.emp, emp)
                 .where(
                         isKeywordContain(keyword),
                         isStatusEq(status),

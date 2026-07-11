@@ -90,7 +90,7 @@ public class Franchise extends AbstractEntity {
         requireNonNull(emp);
 
         state(emp.getStatus().equals(EmpStatus.ACTIVE), "활성화된 사원이 아님");
-        state(emp.getSystemRoles().contains(SystemRoleCode.FRANCHISE), "가맹점 권한이 없음");
+        state(emp.getSystemRoles().contains(SystemRoleCode.FRANCHISE) || emp.isAdmin(), "가맹점 권한이 없음");
 
         this.emp = emp;
     }
