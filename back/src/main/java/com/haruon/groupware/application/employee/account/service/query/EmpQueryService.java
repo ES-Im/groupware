@@ -62,7 +62,9 @@ public class EmpQueryService implements EmpAccountRetriever {
         Emp foundEmp = findActiveEmpById(empRepository, managerOrHrId);
         Set<SystemRoleCode> systemRoles = foundEmp.getSystemRoles();
 
-        if(systemRoles.contains(SystemRoleCode.HR)) {
+        if (systemRoles.contains(SystemRoleCode.ADMIN)) {
+            return empQueryRepository.findEmpInfoList(deptId, status, keyword, pageable);
+        } else if(systemRoles.contains(SystemRoleCode.HR)) {
             checkHRRoleEmp(authorizationQueryRepository, managerOrHrId);
 
             return empQueryRepository.findEmpInfoList(deptId, status, keyword, pageable);
