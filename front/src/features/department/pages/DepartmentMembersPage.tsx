@@ -37,7 +37,11 @@ import { getPrimaryDeptId } from '../lib/getPrimaryDeptId'
 export function DepartmentMembersPage() {
   const navigate = useNavigate()
   const roles = useAuthStore((state) => state.roles)
-  const canManageMembers = hasRequiredRole(roles, 'DEPT_MANAGER')
+  const canManageMembers = hasRequiredRole(roles, 'DEPT_MANAGER') || hasRequiredRole(roles, 'HR')
+  // 부서 근태 보드는 DEPT_MANAGER 전용 API(DEPT_ATTENDANCE_MONTHLY/_PENDING)를 쓰므로 HR을 포함하는
+  // canManageMembers와 별도로 계산한다(code-reviewer 지적, HR 뷰어에게 위젯을 보이면 403이 조용히
+  // 삼켜져 "근태 기록 없음"으로 오인 표시됨).
+  const canViewAttendanceBoard = hasRequiredRole(roles, 'DEPT_MANAGER')
   const meQuery = useMeQuery()
   //todo : [이 페이지는 getPrimaryDeptId로 deptId를 로그인 사용자의 소속 부서로 고정 도출하고 라우트 파라미터를 쓰지 않는다. 그러나 docs/prd/3.department-management-prd.md(F202/F203, "부서 상세 페이지")는 "부서 목록 페이지 행 클릭 → 부서 상세 페이지"로 임의 부서(deptId route param)를 열람하는 화면을 요구하는데, 이는 별도 페이지(DepartmentDetailPage, T7.1)로 이미 구현되어 있다. 두 페이지가 공존하는 것이 의도된 설계인지, 이 페이지(F104)를 그대로 유지할지 재확인 필요]
   const deptId = meQuery.data ? getPrimaryDeptId(meQuery.data.currentDepts) : undefined
@@ -181,6 +185,7 @@ export function DepartmentMembersPage() {
           }
         }
         canManageMembers={canManageMembers}
+        canViewAttendanceBoard={canViewAttendanceBoard}
         keyword={keyword}
         onKeywordChange={(value) => {
           setKeyword(value)

@@ -191,6 +191,9 @@ export function DepartmentDetailPage() {
           }
         }
         canManageMembers={canManageMembers}
+        // 이 페이지의 canManageMembers는 이미 hasRequiredRole(roles,'DEPT_MANAGER') 단독 계산이라
+        // (DepartmentMembersPage와 달리 HR을 섞지 않음) 근태 보드 게이팅에 그대로 재사용할 수 있다.
+        canViewAttendanceBoard={canManageMembers}
         canManageDept={canManageDept}
         onToggleActive={handleToggleActive}
         isTogglingActive={isTogglingActive}

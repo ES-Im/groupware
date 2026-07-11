@@ -22,6 +22,7 @@ import { Card, CardContent } from '@/shared/ui/card'
 import { Input } from '@/shared/ui/input'
 import type { DeptInfoResponse, DeptLeader } from '../model/deptInfo'
 import type { DeptMemberResponse, Page } from '../model/deptMember'
+import { DeptAttendanceBoardWidget } from './DeptAttendanceBoardWidget'
 import { DepartmentMembersTable } from './DepartmentMembersTable'
 
 /** 검색 디바운스 지연(ms). 매 키 입력마다 부모 상태(page/query)를 갱신하지 않도록 유예를 둔다. */
@@ -43,6 +44,15 @@ interface DepartmentDetailViewProps {
   pageInfo: Page<unknown>
   /** dept-manager/admin 전용 "관리" 액션 컬럼 노출 여부(표에 위임). role 계산은 상위에서 수행. */
   canManageMembers?: boolean
+  /**
+   * 부서 근태 보드(DeptAttendanceBoardWidget) 노출 여부. role 계산은 상위에서 수행.
+   * `canManageMembers`(DEPT_MANAGER 또는 HR)와 별도 값이다 — 근태 조회 API(`DEPT_ATTENDANCE_MONTHLY`/
+   * `_PENDING`)는 DEPT_MANAGER 권한만 허용하므로(HR은 불가) `hasRequiredRole(roles,'DEPT_MANAGER')`
+   * 단독으로 계산해 주입해야 한다. 이 값 없이(기본 false) 위젯을 무조건 렌더하면 권한 없는
+   * 뷰어(일반 사원·HR 전용 담당자)에게 403이 조용히 삼켜져 "근태 기록이 없습니다"로 오인 표시된다
+   * (code-reviewer 지적, 수정).
+   */
+  canViewAttendanceBoard?: boolean
   /**
    * ADMIN 전용 "부서 관리" 섹션 노출 여부. role 계산은 상위에서 수행.
    * true로 주는 페이지는 아래 5개 관리 콜백을 반드시 함께 전달해야 한다(현재는 임의 부서를 다루는
@@ -148,6 +158,7 @@ export function DepartmentDetailView({
   membersErrorMessage,
   pageInfo,
   canManageMembers = false,
+  canViewAttendanceBoard = false,
   canManageDept = false,
   onToggleActive,
   isTogglingActive = false,
@@ -342,9 +353,15 @@ export function DepartmentDetailView({
         </CardContent>
       </Card>
 
-      {/* 우측: 부서 멤버 영역 */}
-      <section className="space-y-3">
-        <h2 className="text-lg font-semibold tracking-tight">부서 멤버 목록</h2>
+      {/* 우측: 부서 멤버 영역. min-w-0으로 1fr 트랙을 축소 허용해 멤버 표의 자연폭이 트랙을
+          밀어내(페이지 가로 스크롤 유발) 넘치지 않게 하고, 오버플로는 표 자체의 overflow-x-auto가 흡수한다. */}
+      <section className="min-w-0 space-y-3">
+        <div className="space-y-1">
+          <h2 className="text-lg font-semibold tracking-tight">부서 멤버 목록</h2>
+          <p className="text-sm text-muted-foreground">
+            부서 현황을 확인하고 필요한 멤버를 상세 화면에서 관리합니다.
+          </p>
+        </div>
         <Card className="h-fit">
           <CardContent className="space-y-4">
             {/* 툴바: 검색 + 총원 배지 + 페이지 크기 select */}
@@ -408,6 +425,12 @@ export function DepartmentDetailView({
             />
           </CardContent>
         </Card>
+
+        {/* 부서 근태 보드(adapt-ui 신규): 별도 부서 근태 요약 API가 없어 기존 DEPT_ATTENDANCE_MONTHLY/
+            DEPT_ATTENDANCE_PENDING 조회 훅을 재사용하는 위젯(PersonalRecordsWidget과 동형 패턴).
+            canViewAttendanceBoard(DEPT_MANAGER 전용)일 때만 렌더 — HR/일반 사원은 근태 조회 API
+            자체가 403이라 무조건 렌더하면 안 된다. */}
+        {canViewAttendanceBoard && <DeptAttendanceBoardWidget deptId={deptInfo.deptId} />}
       </section>
     </div>
   )

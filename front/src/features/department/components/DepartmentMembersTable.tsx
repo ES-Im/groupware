@@ -62,7 +62,7 @@ export function DepartmentMembersTable({
                   }}
                 >
                   <UserCog />
-                  관리
+                  멤버 관리
                 </Button>
               ),
             }),

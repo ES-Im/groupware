@@ -1,8 +1,12 @@
 import { useEffect } from 'react'
 import { useParams } from 'react-router'
 import { toast } from 'sonner'
+import { useAuthStore } from '@/features/auth/store/authStore'
+import { getPrimaryDeptId } from '@/features/department/lib/getPrimaryDeptId'
 import { isForbidden, isNotFound, normalizeApiError } from '@/shared/lib/apiError'
+import { hasRequiredRole } from '@/shared/lib/hasRequiredRole'
 import { useEmployeeQuery } from '../api/useEmployeeQuery'
+import { EmpManagementSection } from '../components/EmpManagementSection'
 import { EmployeeInfoView } from '../components/EmployeeInfoView'
 
 /**
@@ -18,6 +22,10 @@ export function EmployeeDetailPage() {
   const parsedEmpId = empId !== undefined ? Number(empId) : undefined
   const isValidEmpId = parsedEmpId !== undefined && !Number.isNaN(parsedEmpId)
   const query = useEmployeeQuery(isValidEmpId ? parsedEmpId : undefined)
+  const roles = useAuthStore((state) => state.roles)
+  const canManageAsHr = hasRequiredRole(roles, 'HR')
+  const canManageAsDeptManager = !canManageAsHr && hasRequiredRole(roles, 'DEPT_MANAGER')
+  const canManage = canManageAsHr || canManageAsDeptManager
 
   // not-found/forbidden은 아래에서 전용 UX로 렌더하므로, 그 외 실패만 토스트로 알린다.
   useEffect(() => {
@@ -86,6 +94,16 @@ export function EmployeeDetailPage() {
         숨겨 개인정보 노출을 막는다(본인 조회 페이지인 MyInfoPage와의 핵심 차이점).
       */}
       <EmployeeInfoView data={query.data} empId={parsedEmpId} viewerIsSelf={false} />
+      {canManage && (
+        <div className="mt-6">
+          <EmpManagementSection
+            empId={parsedEmpId}
+            deptId={getPrimaryDeptId(query.data.currentDepts)}
+            canManageAsHr={canManageAsHr}
+            canManageAsDeptManager={canManageAsDeptManager}
+          />
+        </div>
+      )}
     </div>
   )
 }

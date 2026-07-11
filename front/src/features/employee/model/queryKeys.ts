@@ -11,9 +11,22 @@ export const employeeKeys = {
   me: () => [...employeeKeys.all, 'me'] as const,
   detail: (empId: number | undefined) => [...employeeKeys.all, 'detail', empId] as const,
   /**
-   * 프로필사진/전자서명파일 전체 조회(`RETRIEVE_FILES_INFOS`, ROADMAP T5.3) 폴백 캐시 키.
-   * useMeQuery()의 activeFiles가 비어있는 예외 상황에서만 사용하는 대체 조회이므로 me()와
-   * 별도 키로 분리해 서로의 캐시를 오염시키지 않는다.
+   * 프로필사진/전자서명파일 전체 조회(`RETRIEVE_FILES_INFOS`) 캐시 키.
+   * useMeQuery()의 activeFiles(활성만)가 비어있는 예외 상황의 폴백 조회(ROADMAP T5.3)로 시작했지만,
+   * RETRIEVE_FILES_INFOS는 비활성 파일도 함께 반환하므로 파일관리 탭(EmpFileManagementPanel)의
+   * 활성화/삭제 관리 주 데이터 소스로도 쓰인다. me()와 별도 키로 분리해 서로의 캐시를 오염시키지 않는다.
    */
   filesInfos: () => [...employeeKeys.all, 'filesInfos'] as const,
+  /**
+   * 관리용 사원 리스트 조회(`EMPS_FOR_MANAGEMENT`) 캐시 키. deptId/status/keyword/page/size가
+   * 바뀔 때마다 별도 캐시 엔트리로 구분되도록 params를 그대로 queryKey에 포함한다
+   * (departmentKeys.members/list와 동일 컨벤션).
+   */
+  empsForManagement: (params?: {
+    deptId?: number
+    status?: string
+    keyword?: string
+    page?: number
+    size?: number
+  }) => [...employeeKeys.all, 'empsForManagement', params] as const,
 }

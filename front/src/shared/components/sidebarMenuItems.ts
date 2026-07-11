@@ -166,14 +166,17 @@ export const sidebarMenuItems: SidebarMenuItem[] = [
     ],
   },
   {
+    // 가맹점 그룹: ROADMAP(FRANCHISE) T1.2에서 placeholder 4개를 실 라우트로 승격했다. minRole
+    // FRANCHISE는 그룹·자식 모두 그대로 유지한다(hasRequiredRole이 ADMIN을 자동 포함, meeting
+    // FACILITY 그룹 선례 동형).
     label: '가맹점',
     minRole: 'FRANCHISE',
     icon: Store,
     children: [
-      { label: '가맹점 관리', minRole: 'FRANCHISE', implemented: false },
-      { label: '가맹점 교육', minRole: 'FRANCHISE', implemented: false },
-      { label: '가맹점 문의', minRole: 'FRANCHISE', implemented: false },
-      { label: '가맹점 매출', minRole: 'FRANCHISE', implemented: false },
+      { label: '가맹점 관리', to: '/franchises', minRole: 'FRANCHISE' },
+      { label: '가맹점 교육', to: '/franchise-educations', minRole: 'FRANCHISE' },
+      { label: '가맹점 문의', to: '/franchise-inquiries', minRole: 'FRANCHISE' },
+      { label: '가맹점 매출', to: '/franchise-sales', minRole: 'FRANCHISE' },
     ],
   },
   {
