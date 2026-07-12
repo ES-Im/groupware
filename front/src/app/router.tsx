@@ -26,8 +26,9 @@ import { BoardDraftsPage } from '@/features/board/pages/BoardDraftsPage'
 import { BoardEditPage } from '@/features/board/pages/BoardEditPage'
 import { BoardListPage } from '@/features/board/pages/BoardListPage'
 import { DepartmentDetailPage } from '@/features/department/pages/DepartmentDetailPage'
+import { DepartmentExplorerEmptyState } from '@/features/department/pages/DepartmentExplorerEmptyState'
 import { DepartmentMembersPage } from '@/features/department/pages/DepartmentMembersPage'
-import { DepartmentsPage } from '@/features/department/pages/DepartmentsPage'
+import { DepartmentsExplorerLayout } from '@/features/department/pages/DepartmentsExplorerLayout'
 import { CompanyInfoPage } from '@/features/company/pages/CompanyInfoPage'
 import { MessageBoxPage } from '@/features/message/pages/MessageBoxPage'
 import { EmployeeDetailPage } from '@/features/employee/pages/EmployeeDetailPage'
@@ -61,9 +62,12 @@ import { LayoutShell } from '@/shared/components/LayoutShell'
  * T2.2에서 EmployeeDetailPage(사원 상세 실페이지)로 교체했다. /me는 T2.3에서 MyInfoPage(내 정보
  * 조회 페이지)로 연결했다. 내 정보 수정은 T3.1에서 /me/edit 전용 페이지(UpdateMePage)로 시작했으나
  * adapt-ui 2차 수정에서 MyInfoPage 내 UpdateMeDialog 모달로 전환하며 라우트 자체를 제거했다.
- * /departments는 T6.3에서 DepartmentsPage(전사 부서 목록/조직도 페이지)로 연결했다.
- * /departments/:deptId는 T7.1에서 DepartmentDetailPage(부서 상세 컨테이너)로 연결했다.
- * deptId 파라미터 유효성 검사·not-found 분기는 페이지 컴포넌트 내부에서 처리한다.
+ * /departments는 탐색형 조직도(좌측 트리 + 우측 상세, master-detail)로 재구성했다. 표 목록
+ * 페이지(DepartmentsPage, T6.3)는 DepartmentsExplorerLayout(레이아웃 라우트)으로 대체됐고,
+ * /departments(index)는 DepartmentExplorerEmptyState(부서 미선택 안내), /departments/:deptId는
+ * 기존 DepartmentDetailPage(T7.1, 우측 상세 영역 내용만 그리도록 리팩터)를 자식 라우트로 중첩한다.
+ * 경로 문자열 자체는 그대로 유지해 기존 딥링크가 깨지지 않는다. deptId 파라미터 유효성 검사·
+ * not-found 분기는 DepartmentDetailPage 내부에서 처리한다.
  * /boards는 T10.3에서 BoardListPage(게시판 목록 페이지)로 연결했다. /boards/:boardId는
  * T11.3에서 BoardDetailPage(게시글 상세 컨테이너)로 연결했다.
  * /boards/new는 T12.2에서 BoardCreatePage(게시글 작성 페이지)로 연결했다. /boards/:boardId/edit는
@@ -197,11 +201,11 @@ export const router = createBrowserRouter([
       },
       {
         path: 'departments',
-        element: <DepartmentsPage />,
-      },
-      {
-        path: 'departments/:deptId',
-        element: <DepartmentDetailPage />,
+        element: <DepartmentsExplorerLayout />,
+        children: [
+          { index: true, element: <DepartmentExplorerEmptyState /> },
+          { path: ':deptId', element: <DepartmentDetailPage /> },
+        ],
       },
       {
         path: 'department-members',
