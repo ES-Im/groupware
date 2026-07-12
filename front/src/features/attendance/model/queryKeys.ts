@@ -34,10 +34,14 @@ interface DeptMonthlyParams {
 }
 
 /**
- * DEPT_ATTENDANCE_PENDING(F306) 쿼리 파라미터. query-parameters.adoc 실측대로
- * page/size만 존재한다(필터 없음).
+ * DEPT_ATTENDANCE_PENDING(F306) 쿼리 파라미터. query-parameters.adoc 실측 기준은 아직
+ * page/size뿐이지만, 백엔드가 DEPT_ATTENDANCE_MONTHLY와 동일한 단일값 `status` 필터를 추가할
+ * 예정이라(front/CLAUDE.md 계약 우선 원칙과 별개로, 이 필드는 사용자 확인 하에 선반영) 미리
+ * 타입에 반영해둔다. 백엔드가 실제로 이 파라미터를 바인딩하기 전까지는 요청에 실려도 서버가
+ * 조용히 무시한다(요청/쿼리 자체는 실패하지 않는다).
  */
 interface DeptPendingParams {
+  status?: AttendanceStatus
   page?: number
   size?: number
 }

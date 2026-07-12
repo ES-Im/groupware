@@ -1,0 +1,102 @@
+/*
+ * 부서 근태 캘린더(FullCalendar) 전용 스코프드 스타일.
+ * schedule/scheduleCalendar.css와 동일한 원칙을 따른다: 그리드 크롬은 shadcn 시맨틱 토큰만 쓰고,
+ * 이벤트 유형 색(근태 상태 배지 variant)만 이 파일에서 라이트/다크 CSS 변수로 정의한다.
+ * 모든 규칙은 .attendance-calendar 루트로 스코프를 제한해 전역 index.css를 오염시키지 않는다.
+ */
+
+.attendance-calendar {
+  /* FullCalendar 기본 팔레트를 shadcn 토큰에 맞춘다(다크모드 자동 대응). */
+  --fc-border-color: var(--border);
+  --fc-page-bg-color: var(--card);
+  --fc-neutral-bg-color: var(--muted);
+  --fc-today-bg-color: color-mix(in oklch, var(--foreground) 4%, transparent);
+
+  /* 근태 상태 배지 variant별 범주형 색(라이트). attendanceStatusBadgeMap과 의미를 맞춘다:
+     default=정상, secondary=반차/연차, destructive=지각조퇴/결근, outline=병가/진행 중. */
+  --att-default-bg: #dcfce7;
+  --att-default-fg: #15803d;
+  --att-secondary-bg: #e0e7ff;
+  --att-secondary-fg: #4338ca;
+  --att-destructive-bg: #fee2e2;
+  --att-destructive-fg: #b91c1c;
+  --att-outline-bg: #fef3c7;
+  --att-outline-fg: #b45309;
+
+  font-size: 0.8125rem;
+}
+
+.dark .attendance-calendar {
+  --att-default-bg: color-mix(in srgb, #22c55e 22%, transparent);
+  --att-default-fg: #bbf7d0;
+  --att-secondary-bg: color-mix(in srgb, #6366f1 22%, transparent);
+  --att-secondary-fg: #c7d2fe;
+  --att-destructive-bg: color-mix(in srgb, #ef4444 22%, transparent);
+  --att-destructive-fg: #fecaca;
+  --att-outline-bg: color-mix(in srgb, #f59e0b 24%, transparent);
+  --att-outline-fg: #fde68a;
+}
+
+/* 요일 헤더 행 */
+.attendance-calendar .fc .fc-col-header-cell-cushion {
+  padding: 0.5rem 0.25rem;
+  font-weight: 500;
+  color: var(--muted-foreground);
+}
+
+/* 날짜 숫자를 본문 색으로 */
+.attendance-calendar .fc .fc-daygrid-day-number {
+  color: var(--foreground);
+}
+
+/* 오늘 날짜 숫자를 primary 원형 배지로 강조 */
+.attendance-calendar .fc-daygrid-day.fc-day-today .fc-daygrid-day-number {
+  display: inline-flex;
+  min-width: 1.5rem;
+  height: 1.5rem;
+  align-items: center;
+  justify-content: center;
+  margin: 2px;
+  padding: 0 0.35rem;
+  border-radius: 9999px;
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+  font-weight: 600;
+}
+
+/* 이벤트 공통: 옅은 배경 + 좌측 3px 액센트 + 진한 텍스트 */
+.attendance-calendar .fc-event.attendance-event {
+  border: 0;
+  border-left: 3px solid transparent;
+  border-radius: 4px;
+  padding: 1px 5px;
+  background-color: transparent;
+  font-weight: 500;
+  cursor: pointer;
+}
+.attendance-calendar .fc-event.attendance-event .fc-event-title,
+.attendance-calendar .fc-event.attendance-event .fc-event-main {
+  color: inherit;
+  font-weight: 500;
+}
+
+.attendance-calendar .fc-event.attendance-event-default {
+  background-color: var(--att-default-bg);
+  border-left-color: var(--att-default-fg);
+  color: var(--att-default-fg);
+}
+.attendance-calendar .fc-event.attendance-event-secondary {
+  background-color: var(--att-secondary-bg);
+  border-left-color: var(--att-secondary-fg);
+  color: var(--att-secondary-fg);
+}
+.attendance-calendar .fc-event.attendance-event-destructive {
+  background-color: var(--att-destructive-bg);
+  border-left-color: var(--att-destructive-fg);
+  color: var(--att-destructive-fg);
+}
+.attendance-calendar .fc-event.attendance-event-outline {
+  background-color: var(--att-outline-bg);
+  border-left-color: var(--att-outline-fg);
+  color: var(--att-outline-fg);
+}

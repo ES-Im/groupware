@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import dayjs from 'dayjs'
 import { Search } from 'lucide-react'
 import { toast } from 'sonner'
+import type { EventClickArg } from '@fullcalendar/core'
 import { handleApiError } from '@/shared/lib/apiError'
 import { usePageState } from '@/shared/lib/usePageState'
 import type { PageMeta } from '@/shared/components/PaginationControls'
@@ -11,10 +12,12 @@ import { Input } from '@/shared/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/tabs'
 import { useDeptAttendanceMonthlyQuery } from '../api/useDeptAttendanceMonthlyQuery'
 import { useDeptAttendancePendingQuery } from '../api/useDeptAttendancePendingQuery'
-import { DeptAttendanceMonthlyTable } from '../components/DeptAttendanceMonthlyTable'
+import { AttendanceCalendar } from '../components/AttendanceCalendar'
+import { DeptAttendanceMemberList } from '../components/DeptAttendanceMemberList'
 import { DeptAttendancePendingTable } from '../components/DeptAttendancePendingTable'
 import { UpdateAttendanceDialog } from '../components/UpdateAttendanceDialog'
 import { attendanceStatusBadgeMap } from '../lib/attendanceStatusBadge'
+import { mapAttendanceToEvents } from '../lib/mapAttendanceToEvents'
 import type { AttendanceStatus } from '../model/attendance'
 import type { AttendanceEditTarget } from '../model/deptAttendance'
 import { usePrimaryDeptId } from '../model/usePrimaryDeptId'
@@ -29,15 +32,17 @@ const STATUS_OPTIONS = Object.keys(attendanceStatusBadgeMap) as AttendanceStatus
  * 부서 근태 관리 페이지(ROADMAP2 T3.4-a/T3.4-b, docs/prd/5.attendance-prd.md §페이지별 상세(부서 근태 관리)).
  *
  * shadcn Tabs로 셸을 구성한다: 탭①(월별 근태, F305)은 T3.4-a가 완성했고, 탭②(승인 대기, F306)는
- * T3.4-b가 이 태스크에서 완성한다. 탭②는 계약상 필터가 page/size뿐이라(query-parameters.adoc
- * DEPT_ATTENDANCE_PENDING 실측) 탭①과 달리 검색/월/상태 필터 UI가 없다.
+ * T3.4-b가 이 태스크에서 완성했다. query-parameters.adoc 실측(현재)은 아직 page/size뿐이지만,
+ * DEPT_ATTENDANCE_MONTHLY와 동일한 단일값 `status` 필터가 백엔드에 곧 추가될 예정이라(사용자 확인)
+ * 탭②도 탭①과 동일한 서버 사이드 status 필터 컨벤션으로 미리 맞춰뒀다 — 검색/월 필터는 계약에
+ * 없어 그대로 없다.
  *
- * 탭①의 필터/페이지 상태(keyword/yearMonth/status/usePageState)와 탭②의 페이지 상태
- * (별도 usePageState 호출)는 서로 다른 useState/usePageState 호출로 완전히 독립된 스코프를
- * 가진다. 두 상태 모두 이 페이지 컴포넌트(DeptAttendancePage) 최상단에서 선언되고 각 쿼리 훅도
- * 여기서 호출되므로(Radix Tabs.Content가 비활성 탭의 DOM만 언마운트할 뿐 이 최상위 함수 자체는
- * 리렌더되지 않는 한 계속 유지됨), 탭①에서 페이지를 이동한 뒤 탭②로 전환해도 탭①의 page/필터
- * 상태가 그대로 보존된다(반대 방향도 동일).
+ * 탭①의 필터/페이지 상태(keyword/yearMonth/status/usePageState)와 탭②의 필터/페이지 상태
+ * (status/usePageState, 별도 훅 호출)는 서로 다른 useState/usePageState 호출로 완전히 독립된
+ * 스코프를 가진다. 두 상태 모두 이 페이지 컴포넌트(DeptAttendancePage) 최상단에서 선언되고 각
+ * 쿼리 훅도 여기서 호출되므로(Radix Tabs.Content가 비활성 탭의 DOM만 언마운트할 뿐 이 최상위
+ * 함수 자체는 리렌더되지 않는 한 계속 유지됨), 탭①에서 페이지를 이동한 뒤 탭②로 전환해도 탭①의
+ * page/필터 상태가 그대로 보존된다(반대 방향도 동일).
  *
  * deptId는 T3.2(usePrimaryDeptId, 폴백 없는 엄격 도출)로 얻는다. useMeQuery가 아직 로딩 중이거나
  * isPrimary 소속이 없으면 deptId가 undefined인데, 이때 useDeptAttendanceMonthlyQuery는
@@ -64,18 +69,26 @@ export function DeptAttendancePage() {
   // 동일한 상태 하나(단일 다이얼로그 인스턴스)를 채운다.
   const [editTarget, setEditTarget] = useState<AttendanceEditTarget | null>(null)
 
+  // 월별 탭(마스터-디테일) 좌측 목록에서 선택된 사원. 셀렉션 전용 로컬 state로, 우측 캘린더 상세를
+  // 결정한다(라우트/URL 파라미터 미도입).
+  const [selectedEmpId, setSelectedEmpId] = useState<number | null>(null)
+
   const [searchInput, setSearchInput] = useState('')
   const [keyword, setKeyword] = useState('')
   const [yearMonth, setYearMonth] = useState(() => dayjs().format('YYYY-MM'))
   const [status, setStatus] = useState<AttendanceStatus | undefined>(undefined)
   const { page, size, onPageChange, resetPage } = usePageState()
 
-  // 탭②(승인 대기) 전용 페이지 상태 — 탭①의 usePageState 인스턴스와 완전히 분리된 별도 훅 호출.
-  // 필터가 page/size뿐이라 resetPage를 트리거할 다른 필터 상태가 없다.
+  // 탭②(승인 대기) 전용 필터/페이지 상태 — 탭①의 useState/usePageState 인스턴스와 완전히 분리된
+  // 별도 선언. status는 서버 사이드 필터(getDeptAttendancePending 참고, 백엔드 반영 예정)라
+  // useDeptAttendancePendingQuery에 그대로 전달한다. Tabs.Content가 비활성 탭을 언마운트하므로
+  // 이 상위 컴포넌트가 계속 들고 있어야 탭 전환 후에도 유지된다(탭①과 동일 컨벤션).
+  const [pendingStatus, setPendingStatus] = useState<AttendanceStatus | undefined>(undefined)
   const {
     page: pendingPage,
     size: pendingSize,
     onPageChange: onPendingPageChange,
+    resetPage: resetPendingPage,
   } = usePageState()
 
   // 검색 입력 디바운스(DepartmentsPage와 동일 패턴): 300ms 유예 후에만 확정 keyword로 반영 + page 리셋.
@@ -107,7 +120,41 @@ export function DeptAttendancePage() {
     handleApiError(monthlyQuery.error, { toast })
   }, [monthlyQuery.error])
 
+  // 좌측 목록에서 선택된 사원의 행(없으면 null). content는 react-query가 참조를 유지하므로
+  // selectedEmpId/데이터가 바뀔 때만 새 참조가 된다.
+  const monthlyRows = monthlyQuery.data?.content ?? []
+  const selectedRow =
+    selectedEmpId === null ? null : (monthlyRows.find((row) => row.empInfo.empId === selectedEmpId) ?? null)
+
+  // 선택 사원의 근태 상세 배열 → FullCalendar 이벤트. 선택이 없으면 빈 배열.
+  const calendarEvents = useMemo(
+    () => (selectedRow ? mapAttendanceToEvents(selectedRow.attendanceInfo, selectedRow.empInfo.empId) : []),
+    [selectedRow],
+  )
+
+  // 캘린더 이벤트 클릭 → 미승인 근태일 때만 수정 다이얼로그(F307)를 연다(승인된 근태는 서버가 수정
+  // 자체를 거부하므로 무시). 대상 근태 페이로드는 mapAttendanceToEvents가 extendedProps로 실어 둔다.
+  function handleCalendarEventClick(arg: EventClickArg) {
+    const props = arg.event.extendedProps as {
+      targetEmpId: number
+      attendanceId: number
+      startAt: string | null
+      endAt: string | null
+      isApproved: boolean
+    }
+    if (props.isApproved) {
+      return
+    }
+    setEditTarget({
+      targetEmpId: props.targetEmpId,
+      attendanceId: props.attendanceId,
+      startAt: props.startAt,
+      endAt: props.endAt,
+    })
+  }
+
   const pendingQuery = useDeptAttendancePendingQuery(deptId, {
+    status: pendingStatus,
     page: pendingPage,
     size: pendingSize,
   })
@@ -127,6 +174,11 @@ export function DeptAttendancePage() {
   function handleStatusChange(value: string) {
     setStatus(value === '' ? undefined : (value as AttendanceStatus))
     resetPage()
+  }
+
+  function handlePendingStatusChange(nextStatus: AttendanceStatus | undefined) {
+    setPendingStatus(nextStatus)
+    resetPendingPage()
   }
 
   const pageInfo: PageMeta = monthlyQuery.data ?? {
@@ -172,82 +224,119 @@ export function DeptAttendancePage() {
           </TabsList>
 
           <TabsContent value="monthly">
-            <Card className="h-fit">
-              <CardContent className="space-y-4">
-                {/* 필터 툴바: 부서원 이름 검색 + 조회 월(yyyy-MM) + 근태 상태 필터 */}
-                <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-                  <div className="relative w-full sm:max-w-xs">
-                    <Search className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
-                    <label htmlFor="dept-attendance-keyword" className="sr-only">
-                      부서원 이름 검색
-                    </label>
-                    <Input
-                      id="dept-attendance-keyword"
-                      type="search"
-                      value={searchInput}
-                      onChange={(event) => setSearchInput(event.target.value)}
-                      placeholder="부서원 이름 검색..."
-                      className="pl-8"
-                    />
+            {/* 마스터-디테일 2분할: 좌측(필터+사원 목록+페이지네이션) / 우측(선택 사원 근태 캘린더).
+                DepartmentsExplorerLayout의 grid 패턴을 근태 목록 폭에 맞춰 좁게 조정한다. */}
+            <div className="grid gap-4 lg:grid-cols-[minmax(280px,34%)_1fr]">
+              <Card className="h-fit">
+                <CardContent className="space-y-4">
+                  {/* 필터 툴바: 부서원 이름 검색 + 조회 월(yyyy-MM) + 근태 상태 필터 */}
+                  <div className="flex flex-col gap-3">
+                    <div className="relative w-full">
+                      <Search className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
+                      <label htmlFor="dept-attendance-keyword" className="sr-only">
+                        부서원 이름 검색
+                      </label>
+                      <Input
+                        id="dept-attendance-keyword"
+                        type="search"
+                        value={searchInput}
+                        onChange={(event) => setSearchInput(event.target.value)}
+                        placeholder="부서원 이름 검색..."
+                        className="pl-8"
+                      />
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <label htmlFor="dept-attendance-month" className="sr-only">
+                        조회 월
+                      </label>
+                      <Input
+                        id="dept-attendance-month"
+                        type="month"
+                        value={yearMonth}
+                        onChange={(event) => handleYearMonthChange(event.target.value)}
+                        className="w-auto"
+                      />
+                      <label htmlFor="dept-attendance-status-select" className="sr-only">
+                        근태 상태 필터
+                      </label>
+                      <select
+                        id="dept-attendance-status-select"
+                        value={status ?? ''}
+                        onChange={(event) => handleStatusChange(event.target.value)}
+                        className="h-8 rounded-lg border border-input bg-transparent px-2.5 text-sm text-foreground transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
+                      >
+                        <option value="">전체</option>
+                        {STATUS_OPTIONS.map((option) => (
+                          <option key={option} value={option}>
+                            {attendanceStatusBadgeMap[option].label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <label htmlFor="dept-attendance-month" className="sr-only">
-                      조회 월
-                    </label>
-                    <Input
-                      id="dept-attendance-month"
-                      type="month"
-                      value={yearMonth}
-                      onChange={(event) => handleYearMonthChange(event.target.value)}
-                      className="w-auto"
-                    />
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <label htmlFor="dept-attendance-status-select" className="sr-only">
-                      근태 상태 필터
-                    </label>
-                    <select
-                      id="dept-attendance-status-select"
-                      value={status ?? ''}
-                      onChange={(event) => handleStatusChange(event.target.value)}
-                      className="h-8 rounded-lg border border-input bg-transparent px-2.5 text-sm text-foreground transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
-                    >
-                      <option value="">전체</option>
-                      {STATUS_OPTIONS.map((option) => (
-                        <option key={option} value={option}>
-                          {attendanceStatusBadgeMap[option].label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
 
-                {monthlyQuery.isLoading ? (
-                  <p className="py-8 text-center text-sm text-muted-foreground">불러오는 중...</p>
-                ) : monthlyQuery.error ? (
-                  <p className="py-8 text-center text-sm text-muted-foreground">
-                    부서 근태 목록을 불러오지 못했습니다.
-                  </p>
-                ) : (
-                  <DeptAttendanceMonthlyTable
-                    data={monthlyQuery.data?.content ?? []}
-                    onEdit={setEditTarget}
+                  {monthlyQuery.isLoading ? (
+                    <p className="py-8 text-center text-sm text-muted-foreground">불러오는 중...</p>
+                  ) : monthlyQuery.error ? (
+                    <p className="py-8 text-center text-sm text-muted-foreground">
+                      부서 근태 목록을 불러오지 못했습니다.
+                    </p>
+                  ) : (
+                    <DeptAttendanceMemberList
+                      data={monthlyRows}
+                      selectedEmpId={selectedEmpId}
+                      onSelect={setSelectedEmpId}
+                    />
+                  )}
+
+                  <PaginationControls
+                    className="border-t pt-4"
+                    pageInfo={pageInfo}
+                    page={page}
+                    onPageChange={onPageChange}
+                    unit="명"
                   />
-                )}
+                </CardContent>
+              </Card>
 
-                <PaginationControls
-                  className="border-t pt-4"
-                  pageInfo={pageInfo}
-                  page={page}
-                  onPageChange={onPageChange}
-                  unit="명"
-                />
-              </CardContent>
-            </Card>
+              {/* 우측 상세: 선택 사원의 근태 캘린더. height="100%" 성립을 위해 카드에 고정 높이를 준다. */}
+              <Card className="h-[440px] lg:sticky lg:top-4 lg:h-[560px]">
+                <CardContent className="flex h-full min-h-0 flex-col">
+                  {selectedRow ? (
+                    <>
+                      <header className="mb-3 shrink-0">
+                        <h2 className="text-sm font-semibold text-foreground">
+                          {selectedRow.empInfo.empName}
+                        </h2>
+                        <p className="text-xs text-muted-foreground">
+                          {selectedRow.empInfo.positionName} · {dayjs(yearMonth).format('YYYY년 M월')}
+                        </p>
+                      </header>
+                      <div className="min-h-0 flex-1">
+                        <AttendanceCalendar
+                          key={yearMonth}
+                          events={calendarEvents}
+                          initialDate={`${yearMonth}-01`}
+                          onEventClick={handleCalendarEventClick}
+                        />
+                      </div>
+                    </>
+                  ) : (
+                    <div className="flex h-full items-center justify-center">
+                      <p className="max-w-xs text-center text-sm text-muted-foreground">
+                        좌측 목록에서 부서원을 선택하면 해당 월 근태 캘린더가 표시됩니다.
+                      </p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           <TabsContent value="pending">
-            {/* 승인 대기 탭(F306, T3.4-b). 계약상 필터가 page/size뿐이라 검색/월/상태 UI는 없다. */}
+            {/* 승인 대기 탭(F306, T3.4-b). status는 서버 사이드 필터로 pendingQuery에 그대로
+                전달되고(백엔드 반영 예정, useDeptAttendancePendingQuery 참고), 페이지네이션도
+                탭①과 동일하게 서버 page/size를 그대로 쓴다 — 클라이언트 전량 조회/재슬라이싱 없음. */}
             <Card className="h-fit">
               <CardContent className="space-y-4">
                 {pendingQuery.isLoading ? (
@@ -259,7 +348,10 @@ export function DeptAttendancePage() {
                 ) : (
                   <DeptAttendancePendingTable
                     data={pendingQuery.data?.content ?? []}
+                    totalElements={pendingQuery.data?.totalElements ?? 0}
                     onEdit={setEditTarget}
+                    status={pendingStatus}
+                    onStatusChange={handlePendingStatusChange}
                   />
                 )}
 

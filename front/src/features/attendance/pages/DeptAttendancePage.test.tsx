@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import dayjs from 'dayjs'
 import { http, HttpResponse } from 'msw'
@@ -320,7 +320,9 @@ describe('DeptAttendancePage (F306) - 승인 대기 탭', () => {
     await user.click(screen.getByRole('tab', { name: '승인 대기' }))
 
     expect(await screen.findByText('김대기')).toBeInTheDocument()
-    expect(screen.getByText('지각/조퇴')).toBeInTheDocument()
+    // DeptAttendancePendingTable의 상태 필터(ToggleGroup)도 동일한 상태 라벨을 렌더하므로
+    // 표 영역으로 쿼리 범위를 좁혀 배지 텍스트와의 중복 매치를 피한다.
+    expect(within(screen.getByRole('table')).getByText('지각/조퇴')).toBeInTheDocument()
     // PaginationControls unit="건" 렌더 확인(범위 요약 문구에 '건'이 포함된다).
     expect(screen.getByText((_, element) => element?.textContent === '1-1 / 1건')).toBeInTheDocument()
   })
@@ -447,10 +449,51 @@ describe('DeptAttendancePage (F305/F306) - 탭①/탭② 상태 분리(usePageSt
     expect(await screen.findByText('대기사원2')).toBeInTheDocument()
     expect(screen.queryByText('대기사원1')).not.toBeInTheDocument()
   })
+
+  it('탭②에서 상태 필터를 바꾸면 status가 서버 쿼리에 전달되고 조회 페이지가 0으로 리셋된다', async () => {
+    mockMePrimaryDept(DEPT_ID)
+    mockMonthlyDefault([makeRow(1)])
+
+    const pendingRequests: Array<{ status: string | null; page: string | null }> = []
+    server.use(
+      http.get(`${BASE_URL}/api/employees/attendances/${DEPT_ID}/monthly/pending`, ({ request }) => {
+        const url = new URL(request.url)
+        const page = url.searchParams.get('page') === '1' ? 1 : 0
+        pendingRequests.push({
+          status: url.searchParams.get('status'),
+          page: url.searchParams.get('page'),
+        })
+        return HttpResponse.json({
+          ...makePage([makePendingRow(page === 1 ? 2 : 1)], page),
+          totalPages: 2,
+          first: page === 0,
+          last: page === 1,
+        })
+      }),
+    )
+
+    const user = userEvent.setup()
+    renderPage()
+
+    await screen.findByText('사원1')
+    await user.click(screen.getByRole('tab', { name: '승인 대기' }))
+    await screen.findByText('대기사원1')
+
+    // 다음 페이지로 이동한 뒤 필터를 바꾸면 0페이지로 리셋되고, 새 요청에 status가 실린다.
+    await user.click(screen.getByRole('button', { name: '다음 페이지' }))
+    await screen.findByText('대기사원2')
+
+    await user.selectOptions(screen.getByLabelText('근태 상태 필터'), '지각/조퇴')
+
+    await waitFor(() =>
+      expect(pendingRequests.some((r) => r.status === 'LATE_EARLY' && r.page === '0')).toBe(true),
+    )
+    expect(await screen.findByText('대기사원1')).toBeInTheDocument()
+  })
 })
 
 describe('DeptAttendancePage (F307) - 근태 수정 다이얼로그 배선(T4.3)', () => {
-  it('탭①의 [수정] 버튼 클릭 시 다이얼로그가 열리고 대상 근태 시각이 채워진다', async () => {
+  it('탭①에서 사원 선택 후 캘린더의 미승인 이벤트 클릭 시 다이얼로그가 열리고 대상 근태 시각이 채워진다', async () => {
     mockMePrimaryDept(DEPT_ID)
     const editableItem = { ...makeAttendanceItem(77), isApproved: false, startAt: '07:30:00', endAt: null }
     mockMonthlyDefault([{ ...makeRow(1), attendanceInfo: [editableItem] }])
@@ -459,12 +502,39 @@ describe('DeptAttendancePage (F307) - 근태 수정 다이얼로그 배선(T4.3)
     const user = userEvent.setup()
     renderPage()
 
+    // 좌측 목록에서 사원을 선택해야 우측 캘린더가 렌더된다([수정] 진입점은 목록이 아니라
+    // 캘린더 이벤트 클릭으로 옮겨졌다).
     await screen.findByText('사원1')
-    await user.click(screen.getByRole('button', { name: '수정' }))
+    await user.click(screen.getByText('사원1'))
+
+    // 캘린더 이벤트 타이틀은 근태 상태 라벨("정상")이다. 동일 라벨이 상태 필터 <select><option>에도
+    // 존재하므로(.attendance-calendar 스코프 밖) 캘린더 컨테이너로 쿼리 범위를 좁힌다.
+    const calendar = document.querySelector('.attendance-calendar') as HTMLElement
+    const eventEl = await within(calendar).findByText('정상')
+    fireEvent.click(eventEl)
 
     expect(await screen.findByRole('dialog', { name: '근태 수정' })).toBeInTheDocument()
     expect(screen.getByLabelText('시작 시각')).toHaveValue('07:30:00')
     expect(screen.getByLabelText('종료 시각')).toHaveValue('')
+  })
+
+  it('승인된(isApproved===true) 캘린더 이벤트를 클릭해도 다이얼로그가 열리지 않는다', async () => {
+    mockMePrimaryDept(DEPT_ID)
+    const approvedItem = { ...makeAttendanceItem(77), isApproved: true }
+    mockMonthlyDefault([{ ...makeRow(1), attendanceInfo: [approvedItem] }])
+    mockPendingDefault([])
+
+    const user = userEvent.setup()
+    renderPage()
+
+    await screen.findByText('사원1')
+    await user.click(screen.getByText('사원1'))
+
+    const calendar = document.querySelector('.attendance-calendar') as HTMLElement
+    const eventEl = await within(calendar).findByText('정상')
+    fireEvent.click(eventEl)
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
   it('탭②의 [수정] 버튼 클릭 시 다이얼로그가 열리고 대상 근태 시각이 채워진다', async () => {
@@ -510,7 +580,10 @@ describe('DeptAttendancePage (F307) - 근태 수정 다이얼로그 배선(T4.3)
     renderPage()
 
     await screen.findByText('사원1')
-    await user.click(screen.getByRole('button', { name: '수정' }))
+    await user.click(screen.getByText('사원1'))
+    const calendar = document.querySelector('.attendance-calendar') as HTMLElement
+    const eventEl = await within(calendar).findByText('정상')
+    fireEvent.click(eventEl)
     expect(await screen.findByRole('dialog')).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: '취소' }))

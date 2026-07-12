@@ -1,4 +1,5 @@
 import { apiClient } from '@/shared/api/client'
+import type { AttendanceStatus } from '../model/attendance'
 import type { DeptAttendancePending } from '../model/deptAttendance'
 
 /**
@@ -6,8 +7,11 @@ import type { DeptAttendancePending } from '../model/deptAttendance'
  * `DEPT_ATTENDANCE_PENDING` → `GET /api/employees/attendances/{deptId}/monthly/pending`,
  * minRole DEPT_MANAGER).
  *
- * query-parameters.adoc 실측대로 page/size만 존재하고 필터(keyword/status 등)는 없다.
- * 값이 없는 파라미터는 쿼리스트링 자체에서 생략되도록 params 객체에 조건부로만 채운다.
+ * query-parameters.adoc 실측 기준은 아직 page/size뿐이지만, `status`(DEPT_ATTENDANCE_MONTHLY와
+ * 동일한 단일값 AttendanceStatus)가 백엔드에 곧 추가될 예정이라 getDeptAttendanceMonthly와 동일한
+ * 조건부 포함 패턴으로 미리 실어 보낸다. 백엔드가 아직 이 파라미터를 바인딩하지 않는 동안은 서버가
+ * 조용히 무시하므로(필터 없이 기존과 동일하게 동작) 안전하다 — 값이 없는 파라미터는 쿼리스트링
+ * 자체에서 생략되도록 params 객체에 조건부로만 채운다.
  *
  * 타 부서 접근 시 서버가 403(ROLE_003)을 반환하며, 이 함수는 별도 처리 없이 그대로 throw한다
  * (호출부가 기존 handleApiError로 정규화 소비, 재구현 금지).
@@ -17,11 +21,15 @@ import type { DeptAttendancePending } from '../model/deptAttendance'
 export async function getDeptAttendancePending(
   deptId: number,
   params?: {
+    status?: AttendanceStatus
     page?: number
     size?: number
   },
 ): Promise<DeptAttendancePending> {
-  const query: Record<string, number> = {}
+  const query: Record<string, string | number> = {}
+  if (params?.status) {
+    query.status = params.status
+  }
   if (params?.page != null) {
     query.page = params.page
   }
