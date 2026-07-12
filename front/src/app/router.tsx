@@ -34,6 +34,7 @@ import { CompanyInfoPage } from '@/features/company/pages/CompanyInfoPage'
 import { MessageBoxPage } from '@/features/message/pages/MessageBoxPage'
 import { EmployeeDetailPage } from '@/features/employee/pages/EmployeeDetailPage'
 import { MyInfoPage } from '@/features/employee/pages/MyInfoPage'
+import { NewEmployeeApprovalListPage } from '@/features/employee/registration/pages/NewEmployeeApprovalListPage'
 import { MyMeetingCalendarPage } from '@/features/meeting/pages/MyMeetingCalendarPage'
 import { MeetingReservationCreatePage } from '@/features/meeting/pages/MeetingReservationCreatePage'
 import { MeetingReservationManagementPage } from '@/features/meeting/pages/MeetingReservationManagementPage'
@@ -186,6 +187,13 @@ import { LayoutShell } from '@/shared/components/LayoutShell'
  * 로직을 채우는 셸 상태다.
  * /schedules는 ROADMAP(SCHEDULE) T1.5에서 ScheduleCalendarPage(일정 캘린더 조회 페이지)로
  * 연결했다. minRole EMPLOYEE라 별도 RoleGuard 없이 ProtectedRoute(인증 가드)만으로 충분하다.
+ * /employees/new는 인사관리(가입승인) 도메인 M1(T1.6)에서 NewEmployeeApprovalListPage(신규 사원
+ * 승인 목록 페이지)로 연결했다. 정적 세그먼트 'new'는 React Router 7 랭킹 규칙상 동적
+ * ':empId'보다 항상 우선 매칭되지만(위 'boards/new'·'drafts/new' 등과 동일 근거), 명시적으로도
+ * 'employees/:empId'보다 앞에 등록해 둔다. 다이얼로그 연결(승인 확정 액션)은 M2(T2.5) 소관이라
+ * 이 라우트는 목록 조회 화면만 배선한다. minRole HR 게이팅은 사이드바(minRole)에서만 처리하고
+ * (근태 /attendance/dept·휴가·회의실 컨벤션과 동일), 라우트 자체는 ProtectedRoute(인증 가드)만
+ * 적용한다 — 최종 권한 판단은 서버(403 ROLE_003)에 위임한다.
  */
 export const router = createBrowserRouter([
   {
@@ -239,6 +247,13 @@ export const router = createBrowserRouter([
         // "임시저장글 불러오기"에서 draft를 선택했을 때의 이동 목적지가 실제 화면으로 이어진다.
         path: 'boards/:boardId/edit',
         element: <BoardEditPage />,
+      },
+      {
+        // 신규 사원 승인 목록 페이지: 인사관리(가입승인) 도메인 M1(T1.6)에서
+        // NewEmployeeApprovalListPage로 연결했다. 정적 세그먼트 'new'는 동적 ':empId'보다 항상
+        // 우선 매칭되지만(위 기안 라우트들과 동일 근거), 명시적으로도 앞에 등록해 둔다.
+        path: 'employees/new',
+        element: <NewEmployeeApprovalListPage />,
       },
       {
         path: 'employees/:empId',

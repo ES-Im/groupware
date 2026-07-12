@@ -29,4 +29,16 @@ export const employeeKeys = {
     page?: number
     size?: number
   }) => [...employeeKeys.all, 'empsForManagement', params] as const,
+  /**
+   * 가입대기자 목록 조회(`NEW_EMP_LIST`) 캐시 키. keyword/page/size가 바뀔 때마다
+   * 별도 캐시 엔트리로 구분되도록 params를 그대로 queryKey에 포함한다(empsForManagement와 동일 컨벤션).
+   *
+   * params 미지정 시 3칸(['employee','newEmployees',undefined])이 아니라 2칸 프리픽스를 반환한다 —
+   * invalidateQueries({queryKey: employeeKeys.newEmployees()})가 구체 params를 가진 실제 캐시
+   * 쿼리와 partialMatchKey로 매칭되게 하기 위함(scheduleKeys.calendar와 동일 패턴, T6.1 리뷰로 확인됨).
+   */
+  newEmployees: (params?: { keyword?: string; page?: number; size?: number }) =>
+    params === undefined
+      ? ([...employeeKeys.all, 'newEmployees'] as const)
+      : ([...employeeKeys.all, 'newEmployees', params] as const),
 }

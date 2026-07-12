@@ -148,7 +148,7 @@ export const sidebarMenuItems: SidebarMenuItem[] = [
     minRole: 'HR',
     icon: UserCog,
     children: [
-      { label: '신규 사원 승인', minRole: 'HR', implemented: false },
+      { label: '신규 사원 승인', to: '/employees/new', minRole: 'HR' },
       { label: '사원 상태 관리', minRole: 'HR', implemented: false },
     ],
   },
