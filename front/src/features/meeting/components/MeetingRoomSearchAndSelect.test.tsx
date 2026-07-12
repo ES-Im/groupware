@@ -72,7 +72,11 @@ describe('MeetingRoomSearchAndSelect - 검색 전/후', () => {
     server.use(
       http.get(`${BASE_URL}/api/meeting-rooms/available`, ({ request }) => {
         const url = new URL(request.url)
-        requestedParams = Object.fromEntries(url.searchParams.entries())
+        const captured: Record<string, string | null> = {}
+        url.searchParams.forEach((value, key) => {
+          captured[key] = value
+        })
+        requestedParams = captured
         return HttpResponse.json(pageOf([{ meetingRoomId: 3, name: '대회의실', capacity: 10, isAvailable: true }]))
       }),
     )

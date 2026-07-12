@@ -30,28 +30,6 @@ function createWrapper() {
   return { Wrapper, queryClient }
 }
 
-function mockRoomDetail(meetingRoomId: number, isAvailable: boolean) {
-  return http.get(`${BASE_URL}/api/meeting-rooms/${meetingRoomId}`, () =>
-    HttpResponse.json({ meetingRoomId, name: '대회의실', description: '설명', capacity: 10, isAvailable }),
-  )
-}
-
-function mockRoomManagementList(isAvailable: boolean) {
-  return http.get(`${BASE_URL}/api/meeting-rooms/management`, () =>
-    HttpResponse.json({
-      content: [{ meetingRoomId: 1, name: '대회의실', capacity: 10, isAvailable }],
-      totalElements: 1,
-      totalPages: 1,
-      number: 0,
-      size: 10,
-      numberOfElements: 1,
-      first: true,
-      last: true,
-      empty: false,
-    }),
-  )
-}
-
 describe('useMeetingRoomActivateMutation - 이중 invalidate', () => {
   it('활성화 성공(204) 시 roomManagement 목록과 roomDetail 둘 다 invalidate되어 재조회된다', async () => {
     let isAvailable = false
