@@ -194,6 +194,10 @@ export function BoardEditPage() {
     <div className="mx-auto w-full max-w-2xl p-4 sm:p-6 lg:p-8">
       <h1 className="mb-6 text-xl font-semibold tracking-tight">게시글 수정</h1>
 
+      {/* 게시글 작성 페이지(BoardCreatePage)와 동일하게 폼+첨부를 하나의 카드 공간 안에 담는다 —
+          이전에는 첨부(BoardEditAttachments)가 별도 카드로 아래에 떨어져 있었다(사용자 요청으로 통합).
+          BoardEditAttachments의 flat prop(순수 프레젠테이션 분기, 인라인 편집 때 이미 도입)을 그대로
+          재사용해 카드 래퍼 없이 렌더한다. */}
       <Card>
         <CardHeader className="border-b">
           <CardTitle className="flex items-center gap-1.5">
@@ -202,7 +206,7 @@ export function BoardEditPage() {
           </CardTitle>
           <CardDescription>카테고리·제목·본문을 수정한 뒤 저장합니다.</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="flex flex-col gap-4">
           {/* //todo : [minor] cancel(link)는 매 렌더 계산되는데 detailQuery는 editMode 성공 후에야 발화한다 — detail 로딩 창에서는 초안이어도 detailQuery.error가 없어 /boards/:boardId(상세)로 계산돼, 그 사이 "취소"를 누른 초안은 여전히 상세 404에 착지한다(저장은 isModifiedAtReady로 게이팅되나 취소 Link는 항상 활성이라 비대칭). detail이 resolve될 때까지 취소도 함께 게이팅/보류하는 방향 검토 */}
           <BoardEditForm
             cancel={{ type: 'link', path: resolveEditTargetPath() }}
@@ -216,10 +220,9 @@ export function BoardEditPage() {
             isModifiedAtReady={getModifiedAt() !== undefined}
             onSubmitPayload={handleSubmitPayload}
           />
+          <BoardEditAttachments boardId={boardId} flat />
         </CardContent>
       </Card>
-
-      <BoardEditAttachments boardId={boardId} />
     </div>
   )
 }

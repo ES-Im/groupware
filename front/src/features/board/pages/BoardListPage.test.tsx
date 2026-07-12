@@ -15,6 +15,10 @@ import { BoardListPage } from './BoardListPage'
  * - 카테고리 로딩/목록 로딩 도중 "게시글이 없습니다" 오표시 플래시가 나오지 않는지
  *   (1프레임 깜빡임 방지 가드, BoardListPage.tsx L171-175 주석 참조).
  * - 페이지네이션 조작 시 목록이 올바른 page 파라미터로 갱신되는지.
+ *
+ * "게시글 작성"은 더 이상 상시 노출 카드가 아니라 좌측 "게시글 작성" 버튼으로 진입하는 별도 화면
+ * 전환이다(사용자 요청 레이아웃 개편) — 기본 상태는 곧바로 "게시글 목록"이 렌더되므로, 이전
+ * 라운드의 closeComposeCard 같은 사전 조작 없이 바로 목록 단언을 할 수 있다.
  */
 
 function boardSummary(overrides: Partial<Record<string, unknown>> = {}) {

@@ -4,6 +4,7 @@ import { toast } from 'sonner'
 import { normalizeApiError } from '@/shared/lib/apiError'
 import { Button } from '@/shared/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
+import { Label } from '@/shared/ui/label'
 import { useBoardFileDeleteMutation } from '../api/useBoardFileDeleteMutation'
 import { useBoardFilesQuery } from '../api/useBoardFilesQuery'
 import { useBoardFileUploadMutation } from '../api/useBoardFileUploadMutation'
@@ -31,7 +32,19 @@ function formatFileSizeMb(bytes: number): string {
  * `normalizeApiError`는 axios 에러 전용 분기만 인식해 이 도메인 에러를 "알 수 없는 오류"로 뭉개
  * 버리므로 별도로 `instanceof` 분기한다.
  */
-export function BoardEditAttachments({ boardId }: { boardId: number }) {
+export function BoardEditAttachments({
+  boardId,
+  flat = false,
+}: {
+  boardId: number
+  /**
+   * 카드 래퍼 없이 평평하게 렌더할지 여부(순수 프레젠테이션 분기 — 업로드/삭제/조회 로직에는 영향
+   * 없음). 목록 인라인 편집(BoardCreateForm)에서 소비될 때 true로 주어, create 모드의 첨부파일
+   * 블록과 동일하게 Card/CardHeader/CardTitle 없이 Label 헤더 + "파일 추가" 버튼 + 목록으로
+   * 렌더한다. 전용 수정 페이지(BoardEditPage)는 미지정(false)으로 기존 `<Card>` 박스 모양을 유지한다.
+   */
+  flat?: boolean
+}) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const filesQuery = useBoardFilesQuery(boardId)
   const uploadMutation = useBoardFileUploadMutation()
@@ -93,6 +106,77 @@ export function BoardEditAttachments({ boardId }: { boardId: number }) {
     )
   }
 
+  // 파일 <input>은 카드/평평(flat) 모드에서 동일하다 — 한 번만 정의해 두 분기에서 공유한다.
+  const fileInput = (
+    <input
+      ref={fileInputRef}
+      type="file"
+      multiple
+      className="hidden"
+      disabled={uploadMutation.isPending}
+      onChange={handleFileInputChange}
+    />
+  )
+
+  // 파일 목록/로딩/빈 상태 본문 — 카드 유무(flat)와 무관하게 동일하게 렌더한다.
+  const attachmentList = filesQuery.isLoading ? (
+    <p className="text-sm text-muted-foreground">첨부파일을 불러오는 중...</p>
+  ) : files.length === 0 ? (
+    <p className="text-sm text-muted-foreground">첨부파일이 없습니다.</p>
+  ) : (
+    <ul className="flex flex-col gap-2">
+      {files.map((file) => {
+        const isDeleting = deletingFileIds.has(file.fileId)
+        return (
+          <li
+            key={file.fileId}
+            className="flex items-center justify-between gap-3 rounded-lg border px-3 py-2"
+          >
+            <span className="min-w-0 truncate text-sm text-foreground">{file.originalName}</span>
+            <div className="flex shrink-0 items-center gap-3">
+              <span className="text-xs text-muted-foreground">{formatFileSizeMb(file.fileSize)}</span>
+              <Button
+                type="button"
+                variant="destructive"
+                size="icon-sm"
+                disabled={isDeleting}
+                onClick={() => handleDelete(file.fileId)}
+                aria-label={`${file.originalName} 삭제`}
+              >
+                {/* 파일별 삭제 진행 상태(deletingFileIds)를 개별 스피너로 표시한다 —
+                    동시 삭제 시 각 행이 독립적으로 진행 표시되도록 로컬 상태를 그대로 소비한다. */}
+                {isDeleting ? <Loader2 className="animate-spin" /> : <Trash2 />}
+              </Button>
+            </div>
+          </li>
+        )
+      })}
+    </ul>
+  )
+
+  // 목록 인라인 편집(BoardCreateForm)에서 소비될 때(flat): create 모드 첨부 블록과 동일한 평평한
+  // 구조로 렌더한다 — Card/CardHeader/CardTitle 없이 Label 헤더 + "파일 추가" 버튼 + 목록.
+  if (flat) {
+    return (
+      <div className="flex flex-col gap-1.5">
+        <Label>첨부파일{files.length > 0 && ` ${files.length}개`}</Label>
+        {fileInput}
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="w-fit"
+          disabled={uploadMutation.isPending}
+          onClick={() => fileInputRef.current?.click()}
+        >
+          {uploadMutation.isPending ? <Loader2 className="animate-spin" /> : <Plus />}
+          {uploadMutation.isPending ? '업로드 중...' : '파일 추가'}
+        </Button>
+        {attachmentList}
+      </div>
+    )
+  }
+
   return (
     <Card className="mt-4">
       <CardHeader className="border-b">
@@ -101,14 +185,7 @@ export function BoardEditAttachments({ boardId }: { boardId: number }) {
             <Paperclip className="size-4" />
             첨부파일{files.length > 0 && ` ${files.length}개`}
           </CardTitle>
-          <input
-            ref={fileInputRef}
-            type="file"
-            multiple
-            className="hidden"
-            disabled={uploadMutation.isPending}
-            onChange={handleFileInputChange}
-          />
+          {fileInput}
           <Button
             type="button"
             variant="outline"
@@ -121,46 +198,7 @@ export function BoardEditAttachments({ boardId }: { boardId: number }) {
           </Button>
         </div>
       </CardHeader>
-      <CardContent>
-        {filesQuery.isLoading ? (
-          <p className="text-sm text-muted-foreground">첨부파일을 불러오는 중...</p>
-        ) : files.length === 0 ? (
-          <p className="text-sm text-muted-foreground">첨부파일이 없습니다.</p>
-        ) : (
-          <ul className="flex flex-col gap-2">
-            {files.map((file) => {
-              const isDeleting = deletingFileIds.has(file.fileId)
-              return (
-                <li
-                  key={file.fileId}
-                  className="flex items-center justify-between gap-3 rounded-lg border px-3 py-2"
-                >
-                  <span className="min-w-0 truncate text-sm text-foreground">
-                    {file.originalName}
-                  </span>
-                  <div className="flex shrink-0 items-center gap-3">
-                    <span className="text-xs text-muted-foreground">
-                      {formatFileSizeMb(file.fileSize)}
-                    </span>
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      size="icon-sm"
-                      disabled={isDeleting}
-                      onClick={() => handleDelete(file.fileId)}
-                      aria-label={`${file.originalName} 삭제`}
-                    >
-                      {/* 파일별 삭제 진행 상태(deletingFileIds)를 개별 스피너로 표시한다 —
-                          동시 삭제 시 각 행이 독립적으로 진행 표시되도록 로컬 상태를 그대로 소비한다. */}
-                      {isDeleting ? <Loader2 className="animate-spin" /> : <Trash2 />}
-                    </Button>
-                  </div>
-                </li>
-              )
-            })}
-          </ul>
-        )}
-      </CardContent>
+      <CardContent>{attachmentList}</CardContent>
     </Card>
   )
 }

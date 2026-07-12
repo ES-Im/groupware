@@ -342,7 +342,9 @@ export function BoardDetailView({ boardId, onBack }: BoardDetailViewProps) {
     return (
       <div className="flex flex-col lg:min-h-0 lg:flex-1">
         <div className="mb-4 shrink-0">{backButton}</div>
-        <Card className="lg:min-h-0 lg:flex-1">
+        {/* min-h-0 대신 구체적인 최소 높이(BoardListPage 목록 카드와 동일 값) — "게시글 작성" 카드가
+            펼쳐진 채로 상세 진입하면 이 카드도 같은 이유로 0에 가깝게 눌릴 수 있어 최소 높이를 둔다. */}
+        <Card className="lg:min-h-[22rem] lg:flex-1">
           {cardHeader}
           <div className="lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
             {cardBody}

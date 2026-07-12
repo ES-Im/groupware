@@ -67,7 +67,10 @@ describe('BoardCreatePage (F305) - zod 사전검증', () => {
     vi.clearAllMocks()
   })
 
-  it('빈 값으로 "임시저장"을 눌러도 zod 사전검증 메시지를 보여주고 API를 호출하지 않는다', async () => {
+  it('빈 값으로 "임시저장"을 눌러도 제목/본문 사전검증 메시지를 보여주고 API를 호출하지 않는다', async () => {
+    // 카테고리는 BoardCreateForm의 마운트 시 1회 동기화(§defaultCategoryId)로 categories[0]이
+    // 자동 선택되므로(사용자 요청: 좌측 선택 카테고리와 동기화), 빈 값 제출 시나리오에서도
+    // "카테고리를 선택해주세요"는 더 이상 재현되지 않는다 — 제목/본문만 검증한다.
     mockCategoriesAndDrafts()
     let registerCalled = false
     server.use(
@@ -84,7 +87,6 @@ describe('BoardCreatePage (F305) - zod 사전검증', () => {
 
     const alerts = await screen.findAllByRole('alert')
     const alertTexts = alerts.map((el) => el.textContent)
-    expect(alertTexts).toContain('카테고리를 선택해주세요')
     expect(alertTexts).toContain('제목을 입력해주세요')
     expect(alertTexts).toContain('본문을 입력해주세요')
     expect(registerCalled).toBe(false)
@@ -106,7 +108,7 @@ describe('BoardCreatePage (F305) - zod 사전검증', () => {
     await user.click(screen.getByRole('button', { name: '발행' }))
 
     const alerts = await screen.findAllByRole('alert')
-    expect(alerts.map((el) => el.textContent)).toContain('카테고리를 선택해주세요')
+    expect(alerts.map((el) => el.textContent)).toContain('제목을 입력해주세요')
     expect(registerCalled).toBe(false)
   })
 })

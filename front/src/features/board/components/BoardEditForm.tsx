@@ -2,6 +2,7 @@ import { Link } from 'react-router'
 import { Save } from 'lucide-react'
 import { toast } from 'sonner'
 import { submitWithErrorMapping, useZodForm } from '@/shared/lib/form'
+import { cn } from '@/shared/lib/utils'
 import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
 import { Label } from '@/shared/ui/label'
@@ -33,6 +34,7 @@ export function BoardEditForm({
   cancel,
   categories,
   defaultValues,
+  emphasizeActions = false,
   getModifiedAt,
   isModifiedAtReady,
   onSubmitPayload,
@@ -40,6 +42,13 @@ export function BoardEditForm({
   cancel: BoardEditCancel
   categories: CategoryItem[]
   defaultValues: BoardEditFormValues
+  /**
+   * 액션 행(취소/저장) 시각 강조 여부(순수 프레젠테이션 분기 — 제출/검증 로직에는 영향 없음).
+   * 목록 인라인 편집(BoardCreateForm)에서 소비될 때 true로 주어, 같은 카드 자리를 오가는 create
+   * 모드 폼과 동일하게 상단 구분선 + 큰 버튼(size="lg")으로 렌더한다(저장=primary 강조). 전용 수정
+   * 페이지(BoardEditPage)는 미지정(false)으로 기존 기본 크기 버튼 스타일을 그대로 유지한다.
+   */
+  emphasizeActions?: boolean
   getModifiedAt: () => string | undefined
   isModifiedAtReady: boolean
   onSubmitPayload: (payload: BoardUpdateRequest) => Promise<void>
@@ -149,20 +158,41 @@ export function BoardEditForm({
         </p>
       )}
 
-      <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+      {/* emphasizeActions=true(목록 인라인 편집): create 모드 액션 행과 동일하게 상단 구분선 +
+          우측 정렬 + 큰 버튼. false(전용 수정 페이지): 구분선 없는 기존 기본 크기 버튼 그대로. */}
+      <div
+        className={
+          emphasizeActions
+            ? 'flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-end'
+            : 'flex flex-col-reverse gap-2 sm:flex-row sm:justify-end'
+        }
+      >
         {/* cancel은 소비처가 컨텍스트에 맞게 주입한다: 전용 수정 페이지는 유효 경로 Link(발행 글이면
             상세, 초안이면 목록), 목록 인라인 편집은 create 모드로 되돌리는 버튼. */}
         {cancel.type === 'link' ? (
-          <Button asChild variant="outline">
+          <Button
+            asChild
+            variant="outline"
+            size={emphasizeActions ? 'lg' : undefined}
+            className={cn(emphasizeActions && 'px-5')}
+          >
             <Link to={cancel.path}>취소</Link>
           </Button>
         ) : (
-          <Button type="button" variant="outline" onClick={cancel.onClick}>
+          <Button
+            type="button"
+            variant="outline"
+            size={emphasizeActions ? 'lg' : undefined}
+            className={cn(emphasizeActions && 'px-5')}
+            onClick={cancel.onClick}
+          >
             취소
           </Button>
         )}
         <Button
           type="button"
+          size={emphasizeActions ? 'lg' : undefined}
+          className={cn(emphasizeActions && 'px-5 font-semibold')}
           disabled={isSubmitting || !isModifiedAtReady}
           onClick={() => void submitEdit()}
         >
