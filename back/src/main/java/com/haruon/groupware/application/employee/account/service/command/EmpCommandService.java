@@ -1,5 +1,6 @@
 package com.haruon.groupware.application.employee.account.service.command;
 
+import com.haruon.groupware.application.dept.required.DeptRepository;
 import com.haruon.groupware.application.employee.account.provided.forCommand.EmpAccountManager;
 import com.haruon.groupware.application.employee.account.required.EmpRepository;
 import com.haruon.groupware.application.employee.account.service.command.dto.*;
@@ -7,10 +8,12 @@ import com.haruon.groupware.application.employee.leave.required.EmpLeaveReposito
 import com.haruon.groupware.application.employee.leave.service.support.LeaveCalculator;
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import com.haruon.groupware.application.exception.common.role.PermissionDeniedException;
+import com.haruon.groupware.application.exception.employee.dept.DeptNotFoundException;
 import com.haruon.groupware.application.exception.employee.emp.*;
 import com.haruon.groupware.application.utils.projection.DeptManagerAndTargetEmpInfo;
 import com.haruon.groupware.application.utils.required.AuthorizationQueryRepository;
 import com.haruon.groupware.application.utils.required.CompanyPolicyPort;
+import com.haruon.groupware.domain.employee.Dept;
 import com.haruon.groupware.domain.employee.Emp;
 import com.haruon.groupware.domain.employee.EmpLeave;
 import com.haruon.groupware.domain.employee.EmpPasswordEncoder;
@@ -37,6 +40,7 @@ public class EmpCommandService extends LeaveCalculator implements EmpAccountMana
 
     private final EmpPasswordEncoder encoder;
     private final EmpRepository empRepository;
+    private final DeptRepository deptRepository;
     private final EmpLeaveRepository empLeaveRepository;
     private final CompanyPolicyPort companyPolicy;
     private final AuthorizationQueryRepository authorizationQueryRepository;
@@ -157,9 +161,12 @@ public class EmpCommandService extends LeaveCalculator implements EmpAccountMana
         checkHRRoleEmp(authorizationQueryRepository, editorId);
 
         Emp emp = findActiveEmpById(empRepository, request.targetEmpId());
+        Dept dept = request.deptId() == null
+                ? null
+                : deptRepository.findById(request.deptId()).orElseThrow(DeptNotFoundException::new);
 
         emp.changeBelongingsByHR(
-                request.dept(),
+                dept,
                 request.position(),
                 request.isPrimary(),
                 request.startAt(),

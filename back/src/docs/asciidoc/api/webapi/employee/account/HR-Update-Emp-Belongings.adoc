@@ -1,0 +1,40 @@
+[tabs%nosync]
+
+====
+Request::
++
+--
+_HTTP request_
+include::{snippets}/HR_UPDATE_EMP_BELONGINGS/http-request.adoc[]
+
+_Request header_
+include::{snippets}/HR_UPDATE_EMP_BELONGINGS/request-headers.adoc[]
+
+_Path parameter_
+include::{snippets}/HR_UPDATE_EMP_BELONGINGS/path-parameters.adoc[]
+
+_Request fields_
+include::{snippets}/HR_UPDATE_EMP_BELONGINGS/request-fields.adoc[]
+--
+Response (204)::
++
+--
+_HTTP response_
+include::{snippets}/HR_UPDATE_EMP_BELONGINGS/http-response.adoc[]
+--
+Exception ::
++
+--
+이 API에서 발생 가능한 에러:
+
+|===
+|Error Code
+
+|ACTIVE_EMPLOYEE_NOT_FOUND_EXCEPTION
+|DEPT_NOT_FOUND_EXCEPTION
+|PERMISSION_DENIED_EXCEPTION
+|REQUIRED_VALUE_MISSING_EXCEPTION
+|END_TIME_BEFORE_START_TIME_EXCEPTION
+|===
+--
+====

@@ -18,6 +18,9 @@
 | 회사 홈페이지 URL 수정(이력 생성) | `COMPANY_UPDATE_HOME_PAGE_URL` | `POST` | `/api/companies/home-page-url` | JSON Body | `204` Empty | 예 | ADMIN |
 
 ### EMP_ACCOUNT API
+
+> ⚠️ `HR_UPDATE_EMP_BELONGINGS`는 인사관리(가입승인+조직소속) build-domain 착수 시(2026-07-12) 신규 추가됐다. 서비스/도메인 로직(`EmpAccountManager.updateBelongingsByHR`, `Emp.changeBelongingsByHR`)은 기존에 구현·테스트되어 있었으나 이를 노출하는 컨트롤러 엔드포인트가 없어서 이번에 `EmpManagementApi`에 추가했다(`PATCH /api/employees/{empId}/belongings`, 요청 DTO `EmpBelongingsUpdateRequest.java`). REST Docs 테스트(`EmpManagementApiDocsTest.update_emp_belongings_by_hr`)까지 작성·실행해 `back/build/generated-snippets/HR_UPDATE_EMP_BELONGINGS/`에서 스니펫 생성 확인 완료(신규 소속 등록 시 `deptId/position/isPrimary/startAt` 필수, 기존 소속 수정 시 `deptId` 생략 가능). 같은 세션에서 `SecurityConfig.java`의 URL 레벨 HR 매처에 `/belongings`(PATCH)와 `/new`(GET)가 누락되어 있던 것도 함께 정리했다(전에는 서비스 계층 `checkHRRoleEmp`에서만 걸러 401 `ROLE_002`로 응답 — 이제 URL 게이트에서 403으로 통일, `docs/backend-contract/security.md` HR 행에도 반영).
+
 | 기능                     | ID                             | Method | Endpoint | Request | Response | 권한필요여부 | 필요한 권한 |
 |---|---|---|---|---|---|---|---|
 | 회원가입                   | `REGISTER`                     | `POST` | `/api/employees` | JSON Body | `204` Empty | 아니오 | 공개 |
@@ -32,6 +35,7 @@
 | 관리용 사원 리스트 조회          | `EMPS_FOR_MANAGEMENT`          | `GET` | `/api/employees?deptId={value}&status={value}&keyword={value}&page={value}&size={value}` | Query | `200` JSON Body | 예 | HR 또는 DEPT_MANAGER(같은 부서) 또는 ADMIN |
 | 신규 사원 리스트 조회           | `NEW_EMP_LIST`                 | `GET` | `/api/employees/new?page={value}&size={value}&keyword={value}` | Query | `200` JSON Body | 예 | HR 또는 ADMIN |
 | 신규 사원 가입 승인            | `HR_APPROVE_EMP_REGISTRATION`  | `PATCH` | `/api/employees/{empId}/registration-approval?hiredAt={value}` | Path + Query | `204` Empty | 예 | HR 또는 ADMIN |
+| 사원 소속 정보 등록/수정         | `HR_UPDATE_EMP_BELONGINGS`     | `PATCH` | `/api/employees/{empId}/belongings` | Path + JSON Body | `204` Empty | 예 | HR 또는 ADMIN |
 | 사원 퇴직 처리               | `HR_RESIGN_EMP`                | `PATCH` | `/api/employees/{empId}/resignation?hiredAt={value}` | Path + Query | `204` Empty | 예 | HR 또는 ADMIN |
 | 사원 활성화 처리              | `HR_ACTIVATE_EMP`              | `PATCH` | `/api/employees/{empId}/status/activation` | Path | `204` Empty | 예 | HR 또는 ADMIN |
 | 사원 정직 처리               | `HR_SUSPEND_EMP`               | `PATCH` | `/api/employees/{empId}/status/suspension` | Path | `204` Empty | 예 | HR 또는 ADMIN |

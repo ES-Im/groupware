@@ -85,13 +85,15 @@ public class SecurityConfig {
                         /* Employee - Manager API */
                         .requestMatchers(HttpMethod.GET, "/api/employees")
                                     .hasAnyRole(SystemRoleCode.HR.name(), SystemRoleCode.DEPT_MANAGER.name())
+                        .requestMatchers(HttpMethod.GET, "/api/employees/new").hasRole(SystemRoleCode.HR.name())
 
                         .requestMatchers(HttpMethod.PATCH,
                                 "/api/employees/*/registration-approval",
                                 "/api/employees/*/resignation",
                                 "/api/employees/*/hr-managed-info",
                                 "/api/employees/*/status/activation",
-                                "/api/employees/*/status/suspension"
+                                "/api/employees/*/status/suspension",
+                                "/api/employees/*/belongings"
                         ).hasRole(SystemRoleCode.HR.name())
 
                         .requestMatchers(HttpMethod.PATCH,

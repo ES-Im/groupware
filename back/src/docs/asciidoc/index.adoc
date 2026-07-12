@@ -95,6 +95,10 @@ include::api/webapi/employee/account/HR-Suspend-Emp.adoc[]
 === 특정 사원 정보 수정 (HR)
 include::api/webapi/employee/account/HR-Update-Emp-Info.adoc[]
 
+[[HR_UPDATE_EMP_BELONGINGS]]
+=== 특정 사원 소속 정보 등록/수정 (HR)
+include::api/webapi/employee/account/HR-Update-Emp-Belongings.adoc[]
+
 [[DEPT_MANAGER_UPDATE_EMP_INFO]]
 === 특정 사원 정보 수정 (부서매니저)
 include::api/webapi/employee/account/DeptManager-Update-Emp-Info.adoc[]

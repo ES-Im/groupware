@@ -435,7 +435,7 @@ record EmpAccountManagerTest(
 
         EmpBelongingsParam newBelongingsParam = EmpBelongingsParam.builder()
                 .targetEmpId(targetEmp.getId())
-                .dept(dept)
+                .deptId(dept.getId())
                 .position(newPosition)
                 .isPrimary(true)
                 .startAt(LocalDate.of(2026,4,15))

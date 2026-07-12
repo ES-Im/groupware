@@ -157,7 +157,7 @@ class EmpManagementApiTest extends IntegrationTestSupport {
                                 .header("Authorization", BEARER + accessToken)
                                 .param("keyword", "t")
                 ).andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isForbidden());
     }
 
 

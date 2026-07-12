@@ -1,8 +1,10 @@
 package com.haruon.groupware.adapter.webapi.employee.account;
 
 import com.haruon.groupware.adapter.security.empDtails.EmpDetails;
+import com.haruon.groupware.adapter.webapi.employee.account.dto.EmpBelongingsUpdateRequest;
 import com.haruon.groupware.application.employee.account.provided.forCommand.EmpAccountManager;
 import com.haruon.groupware.application.employee.account.provided.forRetriever.EmpAccountRetriever;
+import com.haruon.groupware.application.employee.account.service.command.dto.EmpBelongingsParam;
 import com.haruon.groupware.application.employee.account.service.command.dto.EmpUpdateRequestByDeptManager;
 import com.haruon.groupware.application.employee.account.service.command.dto.EmpUpdateRequestByHR;
 import com.haruon.groupware.application.employee.account.service.query.dto.EmpBasicInfo;
@@ -132,6 +134,27 @@ public class EmpManagementApi {
             @RequestBody @Valid EmpUpdateRequestByHR request
     ) {
         empAccountManager.updateInfoByHR(details.getEmpId(), empId, request);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{empId}/belongings")
+    public ResponseEntity<Void> updateEmpBelongings(
+            @AuthenticationPrincipal EmpDetails details,
+            @PathVariable Long empId,
+            @RequestBody @Valid EmpBelongingsUpdateRequest request
+    ) {
+        empAccountManager.updateBelongingsByHR(
+                EmpBelongingsParam.builder()
+                        .targetEmpId(empId)
+                        .deptId(request.deptId())
+                        .position(request.position())
+                        .isPrimary(request.isPrimary())
+                        .startAt(request.startAt())
+                        .endAt(request.endAt())
+                        .build(),
+                details.getEmpId()
+        );
 
         return ResponseEntity.noContent().build();
     }

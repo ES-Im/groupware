@@ -2,7 +2,6 @@ package com.haruon.groupware.application.employee.account.service.command.dto;
 
 import com.haruon.groupware.application.exception.common.EndTimeBeforeStartTimeException;
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
-import com.haruon.groupware.domain.employee.Dept;
 import com.haruon.groupware.domain.employee.enums.PositionCode;
 import lombok.Builder;
 import org.jspecify.annotations.Nullable;
@@ -18,7 +17,7 @@ public record EmpBelongingsParam(
         Long targetEmpId,
 
         @Nullable
-        Dept dept,
+        Long deptId,
 
         @Nullable
         PositionCode position,
@@ -36,7 +35,7 @@ public record EmpBelongingsParam(
     public EmpBelongingsParam {
         if(targetEmpId == null) throw new RequiredValueMissingException();
 
-        if(dept == null && position == null && isPrimary == null && startAt == null && endAt == null) {
+        if(deptId == null && position == null && isPrimary == null && startAt == null && endAt == null) {
             throw new RequiredValueMissingException();
         }
 

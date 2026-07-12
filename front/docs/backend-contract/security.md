@@ -29,7 +29,7 @@
 | 공개    | `/api/auth/login`, `/api/auth/reissue`, `POST /api/employees`(회원가입), `GET /api/companies`                                         | permitAll                                                                   |
 | 인증만   | `/api/departments/**`(GET), `/api/employees/attendances/me/**`, `/api/employees/me/leaves/summary`(GET)                           | authenticated                                                               |
 | 사원    | `/api/employees/**`, `/api/drafts/**`, `/api/messages/**`, `/api/schedules/**`, `/api/chat/rooms/**`, `/api/document-boxes/me/**` | `EMPLOYEE`                                                                  |
-| HR    | `PATCH /api/employees/*/registration-approval`·`/resignation`·`/hr-managed-info`·`/status/**`                                     | `HR`                                                                        |
+| HR    | `PATCH /api/employees/*/registration-approval`·`/resignation`·`/hr-managed-info`·`/status/**`·`/belongings`, `GET /api/employees/new` | `HR`                                                                        |
 | 부서매니저 | `PATCH /api/employees/*/dept-managed-info`, `/api/employees/attendances/**`(me 제외), `/api/leaves/departments/*/request-history`   | `DEPT_MANAGER`                                                              |
 | 관리자   | `/api/departments/**`(PATCH/POST/DELETE), `/api/employees/leaves/**`, `/api/employees/*/leaves/*-grant-days`                      | `ADMIN`                                                                     |
 | 가맹점   | `/api/franchises/**`, `/api/franchise-educations/**`, `/api/franchise-inquiries/**`, `/api/drafts/sales/**`                       | `FRANCHISE`                                                                 |

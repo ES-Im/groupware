@@ -3,8 +3,10 @@ package com.haruon.groupware.adapter.docs.webapi.employee.account;
 import com.haruon.groupware.adapter.docs.RestDocsSupport;
 import com.haruon.groupware.adapter.security.empDtails.EmpDetails;
 import com.haruon.groupware.adapter.webapi.employee.account.EmpManagementApi;
+import com.haruon.groupware.adapter.webapi.employee.account.dto.EmpBelongingsUpdateRequest;
 import com.haruon.groupware.application.employee.account.provided.forCommand.EmpAccountManager;
 import com.haruon.groupware.application.employee.account.provided.forRetriever.EmpAccountRetriever;
+import com.haruon.groupware.application.employee.account.service.command.dto.EmpBelongingsParam;
 import com.haruon.groupware.application.employee.account.service.command.dto.EmpUpdateRequestByDeptManager;
 import com.haruon.groupware.application.employee.account.service.command.dto.EmpUpdateRequestByHR;
 import com.haruon.groupware.application.employee.account.service.query.dto.BelongingInfo;
@@ -475,6 +477,56 @@ public class EmpManagementApiDocsTest extends RestDocsSupport {
                                         .attributes(key("constraints").value("yyyy-MM-dd"))
                                         .description("입사일자")
 
+                        )
+                    )
+                );
+    }
+
+    @Test
+    @DisplayName("특정 사원 소속 정보 등록/수정 - HR")
+    void update_emp_belongings_by_hr() throws Exception {
+        EmpBelongingsUpdateRequest request = new EmpBelongingsUpdateRequest(
+                1L, PositionCode.ASSISTANT_MANAGER, true, LocalDate.of(2026, 4, 15), null
+        );
+
+        Mockito.doNothing()
+                .when(empAccountManager).updateBelongingsByHR(any(EmpBelongingsParam.class), eq(1L));
+
+        mockMvc.perform(
+                patch("/api/employees/{empId}/belongings", 2L)
+                        .with(hrAuthentication())
+                        .header("Authorization", "Bearer accessToken")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(request))
+        )
+                .andExpect(status().isNoContent())
+                .andDo(document("HR_UPDATE_EMP_BELONGINGS",
+                        preprocessRequest(prettyPrint()),
+
+                        pathParameters(
+                                parameterWithName("empId").description("사원 식별 번호")
+                        ),
+
+                        requestHeaders(
+                                headerWithName("Authorization").description("Bearer Access Token")
+                        ),
+
+                        requestFields(
+                                fieldWithPath("deptId").type(JsonFieldType.NUMBER)
+                                        .attributes(key("constraints").value("신규 소속 등록 시 필수"))
+                                        .description("소속시킬 부서 식별 번호 (신규 소속 등록 시에만 필수, 현재 소속 정보 수정 시 생략)").optional(),
+                                fieldWithPath("position").type(JsonFieldType.STRING)
+                                        .attributes(key("constraints").value("신규 소속 등록 시 필수"))
+                                        .description("직급").optional(),
+                                fieldWithPath("isPrimary").type(JsonFieldType.BOOLEAN)
+                                        .attributes(key("constraints").value("신규 소속 등록 시 필수"))
+                                        .description("주요 소속 여부").optional(),
+                                fieldWithPath("startAt").type(JsonFieldType.STRING)
+                                        .attributes(key("constraints").value("yyyy-MM-dd, 신규 소속 등록 시 필수"))
+                                        .description("소속(발령) 시작일자").optional(),
+                                fieldWithPath("endAt").type(JsonFieldType.STRING)
+                                        .attributes(key("constraints").value("yyyy-MM-dd"))
+                                        .description("소속(발령) 종료일자").optional()
                         )
                     )
                 );
