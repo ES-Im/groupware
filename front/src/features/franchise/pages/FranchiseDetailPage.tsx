@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
 import { toast } from 'sonner'
+import { GraduationCap, Mail, MapPin } from 'lucide-react'
 import { isNotFound, normalizeApiError } from '@/shared/lib/apiError'
 import { Button } from '@/shared/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
@@ -9,8 +10,18 @@ import { FranchiseBusinessStatusBadge } from '../components/FranchiseBusinessSta
 import { FranchiseManagerUpdateDialog } from '../components/FranchiseManagerUpdateDialog'
 import { FranchiseMemoActions } from '../components/FranchiseMemoActions'
 import { FranchisePageHeader } from '../components/FranchisePageHeader'
+import { FranchiseSalesOverview } from '../components/FranchiseSalesOverview'
 import { FranchiseStatusSelect } from '../components/FranchiseStatusSelect'
 import { FranchiseUpdateDialog } from '../components/FranchiseUpdateDialog'
+
+/**
+ * 주소 텍스트로 카카오맵 장소 검색 결과를 새 탭에서 연다(`https://map.kakao.com/link/search/{keyword}`
+ * — 카카오맵 공개 검색 딥링크 규격). 가맹점 도메인 모델에는 좌표 필드가 없어(주소 문자열만 보유)
+ * 실제 좌표 임베드 지도 대신 이 방식을 쓰기로 사용자와 합의했다(지오코딩 API 신규 도입 없음).
+ */
+function buildKakaoMapSearchUrl(address: string): string {
+  return `https://map.kakao.com/link/search/${encodeURIComponent(address)}`
+}
 
 /**
  * P2 가맹점 상세 페이지(F1602 FRANCHISE_DETAIL, ROADMAP(FRANCHISE) T2.3).
@@ -26,6 +37,14 @@ import { FranchiseUpdateDialog } from '../components/FranchiseUpdateDialog'
  * mutation 배선(T2.4 완료): 기본정보 수정(F1604 — FranchiseUpdateDialog)·영업상태 변경(F1605 —
  * FranchiseStatusSelect)·담당자 변경(F1606 — FranchiseManagerUpdateDialog)·메모 수정/삭제
  * (F1607/F1608 — FranchiseMemoActions). 성공 시 각 mutation 훅이 상세·목록 캐시를 invalidate한다.
+ *
+ * UI/UX 개편(사용자 요청, 2026-07-11): 상세 카드 하단에 위치 카드(주소 + 카카오맵 새 탭 링크,
+ * buildKakaoMapSearchUrl)를 추가하고, 매출 요약(FranchiseSalesOverview — P3 FranchiseSalesPage와
+ * 공용 소비, 연/월/일 탭+차트)을 별도 카드로 임베드했다. 교육 신청 정보·문의 정보는 카드 2개로
+ * 분리했으나 실 데이터를 표시하지 않는다 — 문의 목록 조회(FRANCHISE_INQUIRY_LIST)에는 franchiseId
+ * 필터 파라미터가 없고, 교육 신청자 조회(FRANCHISE_EDUCATION_APPLICANTS)는 educationId 단위 조회만
+ * 있어 "이 가맹점이 신청한 교육" 역조회 자체가 계약상 불가능하다(사용자 확정 — 각 도메인
+ * 목록/캘린더 페이지로 이동하는 바로가기 카드로 대체, 없는 API를 우회 구현하지 않는다).
  */
 export function FranchiseDetailPage() {
   const { franchiseId: franchiseIdParam } = useParams<{ franchiseId: string }>()
@@ -152,10 +171,90 @@ export function FranchiseDetailPage() {
           </dl>
 
           <div className="border-t pt-4">
+            <h3 className="mb-2 text-sm font-medium">메모</h3>
             <FranchiseMemoActions franchiseId={franchise.id} currentMemo={franchise.memo} />
+          </div>
+
+          <div className="border-t pt-4">
+            <h3 className="mb-2 text-sm font-medium">위치</h3>
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-muted/40 p-3">
+              <div className="flex min-w-0 items-center gap-2">
+                <MapPin className="size-4 shrink-0 text-muted-foreground" />
+                <span className="truncate text-sm">{franchise.address}</span>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  window.open(
+                    buildKakaoMapSearchUrl(franchise.address),
+                    '_blank',
+                    'noopener,noreferrer',
+                  )
+                }
+              >
+                지도에서 보기
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">매출 요약</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <FranchiseSalesOverview franchiseId={franchise.id} />
+        </CardContent>
+      </Card>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Card className="h-full">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <GraduationCap className="size-4 text-muted-foreground" />
+              교육 신청 정보
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-1 flex-col gap-3">
+            <p className="text-sm text-muted-foreground">
+              이 가맹점의 교육 신청 내역은 가맹점 교육 캘린더에서 세션별로 확인할 수 있습니다.
+            </p>
+            <Button
+              type="button"
+              variant="outline"
+              className="mt-auto self-start"
+              onClick={() => navigate('/franchise-educations')}
+            >
+              가맹점 교육으로 이동
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card className="h-full">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Mail className="size-4 text-muted-foreground" />
+              문의 정보
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-1 flex-col gap-3">
+            <p className="text-sm text-muted-foreground">
+              이 가맹점 관련 문의는 가맹점 문의 목록에서 검색해 확인할 수 있습니다.
+            </p>
+            <Button
+              type="button"
+              variant="outline"
+              className="mt-auto self-start"
+              onClick={() => navigate('/franchise-inquiries')}
+            >
+              가맹점 문의로 이동
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
 
       <FranchiseUpdateDialog
         open={updateOpen}
