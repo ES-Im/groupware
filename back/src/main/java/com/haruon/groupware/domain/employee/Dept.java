@@ -47,7 +47,7 @@ public class Dept extends AbstractEntity {
 
     public void activate() {
         state(!this.isActive, "이미 활성화된 부서입니다.");
-        state(this.parentDept == null || this.parentDept.isActive, "상위 부서가 활성화되어야 하위 부서를 활성화할 수 있습니다.");
+        state(this.parentDept == null || this.parentDept.isActive(), "상위 부서가 활성화되어야 하위 부서를 활성화할 수 있습니다.");
 
         this.isActive = true;
     }
