@@ -109,6 +109,15 @@ function renderPage() {
   )
 }
 
+/**
+ * ScheduleSidebar가 오늘 날짜 일정을 "오늘 일정" 목록으로도 함께 렌더하기 때문에(makeItem()의
+ * scheduleDate 기본값이 항상 오늘), FullCalendar 그리드 쪽 이벤트 타이틀 텍스트가 사이드바와
+ * 중복 매치될 수 있다. 캘린더 컨테이너(.schedule-calendar)로 쿼리 범위를 좁혀 중복을 피한다.
+ */
+function calendarContainer() {
+  return document.querySelector('.schedule-calendar') as HTMLElement
+}
+
 describe('ScheduleCalendarPage - 정상 렌더', () => {
   it('실 데이터(MSW 응답)가 캘린더 이벤트로 렌더된다', async () => {
     server.use(
@@ -119,12 +128,12 @@ describe('ScheduleCalendarPage - 정상 렌더', () => {
 
     renderPage()
 
-    expect(await screen.findByText('수기 일정')).toBeInTheDocument()
+    expect(await within(calendarContainer()).findByText('수기 일정')).toBeInTheDocument()
   })
 })
 
 describe('ScheduleCalendarPage - scheduleType 필터', () => {
-  it('"회의" 토글 클릭 시 MEETING 이벤트만 표시되고 MANUAL 이벤트는 숨겨진다', async () => {
+  it('"개인 일정" 체크박스 해제 시 MEETING 이벤트만 표시되고 MANUAL 이벤트는 숨겨진다', async () => {
     server.use(
       http.get(`${BASE_URL}/api/schedules/calendar`, () =>
         HttpResponse.json([
@@ -136,15 +145,17 @@ describe('ScheduleCalendarPage - scheduleType 필터', () => {
 
     const user = userEvent.setup()
     renderPage()
+    const calendar = calendarContainer()
 
-    // 필터링 전: 두 이벤트 모두 렌더된다.
-    expect(await screen.findByText('수기 일정 A')).toBeInTheDocument()
-    expect(await screen.findByText('주간 회의')).toBeInTheDocument()
+    // 필터링 전: 두 이벤트 모두 렌더된다(모든 유형이 기본 체크 상태).
+    expect(await within(calendar).findByText('수기 일정 A')).toBeInTheDocument()
+    expect(await within(calendar).findByText('주간 회의')).toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: '회의' }))
+    // 다중선택 체크박스 모델이라 "MEETING만 표시"를 얻으려면 MANUAL 체크를 해제한다.
+    await user.click(screen.getByRole('checkbox', { name: '개인 일정' }))
 
-    expect(await screen.findByText('주간 회의')).toBeInTheDocument()
-    expect(screen.queryByText('수기 일정 A')).not.toBeInTheDocument()
+    expect(await within(calendar).findByText('주간 회의')).toBeInTheDocument()
+    expect(within(calendar).queryByText('수기 일정 A')).not.toBeInTheDocument()
   })
 })
 
@@ -178,7 +189,7 @@ describe('ScheduleCalendarPage - 이벤트 클릭 → 상세 다이얼로그(ROA
 
     renderPage()
 
-    const eventEl = await screen.findByText('수기 일정 A')
+    const eventEl = await within(calendarContainer()).findByText('수기 일정 A')
     fireEvent.click(eventEl)
 
     expect(await screen.findByText('일정 A 상세')).toBeInTheDocument()
@@ -201,8 +212,9 @@ describe('ScheduleCalendarPage - 이벤트 클릭 → 상세 다이얼로그(ROA
 
     renderPage()
 
-    const eventA = await screen.findByText('수기 일정 A')
-    const eventB = await screen.findByText('수기 일정 B')
+    const calendar = calendarContainer()
+    const eventA = await within(calendar).findByText('수기 일정 A')
+    const eventB = await within(calendar).findByText('수기 일정 B')
 
     fireEvent.click(eventA)
     expect(await screen.findByText('일정 A 상세')).toBeInTheDocument()
@@ -225,7 +237,7 @@ describe('ScheduleCalendarPage - 일정 등록 다이얼로그(ROADMAP(SCHEDULE)
 
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: '일정 등록' }))
+    await user.click(screen.getByRole('button', { name: '새 일정 등록' }))
 
     const dialog = await screen.findByRole('dialog')
     expect(within(dialog).getByText('일정 등록')).toBeInTheDocument()
@@ -243,7 +255,7 @@ describe('ScheduleCalendarPage - 일정 등록 다이얼로그(ROADMAP(SCHEDULE)
     const user = userEvent.setup()
     renderPage()
 
-    await user.click(screen.getByRole('button', { name: '일정 등록' }))
+    await user.click(screen.getByRole('button', { name: '새 일정 등록' }))
     expect(await screen.findByRole('dialog')).toBeInTheDocument()
 
     await user.type(screen.getByLabelText(/제목/), '신규 일정')

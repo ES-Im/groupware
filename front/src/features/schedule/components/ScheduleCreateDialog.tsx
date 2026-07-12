@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
+import dayjs from 'dayjs'
 import { toast } from 'sonner'
 import { submitWithErrorMapping, useZodForm } from '@/shared/lib/form'
 import { Button } from '@/shared/ui/button'
@@ -26,6 +27,11 @@ interface ScheduleCreateDialogProps {
   /** 다이얼로그 열림 상태(제어형, 오픈 트리거는 T3.4가 소유). */
   open: boolean
   onOpenChange: (open: boolean) => void
+  /**
+   * 캘린더 날짜 클릭으로 열 때 시작 일시 프리필 기본값(datetime-local 포맷 'YYYY-MM-DDTHH:mm').
+   * 지정 시 종료 일시는 +1시간으로 채운다. 미지정([새 일정 등록] 버튼)이면 빈 값으로 연다.
+   */
+  defaultStartAt?: string
 }
 
 /**
@@ -42,7 +48,7 @@ interface ScheduleCreateDialogProps {
  * 이유 — 제어형 다이얼로그는 언마운트되지 않는다). 종료<시작 등 서버 도메인 위반은
  * submitWithErrorMapping → handleApiError가 자연히 처리한다(별도 분기 없음).
  */
-export function ScheduleCreateDialog({ open, onOpenChange }: ScheduleCreateDialogProps) {
+export function ScheduleCreateDialog({ open, onOpenChange, defaultStartAt }: ScheduleCreateDialogProps) {
   const queryClient = useQueryClient()
   const mutation = useCreateManualScheduleMutation()
   const form = useZodForm(manualScheduleCreateSchema)
@@ -55,11 +61,13 @@ export function ScheduleCreateDialog({ open, onOpenChange }: ScheduleCreateDialo
 
   useEffect(() => {
     if (open) {
-      reset({ title: '', content: '', startAt: '', endAt: '' })
+      const startAt = defaultStartAt ?? ''
+      const endAt = defaultStartAt ? dayjs(defaultStartAt).add(1, 'hour').format('YYYY-MM-DDTHH:mm') : ''
+      reset({ title: '', content: '', startAt, endAt })
     } else {
       reset()
     }
-  }, [open, reset])
+  }, [open, reset, defaultStartAt])
 
   async function handleSubmit(values: ManualScheduleCreateFormValues) {
     await mutation.mutateAsync({

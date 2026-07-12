@@ -1,0 +1,155 @@
+/*
+ * 일정 캘린더(FullCalendar) 전용 스코프드 스타일.
+ * 전역 index.css를 오염시키지 않기 위해 이 파일에서만 정의하고 ScheduleCalendar.tsx에서 import한다.
+ * 모든 규칙은 .schedule-calendar 루트로 스코프를 제한한다.
+ *
+ * 색 원칙:
+ *  - 그리드 크롬(테두리·요일 헤더·오늘 셀)은 shadcn 시맨틱 토큰(--border/--muted-foreground/--foreground
+ *    /--primary)만 사용해 다크모드가 자동으로 따라온다.
+ *  - 이벤트 유형 색(개인/회의/휴가/출장)은 시맨틱 토큰으로 표현할 수 없는 "범주형 데이터 색"이라
+ *    이 파일에서 라이트/다크 각각의 CSS 변수로 정의한다(옅은 배경 + 좌측 액센트 + 진한 텍스트).
+ */
+
+.schedule-calendar {
+  /* FullCalendar 기본 팔레트를 shadcn 토큰에 맞춘다. */
+  --fc-border-color: var(--border);
+  --fc-page-bg-color: var(--card);
+  --fc-neutral-bg-color: var(--muted);
+  --fc-today-bg-color: color-mix(in oklch, var(--foreground) 4%, transparent);
+  --fc-now-indicator-color: var(--destructive);
+  --fc-highlight-color: color-mix(in oklch, var(--primary) 10%, transparent);
+
+  /* 이벤트 유형별 범주형 색(라이트). */
+  --sched-manual-bg: #ecebfb;
+  --sched-manual-fg: #4f46e5;
+  --sched-meeting-bg: #e0f2fe;
+  --sched-meeting-fg: #0369a1;
+  --sched-leave-bg: #d1fae5;
+  --sched-leave-fg: #047857;
+  --sched-trip-bg: #fef3c7;
+  --sched-trip-fg: #b45309;
+
+  font-size: 0.8125rem;
+}
+
+.dark .schedule-calendar {
+  --sched-manual-bg: color-mix(in srgb, #6366f1 22%, transparent);
+  --sched-manual-fg: #c7d2fe;
+  --sched-meeting-bg: color-mix(in srgb, #38bdf8 22%, transparent);
+  --sched-meeting-fg: #bae6fd;
+  --sched-leave-bg: color-mix(in srgb, #10b981 22%, transparent);
+  --sched-leave-fg: #a7f3d0;
+  --sched-trip-bg: color-mix(in srgb, #f59e0b 24%, transparent);
+  --sched-trip-fg: #fde68a;
+}
+
+/* 요일 헤더 행 */
+.schedule-calendar .fc .fc-col-header-cell-cushion {
+  padding: 0.5rem 0.25rem;
+  font-weight: 500;
+  color: var(--muted-foreground);
+}
+
+/* 날짜 숫자·시간축 라벨 등 텍스트를 본문 색으로 */
+.schedule-calendar .fc .fc-daygrid-day-number,
+.schedule-calendar .fc .fc-timegrid-slot-label-cushion,
+.schedule-calendar .fc .fc-timegrid-axis-cushion,
+.schedule-calendar .fc .fc-list-day-text,
+.schedule-calendar .fc .fc-list-day-side-text {
+  color: var(--foreground);
+}
+
+/* 오늘 날짜 숫자를 primary 원형 배지로 강조(셀 배경은 위 --fc-today-bg-color가 옅게 처리) */
+.schedule-calendar .fc-daygrid-day.fc-day-today .fc-daygrid-day-number {
+  display: inline-flex;
+  min-width: 1.5rem;
+  height: 1.5rem;
+  align-items: center;
+  justify-content: center;
+  margin: 2px;
+  padding: 0 0.35rem;
+  border-radius: 9999px;
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+  font-weight: 600;
+}
+
+/* 이벤트 공통: 옅은 배경 + 좌측 3px 액센트 + 진한 텍스트 */
+.schedule-calendar .fc-event.schedule-event {
+  border: 0;
+  border-left: 3px solid transparent;
+  border-radius: 4px;
+  padding: 1px 5px;
+  background-color: transparent;
+  font-weight: 500;
+}
+.schedule-calendar .fc-event.schedule-event .fc-event-title,
+.schedule-calendar .fc-event.schedule-event .fc-event-time,
+.schedule-calendar .fc-event.schedule-event .fc-event-main {
+  color: inherit;
+  font-weight: 500;
+}
+
+.schedule-calendar .fc-event.schedule-event-manual {
+  background-color: var(--sched-manual-bg);
+  border-left-color: var(--sched-manual-fg);
+  color: var(--sched-manual-fg);
+}
+.schedule-calendar .fc-event.schedule-event-meeting {
+  background-color: var(--sched-meeting-bg);
+  border-left-color: var(--sched-meeting-fg);
+  color: var(--sched-meeting-fg);
+}
+.schedule-calendar .fc-event.schedule-event-leave {
+  background-color: var(--sched-leave-bg);
+  border-left-color: var(--sched-leave-fg);
+  color: var(--sched-leave-fg);
+}
+.schedule-calendar .fc-event.schedule-event-trip {
+  background-color: var(--sched-trip-bg);
+  border-left-color: var(--sched-trip-fg);
+  color: var(--sched-trip-fg);
+}
+
+/* 취소된 일정: 흐림 + 취소선(캘린더 표시가 mapScheduleToEvents의 [취소] 접두사와 결을 맞춤) */
+.schedule-calendar .fc-event.schedule-event-canceled {
+  opacity: 0.55;
+}
+.schedule-calendar .fc-event.schedule-event-canceled .fc-event-title {
+  text-decoration: line-through;
+}
+
+/* 목록(list) 뷰: 좌측 점 색을 유형 색으로, 행 hover는 토큰으로 */
+.schedule-calendar .fc-list-event.schedule-event-manual .fc-list-event-dot {
+  border-color: var(--sched-manual-fg);
+}
+.schedule-calendar .fc-list-event.schedule-event-meeting .fc-list-event-dot {
+  border-color: var(--sched-meeting-fg);
+}
+.schedule-calendar .fc-list-event.schedule-event-leave .fc-list-event-dot {
+  border-color: var(--sched-leave-fg);
+}
+.schedule-calendar .fc-list-event.schedule-event-trip .fc-list-event-dot {
+  border-color: var(--sched-trip-fg);
+}
+.schedule-calendar .fc .fc-list-event:hover td {
+  background-color: var(--muted);
+}
+.schedule-calendar .fc .fc-list-day-cushion {
+  background-color: var(--muted);
+}
+.schedule-calendar .fc .fc-list-event-title,
+.schedule-calendar .fc .fc-list-event-time {
+  color: var(--foreground);
+}
+
+/* 목록 뷰 빈 상태 문구 */
+.schedule-calendar .fc .fc-list-empty {
+  background-color: transparent;
+  color: var(--muted-foreground);
+}
+
+/* draggable 이벤트에 커서 힌트 */
+.schedule-calendar .fc-event.fc-event-draggable {
+  cursor: grab;
+}
