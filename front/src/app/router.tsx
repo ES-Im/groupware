@@ -1,5 +1,6 @@
 import { createBrowserRouter, Navigate } from 'react-router'
 import { LoginPage } from '@/features/auth/pages/LoginPage'
+import { HomePage } from '@/features/home/pages/HomePage'
 import { RegisterPage } from '@/features/auth/pages/RegisterPage'
 import { MyAttendancePage } from '@/features/attendance/pages/MyAttendancePage'
 import { DeptAttendancePage } from '@/features/attendance/pages/DeptAttendancePage'
@@ -196,8 +197,11 @@ export const router = createBrowserRouter([
     ),
     children: [
       {
+        // 홈 대시보드: adapt-ui(2026-07-12)에서 Ubold 레퍼런스(localhost:5174/apps/groupware/dashboard)
+        // 이식 결과인 HomePage로 placeholder를 교체했다(src/features/home/pages/HomePage.tsx 상단
+        // JSDoc 참조 — 역할별 위젯 분리 근거).
         index: true,
-        element: <div>홈(placeholder, 인증/사원 도메인 태스크에서 교체)</div>,
+        element: <HomePage />,
       },
       {
         path: 'departments',

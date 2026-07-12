@@ -1,0 +1,8 @@
+/*
+ * 홈 대시보드 "내 일정" 위젯 전용 스코프드 스타일.
+ * schedule 도메인의 scheduleCalendar.css(전 화면 캘린더)는 건드리지 않고, 이 위젯만 쓰는
+ * "선택한 날짜 강조" 규칙을 별도로 둔다. .schedule-calendar 루트 아래로 스코프를 제한한다.
+ */
+.schedule-calendar .schedule-calendar-selected-day {
+  background-color: color-mix(in oklch, var(--primary) 12%, transparent);
+}
