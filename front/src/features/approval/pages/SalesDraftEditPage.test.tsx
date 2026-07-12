@@ -19,6 +19,7 @@ import { SalesDraftEditPage } from './SalesDraftEditPage'
  *   - 기안자 본인이 아니거나 UNSUBMITTED가 아니면 권한 부족 안내(resolveDrafterActions.canEdit).
  *   - 정상 진입 시 title/content/franchiseId(FranchisePicker 선택칩)/reportMonth/salesAmount 프리필.
  *   - 저장 성공(204) 시 상세 페이지로 navigate + 성공 토스트.
+ *   - 기존 결재선 role(협조 포함)은 저장 요청에 그대로 보존된다(이 화면엔 역할 변경 UI가 없음).
  *
  * meQuery(useMeQuery)는 가드 판정 전에 항상 호출되므로 모든 케이스에서 GET /api/employees/me 목이
  * 필요하다(onUnhandledRequest:'error'). 정상 진입 케이스는 SalesDraftEditForm이 마운트되며
@@ -225,5 +226,72 @@ describe('SalesDraftEditPage - 저장 성공 흐름', () => {
     expect(await screen.findByText('기안 상세 화면 draftId=1')).toBeInTheDocument()
     const { toast } = await import('sonner')
     await waitFor(() => expect(toast.success).toHaveBeenCalledWith('매출 기안서를 수정했습니다'))
+  })
+})
+
+describe('SalesDraftEditPage - 기존 결재선 role(협조 포함) 보존', () => {
+  afterEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('COOPERATOR가 포함된 결재선을 그대로 저장하면 요청 approvers에 기존 role이 보존된다(전원 APPROVER로 덮이지 않음)', async () => {
+    server.use(
+      http.get(`${BASE_URL}/api/drafts/1`, () =>
+        HttpResponse.json(
+          draftDetail({
+            approvers: [
+              {
+                empId: 201,
+                empName: '박결재',
+                role: 'APPROVER',
+                order: 1,
+                approvedAt: null,
+                rejectedAt: null,
+                rejectReason: null,
+              },
+              {
+                empId: 202,
+                empName: '이협조',
+                role: 'COOPERATOR',
+                order: 2,
+                approvedAt: null,
+                rejectedAt: null,
+                rejectReason: null,
+              },
+            ],
+          }),
+        ),
+      ),
+    )
+    mockFormDependencies(10)
+    let updateBody: Record<string, unknown> | undefined
+    server.use(
+      http.patch(`${BASE_URL}/api/drafts/sales/1`, async ({ request }) => {
+        updateBody = (await request.json()) as Record<string, unknown>
+        return new HttpResponse(null, { status: 204 })
+      }),
+    )
+
+    const user = userEvent.setup()
+    renderPage()
+
+    await screen.findByLabelText(/^제목/)
+
+    await user.click(screen.getByRole('button', { name: '저장' }))
+
+    expect(await screen.findByText('기안 상세 화면 draftId=1')).toBeInTheDocument()
+    expect(updateBody).toEqual({
+      param: {
+        title: '7월 매출 보고',
+        content: '7월 매출을 보고합니다.',
+        approvers: [
+          { approverId: 201, role: 'APPROVER', order: 1 },
+          { approverId: 202, role: 'COOPERATOR', order: 2 },
+        ],
+      },
+      franchiseId: 5,
+      reportMonth: '2026-07',
+      salesAmount: 1000000,
+    })
   })
 })

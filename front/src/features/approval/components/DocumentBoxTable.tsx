@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   createColumnHelper,
   flexRender,
@@ -6,14 +6,13 @@ import {
   useReactTable,
 } from '@tanstack/react-table'
 import type { UseQueryResult } from '@tanstack/react-query'
-import { Search } from 'lucide-react'
+import { Eye } from 'lucide-react'
 import { toast } from 'sonner'
 import { handleApiError } from '@/shared/lib/apiError'
 import { usePageState } from '@/shared/lib/usePageState'
 import type { PageMeta } from '@/shared/components/PaginationControls'
 import { PaginationControls } from '@/shared/components/PaginationControls'
 import { Badge } from '@/shared/ui/badge'
-import { Input } from '@/shared/ui/input'
 import { cn } from '@/shared/lib/utils'
 import {
   formatDraftDateTime,
@@ -51,9 +50,10 @@ type DocumentBoxListQueryHook = (
  */
 const columnHelper = createColumnHelper<DocumentBoxRow>()
 
-/** 첨부 아이콘 셀만 중앙 정렬한다(그 외 텍스트/배지 컬럼은 좌측 정렬). */
+/** 첨부·보기 셀만 중앙 정렬한다(그 외 텍스트/배지 컬럼은 좌측 정렬). */
 const COLUMN_ALIGN: Record<string, string> = {
   isFileAttached: 'text-center',
+  view: 'text-center',
 }
 
 /** 셀 정렬 클래스(맵에 없으면 좌측 정렬). 헤더·본문 셀이 동일 규칙을 공유한다. */
@@ -66,32 +66,38 @@ interface DocumentBoxTableProps {
   useListQuery: DocumentBoxListQueryHook
   /** 목록이 비었을 때 표시 문구. 문서함별로 다른 안내를 주입한다. */
   emptyMessage?: string
-  /** 검색 입력 placeholder. 기본값 "제목으로 검색". */
-  searchPlaceholder?: string
-  /** 검색 입력 label/id 구분용 접두사(한 화면에 표가 여러 개일 때 대비, 기본 "document-box"). */
-  searchId?: string
+  /** 상위(문서함 홈)가 소유한 검색어. 실제 검색 입력은 상위 TabsList 행에서 렌더되며, 이 값이
+   *  300ms 디바운스되어 서버 keyword로 반영된다(항상 부모가 값을 주므로 필수). */
+  searchValue: string
   /** 행 클릭 콜백. M2 T2.5에서 상세 네비게이션을 주입한다. 없으면 행은 비인터랙티브. */
   onRowClick?: (draftId: number) => void
 }
 
 /**
- * 문서함 목록 표 + 검색 + 페이징을 캡슐화한 공용 패널. 4종 페이지가 조회 훅만 바꿔 재사용한다.
+ * 문서함 목록 표 + 페이징을 캡슐화한 공용 패널. 4종 페이지가 조회 훅만 바꿔 재사용한다.
+ * 검색 입력은 상위 화면(TabsList 행)이 소유하고, 이 컴포넌트는 searchValue를 디바운스만 담당한다.
  */
 export function DocumentBoxTable({
   useListQuery,
   emptyMessage = '문서가 없습니다.',
-  searchPlaceholder = '제목으로 검색',
-  searchId = 'document-box',
+  searchValue,
   onRowClick,
 }: DocumentBoxTableProps) {
-  const [searchInput, setSearchInput] = useState('')
   const [keyword, setKeyword] = useState('')
   const { page, size, onPageChange, resetPage } = usePageState()
 
-  // 검색 입력 디바운스: 300ms 유예 후에만 확정된 keyword로 반영하고 페이지를 0으로 리셋한다.
+  // onRowClick을 ref로 참조한다: 상위가 인라인 화살표 핸들러를 넘기면 매 렌더마다 identity가 바뀌는데,
+  // 이를 columns 의존성에 직접 넣으면 columns가 매번 재생성돼 react-table이 표 서브트리를 리마운트한다
+  // (검색 타이핑마다 표 깜빡임·포커스 손실). ref로 최신 핸들러만 갈아끼워 columns를 안정 참조로 유지한다.
+  const onRowClickRef = useRef(onRowClick)
+  useEffect(() => {
+    onRowClickRef.current = onRowClick
+  }, [onRowClick])
+
+  // 검색어 디바운스: 상위가 주입한 searchValue를 300ms 유예 후 확정 keyword로 반영하고 페이지를 0으로 리셋한다.
   // resetPage는 usePageState 내부에서 useCallback으로 안정화돼 있어 무관한 리렌더마다 재실행되지 않는다.
   useEffect(() => {
-    const trimmed = searchInput.trim()
+    const trimmed = searchValue.trim()
     if (trimmed === keyword) {
       return
     }
@@ -100,7 +106,7 @@ export function DocumentBoxTable({
       resetPage()
     }, SEARCH_DEBOUNCE_MS)
     return () => clearTimeout(timer)
-  }, [searchInput, keyword, resetPage])
+  }, [searchValue, keyword, resetPage])
 
   const listQuery = useListQuery({ keyword, page, size })
 
@@ -154,6 +160,28 @@ export function DocumentBoxTable({
           )
         },
       }),
+      // 보기: 행 전체 클릭과 별개인 명시적 상세 진입 버튼. onRowClick이 없으면(비인터랙티브) 셀을 비운다.
+      // 최신 핸들러는 ref로 읽어(위 주석 참조) columns를 안정 참조로 유지한다.
+      columnHelper.display({
+        id: 'view',
+        header: '보기',
+        cell: ({ row }) => {
+          const handleView = onRowClickRef.current
+          return handleView ? (
+            <button
+              type="button"
+              onClick={(event) => {
+                event.stopPropagation() // 행 클릭 핸들러와 중복 트리거 방지
+                handleView(row.original.draftId)
+              }}
+              className="inline-flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              aria-label="상세보기"
+            >
+              <Eye className="size-4" />
+            </button>
+          ) : null
+        },
+      }),
     ],
     [],
   )
@@ -179,39 +207,23 @@ export function DocumentBoxTable({
   const isInteractive = onRowClick != null
 
   return (
-    <div className="space-y-4">
-      {/* 툴바: 제목 keyword 검색(BoardListPage 검색창 톤 유지) */}
-      <div className="sm:flex sm:justify-end">
-        <div className="relative w-full sm:max-w-xs">
-          <Search className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
-          <label htmlFor={`${searchId}-search`} className="sr-only">
-            제목 검색
-          </label>
-          <Input
-            id={`${searchId}-search`}
-            type="search"
-            value={searchInput}
-            onChange={(event) => setSearchInput(event.target.value)}
-            placeholder={searchPlaceholder}
-            className="pl-8"
-          />
-        </div>
-      </div>
-
-      {/* 표 영역: placeholderData: keepPreviousData가 검색·페이지 변경 중 이전 목록을 유지하므로
+    <div className="flex flex-1 flex-col gap-4">
+      {/* 표 영역: flex-1로 남는 높이를 채워 페이지네이션을 카드 하단에 고정한다.
+          placeholderData: keepPreviousData가 검색·페이지 변경 중 이전 목록을 유지하므로
           isLoading은 최초 로딩에서만 true가 되어 깜빡임이 없다. */}
-      {listQuery.isLoading ? (
-        <p className="py-8 text-center text-sm text-muted-foreground">불러오는 중...</p>
-      ) : listQuery.error ? (
-        // 실패는 위 useEffect가 토스트로 알렸으므로 화면은 빈 상태 문구만 표시한다.
-        <p className="py-8 text-center text-sm text-muted-foreground">
-          목록을 불러오지 못했습니다.
-        </p>
-      ) : rows.length === 0 ? (
-        <p className="py-8 text-center text-sm text-muted-foreground">{emptyMessage}</p>
-      ) : (
-        <div className="w-full overflow-x-auto">
-          <table className="w-full border-collapse text-sm">
+      <div className="flex-1">
+        {listQuery.isLoading ? (
+          <p className="py-8 text-center text-sm text-muted-foreground">불러오는 중...</p>
+        ) : listQuery.error ? (
+          // 실패는 위 useEffect가 토스트로 알렸으므로 화면은 빈 상태 문구만 표시한다.
+          <p className="py-8 text-center text-sm text-muted-foreground">
+            목록을 불러오지 못했습니다.
+          </p>
+        ) : rows.length === 0 ? (
+          <p className="py-8 text-center text-sm text-muted-foreground">{emptyMessage}</p>
+        ) : (
+          <div className="w-full overflow-x-auto">
+            <table className="w-full border-collapse text-sm">
             <thead>
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id} className="border-b border-border">
@@ -268,6 +280,7 @@ export function DocumentBoxTable({
           </table>
         </div>
       )}
+      </div>
 
       {/* 하단 페이지네이션(공유 표준 컴포넌트 재사용, 페이징 number+1) */}
       <PaginationControls

@@ -28,7 +28,8 @@ export function ApprovalLineTimeline({ draft }: DraftDetailSectionProps) {
   const approvers = [...draft.approvers].sort((a, b) => a.order - b.order)
 
   return (
-    <section className="space-y-3 border-t pt-4">
+    // 독립 카드(CardContent) 안에서 렌더되므로 자체 상단 구분선은 두지 않는다(레퍼런스 사이드 카드).
+    <section className="space-y-3">
       <h3 className="text-sm font-semibold text-muted-foreground">결재선</h3>
       {approvers.length === 0 ? (
         <p className="text-sm text-muted-foreground">지정된 결재자가 없습니다.</p>

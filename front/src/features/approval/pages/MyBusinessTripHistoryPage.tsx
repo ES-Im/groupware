@@ -50,7 +50,7 @@ export function MyBusinessTripHistoryPage() {
   const rows = historyQuery.data ?? []
 
   return (
-    <div className="w-full p-4 sm:p-6 lg:p-8">
+    <div className="w-full p-3">
       <div className="mb-6">
         <h1 className="text-xl font-semibold tracking-tight">내 출장 이력</h1>
       </div>

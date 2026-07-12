@@ -4,7 +4,9 @@ import { RegisterPage } from '@/features/auth/pages/RegisterPage'
 import { MyAttendancePage } from '@/features/attendance/pages/MyAttendancePage'
 import { DeptAttendancePage } from '@/features/attendance/pages/DeptAttendancePage'
 import { DocumentBoxHomePage } from '@/features/approval/pages/DocumentBoxHomePage'
+import { DraftCreatePreviewPage } from '@/features/approval/pages/DraftCreatePreviewPage'
 import { DraftDetailPage } from '@/features/approval/pages/DraftDetailPage'
+import { DraftPrintPreviewPage } from '@/features/approval/pages/DraftPrintPreviewPage'
 import { GeneralDraftCreatePage } from '@/features/approval/pages/GeneralDraftCreatePage'
 import { GeneralDraftEditPage } from '@/features/approval/pages/GeneralDraftEditPage'
 import { BusinessTripDraftCreatePage } from '@/features/approval/pages/BusinessTripDraftCreatePage'
@@ -126,6 +128,12 @@ import { LayoutShell } from '@/shared/components/LayoutShell'
  * 마운트되는 오버레이 패널(ChatOverlayPanel, src/shared/components/LayoutShell.tsx)로
  * 전환됐다(팝업 창 → 인앱 오버레이 구조 변경). 목록/상세 패널 전환은 chatOverlayStore의
  * selectedRoomId로 처리하므로 라우터 트리에는 chat 관련 라우트가 없다.
+ * /approval/drafts/:draftId/print(DraftPrintPreviewPage)·/approval/drafts/preview
+ * (DraftCreatePreviewPage)는 인쇄 전용 새 창(window.open)으로 열리는 화면이라 사이드바/탑바
+ * 크롬이 없어야 한다 — /login·/register와 동일하게 LayoutShell 밖 형제 라우트로 등록하되,
+ * 인증은 필요하므로 ProtectedRoute로만 감싼다. 전자는 상신된 기안(draftId 있음)을 서버
+ * 재조회해 보여주고, 후자는 작성 중(draftId 없음) 폼 스냅샷을 sessionStorage로 건네받아
+ * 보여준다(핸드오프 계약은 features/approval/model/draftPreview.ts).
  * /settings/company는 ROADMAP(COMPANY) T1.3에서 CompanyInfoPage(F1401)로 연결했다. 사이드바
  * 노출은 minRole ADMIN이지만, 조회 API가 permitAll이라 라우트 가드는 의도적으로 EMPLOYEE
  * 수준(ProtectedRoute만)으로 둔다 — URL 직접 접근 시에도 읽기 전용 뷰가 정상 렌더되어야 한다.
@@ -494,5 +502,21 @@ export const router = createBrowserRouter([
   {
     path: '/register',
     element: <RegisterPage />,
+  },
+  {
+    path: '/approval/drafts/:draftId/print',
+    element: (
+      <ProtectedRoute>
+        <DraftPrintPreviewPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/approval/drafts/preview',
+    element: (
+      <ProtectedRoute>
+        <DraftCreatePreviewPage />
+      </ProtectedRoute>
+    ),
   },
 ])

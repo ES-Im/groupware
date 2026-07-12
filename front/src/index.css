@@ -126,3 +126,11 @@
     @apply font-sans;
     }
 }
+
+/* 전자결재 인쇄 미리보기(DraftPrintDocument): A4 세로·여백 0으로 브라우저 기본 인쇄 여백을 없앤다. */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+}

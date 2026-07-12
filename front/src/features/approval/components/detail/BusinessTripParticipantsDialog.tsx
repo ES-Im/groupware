@@ -9,7 +9,7 @@ import {
   DialogTitle,
 } from '@/shared/ui/dialog'
 import { useBusinessTripParticipantsUpdateMutation } from '../../api/useBusinessTripParticipantsUpdateMutation'
-import { EmployeePicker, type EmployeePickerEmployee } from '../EmployeePicker'
+import { EmployeePicker, type EmployeePickerEmployee } from '@/shared/components/EmployeePicker'
 
 interface BusinessTripParticipantsDialogProps {
   /** 참여자를 교체할 출장 기안 식별 번호. */

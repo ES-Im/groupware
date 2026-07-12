@@ -53,7 +53,8 @@ export function CirculationSection({ draft }: DraftDetailSectionProps) {
   }
 
   return (
-    <section className="space-y-3 border-t pt-4">
+    // 독립 카드(CardContent) 안에서 렌더되므로 자체 상단 구분선은 두지 않는다(레퍼런스 사이드 카드).
+    <section className="space-y-3">
       <div className="flex items-center justify-between gap-3">
         <h3 className="text-sm font-semibold text-muted-foreground">공람</h3>
         <div className="flex items-center gap-2">

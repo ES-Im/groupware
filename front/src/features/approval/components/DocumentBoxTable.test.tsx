@@ -59,7 +59,7 @@ function stubHook(state: {
 
 describe('DocumentBoxTable (F710·F712·F713·F714)', () => {
   it('제목/기안자/상신일시/최근 결재자/상태 배지/첨부 컬럼을 한 행에 렌더한다', () => {
-    render(<DocumentBoxTable useListQuery={stubHook({ data: makePage([makeRow()]) })} />)
+    render(<DocumentBoxTable searchValue="" useListQuery={stubHook({ data: makePage([makeRow()]) })} />)
 
     // 헤더
     expect(screen.getByText('제목')).toBeInTheDocument()
@@ -83,6 +83,7 @@ describe('DocumentBoxTable (F710·F712·F713·F714)', () => {
   it('submittedAt/latestApproverName이 null이면 대시("-")로 표기한다', () => {
     render(
       <DocumentBoxTable
+        searchValue=""
         useListQuery={stubHook({
           data: makePage([makeRow({ submittedAt: null, latestApproverName: null })]),
         })}
@@ -96,6 +97,7 @@ describe('DocumentBoxTable (F710·F712·F713·F714)', () => {
   it('첨부가 없으면(isFileAttached=false) "첨부파일 없음" 라벨로 대시 표기한다', () => {
     render(
       <DocumentBoxTable
+        searchValue=""
         useListQuery={stubHook({ data: makePage([makeRow({ isFileAttached: false })]) })}
       />,
     )
@@ -107,6 +109,7 @@ describe('DocumentBoxTable (F710·F712·F713·F714)', () => {
   it('목록이 비면 emptyMessage를 노출하고 표(table)는 렌더하지 않는다', () => {
     render(
       <DocumentBoxTable
+        searchValue=""
         useListQuery={stubHook({ data: makePage([]) })}
         emptyMessage="상신한 문서가 없습니다."
       />,
@@ -117,13 +120,13 @@ describe('DocumentBoxTable (F710·F712·F713·F714)', () => {
   })
 
   it('로딩 중이면 "불러오는 중..."을 노출한다', () => {
-    render(<DocumentBoxTable useListQuery={stubHook({ isLoading: true })} />)
+    render(<DocumentBoxTable searchValue="" useListQuery={stubHook({ isLoading: true })} />)
 
     expect(screen.getByText('불러오는 중...')).toBeInTheDocument()
   })
 
   it('조회 에러 시 "목록을 불러오지 못했습니다." 문구를 노출한다', () => {
-    render(<DocumentBoxTable useListQuery={stubHook({ error: new Error('boom') })} />)
+    render(<DocumentBoxTable searchValue="" useListQuery={stubHook({ error: new Error('boom') })} />)
 
     expect(screen.getByText('목록을 불러오지 못했습니다.')).toBeInTheDocument()
   })
@@ -133,6 +136,7 @@ describe('DocumentBoxTable (F710·F712·F713·F714)', () => {
     const onRowClick = vi.fn()
     render(
       <DocumentBoxTable
+        searchValue=""
         useListQuery={stubHook({ data: makePage([makeRow({ draftId: 42 })]) })}
         onRowClick={onRowClick}
       />,
@@ -146,7 +150,7 @@ describe('DocumentBoxTable (F710·F712·F713·F714)', () => {
   })
 
   it('onRowClick 미주입 시 행은 비인터랙티브(role=button 아님)로 렌더된다', () => {
-    render(<DocumentBoxTable useListQuery={stubHook({ data: makePage([makeRow()]) })} />)
+    render(<DocumentBoxTable searchValue="" useListQuery={stubHook({ data: makePage([makeRow()]) })} />)
 
     // 행이 button role을 갖지 않으므로 title로 button을 조회하면 없다(페이지네이션 버튼은 별개).
     expect(screen.queryByRole('button', { name: /연차 신청서/ })).not.toBeInTheDocument()

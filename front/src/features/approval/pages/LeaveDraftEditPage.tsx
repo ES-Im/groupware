@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
 import dayjs from 'dayjs'
 import { Save, SquarePen } from 'lucide-react'
@@ -13,16 +13,25 @@ import { Textarea } from '@/shared/ui/textarea'
 import { useMeQuery } from '@/features/employee/api/useMeQuery'
 import { useDraftDetailQuery } from '../api/useDraftDetailQuery'
 import { useLeaveDraftUpdateMutation } from '../api/useLeaveDraftUpdateMutation'
-import { EmployeePicker, type EmployeePickerEmployee } from '../components/EmployeePicker'
+import { EmployeePicker, type EmployeePickerEmployee } from '@/shared/components/EmployeePicker'
+import { composeLeaveAt, LeaveDateHourField } from '../components/LeaveDateHourField'
 import { isLeaveDraft } from '../lib/isLeaveDraft'
+import { useMyLeaveSummaryQuery } from '@/features/leave/api/useMyLeaveSummaryQuery'
+import {
+  calculateUsedLeaveDays,
+  formatLeaveDays,
+  isFourHourUnitLeaveType,
+  LEAVE_END_HOUR_OPTIONS,
+  LEAVE_START_HOUR_OPTIONS,
+} from '../lib/leaveHours'
 import { resolveDrafterActions } from '../lib/resolveDrafterActions'
-import type { ApproverParam } from '../model/approverParam'
+import { toApprovalRole, type ApproverParam } from '../model/approverParam'
 import type { DraftDetailResponse, LeaveSlot } from '../model/draftDetail'
 import { leaveDraftSchema, leaveTypeOptions, type LeaveDraftFormValues } from '../model/leaveDraftSchema'
 
 /** 안내 문구만 표시하는 공통 셸(로딩/에러/권한 분기 공유, BusinessTripDraftEditPage 동형). */
 function EditPageShell({ children }: { children: React.ReactNode }) {
-  return <div className="mx-auto w-full max-w-2xl p-4 sm:p-6 lg:p-8">{children}</div>
+  return <div className="mx-auto w-full max-w-2xl p-3">{children}</div>
 }
 
 /**
@@ -64,6 +73,21 @@ function LeaveDraftEditForm({
       .map((approver) => ({ empId: approver.empId, empName: approver.empName })),
   )
 
+  // 기존 결재선의 역할(결재/협조)을 empId→role로 보존한다. 이 화면에는 역할 변경 UI가 없으므로
+  // 저장 시 기존 역할을 그대로 되돌리고 새로 추가된 사원만 기본 APPROVER로 매핑한다(role을
+  // APPROVER로 고정하면 협조자가 포함된 기안을 저장할 때 전원 결재로 덮여 결재선이 훼손된다).
+  const existingRolesByEmpId = new Map(
+    draft.approvers.map((approver) => [approver.empId, toApprovalRole(approver.role)]),
+  )
+
+  // 일시 분리 입력 상태(작성 폼과 동일 — 분 선택 UI 없이 날짜+시로 받는다). 기존 값
+  // (yyyy-MM-ddTHH:mm:ss)을 날짜/시로 쪼개 프리필한다. 반차 경계(09/13·13/18) 밖의 옛 시각은
+  // LeaveDateHourField가 보존 옵션으로 표시한다.
+  const [startDate, setStartDate] = useState(() => dayjs(leave.startAt).format('YYYY-MM-DD'))
+  const [startHour, setStartHour] = useState(() => dayjs(leave.startAt).format('HH'))
+  const [endDate, setEndDate] = useState(() => dayjs(leave.endAt).format('YYYY-MM-DD'))
+  const [endHour, setEndHour] = useState(() => dayjs(leave.endAt).format('HH'))
+
   const form = useZodForm(leaveDraftSchema, {
     defaultValues: {
       title: draft.title,
@@ -75,8 +99,65 @@ function LeaveDraftEditForm({
   })
   const {
     register,
-    formState: { errors, isSubmitting },
+    setValue,
+    watch,
+    formState: { errors, isSubmitting, isSubmitted },
   } = form
+
+  const leaveTypeValue = watch('leaveType')
+  // 4시간 단위 유형(연차·특별휴가·대체휴무)이면 시각 옵션을 반차 경계(시작 09/13, 종료 13/18)로
+  // 제한하고 사용 일수를 계산해 보여준다(작성 폼 동형 — 2026-07-11 폼 개편, 종료 직접 선택).
+  const isFourHourUnit = isFourHourUnitLeaveType(leaveTypeValue)
+
+  // 유형별 잔여 휴가(MY_EMP_LEAVE_SUMMARY — 작성 폼 동형). 연도는 백엔드 검증과 동일하게
+  // 시작일 기준. EmpLeave 미보유 사원은 200 + 빈 바디라 문자열/undefined 방어.
+  const summaryQuery = useMyLeaveSummaryQuery(startDate ? dayjs(startDate).year() : undefined)
+  const leaveSummary =
+    summaryQuery.data && typeof summaryQuery.data !== 'string' ? summaryQuery.data : null
+  const remainingDaysByType: Record<string, number | null> = {
+    ANNUAL: leaveSummary ? leaveSummary.annualBaseGrantDays - leaveSummary.annualUsedDays : null,
+    SPECIAL: leaveSummary ? leaveSummary.specialGrantDays - leaveSummary.specialUsedDays : null,
+    COMPENSATORY: leaveSummary
+      ? leaveSummary.compensatoryGrantDays - leaveSummary.compensatoryUsedDays
+      : null,
+  }
+  const remainingDays = isFourHourUnit ? (remainingDaysByType[leaveTypeValue ?? ''] ?? null) : null
+
+  // 선택한 시작·종료로 계산한 사용 일수(0.5 단위 — 작성 폼 동형).
+  const usedLeaveDays = isFourHourUnit
+    ? calculateUsedLeaveDays(startDate, startHour, endDate, endHour)
+    : null
+
+  // 분리 입력 → zod 필드(startAt/endAt) 동기화. 재검증은 저장 시도 이후에만(shouldValidate:
+  // isSubmitted — 기본 mode=onSubmit과 정합). 작성 폼과 달리 min/클램프는 기존 동작대로 두지 않는다
+  // (이 폼은 원래 min 제어가 없었다 — 기간 정합성 최종 판정은 서버).
+  function handleStartChange(date: string, hour: string) {
+    setStartDate(date)
+    setStartHour(hour)
+    setValue('startAt', composeLeaveAt(date, hour), { shouldValidate: isSubmitted })
+  }
+
+  function handleEndChange(date: string, hour: string) {
+    setEndDate(date)
+    setEndHour(hour)
+    setValue('endAt', composeLeaveAt(date, hour), { shouldValidate: isSubmitted })
+  }
+
+  // 유형이 4시간 단위 유형으로 바뀌면 반차 경계 밖 시각을 비운다(작성 폼 동형). 프리필 시각이
+  // 경계 밖인 기존 기안도 이 정리를 거친다 — 저장하려면 새 경계로 다시 고르게 하는 의도.
+  useEffect(() => {
+    if (!isFourHourUnit) {
+      return
+    }
+    if (startHour && !(LEAVE_START_HOUR_OPTIONS as readonly string[]).includes(startHour)) {
+      setStartHour('')
+      setValue('startAt', '', { shouldValidate: isSubmitted })
+    }
+    if (endHour && !(LEAVE_END_HOUR_OPTIONS as readonly string[]).includes(endHour)) {
+      setEndHour('')
+      setValue('endAt', '', { shouldValidate: isSubmitted })
+    }
+  }, [isFourHourUnit, startHour, endHour, isSubmitted, setValue])
 
   async function submit(values: LeaveDraftFormValues) {
     // 결재선은 EmployeePicker 로컬 상태다. 화면 선택을 그대로 전량 갱신으로 보낸다(부분 전송도
@@ -86,7 +167,7 @@ function LeaveDraftEditForm({
       approverSelection.length > 0
         ? approverSelection.map((emp, index) => ({
             approverId: emp.empId,
-            role: 'APPROVER',
+            role: existingRolesByEmpId.get(emp.empId) ?? 'APPROVER',
             order: index + 1,
           }))
         : undefined
@@ -164,7 +245,7 @@ function LeaveDraftEditForm({
               <select
                 id="leave-draft-edit-type"
                 aria-invalid={!!errors.leaveType}
-                className="h-9 rounded-lg border border-input bg-transparent px-3 text-sm text-foreground transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
+                className="h-8 rounded-lg border border-input bg-transparent px-2.5 text-sm text-foreground transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
                 {...register('leaveType')}
               >
                 {leaveTypeOptions.map((option) => (
@@ -173,6 +254,31 @@ function LeaveDraftEditForm({
                   </option>
                 ))}
               </select>
+              {/* 4시간 단위 유형(DRAFT_005 미러) 안내 + 유형별 잔여 휴가(작성 폼 동형). */}
+              {isFourHourUnit && (
+                <p className="text-xs text-muted-foreground">
+                  연차·특별휴가·대체휴무는 0.5일(4시간) 단위로만 사용할 수 있습니다. 사용 일수는
+                  시작·종료 일시로 자동 계산되어 본문에 표시됩니다.
+                </p>
+              )}
+              {isFourHourUnit && (
+                <p className="text-xs text-muted-foreground">
+                  {remainingDays !== null ? (
+                    <>
+                      잔여{' '}
+                      {leaveTypeOptions.find((option) => option.value === leaveTypeValue)?.label}:{' '}
+                      <span className="font-medium text-foreground">
+                        {formatLeaveDays(remainingDays)}
+                      </span>
+                      {usedLeaveDays !== null && (
+                        <> · 이번 신청 사용: {formatLeaveDays(usedLeaveDays)}</>
+                      )}
+                    </>
+                  ) : (
+                    '잔여 휴가 정보를 불러올 수 없습니다.'
+                  )}
+                </p>
+              )}
               {errors.leaveType && (
                 <p role="alert" className="text-sm text-destructive">
                   {errors.leaveType.message}
@@ -180,40 +286,31 @@ function LeaveDraftEditForm({
               )}
             </div>
 
+            {/* 시작·종료 일시는 항상 같은 행에 배치한다(sm 이상 2열 — 사용자 요청 2026-07-11).
+                4시간 단위 유형은 시각 옵션을 반차 경계(시작 09/13, 종료 13/18)로 제한하고,
+                병가·공가는 근무시간(09~18시) 전체를 1시간 단위로 허용한다(작성 폼 동형). */}
             <div className="grid gap-4 sm:grid-cols-2">
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="leave-draft-edit-start-at">
-                  휴가 시작 일시 <span className="text-destructive">*</span>
-                </Label>
-                <Input
-                  id="leave-draft-edit-start-at"
-                  type="datetime-local"
-                  aria-invalid={!!errors.startAt}
-                  {...register('startAt')}
-                />
-                {errors.startAt && (
-                  <p role="alert" className="text-sm text-destructive">
-                    {errors.startAt.message}
-                  </p>
-                )}
-              </div>
+              <LeaveDateHourField
+                id="leave-draft-edit-start-at"
+                label="휴가 시작 일시"
+                hourAriaLabel="휴가 시작 시간"
+                dateValue={startDate}
+                hourValue={startHour}
+                error={errors.startAt?.message}
+                hourOptions={isFourHourUnit ? LEAVE_START_HOUR_OPTIONS : undefined}
+                onChange={handleStartChange}
+              />
 
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="leave-draft-edit-end-at">
-                  휴가 종료 일시 <span className="text-destructive">*</span>
-                </Label>
-                <Input
-                  id="leave-draft-edit-end-at"
-                  type="datetime-local"
-                  aria-invalid={!!errors.endAt}
-                  {...register('endAt')}
-                />
-                {errors.endAt && (
-                  <p role="alert" className="text-sm text-destructive">
-                    {errors.endAt.message}
-                  </p>
-                )}
-              </div>
+              <LeaveDateHourField
+                id="leave-draft-edit-end-at"
+                label="휴가 종료 일시"
+                hourAriaLabel="휴가 종료 시간"
+                dateValue={endDate}
+                hourValue={endHour}
+                error={errors.endAt?.message}
+                hourOptions={isFourHourUnit ? LEAVE_END_HOUR_OPTIONS : undefined}
+                onChange={handleEndChange}
+              />
             </div>
 
             <div className="flex flex-col gap-1.5">

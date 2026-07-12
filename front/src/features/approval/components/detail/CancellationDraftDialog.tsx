@@ -20,7 +20,7 @@ import {
   cancellationDraftSchema,
   type CancellationDraftFormValues,
 } from '../../model/cancellationDraftSchema'
-import { EmployeePicker, type EmployeePickerEmployee } from '../EmployeePicker'
+import { EmployeePicker, type EmployeePickerEmployee } from '@/shared/components/EmployeePicker'
 
 interface CancellationDraftDialogProps {
   /** 취소 대상 원본 기안서 식별 번호(APPROVED 원본). path param으로 전송된다. */

@@ -21,8 +21,13 @@ export const leaveTypeLabels: Record<LeaveType, string> = {
   SPECIAL: '특별휴가',
 }
 
-/** 작성 폼 Select 옵션 목록(enum 선언 순서 유지). */
-export const leaveTypeOptions = LEAVE_TYPES.map((value) => ({
+/**
+ * 작성 폼 Select 옵션 목록(enum 선언 순서 유지). HOURLY는 백엔드
+ * `LeaveDraftService.REQUESTABLE_LEAVE_TYPES` 실측상 신청 불가(선택 시 항상 DRAFT_007
+ * "신청할 수 없는 휴가 타입입니다")라 옵션에서 제외한다 — `leaveTypeLabels`에는 남겨
+ * 상세 표시(LeaveDraftBody)의 기존 데이터 라벨링은 유지한다.
+ */
+export const leaveTypeOptions = LEAVE_TYPES.filter((value) => value !== 'HOURLY').map((value) => ({
   value,
   label: leaveTypeLabels[value],
 }))
@@ -46,13 +51,28 @@ export const leaveTypeOptions = LEAVE_TYPES.map((value) => ({
  * 서버 판정(VALIDATION_ERROR 등)은 submitWithErrorMapping이 handleApiError로 위임하므로 여기서는
  * 클라 사전검증 수준(공백 불가·유형 택1·기간 순서)만 다룬다.
  */
+/**
+ * 연가 1시간 단위 규칙(도메인모델 "연가는 1시간 단위로 사용"): 값이 정시(:00)인지 검사한다.
+ * 폼은 날짜+시 분리 입력(LeaveDateHourField)이라 분 선택 UI 자체가 없지만, 값 경로가 늘어나도
+ * 깨지지 않도록 스키마가 최종 보루로 남는다. 시작·종료가 모두 정시면 사용 시간도 자연히
+ * 1시간 단위가 되므로 기간 차이를 별도로 검사하지 않는다.
+ */
+const isOnTheHour = (value: string) => /T\d{2}:00(:00)?$/.test(value)
+const HOUR_UNIT_MESSAGE = '연가는 1시간 단위로만 사용할 수 있습니다(분 단위 선택 불가)'
+
 export const leaveDraftSchema = z
   .object({
     title: z.string().trim().min(1, '제목을 입력해주세요'),
     content: z.string().trim().min(1, '기안 내용을 입력해주세요'),
     leaveType: z.enum(LEAVE_TYPES, { error: '휴가 유형을 선택해주세요' }),
-    startAt: z.string().min(1, '휴가 시작 일시를 입력해주세요'),
-    endAt: z.string().min(1, '휴가 종료 일시를 입력해주세요'),
+    startAt: z
+      .string()
+      .min(1, '휴가 시작 일시를 입력해주세요')
+      .refine(isOnTheHour, HOUR_UNIT_MESSAGE),
+    endAt: z
+      .string()
+      .min(1, '휴가 종료 일시를 입력해주세요')
+      .refine(isOnTheHour, HOUR_UNIT_MESSAGE),
   })
   .refine(
     (data) =>

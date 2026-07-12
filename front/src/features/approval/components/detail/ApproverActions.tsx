@@ -28,12 +28,13 @@ export function ApproverActions({ draft }: DraftDetailSectionProps) {
     <div className="flex flex-wrap gap-2">
       <Button
         type="button"
+        size="sm"
         onClick={() => approveMutation.mutate(draft.draftId)}
         disabled={approveMutation.isPending}
       >
         승인
       </Button>
-      <Button type="button" variant="destructive" onClick={() => setRejectOpen(true)}>
+      <Button type="button" size="sm" variant="destructive" onClick={() => setRejectOpen(true)}>
         반려
       </Button>
 

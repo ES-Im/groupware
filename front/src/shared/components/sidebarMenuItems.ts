@@ -70,37 +70,24 @@ export const sidebarMenuItems: SidebarMenuItem[] = [
     ],
   },
   {
-    // 전자결재 그룹: 상신함/임시저장함/결재대기함/결재함 4종 리프는 문서함 UI 통합 작업에서 단일
-    // '문서함' 항목(/approval/box → 결재대기 탭으로 리다이렉트)으로 합쳤다 — 4종 목록은 이제
-    // DocumentBoxHomePage 내부 탭 전환으로 대체된다. 결재대기함이 갖던 badgeKey('approvalPending',
-    // F711 결재대기 건수 뱃지)는 '문서함' 항목으로 그대로 이전한다 — 실제 count는 LayoutShell이
+    // 전자결재 그룹은 '결재함'과 '새 기안 작성' 딱 2개만 둔다(사용자 확정, 2026-07-10).
+    // 유형별 작성 항목(출장/연가/매출)은 메뉴에서 제거했다 — 작성 화면(DraftCreateFrame)의
+    // 좌측 "기안서 종류" 카드가 4종 전환을 담당하므로 진입점은 '새 기안 작성' 하나로 충분하다.
+    // '결재함'(/approval/box → 결재대기 탭 리다이렉트)은 4종 문서함을 DocumentBoxHomePage 내부
+    // 탭으로 통합한 단일 진입점이며, 결재대기 건수 badgeKey('approvalPending', F711)는 LayoutShell이
     // useMyPendingApprovalDraftsCountQuery로 조회해 주입한다.
-    // 새 기안 작성은 DRAFT-COMMON에서 GeneralDraftCreatePage(F720) 진입점으로 그룹 최상단에 추가했다.
-    // 출장 기안 작성은 ROADMAP(DRAFT-BUSINESSTRIP) T1.4에서 새 기안 작성 옆에 추가했다.
-    // 매출 기안 작성은 ROADMAP(SALES) M4(T4.1)에서 출장 기안 작성 옆에 추가했다. minRole
-    // FRANCHISE(hasRequiredRole가 ADMIN 자동 포함 게이팅).
     // 내/부서 출장 이력은 문서함 UI 통합 작업에서 '[미배치]' 그룹으로 이동했다(아래 그룹 주석 참고).
     label: '전자결재',
     minRole: 'EMPLOYEE',
     icon: FileSignature,
     children: [
-      { label: '새 기안 작성', to: '/approval/drafts/new', minRole: 'EMPLOYEE' },
       {
-        label: '출장 기안 작성',
-        to: '/approval/drafts/business-trips/new',
-        minRole: 'EMPLOYEE',
-      },
-      {
-        label: '매출 기안 작성',
-        to: '/approval/drafts/sales/new',
-        minRole: 'FRANCHISE',
-      },
-      {
-        label: '문서함',
+        label: '결재함',
         to: '/approval/box',
         minRole: 'EMPLOYEE',
         badgeKey: 'approvalPending',
       },
+      { label: '새 기안 작성', to: '/approval/drafts/new', minRole: 'EMPLOYEE' },
     ],
   },
   {

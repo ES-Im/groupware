@@ -118,6 +118,33 @@ describe('leaveDraftSchema - startAt/endAt 필수 + endAt>=startAt refine(경계
   })
 })
 
+describe('leaveDraftSchema - 1시간 단위(정시 :00) refine', () => {
+  it('startAt이 정시가 아니면(:30) 실패한다', () => {
+    const result = leaveDraftSchema.safeParse(validPayload({ startAt: '2026-07-10T09:30' }))
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      const issue = result.error.issues.find((i) => i.path[0] === 'startAt')
+      expect(issue?.message).toBe('연가는 1시간 단위로만 사용할 수 있습니다(분 단위 선택 불가)')
+    }
+  })
+
+  it('endAt이 정시가 아니면(:45) 실패한다', () => {
+    const result = leaveDraftSchema.safeParse(validPayload({ endAt: '2026-07-10T18:45' }))
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      const issue = result.error.issues.find((i) => i.path[0] === 'endAt')
+      expect(issue?.message).toBe('연가는 1시간 단위로만 사용할 수 있습니다(분 단위 선택 불가)')
+    }
+  })
+
+  it('초가 붙은 정시 표기(THH:00:00)도 허용한다', () => {
+    const result = leaveDraftSchema.safeParse(
+      validPayload({ startAt: '2026-07-10T09:00:00', endAt: '2026-07-10T18:00:00' }),
+    )
+    expect(result.success).toBe(true)
+  })
+})
+
 describe('leaveTypeLabels / leaveTypeOptions', () => {
   it('enum 6종 코드를 백엔드 LeaveType.java description과 동일한 한글 라벨로 매핑한다', () => {
     expect(leaveTypeLabels).toEqual({
@@ -130,10 +157,9 @@ describe('leaveTypeLabels / leaveTypeOptions', () => {
     })
   })
 
-  it('leaveTypeOptions는 enum 선언 순서를 유지한 {value,label}[] 이다', () => {
+  it('leaveTypeOptions는 신청 가능 유형 5종만 enum 선언 순서대로 담는다(HOURLY는 백엔드 REQUESTABLE 밖이라 제외)', () => {
     expect(leaveTypeOptions).toEqual([
       { value: 'ANNUAL', label: '연차' },
-      { value: 'HOURLY', label: '공휴일' },
       { value: 'SICK', label: '병가' },
       { value: 'OFFICIAL', label: '공가' },
       { value: 'COMPENSATORY', label: '대체휴무' },

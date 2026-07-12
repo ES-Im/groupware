@@ -12,17 +12,17 @@ import { Textarea } from '@/shared/ui/textarea'
 import { useMeQuery } from '@/features/employee/api/useMeQuery'
 import { useDraftDetailQuery } from '../api/useDraftDetailQuery'
 import { useSalesDraftUpdateMutation } from '../api/useSalesDraftUpdateMutation'
-import { EmployeePicker, type EmployeePickerEmployee } from '../components/EmployeePicker'
-import { FranchisePicker, type FranchisePickerSelection } from '../components/FranchisePicker'
+import { EmployeePicker, type EmployeePickerEmployee } from '@/shared/components/EmployeePicker'
+import { FranchisePicker, type FranchisePickerSelection } from '@/shared/components/FranchisePicker'
 import { isSalesDraft } from '../lib/isSalesDraft'
 import { resolveDrafterActions } from '../lib/resolveDrafterActions'
-import type { ApproverParam } from '../model/approverParam'
+import { toApprovalRole, type ApproverParam } from '../model/approverParam'
 import type { DraftDetailResponse, SalesSlot } from '../model/draftDetail'
 import { salesDraftSchema, type SalesDraftFormValues } from '../model/salesDraftSchema'
 
 /** 안내 문구만 표시하는 공통 셸(로딩/에러/권한 분기 공유, BusinessTripDraftEditPage 동형). */
 function EditPageShell({ children }: { children: React.ReactNode }) {
-  return <div className="mx-auto w-full max-w-2xl p-4 sm:p-6 lg:p-8">{children}</div>
+  return <div className="mx-auto w-full max-w-2xl p-3">{children}</div>
 }
 
 /**
@@ -52,6 +52,13 @@ function SalesDraftEditForm({
     [...draft.approvers]
       .sort((a, b) => a.order - b.order)
       .map((approver) => ({ empId: approver.empId, empName: approver.empName })),
+  )
+
+  // 기존 결재선의 역할(결재/협조)을 empId→role로 보존한다. 이 화면에는 역할 변경 UI가 없으므로
+  // 저장 시 기존 역할을 그대로 되돌리고 새로 추가된 사원만 기본 APPROVER로 매핑한다(role을
+  // APPROVER로 고정하면 협조자가 포함된 기안을 저장할 때 전원 결재로 덮여 결재선이 훼손된다).
+  const existingRolesByEmpId = new Map(
+    draft.approvers.map((approver) => [approver.empId, toApprovalRole(approver.role)]),
   )
 
   const [franchiseSelection, setFranchiseSelection] = useState<FranchisePickerSelection | null>({
@@ -87,7 +94,7 @@ function SalesDraftEditForm({
       approverSelection.length > 0
         ? approverSelection.map((emp, index) => ({
             approverId: emp.empId,
-            role: 'APPROVER',
+            role: existingRolesByEmpId.get(emp.empId) ?? 'APPROVER',
             order: index + 1,
           }))
         : undefined

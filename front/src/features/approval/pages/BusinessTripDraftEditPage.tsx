@@ -13,10 +13,11 @@ import { Textarea } from '@/shared/ui/textarea'
 import { useMeQuery } from '@/features/employee/api/useMeQuery'
 import { useBusinessTripDraftUpdateMutation } from '../api/useBusinessTripDraftUpdateMutation'
 import { useDraftDetailQuery } from '../api/useDraftDetailQuery'
-import { EmployeePicker, type EmployeePickerEmployee } from '../components/EmployeePicker'
+import { composeDateTime, DateTimeField } from '../components/DateTimeField'
+import { EmployeePicker, type EmployeePickerEmployee } from '@/shared/components/EmployeePicker'
 import { isBusinessTripDraft } from '../lib/isBusinessTripDraft'
 import { resolveDrafterActions } from '../lib/resolveDrafterActions'
-import type { ApproverParam } from '../model/approverParam'
+import { toApprovalRole, type ApproverParam } from '../model/approverParam'
 import {
   businessTripDraftSchema,
   type BusinessTripDraftFormValues,
@@ -25,7 +26,7 @@ import type { BusinessTripSlot, DraftDetailResponse } from '../model/draftDetail
 
 /** 안내 문구만 표시하는 공통 셸(로딩/에러/권한 분기 공유, GeneralDraftEditPage 동형). */
 function EditPageShell({ children }: { children: React.ReactNode }) {
-  return <div className="mx-auto w-full max-w-2xl p-4 sm:p-6 lg:p-8">{children}</div>
+  return <div className="mx-auto w-full max-w-2xl p-3">{children}</div>
 }
 
 /**
@@ -68,6 +69,20 @@ function BusinessTripDraftEditForm({
       .map((approver) => ({ empId: approver.empId, empName: approver.empName })),
   )
 
+  // 기존 결재선의 역할(결재/협조)을 empId→role로 보존한다. 이 화면에는 역할 변경 UI가 없으므로
+  // 저장 시 기존 역할을 그대로 되돌리고 새로 추가된 사원만 기본 APPROVER로 매핑한다(role을
+  // APPROVER로 고정하면 협조자가 포함된 기안을 저장할 때 전원 결재로 덮여 결재선이 훼손된다).
+  const existingRolesByEmpId = new Map(
+    draft.approvers.map((approver) => [approver.empId, toApprovalRole(approver.role)]),
+  )
+
+  // 일시 분리 입력 상태(날짜 yyyy-MM-dd + 시각 HH:mm — DateTimeField, 2026-07-11 datetime-local
+  // 대체). 기존 값(yyyy-MM-ddTHH:mm:ss)을 날짜/시각으로 쪼개 프리필한다.
+  const [startDate, setStartDate] = useState(() => dayjs(businessTrip.startAt).format('YYYY-MM-DD'))
+  const [startTime, setStartTime] = useState(() => dayjs(businessTrip.startAt).format('HH:mm'))
+  const [endDate, setEndDate] = useState(() => dayjs(businessTrip.endAt).format('YYYY-MM-DD'))
+  const [endTime, setEndTime] = useState(() => dayjs(businessTrip.endAt).format('HH:mm'))
+
   const form = useZodForm(businessTripDraftSchema, {
     defaultValues: {
       title: draft.title,
@@ -80,8 +95,24 @@ function BusinessTripDraftEditForm({
   })
   const {
     register,
-    formState: { errors, isSubmitting },
+    setValue,
+    formState: { errors, isSubmitting, isSubmitted },
   } = form
+
+  // 분리 입력 → zod 필드(startAt/endAt) 동기화. 재검증은 저장 시도 이후에만(shouldValidate:
+  // isSubmitted — 기본 mode=onSubmit과 정합). 이 폼은 원래 min/클램프 제어가 없었으므로 두지
+  // 않는다(기간 정합성 최종 판정은 서버).
+  function handleStartChange(date: string, time: string) {
+    setStartDate(date)
+    setStartTime(time)
+    setValue('startAt', composeDateTime(date, time), { shouldValidate: isSubmitted })
+  }
+
+  function handleEndChange(date: string, time: string) {
+    setEndDate(date)
+    setEndTime(time)
+    setValue('endAt', composeDateTime(date, time), { shouldValidate: isSubmitted })
+  }
 
   async function submit(values: BusinessTripDraftFormValues) {
     // 결재선은 EmployeePicker 로컬 상태다. 화면 선택을 그대로 전량 갱신으로 보낸다(부분 전송도
@@ -91,7 +122,7 @@ function BusinessTripDraftEditForm({
       approverSelection.length > 0
         ? approverSelection.map((emp, index) => ({
             approverId: emp.empId,
-            role: 'APPROVER',
+            role: existingRolesByEmpId.get(emp.empId) ?? 'APPROVER',
             order: index + 1,
           }))
         : undefined
@@ -162,39 +193,25 @@ function BusinessTripDraftEditForm({
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="business-trip-draft-edit-start-at">
-                  출장 시작 일시 <span className="text-destructive">*</span>
-                </Label>
-                <Input
-                  id="business-trip-draft-edit-start-at"
-                  type="datetime-local"
-                  aria-invalid={!!errors.startAt}
-                  {...register('startAt')}
-                />
-                {errors.startAt && (
-                  <p role="alert" className="text-sm text-destructive">
-                    {errors.startAt.message}
-                  </p>
-                )}
-              </div>
+              <DateTimeField
+                id="business-trip-draft-edit-start-at"
+                label="출장 시작 일시"
+                timeAriaLabel="출장 시작 시각"
+                dateValue={startDate}
+                timeValue={startTime}
+                error={errors.startAt?.message}
+                onChange={handleStartChange}
+              />
 
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="business-trip-draft-edit-end-at">
-                  출장 종료 일시 <span className="text-destructive">*</span>
-                </Label>
-                <Input
-                  id="business-trip-draft-edit-end-at"
-                  type="datetime-local"
-                  aria-invalid={!!errors.endAt}
-                  {...register('endAt')}
-                />
-                {errors.endAt && (
-                  <p role="alert" className="text-sm text-destructive">
-                    {errors.endAt.message}
-                  </p>
-                )}
-              </div>
+              <DateTimeField
+                id="business-trip-draft-edit-end-at"
+                label="출장 종료 일시"
+                timeAriaLabel="출장 종료 시각"
+                dateValue={endDate}
+                timeValue={endTime}
+                error={errors.endAt?.message}
+                onChange={handleEndChange}
+              />
             </div>
 
             <div className="flex flex-col gap-1.5">

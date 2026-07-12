@@ -1,10 +1,11 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Navigate, useNavigate, useParams } from 'react-router'
 import {
   ArrowUpRight,
   FilePen,
   FilePlus,
   FolderCheck,
+  Search,
   Send,
   Stamp,
   type LucideIcon,
@@ -16,6 +17,7 @@ import { cn } from '@/shared/lib/utils'
 import { Badge } from '@/shared/ui/badge'
 import { Button } from '@/shared/ui/button'
 import { Card, CardContent } from '@/shared/ui/card'
+import { Input } from '@/shared/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/tabs'
 import { useMyAccessibleDocumentsQuery } from '../api/useMyAccessibleDocumentsQuery'
 import { useMyDocumentBoxSummaryQuery } from '../api/useMyDocumentBoxSummaryQuery'
@@ -55,8 +57,6 @@ interface BoxTabConfig {
   useListQuery: DocumentBoxListQueryHook
   /** 목록이 비었을 때 안내 문구. */
   emptyMessage: string
-  /** 검색 입력 label/id 구분용 접두사. */
-  searchId: string
   /** 요약값 selector(카드 건수). */
   getValue: (summary: MyDocumentBoxSummary) => number
   /** 탭 배지 selector(결재대기·임시저장만 노출). 없으면 배지 미표시. */
@@ -78,7 +78,6 @@ const BOX_TABS: Record<string, BoxTabConfig> = {
     icon: Send,
     useListQuery: useMySubmittedDraftsQuery,
     emptyMessage: '상신한 기안이 없습니다.',
-    searchId: 'submitted-drafts',
     getValue: (s) => s.submittedDraftCount,
   },
   pending: {
@@ -90,7 +89,6 @@ const BOX_TABS: Record<string, BoxTabConfig> = {
     emphasized: true,
     useListQuery: useMyPendingApprovalDraftsQuery,
     emptyMessage: '결재 대기 중인 문서가 없습니다.',
-    searchId: 'pending-approval-drafts',
     getValue: (s) => s.pendingApprovalDraftCount,
     getBadge: (s) => s.pendingApprovalDraftCount,
   },
@@ -102,7 +100,6 @@ const BOX_TABS: Record<string, BoxTabConfig> = {
     icon: FolderCheck,
     useListQuery: useMyAccessibleDocumentsQuery,
     emptyMessage: '조회 가능한 문서가 없습니다.',
-    searchId: 'accessible-documents',
     getValue: (s) => s.accessibleDocumentCount,
   },
   unsubmitted: {
@@ -113,7 +110,6 @@ const BOX_TABS: Record<string, BoxTabConfig> = {
     icon: FilePen,
     useListQuery: useMyUnsubmittedDraftsQuery,
     emptyMessage: '임시저장한 기안이 없습니다.',
-    searchId: 'unsubmitted-drafts',
     getValue: (s) => s.unsubmittedDraftCount,
     getBadge: (s) => s.unsubmittedDraftCount,
   },
@@ -140,6 +136,8 @@ export function DocumentBoxHomePage() {
   const navigate = useNavigate()
   const { tab } = useParams<{ tab: string }>()
   const summaryQuery = useMyDocumentBoxSummaryQuery()
+  // 검색어는 상위에서 소유해 TabsList와 같은 줄에 렌더한다(비활성 탭 언마운트로 표에 둘 수 없어 끌어올림).
+  const [searchValue, setSearchValue] = useState('')
 
   useEffect(() => {
     if (!summaryQuery.error) {
@@ -157,19 +155,21 @@ export function DocumentBoxHomePage() {
   }
 
   const activeTab = tab
+  // 검색 입력 label/id는 활성 탭별 접두사로 구분해 접근성 label 중복을 피한다.
+  const searchInputId = `${activeTab}-search`
 
   return (
-    <div className="w-full p-4 sm:p-6 lg:p-8">
+    // min-h-full 플렉스 컬럼: 콘텐츠가 짧아도 탭 카드(flex-1)가 남는 높이를 흡수해
+    // 카드 하단과 푸터 사이 간격이 페이지 인셋(p-3)만 남는다.
+    <div className="flex min-h-full w-full flex-col p-3">
       {/* 헤더: 페이지 타이틀 + 새 기안서 작성 진입 */}
-      <header className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+      <header className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
           <h1 className="text-xl font-semibold tracking-tight">문서함 요약</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            상신 및 결재 문서의 현재 처리 상태입니다.
-          </p>
         </div>
         <Button
           type="button"
+          size="sm"
           onClick={() => navigate('/approval/drafts/new')}
           className="w-full sm:w-auto"
         >
@@ -190,7 +190,10 @@ export function DocumentBoxHomePage() {
             <button
               key={key}
               type="button"
-              onClick={() => navigate(`/approval/box/${key}`)}
+              onClick={() => {
+                setSearchValue('') // 탭 전환 시 검색창을 비운다(기존 언마운트 초기화 동작 유지)
+                navigate(`/approval/box/${key}`)
+              }}
               aria-current={activeTab === key ? 'true' : undefined}
               className="group rounded-xl text-left focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
             >
@@ -244,48 +247,72 @@ export function DocumentBoxHomePage() {
         })}
       </section>
 
-      {/* 탭 + 활성 탭 목록: 탭 전환은 URL 세그먼트 이동으로 구현된다 */}
-      <Tabs
-        value={activeTab}
-        onValueChange={(value) => navigate(`/approval/box/${value}`)}
-        className="mt-8"
-      >
-        <div className="overflow-x-auto border-b border-border pb-1.5">
-          <TabsList variant="line" className="w-full justify-start">
-            {TAB_ORDER.map((key) => {
-              const tabConfig = BOX_TABS[key]
-              const Icon = tabConfig.icon
-              const badge =
-                tabConfig.getBadge && summary ? tabConfig.getBadge(summary) : 0
-              return (
-                <TabsTrigger key={key} value={key} className="flex-none">
-                  <Icon />
-                  {tabConfig.navLabel}
-                  {badge > 0 && (
-                    <Badge variant="secondary" className="ml-1 tabular-nums">
-                      {badge}
-                    </Badge>
-                  )}
-                </TabsTrigger>
-              )
-            })}
-          </TabsList>
-        </div>
-
-        {TAB_ORDER.map((key) => {
-          const tabConfig = BOX_TABS[key]
-          return (
-            <TabsContent key={key} value={key} className="mt-6">
-              <DocumentBoxTable
-                useListQuery={tabConfig.useListQuery}
-                emptyMessage={tabConfig.emptyMessage}
-                searchId={tabConfig.searchId}
-                onRowClick={(draftId) => navigate(`/approval/drafts/${draftId}`)}
+      {/* 탭 + 검색 + 활성 탭 목록을 하나의 카드로 묶는다. 탭을 바꿔도 카드 높이가 출렁이지 않도록
+          최소 높이를 두고, flex-1로 페이지의 남는 높이까지 흡수한다(푸터와의 간격 = 페이지 p-3).
+          내부는 flex 컬럼이라 목록·페이지네이션이 카드 하단까지 자연스럽게 늘어난다. */}
+      <Card className="mt-6 flex min-h-[540px] flex-1 flex-col gap-0 py-0">
+        <Tabs
+          value={activeTab}
+          onValueChange={(value) => {
+            setSearchValue('') // 탭 전환 시 검색창을 비운다(기존 언마운트 초기화 동작 유지)
+            navigate(`/approval/box/${value}`)
+          }}
+          className="flex flex-1 flex-col gap-0"
+        >
+          {/* 탭 목록과 검색 입력을 같은 줄에 둔다: 데스크톱은 한 행(탭 좌·검색 우), 모바일은 세로로 쌓인다 */}
+          <div className="flex flex-col gap-3 border-b border-border px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0 overflow-x-auto">
+              <TabsList variant="line" className="justify-start">
+                {TAB_ORDER.map((key) => {
+                  const tabConfig = BOX_TABS[key]
+                  const Icon = tabConfig.icon
+                  const badge =
+                    tabConfig.getBadge && summary ? tabConfig.getBadge(summary) : 0
+                  return (
+                    <TabsTrigger key={key} value={key} className="flex-none">
+                      <Icon />
+                      {tabConfig.navLabel}
+                      {badge > 0 && (
+                        <Badge variant="secondary" className="ml-1 tabular-nums">
+                          {badge}
+                        </Badge>
+                      )}
+                    </TabsTrigger>
+                  )
+                })}
+              </TabsList>
+            </div>
+            <div className="relative w-full sm:max-w-xs">
+              <Search className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
+              <label htmlFor={searchInputId} className="sr-only">
+                제목 검색
+              </label>
+              <Input
+                id={searchInputId}
+                type="search"
+                value={searchValue}
+                onChange={(event) => setSearchValue(event.target.value)}
+                placeholder="제목으로 검색"
+                className="pl-8"
               />
-            </TabsContent>
-          )
-        })}
-      </Tabs>
+            </div>
+          </div>
+
+          {TAB_ORDER.map((key) => {
+            const tabConfig = BOX_TABS[key]
+            return (
+              <TabsContent key={key} value={key} className="flex flex-1 flex-col p-4">
+                <DocumentBoxTable
+                  useListQuery={tabConfig.useListQuery}
+                  emptyMessage={tabConfig.emptyMessage}
+                  searchValue={searchValue}
+                  onRowClick={(draftId) => navigate(`/approval/drafts/${draftId}`)}
+                />
+              </TabsContent>
+            )
+          })}
+        </Tabs>
+      </Card>
     </div>
   )
 }

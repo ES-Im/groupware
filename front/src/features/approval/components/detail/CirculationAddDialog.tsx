@@ -9,7 +9,7 @@ import {
   DialogTitle,
 } from '@/shared/ui/dialog'
 import { useCirculationAddMutation } from '../../api/useCirculationAddMutation'
-import { EmployeePicker, type EmployeePickerEmployee } from '../EmployeePicker'
+import { EmployeePicker, type EmployeePickerEmployee } from '@/shared/components/EmployeePicker'
 
 interface CirculationAddDialogProps {
   /** 공람자를 추가할 기안서 식별 번호. */
