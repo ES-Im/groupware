@@ -4,8 +4,10 @@ import type { DatesSetArg, EventClickArg, EventDropArg } from '@fullcalendar/cor
 import type { DateClickArg } from '@fullcalendar/interaction'
 import dayjs from 'dayjs'
 import { useQueryClient } from '@tanstack/react-query'
+import { CalendarPlus } from 'lucide-react'
 import { toast } from 'sonner'
 import { handleApiError } from '@/shared/lib/apiError'
+import { Button } from '@/shared/ui/button'
 import { Card, CardContent, CardHeader } from '@/shared/ui/card'
 import { buildCalendarRangeParams, type CalendarRangeParams } from '@/features/meeting/lib/calendarRange'
 import { useScheduleCalendarQuery } from '../api/useScheduleCalendarQuery'
@@ -149,14 +151,23 @@ export function ScheduleCalendarPage() {
     // 남는 높이 전체를 차지하게 한다(BoardListPage와 동일 패턴). 좌측 사이드바는 h-fit으로 그리드/
     // flex 기본 stretch를 눌러 콘텐츠 높이만큼만 차지한다.
     <div className="flex w-full flex-col p-4 sm:p-6 lg:h-full lg:p-8">
-      <div className="mb-6">
-        <h1 className="text-xl font-semibold tracking-tight">일정 캘린더</h1>
-      </div>
+      {/* 페이지 헤더: 좌측 타이틀+부제, 우측 등록 버튼(모바일은 세로 스택). 버튼 로직은 페이지 소유. */}
+      <header className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h1 className="text-xl font-semibold tracking-tight">일정 캘린더</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            개인 · 회의 · 휴가 · 출장 일정을 한 화면에서 관리하세요
+          </p>
+        </div>
+        <Button type="button" onClick={openCreate} className="sm:shrink-0">
+          <CalendarPlus />
+          새 일정 등록
+        </Button>
+      </header>
 
       {/* mobile-first: 세로 1열 → lg 이상에서 300px 고정 좌측 패널 + 유동폭 우측 캘린더. */}
       <div className="flex flex-col gap-4 lg:min-h-0 lg:flex-1 lg:flex-row">
         <ScheduleSidebar
-          onCreate={openCreate}
           counts={counts}
           visibleTypes={visibleTypes}
           onToggleType={toggleType}

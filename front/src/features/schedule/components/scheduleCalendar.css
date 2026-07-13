@@ -29,6 +29,16 @@
   --sched-trip-bg: #fef3c7;
   --sched-trip-fg: #b45309;
 
+  /* 종일 일정 pill의 진한 채움색(라이트/다크 공통 vivid -500, 흰 텍스트 대비 확보). */
+  --sched-manual-solid: #6366f1;
+  --sched-meeting-solid: #0ea5e9;
+  --sched-leave-solid: #10b981;
+  --sched-trip-solid: #f59e0b;
+
+  /* 주말 요일/날짜 색(범주형 강조색, 시맨틱 토큰으로 표현 불가). */
+  --sched-sun: #dc6a6a;
+  --sched-sat: #5a8fd8;
+
   font-size: 0.8125rem;
 }
 
@@ -41,6 +51,10 @@
   --sched-leave-fg: #a7f3d0;
   --sched-trip-bg: color-mix(in srgb, #f59e0b 24%, transparent);
   --sched-trip-fg: #fde68a;
+
+  /* 주말 색은 다크 배경에서 가독성을 위해 한 톤 밝게. */
+  --sched-sun: #f0a0a0;
+  --sched-sat: #93b7ec;
 }
 
 /* 요일 헤더 행 */
@@ -50,6 +64,14 @@
   color: var(--muted-foreground);
 }
 
+/* 요일 헤더의 일요일(붉은톤)·토요일(파란톤) 강조 */
+.schedule-calendar .fc .fc-col-header-cell.fc-day-sun .fc-col-header-cell-cushion {
+  color: var(--sched-sun);
+}
+.schedule-calendar .fc .fc-col-header-cell.fc-day-sat .fc-col-header-cell-cushion {
+  color: var(--sched-sat);
+}
+
 /* 날짜 숫자·시간축 라벨 등 텍스트를 본문 색으로 */
 .schedule-calendar .fc .fc-daygrid-day-number,
 .schedule-calendar .fc .fc-timegrid-slot-label-cushion,
@@ -57,6 +79,14 @@
 .schedule-calendar .fc .fc-list-day-text,
 .schedule-calendar .fc .fc-list-day-side-text {
   color: var(--foreground);
+}
+
+/* 월 그리드 날짜 숫자도 주말은 요일 색으로(오늘 배지는 아래 규칙이 뒤에서 덮어써 우선한다). */
+.schedule-calendar .fc-daygrid-day.fc-day-sun .fc-daygrid-day-number {
+  color: var(--sched-sun);
+}
+.schedule-calendar .fc-daygrid-day.fc-day-sat .fc-daygrid-day-number {
+  color: var(--sched-sat);
 }
 
 /* 오늘 날짜 숫자를 primary 원형 배지로 강조(셀 배경은 위 --fc-today-bg-color가 옅게 처리) */
@@ -109,6 +139,26 @@
   background-color: var(--sched-trip-bg);
   border-left-color: var(--sched-trip-fg);
   color: var(--sched-trip-fg);
+}
+
+/* 종일 일정(월 그리드): 시간 라벨이 없는 블록 이벤트를 진한 채움 pill + 흰 텍스트로 표시한다.
+   커스텀 클래스 없이 구조(:has)로 종일을 판별해 이벤트 매퍼 로직을 건드리지 않는다. */
+.schedule-calendar .fc-daygrid-block-event.schedule-event:not(:has(.fc-event-time)) {
+  border-left-color: transparent;
+  padding-left: 7px;
+  color: #fff;
+}
+.schedule-calendar .fc-daygrid-block-event.schedule-event-manual:not(:has(.fc-event-time)) {
+  background-color: var(--sched-manual-solid);
+}
+.schedule-calendar .fc-daygrid-block-event.schedule-event-meeting:not(:has(.fc-event-time)) {
+  background-color: var(--sched-meeting-solid);
+}
+.schedule-calendar .fc-daygrid-block-event.schedule-event-leave:not(:has(.fc-event-time)) {
+  background-color: var(--sched-leave-solid);
+}
+.schedule-calendar .fc-daygrid-block-event.schedule-event-trip:not(:has(.fc-event-time)) {
+  background-color: var(--sched-trip-solid);
 }
 
 /* 취소된 일정: 흐림 + 취소선(캘린더 표시가 mapScheduleToEvents의 [취소] 접두사와 결을 맞춤) */

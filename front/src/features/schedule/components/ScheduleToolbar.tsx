@@ -56,22 +56,26 @@ export function ScheduleToolbar({
         <h2 className="ml-1 text-base font-semibold tracking-tight sm:ml-2 sm:text-lg">{title}</h2>
       </div>
 
+      {/* 세그먼트 컨트롤: muted 트랙 안에서 활성 항목만 카드색 pill(+그림자)로 떠오르게 한다. */}
       <ToggleGroup
         type="single"
-        variant="outline"
-        size="sm"
-        spacing={0}
         value={view}
         onValueChange={(next) => {
           if (next) {
             onViewChange(next as ScheduleViewType)
           }
         }}
-        className="self-start sm:self-auto"
+        className="gap-0.5 self-start rounded-lg bg-muted p-[3px] sm:self-auto"
         aria-label="캘린더 보기 방식"
       >
         {VIEW_OPTIONS.map((option) => (
-          <ToggleGroupItem key={option.value} value={option.value} aria-label={`${option.label} 보기`}>
+          <ToggleGroupItem
+            key={option.value}
+            value={option.value}
+            size="sm"
+            className="rounded-md px-3 text-xs font-medium text-muted-foreground hover:bg-transparent hover:text-foreground data-[state=on]:bg-card data-[state=on]:text-primary data-[state=on]:shadow-sm data-[state=on]:hover:bg-card"
+            aria-label={`${option.label} 보기`}
+          >
             {option.label}
           </ToggleGroupItem>
         ))}
