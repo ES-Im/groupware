@@ -55,7 +55,7 @@ class ChatApiDocsTest extends RestDocsSupport {
         when(chatRoomRetriever.retrieveChatRooms(eq(1L), eq("업무"), eq(true)))
                 .thenReturn(List.of(new MyChatRoomsResponse(
                         3L, "업무방", "마지막 메시지", LocalDateTime.of(2026, 6, 24, 10, 30),
-                        2L, true, false, true, 3L
+                        2L, true, false, true, 3L, List.of("김영희", "박지민")
                 )));
 
         mockMvc.perform(get(REQUEST_MAPPING_URL)
@@ -82,7 +82,8 @@ class ChatApiDocsTest extends RestDocsSupport {
                                 fieldWithPath("[].isGroup").type(JsonFieldType.BOOLEAN).attributes(destinationType("Boolean")).description("그룹 채팅방 여부"),
                                 fieldWithPath("[].isPastRoom").type(JsonFieldType.BOOLEAN).attributes(destinationType("Boolean")).description("오래된 채팅방 여부"),
                                 fieldWithPath("[].isBookmarked").type(JsonFieldType.BOOLEAN).attributes(destinationType("Boolean")).description("즐겨찾기 여부"),
-                                fieldWithPath("[].joinedMemberCount").type(JsonFieldType.NUMBER).attributes(destinationType("Number")).description("현재 참여자 수")
+                                fieldWithPath("[].joinedMemberCount").type(JsonFieldType.NUMBER).attributes(destinationType("Number")).description("현재 참여자 수"),
+                                fieldWithPath("[].participantNames").type(JsonFieldType.ARRAY).attributes(destinationType("Array")).description("참여자 이름 목록(본인 제외, 표시명 폴백용)")
                         )
                 ));
     }

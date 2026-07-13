@@ -10,6 +10,7 @@ import com.haruon.groupware.domain.employee.QDept;
 import com.haruon.groupware.domain.employee.QEmp;
 import com.haruon.groupware.domain.employee.QEmpBelongings;
 import com.haruon.groupware.domain.employee.QEmpFile;
+import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -20,7 +21,10 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static com.haruon.groupware.application.utils.Utils.SEOUL_ZONE;
@@ -114,7 +118,7 @@ public class ChatRoomQueryRepositoryAdapter implements ChatRoomQueryRepository {
                 )
                 .exists();
 
-        return query
+        List<MyChatRoomsResponse> rooms = query
                 .select(Projections.constructor(
                         MyChatRoomsResponse.class,
                         outerRoom.id, member.roomName,
@@ -132,6 +136,47 @@ public class ChatRoomQueryRepositoryAdapter implements ChatRoomQueryRepository {
                         isKeywordContains(keyword, member, outerRoom)
                 )
                 .fetch();
+
+        if (rooms.isEmpty()) {
+            return rooms;
+        }
+
+        // 채팅방 표시명(roomName)이 없는 방을 화면에서 참여자 이름으로 폴백 표시하기 위해, 조회된
+        // 방들의 참여자 이름(본인 제외)을 배치로 모아 응답에 주입한다. 방마다 상세 조회를 반복하면
+        // N+1이므로 roomId in (...) 한 번으로 취합한다.
+        List<Long> roomIds = rooms.stream().map(MyChatRoomsResponse::chatRoomId).toList();
+        Map<Long, List<String>> participantNamesByRoom = findParticipantNamesByRoom(roomIds, empId);
+
+        return rooms.stream()
+                .map(room -> room.withParticipantNames(
+                        participantNamesByRoom.getOrDefault(room.chatRoomId(), List.of())))
+                .toList();
+    }
+
+    // 여러 채팅방의 참여자 이름을 한 번에 조회해 roomId → 이름 목록(본인 제외, 참여 순)으로 묶는다.
+    private Map<Long, List<String>> findParticipantNamesByRoom(List<Long> roomIds, Long empId) {
+        QChatMember nameMember = new QChatMember("nameMember");
+        QEmp nameEmp = new QEmp("nameEmp");
+
+        List<Tuple> rows = query
+                .select(nameMember.room.id, nameEmp.empName)
+                .from(nameMember)
+                .join(nameMember.emp, nameEmp)
+                .where(
+                        nameMember.room.id.in(roomIds),
+                        nameMember.leftAt.isNull(),
+                        nameEmp.id.ne(empId)
+                )
+                .orderBy(nameMember.joinedAt.asc())
+                .fetch();
+
+        Map<Long, List<String>> namesByRoom = new LinkedHashMap<>();
+        for (Tuple row : rows) {
+            Long roomId = row.get(nameMember.room.id);
+            String name = row.get(nameEmp.empName);
+            namesByRoom.computeIfAbsent(roomId, key -> new ArrayList<>()).add(name);
+        }
+        return namesByRoom;
     }
 
 
