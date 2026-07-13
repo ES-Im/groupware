@@ -28,6 +28,7 @@ function chatRoom(chatRoomId: number, roomName: string, isBookmarked: boolean): 
     isPastRoom: false,
     isBookmarked,
     joinedMemberCount: 3,
+    participantNames: [],
   }
 }
 

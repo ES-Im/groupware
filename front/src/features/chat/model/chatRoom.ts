@@ -6,13 +6,12 @@
 export interface ChatRoomListItem {
   chatRoomId: number
   /**
-   * 채팅방 표시명.
-   * //todo Open Q#3(PRD §❓): 도메인모델상 커스텀 표시명 기본값은 null이고 참여자 소속·이름으로
-   * 폴백 표시하나, 목록 응답에는 폴백용 참여자 이름 정보가 없어(joinedMemberCount만 존재) 서버가
-   * 이미 합성된 표시명을 내려주는지(null 안 옴)가 미확정이다. 확정 전까지 스니펫 실측값(string)을
-   * 그대로 따르고 null 폴백 로직은 임의로 발명하지 않는다.
+   * 채팅방 표시명(멤버별 커스텀 이름). 도메인 규칙상 기본값은 null이며(미설정),
+   * `.optional()` 실측대로 null이 온다. null일 때는 화면에서 `participantNames`로 폴백 표시한다
+   * (`resolveChatRoomDisplayName`). "view에서는 참여자 소속·이름이 보여진다"는 도메인 규칙을
+   * 충족하기 위해 목록 응답에도 참여자 이름(`participantNames`)을 함께 내려받는다.
    */
-  roomName: string
+  roomName: string | null
   /** 아직 메시지가 없는 새 방 등에서 null(`ChatApiDocsTest.java` getMyJoinedChatRooms() 실측, optional). */
   lastMessageContent: string | null
   /** 'yyyy-MM-dd\'T\'HH:mm:ss' 포맷 문자열. 메시지 없는 새 방 등에서 null. dayjs 파싱/표기는 소비 화면(T1.2)에서 null 방어 후 처리한다. */
@@ -24,4 +23,10 @@ export interface ChatRoomListItem {
   isPastRoom: boolean
   isBookmarked: boolean
   joinedMemberCount: number
+  /**
+   * 참여자 이름 목록(본인 제외, 참여 순). `roomName`이 null일 때 표시명 폴백에 쓴다
+   * (도메인모델: 채팅방 이름 기본값 null → view에서 참여자 소속·이름 표시). 서버가 항상 배열로
+   * 내려준다(참여자가 본인뿐이면 빈 배열).
+   */
+  participantNames: string[]
 }

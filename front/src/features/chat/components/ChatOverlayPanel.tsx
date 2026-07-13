@@ -47,12 +47,12 @@ function ChatOverlayPanelContent() {
     // 애니메이션은 로직(STOMP 생명주기) 변경 없이는 불가하므로 진입 애니메이션만 적용한다.
     <div className="fixed right-4 bottom-4 z-50 flex h-[760px] max-h-[calc(100vh-2rem)] w-[420px] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-2xl border border-border bg-card text-card-foreground shadow-2xl duration-200 animate-in fade-in-0 zoom-in-95 slide-in-from-bottom-2">
       {/* 오버레이 크롬 헤더: 앱 레벨 제목(채팅) + 닫기. 목록/상세 전환과 무관하게 상시 유지된다. */}
-      <div className="flex h-12 shrink-0 items-center justify-between gap-2 border-b border-border px-4">
-        <div className="flex items-center gap-2">
-          <span className="flex size-7 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <MessageSquare className="size-4" aria-hidden="true" />
+      <div className="flex h-14 shrink-0 items-center justify-between gap-2 border-b border-border px-4">
+        <div className="flex items-center gap-2.5">
+          <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+            <MessageSquare className="size-[18px]" aria-hidden="true" />
           </span>
-          <span className="text-sm font-semibold">채팅</span>
+          <span className="text-[15px] font-semibold">채팅</span>
         </div>
         <Button type="button" variant="ghost" size="icon-sm" aria-label="채팅 닫기" onClick={close}>
           <X aria-hidden="true" />

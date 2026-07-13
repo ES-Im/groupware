@@ -81,20 +81,21 @@ describe('ChatHomeScreen', () => {
     render(<ChatHomeScreen />, { wrapper: createWrapper() })
 
     expect(await screen.findByPlaceholderText('채팅방 검색')).toBeInTheDocument()
-    expect(screen.queryByLabelText('부서 선택')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('사원 이름 검색')).not.toBeInTheDocument()
   })
 
   it('사원목록 탭 클릭 시 setActiveTab이 호출되어 activeTab이 employees로 바뀌고 ChatEmployeeListPanel이 마운트된다', async () => {
     server.use(
       http.get(`${BASE_URL}/api/employees/me`, () => HttpResponse.json(meFixture())),
       http.get(`${BASE_URL}/api/chat/rooms`, () => HttpResponse.json([])),
-      http.get(`${BASE_URL}/api/departments`, () =>
+      // 통합 검색창 마운트 시 본인 주 소속 부서(개발팀=10) 멤버를 기본 조회한다.
+      http.get(`${BASE_URL}/api/departments/10/members`, () =>
         HttpResponse.json({
           content: [],
           totalElements: 0,
           totalPages: 0,
           number: 0,
-          size: 100,
+          size: 50,
           numberOfElements: 0,
           first: true,
           last: true,
@@ -109,6 +110,6 @@ describe('ChatHomeScreen', () => {
     await user.click(screen.getByRole('tab', { name: '사원목록' }))
 
     expect(useChatOverlayStore.getState().activeTab).toBe('employees')
-    expect(await screen.findByLabelText('부서 선택')).toBeInTheDocument()
+    expect(await screen.findByLabelText('사원 이름 검색')).toBeInTheDocument()
   })
 })

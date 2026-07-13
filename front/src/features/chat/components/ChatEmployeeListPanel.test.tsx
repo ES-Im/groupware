@@ -12,7 +12,11 @@ import { ChatEmployeeListPanel } from './ChatEmployeeListPanel'
 /**
  * ChatEmployeeListPanel(홈 화면 '사원목록' 탭) 검증.
  *
- * chatOverlayStore.inviteTargetRoomId로 두 모드를 분기한다:
+ * 부서 select + 이름 검색 2단 구조를 단일 검색창으로 통합했다:
+ * - 검색어 없음: 본인 주 소속 부서(me.currentDepts primary) 멤버를 기본 노출.
+ * - 검색어 있음(디바운스): useEmployeeNameSearchQuery로 전사 사원 이름 검색.
+ *
+ * chatOverlayStore.inviteTargetRoomId로 두 동작 모드를 분기한다:
  * - null(일반 브라우징): 사원 클릭 → useCreateChatRoomMutation(POST /api/chat/rooms) →
  *   성공 시 selectRoom(응답 roomId).
  * - non-null(멤버 초대): 사원 클릭 → useInviteChatRoomMembersMutation
@@ -34,7 +38,17 @@ function meFixture() {
       extensionNo: null,
     },
     activeFiles: [],
-    currentDepts: [],
+    currentDepts: [
+      {
+        deptId: 10,
+        deptCode: 'DEV',
+        deptName: '개발팀',
+        positionName: '사원',
+        isPrimary: true,
+        startAt: '2020-01-01T00:00:00',
+        endAt: null,
+      },
+    ],
   }
 }
 
@@ -103,13 +117,6 @@ function createWrapper() {
   }
 }
 
-async function selectDeptAndWaitMembers(user: ReturnType<typeof userEvent.setup>) {
-  const select = await screen.findByLabelText('부서 선택')
-  await screen.findByRole('option', { name: '개발팀' })
-  await user.selectOptions(select, '10')
-  await screen.findByText('김철수')
-}
-
 afterEach(() => {
   useChatOverlayStore.setState({
     isOpen: false,
@@ -121,43 +128,37 @@ afterEach(() => {
 })
 
 describe('ChatEmployeeListPanel', () => {
-  it('본인 소속 부서를 기본 선택값으로 미리 채운다', async () => {
-    server.use(
-      http.get(`${BASE_URL}/api/employees/me`, () =>
-        HttpResponse.json({
-          ...meFixture(),
-          currentDepts: [
-            {
-              deptId: 10,
-              deptCode: 'DEV',
-              deptName: '개발팀',
-              positionName: '사원',
-              isPrimary: true,
-              startAt: '2020-01-01T00:00:00',
-              endAt: null,
-            },
-          ],
-        }),
-      ),
-      http.get(`${BASE_URL}/api/departments`, () => HttpResponse.json(deptsFixture())),
-      http.get(`${BASE_URL}/api/departments/10/members`, () => HttpResponse.json(membersFixture())),
-    )
+  it('검색어가 없으면 본인 주 소속 부서 멤버를 기본 노출한다', async () => {
+    mockBaseEndpoints()
     render(<ChatEmployeeListPanel />, { wrapper: createWrapper() })
 
-    // 부서를 직접 클릭하지 않아도 본인 소속 부서(개발팀)의 사원 목록이 곧바로 보여야 한다.
+    // 부서를 직접 고르지 않아도 본인 소속 부서(개발팀)의 사원 목록이 곧바로 보여야 한다.
     await screen.findByText('김철수')
-    expect(screen.getByLabelText('부서 선택')).toHaveValue('10')
+    expect(screen.getByText('개발팀 · 3명')).toBeInTheDocument()
   })
 
   it('본인(empId)은 항상 disabled 상태로 렌더된다', async () => {
     mockBaseEndpoints()
     render(<ChatEmployeeListPanel />, { wrapper: createWrapper() })
-    const user = userEvent.setup()
 
-    await selectDeptAndWaitMembers(user)
+    await screen.findByText('김철수')
 
     expect(screen.getByRole('button', { name: /홍길동/ })).toBeDisabled()
     expect(screen.getByRole('button', { name: /김철수/ })).not.toBeDisabled()
+  })
+
+  it('검색어를 입력하면 전사 이름 검색 결과가 부서·직급과 함께 노출된다', async () => {
+    mockBaseEndpoints()
+    render(<ChatEmployeeListPanel />, { wrapper: createWrapper() })
+    const user = userEvent.setup()
+
+    await screen.findByText('김철수') // 먼저 본인 부서 기본 목록이 뜬다.
+
+    await user.type(screen.getByLabelText('사원 이름 검색'), '김')
+
+    // 디바운스 후 검색 모드로 전환되어 "검색 결과 · N명" 라벨과 부서·직급 보조 라벨이 나타난다.
+    await screen.findByText(/검색 결과 ·/)
+    expect(screen.getByText('개발팀 · 팀장')).toBeInTheDocument()
   })
 
   it('inviteTargetRoomId가 null(일반 브라우징)일 때 사원 클릭 시 방 생성 후 selectRoom이 호출된다', async () => {
@@ -173,8 +174,7 @@ describe('ChatEmployeeListPanel', () => {
     render(<ChatEmployeeListPanel />, { wrapper: createWrapper() })
     const user = userEvent.setup()
 
-    await selectDeptAndWaitMembers(user)
-    await user.click(screen.getByRole('button', { name: /김철수/ }))
+    await user.click(await screen.findByRole('button', { name: /김철수/ }))
 
     await waitFor(() => expect(useChatOverlayStore.getState().selectedRoomId).toBe(99))
     expect(createBody).toEqual({ memberIds: [2] })
@@ -203,7 +203,6 @@ describe('ChatEmployeeListPanel', () => {
     render(<ChatEmployeeListPanel />, { wrapper: createWrapper() })
     const user = userEvent.setup()
 
-    await selectDeptAndWaitMembers(user)
     // 이미 방 멤버인 이영희(memberId 3)는 초대 모드에서 disabled여야 한다.
     await waitFor(() => expect(screen.getByRole('button', { name: /이영희/ })).toBeDisabled())
 

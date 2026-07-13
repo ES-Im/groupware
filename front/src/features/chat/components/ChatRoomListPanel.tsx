@@ -11,9 +11,11 @@ import {
   ContextMenuItem,
   ContextMenuTrigger,
 } from '@/shared/ui/context-menu'
+import { cn } from '@/shared/lib/utils'
 import { Input } from '@/shared/ui/input'
 import { useChatRoomsQuery } from '../api/useChatRoomsQuery'
 import { useToggleBookmarkMutation } from '../api/useToggleBookmarkMutation'
+import { resolveChatRoomDisplayName } from '../lib/resolveChatRoomDisplayName'
 import { useChatOverlayStore } from '../lib/chatOverlayStore'
 import type { ChatRoomListItem } from '../model/chatRoom'
 import { ChatRoomAvatar } from './ChatRoomAvatar'
@@ -110,8 +112,8 @@ export function ChatRoomListPanel() {
       {/* 고정 서브 헤더: 섹션 라벨 + 새 채팅 액션, 그 아래 검색/즐겨찾기 필터. 목록만 스크롤한다. */}
       <div className="flex shrink-0 flex-col gap-3 border-b border-border px-4 pt-4 pb-3">
         <div className="flex items-center justify-between gap-2">
-          <h2 className="text-sm font-semibold text-muted-foreground">대화 목록</h2>
-          <Button type="button" size="sm" onClick={handleCreateChat}>
+          <h2 className="text-sm font-semibold">대화 목록</h2>
+          <Button type="button" size="sm" className="rounded-lg" onClick={handleCreateChat}>
             <SquarePen aria-hidden="true" />
             새 채팅
           </Button>
@@ -123,7 +125,7 @@ export function ChatRoomListPanel() {
           </label>
           <div className="relative flex-1">
             <Search
-              className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground"
+              className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
               aria-hidden="true"
             />
             <Input
@@ -132,18 +134,22 @@ export function ChatRoomListPanel() {
               value={keyword}
               onChange={(event) => setKeyword(event.target.value)}
               placeholder="채팅방 검색"
-              className="pl-8"
+              className="rounded-xl pl-9"
             />
           </div>
           <Button
             type="button"
-            variant={isBookmark ? 'default' : 'outline'}
+            variant={isBookmark ? 'secondary' : 'outline'}
             size="icon"
+            className="shrink-0 rounded-xl"
             aria-pressed={isBookmark}
             aria-label="즐겨찾기만 보기"
             onClick={() => setIsBookmark((prev) => !prev)}
           >
-            <Star className={isBookmark ? 'fill-current' : ''} aria-hidden="true" />
+            <Star
+              className={cn('size-4', isBookmark ? 'fill-amber-400 text-amber-500' : '')}
+              aria-hidden="true"
+            />
           </Button>
         </div>
       </div>
@@ -248,6 +254,10 @@ function ChatRoomListRow({
   onRequestRename: (chatRoomId: number) => void
   isBookmarkPending: boolean
 }) {
+  // 표시명 폴백: 커스텀 roomName이 없으면 participantNames로 "N명 외 M명"을 합성한다.
+  const displayName = resolveChatRoomDisplayName(room.roomName, room.participantNames)
+  const unreadCount = room.unreadMessageCount ?? 0
+  const isUnread = unreadCount > 0
   return (
     <li>
       {/* 별 토글 버튼을 카드 클릭(방 이동) 영역과 형제로 분리한다 — button 안에 button을 중첩하면
@@ -256,50 +266,64 @@ function ChatRoomListRow({
           좌클릭(방 진입)은 그대로 통과시키므로 기존 handleRoomClick 동작과 공존한다. */}
       <ContextMenu>
         <ContextMenuTrigger asChild>
-          <div className="group flex items-center gap-2 rounded-lg px-2 py-2 transition-colors hover:bg-muted">
+          <div className="group flex items-center gap-3 rounded-xl px-2 py-2.5 transition-colors hover:bg-muted">
             <button
               type="button"
               onClick={() => onClick(room.chatRoomId)}
-              aria-label={room.roomName}
+              aria-label={displayName}
               className="flex min-w-0 flex-1 items-center gap-3 text-left"
             >
               <ChatRoomAvatar isGroup={room.isGroup} />
               <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-                <div className="flex items-center gap-2">
-                  {/* todo: Open Q#3(PRD §❓, chatRoom.ts 동일 주석) roomName null 가능 여부/폴백 표기
-                      미확정 — 서버 응답 문자열을 그대로 표시하고 폴백 로직을 임의로 발명하지 않는다. */}
-                  <span className="truncate font-medium">{room.roomName}</span>
+                <div className="flex items-center gap-1.5">
+                  <span className={cn('truncate', isUnread ? 'font-bold' : 'font-medium')}>
+                    {displayName}
+                  </span>
                   {room.isGroup && (
-                    <span className="shrink-0 text-xs text-muted-foreground">
+                    <span className="shrink-0 text-xs font-medium text-muted-foreground">
                       {room.joinedMemberCount}
                     </span>
                   )}
-                  <span className="ml-auto shrink-0 text-xs text-muted-foreground">
-                    {room.lastMessagedAt ? dayjs(room.lastMessagedAt).format('MM-DD HH:mm') : ''}
-                  </span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="min-w-0 flex-1 truncate text-sm text-muted-foreground">
-                    {room.lastMessageContent ?? '메시지 없음'}
-                  </span>
-                  {!!room.unreadMessageCount && (
-                    <Badge className="shrink-0">{room.unreadMessageCount}</Badge>
+                <span
+                  className={cn(
+                    'truncate text-xs',
+                    isUnread ? 'font-medium text-foreground/80' : 'text-muted-foreground',
                   )}
-                </div>
+                >
+                  {room.lastMessageContent ?? '메시지 없음'}
+                </span>
               </div>
             </button>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-sm"
-              className="shrink-0 text-muted-foreground"
-              aria-pressed={room.isBookmarked}
-              aria-label={room.isBookmarked ? '즐겨찾기 해제' : '즐겨찾기 등록'}
-              disabled={isBookmarkPending}
-              onClick={() => onToggleBookmark(room.chatRoomId, room.isBookmarked)}
-            >
-              <Star className={room.isBookmarked ? 'fill-current text-foreground' : ''} />
-            </Button>
+            {/* 우측 열: 시간(위) + 안읽음 배지·즐겨찾기 별(아래). 별은 즐겨찾기 해제를 위해 항상
+                노출하고, 안읽음이 있을 때만 그 앞에 배지를 덧붙인다. */}
+            <div className="flex shrink-0 flex-col items-end gap-1.5">
+              <span className="text-[11px] text-muted-foreground">
+                {room.lastMessagedAt ? dayjs(room.lastMessagedAt).format('MM-DD HH:mm') : ''}
+              </span>
+              <div className="flex items-center gap-1">
+                {isUnread && (
+                  <Badge className="h-5 min-w-5 justify-center rounded-full px-1.5 text-[11px]">
+                    {unreadCount}
+                  </Badge>
+                )}
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  className={cn(
+                    'size-6 shrink-0',
+                    room.isBookmarked ? 'text-amber-500' : 'text-muted-foreground/50',
+                  )}
+                  aria-pressed={room.isBookmarked}
+                  aria-label={room.isBookmarked ? '즐겨찾기 해제' : '즐겨찾기 등록'}
+                  disabled={isBookmarkPending}
+                  onClick={() => onToggleBookmark(room.chatRoomId, room.isBookmarked)}
+                >
+                  <Star className={cn('size-4', room.isBookmarked && 'fill-current')} />
+                </Button>
+              </div>
+            </div>
           </div>
         </ContextMenuTrigger>
         <ContextMenuContent>

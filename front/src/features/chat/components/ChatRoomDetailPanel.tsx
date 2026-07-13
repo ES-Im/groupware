@@ -13,6 +13,7 @@ import { useChatRoomSubscription } from '../hooks/useChatRoomSubscription'
 import { useReadPositionSync } from '../hooks/useReadPositionSync'
 import { useChatOverlayStore } from '../lib/chatOverlayStore'
 import { parseEmpFilePreviewFileId } from '../lib/parseEmpFilePreviewFileId'
+import { resolveChatRoomDisplayName } from '../lib/resolveChatRoomDisplayName'
 import type { ChatMessage } from '../model/chatMessage'
 import { ChatMessageInput } from './ChatMessageInput'
 import { ChatRoomAvatar } from './ChatRoomAvatar'
@@ -49,6 +50,9 @@ const SCROLL_TOP_THRESHOLD = 24
 export function ChatRoomDetailPanel({ roomId }: { roomId: number }) {
   const backToList = useChatOverlayStore((state) => state.backToList)
   const startInviteFlow = useChatOverlayStore((state) => state.startInviteFlow)
+  // 표시명 폴백 시 본인을 제외하기 위한 내 empId(헤더 표시명 계산에만 쓴다).
+  const meQuery = useMeQuery()
+  const myEmpId = meQuery.data?.empBasicInfo.empId
 
   const detailQuery = useChatRoomDetailQuery(roomId)
   // 방 진입 시 방 토픽 SUBSCRIBE, 방 이탈/전환·연결 끊김 시 UNSUBSCRIBE(ROADMAP(CHAT) T2.3-a).
@@ -129,16 +133,19 @@ export function ChatRoomDetailPanel({ roomId }: { roomId: number }) {
 
   const room = detailQuery.data
 
+  // 표시명 폴백: 커스텀 roomName이 없으면 본인을 제외한 참여자 이름으로 합성한다("N명 외 M명").
+  const participantNames = room.members
+    .filter((member) => member.memberId !== myEmpId)
+    .map((member) => member.memberName)
+  const displayName = resolveChatRoomDisplayName(room.roomName, participantNames)
+
   return (
     <div className="flex h-full flex-col">
       <header className="flex shrink-0 items-center gap-2 border-b border-border px-3 py-2.5">
         {backButton}
         <ChatRoomAvatar isGroup={room.isGroup} className="size-9" />
         <div className="min-w-0 flex-1">
-          {/* todo: Open Q#3(PRD §❓, chatRoomDetail.ts 동일 주석) roomName null 가능 여부/폴백
-              구성 미확정 — 서버 응답 문자열을 그대로 표시하고 members[] 기반 폴백을 임의로
-              발명하지 않는다. */}
-          <h1 className="truncate text-sm font-semibold">{room.roomName}</h1>
+          <h1 className="truncate text-sm font-semibold">{displayName}</h1>
           <p className="truncate text-xs text-muted-foreground">
             {room.isGroup ? `참여 ${room.members.length}명` : '1:1 대화'}
           </p>
@@ -156,7 +163,7 @@ export function ChatRoomDetailPanel({ roomId }: { roomId: number }) {
         <ChatRoomSettingsMenu roomId={room.roomId} />
       </header>
 
-      <div className="flex shrink-0 items-start gap-3 overflow-x-auto border-b border-border px-3 py-2.5">
+      <div className="flex shrink-0 items-start gap-3 overflow-x-auto border-b border-border bg-muted/30 px-3 py-2.5">
         {room.members.map((member) => (
           <div
             key={member.memberId}

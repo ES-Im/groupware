@@ -22,7 +22,7 @@ import { ChatRoomListPanel } from './ChatRoomListPanel'
 
 function chatRoom(
   chatRoomId: number,
-  roomName: string,
+  roomName: string | null,
   overrides?: Partial<ChatRoomListItem>,
 ): ChatRoomListItem {
   return {
@@ -35,6 +35,7 @@ function chatRoom(
     isPastRoom: false,
     isBookmarked: false,
     joinedMemberCount: 3,
+    participantNames: [],
     ...overrides,
   }
 }
@@ -141,6 +142,17 @@ describe('ChatRoomListPanel', () => {
       '최신메시지-비즐겨찾기',
       '오래된메시지-비즐겨찾기',
     ])
+  })
+
+  it('roomName이 없으면 participantNames로 "N명 외 M명" 표시명을 폴백 렌더한다', async () => {
+    mockChatRoomsAndMe([
+      chatRoom(5, null, { participantNames: ['김영희', '김철수', '박지민'] }),
+    ])
+    render(<ChatRoomListPanel />, { wrapper: createWrapper() })
+
+    expect(
+      await screen.findByRole('button', { name: '김영희, 김철수 외 1명' }),
+    ).toBeInTheDocument()
   })
 
   it('오래된 방이 없으면 구분선을 렌더하지 않는다', async () => {
