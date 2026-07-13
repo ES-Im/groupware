@@ -126,7 +126,8 @@ describe('CompanyInfoPage - 조회 분기', () => {
 
     await waitFor(() => expect(screen.getAllByText('HARUON').length).toBeGreaterThan(0))
     expect(screen.getAllByRole('button', { name: '편집' })).toHaveLength(3)
-    expect(screen.getByText('서울특별시 강남구')).toBeInTheDocument()
+    // location은 회사 헤더 요약과 기본정보 섹션 양쪽에 노출되므로 getAllByText로 존재만 확인한다.
+    expect(screen.getAllByText('서울특별시 강남구').length).toBeGreaterThan(0)
     expect(screen.getByText('contact@haruon.com')).toBeInTheDocument()
     expect(screen.getByText('https://haruon.com')).toBeInTheDocument()
   })
@@ -279,8 +280,8 @@ describe('CompanyInfoPage - 최초 등록 폼(CompanyRegisterCard, F1402)', () =
     )
     // COMPANY_002는 root 폼 에러로 표시되지 않는다(전용 토스트로만 처리).
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
-    // 재조회로 상태가 동기화되어 카드 뷰(등록됨)로 전환된다.
-    await screen.findByText('서울특별시 강남구')
+    // 재조회로 상태가 동기화되어 카드 뷰(등록됨)로 전환된다(location은 헤더·기본정보 양쪽에 노출).
+    await screen.findAllByText('서울특별시 강남구')
   })
 
   it('그 외 서버 에러(VALIDATION_ERROR)는 handleApiError 기본 경로로 위임되어 root 에러가 표시된다', async () => {
