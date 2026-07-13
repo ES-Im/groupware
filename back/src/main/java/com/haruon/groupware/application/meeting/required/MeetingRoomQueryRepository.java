@@ -15,7 +15,11 @@ import java.util.List;
 
 public interface MeetingRoomQueryRepository {
     Page<MeetingRoomResponse> findAvailableMeetingRooms(
-            LocalDate date, LocalTime startAt, LocalTime endAt, Integer capacity, Pageable pageable
+            @Nullable LocalDate date,
+            @Nullable LocalTime startAt,
+            @Nullable LocalTime endAt,
+            @Nullable Integer capacity,
+            Pageable pageable
     );
 
 

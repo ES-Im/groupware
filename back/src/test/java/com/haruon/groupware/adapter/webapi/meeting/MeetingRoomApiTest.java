@@ -122,6 +122,13 @@ class MeetingRoomApiTest extends IntegrationTestSupport {
                         .param("capacity", "5"))
                 .andExpect(status().isBadRequest());
 
+        mockMvc.perform(get("/api/meeting-rooms/available")
+                        .header("Authorization", BEARER + accessToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.length()").value(2))
+                .andExpect(jsonPath("$.content[0].meetingRoomId").value(bookedRoom.getId()))
+                .andExpect(jsonPath("$.content[1].meetingRoomId").value(emptyRoom.getId()));
+
         MeetingRoomCreateRequest createRequest = MeetingRoomCreateRequest.builder()
                 .name("신규 회의실")
                 .description("신규 회의실 설명")

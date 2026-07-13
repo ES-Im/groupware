@@ -59,12 +59,16 @@ public class MeetingRoomQueryRepositoryAdapter implements MeetingRoomQueryReposi
      */
     @Override
     public Page<MeetingRoomResponse> findAvailableMeetingRooms(
-            LocalDate date, LocalTime startAt, LocalTime endAt, Integer capacity, Pageable pageable
+            @Nullable LocalDate date,
+            @Nullable LocalTime startAt,
+            @Nullable LocalTime endAt,
+            @Nullable Integer capacity,
+            Pageable pageable
     ) {
         Long rows = query
                 .select(meetingRoom.id.countDistinct())
                 .from(meetingRoom)
-                .where(findAvailableWhereExpression(date, startAt, endAt, capacity))
+                .where(findAvailableWhereExpressions(date, startAt, endAt, capacity))
                 .fetchOne();
 
         long totalRows = rows == null ? 0 : rows;
@@ -75,7 +79,7 @@ public class MeetingRoomQueryRepositoryAdapter implements MeetingRoomQueryReposi
                         MeetingRoomResponse.class,
                         meetingRoom.id, meetingRoom.name, meetingRoom.capacity, meetingRoom.isAvailable
                 )).from(meetingRoom)
-                .where(findAvailableWhereExpression(date, startAt, endAt, capacity))
+                .where(findAvailableWhereExpressions(date, startAt, endAt, capacity))
                 .orderBy(meetingRoom.id.asc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
@@ -84,24 +88,40 @@ public class MeetingRoomQueryRepositoryAdapter implements MeetingRoomQueryReposi
         return new PageImpl<>(responses, pageable, totalRows);
     }
 
-    private BooleanExpression findAvailableWhereExpression(
-            LocalDate date, LocalTime startAt, LocalTime endAt, Integer capacity
+    private BooleanExpression[] findAvailableWhereExpressions(
+            @Nullable LocalDate date, @Nullable LocalTime startAt, @Nullable LocalTime endAt, @Nullable Integer capacity
     ) {
-        return meetingRoom.capacity.goe(capacity)
-                .and(meetingRoom.isAvailable.isTrue())
-                .and(JPAExpressions
-                        .selectOne()
-                        .from(meeting)
-                        .where(
-                                meeting.meetingRoom.eq(meetingRoom),
-                                meeting.meetingDate.eq(date),
-                                meeting.isCancel.isFalse(),
-                                meeting.startAt.lt(endAt),
-                                meeting.endAt.gt(startAt)
-                        )
-                        .notExists()
-                );
+        return new BooleanExpression[]{
+                capacityGoe(capacity),
+                meetingRoom.isAvailable.isTrue(),
+                isNotReservedAt(date, startAt, endAt)
+        };
     }
+
+    private BooleanExpression capacityGoe(@Nullable Integer capacity) {
+        return capacity == null
+                ? null
+                : meetingRoom.capacity.goe(capacity);
+    }
+
+    private BooleanExpression isNotReservedAt(
+            @Nullable LocalDate date, @Nullable LocalTime startAt, @Nullable LocalTime endAt
+    ) {
+        if(date == null || startAt == null || endAt == null) return null;
+
+        return JPAExpressions
+                .selectOne()
+                .from(meeting)
+                .where(
+                        meeting.meetingRoom.eq(meetingRoom),
+                        meeting.meetingDate.eq(date),
+                        meeting.isCancel.isFalse(),
+                        meeting.startAt.lt(endAt),
+                        meeting.endAt.gt(startAt)
+                )
+                .notExists();
+    }
+
 
     @Override
     public Page<MeetingRoomResponse> findMeetingRooms(

@@ -33,10 +33,10 @@ public class MeetingRoomQueryService implements MeetingRoomRetriever {
 
     @Override
     public Page<MeetingRoomResponse> retrieveAvailableMeetingRooms(
-            LocalDate date,
-            LocalTime startAt,
-            LocalTime endAt,
-            Integer capacity,
+            @Nullable LocalDate date,
+            @Nullable LocalTime startAt,
+            @Nullable LocalTime endAt,
+            @Nullable Integer capacity,
             Pageable pageable
     ) {
         return meetingRoomQueryRepository.findAvailableMeetingRooms(

@@ -39,14 +39,14 @@ public class MeetingRoomApi {
 
     @GetMapping("/available")   // 예약조건에 맞는 회의실 조회
     public ResponseEntity<Page<MeetingRoomResponse>> getAvailableMeetingRooms(
-            @RequestParam LocalDate date,
-            @RequestParam LocalTime startAt,
-            @RequestParam LocalTime endAt,
-            @RequestParam Integer capacity,
+            @RequestParam(required = false) LocalDate date,
+            @RequestParam(required = false) LocalTime startAt,
+            @RequestParam(required = false) LocalTime endAt,
+            @RequestParam(required = false) Integer capacity,
             @PageableDefault(size = 10, page = 0) Pageable pageable
     ) {
-        if(!endAt.isAfter(startAt)) throw new EndTimeBeforeStartTimeException();
-        if(capacity <= 0) throw new PositiveValueRequiredException();
+        if(startAt != null && endAt != null && !endAt.isAfter(startAt)) throw new EndTimeBeforeStartTimeException();
+        if(capacity != null && capacity <= 0) throw new PositiveValueRequiredException();
 
         Page<MeetingRoomResponse> responses = meetingRoomRetriever
                 .retrieveAvailableMeetingRooms(date, startAt, endAt, capacity, pageable);
