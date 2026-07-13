@@ -90,3 +90,31 @@ export const systemRoleLabels: Record<SystemRoleCode, string> = {
 
 /** DEPT_MANAGER_UPDATE_EMP_INFO 계약상 부서매니저가 후보로 가질 수 있는 Layer-2 권한 후보군. */
 export const LAYER2_ROLE_CODES: SystemRoleCode[] = ['FRANCHISE', 'IT', 'HR', 'FACILITY']
+
+/** Badge 컴포넌트 variant 팔레트 중 상태/권한 표시에 쓰는 부분집합. */
+type StatusBadgeVariant = 'default' | 'secondary' | 'destructive' | 'outline'
+
+/**
+ * 근무 상태별 배지 톤(목록 표·시트 공용). ACTIVE는 긍정 강조(primary), SUSPENDED는 경고(destructive),
+ * RESIGNED는 비활성(muted secondary), PENDING은 중립(outline)으로 톤을 분리한다.
+ */
+export const empStatusBadgeVariant: Record<EmpStatus, StatusBadgeVariant> = {
+  ACTIVE: 'default',
+  PENDING: 'outline',
+  SUSPENDED: 'destructive',
+  RESIGNED: 'secondary',
+}
+
+/**
+ * 시스템 권한별 배지 톤. Layer-1 관리 권한(ADMIN/DEPT_MANAGER)만 강조하고, 그 외(EMPLOYEE 및
+ * Layer-2 기능 권한)는 중립 outline으로 둔다.
+ */
+export const systemRoleBadgeVariant: Record<SystemRoleCode, StatusBadgeVariant> = {
+  ADMIN: 'default',
+  DEPT_MANAGER: 'secondary',
+  EMPLOYEE: 'outline',
+  FRANCHISE: 'outline',
+  IT: 'outline',
+  HR: 'outline',
+  FACILITY: 'outline',
+}

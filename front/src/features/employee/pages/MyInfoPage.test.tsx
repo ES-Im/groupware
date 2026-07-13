@@ -9,13 +9,16 @@ import { server } from '@/test/mocks/server'
 import { MyInfoPage } from './MyInfoPage'
 
 /**
- * MyInfoPage(F003 RETRIEVE_ME_INFO, adapt-ui 리디자인 2차) 조합 스모크 테스트.
+ * MyInfoPage(F003 RETRIEVE_ME_INFO, adapt-ui 리디자인 3차 — Magic Patterns 목업 이식) 조합
+ * 스모크 테스트.
  *
- * 하위 컴포넌트(EmployeeSummaryCard/SignatureCard/EmployeeProfileTabs/PersonalRecordsWidget/
- * UpdateMeDialog)의 세부 분기는 각자의 .test.tsx가 이미 담당하므로, 이 페이지는 로딩/에러/성공
- * 렌더와 페이지 레벨 조합("수정" 버튼 → UpdateMeDialog 오픈, "현재 활성 파일" 카드 제거)만
- * 검증한다. "수정" 버튼은 2차 수정으로 `/me/edit` 페이지 링크에서 다이얼로그 오픈 버튼으로
- * 전환됐고, "현재 활성 파일" 카드는 완전히 제거됐다(파일관리 탭에서 이미 확인 가능).
+ * 하위 컴포넌트(EmployeeSummaryCard/SignatureCard/EmployeeProfileTabs/DeptHistoryCard/
+ * PersonalRecordsWidget/UpdateMeDialog)의 세부 분기는 각자의 .test.tsx가 이미 담당하므로, 이
+ * 페이지는 로딩/에러/성공 렌더와 페이지 레벨 조합("정보/비밀번호 수정" 버튼 → UpdateMeDialog
+ * 오픈, "현재 활성 파일" 카드 제거)만 검증한다. "수정" 버튼은 3차 수정으로 좌측 요약 카드의
+ * "정보/비밀번호 수정" 버튼 1개로 옮겨졌다(애초 "정보 수정"/"비밀번호" 2버튼안은 같은 다이얼로그를
+ * 여는 중복 진입점이라 사용자 요청으로 통합했다). "현재 활성 파일" 카드는 2차 수정으로 완전히
+ * 제거됐다(파일관리 탭에서 이미 확인 가능).
  *
  * activeFiles에 PROFILE_PICTURE/SIGNATURE를 모두 활성으로 두면 EmployeeSummaryCard의
  * BlobAvatar·SignatureCard가 각각 EMP_FILE_PREVIEW(GET /api/employees/{empId}/files/{fileId}/preview)를
@@ -131,7 +134,7 @@ describe('MyInfoPage - 에러 상태', () => {
 })
 
 describe('MyInfoPage - 성공 렌더', () => {
-  it('사원 기본정보가 렌더되고 "수정" 버튼 클릭 시 UpdateMeDialog(내 정보 수정)가 열린다', async () => {
+  it('사원 기본정보가 렌더되고 "정보/비밀번호 수정" 버튼 클릭 시 UpdateMeDialog(내 정보 수정)가 열린다', async () => {
     server.use(http.get(ME_URL, () => HttpResponse.json(makeMeResponse())))
     mockAttendanceWidgetDefaults()
     const user = userEvent.setup()
@@ -139,9 +142,10 @@ describe('MyInfoPage - 성공 렌더', () => {
     renderPage()
 
     expect(await screen.findAllByText('홍길동')).not.toHaveLength(0)
-    // 2차 수정: "수정"은 이제 /me/edit 링크가 아니라 UpdateMeDialog를 여는 버튼이다.
-    expect(screen.queryByRole('link', { name: '수정' })).not.toBeInTheDocument()
-    const editButton = screen.getByRole('button', { name: '수정' })
+    // 3차 수정(Magic Patterns 목업 이식): "수정" 버튼은 좌측 요약 카드의 "정보/비밀번호 수정"
+    // 버튼 1개로 옮겨졌다(같은 UpdateMeDialog를 연다).
+    expect(screen.queryByRole('link', { name: '정보/비밀번호 수정' })).not.toBeInTheDocument()
+    const editButton = screen.getByRole('button', { name: '정보/비밀번호 수정' })
 
     await user.click(editButton)
 
@@ -160,7 +164,7 @@ describe('MyInfoPage - 성공 렌더', () => {
 
     renderPage()
 
-    await user.click(await screen.findByRole('button', { name: '수정' }))
+    await user.click(await screen.findByRole('button', { name: '정보/비밀번호 수정' }))
     expect(await screen.findByRole('heading', { name: '내 정보 수정' })).toBeInTheDocument()
 
     await user.clear(screen.getByLabelText('새 비밀번호'))

@@ -10,17 +10,20 @@ import { server } from '@/test/mocks/server'
 import { PersonalRecordsWidget } from './PersonalRecordsWidget'
 
 /**
- * PersonalRecordsWidget(MyInfoPage 전용, adapt-ui 리디자인) 검증.
+ * PersonalRecordsWidget(MyInfoPage 전용, adapt-ui 리디자인 3차 — Magic Patterns 목업 카드3
+ * "근태/휴가·출장" 2탭 이식) 검증.
  *
- * 근태/연차/출장 3개 도메인의 "내 이력" 쿼리 훅을 재사용하는 위젯이라, 각 탭의 데이터 소스
- * 엔드포인트(MY_ATTENDANCE_MONTHLY(+SUMMARY)/MY_LEAVE_REQUEST_HISTORY/MY_BUSINESS_TRIP_REQUEST_HISTORY)를
- * MyAttendancePage.test.tsx/useMyLeaveHistoryQuery.test.tsx 등 기존 슬라이스가 이미 확립한 MSW
- * 엔드포인트 그대로 재사용한다.
+ * 기존 3구역 세로 스택(근태/연차/출장 동시 노출) 구조를 탭 2개(근태 / 휴가·출장)로 재구성했다.
+ * "자세히 보기"류 버튼은 여전히 Dialog 오버레이를 열어 전용 페이지(MyAttendancePage/MyLeavePage/
+ * MyBusinessTripHistoryPage)를 그대로 마운트한다(2026-07-13 확정된 오버레이 방침 유지) — 오버레이
+ * 안의 페이지가 추가로 호출하는 쿼리도 위젯 자체가 쓰는 5개 엔드포인트와 동일하므로 별도 목이 필요
+ * 없다.
  */
 
 const ATTENDANCE_MONTHLY_URL = `${BASE_URL}/api/employees/attendances/me/monthly`
 const ATTENDANCE_SUMMARY_URL = `${BASE_URL}/api/employees/attendances/me/monthly/summary`
 const LEAVE_HISTORY_URL = `${BASE_URL}/api/leaves/employees/me/request-history`
+const LEAVE_SUMMARY_URL = `${BASE_URL}/api/employees/me/leaves/summary`
 const TRIP_HISTORY_URL = `${BASE_URL}/api/business-trips/employees/me/request-history`
 
 function makeAttendancePage(items: unknown[]) {
@@ -29,7 +32,7 @@ function makeAttendancePage(items: unknown[]) {
     totalElements: items.length,
     totalPages: 1,
     number: 0,
-    size: 5,
+    size: 100,
     first: true,
     last: true,
     numberOfElements: items.length,
@@ -37,18 +40,34 @@ function makeAttendancePage(items: unknown[]) {
   }
 }
 
+function makeAttendanceSummary(overrides: Partial<Record<string, number>> = {}) {
+  return {
+    totalAttendanceCount: 0,
+    pendingAttendanceCount: 0,
+    approvedAttendanceCount: 0,
+    overtimeMinutes: 0,
+    ...overrides,
+  }
+}
+
+function makeLeaveSummary(overrides: Partial<Record<string, number>> = {}) {
+  return {
+    annualBaseGrantDays: 0,
+    annualUsedDays: 0,
+    specialGrantDays: 0,
+    specialUsedDays: 0,
+    compensatoryGrantDays: 0,
+    compensatoryUsedDays: 0,
+    ...overrides,
+  }
+}
+
 function mockAll() {
   server.use(
     http.get(ATTENDANCE_MONTHLY_URL, () => HttpResponse.json(makeAttendancePage([]))),
-    http.get(ATTENDANCE_SUMMARY_URL, () =>
-      HttpResponse.json({
-        totalAttendanceCount: 0,
-        pendingAttendanceCount: 0,
-        approvedAttendanceCount: 0,
-        overtimeMinutes: 0,
-      }),
-    ),
+    http.get(ATTENDANCE_SUMMARY_URL, () => HttpResponse.json(makeAttendanceSummary())),
     http.get(LEAVE_HISTORY_URL, () => HttpResponse.json([])),
+    http.get(LEAVE_SUMMARY_URL, () => HttpResponse.json(makeLeaveSummary())),
     http.get(TRIP_HISTORY_URL, () => HttpResponse.json([])),
   )
 }
@@ -64,125 +83,117 @@ function renderWidget() {
   )
 }
 
-describe('PersonalRecordsWidget - 근태 탭(기본)', () => {
-  it('근태 요약(건수/승인대기/처리완료)과 목록 데이터를 렌더하고 "자세히 보기"는 /attendance/me로 연결된다', async () => {
+describe('PersonalRecordsWidget - 근태 탭(기본 탭)', () => {
+  it('통계 타일 4개(근태건수/승인대기/처리완료/지각·결근)와 미니 캘린더를 렌더하고, "자세히 보기" 클릭 시 내 근태 오버레이가 열린다', async () => {
+    const yearMonth = dayjs().format('YYYY-MM')
     mockAll()
     server.use(
+      http.get(ATTENDANCE_SUMMARY_URL, () =>
+        HttpResponse.json(makeAttendanceSummary({ totalAttendanceCount: 12, pendingAttendanceCount: 5, approvedAttendanceCount: 10 })),
+      ),
       http.get(ATTENDANCE_MONTHLY_URL, () =>
         HttpResponse.json(
           makeAttendancePage([
-            {
-              attendanceId: 1,
-              attendanceStatus: 'NORMAL',
-              attendanceDate: '2026-07-01',
-              startAt: '09:00:00',
-              endAt: '18:00:00',
-              isApproved: true,
-              draftId: null,
-            },
+            { attendanceId: 1, attendanceStatus: 'ABSENT', attendanceDate: `${yearMonth}-05`, startAt: null, endAt: null, isApproved: true, draftId: null },
+            { attendanceId: 2, attendanceStatus: 'LATE_EARLY', attendanceDate: `${yearMonth}-06`, startAt: null, endAt: null, isApproved: true, draftId: null },
           ]),
         ),
       ),
-      http.get(ATTENDANCE_SUMMARY_URL, () =>
-        HttpResponse.json({
-          totalAttendanceCount: 12,
-          pendingAttendanceCount: 2,
-          approvedAttendanceCount: 10,
-          overtimeMinutes: 30,
-        }),
-      ),
     )
-
+    const user = userEvent.setup()
     renderWidget()
 
     expect(await screen.findByText('12건')).toBeInTheDocument()
-    expect(screen.getByText('2건')).toBeInTheDocument()
+    expect(screen.getByText('5건')).toBeInTheDocument()
     expect(screen.getByText('10건')).toBeInTheDocument()
-    expect(screen.getByText(/2026-07-01/)).toBeInTheDocument()
+    // 지각·결근은 서버 요약이 아니라 당월 목록에서 LATE_EARLY+ABSENT 건수로 파생한다(1+1=2건).
+    await waitFor(() => expect(screen.getByText('지각 · 결근').nextElementSibling).toHaveTextContent('2건'))
 
-    const links = screen.getAllByRole('link', { name: '자세히 보기 →' })
-    expect(links).toHaveLength(1)
-    expect(links[0]).toHaveAttribute('href', '/attendance/me')
-  })
+    // 미니 캘린더: 요일 헤더 7개 + 결근으로 표시한 5일 타일이 렌더된다.
+    expect(screen.getByText('일')).toBeInTheDocument()
+    expect(screen.getByText('결근')).toBeInTheDocument()
 
-  it('attendanceStatus가 null이면(출근만 하고 아직 마감 전) "진행 중" outline 배지로 렌더된다', async () => {
-    mockAll()
-    server.use(
-      http.get(ATTENDANCE_MONTHLY_URL, () =>
-        HttpResponse.json(
-          makeAttendancePage([
-            {
-              attendanceId: 2,
-              attendanceStatus: null,
-              attendanceDate: '2026-07-11',
-              startAt: '09:00:00',
-              endAt: null,
-              isApproved: false,
-              draftId: null,
-            },
-          ]),
-        ),
-      ),
-    )
+    await user.click(screen.getByRole('button', { name: '자세히 보기 →' }))
 
-    renderWidget()
-
-    const matches = await screen.findAllByText('진행 중')
-    expect(matches).toHaveLength(1)
-    const badge = matches.find((el) => el.getAttribute('data-slot') === 'badge')
-    expect(badge).toHaveAttribute('data-variant', 'outline')
+    // 오버레이 안에 MyAttendancePage가 그대로 마운트되어 출근/퇴근 버튼이 나타난다.
+    expect(await screen.findByRole('button', { name: '출근' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '퇴근' })).toBeInTheDocument()
   })
 })
 
-describe('PersonalRecordsWidget - 연차 탭', () => {
-  it('탭 전환 시 연차 이력을 조회하고, WAITING·IN_PROGRESS는 대기·나머지는 완료로 집계되며 "자세히 보기"는 /leaves/me로 연결된다', async () => {
+describe('PersonalRecordsWidget - 휴가·출장 탭', () => {
+  it('잔여 휴가 게이지(연차/특별/포상)를 렌더하고, "자세히" 클릭 시 내 휴가 오버레이가 열린다', async () => {
+    mockAll()
+    server.use(
+      http.get(LEAVE_SUMMARY_URL, () =>
+        HttpResponse.json(
+          makeLeaveSummary({
+            annualBaseGrantDays: 15,
+            annualUsedDays: 3,
+            specialGrantDays: 2,
+            specialUsedDays: 0,
+            compensatoryGrantDays: 1,
+            compensatoryUsedDays: 1,
+          }),
+        ),
+      ),
+    )
+    const user = userEvent.setup()
+    renderWidget()
+
+    await user.click(screen.getByRole('tab', { name: '휴가 · 출장' }))
+
+    // 잔여 = 부여 - 사용: 연차 12/15, 특별 2/2, 포상 0/1.
+    await waitFor(() => expect(screen.getByText('12 / 15')).toBeInTheDocument())
+    expect(screen.getByText('2 / 2')).toBeInTheDocument()
+    expect(screen.getByText('0 / 1')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: '자세히 →' }))
+
+    // 오버레이 안에 MyLeavePage가 그대로 마운트되어 전용 "휴가 신청" 버튼이 나타난다.
+    expect(await screen.findByRole('button', { name: '휴가 신청' })).toBeInTheDocument()
+  })
+
+  it('연차·출장 신청 이력을 시작일 내림차순으로 병합해 보여주고, "출장 이력" 클릭 시 내 출장 이력 오버레이가 열린다', async () => {
     mockAll()
     server.use(
       http.get(LEAVE_HISTORY_URL, () =>
         HttpResponse.json([
           { draftId: 1, leaveType: '연차', startAt: '2026-07-01', endAt: '2026-07-01', requestedLeaveDays: 1, approvalStatus: '결재대기' },
-          { draftId: 2, leaveType: '연차', startAt: '2026-07-02', endAt: '2026-07-02', requestedLeaveDays: 1, approvalStatus: '결재진행중' },
-          { draftId: 3, leaveType: '반차', startAt: '2026-07-03', endAt: '2026-07-03', requestedLeaveDays: 0.5, approvalStatus: '결재완료' },
-          { draftId: 4, leaveType: '연차', startAt: '2026-07-04', endAt: '2026-07-04', requestedLeaveDays: 1, approvalStatus: '반려' },
-          { draftId: 5, leaveType: '연차', startAt: '2026-07-05', endAt: '2026-07-05', requestedLeaveDays: 1, approvalStatus: '미상신' },
         ]),
       ),
-    )
-    const user = userEvent.setup()
-    renderWidget()
-
-    await user.click(screen.getByRole('tab', { name: '연차' }))
-
-    // 연차 건수 5, 승인 대기(결재대기+결재진행중) 2, 처리 완료(결재완료+반려+미상신) 3.
-    await waitFor(() => expect(screen.getByText('5건')).toBeInTheDocument())
-    expect(screen.getByText('2건')).toBeInTheDocument()
-    expect(screen.getByText('3건')).toBeInTheDocument()
-
-    const link = screen.getByRole('link', { name: '자세히 보기 →' })
-    expect(link).toHaveAttribute('href', '/leaves/me')
-  })
-})
-
-describe('PersonalRecordsWidget - 출장 탭', () => {
-  it('탭 전환 시 출장 이력을 조회하고, "자세히 보기"는 /approval/business-trips/me/history로 연결된다', async () => {
-    mockAll()
-    server.use(
       http.get(TRIP_HISTORY_URL, () =>
         HttpResponse.json([
-          { draftId: 10, startAt: '2026-07-05', endAt: '2026-07-06', destination: '부산', purpose: '출장 업무', approvalStatus: '결재대기' },
+          { draftId: 10, startAt: '2026-07-10', endAt: '2026-07-11', destination: '부산', purpose: '가맹점 실사', approvalStatus: '반려' },
         ]),
       ),
     )
     const user = userEvent.setup()
     renderWidget()
 
-    await user.click(screen.getByRole('tab', { name: '출장' }))
+    await user.click(screen.getByRole('tab', { name: '휴가 · 출장' }))
 
-    expect(await screen.findByText('부산')).toBeInTheDocument()
-    expect(screen.getByText('출장 업무', { exact: false })).toBeInTheDocument()
+    const items = await screen.findAllByRole('listitem')
+    // startAt 내림차순: 출장(07-10)이 연차(07-01)보다 먼저 나온다.
+    expect(items[0]).toHaveTextContent('부산')
+    expect(items[0]).toHaveTextContent('반려')
+    expect(items[1]).toHaveTextContent('연차')
+    expect(items[1]).toHaveTextContent('결재대기')
 
-    const link = screen.getByRole('link', { name: '자세히 보기 →' })
-    expect(link).toHaveAttribute('href', '/approval/business-trips/me/history')
+    await user.click(screen.getByRole('button', { name: '출장 이력 →' }))
+
+    // 오버레이 안에 MyBusinessTripHistoryPage가 그대로 마운트되어 목적지 데이터가 나타난다.
+    expect(await screen.findAllByText('부산')).not.toHaveLength(0)
+  })
+
+  it('신청 내역이 없으면 안내 문구를 보여준다', async () => {
+    mockAll()
+    const user = userEvent.setup()
+    renderWidget()
+
+    await user.click(screen.getByRole('tab', { name: '휴가 · 출장' }))
+
+    expect(await screen.findByText(/신청 내역이 없습니다\./)).toBeInTheDocument()
   })
 })
 
@@ -191,19 +202,11 @@ describe('PersonalRecordsWidget - 월 변경', () => {
     mockAll()
     const requestedYearMonths: string[] = []
     server.use(
-      http.get(ATTENDANCE_MONTHLY_URL, ({ request }) => {
+      http.get(ATTENDANCE_SUMMARY_URL, ({ request }) => {
         const url = new URL(request.url)
         requestedYearMonths.push(url.searchParams.get('yearMonth') ?? '')
-        return HttpResponse.json(makeAttendancePage([]))
+        return HttpResponse.json(makeAttendanceSummary())
       }),
-      http.get(ATTENDANCE_SUMMARY_URL, () =>
-        HttpResponse.json({
-          totalAttendanceCount: 0,
-          pendingAttendanceCount: 0,
-          approvedAttendanceCount: 0,
-          overtimeMinutes: 0,
-        }),
-      ),
     )
     const user = userEvent.setup()
     const { container } = renderWidget()
@@ -234,10 +237,10 @@ describe('PersonalRecordsWidget - 월 변경', () => {
     mockAll()
     const requestedYearMonths: string[] = []
     server.use(
-      http.get(ATTENDANCE_MONTHLY_URL, ({ request }) => {
+      http.get(ATTENDANCE_SUMMARY_URL, ({ request }) => {
         const url = new URL(request.url)
         requestedYearMonths.push(url.searchParams.get('yearMonth') ?? '')
-        return HttpResponse.json(makeAttendancePage([]))
+        return HttpResponse.json(makeAttendanceSummary())
       }),
     )
     const { container } = renderWidget()
@@ -264,6 +267,7 @@ describe('PersonalRecordsWidget - 로딩 상태', () => {
       http.get(ATTENDANCE_MONTHLY_URL, () => HttpResponse.json(makeAttendancePage([]))),
       http.get(ATTENDANCE_SUMMARY_URL, () => gate),
       http.get(LEAVE_HISTORY_URL, () => HttpResponse.json([])),
+      http.get(LEAVE_SUMMARY_URL, () => HttpResponse.json(makeLeaveSummary())),
       http.get(TRIP_HISTORY_URL, () => HttpResponse.json([])),
     )
 
@@ -271,13 +275,6 @@ describe('PersonalRecordsWidget - 로딩 상태', () => {
 
     expect(await screen.findByText('불러오는 중...')).toBeInTheDocument()
 
-    resolveResponse?.(
-      HttpResponse.json({
-        totalAttendanceCount: 0,
-        pendingAttendanceCount: 0,
-        approvedAttendanceCount: 0,
-        overtimeMinutes: 0,
-      }),
-    )
+    resolveResponse?.(HttpResponse.json(makeAttendanceSummary()))
   })
 })

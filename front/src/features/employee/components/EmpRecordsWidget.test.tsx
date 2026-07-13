@@ -10,8 +10,8 @@ import { server } from '@/test/mocks/server'
 import { EmpRecordsWidget } from './EmpRecordsWidget'
 
 /**
- * EmpRecordsWidget(EmployeeDetailPage 관리용 "빨간 박스" 위젯, adapt-ui 신규) 검증.
- * PersonalRecordsWidget/DeptAttendanceBoardWidget과 동형 구조(월 선택 + 근태/연차/출장 3탭)이지만,
+ * EmpRecordsWidget(EmployeeDetailPage 관리용 "근태·휴가·출장 조회" 위젯) 검증.
+ * PersonalRecordsWidget과 동형 구조(월 선택 + 근태/연차/출장 3구역 세로 나열 + 요약 통계)이지만,
  * 부서 단위 목록 API(DEPT_ATTENDANCE_MONTHLY/DEPT_LEAVE_REQUEST_HISTORY/
  * DEPT_BUSINESS_TRIP_REQUEST_HISTORY)를 size=100으로 통째로 받아 대상 empId 행만 select/filter로
  * 골라내는 워크어라운드라, 응답에 다른 empId 행이 섞여 있어도 대상 사원 것만 보여주는지가 핵심이다.
@@ -102,8 +102,8 @@ function renderWidget() {
   )
 }
 
-describe('EmpRecordsWidget - 근태 탭(기본)', () => {
-  it('대상 empId 행만 통계·최근 목록으로 보여주고, 다른 사원 행은 무시하며 "자세히 보기"는 /attendance/dept로 연결된다', async () => {
+describe('EmpRecordsWidget - 근태 구역(기본)', () => {
+  it('대상 empId 행만 통계로 보여주고, 다른 사원 행은 무시하며 "자세히 보기"는 /attendance/dept로 연결된다', async () => {
     mockAll()
     server.use(
       http.get(ATTENDANCE_URL, () =>
@@ -125,10 +125,15 @@ describe('EmpRecordsWidget - 근태 탭(기본)', () => {
     expect(screen.getByText('10건')).toBeInTheDocument()
     // 다른 사원(99)의 통계(30건)는 렌더되지 않는다.
     expect(screen.queryByText('30건')).not.toBeInTheDocument()
-    expect(screen.getByText('2026-07-01')).toBeInTheDocument()
 
-    const link = screen.getByRole('link', { name: '자세히 보기 →' })
-    expect(link).toHaveAttribute('href', '/attendance/dept')
+    // 근태/연차/출장 3구역이 항상 동시에 렌더되므로 "자세히 보기 →" 링크도 3개 동시 존재한다.
+    // 컴포넌트 렌더 순서(AttendanceSection → LeaveSection → BusinessTripSection)가 고정이라
+    // 인덱스로 각 구역의 링크를 구분한다.
+    const links = screen.getAllByRole('link', { name: '자세히 보기 →' })
+    expect(links).toHaveLength(3)
+    expect(links[0]).toHaveAttribute('href', '/attendance/dept')
+    expect(links[1]).toHaveAttribute('href', '/leaves/dept')
+    expect(links[2]).toHaveAttribute('href', '/approval/business-trips/dept/history')
   })
 
   it('대상 empId 행이 없으면 "이번 달 근태 기록이 없습니다."를 보여준다', async () => {
@@ -141,8 +146,8 @@ describe('EmpRecordsWidget - 근태 탭(기본)', () => {
   })
 })
 
-describe('EmpRecordsWidget - 연차 탭', () => {
-  it('대상 empId 행만 필터해 건수/대기/완료를 집계하고 "자세히 보기"는 /leaves/dept로 연결된다', async () => {
+describe('EmpRecordsWidget - 연차 구역', () => {
+  it('대상 empId 행만 필터해 건수/대기/완료를 집계한다(3구역 동시 렌더, 탭 전환 없음)', async () => {
     mockAll()
     server.use(
       http.get(LEAVE_URL, () =>
@@ -156,50 +161,54 @@ describe('EmpRecordsWidget - 연차 탭', () => {
         ),
       ),
     )
-    const user = userEvent.setup()
     renderWidget()
-
-    await user.click(screen.getByRole('tab', { name: '연차' }))
 
     // empId=7 행 3건만 집계(99번 행은 제외) — 건수 3, 대기(결재대기+결재진행중) 2, 완료 1.
     await waitFor(() => expect(screen.getByText('3건')).toBeInTheDocument())
     expect(screen.getByText('2건')).toBeInTheDocument()
     expect(screen.getByText('1건')).toBeInTheDocument()
-
-    const link = screen.getByRole('link', { name: '자세히 보기 →' })
-    expect(link).toHaveAttribute('href', '/leaves/dept')
   })
 
-  it('대상 empId 행이 없으면 "이번 달 휴가 신청 이력이 없습니다."를 보여준다', async () => {
+  it('대상 empId 행이 없으면 건수/대기/완료가 모두 0건으로 표시된다(최근 목록이 사라져 별도 안내 문구는 없음)', async () => {
     mockAll()
-    server.use(http.get(LEAVE_URL, () => HttpResponse.json(makePage([makeLeaveRow(99, 1, '결재대기')]))))
-    const user = userEvent.setup()
+    server.use(
+      // 근태·출장 구역은 0건이 섞이지 않도록 대상 empId에 0이 아닌 값을 채워 연차 구역의 0건 3개만
+      // 명확히 골라낼 수 있게 한다.
+      http.get(ATTENDANCE_URL, () => HttpResponse.json(makePage([makeMonthlyRow(EMP_ID, 5, 1, 4, [])]))),
+      http.get(LEAVE_URL, () => HttpResponse.json(makePage([makeLeaveRow(99, 1, '결재대기')]))),
+      http.get(TRIP_URL, () =>
+        HttpResponse.json(
+          makePage([makeTripRow(EMP_ID, 1, '부산', '결재대기'), makeTripRow(EMP_ID, 2, '광주', '결재완료')]),
+        ),
+      ),
+    )
     renderWidget()
 
-    await user.click(screen.getByRole('tab', { name: '연차' }))
-
-    expect(await screen.findByText('이번 달 휴가 신청 이력이 없습니다.')).toBeInTheDocument()
+    await waitFor(() => expect(screen.getAllByText('0건')).toHaveLength(3))
   })
 })
 
-describe('EmpRecordsWidget - 출장 탭', () => {
-  it('대상 empId 행만 필터해 목록을 보여주고 "자세히 보기"는 /approval/business-trips/dept/history로 연결된다', async () => {
+describe('EmpRecordsWidget - 출장 구역', () => {
+  it('대상 empId 행만 필터해 통계를 집계한다(3구역 동시 렌더, 탭 전환 없음)', async () => {
     mockAll()
     server.use(
       http.get(TRIP_URL, () =>
-        HttpResponse.json(makePage([makeTripRow(99, 200, '서울', '결재대기'), makeTripRow(EMP_ID, 10, '부산', '결재대기')])),
+        HttpResponse.json(
+          makePage([
+            makeTripRow(99, 200, '서울', '결재대기'),
+            makeTripRow(EMP_ID, 10, '부산', '결재대기'),
+            makeTripRow(EMP_ID, 11, '제주', '결재진행중'),
+            makeTripRow(EMP_ID, 12, '광주', '결재완료'),
+          ]),
+        ),
       ),
     )
-    const user = userEvent.setup()
     renderWidget()
 
-    await user.click(screen.getByRole('tab', { name: '출장' }))
-
-    expect(await screen.findByText('부산')).toBeInTheDocument()
-    expect(screen.queryByText('서울')).not.toBeInTheDocument()
-
-    const link = screen.getByRole('link', { name: '자세히 보기 →' })
-    expect(link).toHaveAttribute('href', '/approval/business-trips/dept/history')
+    // empId=7 행 3건만 집계(99번 행은 제외) — 건수 3, 대기(결재대기+결재진행중) 2, 완료 1.
+    await waitFor(() => expect(screen.getByText('3건')).toBeInTheDocument())
+    expect(screen.getByText('2건')).toBeInTheDocument()
+    expect(screen.getByText('1건')).toBeInTheDocument()
   })
 })
 

@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { normalizeApiError } from '@/shared/lib/apiError'
-import { Button } from '@/shared/ui/button'
 import { useMeQuery } from '../api/useMeQuery'
+import { DeptHistoryCard } from '../components/DeptHistoryCard'
 import { EmployeeProfileTabs } from '../components/EmployeeProfileTabs'
 import { EmployeeSummaryCard } from '../components/EmployeeSummaryCard'
 import { PersonalRecordsWidget } from '../components/PersonalRecordsWidget'
@@ -10,28 +10,33 @@ import { SignatureCard } from '../components/SignatureCard'
 import { UpdateMeDialog } from '../components/UpdateMeDialog'
 
 /**
- * 내 정보 조회 페이지(본인 상세, F003 RETRIEVE_ME_INFO, adapt-ui 리디자인).
+ * 내 정보 조회 페이지(본인 상세, F003 RETRIEVE_ME_INFO, adapt-ui 리디자인 3차 — Magic Patterns
+ * 목업(me-page.html) 이식).
  *
- * Ubold 레퍼런스(localhost:5174/apps/groupware/my-info)의 카드 배치를 이식한다 — 좌측에
- * 요약 카드(EmployeeSummaryCard)·전자서명 카드(SignatureCard)를 쌓고, 우측에 사원 프로필 탭
- * (EmployeeProfileTabs, 기본정보/부서이력/파일관리)과 개인 기록 조회 위젯(PersonalRecordsWidget)을
- * 배치한다. 공통 레이아웃(헤더/사이드바/푸터)은 우리 프로젝트 것을 그대로 쓰고, 레퍼런스는 콘텐츠
- * 프레임(카드 구성)만 참고했다.
+ * 좌측 레일: 요약 카드(EmployeeSummaryCard, 역할 배지+정보/비밀번호 수정 진입점 포함)·전자서명
+ * 카드(SignatureCard). 우측 컬럼: 사원 프로필 탭(EmployeeProfileTabs, showDeptTab=false로
+ * 기본정보/파일관리 2탭만)·소속·발령 카드(DeptHistoryCard, 부서이력 탭에서 분리한 타임라인)·
+ * 근태·휴가 위젯(PersonalRecordsWidget, 근태/휴가·출장 2탭). 공통 레이아웃(헤더/사이드바/푸터)은
+ * 우리 프로젝트 것을 그대로 쓰고, 목업은 메인 콘텐츠 카드 배치만 참고했다.
  *
- * 레퍼런스에는 백엔드 계약에 없는 목업 요소가 섞여 있어 제거했다: "상태 메모"(RETRIEVE_ME_INFO
- * 응답에 없는 필드), "보관 파일"(사원 FileType은 PROFILE_PICTURE/SIGNATURE 2종뿐), 파일
- * 업로드 일시(activeFiles/filesInfos 응답에 날짜 필드 없음). 반대로 전자서명 노출·업로드·
- * 활성화·삭제, 개인 기록 조회(근태/연차/출장 요약)는 계약이 존재해 새로 구현했다(사용자 확인 완료).
+ * EmployeeProfileTabs/EmployeeSummaryCard는 EmployeeDetailPage(타 사원 상세)와 공유하는
+ * 컴포넌트라 이 페이지 전용 변경(showDeptTab/onEditClick)은 옵션 prop으로만 추가했다 — 기존
+ * 타 사원 상세 화면은 회귀 없이 그대로 동작한다.
  *
- * "현재 활성 파일" 카드(전체 타입 목록)는 사용자 요청으로 제거했다(adapt-ui 2차 수정) — 활성
- * 파일 확인은 EmployeeProfileTabs의 "파일관리" 탭에서 이미 가능하다. "수정" 버튼도 같은 요청으로
- * `/me/edit` 페이지 이동 대신 UpdateMeDialog 모달로 전환했다.
+ * 목업에 있던 "재직중" 상태 배지·"신규 입사" 발령 이력은 RETRIEVE_ME_INFO에 대응 필드/계약이
+ * 없어(empBasicInfo에 status 없음, currentDepts는 현재 소속만 응답) 렌더하지 않는다(계약에
+ * 없는 값 발명 금지, 기존 adapt-ui 방침 유지). 역할 배지는 대신 세션 roles(JWT 스냅샷,
+ * useAuthStore)로 실제 데이터에 기반해 보여준다.
+ *
+ * "정보/비밀번호 수정" 버튼은 UpdateMeDialog를 연다 — UpdateMeForm이 내선번호·비밀번호를 한
+ * 폼에서 함께 처리하므로 새 라우트/모달을 만들지 않았다(애초 "정보 수정"/"비밀번호" 2버튼안은
+ * 같은 다이얼로그를 여는 중복 진입점이라 사용자 요청으로 버튼 1개로 통합했다). `/attendance/me`·
+ * `/leaves/me`·`/approval/business-trips/me/history` 라우트도 그대로 유지한다(PersonalRecordsWidget의
+ * Dialog 오버레이가 계속 재사용). 세 가지 모두 react-router-developer 에이전트 검토로 라우팅
+ * 변경 불필요를 확정했다(router.tsx 미수정).
  *
  * empId는 RETRIEVE_ME_INFO.empBasicInfo.empId(Number, PK)로 항상 내려오므로(스니펫 실측),
  * 아바타·서명 미리보기(EMP_FILE_PREVIEW)와 파일 삭제(경로 파라미터)에 그대로 사용한다.
- *
- * activeFiles는 이 페이지에서 SIGNATURE/PROFILE_PICTURE 구분 없이 전체를 보여준다(레퍼런스와
- * 동일 — 기존에는 SIGNATURE를 의도적으로 숨겼으나 이번 adapt-ui에서 노출하기로 확정했다).
  */
 export function MyInfoPage() {
   const query = useMeQuery()
@@ -65,30 +70,27 @@ export function MyInfoPage() {
     return null
   }
 
-  const { empBasicInfo, activeFiles } = query.data
+  const { empBasicInfo, activeFiles, currentDepts } = query.data
   const empId = empBasicInfo.empId
 
   return (
     <div className="w-full p-4 sm:p-6 lg:p-8">
       <div className="grid gap-6 lg:grid-cols-[320px_1fr]">
-        {/* 좌측 컬럼: 요약 카드 + 전자서명 카드 */}
+        {/* 좌측 레일: 요약 카드(역할 배지+정보/비밀번호 수정) + 전자서명 카드 */}
         <div className="space-y-6">
-          <EmployeeSummaryCard data={query.data} empId={empId} viewerIsSelf />
-          <SignatureCard empId={empId} activeFiles={activeFiles} />
-        </div>
-
-        {/* 우측 컬럼: 사원 프로필 탭(기본정보/부서이력/파일관리) + 개인 기록 조회 위젯 */}
-        <div className="space-y-6">
-          <EmployeeProfileTabs
+          <EmployeeSummaryCard
             data={query.data}
             empId={empId}
             viewerIsSelf
-            actions={
-              <Button type="button" variant="outline" size="sm" onClick={() => setEditDialogOpen(true)}>
-                수정
-              </Button>
-            }
+            onEditClick={() => setEditDialogOpen(true)}
           />
+          <SignatureCard empId={empId} activeFiles={activeFiles} />
+        </div>
+
+        {/* 우측 컬럼: 사원 프로필 탭(기본정보/파일관리) + 소속·발령 카드 + 근태·휴가 위젯 */}
+        <div className="space-y-6">
+          <EmployeeProfileTabs data={query.data} empId={empId} viewerIsSelf showDeptTab={false} />
+          <DeptHistoryCard currentDepts={currentDepts} />
           <PersonalRecordsWidget />
         </div>
       </div>

@@ -1,7 +1,10 @@
 import type { ComponentType, ReactNode, SVGProps } from 'react'
 import { Building2, Contact, IdCard, Mail, Phone } from 'lucide-react'
+import { useAuthStore } from '@/features/auth/store/authStore'
+import { getRoleLabel } from '@/features/home/lib/roleLabels'
 import { BlobAvatar } from '@/shared/components/BlobAvatar'
 import { getActiveProfilePicture } from '@/shared/lib/activeFiles'
+import { Button } from '@/shared/ui/button'
 import { Card, CardContent } from '@/shared/ui/card'
 import type { EmployeeInfoResponse } from '../model/me'
 
@@ -9,8 +12,16 @@ interface EmployeeSummaryCardProps {
   data: EmployeeInfoResponse
   /** 사원 식별 번호(numeric). BlobAvatar의 EMP_FILE_PREVIEW 조회에 사용한다. */
   empId?: number
-  /** 조회 주체가 본인인지 여부. false(타 사원 상세)면 아이디(loginId)를 숨긴다. */
+  /** 조회 주체가 본인인지 여부. false(타 사원 상세)면 아이디(loginId)와 역할 배지를 숨긴다. */
   viewerIsSelf?: boolean
+  /**
+   * "정보/비밀번호 수정" 버튼 클릭 핸들러(MyInfoPage 전용, adapt-ui 리디자인 신규).
+   * UpdateMeDialog 한 폼이 내선번호·비밀번호를 함께 처리하므로(UpdateMeForm) 버튼도 하나로
+   * 통합했다(사용자 확인, 애초의 "정보 수정"/"비밀번호" 2버튼안은 같은 다이얼로그를 여는
+   * 중복 진입점이라 하나로 합쳤다). 전달하지 않으면(EmployeeDetailPage 등 타 사원 조회) 버튼을
+   * 렌더하지 않는다.
+   */
+  onEditClick?: () => void
 }
 
 /** 아이콘+라벨+값 한 줄(계정 정보 섹션). */
@@ -73,14 +84,22 @@ function SectionHeading({
  * 활성 파일 표시는 이 카드의 책임이 아니다(adapt-ui 리디자인으로 MyInfoPage 전용 카드로 분리 —
  * EmployeeDetailPage(타 사원)는 원래도 활성 파일을 노출하지 않아 회귀 없음).
  */
-export function EmployeeSummaryCard({ data, empId, viewerIsSelf = true }: EmployeeSummaryCardProps) {
+export function EmployeeSummaryCard({
+  data,
+  empId,
+  viewerIsSelf = true,
+  onEditClick,
+}: EmployeeSummaryCardProps) {
   const { empBasicInfo, currentDepts, activeFiles } = data
   const profilePictureFileId = getActiveProfilePicture(activeFiles)
+  // 세션 roles(JWT 스냅샷)는 본인 소유 정보라 타 사원 상세(viewerIsSelf=false)에서는 조회 대상과
+  // 무관하므로 렌더하지 않는다 — RETRIEVE_EMP_INFO 응답에도 역할 필드가 없다(추측 금지).
+  const roles = useAuthStore((state) => state.roles)
 
   return (
     <Card className="h-fit">
       <CardContent className="space-y-5">
-        {/* 아바타 + 이름 + 사번 + 소속 부서 배지(전체) */}
+        {/* 아바타 + 이름 + 사번 + 소속 부서 배지(전체) + (본인이면) 역할 배지 */}
         <div className="flex flex-col items-center gap-3 text-center">
           <BlobAvatar
             empId={empId}
@@ -92,13 +111,26 @@ export function EmployeeSummaryCard({ data, empId, viewerIsSelf = true }: Employ
             <h3 className="truncate text-lg font-semibold tracking-tight">{empBasicInfo.name}</h3>
             <p className="truncate text-sm text-muted-foreground">사번 {empBasicInfo.empNo}</p>
           </div>
-          {currentDepts.length > 0 && (
+          {(currentDepts.length > 0 || (viewerIsSelf && roles.length > 0)) && (
             <div className="flex flex-wrap justify-center gap-1.5">
               {currentDepts.map((dept) => (
                 <Pill key={dept.deptId} tone={dept.isPrimary ? 'primary' : 'muted'}>
                   {dept.deptName} · {dept.positionName}
                 </Pill>
               ))}
+              {viewerIsSelf &&
+                roles.map((role) => (
+                  <Pill key={role} tone="muted">
+                    {getRoleLabel(role)}
+                  </Pill>
+                ))}
+            </div>
+          )}
+          {viewerIsSelf && onEditClick && (
+            <div className="pt-1">
+              <Button type="button" size="sm" onClick={onEditClick}>
+                정보/비밀번호 수정
+              </Button>
             </div>
           )}
         </div>

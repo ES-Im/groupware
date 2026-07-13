@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
+import { Search } from 'lucide-react'
 import { toast } from 'sonner'
 import { handleApiError } from '@/shared/lib/apiError'
 import { usePageState } from '@/shared/lib/usePageState'
@@ -77,6 +78,9 @@ export function NewEmployeeApprovalListPage() {
     <div className="w-full space-y-6 p-4 sm:p-6 lg:p-8">
       <div>
         <h1 className="text-xl font-semibold tracking-tight">신규 사원 승인</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          가입 대기 중인 사원을 승인하고 조직 소속을 배정합니다 (HR · ADMIN)
+        </p>
       </div>
 
       <Card className="h-fit">
@@ -86,17 +90,23 @@ export function NewEmployeeApprovalListPage() {
             {newEmployeesQuery.data && (
               <Badge variant="secondary">{pageInfo.totalElements}건</Badge>
             )}
+
+            <div className="relative ml-auto w-full sm:w-64">
+              <Search
+                className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground"
+                aria-hidden="true"
+              />
+              <Input
+                value={searchInput}
+                onChange={(event) => setSearchInput(event.target.value)}
+                placeholder="이름 검색"
+                aria-label="이름 검색"
+                className="h-8 w-full pl-8"
+              />
+            </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          <Input
-            value={searchInput}
-            onChange={(event) => setSearchInput(event.target.value)}
-            placeholder="이름 검색"
-            aria-label="이름 검색"
-            className="h-8 w-full sm:w-64"
-          />
-
           {newEmployeesQuery.isLoading ? (
             <p className="py-8 text-center text-sm text-muted-foreground">불러오는 중...</p>
           ) : newEmployeesQuery.error ? (
