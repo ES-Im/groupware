@@ -132,10 +132,16 @@ npm run build       # 빌드 성공 확인
 
 ## **10. 테스트 계정**
 
-- ADMIN  
-- id : test1234 / pw : test!1234
-- DEPT-MANAGER  
-- id : test2345 / pw : test!2345
-- EMPLOYEE  
-- id : test3456 / pw : test!3456
+
+| 역할               | 아이디             | 비밀번호      |
+| ---------------- | --------------- | --------- |
+| ADMIN            | admin1234       | test!1234 |
+| DEPT-MANAGER(IT) | deptmanager1234 | test!2345 |
+| EMPLOYEE         | emp1234         | test!3456 |
+| HR               | hrmember1234    | test!1234 |
+| franchise        | franchise1234   | test!1234 |
+| facility         | facility1234    | test!1234 |
+
+
+
 
