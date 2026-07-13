@@ -33,19 +33,19 @@ import { DepartmentsExplorerLayout } from '@/features/department/pages/Departmen
 import { CompanyInfoPage } from '@/features/company/pages/CompanyInfoPage'
 import { MessageBoxPage } from '@/features/message/pages/MessageBoxPage'
 import { EmployeeDetailPage } from '@/features/employee/pages/EmployeeDetailPage'
+import { EmpManagementListPage } from '@/features/employee/pages/EmpManagementListPage'
 import { MyInfoPage } from '@/features/employee/pages/MyInfoPage'
 import { NewEmployeeApprovalListPage } from '@/features/employee/registration/pages/NewEmployeeApprovalListPage'
 import { MyMeetingCalendarPage } from '@/features/meeting/pages/MyMeetingCalendarPage'
 import { MeetingReservationCreatePage } from '@/features/meeting/pages/MeetingReservationCreatePage'
 import { MeetingReservationManagementPage } from '@/features/meeting/pages/MeetingReservationManagementPage'
-import { MeetingReservationDetailPage } from '@/features/meeting/pages/MeetingReservationDetailPage'
 import { MeetingRoomManagementPage } from '@/features/meeting/pages/MeetingRoomManagementPage'
 import { MeetingRoomDetailPage } from '@/features/meeting/pages/MeetingRoomDetailPage'
 import { MeetingRoomManagementDetailPage } from '@/features/meeting/pages/MeetingRoomManagementDetailPage'
 import { FranchiseListPage } from '@/features/franchise/pages/FranchiseListPage'
 import { FranchiseDetailPage } from '@/features/franchise/pages/FranchiseDetailPage'
-import { FranchiseSalesPage } from '@/features/franchise/pages/FranchiseSalesPage'
 import { FranchiseEducationCalendarPage } from '@/features/franchise/pages/FranchiseEducationCalendarPage'
+import { FranchiseEducationCreatePage } from '@/features/franchise/pages/FranchiseEducationCreatePage'
 import { FranchiseEducationDetailPage } from '@/features/franchise/pages/FranchiseEducationDetailPage'
 import { FranchiseInquiryListPage } from '@/features/franchise/pages/FranchiseInquiryListPage'
 import { FranchiseInquiryDetailPage } from '@/features/franchise/pages/FranchiseInquiryDetailPage'
@@ -166,7 +166,7 @@ import { LayoutShell } from '@/shared/components/LayoutShell'
  * 게이팅하지 않는다. 상세/작성은 별도 라우트가 아니다 — 카드 내 뷰 전환으로 처리한다(채팅 오버레이와
  * 동일 철학). 'messages'(1세그먼트)와 'messages/:box'(2세그먼트)는 세그먼트 깊이가 달라 랭킹 충돌이
  * 없다. 전 항목 minRole EMPLOYEE라 별도 RoleGuard 없이 ProtectedRoute(인증 가드)만으로 충분하다.
- * /franchises·/franchises/:franchiseId·/franchise-sales·/franchise-educations·
+ * /franchises·/franchises/:franchiseId·/franchise-educations·
  * /franchise-educations/:educationId·/franchise-inquiries·/franchise-inquiries/:inquiryId는
  * ROADMAP(FRANCHISE) T1.2에서 franchise 도메인 페이지 7종(FranchiseListPage/P1·F1601·F1603,
  * FranchiseDetailPage/P2·F1602·F1604~F1608, FranchiseSalesPage/P3·F1624~F1626,
@@ -194,6 +194,11 @@ import { LayoutShell } from '@/shared/components/LayoutShell'
  * 이 라우트는 목록 조회 화면만 배선한다. minRole HR 게이팅은 사이드바(minRole)에서만 처리하고
  * (근태 /attendance/dept·휴가·회의실 컨벤션과 동일), 라우트 자체는 ProtectedRoute(인증 가드)만
  * 적용한다 — 최종 권한 판단은 서버(403 ROLE_003)에 위임한다.
+ * /employees는 인사관리 도메인에서 EmpManagementListPage(전사 사원 조회+관리, HR/ADMIN 전용)로
+ * 연결했다. 행 클릭은 페이지 이동이 아니라 우측 오버레이 시트(EmpManagementSheet)를 열므로 하위
+ * 라우트가 없다. 1세그먼트 정적 라우트라 위 'employees/new'·'employees/:empId'(둘 다 2세그먼트)와
+ * 랭킹 충돌이 없다. minRole HR 게이팅은 사이드바에서만 처리하고, 라우트 자체는 ProtectedRoute
+ * (인증 가드)만 적용한다 — 최종 권한 판단은 서버(403 ROLE_003)에 위임한다.
  */
 export const router = createBrowserRouter([
   {
@@ -247,6 +252,17 @@ export const router = createBrowserRouter([
         // "임시저장글 불러오기"에서 draft를 선택했을 때의 이동 목적지가 실제 화면으로 이어진다.
         path: 'boards/:boardId/edit',
         element: <BoardEditPage />,
+      },
+      {
+        // 사원 관리 목록 페이지: 인사관리 도메인에서 EmpManagementListPage(전사 사원 조회+관리,
+        // 오버레이 시트 방식)로 연결했다. 'employees'(1세그먼트, 정적)는 'employees/new'·
+        // 'employees/:empId'(둘 다 2세그먼트)와 세그먼트 깊이가 달라 랭킹 충돌이 없다. 행 클릭 시
+        // 페이지 이동 없이 EmpManagementSheet가 열리므로 이 라우트 자체에는 하위 라우트가 없다.
+        // minRole HR 게이팅은 사이드바(minRole)에서만 처리하고(신규 사원 승인 등 기존 인사관리
+        // 컨벤션과 동일), 라우트 자체는 ProtectedRoute(인증 가드)만 적용한다 — 최종 권한 판단은
+        // 서버(403 ROLE_003)에 위임한다.
+        path: 'employees',
+        element: <EmpManagementListPage />,
       },
       {
         // 신규 사원 승인 목록 페이지: 인사관리(가입승인) 도메인 M1(T1.6)에서
@@ -415,13 +431,6 @@ export const router = createBrowserRouter([
         element: <MeetingReservationManagementPage />,
       },
       {
-        // 회의 예약 상세·수정·참여자교체·취소 페이지(P3): ROADMAP(MEETING-ROOMS) M4(T4.3-c)에서
-        // MeetingReservationDetailPage(F801·F804~F806)로 연결했다. 위 'meetings/new'·
-        // 'meetings/management'(둘 다 정적 세그먼트)보다 뒤에 등록해 랭킹 충돌을 피한다.
-        path: 'meetings/:meetingId',
-        element: <MeetingReservationDetailPage />,
-      },
-      {
         // 회의실 관리 목록 페이지(P6, FACILITY): ROADMAP(MEETING-ROOMS) M6(T6.3-b)에서
         // MeetingRoomManagementPage(F811·F812·F814)로 연결했다. 정적 세그먼트라 동적
         // 'meeting-rooms/:meetingRoomId'보다 항상 우선 매칭되지만, 명시적으로도 앞에 등록해 둔다.
@@ -481,13 +490,6 @@ export const router = createBrowserRouter([
         element: <FranchiseDetailPage />,
       },
       {
-        // 가맹점 매출 조회 페이지(P3): ROADMAP(FRANCHISE) T1.2에서 FranchiseSalesPage(F1624~F1626)로
-        // 연결했다. 대응하는 동적 페어 없는 단일 정적 라우트다. 사이드바 "가맹점 > 가맹점 매출"
-        // 항목·가맹점 상세(P2) [매출 조회] 액션의 진입점이다.
-        path: 'franchise-sales',
-        element: <FranchiseSalesPage />,
-      },
-      {
         // 가맹점 교육 캘린더 페이지(P4): ROADMAP(FRANCHISE) T1.2에서
         // FranchiseEducationCalendarPage(F1609·F1612)로 연결했다. 사이드바 "가맹점 > 가맹점 교육"
         // 항목의 실제 진입점이다.
@@ -495,10 +497,18 @@ export const router = createBrowserRouter([
         element: <FranchiseEducationCalendarPage />,
       },
       {
+        // 가맹점 교육 등록 페이지(F1612): 사용자 요청(2026-07-13 UI 개편)으로 등록 다이얼로그를
+        // 전용 페이지로 전환하며 추가했다. 아래 'franchise-educations/:educationId'(2세그먼트,
+        // 동적)와 세그먼트 깊이가 같으므로 정적 'new'를 동적 페어보다 앞에 등록해 랭킹 모호성을
+        // 피한다(기존 도메인 컨벤션 동형). 캘린더 페이지 [교육 등록] 버튼의 이동 목적지다.
+        path: 'franchise-educations/new',
+        element: <FranchiseEducationCreatePage />,
+      },
+      {
         // 가맹점 교육 상세 페이지(P5): ROADMAP(FRANCHISE) T1.2에서
         // FranchiseEducationDetailPage(F1610·F1611·F1613~F1616)로 연결했다. 위
-        // 'franchise-educations'(1세그먼트, 정적)보다 뒤에 등록해 랭킹 충돌을 피한다. 캘린더 이벤트
-        // 클릭·교육 등록 성공 직후의 이동 목적지다.
+        // 'franchise-educations'(1세그먼트, 정적)·'franchise-educations/new'(2세그먼트, 정적)보다
+        // 뒤에 등록해 랭킹 충돌을 피한다. 캘린더 이벤트 클릭·교육 등록 성공 직후의 이동 목적지다.
         path: 'franchise-educations/:educationId',
         element: <FranchiseEducationDetailPage />,
       },

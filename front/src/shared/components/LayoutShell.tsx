@@ -7,15 +7,18 @@ import { useAuthStore } from '@/features/auth/store/authStore'
 import { ChatOverlayPanel } from '@/features/chat/components/ChatOverlayPanel'
 import { useFilesInfosQuery } from '@/features/employee/api/useFilesInfosQuery'
 import { useMeQuery } from '@/features/employee/api/useMeQuery'
+import { EmployeeSearchOverlay } from '@/features/employee/components/EmployeeSearchOverlay'
 import { useMailboxCountsQuery } from '@/features/message/api/useMailboxCountsQuery'
 import { queryClient } from '@/shared/api/queryClient'
 import { Footer } from '@/shared/components/Footer'
 import { Header } from '@/shared/components/Header'
+import { ProfileRailPanel } from '@/shared/components/ProfileRailPanel'
 import { Sidebar } from '@/shared/components/Sidebar'
 import { getActiveProfilePicture } from '@/shared/lib/activeFiles'
 import { useDarkMode } from '@/shared/lib/useDarkMode'
 import { useIsMobile } from '@/shared/lib/useIsMobile'
 import { useMobileSidebarOpen } from '@/shared/lib/useMobileSidebarOpen'
+import { useProfileRailOpen } from '@/shared/lib/useProfileRailOpen'
 import { useSidebarCollapsed } from '@/shared/lib/useSidebarCollapsed'
 
 /**
@@ -58,6 +61,12 @@ export function LayoutShell() {
     toggle: toggleMobileSidebar,
     close: closeMobileSidebar,
   } = useMobileSidebarOpen()
+  /**
+   * 좌측 프로필 패널(ProfileRailPanel) 열림 상태(2026-07-13 개편). 헤더 사원 이름 클릭으로 데스크톱
+   * 에서만 여닫는 토글이며(요구사항3·4), collapsed(메뉴 사이드바)·mobileSidebarOpen(모바일 드로어)과
+   * 완전히 독립적인 세 번째 UI 토글이다. localStorage 영속(useProfileRailOpen).
+   */
+  const { open: profileRailOpen, toggle: toggleProfileRail } = useProfileRailOpen()
 
   /**
    * 라우트 이동 시 모바일 드로어 자동 닫힘: 메뉴 클릭으로 페이지가 바뀐 뒤에도 오버레이가 계속
@@ -132,13 +141,18 @@ export function LayoutShell() {
         mobileSidebarOpen={mobileSidebarOpen}
         isDark={isDark}
         onToggleDarkMode={toggleDarkMode}
+        profileRailOpen={profileRailOpen}
+        onToggleProfileRail={toggleProfileRail}
         me={me}
         profilePictureFileId={profilePictureFileId}
         onLogout={handleLogout}
         logoutPending={logoutMutation.isPending}
       />
-      {/* 헤더 아래: 사이드바 + 본문 컬럼(좌우 배치). min-h-0으로 flex 기본 min-height:auto 오버플로 함정 회피. */}
+      {/* 헤더 아래: 메뉴 사이드바 + 본문 컬럼 + (토글) 우측 프로필 패널(좌우 배치). min-h-0으로 flex
+          기본 min-height:auto 오버플로 함정 회피. */}
       <div className="flex min-h-0 flex-1">
+        {/* 최좌측 고정 열: 메뉴 사이드바(Sidebar). 2026-07-13 개편으로 좌측 프로필 패널 대신 Sidebar가
+            최좌측 위치를 차지한다(요구사항1). 헤더 햄버거가 이 열과 같은 가로 위치에 정렬된다. */}
         <Sidebar
           collapsed={collapsed}
           roles={roles}
@@ -156,10 +170,25 @@ export function LayoutShell() {
           </main>
           <Footer />
         </div>
+        {/* 프로필 패널(ProfileRailPanel): 상시 고정 → 헤더 사원 이름 클릭 토글로 전환(요구사항3).
+            풀스크린(데스크톱, !isMobile)에서만 유효하며(요구사항4), 열렸을 때만 레이아웃에 참여하는
+            고정 열로 마운트된다(닫히면 언마운트 → 폭 0, 본문이 전체 폭으로 확장). 오버레이 드로어가
+            아니다. 사용자 확정(2026-07-13): 패널은 화면 '최우측'(본문 컬럼 오른쪽)에 개폐한다 —
+            그래서 본문 컬럼 '뒤'에 둔다. */}
+        {!isMobile && profileRailOpen && (
+          <ProfileRailPanel
+            me={me}
+            profilePictureFileId={profilePictureFileId}
+            onLogout={handleLogout}
+            logoutPending={logoutMutation.isPending}
+          />
+        )}
       </div>
       {/* 채팅 오버레이(팝업 창 → 인앱 오버레이 전환): 라우트 전환에 언마운트되지 않도록 최상위
           div의 직계 자식으로 둔다. isOpen이 false면 스스로 null을 반환한다(ChatOverlayPanel). */}
       <ChatOverlayPanel />
+      {/* 사원 찾기 검색 오버레이: ChatOverlayPanel과 동일한 조건부 마운트 패턴. */}
+      <EmployeeSearchOverlay />
     </div>
   )
 }

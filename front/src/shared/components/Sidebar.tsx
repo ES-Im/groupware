@@ -1,6 +1,7 @@
 import { SidebarMenuGroup } from '@/shared/components/SidebarMenuGroup'
 import { SidebarMenuLink } from '@/shared/components/SidebarMenuLink'
 import { SidebarMenuPlaceholder } from '@/shared/components/SidebarMenuPlaceholder'
+import { SidebarSectionHeader } from '@/shared/components/SidebarSectionHeader'
 import { sidebarMenuItems } from '@/shared/components/sidebarMenuItems'
 import { hasRequiredRole } from '@/shared/lib/hasRequiredRole'
 import { cn } from '@/shared/lib/utils'
@@ -65,11 +66,24 @@ export function Sidebar({
       )}
     >
       {sidebarMenuItems
-        // 최상위 노드 1차 필터: 노드의 minRole로 게이팅한다(기존과 동일 규칙).
+        // 최상위 노드 1차 필터: 노드의 minRole로 게이팅한다(기존과 동일 규칙). 섹션 헤더는 이
+        // 필터를 통과해 실제로 보이는 항목 앞에만 붙어야 하므로, 필터링을 먼저 끝낸 뒤 순회하며
+        // 직전 항목과 section이 달라지는 지점에서만 헤더를 삽입한다(권한상 텅 빈 섹션은 헤더도
+        // 함께 사라진다).
         .filter((item) => hasRequiredRole(roles, item.minRole))
-        .map((item) => {
+        .flatMap((item, index, visibleItems) => {
+          const nodes = []
+          if (item.section && item.section !== visibleItems[index - 1]?.section) {
+            nodes.push(
+              <SidebarSectionHeader
+                key={`section-${item.section}`}
+                title={item.section}
+                collapsed={collapsedView}
+              />,
+            )
+          }
           if (item.children) {
-            return (
+            nodes.push(
               <SidebarMenuGroup
                 key={item.label}
                 item={item}
@@ -77,19 +91,21 @@ export function Sidebar({
                 collapsed={collapsedView}
                 onExpandSidebar={onExpandSidebar}
                 badgeCounts={badgeCounts}
-              />
+              />,
             )
+          } else if (item.implemented !== false) {
+            nodes.push(
+              <SidebarMenuLink
+                key={item.label}
+                item={item}
+                collapsed={collapsedView}
+                badgeCounts={badgeCounts}
+              />,
+            )
+          } else {
+            nodes.push(<SidebarMenuPlaceholder key={item.label} item={item} collapsed={collapsedView} />)
           }
-          return item.implemented !== false ? (
-            <SidebarMenuLink
-              key={item.label}
-              item={item}
-              collapsed={collapsedView}
-              badgeCounts={badgeCounts}
-            />
-          ) : (
-            <SidebarMenuPlaceholder key={item.label} item={item} collapsed={collapsedView} />
-          )
+          return nodes
         })}
     </nav>
   )

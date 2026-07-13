@@ -1,13 +1,11 @@
 import {
+  Building2,
   CalendarDays,
-  Clock,
-  Ellipsis,
   FileSignature,
   Home,
   Mail,
-  Network,
   Notebook,
-  Palmtree,
+  Presentation,
   Settings,
   Store,
   UserCog,
@@ -44,31 +42,44 @@ export interface SidebarMenuItem {
    * badgeCounts 맵(예 `{ approvalPending: 3 }`)으로 Sidebar에 주입한다(SidebarMenuLink가 조회해 렌더).
    */
   badgeKey?: string
+  /**
+   * 최상위 노드 전용 섹션 라벨(사용자 확정, 2026-07-13). 값이 이전 최상위 노드와 다르면 Sidebar가
+   * 그 앞에 섹션 헤더(제목 + 절취선, SidebarSectionHeader)를 렌더한다. undefined면 어떤 섹션에도
+   * 속하지 않는다('홈'처럼 최상단에 단독으로 노출). 최상위가 아닌 children에는 의미가 없다.
+   */
+  section?: string
 }
 
 export const sidebarMenuItems: SidebarMenuItem[] = [
-  // Layer 1 — 공통(전 사원 접근). 실 라우트로 연결된 구현 완료 항목.
+  // 홈은 어떤 섹션에도 속하지 않고 최상단에 단독으로 노출한다.
   { label: '홈', to: '/', minRole: 'EMPLOYEE', icon: Home },
-  // 조직도(전사 부서 디렉터리)와 부서 멤버 목록(본인 소속 부서 바로가기)은 서로 다른 화면 — PRD 메뉴 순서(홈 → 조직도 → 부서 멤버 목록)를 따른다.
-  { label: '조직도', to: '/departments', minRole: 'EMPLOYEE', icon: Network },
-  { label: '부서 멤버 목록', to: '/department-members', minRole: 'EMPLOYEE', icon: Users },
-  { label: '내 정보', to: '/me', minRole: 'EMPLOYEE', icon: UserRound },
+
+  // 개인 섹션: 본인 정보·일정 조회.
+  { label: '내 정보', to: '/me', minRole: 'EMPLOYEE', icon: UserRound, section: '개인' },
+  // 일정 캘린더: '일정/회의' 그룹에서 최상위로 승격했다(사용자 확정, 2026-07-13).
+  // 아이콘은 그룹이 쓰던 CalendarDays를 그대로 유지한다.
+  { label: '일정 캘린더', to: '/schedules', minRole: 'EMPLOYEE', icon: CalendarDays, section: '개인' },
+
+  // 소통 섹션: 쪽지·게시판.
   // 쪽지함: ROADMAP(MESSAGE) T1.3에서 placeholder 없이 최상위 항목으로 신규 추가했다. badgeKey만
   // 선언하고 실제 미확인 건수 조회·주입은 LayoutShell(T1.4)이 담당한다(전자결재 결재대기 배지와
   // 동일 컨벤션 — 위 badgeKey 필드 주석 참고).
-  { label: '쪽지함', to: '/messages', minRole: 'EMPLOYEE', icon: Mail, badgeKey: 'messageUnread' },
-
-  // Layer 2 — 업무 도메인 그룹. 하위 항목은 아직 프론트 미구현이라 전부 placeholder("준비중").
-  // IT 관리 그룹과 채팅은 제외한다(IT는 백엔드 계약 없음, 채팅은 ROADMAP 완전 제외).
   {
-    label: '근태',
+    label: '쪽지함',
+    to: '/messages',
     minRole: 'EMPLOYEE',
-    icon: Clock,
-    children: [
-      { label: '내 근태', to: '/attendance/me', minRole: 'EMPLOYEE' },
-      { label: '부서 근태 승인', to: '/attendance/dept', minRole: 'DEPT_MANAGER' },
-    ],
+    icon: Mail,
+    badgeKey: 'messageUnread',
+    section: '소통',
   },
+  // 게시판: 원래 '게시판/쪽지' 그룹이었으나 쪽지함이 최상위로 승격되며 자식이 게시판 하나만
+  // 남아, 자식 1개짜리 그룹(불필요한 펼침/접힘 계층)을 최상위 단일 링크로 평탄화했다
+  // (ux-ui-stylist, 2026-07-11). 아이콘은 그룹이 쓰던 Notebook을 그대로 유지한다.
+  { label: '게시판', to: '/boards', minRole: 'EMPLOYEE', icon: Notebook, section: '소통' },
+
+  // 업무 섹션: 전자결재·회의(둘 다 그룹).
+  // 근태: '내 근태'는 MyInfoPage의 "개인 기록 조회" 위젯 오버레이로, '부서 근태 승인'은 '부서관리'
+  // 그룹으로 이동했다(2026-07-13). 라우트(/attendance/me, /attendance/dept)는 둘 다 유지한다.
   {
     // 전자결재 그룹은 '결재함'과 '새 기안 작성' 딱 2개만 둔다(사용자 확정, 2026-07-10).
     // 유형별 작성 항목(출장/연가/매출)은 메뉴에서 제거했다 — 작성 화면(DraftCreateFrame)의
@@ -76,10 +87,11 @@ export const sidebarMenuItems: SidebarMenuItem[] = [
     // '결재함'(/approval/box → 결재대기 탭 리다이렉트)은 4종 문서함을 DocumentBoxHomePage 내부
     // 탭으로 통합한 단일 진입점이며, 결재대기 건수 badgeKey('approvalPending', F711)는 LayoutShell이
     // useMyPendingApprovalDraftsCountQuery로 조회해 주입한다.
-    // 내/부서 출장 이력은 문서함 UI 통합 작업에서 '[미배치]' 그룹으로 이동했다(아래 그룹 주석 참고).
+    // 내 출장 이력은 MyInfoPage 위젯 오버레이로, 부서 출장 이력은 '부서관리' 그룹으로 이동했다.
     label: '전자결재',
     minRole: 'EMPLOYEE',
     icon: FileSignature,
+    section: '업무',
     children: [
       {
         label: '결재함',
@@ -91,65 +103,50 @@ export const sidebarMenuItems: SidebarMenuItem[] = [
     ],
   },
   {
-    // [미배치] 그룹: 결재함(공람류)과 출장 이력류는 추후 별도 '부서관리' 탭으로 옮길 예정이라
-    // 정식 그룹에 배치하지 않고 임시로 이 그룹에 둔다(문서함 UI 통합 작업). 전자결재 그룹의 형제로
-    // 최상위 트리에 둔다.
-    label: '[미배치]',
+    // 회의 그룹(구 '일정/회의'): '일정 캘린더'는 최상위로 승격했고, '회의실 관리'는
+    // '시설관리' 그룹으로 이동했다(2026-07-13). 남은 두 항목(회의실 예약·회의 예약 관리)만으로
+    // 그룹명을 '회의'로 정정하고, 그룹 접두어와 중복되는 '회의 예약 관리'는 '예약 관리'로
+    // 축약했다. 그룹 자체의 minRole은 자식 중 가장 낮은 권한(EMPLOYEE)으로 둔다(다른 그룹과
+    // 동일 선례 패턴) — 예약 관리(FACILITY)는 hasRequiredRole이 ADMIN을 자동 포함한다.
+    label: '회의',
     minRole: 'EMPLOYEE',
-    icon: Ellipsis,
+    icon: Presentation,
+    section: '업무',
     children: [
-      {
-        label: '내 출장 이력',
-        to: '/approval/business-trips/me/history',
-        minRole: 'EMPLOYEE',
-      },
-      {
-        label: '부서 출장 이력',
-        to: '/approval/business-trips/dept/history',
-        minRole: 'DEPT_MANAGER',
-      },
-    ],
-  },
-  {
-    // 일정/회의 그룹: '일정 캘린더'는 ROADMAP(SCHEDULE) T1.5에서 ScheduleCalendarPage로 실 라우트
-    // 승격했다. '회의실 예약'·'회의실 관리'는 ROADMAP(MEETING-ROOMS) M8(T8.1)에서 placeholder→실
-    // 라우트로 승격했고, '회의 예약 관리'(FACILITY 조회 전용, F810)를 신규 추가했다. franchise 그룹의
-    // minRole:'FRANCHISE' 게이팅 선례와 동일하게 minRole:'FACILITY'도 hasRequiredRole이 ADMIN을
-    // 자동 포함한다.
-    label: '일정/회의',
-    minRole: 'EMPLOYEE',
-    icon: CalendarDays,
-    children: [
-      { label: '일정 캘린더', to: '/schedules', minRole: 'EMPLOYEE' },
       { label: '회의실 예약', to: '/meetings', minRole: 'EMPLOYEE' },
-      { label: '회의실 관리', to: '/meeting-rooms/management', minRole: 'FACILITY' },
-      { label: '회의 예약 관리', to: '/meetings/management', minRole: 'FACILITY' },
+      { label: '예약 관리', to: '/meetings/management', minRole: 'FACILITY' },
     ],
   },
-  // 게시판: 원래 '게시판/쪽지' 그룹이었으나 쪽지함이 최상위로 승격되며 자식이 게시판 하나만
-  // 남아, 자식 1개짜리 그룹(불필요한 펼침/접힘 계층)을 최상위 단일 링크로 평탄화했다
-  // (ux-ui-stylist, 2026-07-11). 아이콘은 그룹이 쓰던 Notebook을 그대로 유지한다.
-  { label: '게시판', to: '/boards', minRole: 'EMPLOYEE', icon: Notebook },
+
+  // 관리 섹션: 부서·인사·가맹점·시설·관리자 5개 그룹.
   {
-    // 휴가 관리 그룹: ROADMAP(LEAVE) M6(T6.1)에서 placeholder 2개를 실 라우트로 승격하고 관리자
-    // 휴가 현황 항목을 신규 추가했다. '내 휴가 요약'은 잔여+이력을 함께 다루므로 라벨을 '내 휴가'로
-    // 조정했다. 결재대기함은 이미 '전자결재' 그룹에 있으므로 여기 추가하지 않는다(PRD §메뉴 구조).
-    label: '휴가 관리',
+    // 부서관리 그룹(사용자 확정, 2026-07-13): 이미 존재하던 부서 멤버 목록·부서 휴가 관리·부서
+    // 출장 이력·부서 근태 승인 4개 뷰를 한데 묶은 순수 배치 이동이다. 그룹 자체의 minRole은 자식
+    // 중 가장 낮은 권한(EMPLOYEE)으로 둔다 — 다른 관리 섹션 그룹과 동일한 선례 패턴이며, 각 자식은
+    // 기존 개별 minRole을 그대로 유지해 열람 권한에 변화가 없다(부서 멤버 목록은 전 사원, 나머지
+    // 셋은 DEPT_MANAGER·ADMIN 자동 포함).
+    label: '부서관리',
     minRole: 'EMPLOYEE',
-    icon: Palmtree,
+    icon: Users,
+    section: '관리',
     children: [
-      { label: '내 휴가', to: '/leaves/me', minRole: 'EMPLOYEE' },
+      { label: '부서 멤버 목록', to: '/department-members', minRole: 'EMPLOYEE' },
       { label: '부서 휴가 관리', to: '/leaves/dept', minRole: 'DEPT_MANAGER' },
-      { label: '관리자 휴가 현황', to: '/leaves/admin', minRole: 'ADMIN' },
+      { label: '부서 출장 이력', to: '/approval/business-trips/dept/history', minRole: 'DEPT_MANAGER' },
+      { label: '부서 근태 승인', to: '/attendance/dept', minRole: 'DEPT_MANAGER' },
     ],
   },
   {
+    // 인사관리 그룹(ADMIN, HR — 사용자 확정, 2026-07-13): minRole:'HR'는 이미 ROLE_HIERARCHY상
+    // ADMIN을 자동 포함하므로(hasRequiredRole.ts) 별도 변경 없이 두 역할 모두 노출된다.
+    // '사원 관리'는 EmpManagementListPage(/employees) 구현으로 placeholder를 실 라우트로 승격했다.
     label: '인사관리',
     minRole: 'HR',
     icon: UserCog,
+    section: '관리',
     children: [
       { label: '신규 사원 승인', to: '/employees/new', minRole: 'HR' },
-      { label: '사원 상태 관리', minRole: 'HR', implemented: false },
+      { label: '사원 관리', to: '/employees', minRole: 'HR' },
     ],
   },
   {
@@ -159,21 +156,42 @@ export const sidebarMenuItems: SidebarMenuItem[] = [
     label: '가맹점',
     minRole: 'FRANCHISE',
     icon: Store,
+    section: '관리',
     children: [
       { label: '가맹점 관리', to: '/franchises', minRole: 'FRANCHISE' },
       { label: '가맹점 교육', to: '/franchise-educations', minRole: 'FRANCHISE' },
       { label: '가맹점 문의', to: '/franchise-inquiries', minRole: 'FRANCHISE' },
-      { label: '가맹점 매출', to: '/franchise-sales', minRole: 'FRANCHISE' },
     ],
   },
   {
-    // 설정 그룹: ROADMAP(COMPANY) T1.3에서 신규 추가. 그룹·리프 모두 minRole ADMIN이라 사이드바에는
-    // ADMIN에게만 노출되지만, 실제 라우트(/settings/company) 가드는 EMPLOYEE 수준이다 — 조회 API가
-    // permitAll이라 비-ADMIN이 URL을 직접 입력해도 읽기 전용 뷰가 정상 렌더되어야 하므로 의도된
-    // 비대칭이다(router.tsx 주석 참고).
-    label: '설정',
-    minRole: 'ADMIN',
+    // 시설관리 그룹(FACILITY, ADMIN — 사용자 확정, 2026-07-13): '일정/회의' 그룹에 있던 '회의실
+    // 관리'를 이 그룹으로 이동한 순수 배치 이동이다. 자식이 1개뿐이지만 사용자가 명시적으로
+    // "그룹 생성"을 요청해, 다른 그룹들의 "자식 1개→최상위 평탄화" 관례를 이번엔 적용하지 않는다
+    // (추후 시설 관련 항목이 늘어날 확장 여지로 보인다). '회의 예약 관리'(FACILITY)는 이동 대상으로
+    // 지목되지 않아 '회의' 그룹에 그대로 남긴다.
+    label: '시설관리',
+    minRole: 'FACILITY',
+    icon: Building2,
+    section: '관리',
+    children: [{ label: '회의실 관리', to: '/meeting-rooms/management', minRole: 'FACILITY' }],
+  },
+  {
+    // 관리자 그룹(사용자 확정, 2026-07-13): 이미 존재하던 조직도·관리자 휴가 현황·설정(회사 정보)
+    // 3개 뷰를 한데 묶은 순수 배치 이동이다(라벨은 각각 조직 관리/휴가 관리/회사 관리로 재명명).
+    // 그룹 자체의 minRole은 자식 중 가장 낮은 권한(EMPLOYEE)으로 둔다 — 다른 관리 섹션 그룹과
+    // 동일한 선례 패턴이며, 조직 관리(EMPLOYEE, 전사 부서 디렉터리 조회)는 기존처럼 전 사원이
+    // 계속 볼 수 있고, 휴가 관리·회사 관리(ADMIN)만 관리자에게 노출된다.
+    // 회사 관리(/settings/company)는 실제 라우트 가드가 EMPLOYEE 수준이다 — 조회 API가 permitAll이라
+    // 비-ADMIN이 URL을 직접 입력해도 읽기 전용 뷰가 정상 렌더되어야 하므로 의도된 비대칭이다
+    // (router.tsx 주석 참고, 사이드바 메뉴 노출만 ADMIN으로 좁힌다).
+    label: '관리자',
+    minRole: 'EMPLOYEE',
     icon: Settings,
-    children: [{ label: '회사 정보', to: '/settings/company', minRole: 'ADMIN' }],
+    section: '관리',
+    children: [
+      { label: '조직 관리', to: '/departments', minRole: 'EMPLOYEE' },
+      { label: '휴가 관리', to: '/leaves/admin', minRole: 'ADMIN' },
+      { label: '회사 관리', to: '/settings/company', minRole: 'ADMIN' },
+    ],
   },
 ]
