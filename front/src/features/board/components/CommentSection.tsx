@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { MessageCircle } from 'lucide-react'
 import { toast } from 'sonner'
+import { useAuthStore } from '@/features/auth/store/authStore'
 import { isForbidden, normalizeApiError } from '@/shared/lib/apiError'
 import type { PageMeta } from '@/shared/components/PaginationControls'
 import { PaginationControls } from '@/shared/components/PaginationControls'
@@ -11,6 +12,7 @@ import { useCommentRegisterMutation } from '../api/useCommentRegisterMutation'
 import type { CommentFormValues } from '../model/commentSchema'
 import { CommentForm } from './CommentForm'
 import { CommentItem } from './CommentItem'
+import { InitialsAvatar } from './InitialsAvatar'
 
 interface CommentSectionProps {
   boardId: number
@@ -49,6 +51,9 @@ export function CommentSection({ boardId, variant = 'standalone' }: CommentSecti
   const { page, size, onPageChange } = usePageState()
   const commentsQuery = useBoardCommentsQuery(boardId, { page, size })
   const registerMutation = useCommentRegisterMutation()
+  // 등록 폼 아바타 프리픽스(목표 디자인 board-page.html의 댓글 작성 박스)용 현재 사용자 이름.
+  // 아직 me 정보가 없으면(부팅 직후 등) '나'로 폴백한다 — 순수 표시용이라 로직에 영향 없음.
+  const myName = useAuthStore((state) => state.user?.empBasicInfo.name) ?? '나'
 
   const comments = commentsQuery.data?.content ?? []
 
@@ -90,7 +95,14 @@ export function CommentSection({ boardId, variant = 'standalone' }: CommentSecti
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <CommentForm submitLabel="등록" onSubmit={handleRegisterSubmit} />
+        {/* 댓글 작성 박스: 좌측 작성자 아바타 + 우측 입력 폼(목표 디자인). CommentForm은 등록/
+            대댓글/수정 공용이라 아바타는 여기 최상위 등록 폼에만 붙인다. */}
+        <div className="flex items-start gap-3">
+          <InitialsAvatar name={myName} />
+          <div className="min-w-0 flex-1">
+            <CommentForm submitLabel="등록" onSubmit={handleRegisterSubmit} />
+          </div>
+        </div>
 
         {/* 로딩 → 조회 실패(403 전용 문구, 그 외 실패는 "불러오지 못했습니다." 전용 문구 —
             BoardListPage.tsx의 not-found 외 실패 분기 관행과 동일) → 빈 목록 → 목록 순서대로 분기.

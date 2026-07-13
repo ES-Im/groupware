@@ -4,6 +4,7 @@ import dayjs from 'dayjs'
 import { Eye, Heart, MessageCircle, Paperclip } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
 import type { BoardSummary } from '../model/board'
+import { InitialsAvatar } from './InitialsAvatar'
 
 /**
  * 게시판 목록 표(F301, ROADMAP T10.3). `DepartmentMembersTable`(T2.1-b)의 컬럼 헬퍼 패턴을
@@ -55,7 +56,12 @@ export function BoardListTable({ data, onRowClick }: BoardListTableProps) {
     () => [
       columnHelper.accessor('boardId', {
         header: '번호',
-        cell: (info) => <span className="tabular-nums">#{info.getValue()}</span>,
+        // 목표 디자인(board-page.html): 번호는 모노스페이스 muted "#id"로 옅게 표기한다.
+        cell: (info) => (
+          <span className="font-mono text-xs text-muted-foreground tabular-nums">
+            #{info.getValue()}
+          </span>
+        ),
       }),
       columnHelper.accessor('boardTitle', {
         header: '제목',
@@ -75,7 +81,17 @@ export function BoardListTable({ data, onRowClick }: BoardListTableProps) {
           </div>
         ),
       }),
-      columnHelper.accessor('authorName', { header: '작성자' }),
+      columnHelper.accessor('authorName', {
+        header: '작성자',
+        // 목표 디자인(board-page.html): 작성자 셀은 이니셜 아바타 + 이름. BoardSummary에는 부서
+        // 필드가 없어(BOARD_LIST 계약 실측) 레퍼런스의 부서 보조 줄은 렌더하지 않는다(발명 금지).
+        cell: (info) => (
+          <div className="flex items-center gap-2.5">
+            <InitialsAvatar name={info.getValue()} className="size-7" />
+            <span className="truncate font-medium text-foreground">{info.getValue()}</span>
+          </div>
+        ),
+      }),
       columnHelper.accessor('publishedAt', {
         header: '발행일',
         cell: (info) => dayjs(info.getValue()).format('YYYY-MM-DD HH:mm'),

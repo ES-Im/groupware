@@ -18,6 +18,43 @@ import { isImageExtension } from '../lib/isImageExtension'
 import type { BoardFileInfo } from '../model/board'
 import { CategoryBadge } from './CategoryBadge'
 import { CommentSection } from './CommentSection'
+import { InitialsAvatar } from './InitialsAvatar'
+
+/** 바이트 크기를 사람이 읽는 단위 문자열로 변환한다(목표 디자인의 "248 KB" / "1.8 MB" 표기).
+ * 1MB 이상은 MB(소수 1자리), 그 미만은 KB(반올림, 최소 1KB)로 보인다. */
+function formatFileSize(bytes: number): string {
+  if (bytes >= 1024 * 1024) {
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+  }
+  return `${Math.max(1, Math.round(bytes / 1024))} KB`
+}
+
+/**
+ * 비-이미지 첨부 1건을 표기하는 파일 카드(목표 디자인 board-page.html의 첨부 카드 이식).
+ * 확장자 칩 + 파일명 + 용량 + 다운로드 아이콘 버튼. 클릭 시 상위가 넘긴 onDownload를 실행한다.
+ */
+function BoardFileCard({ file, onDownload }: { file: BoardFileInfo; onDownload: () => void }) {
+  return (
+    <div className="flex min-w-56 items-center gap-3 rounded-xl border bg-muted/40 p-3">
+      <span className="rounded-md bg-primary/10 px-1.5 py-1 text-[10px] font-bold text-primary uppercase">
+        {file.extension || '파일'}
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-medium text-foreground">{file.originalName}</p>
+        <p className="mt-0.5 text-xs text-muted-foreground">{formatFileSize(file.fileSize)}</p>
+      </div>
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon-sm"
+        onClick={onDownload}
+        aria-label={`${file.originalName} 다운로드`}
+      >
+        <Download />
+      </Button>
+    </div>
+  )
+}
 
 /** 좋아요/조회/댓글 수를 표시하는 읽기 전용 알약. 아이콘 + 숫자만 — 좋아요는 §열린항목1에 따라 토글 불가(읽기 표시만). */
 function StatPill({
@@ -254,11 +291,8 @@ export function BoardDetailView({ boardId, onBack }: BoardDetailViewProps) {
           {/* 카테고리 표기(목록 pill 필터와 동일한 폴더 아이콘 언어의 CategoryBadge) — 이름을
               해석했을 때만 노출한다. */}
           {categoryName && <CategoryBadge name={categoryName} className="mb-2" />}
-          <CardTitle className="text-xl font-semibold">{board.title}</CardTitle>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {board.authorName} · 발행 {dayjs(board.publishedAt).format('YYYY-MM-DD HH:mm')}
-            {showModifiedAt && ` · 수정 ${dayjs(board.modifiedAt).format('YYYY-MM-DD HH:mm')}`}
-          </p>
+          {/* 목표 디자인(board-page.html): 상세 제목은 목록보다 크고 굵게(2xl bold) 강조한다. */}
+          <CardTitle className="text-2xl font-bold tracking-tight">{board.title}</CardTitle>
         </div>
 
         {/* 우측 액션: (작성자·ADMIN) "수정" + (임시저장 글) "발행". 인라인 전환의 "← 목록"
@@ -282,10 +316,26 @@ export function BoardDetailView({ boardId, onBack }: BoardDetailViewProps) {
         </div>
       </div>
 
-      <div className="mt-3 flex items-center gap-4">
-        <StatPill icon={Eye} label="조회수" value={board.viewCount} />
-        <StatPill icon={Heart} label="좋아요 수" value={board.likeCount} />
-        <StatPill icon={MessageCircle} label="댓글 수" value={board.commentCount} />
+      {/* 작성자 메타(이니셜 아바타 + 이름 + 발행/수정 일시)와 통계(조회·좋아요·댓글)를 한 줄에
+          좌우로 배치한다(목표 디자인). BoardDetailResponse에는 작성자 부서 필드가 없어(계약 실측)
+          레퍼런스의 부서 표기는 생략한다(발명 금지). 좋아요는 토글 엔드포인트가 없어(클래스 주석
+          §열린항목1) 여기서도 읽기 전용 통계로만 표시하고 별도 좋아요 버튼은 만들지 않는다. */}
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <InitialsAvatar name={board.authorName} className="size-10" />
+          <div>
+            <p className="text-sm font-semibold text-foreground">{board.authorName}</p>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              발행 {dayjs(board.publishedAt).format('YYYY-MM-DD HH:mm')}
+              {showModifiedAt && ` · 수정 ${dayjs(board.modifiedAt).format('YYYY-MM-DD HH:mm')}`}
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-4">
+          <StatPill icon={Eye} label="조회수" value={board.viewCount} />
+          <StatPill icon={Heart} label="좋아요 수" value={board.likeCount} />
+          <StatPill icon={MessageCircle} label="댓글 수" value={board.commentCount} />
+        </div>
       </div>
     </CardHeader>
   )
@@ -297,7 +347,7 @@ export function BoardDetailView({ boardId, onBack }: BoardDetailViewProps) {
           dangerouslySetInnerHTML 없이 whitespace-pre-wrap으로만 줄바꿈을 보존한다.
           긴 본문 가독성을 위해 leading-relaxed로 행간을 넓히고, 짧은 글도 본문 영역이
           허전하지 않도록 최소 높이를 준다. */}
-      <p className="min-h-24 text-sm leading-relaxed whitespace-pre-wrap text-foreground">
+      <p className="min-h-24 text-sm leading-7 whitespace-pre-wrap text-foreground">
         {board.content}
       </p>
 
@@ -315,16 +365,11 @@ export function BoardDetailView({ boardId, onBack }: BoardDetailViewProps) {
               isImageExtension(file.extension) ? (
                 <BoardImagePreview key={file.fileId} boardId={boardId} file={file} />
               ) : (
-                <Button
+                <BoardFileCard
                   key={file.fileId}
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleDownload(file)}
-                >
-                  <Download />
-                  {file.originalName}
-                </Button>
+                  file={file}
+                  onDownload={() => handleDownload(file)}
+                />
               ),
             )}
           </div>

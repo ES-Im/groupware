@@ -143,6 +143,9 @@ export function BoardListPage() {
     <div className="flex w-full flex-col p-4 sm:p-6 lg:h-full lg:p-8">
       <div className="mb-6">
         <h1 className="text-xl font-semibold tracking-tight">게시판</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          사내 공지와 소통 게시글을 카테고리별로 확인하세요
+        </p>
       </div>
 
       {/* 좌: 카테고리 카드 + 게시글 작성 버튼 / 우: 게시글 목록·상세·작성(상호 배타). 좌측 컬럼은
