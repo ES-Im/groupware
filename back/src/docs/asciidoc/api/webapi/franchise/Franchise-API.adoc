@@ -496,6 +496,54 @@ Exception ::
 --
 ====
 
+[[FRANCHISE_EDUCATION_FRANCHISE_LIST]]
+=== 가맹점 신청 교육 조회
+
+[tabs%nosync]
+====
+Request::
++
+--
+_HTTP request_
+
+include::{snippets}/FRANCHISE_EDUCATION_FRANCHISE_LIST/http-request.adoc[]
+
+_Request header_
+
+include::{snippets}/FRANCHISE_EDUCATION_FRANCHISE_LIST/request-headers.adoc[]
+
+_Path parameter_
+
+include::{snippets}/FRANCHISE_EDUCATION_FRANCHISE_LIST/path-parameters.adoc[]
+
+_Query parameter_
+
+include::{snippets}/FRANCHISE_EDUCATION_FRANCHISE_LIST/query-parameters.adoc[]
+--
+Response (200)::
++
+--
+_HTTP response_
+
+include::{snippets}/FRANCHISE_EDUCATION_FRANCHISE_LIST/http-response.adoc[]
+
+_Response fields_
+
+include::{snippets}/FRANCHISE_EDUCATION_FRANCHISE_LIST/response-fields.adoc[]
+--
+Exception ::
++
+--
+이 API에서 발생 가능한 에러:
+
+|===
+|Error Code
+
+|PERMISSION_DENIED_EXCEPTION
+|===
+--
+====
+
 [[FRANCHISE_EDUCATION_CREATE]]
 === 교육 등록
 

@@ -12,6 +12,7 @@ import com.haruon.groupware.domain.franchise.QFranchise;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.NumberExpression;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -121,4 +122,31 @@ public class FranchiseEducationQueryRepositoryAdapter implements FranchiseEducat
         return new PageImpl<>(applicantsResponses, pageable, totalRows);
     }
 
+    @Override
+    public List<EducationsResponse> findEducationsByFranchiseId(Long franchiseId, long month) {
+        NumberExpression<Long> appliedCount = appliedCountSum();
+        QEducationApplication franchiseApplication = new QEducationApplication("franchiseApplication");
+
+        return query
+                .select(Projections.constructor(
+                        EducationsResponse.class,
+                        education.id, education.educationDate, education.place, education.title,
+                        isFull(appliedCount), education.isActive
+                ))
+                .from(education)
+                .leftJoin(education.educationApplications, application)
+                .where(
+                        education.educationDate.month().eq((int) month),
+                        JPAExpressions.selectOne()
+                                .from(franchiseApplication)
+                                .where(
+                                        franchiseApplication.education.id.eq(education.id),
+                                        franchiseApplication.franchise.id.eq(franchiseId)
+                                )
+                                .exists()
+                )
+                .groupBy(education.id, education.educationDate, education.place, education.title, education.capacity, education.isActive)
+                .orderBy(education.educationDate.asc(), education.id.asc())
+                .fetch();
+    }
 }

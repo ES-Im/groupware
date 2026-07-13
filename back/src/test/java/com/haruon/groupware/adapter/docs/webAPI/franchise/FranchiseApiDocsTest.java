@@ -13,6 +13,7 @@ import com.haruon.groupware.application.franchise.provided.forRetriever.Franchis
 import com.haruon.groupware.application.franchise.provided.forRetriever.FranchiseRetriever;
 import com.haruon.groupware.application.franchise.provided.forRetriever.FranchiseSalesRetriever;
 import com.haruon.groupware.application.franchise.service.command.dto.*;
+import com.haruon.groupware.application.franchise.service.query.dto.AssignableManagerResponse;
 import com.haruon.groupware.application.franchise.service.query.dto.FranchisesDetailResponse;
 import com.haruon.groupware.application.franchise.service.query.dto.FranchisesResponse;
 import com.haruon.groupware.application.franchise.service.query.dto.education.EducationApplicantsResponse;
@@ -133,6 +134,29 @@ public class FranchiseApiDocsTest extends RestDocsSupport {
                         requestHeaders(headerWithName("Authorization").description("Bearer Access Token")),
                         pathParameters(parameterWithName("franchiseId").description("가맹점 식별 번호")),
                         responseFields(franchiseDetailFields())
+                ));
+    }
+
+    @Test
+    @DisplayName("가맹점 담당자 배정 후보(FRANCHISE 권한 사원) 조회")
+    void getAssignableManagers() throws Exception {
+        Mockito.when(franchiseRetriever.retrieveAssignableManagers(eq(1L)))
+                .thenReturn(List.of(
+                        new AssignableManagerResponse(1L, "김담당"),
+                        new AssignableManagerResponse(2L, "이담당")
+                ));
+
+        mockMvc.perform(
+                get(FRANCHISE_MAPPING + "/assignable-managers")
+                        .with(franchiseAuthentication())
+                        .header("Authorization", "Bearer accessToken")
+        )
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isOk())
+                .andDo(document("FRANCHISE_ASSIGNABLE_MANAGERS",
+                        preprocessRequest(prettyPrint()),
+                        requestHeaders(headerWithName("Authorization").description("Bearer Access Token")),
+                        responseFields(assignableManagerFields())
                 ));
     }
 
@@ -350,6 +374,31 @@ public class FranchiseApiDocsTest extends RestDocsSupport {
     }
 
     @Test
+    @DisplayName("가맹점 신청 교육 조회")
+    void getFranchiseAppliedEducations() throws Exception {
+        Mockito.when(franchiseEducationRetriever.retrieveEducationsByFranchiseId(eq(1L), eq(1L), eq(5L)))
+                .thenReturn(List.of(new EducationsResponse(1L, LocalDate.of(2026, 5, 1), "교육장", "교육 제목", true, true)));
+
+        mockMvc.perform(
+                get(EDUCATION_MAPPING + "/franchise/{franchiseId}", 1L)
+                        .with(franchiseAuthentication())
+                        .header("Authorization", "Bearer accessToken")
+                        .queryParam("month", "5")
+        )
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isOk())
+                .andDo(document("FRANCHISE_EDUCATION_FRANCHISE_LIST",
+                        preprocessRequest(prettyPrint()),
+                        requestHeaders(headerWithName("Authorization").description("Bearer Access Token")),
+                        pathParameters(parameterWithName("franchiseId").description("가맹점 식별 번호")),
+                        queryParameters(
+                                parameterWithName("month").optional().description("조회 월, 1~12, 미입력시 현재 월")
+                        ),
+                        responseFields(educationCalendarFields())
+                ));
+    }
+
+    @Test
     @DisplayName("교육 등록")
     void createEducation() throws Exception {
         EducationCreateRequest request = EducationCreateRequest.builder()
@@ -440,7 +489,10 @@ public class FranchiseApiDocsTest extends RestDocsSupport {
     @Test
     @DisplayName("문의 목록 조회")
     void getInquiries() throws Exception {
-        Mockito.when(franchiseInquiryRetriever.retrieveInquiries(anyLong(), nullable(Boolean.class), nullable(Long.class), nullable(String.class), nullable(LocalDate.class), nullable(LocalDate.class), any(Pageable.class)))
+        LocalDate from = LocalDate.of(2026, 5, 1);
+        LocalDate to = LocalDate.of(2026, 5, 31);
+
+        Mockito.when(franchiseInquiryRetriever.retrieveInquiries(eq(1L), eq(false), eq(1L), eq("문의"), eq(from), eq(to), eq(1L), any(Pageable.class)))
                 .thenReturn(new PageImpl<>(
                         List.of(new InquiriesResponse(1L, "inq-1", 1L, "테스트강남점", "문의 제목", LocalDateTime.of(2026, 5, 1, 10, 0), false, 1L, "김담당", false)),
                         PageRequest.of(0, 10),
@@ -454,8 +506,9 @@ public class FranchiseApiDocsTest extends RestDocsSupport {
                         .queryParam("isAnswered", "false")
                         .queryParam("assignedManagerId", "1")
                         .queryParam("keyword", "문의")
-                        .queryParam("from", "2026-05-01")
-                        .queryParam("to", "2026-05-31")
+                        .queryParam("from", from.toString())
+                        .queryParam("to", to.toString())
+                        .queryParam("franchiseId", "1")
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
@@ -468,6 +521,7 @@ public class FranchiseApiDocsTest extends RestDocsSupport {
                                 parameterWithName("keyword").optional().description("문의 제목 검색어"),
                                 parameterWithName("from").optional().description("조회 시작일, yyyy-MM-dd"),
                                 parameterWithName("to").optional().description("조회 종료일, yyyy-MM-dd"),
+                                parameterWithName("franchiseId").optional().description("가맹점 식별 번호"),
                                 parameterWithName("page").optional().description("페이지 번호"),
                                 parameterWithName("size").optional().description("페이지 크기")
                         ),
@@ -748,6 +802,14 @@ public class FranchiseApiDocsTest extends RestDocsSupport {
                 fieldWithPath("contactEmail").optional().type(JsonFieldType.STRING)
                         .attributes(key("constraints").value("이메일 형식"))
                         .description("변경할 이메일")
+        };
+    }
+
+    private FieldDescriptor[] assignableManagerFields() {
+        return new FieldDescriptor[]{
+                fieldWithPath("[]").type(JsonFieldType.ARRAY).description("배정 가능한 FRANCHISE 권한 사원 목록"),
+                fieldWithPath("[].empId").type(JsonFieldType.NUMBER).description("사원 식별 번호"),
+                fieldWithPath("[].empName").type(JsonFieldType.STRING).description("사원명")
         };
     }
 

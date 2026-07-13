@@ -17,4 +17,6 @@ public interface FranchiseEducationQueryRepository {
     Optional<EducationDetailResponse> findEducationById(Long educationId);
 
     Page<EducationApplicantsResponse> findApplicantsById(Long educationId, Pageable pageable);
+
+    List<EducationsResponse> findEducationsByFranchiseId(Long franchiseId, long month);
 }

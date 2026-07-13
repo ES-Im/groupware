@@ -9,6 +9,7 @@ import com.haruon.groupware.application.franchise.service.query.dto.education.Ed
 import com.haruon.groupware.application.utils.AuthValidator;
 import com.haruon.groupware.application.utils.required.AuthorizationQueryRepository;
 import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -48,6 +49,15 @@ public class FranchiseEducationQueryService implements FranchiseEducationRetriev
 
         return franchiseEducationQueryRepository.findApplicantsById(
                 educationId, pageable
+        );
+    }
+
+    @Override
+    public List<EducationsResponse> retrieveEducationsByFranchiseId(Long empId, Long franchiseId, long month) {
+        AuthValidator.checkFranchiseRoleEmp(authorizationQueryRepository, empId);
+
+        return franchiseEducationQueryRepository.findEducationsByFranchiseId(
+                franchiseId, month
         );
     }
 }

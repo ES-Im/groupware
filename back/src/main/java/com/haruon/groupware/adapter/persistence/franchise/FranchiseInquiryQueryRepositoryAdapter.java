@@ -41,6 +41,7 @@ public class FranchiseInquiryQueryRepositoryAdapter implements FranchiseInquiryQ
             @Nullable String keyword,
             @Nullable LocalDate from,
             @Nullable LocalDate to,
+            @Nullable Long franchiseId,
             Pageable pageable
     ) {
         Long rows = query
@@ -54,7 +55,8 @@ public class FranchiseInquiryQueryRepositoryAdapter implements FranchiseInquiryQ
                         eqAssignedEmpId(assignedManagerId),
                         containKeywordOnTitle(keyword),
                         isBefore(from),
-                        isAfter(to)
+                        isAfter(to),
+                        eqFranchiseId(franchiseId)
                 )
                 .fetchOne();
 
@@ -80,7 +82,8 @@ public class FranchiseInquiryQueryRepositoryAdapter implements FranchiseInquiryQ
                         eqAssignedEmpId(assignedManagerId),
                         containKeywordOnTitle(keyword),
                         isBefore(from),
-                        isAfter(to)
+                        isAfter(to),
+                        eqFranchiseId(franchiseId)
                 )
                 .orderBy(inquiry.id.desc())
                 .offset(pageable.getOffset())
@@ -146,6 +149,12 @@ public class FranchiseInquiryQueryRepositoryAdapter implements FranchiseInquiryQ
     private BooleanExpression eqAssignedEmpId(@Nullable Long assignedManagerId) {
         return assignedManagerId != null
                 ? inquiry.emp.id.eq(assignedManagerId)
+                : null;
+    }
+
+    private BooleanExpression eqFranchiseId(@Nullable Long franchiseId) {
+        return franchiseId != null
+                ? inquiry.franchise.id.eq(franchiseId)
                 : null;
     }
 

@@ -34,12 +34,13 @@ public class FranchiseInquiryQueryService implements FranchiseInquiryRetriever {
             @Nullable String keyword,
             @Nullable LocalDate from,
             @Nullable LocalDate to,
+            @Nullable Long franchiseId,
             Pageable pageable
     ) {
         AuthValidator.checkFranchiseRoleEmp(authorizationQueryRepository, empId);
 
         return franchiseInquiryQueryRepository.findInquiries(
-                isAnswered, assignedManagerId, keyword, from, to, pageable
+                isAnswered, assignedManagerId, keyword, from, to, franchiseId, pageable
         );
     }
 

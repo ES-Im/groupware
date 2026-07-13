@@ -40,10 +40,11 @@ public class FranchiseInquiryApi {
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate from,
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate to,
+            @RequestParam(required = false) Long franchiseId,
             @PageableDefault(page = 0, size = 10) Pageable pageable
     ) {
         Page<InquiriesResponse> responses = franchiseInquiryRetriever
-                .retrieveInquiries(details.getEmpId(), isAnswered, assignedManagerId, keyword, from, to, pageable);
+                .retrieveInquiries(details.getEmpId(), isAnswered, assignedManagerId, keyword, from, to, franchiseId, pageable);
 
         return ResponseEntity.ok().body(responses);
     }

@@ -88,10 +88,10 @@ record FranchiseInquiryQueryRepositoryAdapterTest(
         submitted.submitAnswer(LocalDateTime.of(2026, 6, 1, 10, 30), manager);
 
         Page<InquiriesResponse> answered = inquiryQueryRepository.findInquiries(
-                true, manager.getId(), token, null, null, PageRequest.of(0, 10)
+                true, manager.getId(), token, null, null, franchise.getId(), PageRequest.of(0, 10)
         );
         Page<InquiriesResponse> notAnswered = inquiryQueryRepository.findInquiries(
-                false, manager.getId(), token, null, null, PageRequest.of(0, 10)
+                false, manager.getId(), token, null, null, franchise.getId(), PageRequest.of(0, 10)
         );
 
         assertThat(answered.getContent()).singleElement().satisfies(response ->

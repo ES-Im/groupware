@@ -5,6 +5,7 @@ import com.haruon.groupware.application.franchise.provided.forCommand.FranchiseM
 import com.haruon.groupware.application.franchise.provided.forRetriever.FranchiseRetriever;
 import com.haruon.groupware.application.franchise.service.command.dto.FranchiseCreateRequest;
 import com.haruon.groupware.application.franchise.service.command.dto.FranchiseUpdateRequest;
+import com.haruon.groupware.application.franchise.service.query.dto.AssignableManagerResponse;
 import com.haruon.groupware.application.franchise.service.query.dto.FranchisesDetailResponse;
 import com.haruon.groupware.application.franchise.service.query.dto.FranchisesResponse;
 import com.haruon.groupware.domain.franchise.BusinessStatus;
@@ -17,6 +18,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
 
 
 @RestController
@@ -37,6 +39,16 @@ public class FranchiseApi {
     ) {
         Page<FranchisesResponse> responses = franchiseRetriever
                 .retrieveFranchises(details.getEmpId(), keyword, status, managerId, pageable);
+
+        return ResponseEntity.ok().body(responses);
+    }
+
+    @GetMapping("/assignable-managers")
+    public ResponseEntity<List<AssignableManagerResponse>> getAssignableManagers(
+            @AuthenticationPrincipal EmpDetails details
+    ) {
+        List<AssignableManagerResponse> responses = franchiseRetriever
+                .retrieveAssignableManagers(details.getEmpId());
 
         return ResponseEntity.ok().body(responses);
     }

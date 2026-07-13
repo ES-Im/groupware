@@ -12,7 +12,14 @@ import java.util.Optional;
 
 public interface FranchiseInquiryQueryRepository {
 
-    Page<InquiriesResponse> findInquiries(@Nullable Boolean isAnswered, @Nullable Long assignedManagerId, @Nullable String keyword, @Nullable LocalDate from, @Nullable LocalDate to, Pageable pageable);
+    Page<InquiriesResponse> findInquiries(
+            @Nullable Boolean isAnswered,
+            @Nullable Long assignedManagerId,
+            @Nullable String keyword,
+            @Nullable LocalDate from,
+            @Nullable LocalDate to,
+            @Nullable Long franchiseId,
+            Pageable pageable);
 
     Optional<InquireDetailResponse> findInquiryById(Long inquiryId);
 

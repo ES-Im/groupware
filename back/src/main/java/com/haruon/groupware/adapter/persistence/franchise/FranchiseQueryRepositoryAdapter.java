@@ -2,9 +2,12 @@ package com.haruon.groupware.adapter.persistence.franchise;
 
 import com.haruon.groupware.application.exception.franchise.FranchiseNotFoundException;
 import com.haruon.groupware.application.franchise.required.FranchiseQueryRepository;
+import com.haruon.groupware.application.franchise.service.query.dto.AssignableManagerResponse;
 import com.haruon.groupware.application.franchise.service.query.dto.FranchisesDetailResponse;
 import com.haruon.groupware.application.franchise.service.query.dto.FranchisesResponse;
 import com.haruon.groupware.domain.employee.QEmp;
+import com.haruon.groupware.domain.employee.enums.EmpStatus;
+import com.haruon.groupware.domain.employee.enums.SystemRoleCode;
 import com.haruon.groupware.domain.franchise.BusinessStatus;
 import com.haruon.groupware.domain.franchise.QFranchise;
 import com.querydsl.core.types.Projections;
@@ -90,6 +93,23 @@ public class FranchiseQueryRepositoryAdapter implements FranchiseQueryRepository
                 .fetch();
 
         return new PageImpl<>(responses, pageable, totalRows);
+    }
+
+    @Override
+    public List<AssignableManagerResponse> findAssignableManagers() {
+        return query
+                .select(Projections.constructor(
+                        AssignableManagerResponse.class,
+                        emp.id,
+                        emp.empName
+                ))
+                .from(emp)
+                .where(
+                        emp.systemRoles.contains(SystemRoleCode.FRANCHISE),
+                        emp.status.eq(EmpStatus.ACTIVE)
+                )
+                .orderBy(emp.empName.asc())
+                .fetch();
     }
 
     private BooleanExpression isKeywordContain(@Nullable String keyword) {

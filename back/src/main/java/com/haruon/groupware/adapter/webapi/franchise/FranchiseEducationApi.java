@@ -11,6 +11,8 @@ import com.haruon.groupware.application.franchise.service.query.dto.education.Ed
 import com.haruon.groupware.application.franchise.service.query.dto.education.EducationsResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.Nullable;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -23,6 +25,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static com.haruon.groupware.adapter.webapi.DateSupport.resolveSearchPeriod;
+import static com.haruon.groupware.application.utils.Utils.SEOUL_ZONE;
 
 @RestController
 @RequestMapping("/api/franchise-educations")
@@ -65,6 +68,22 @@ public class FranchiseEducationApi {
     ) {
         Page<EducationApplicantsResponse> response = franchiseEducationRetriever
                 .retrieveApplicantsByEducationId(details.getEmpId(), educationId, pageable);
+
+        return ResponseEntity.ok().body(response);
+    }
+
+    @GetMapping("/franchise/{franchiseId}")
+    public ResponseEntity<List<EducationsResponse>> getFranchiseAppliedEducations(
+            @AuthenticationPrincipal EmpDetails details,
+            @PathVariable Long franchiseId,
+            @RequestParam @Nullable Long month
+    ) {
+        long targetMonth =  month == null || month < 1 || month > 12
+                ? LocalDateTime.now(SEOUL_ZONE).getMonthValue()
+                : month;
+
+        List<EducationsResponse> response = franchiseEducationRetriever
+                .retrieveEducationsByFranchiseId(details.getEmpId(), franchiseId, targetMonth);
 
         return ResponseEntity.ok().body(response);
     }

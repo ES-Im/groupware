@@ -122,7 +122,42 @@ record FranchiseEducationQueryRepositoryAdapterTest(
         );
     }
 
+    @Test
+    @DisplayName("가맹점 신청 교육 조회 - 대상 가맹점으로 필터링하고 전체 신청 합계로 정원 여부를 계산한다")
+    void findEducationsByFranchiseId_success() {
+        Franchise targetFranchise = saveFranchise();
+        Franchise otherFranchise = saveFranchise();
+        Education mayEducation = saveEducation(LocalDateTime.of(2026, 5, 1, 9, 30), 30L);
+        Education juneEducation = saveEducation(LocalDateTime.of(2026, 6, 1, 9, 30), 30L);
+
+        apply(mayEducation, targetFranchise, "app-target-may", 10L);
+        apply(mayEducation, otherFranchise, "app-other-may", 20L);
+        apply(juneEducation, targetFranchise, "app-target-june", 30L);
+
+        List<EducationsResponse> responses = educationQueryRepository.findEducationsByFranchiseId(
+                targetFranchise.getId(), 5L
+        );
+
+        assertThat(responses).singleElement().satisfies(response ->
+                assertThat(response).extracting(
+                        EducationsResponse::id,
+                        EducationsResponse::date,
+                        EducationsResponse::isFull,
+                        EducationsResponse::isActive
+                ).containsExactly(
+                        mayEducation.getId(),
+                        LocalDate.of(2026, 5, 1),
+                        true,
+                        true
+                )
+        );
+    }
+
     private Education saveEducation(Long capacity) {
+        return saveEducation(LocalDateTime.of(2026, 5, 1, 9, 30), capacity);
+    }
+
+    private Education saveEducation(LocalDateTime educationDate, Long capacity) {
         String token = token();
         Emp emp = getSavedFranchiseEmp(
                 deptRepository, empRepository,
@@ -131,7 +166,7 @@ record FranchiseEducationQueryRepositoryAdapterTest(
         );
         Education education = Education.create(
                 emp,
-                LocalDateTime.of(2026, 5, 1, 9, 30),
+                educationDate,
                 "Query Room " + token,
                 "Query Title " + token,
                 "Query Content " + token,

@@ -19,6 +19,7 @@ public interface FranchiseInquiryRetriever {
             @Nullable String keyword,
             @Nullable LocalDate from,
             @Nullable LocalDate to,
+            @Nullable Long franchiseId,
             Pageable pageable);
 
     InquireDetailResponse retrieveInquiry(Long empId, Long inquiryId);
