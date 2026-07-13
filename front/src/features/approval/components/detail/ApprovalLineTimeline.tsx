@@ -1,3 +1,6 @@
+import { Check } from 'lucide-react'
+import { cn } from '@/shared/lib/utils'
+import { Avatar, AvatarFallback } from '@/shared/ui/avatar'
 import { Badge } from '@/shared/ui/badge'
 import { formatDraftDateTime, getApprovalRoleLabel } from '../../lib/approvalStatusBadge'
 import type { DraftApprover } from '../../model/draftDetail'
@@ -30,20 +33,33 @@ export function ApprovalLineTimeline({ draft }: DraftDetailSectionProps) {
   return (
     // 독립 카드(CardContent) 안에서 렌더되므로 자체 상단 구분선은 두지 않는다(레퍼런스 사이드 카드).
     <section className="space-y-3">
-      <h3 className="text-sm font-semibold text-muted-foreground">결재선</h3>
+      <h3 className="text-base font-bold text-foreground">결재선</h3>
       {approvers.length === 0 ? (
         <p className="text-sm text-muted-foreground">지정된 결재자가 없습니다.</p>
       ) : (
-        <ol className="space-y-2">
+        <ol className="space-y-0">
           {approvers.map((approver) => {
             const state = approverStateBadge(approver)
             const processedAt = approver.approvedAt ?? approver.rejectedAt
+            const isDone = approver.approvedAt != null
             return (
               <li
                 key={`${approver.order}-${approver.empId}`}
-                className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-lg border bg-card px-3 py-2 text-sm"
+                className="flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-border py-3 text-sm last:border-0"
               >
-                <span className="tabular-nums text-muted-foreground">#{approver.order}</span>
+                <span
+                  className={cn(
+                    'flex size-6 shrink-0 items-center justify-center rounded-full text-[11px] font-bold',
+                    isDone ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground',
+                  )}
+                >
+                  {isDone ? <Check className="size-3.5" /> : approver.order}
+                </span>
+                <Avatar className="size-7 shrink-0">
+                  <AvatarFallback className="bg-violet-100 text-[10px] font-bold text-violet-700">
+                    {approver.empName.charAt(0)}
+                  </AvatarFallback>
+                </Avatar>
                 <span className="font-medium text-foreground">{approver.empName}</span>
                 <span className="text-xs text-muted-foreground">
                   {getApprovalRoleLabel(approver.role)}
@@ -52,12 +68,12 @@ export function ApprovalLineTimeline({ draft }: DraftDetailSectionProps) {
                   {state.label}
                 </Badge>
                 {processedAt != null && (
-                  <span className="w-full text-xs text-muted-foreground tabular-nums sm:w-auto">
+                  <span className="w-full pl-9 text-xs text-muted-foreground tabular-nums sm:w-auto sm:pl-0">
                     {formatDraftDateTime(processedAt)}
                   </span>
                 )}
                 {approver.rejectedAt != null && approver.rejectReason != null && (
-                  <p className="w-full text-xs text-muted-foreground">
+                  <p className="w-full pl-9 text-xs text-muted-foreground">
                     반려 사유: {approver.rejectReason}
                   </p>
                 )}

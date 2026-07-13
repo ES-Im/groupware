@@ -1,6 +1,8 @@
 import { Link } from 'react-router'
+import { cn } from '@/shared/lib/utils'
 import { Badge } from '@/shared/ui/badge'
 import { formatDraftDateTime, getApprovalStatusBadge } from '../../lib/approvalStatusBadge'
+import { getApprovalStatusColor } from '../../lib/approvalStatusColor'
 import { getDraftTypeMeta, resolveDraftTypeKey } from '../../lib/draftTypes'
 import type { DraftDetailSectionProps } from './types'
 
@@ -17,22 +19,24 @@ import type { DraftDetailSectionProps } from './types'
  */
 export function DraftDetailHeader({ draft }: DraftDetailSectionProps) {
   const status = getApprovalStatusBadge(draft.approvalStatus)
+  const statusColor = getApprovalStatusColor(draft.approvalStatus)
   const typeMeta = getDraftTypeMeta(resolveDraftTypeKey(draft))
   const TypeIcon = typeMeta.icon
 
   return (
     <div className="min-w-0 space-y-2">
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-3">
-          <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+        <div className="flex min-w-0 items-start gap-4">
+          <span className="mt-0.5 flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
             <TypeIcon className="size-5" />
           </span>
           <div className="min-w-0">
-            <p className="text-xs text-muted-foreground">{typeMeta.label}</p>
-            <h1 className="text-xl font-semibold tracking-tight break-words">{draft.title}</h1>
+            <p className="text-xs font-semibold text-primary">{typeMeta.label}</p>
+            <h1 className="mt-1.5 text-2xl font-bold tracking-tight break-words">{draft.title}</h1>
           </div>
         </div>
-        <Badge variant={status.variant} className="shrink-0">
+        <Badge variant="outline" className={cn('shrink-0 gap-1.5', statusColor.className)}>
+          <span className={cn('size-1.5 rounded-full', statusColor.dotClassName)} aria-hidden />
           {status.label}
         </Badge>
       </div>

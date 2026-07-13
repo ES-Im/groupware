@@ -94,12 +94,24 @@ export function DrafterActions({ draft }: DraftDetailSectionProps) {
   return (
     <>
       {availability.canSubmit && (
-        <Button type="button" size="sm" onClick={handleSubmit} disabled={isMutating}>
+        <Button
+          type="button"
+          size="sm"
+          className="rounded-lg"
+          onClick={handleSubmit}
+          disabled={isMutating}
+        >
           상신
         </Button>
       )}
       {availability.canEdit && (
-        <Button type="button" size="sm" variant="outline" onClick={handleEdit}>
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          className="rounded-lg"
+          onClick={handleEdit}
+        >
           수정
         </Button>
       )}
@@ -108,6 +120,7 @@ export function DrafterActions({ draft }: DraftDetailSectionProps) {
           type="button"
           size="sm"
           variant="outline"
+          className="rounded-lg"
           onClick={handleWithdraw}
           disabled={isMutating}
         >
@@ -116,7 +129,13 @@ export function DrafterActions({ draft }: DraftDetailSectionProps) {
       )}
       {availability.canCancel && (
         <>
-          <Button type="button" size="sm" variant="outline" onClick={() => setCancelOpen(true)}>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            className="rounded-lg"
+            onClick={() => setCancelOpen(true)}
+          >
             취소 기안 작성
           </Button>
           <CancellationDraftDialog

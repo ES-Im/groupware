@@ -52,12 +52,16 @@ export function DraftCreateFrame({
     // 공통 인셋은 p-3 하나로 통일(LayoutShell main은 패딩이 없어 각 페이지 래퍼가 인셋을 소유).
     // min-h-full 플렉스 컬럼: 폼이 짧아도 그리드(flex-1)가 남는 높이를 흡수해 카드 하단과 푸터
     // 사이 간격이 페이지 인셋(p-3)만 남는다.
-    <div className="flex min-h-full w-full flex-col p-3">
-      <header className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+    <div className="flex min-h-full w-full flex-col gap-6 p-3">
+      <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div className="min-w-0">
-          <h1 className="text-xl font-semibold tracking-tight">새 기안서</h1>
+          <p className="mb-1.5 text-sm font-medium text-primary">E-APPROVAL</p>
+          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">새 기안서</h1>
+          <p className="mt-1.5 text-sm text-muted-foreground">
+            결재 양식을 선택하고 필요한 내용을 작성하세요
+          </p>
         </div>
-        <Button asChild variant="outline" size="sm" className="shrink-0">
+        <Button asChild variant="outline" className="shrink-0 rounded-xl">
           <Link to="/approval/box">
             <Inbox />
             문서함
@@ -74,21 +78,23 @@ export function DraftCreateFrame({
           <DraftAttachmentsCard attachments={attachments} onChange={onAttachmentsChange} />
         </div>
 
-        <Card className="min-w-0">
-          <CardHeader className="border-b">
+        <Card className="min-w-0 rounded-2xl">
+          <CardHeader className="border-b bg-muted/30">
             <CardTitle className="flex items-center gap-3">
-              <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                 <HeaderIcon className="size-5" />
               </span>
               <span className="flex min-w-0 flex-col">
-                <span className="truncate text-sm font-semibold">{meta.label}</span>
+                <span className="truncate text-base font-bold">{meta.label}</span>
                 <span className="truncate text-xs font-normal text-muted-foreground">
                   {meta.description}
                 </span>
               </span>
             </CardTitle>
             <CardAction>
-              <Badge variant="secondary">작성 중</Badge>
+              <Badge className="rounded-full border-0 bg-amber-100 text-amber-700 hover:bg-amber-100 dark:bg-amber-950/40 dark:text-amber-400">
+                작성 중
+              </Badge>
             </CardAction>
           </CardHeader>
           {/* 카드가 그리드 행 높이만큼 늘어날 때 폼(flex-1)도 같이 늘어나 액션 바가 카드 하단에 붙는다. */}
@@ -109,12 +115,12 @@ function DraftTypeSelector({ currentType }: { currentType: DraftTypeKey }) {
   )
 
   return (
-    <Card className="h-fit">
+    <Card className="h-fit rounded-2xl">
       <CardHeader className="border-b">
-        <CardTitle className="text-sm font-semibold">기안서 종류</CardTitle>
+        <CardTitle className="text-base font-bold">기안서 종류</CardTitle>
       </CardHeader>
       <CardContent>
-        <nav aria-label="기안서 종류 선택" className="flex flex-col gap-1.5">
+        <nav aria-label="기안서 종류 선택" className="flex flex-col gap-1">
           {visibleTypes.map((type) => {
             const TypeIcon = type.icon
             const active = type.key === currentType
@@ -124,29 +130,32 @@ function DraftTypeSelector({ currentType }: { currentType: DraftTypeKey }) {
                 to={type.route}
                 aria-current={active ? 'page' : undefined}
                 className={cn(
-                  'flex items-center gap-3 rounded-lg border p-3 transition-colors',
-                  active
-                    ? 'border-primary/40 bg-accent'
-                    : 'border-transparent hover:bg-muted',
+                  'flex items-center gap-3 rounded-xl p-3 transition-colors',
+                  active ? 'bg-primary/10 text-primary' : 'text-foreground hover:bg-muted',
                 )}
               >
                 <span
                   className={cn(
                     'flex size-9 shrink-0 items-center justify-center rounded-lg',
                     active
-                      ? 'bg-primary text-primary-foreground'
+                      ? 'bg-background text-primary shadow-sm'
                       : 'bg-muted text-muted-foreground',
                   )}
                 >
-                  <TypeIcon className="size-5" />
+                  <TypeIcon className="size-4" />
                 </span>
                 <span className="flex min-w-0 flex-col">
-                  <span className="truncate text-sm font-medium">{type.label}</span>
-                  <span className="truncate text-xs text-muted-foreground">
+                  <span className="truncate text-sm font-semibold">{type.label}</span>
+                  <span
+                    className={cn(
+                      'truncate text-xs font-normal',
+                      active ? 'text-primary/70' : 'text-muted-foreground',
+                    )}
+                  >
                     {type.description}
                   </span>
                 </span>
-                {active && <Check className="ml-auto size-4 shrink-0 text-primary" />}
+                {active && <Check className="ml-auto size-4 shrink-0" />}
               </Link>
             )
           })}
@@ -193,14 +202,14 @@ function DraftAttachmentsCard({
   }
 
   return (
-    <Card>
+    <Card className="rounded-2xl">
       <CardHeader className="border-b">
-        <CardTitle className="flex items-center gap-2 text-sm font-semibold">
+        <CardTitle className="flex items-center gap-2 text-base font-bold">
           <Paperclip className="size-4 text-muted-foreground" />
           첨부파일
         </CardTitle>
         <CardAction>
-          <Button asChild variant="outline" size="sm">
+          <Button asChild variant="ghost" size="sm" className="text-primary hover:text-primary">
             <label htmlFor={inputId} className="cursor-pointer">
               <Plus />
               파일 추가
@@ -222,10 +231,13 @@ function DraftAttachmentsCard({
           }}
         />
         {attachments.length === 0 ? (
-          <div className="flex flex-col items-center gap-1 py-4 text-center text-muted-foreground">
+          <label
+            htmlFor={inputId}
+            className="flex cursor-pointer flex-col items-center gap-1.5 rounded-xl border border-dashed border-border py-4 text-center text-muted-foreground transition-colors hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
+          >
             <FileUp className="size-6" />
-            <p className="text-xs">첨부된 파일이 없습니다.</p>
-          </div>
+            <p className="text-xs">파일을 드래그하거나 선택하세요</p>
+          </label>
         ) : (
           <ul className="flex flex-col gap-1.5">
             {attachments.map((file) => {
@@ -235,9 +247,9 @@ function DraftAttachmentsCard({
               return (
                 <li
                   key={`${file.name}-${file.size}`}
-                  className="flex items-center gap-2 rounded-lg border p-2"
+                  className="flex items-center gap-2 rounded-xl bg-muted/50 p-2.5"
                 >
-                  <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                  <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-rose-100 text-rose-600">
                     <FileText className="size-4" />
                   </span>
                   <span className="min-w-0 flex-1">
@@ -252,7 +264,7 @@ function DraftAttachmentsCard({
                     type="button"
                     variant="ghost"
                     size="icon-sm"
-                    className="shrink-0 text-muted-foreground"
+                    className="shrink-0 text-muted-foreground hover:text-destructive"
                     aria-label={`${file.name} 첨부 제거`}
                     onClick={() => onChange(attachments.filter((item) => item !== file))}
                   >

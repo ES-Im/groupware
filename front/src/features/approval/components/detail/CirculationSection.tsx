@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Check, Loader2, UserPlus, X } from 'lucide-react'
 import { useMeQuery } from '@/features/employee/api/useMeQuery'
+import { Avatar, AvatarFallback } from '@/shared/ui/avatar'
 import { Badge } from '@/shared/ui/badge'
 import { Button } from '@/shared/ui/button'
 import { useCirculationReadMutation } from '../../api/useCirculationReadMutation'
@@ -56,7 +57,7 @@ export function CirculationSection({ draft }: DraftDetailSectionProps) {
     // 독립 카드(CardContent) 안에서 렌더되므로 자체 상단 구분선은 두지 않는다(레퍼런스 사이드 카드).
     <section className="space-y-3">
       <div className="flex items-center justify-between gap-3">
-        <h3 className="text-sm font-semibold text-muted-foreground">공람</h3>
+        <h3 className="text-base font-bold text-foreground">공람</h3>
         <div className="flex items-center gap-2">
           {/* (공람 대상자 본인·미열람) 읽음 처리(F709). */}
           {canMarkRead && (
@@ -91,21 +92,30 @@ export function CirculationSection({ draft }: DraftDetailSectionProps) {
       {circulations.length === 0 ? (
         <p className="text-sm text-muted-foreground">지정된 공람자가 없습니다.</p>
       ) : (
-        <ul className="flex flex-wrap gap-2">
+        <ul className="flex flex-col gap-2">
           {circulations.map((circulation) => {
             const isRemoving = removingEmpIds.has(circulation.empId)
             return (
               <li
                 key={circulation.empId}
-                className="flex items-center gap-2 rounded-lg border bg-card px-3 py-1.5 text-sm"
+                className="flex items-center gap-2.5 rounded-xl bg-muted/50 px-3 py-2 text-sm"
               >
-                <span className="font-medium text-foreground">{circulation.empName}</span>
+                <Avatar className="size-7 shrink-0">
+                  <AvatarFallback className="bg-violet-100 text-[10px] font-bold text-violet-700">
+                    {circulation.empName.charAt(0)}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="min-w-0 flex-1 truncate font-medium text-foreground">
+                  {circulation.empName}
+                </span>
                 {circulation.readAt != null ? (
-                  <Badge variant="secondary" className="tabular-nums">
+                  <Badge variant="secondary" className="shrink-0 tabular-nums">
                     읽음 {formatDraftDateTime(circulation.readAt)}
                   </Badge>
                 ) : (
-                  <Badge variant="outline">미열람</Badge>
+                  <Badge variant="outline" className="shrink-0">
+                    미열람
+                  </Badge>
                 )}
                 {/* (기안자 본인) 공람 제거(F708). 공람자별 진행 상태를 개별 추적한다. */}
                 {isDrafter && (

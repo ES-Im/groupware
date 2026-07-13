@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   createColumnHelper,
   flexRender,
@@ -6,12 +6,13 @@ import {
   useReactTable,
 } from '@tanstack/react-table'
 import type { UseQueryResult } from '@tanstack/react-query'
-import { Eye } from 'lucide-react'
+import { FileText } from 'lucide-react'
 import { toast } from 'sonner'
 import { handleApiError } from '@/shared/lib/apiError'
 import { usePageState } from '@/shared/lib/usePageState'
 import type { PageMeta } from '@/shared/components/PaginationControls'
 import { PaginationControls } from '@/shared/components/PaginationControls'
+import { Avatar, AvatarFallback } from '@/shared/ui/avatar'
 import { Badge } from '@/shared/ui/badge'
 import { cn } from '@/shared/lib/utils'
 import {
@@ -19,6 +20,7 @@ import {
   getApprovalStatusBadge,
   getFileAttachedIconInfo,
 } from '../lib/approvalStatusBadge'
+import { getApprovalStatusColor } from '../lib/approvalStatusColor'
 import type { DocumentBoxQueryParams, DocumentBoxRow, Page } from '../model/approval'
 
 /** 검색 디바운스 지연(ms). BoardListPage(T10.3)와 동일한 값을 재사용한다. */
@@ -50,10 +52,10 @@ type DocumentBoxListQueryHook = (
  */
 const columnHelper = createColumnHelper<DocumentBoxRow>()
 
-/** 첨부·보기 셀만 중앙 정렬한다(그 외 텍스트/배지 컬럼은 좌측 정렬). */
+/** 첨부는 중앙, 상태는 우측 정렬한다(그 외 텍스트 컬럼은 좌측 정렬 — adapt-ui 레퍼런스 이식). */
 const COLUMN_ALIGN: Record<string, string> = {
   isFileAttached: 'text-center',
-  view: 'text-center',
+  approvalStatus: 'text-right',
 }
 
 /** 셀 정렬 클래스(맵에 없으면 좌측 정렬). 헤더·본문 셀이 동일 규칙을 공유한다. */
@@ -86,14 +88,6 @@ export function DocumentBoxTable({
   const [keyword, setKeyword] = useState('')
   const { page, size, onPageChange, resetPage } = usePageState()
 
-  // onRowClick을 ref로 참조한다: 상위가 인라인 화살표 핸들러를 넘기면 매 렌더마다 identity가 바뀌는데,
-  // 이를 columns 의존성에 직접 넣으면 columns가 매번 재생성돼 react-table이 표 서브트리를 리마운트한다
-  // (검색 타이핑마다 표 깜빡임·포커스 손실). ref로 최신 핸들러만 갈아끼워 columns를 안정 참조로 유지한다.
-  const onRowClickRef = useRef(onRowClick)
-  useEffect(() => {
-    onRowClickRef.current = onRowClick
-  }, [onRowClick])
-
   // 검색어 디바운스: 상위가 주입한 searchValue를 300ms 유예 후 확정 keyword로 반영하고 페이지를 0으로 리셋한다.
   // resetPage는 usePageState 내부에서 useCallback으로 안정화돼 있어 무관한 리렌더마다 재실행되지 않는다.
   useEffect(() => {
@@ -124,10 +118,33 @@ export function DocumentBoxTable({
       columnHelper.accessor('draftTitle', {
         header: '제목',
         cell: (info) => (
-          <span className="truncate font-medium text-foreground">{info.getValue()}</span>
+          <div className="flex min-w-0 items-center gap-2.5">
+            <span
+              className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground"
+              aria-hidden
+            >
+              <FileText className="size-4" />
+            </span>
+            <span className="truncate font-medium text-foreground">{info.getValue()}</span>
+          </div>
         ),
       }),
-      columnHelper.accessor('drafterName', { header: '기안자' }),
+      columnHelper.accessor('drafterName', {
+        header: '기안자',
+        cell: (info) => {
+          const name = info.getValue()
+          return (
+            <div className="flex items-center gap-2">
+              <Avatar className="size-6">
+                <AvatarFallback className="bg-violet-100 text-[10px] font-bold text-violet-700">
+                  {name.charAt(0)}
+                </AvatarFallback>
+              </Avatar>
+              <span className="text-foreground">{name}</span>
+            </div>
+          )
+        },
+      }),
       columnHelper.accessor('submittedAt', {
         header: '상신일시',
         // 미상신(임시저장) 문서는 submittedAt이 null → formatDraftDateTime이 "-"로 표기한다.
@@ -137,14 +154,6 @@ export function DocumentBoxTable({
         header: '최근 결재자',
         // 아직 처리 결재자가 없으면 null → 대시로 표기.
         cell: (info) => info.getValue() ?? '-',
-      }),
-      columnHelper.accessor('approvalStatus', {
-        header: '상태',
-        // 서버가 표시명 문자열(예 "결재완료")로 내려주므로 표시명 기준 배지 헬퍼로 매핑한다.
-        cell: (info) => {
-          const { label, variant } = getApprovalStatusBadge(info.getValue())
-          return <Badge variant={variant}>{label}</Badge>
-        },
       }),
       columnHelper.accessor('isFileAttached', {
         header: '첨부',
@@ -160,26 +169,19 @@ export function DocumentBoxTable({
           )
         },
       }),
-      // 보기: 행 전체 클릭과 별개인 명시적 상세 진입 버튼. onRowClick이 없으면(비인터랙티브) 셀을 비운다.
-      // 최신 핸들러는 ref로 읽어(위 주석 참조) columns를 안정 참조로 유지한다.
-      columnHelper.display({
-        id: 'view',
-        header: '보기',
-        cell: ({ row }) => {
-          const handleView = onRowClickRef.current
-          return handleView ? (
-            <button
-              type="button"
-              onClick={(event) => {
-                event.stopPropagation() // 행 클릭 핸들러와 중복 트리거 방지
-                handleView(row.original.draftId)
-              }}
-              className="inline-flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-              aria-label="상세보기"
-            >
-              <Eye className="size-4" />
-            </button>
-          ) : null
+      columnHelper.accessor('approvalStatus', {
+        header: '상태',
+        // 서버가 표시명 문자열(예 "결재완료")로 내려주므로 표시명 기준 배지 헬퍼로 매핑한다.
+        cell: (info) => {
+          const value = info.getValue()
+          const { label } = getApprovalStatusBadge(value)
+          const { className, dotClassName } = getApprovalStatusColor(value)
+          return (
+            <Badge variant="outline" className={cn('gap-1.5', className)}>
+              <span className={cn('size-1.5 rounded-full', dotClassName)} aria-hidden />
+              {label}
+            </Badge>
+          )
         },
       }),
     ],
@@ -226,12 +228,12 @@ export function DocumentBoxTable({
             <table className="w-full border-collapse text-sm">
             <thead>
               {table.getHeaderGroups().map((headerGroup) => (
-                <tr key={headerGroup.id} className="border-b border-border">
+                <tr key={headerGroup.id} className="border-b border-border bg-muted/40">
                   {headerGroup.headers.map((header) => (
                     <th
                       key={header.id}
                       className={cn(
-                        'px-3 py-2.5 text-xs font-medium whitespace-nowrap text-muted-foreground',
+                        'px-4 py-3 text-xs font-semibold whitespace-nowrap text-muted-foreground',
                         alignClass(header.column.id),
                       )}
                     >
@@ -260,14 +262,14 @@ export function DocumentBoxTable({
                   className={cn(
                     'border-b border-border transition-colors last:border-0',
                     isInteractive &&
-                      'cursor-pointer hover:bg-muted/50 focus-visible:bg-muted/50 focus-visible:outline-none',
+                      'cursor-pointer hover:bg-primary/5 focus-visible:bg-primary/5 focus-visible:outline-none',
                   )}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <td
                       key={cell.id}
                       className={cn(
-                        'px-3 py-3 align-middle whitespace-nowrap text-muted-foreground',
+                        'px-4 py-3 align-middle whitespace-nowrap text-muted-foreground',
                         alignClass(cell.column.id),
                       )}
                     >

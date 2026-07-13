@@ -69,7 +69,7 @@ export function DraftDetailPage() {
   }
 
   const backButton = (
-    <Button type="button" variant="outline" size="sm" onClick={handleBack}>
+    <Button type="button" variant="outline" size="sm" className="rounded-lg" onClick={handleBack}>
       <ArrowLeft />
       문서함
     </Button>
@@ -141,6 +141,7 @@ export function DraftDetailPage() {
             type="button"
             variant="outline"
             size="sm"
+            className="rounded-lg"
             onClick={() =>
               window.open(`/approval/drafts/${draftId}/print`, '_blank', 'noopener,noreferrer')
             }
@@ -153,6 +154,7 @@ export function DraftDetailPage() {
             type="button"
             variant="outline"
             size="sm"
+            className="rounded-lg"
             onClick={() => toast.info('PDF 다운로드 기능은 준비 중입니다')}
           >
             <FileDown />
@@ -165,7 +167,7 @@ export function DraftDetailPage() {
 
       {/* 2열 그리드(레퍼런스 xl 8:4): 좌 문서 카드 / 우 사이드 카드 스택. lg 이하는 1열. */}
       <div className="grid grid-cols-1 items-start gap-4 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-        <Card className="min-w-0">
+        <Card className="min-w-0 rounded-2xl">
           <CardHeader className="border-b">
             <DraftDetailHeader draft={draft} />
           </CardHeader>
@@ -173,7 +175,7 @@ export function DraftDetailPage() {
           <CardContent className="space-y-6">
             {/* 문서 메타 4칸(레퍼런스: 문서번호·기안자·상신일시·보존연한). 기안자 부서/직급은
                 DRAFT_DETAIL 계약에 없어 이름만 표기한다(발명 금지). 보존연한은 문서 양식 고정값. */}
-            <dl className="grid grid-cols-2 gap-x-4 gap-y-4 border-b pb-6 lg:grid-cols-4">
+            <dl className="-mx-4 grid grid-cols-2 gap-x-4 gap-y-4 border-y bg-muted/30 px-6 py-4 lg:grid-cols-4">
               <div>
                 <dt className="text-xs text-muted-foreground">문서번호</dt>
                 <dd className="mt-1 text-sm font-semibold">HARUON-DRAFT-{draft.draftId}</dd>
@@ -196,8 +198,8 @@ export function DraftDetailPage() {
 
             {/* 기안 내용: 유형별 본문 슬롯(T2.4)을 레퍼런스처럼 옅은 박스로 감싼다. */}
             <section className="space-y-3">
-              <h3 className="text-sm font-semibold text-foreground">기안 내용</h3>
-              <div className="min-h-[280px] rounded-lg border bg-muted/30 p-4 sm:p-6">
+              <h3 className="text-base font-bold text-foreground">기안 내용</h3>
+              <div className="min-h-[280px] rounded-2xl bg-muted/40 p-4 sm:p-7">
                 <DraftTypeBody draft={draft} />
               </div>
             </section>
@@ -206,22 +208,22 @@ export function DraftDetailPage() {
 
         {/* 사이드 카드 스택(레퍼런스: 결재선·첨부파일·처리 이력 + 이 앱 고유의 공람). */}
         <div className="flex min-w-0 flex-col gap-4">
-          <Card>
+          <Card className="rounded-2xl">
             <CardContent>
               <ApprovalLineTimeline draft={draft} />
             </CardContent>
           </Card>
-          <Card>
+          <Card className="rounded-2xl">
             <CardContent>
               <AttachmentSection draft={draft} />
             </CardContent>
           </Card>
-          <Card>
+          <Card className="rounded-2xl">
             <CardContent>
               <CirculationSection draft={draft} />
             </CardContent>
           </Card>
-          <Card>
+          <Card className="rounded-2xl">
             <CardContent>
               <DraftHistorySection draft={draft} />
             </CardContent>

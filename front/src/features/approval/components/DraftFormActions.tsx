@@ -29,19 +29,37 @@ export function DraftFormActions({
     // (CardContent px-4·Card pb-4 안쪽)에 있으므로 음수 마진(-mx-4/-mb-4)으로 카드 좌우·하단
     // 패딩을 상쇄해 카드 폭 전체를 채우는 푸터로 만든다(--card-spacing=4 기준). mt-auto는 카드가
     // 남는 높이만큼 늘어났을 때(폼이 짧은 화면) 액션바를 카드 하단에 고정한다 — 폼이 길면 무효과.
-    <div className="-mx-4 -mb-4 mt-auto flex flex-col-reverse gap-2 rounded-b-xl border-t bg-muted/50 px-4 py-3 sm:flex-row sm:items-center sm:justify-end">
-      <Button type="button" variant="ghost" disabled={isSubmitting} onClick={onCancel}>
+    <div className="-mx-4 -mb-4 mt-auto flex flex-col-reverse gap-2 rounded-b-2xl border-t bg-muted/40 px-4 py-3 sm:flex-row sm:items-center sm:justify-end">
+      <Button
+        type="button"
+        variant="ghost"
+        className="rounded-xl"
+        disabled={isSubmitting}
+        onClick={onCancel}
+      >
         취소
       </Button>
-      <Button type="button" variant="outline" disabled={isSubmitting} onClick={onPreview}>
+      <Button
+        type="button"
+        variant="outline"
+        className="rounded-xl"
+        disabled={isSubmitting}
+        onClick={onPreview}
+      >
         <Eye />
         기안서 미리보기
       </Button>
-      <Button type="button" variant="outline" disabled={isSubmitting} onClick={onSaveDraft}>
+      <Button
+        type="button"
+        variant="secondary"
+        className="rounded-xl"
+        disabled={isSubmitting}
+        onClick={onSaveDraft}
+      >
         <Save />
         임시저장
       </Button>
-      <Button type="submit" disabled={isSubmitting}>
+      <Button type="submit" className="rounded-xl shadow-md shadow-primary/20" disabled={isSubmitting}>
         <Send />
         상신
       </Button>

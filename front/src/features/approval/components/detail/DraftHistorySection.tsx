@@ -1,4 +1,4 @@
-import { CircleCheck, CircleX, Send, type LucideIcon } from 'lucide-react'
+import { cn } from '@/shared/lib/utils'
 import { formatDraftDateTime, getApprovalRoleLabel } from '../../lib/approvalStatusBadge'
 import type { DraftDetailSectionProps } from './types'
 
@@ -8,8 +8,8 @@ interface HistoryEvent {
   actorName: string
   /** 발생 일시(`yyyy-MM-dd'T'HH:mm:ss` — ISO 형식이라 문자열 정렬이 시간순 정렬과 일치). */
   at: string
-  icon: LucideIcon
-  iconClassName: string
+  /** 타임라인 점 테두리 색(완료류=primary, 반려=destructive). */
+  dotClassName: string
 }
 
 /**
@@ -28,8 +28,7 @@ export function DraftHistorySection({ draft }: DraftDetailSectionProps) {
       label: '문서 상신',
       actorName: draft.drafter.empName,
       at: draft.submittedAt,
-      icon: Send,
-      iconClassName: 'text-primary',
+      dotClassName: 'border-primary',
     })
   }
   for (const approver of draft.approvers) {
@@ -40,8 +39,7 @@ export function DraftHistorySection({ draft }: DraftDetailSectionProps) {
         label: `${getApprovalRoleLabel(approver.role)} 승인`,
         actorName: approver.empName,
         at: approver.approvedAt,
-        icon: CircleCheck,
-        iconClassName: 'text-primary',
+        dotClassName: 'border-primary',
       })
     }
     if (approver.rejectedAt != null) {
@@ -50,8 +48,7 @@ export function DraftHistorySection({ draft }: DraftDetailSectionProps) {
         label: '반려',
         actorName: approver.empName,
         at: approver.rejectedAt,
-        icon: CircleX,
-        iconClassName: 'text-destructive',
+        dotClassName: 'border-destructive',
       })
     }
   }
@@ -59,25 +56,32 @@ export function DraftHistorySection({ draft }: DraftDetailSectionProps) {
 
   return (
     <section className="space-y-3">
-      <h3 className="text-sm font-semibold text-muted-foreground">처리 이력</h3>
+      <h3 className="text-base font-bold text-foreground">처리 이력</h3>
       {events.length === 0 ? (
         <p className="text-sm text-muted-foreground">처리 이력이 없습니다.</p>
       ) : (
-        <ul className="space-y-3">
-          {events.map((event) => {
-            const EventIcon = event.icon
-            return (
-              <li key={event.key} className="flex gap-3 text-sm">
-                <EventIcon className={`mt-0.5 size-4 shrink-0 ${event.iconClassName}`} />
-                <div className="min-w-0">
-                  <p className="font-medium text-foreground">{event.label}</p>
-                  <p className="text-xs text-muted-foreground tabular-nums">
-                    {event.actorName} · {formatDraftDateTime(event.at)}
-                  </p>
-                </div>
-              </li>
-            )
-          })}
+        <ul className="ml-1">
+          {events.map((event, index) => (
+            <li
+              key={event.key}
+              className={cn(
+                'relative border-l pb-4 pl-5 text-sm last:border-transparent last:pb-0',
+                index === events.length - 1 ? 'border-transparent' : 'border-border',
+              )}
+            >
+              <span
+                className={cn(
+                  'absolute top-0.5 -left-[5px] size-2.5 rounded-full border-2 bg-card',
+                  event.dotClassName,
+                )}
+                aria-hidden
+              />
+              <p className="font-medium text-foreground">{event.label}</p>
+              <p className="mt-0.5 text-xs text-muted-foreground tabular-nums">
+                {event.actorName} · {formatDraftDateTime(event.at)}
+              </p>
+            </li>
+          ))}
         </ul>
       )}
     </section>

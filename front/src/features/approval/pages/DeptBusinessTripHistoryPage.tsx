@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
 import dayjs from 'dayjs'
+import { Search } from 'lucide-react'
 import { toast } from 'sonner'
 import { usePrimaryDeptId } from '@/features/attendance/model/usePrimaryDeptId'
 import { handleApiError } from '@/shared/lib/apiError'
 import { usePageState } from '@/shared/lib/usePageState'
+import { BlobAvatar } from '@/shared/components/BlobAvatar'
 import type { PageMeta } from '@/shared/components/PaginationControls'
 import { PaginationControls } from '@/shared/components/PaginationControls'
-import { Card, CardContent } from '@/shared/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card'
 import { Input } from '@/shared/ui/input'
 import { Badge } from '@/shared/ui/badge'
 import { useDeptBusinessTripHistoryQuery } from '../api/useDeptBusinessTripHistoryQuery'
@@ -100,10 +102,11 @@ export function DeptBusinessTripHistoryPage() {
   }
 
   return (
-    <div className="w-full p-3">
-      <div className="mb-6 flex items-center justify-between gap-3">
-        <h1 className="text-xl font-semibold tracking-tight">부서 출장 이력</h1>
-      </div>
+    <div className="w-full p-4 sm:p-6 lg:p-8">
+      <header className="mb-6">
+        <h1 className="text-[1.375rem] font-semibold tracking-tight">부서 출장 이력</h1>
+        <p className="mt-1 text-sm text-muted-foreground">부서원의 출장 신청 이력을 확인합니다.</p>
+      </header>
 
       {deptId === undefined ? (
         <Card className="h-fit">
@@ -115,10 +118,15 @@ export function DeptBusinessTripHistoryPage() {
         </Card>
       ) : (
         <Card className="h-fit">
+          <CardHeader className="border-b">
+            <CardTitle>출장 신청 이력</CardTitle>
+            <CardDescription>부서원의 출장 신청 이력과 결재 상태를 확인합니다.</CardDescription>
+          </CardHeader>
           <CardContent className="space-y-4">
             {/* 필터 툴바: 사원 이름 검색 + 조회 월(yyyy-MM) + 결재 상태 필터 */}
             <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-              <div className="w-full sm:max-w-xs">
+              <div className="relative w-full sm:max-w-xs">
+                <Search className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
                 <label htmlFor="dept-business-trip-keyword" className="sr-only">
                   사원 이름 검색
                 </label>
@@ -128,6 +136,7 @@ export function DeptBusinessTripHistoryPage() {
                   value={searchInput}
                   onChange={(event) => setSearchInput(event.target.value)}
                   placeholder="사원 이름 검색..."
+                  className="pl-8"
                 />
               </div>
               <div className="flex items-center gap-2">
@@ -193,7 +202,7 @@ export function DeptBusinessTripHistoryPage() {
                       <th className="px-3 py-2.5 text-left text-xs font-medium whitespace-nowrap text-muted-foreground">
                         목적
                       </th>
-                      <th className="px-3 py-2.5 text-left text-xs font-medium whitespace-nowrap text-muted-foreground">
+                      <th className="px-3 py-2.5 text-right text-xs font-medium whitespace-nowrap text-muted-foreground">
                         상태
                       </th>
                     </tr>
@@ -217,19 +226,32 @@ export function DeptBusinessTripHistoryPage() {
                           }}
                           className="cursor-pointer border-b border-border transition-colors last:border-0 hover:bg-muted/50 focus-visible:bg-muted/50 focus-visible:outline-none"
                         >
-                          <td className="px-3 py-3 align-middle whitespace-nowrap text-muted-foreground">
-                            {row.empNo} {row.empName}
+                          <td className="px-3 py-3 align-middle whitespace-nowrap">
+                            <div className="flex items-center gap-2.5">
+                              <BlobAvatar
+                                empId={row.empId}
+                                fileId={undefined}
+                                fallbackText={row.empName}
+                                className="size-7"
+                              />
+                              <div className="min-w-0">
+                                <p className="font-medium text-foreground">{row.empName}</p>
+                                <p className="font-mono text-[11px] text-muted-foreground">
+                                  {row.empNo}
+                                </p>
+                              </div>
+                            </div>
                           </td>
                           <td className="px-3 py-3 align-middle whitespace-nowrap text-muted-foreground">
                             {row.historyResponse.startAt} ~ {row.historyResponse.endAt}
                           </td>
-                          <td className="px-3 py-3 align-middle text-muted-foreground">
+                          <td className="px-3 py-3 align-middle font-medium text-foreground">
                             {row.historyResponse.destination}
                           </td>
                           <td className="px-3 py-3 align-middle text-muted-foreground">
                             {row.historyResponse.purpose}
                           </td>
-                          <td className="px-3 py-3 align-middle whitespace-nowrap">
+                          <td className="px-3 py-3 text-right align-middle whitespace-nowrap">
                             <Badge variant={variant}>{label}</Badge>
                           </td>
                         </tr>

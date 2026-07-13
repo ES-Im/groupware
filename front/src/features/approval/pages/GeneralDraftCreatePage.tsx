@@ -168,15 +168,16 @@ export function GeneralDraftCreatePage() {
       onAttachmentsChange={setAttachments}
     >
       {/* form onSubmit은 기본 액션([생성 후 상신])으로 둔다. [임시저장]은 type=button으로 분리. */}
-      <form noValidate onSubmit={handleCreateAndSubmit} className="flex flex-1 flex-col gap-4">
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="general-draft-title">
+      <form noValidate onSubmit={handleCreateAndSubmit} className="flex flex-1 flex-col gap-6">
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="general-draft-title" className="text-sm font-semibold">
             제목 <span className="text-destructive">*</span>
           </Label>
           <Input
             id="general-draft-title"
             placeholder="제목을 입력해주세요"
             aria-invalid={!!errors.title}
+            className="h-11 rounded-xl"
             {...register('title')}
           />
           {errors.title && (
@@ -186,14 +187,14 @@ export function GeneralDraftCreatePage() {
           )}
         </div>
 
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="general-draft-content">
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="general-draft-content" className="text-sm font-semibold">
             기안 내용 <span className="text-destructive">*</span>
           </Label>
           <Textarea
             id="general-draft-content"
             placeholder="기안 내용을 입력해주세요"
-            className="min-h-48"
+            className="min-h-48 rounded-xl leading-7"
             aria-invalid={!!errors.content}
             {...register('content')}
           />
@@ -204,7 +205,7 @@ export function GeneralDraftCreatePage() {
           )}
         </div>
 
-        <div className="flex flex-col gap-4 border-t pt-4">
+        <div className="flex flex-col gap-6 border-t pt-6">
           <EmployeeSelectField
             label="결재선"
             description="결재 순서대로 처리됩니다."

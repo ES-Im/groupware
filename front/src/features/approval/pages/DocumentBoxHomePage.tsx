@@ -51,8 +51,10 @@ interface BoxTabConfig {
   cardDescription: string
   /** 카드/탭 공용 아이콘(모노크롬 톤). */
   icon: LucideIcon
-  /** 결재대기 카드만 시각적으로 강조한다(사용자가 처리해야 할 액션 문서). */
+  /** 결재대기 카드만 시각적으로 강조한다(사용자가 처리해야 할 액션 문서) — primary 톤 타일. */
   emphasized?: boolean
+  /** 비강조 카드의 아이콘 타일 색(adapt-ui 레퍼런스 — 카드별 구분색). emphasized 카드는 무시(primary 고정). */
+  iconTileClassName?: string
   /** 탭 목록에 주입할 조회 훅(고정 참조). */
   useListQuery: DocumentBoxListQueryHook
   /** 목록이 비었을 때 안내 문구. */
@@ -76,6 +78,7 @@ const BOX_TABS: Record<string, BoxTabConfig> = {
     cardLabel: '상신 문서',
     cardDescription: '내가 상신한 기안',
     icon: Send,
+    iconTileClassName: 'bg-sky-100 text-sky-600',
     useListQuery: useMySubmittedDraftsQuery,
     emptyMessage: '상신한 기안이 없습니다.',
     getValue: (s) => s.submittedDraftCount,
@@ -98,6 +101,7 @@ const BOX_TABS: Record<string, BoxTabConfig> = {
     cardLabel: '결재함',
     cardDescription: '조회 가능 문서',
     icon: FolderCheck,
+    iconTileClassName: 'bg-slate-100 text-slate-600',
     useListQuery: useMyAccessibleDocumentsQuery,
     emptyMessage: '조회 가능한 문서가 없습니다.',
     getValue: (s) => s.accessibleDocumentCount,
@@ -108,6 +112,7 @@ const BOX_TABS: Record<string, BoxTabConfig> = {
     cardLabel: '임시저장',
     cardDescription: '상신 전 문서',
     icon: FilePen,
+    iconTileClassName: 'bg-amber-100 text-amber-600',
     useListQuery: useMyUnsubmittedDraftsQuery,
     emptyMessage: '임시저장한 기안이 없습니다.',
     getValue: (s) => s.unsubmittedDraftCount,
@@ -161,17 +166,20 @@ export function DocumentBoxHomePage() {
   return (
     // min-h-full 플렉스 컬럼: 콘텐츠가 짧아도 탭 카드(flex-1)가 남는 높이를 흡수해
     // 카드 하단과 푸터 사이 간격이 페이지 인셋(p-3)만 남는다.
-    <div className="flex min-h-full w-full flex-col p-3">
+    <div className="flex min-h-full w-full flex-col gap-6 p-3">
       {/* 헤더: 페이지 타이틀 + 새 기안서 작성 진입 */}
-      <header className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+      <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div className="min-w-0">
-          <h1 className="text-xl font-semibold tracking-tight">문서함 요약</h1>
+          <p className="mb-1.5 text-sm font-medium text-primary">E-APPROVAL</p>
+          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">문서함 요약</h1>
+          <p className="mt-1.5 text-sm text-muted-foreground">
+            내 결재 대기·상신·임시저장 문서를 한 곳에서 관리하세요
+          </p>
         </div>
         <Button
           type="button"
-          size="sm"
           onClick={() => navigate('/approval/drafts/new')}
-          className="w-full sm:w-auto"
+          className="w-full rounded-xl shadow-lg shadow-primary/20 sm:w-auto"
         >
           <FilePlus />
           새 기안서 작성
@@ -181,7 +189,7 @@ export function DocumentBoxHomePage() {
       {/* 요약 카드 4종: 클릭 시 해당 탭으로 이동(탭 전환과 동일한 진입점) */}
       <section
         aria-label="문서함 요약 카드"
-        className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4"
+        className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"
       >
         {CARD_ORDER.map((key) => {
           const card = BOX_TABS[key]
@@ -195,45 +203,46 @@ export function DocumentBoxHomePage() {
                 navigate(`/approval/box/${key}`)
               }}
               aria-current={activeTab === key ? 'true' : undefined}
-              className="group rounded-xl text-left focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
+              className="group rounded-2xl text-left focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
             >
               <Card
-                size="sm"
                 className={cn(
-                  'h-full transition-colors group-hover:bg-muted/40',
-                  card.emphasized && 'bg-primary/5 group-hover:bg-primary/10',
+                  'h-full rounded-2xl transition-all duration-200 group-hover:-translate-y-0.5 group-hover:shadow-md',
+                  card.emphasized && 'bg-primary/5 ring-primary/20 group-hover:bg-primary/10',
                   activeTab === key && 'ring-2 ring-primary/40',
                 )}
               >
-                <CardContent className="flex items-start gap-3">
-                  <span
-                    className={cn(
-                      'flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground',
-                      card.emphasized && 'bg-primary/10 text-primary',
-                    )}
-                    aria-hidden
-                  >
-                    <Icon className="size-5" />
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center justify-between gap-2">
-                      <p className="truncate text-xs text-muted-foreground">{card.cardLabel}</p>
-                      <ArrowUpRight className="size-4 shrink-0 text-muted-foreground/50 transition-colors group-hover:text-muted-foreground" />
-                    </div>
+                <CardContent className="flex flex-col gap-3">
+                  <div className="flex items-start justify-between">
+                    <span
+                      className={cn(
+                        'flex size-10 shrink-0 items-center justify-center rounded-xl bg-muted text-muted-foreground',
+                        card.emphasized ? 'bg-primary/10 text-primary' : card.iconTileClassName,
+                      )}
+                      aria-hidden
+                    >
+                      <Icon className="size-5" />
+                    </span>
+                    <ArrowUpRight className="size-4 shrink-0 text-muted-foreground/40 transition-colors group-hover:text-primary" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium text-muted-foreground">
+                      {card.cardLabel}
+                    </p>
                     {summaryQuery.isLoading ? (
                       <span
-                        className="mt-1 block h-7 w-14 animate-pulse rounded-md bg-muted"
+                        className="mt-1.5 block h-8 w-16 animate-pulse rounded-md bg-muted"
                         aria-hidden
                       />
                     ) : (
                       <p
                         className={cn(
-                          'mt-0.5 flex items-baseline gap-1 truncate text-2xl font-semibold tracking-tight tabular-nums text-foreground',
+                          'mt-0.5 flex items-baseline gap-1 truncate text-3xl font-bold tracking-tight tabular-nums text-foreground',
                           card.emphasized && 'text-primary',
                         )}
                       >
                         {summary ? card.getValue(summary) : '-'}
-                        <span className="text-xs font-normal text-muted-foreground">건</span>
+                        <span className="text-sm font-normal text-muted-foreground">건</span>
                       </p>
                     )}
                     <p className="mt-0.5 truncate text-xs text-muted-foreground/80">
@@ -250,7 +259,7 @@ export function DocumentBoxHomePage() {
       {/* 탭 + 검색 + 활성 탭 목록을 하나의 카드로 묶는다. 탭을 바꿔도 카드 높이가 출렁이지 않도록
           최소 높이를 두고, flex-1로 페이지의 남는 높이까지 흡수한다(푸터와의 간격 = 페이지 p-3).
           내부는 flex 컬럼이라 목록·페이지네이션이 카드 하단까지 자연스럽게 늘어난다. */}
-      <Card className="mt-6 flex min-h-[540px] flex-1 flex-col gap-0 py-0">
+      <Card className="flex min-h-[540px] flex-1 flex-col gap-0 rounded-2xl py-0">
         <Tabs
           value={activeTab}
           onValueChange={(value) => {
@@ -269,7 +278,11 @@ export function DocumentBoxHomePage() {
                   const badge =
                     tabConfig.getBadge && summary ? tabConfig.getBadge(summary) : 0
                   return (
-                    <TabsTrigger key={key} value={key} className="flex-none">
+                    <TabsTrigger
+                      key={key}
+                      value={key}
+                      className="flex-none data-active:text-primary after:bg-primary"
+                    >
                       <Icon />
                       {tabConfig.navLabel}
                       {badge > 0 && (
@@ -293,7 +306,7 @@ export function DocumentBoxHomePage() {
                 value={searchValue}
                 onChange={(event) => setSearchValue(event.target.value)}
                 placeholder="제목으로 검색"
-                className="pl-8"
+                className="rounded-lg pl-8"
               />
             </div>
           </div>

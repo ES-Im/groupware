@@ -137,8 +137,8 @@ export function AttachmentSection({ draft }: DraftDetailSectionProps) {
     // 독립 카드(CardContent) 안에서 렌더되므로 자체 상단 구분선은 두지 않는다(레퍼런스 사이드 카드).
     <section className="space-y-3">
       <div className="flex items-center justify-between gap-3">
-        <h3 className="flex items-center gap-1.5 text-sm font-semibold text-muted-foreground">
-          <Paperclip className="size-4" />
+        <h3 className="flex items-center gap-1.5 text-base font-bold text-foreground">
+          <Paperclip className="size-4 text-muted-foreground" />
           첨부파일{files.length > 0 ? ` ${files.length}개` : ''}
         </h3>
         {/* (기안자 본인) 첨부 업로드(F716). 다중 선택은 mutation이 파일별 순차 PATCH로 처리한다. */}
@@ -177,13 +177,12 @@ export function AttachmentSection({ draft }: DraftDetailSectionProps) {
             return (
               <li
                 key={file.fileId}
-                className="space-y-2 rounded-lg border bg-card px-3 py-2 text-sm"
+                className="space-y-2 rounded-xl bg-muted/50 px-3 py-2.5 text-sm"
               >
-                <div className="flex items-center gap-2">
-                  <Paperclip
-                    className="size-4 shrink-0 text-muted-foreground"
-                    aria-hidden="true"
-                  />
+                <div className="flex items-center gap-2.5">
+                  <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-rose-100 text-rose-600">
+                    <Paperclip className="size-4" aria-hidden="true" />
+                  </span>
                   <span className="min-w-0 truncate text-foreground">{file.originalName}</span>
                   <span className="ml-auto shrink-0 text-xs text-muted-foreground tabular-nums">
                     {formatFileSizeMb(file.fileSize)}

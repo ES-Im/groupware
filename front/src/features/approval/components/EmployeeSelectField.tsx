@@ -18,6 +18,7 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 import { GripVertical, UserPlus, X } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
+import { Avatar, AvatarFallback } from '@/shared/ui/avatar'
 import { Badge } from '@/shared/ui/badge'
 import { Button } from '@/shared/ui/button'
 import {
@@ -98,7 +99,7 @@ function SortableEmployeeRow({
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition }}
       className={cn(
-        'flex items-center gap-3 rounded-lg border bg-background px-3 py-2',
+        'flex items-center gap-3 rounded-xl border border-transparent bg-muted/40 px-3 py-2',
         isDragging && 'relative z-10 opacity-80 shadow-md',
       )}
     >
@@ -114,10 +115,15 @@ function SortableEmployeeRow({
         </button>
       )}
       {ordered && (
-        <span className="flex size-6 shrink-0 items-center justify-center rounded-md bg-muted text-xs font-medium text-muted-foreground">
+        <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
           {index + 1}
         </span>
       )}
+      <Avatar className="size-7 shrink-0">
+        <AvatarFallback className="bg-violet-100 text-[10px] font-bold text-violet-700">
+          {emp.empName.charAt(0)}
+        </AvatarFallback>
+      </Avatar>
       <span className="min-w-0 flex-1 truncate text-sm font-medium">{emp.empName}</span>
       {roleOptions && onRoleChange ? (
         // 역할 select(결재/협조): 네이티브 select 컨벤션(연가 유형 select 톤)을 행 크기에
@@ -209,7 +215,7 @@ export function EmployeeSelectField({
     <section className="flex flex-col gap-2">
       <div className="flex items-start justify-between gap-3">
         <div className="flex min-w-0 flex-col gap-0.5">
-          <Label>{label}</Label>
+          <Label className="text-base font-bold">{label}</Label>
           {description && <p className="text-xs text-muted-foreground">{description}</p>}
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
@@ -218,9 +224,9 @@ export function EmployeeSelectField({
                 추가인지 구분한다(시각 라벨은 "추가" 유지). */}
             <Button
               type="button"
-              variant="outline"
+              variant="ghost"
               size="sm"
-              className="shrink-0"
+              className="shrink-0 text-primary hover:text-primary"
               aria-label={`${label} 추가`}
             >
               <UserPlus />
@@ -243,7 +249,7 @@ export function EmployeeSelectField({
       </div>
 
       {selected.length === 0 ? (
-        <p className="rounded-lg border border-dashed px-3 py-6 text-center text-sm text-muted-foreground">
+        <p className="rounded-xl border border-dashed border-border px-3 py-6 text-center text-sm text-muted-foreground">
           {emptyText}
         </p>
       ) : (

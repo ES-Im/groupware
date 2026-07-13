@@ -29,12 +29,19 @@ export function ApproverActions({ draft }: DraftDetailSectionProps) {
       <Button
         type="button"
         size="sm"
+        className="rounded-lg"
         onClick={() => approveMutation.mutate(draft.draftId)}
         disabled={approveMutation.isPending}
       >
         승인
       </Button>
-      <Button type="button" size="sm" variant="destructive" onClick={() => setRejectOpen(true)}>
+      <Button
+        type="button"
+        size="sm"
+        variant="destructive"
+        className="rounded-lg"
+        onClick={() => setRejectOpen(true)}
+      >
         반려
       </Button>
 
