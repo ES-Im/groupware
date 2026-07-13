@@ -1,6 +1,8 @@
 import { useCallback, useMemo, useState } from 'react'
 import { createColumnHelper, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import dayjs from 'dayjs'
+import { Check } from 'lucide-react'
+import { BlobAvatar } from '@/shared/components/BlobAvatar'
 import { cn } from '@/shared/lib/utils'
 import { Badge } from '@/shared/ui/badge'
 import { Button } from '@/shared/ui/button'
@@ -108,6 +110,8 @@ export function DeptAttendancePendingTable({
     })
   }, [selectableIds])
 
+  const clearSelection = useCallback(() => setSelectedIds(new Set()), [])
+
   // 선택된 현재 페이지 행만 건별 승인 호출(전용 배치 API 없음).
   function handleBulkApprove() {
     data
@@ -145,22 +149,35 @@ export function DeptAttendancePendingTable({
           )
         },
       }),
-      columnHelper.accessor((row) => row.empInfo.empNo, {
-        id: 'empNo',
-        header: '사번',
-      }),
-      columnHelper.accessor((row) => row.empInfo.empName, {
-        id: 'empName',
-        header: '이름',
-      }),
-      columnHelper.accessor((row) => row.empInfo.positionName, {
-        id: 'positionName',
-        header: '직급',
+      columnHelper.display({
+        id: 'emp',
+        header: '사원',
+        cell: (info) => {
+          const emp = info.row.original.empInfo
+          return (
+            <div className="flex items-center gap-2.5">
+              <BlobAvatar
+                empId={emp.empId}
+                fileId={undefined}
+                fallbackText={emp.empName}
+                className="size-7"
+              />
+              <div className="min-w-0">
+                <p className="font-medium text-foreground">{emp.empName}</p>
+                <p className="text-[11px] text-muted-foreground">
+                  <span className="font-mono">{emp.empNo}</span> · {emp.positionName}
+                </p>
+              </div>
+            </div>
+          )
+        },
       }),
       columnHelper.accessor((row) => row.attendanceInfo.attendanceDate, {
         id: 'attendanceDate',
         header: '일자',
-        cell: (info) => dayjs(info.getValue()).format('YYYY-MM-DD'),
+        cell: (info) => (
+          <span className="font-mono text-xs">{dayjs(info.getValue()).format('YYYY-MM-DD')}</span>
+        ),
       }),
       columnHelper.accessor((row) => row.attendanceInfo.attendanceStatus, {
         id: 'attendanceStatus',
@@ -182,29 +199,14 @@ export function DeptAttendancePendingTable({
       }),
       columnHelper.display({
         id: 'actions',
-        header: '액션',
+        header: '처리',
         cell: (info) => {
           const row = info.row.original
           if (row.attendanceInfo.isApproved) {
             return null
           }
           return (
-            <div className="flex items-center gap-1.5">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() =>
-                  onEdit({
-                    targetEmpId: row.empInfo.empId,
-                    attendanceId: row.attendanceInfo.attendanceId,
-                    startAt: row.attendanceInfo.startAt,
-                    endAt: row.attendanceInfo.endAt,
-                  })
-                }
-              >
-                수정
-              </Button>
+            <div className="flex items-center justify-end gap-1.5">
               <Button
                 type="button"
                 size="sm"
@@ -216,7 +218,23 @@ export function DeptAttendancePendingTable({
                   })
                 }
               >
+                <Check />
                 승인
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() =>
+                  onEdit({
+                    targetEmpId: row.empInfo.empId,
+                    attendanceId: row.attendanceInfo.attendanceId,
+                    startAt: row.attendanceInfo.startAt,
+                    endAt: row.attendanceInfo.endAt,
+                  })
+                }
+              >
+                수정
               </Button>
             </div>
           )
@@ -237,39 +255,50 @@ export function DeptAttendancePendingTable({
       {/* 툴바: 미승인 총건수 + 상태 필터(서버 사이드, 단일값) + 선택 일괄 승인. data가 0건이어도
           필터를 해제할 수 있어야 하므로(현재 필터 결과가 0건인 것과 부서 전체가 0건인 것을
           구분할 신호가 없다) 항상 렌더한다 — data.length===0로 툴바 자체를 숨기지 않는다. */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-wrap items-center gap-3">
-          <p className="text-sm text-muted-foreground">
-            미승인 <span className="font-semibold text-foreground">{totalElements}</span>건
-          </p>
-          <label htmlFor="dept-attendance-pending-status-select" className="sr-only">
-            근태 상태 필터
-          </label>
-          <select
-            id="dept-attendance-pending-status-select"
-            value={status ?? ''}
-            onChange={(event) =>
-              onStatusChange(event.target.value === '' ? undefined : (event.target.value as AttendanceStatus))
-            }
-            className="h-8 rounded-lg border border-input bg-transparent px-2.5 text-sm text-foreground transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
-          >
-            <option value="">전체</option>
-            {FILTERABLE_STATUSES.map((option) => (
-              <option key={option} value={option}>
-                {getAttendanceStatusBadge(option).label}
-              </option>
-            ))}
-          </select>
-        </div>
-        <Button
-          type="button"
-          size="sm"
-          disabled={selectedVisibleCount === 0 || approveMutation.isPending}
-          onClick={handleBulkApprove}
+      <div className="flex flex-wrap items-center gap-3">
+        <p className="text-sm text-muted-foreground">
+          미승인 <span className="font-semibold text-foreground">{totalElements}</span>건
+        </p>
+        <label htmlFor="dept-attendance-pending-status-select" className="sr-only">
+          근태 상태 필터
+        </label>
+        <select
+          id="dept-attendance-pending-status-select"
+          value={status ?? ''}
+          onChange={(event) =>
+            onStatusChange(event.target.value === '' ? undefined : (event.target.value as AttendanceStatus))
+          }
+          className="h-8 rounded-lg border border-input bg-transparent px-2.5 text-sm text-foreground transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
         >
-          선택 {selectedVisibleCount}건 일괄 승인
-        </Button>
+          <option value="">전체</option>
+          {FILTERABLE_STATUSES.map((option) => (
+            <option key={option} value={option}>
+              {getAttendanceStatusBadge(option).label}
+            </option>
+          ))}
+        </select>
       </div>
+
+      {/* 선택 액션 바(목표 디자인 pendbar): 현재 페이지에서 선택된 미승인 건이 있을 때만 노출한다. */}
+      {selectedVisibleCount > 0 && (
+        <div className="flex flex-wrap items-center gap-3 rounded-xl border border-primary/20 bg-primary/5 px-4 py-2.5">
+          <span className="text-sm font-medium text-primary">{selectedVisibleCount}개 선택</span>
+          <div className="ml-auto flex items-center gap-2">
+            <Button type="button" variant="outline" size="sm" onClick={clearSelection}>
+              선택 해제
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              disabled={approveMutation.isPending}
+              onClick={handleBulkApprove}
+            >
+              <Check />
+              선택 승인
+            </Button>
+          </div>
+        </div>
+      )}
 
       {data.length === 0 ? (
         <p className="py-8 text-center text-sm text-muted-foreground">
@@ -299,7 +328,7 @@ export function DeptAttendancePendingTable({
                   className="border-b border-border transition-colors last:border-0 hover:bg-muted/40"
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id} className={cn('px-4 py-3 align-top text-muted-foreground')}>
+                    <td key={cell.id} className={cn('px-4 py-3 align-middle text-muted-foreground')}>
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </td>
                   ))}

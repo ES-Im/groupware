@@ -1,3 +1,4 @@
+import { BlobAvatar } from '@/shared/components/BlobAvatar'
 import { cn } from '@/shared/lib/utils'
 import { formatOvertimeMinutes } from '../lib/formatOvertimeMinutes'
 import type { DeptAttendanceRow } from '../model/deptAttendance'
@@ -47,21 +48,31 @@ export function DeptAttendanceMemberList({
                   : 'border-border hover:bg-muted/50',
               )}
             >
-              <div className="flex items-start justify-between gap-2">
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-medium text-foreground">{emp.empName}</p>
-                  <p className="truncate text-xs text-muted-foreground">
-                    {emp.empNo} · {emp.positionName}
-                  </p>
+              <div className="flex items-start gap-2.5">
+                <BlobAvatar
+                  empId={emp.empId}
+                  fileId={undefined}
+                  fallbackText={emp.empName}
+                  className="mt-0.5 size-8"
+                />
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium text-foreground">{emp.empName}</p>
+                      <p className="truncate text-xs text-muted-foreground">
+                        {emp.empNo} · {emp.positionName}
+                      </p>
+                    </div>
+                    <span className="shrink-0 text-xs text-muted-foreground">
+                      초과 {formatOvertimeMinutes(row.summary.overtimeMinutes)}
+                    </span>
+                  </div>
+                  <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                    <span>승인 {row.summary.approvedAttendanceCount}</span>
+                    <span>대기 {row.summary.pendingAttendanceCount}</span>
+                    <span>전체 {row.summary.totalAttendanceCount}</span>
+                  </div>
                 </div>
-                <span className="shrink-0 text-xs text-muted-foreground">
-                  초과 {formatOvertimeMinutes(row.summary.overtimeMinutes)}
-                </span>
-              </div>
-              <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-                <span>승인 {row.summary.approvedAttendanceCount}</span>
-                <span>대기 {row.summary.pendingAttendanceCount}</span>
-                <span>전체 {row.summary.totalAttendanceCount}</span>
               </div>
             </button>
           </li>

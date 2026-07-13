@@ -7,7 +7,7 @@ import { handleApiError } from '@/shared/lib/apiError'
 import { usePageState } from '@/shared/lib/usePageState'
 import type { PageMeta } from '@/shared/components/PaginationControls'
 import { PaginationControls } from '@/shared/components/PaginationControls'
-import { Card, CardContent } from '@/shared/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
 import { Input } from '@/shared/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/tabs'
 import { useDeptAttendanceMonthlyQuery } from '../api/useDeptAttendanceMonthlyQuery'
@@ -203,9 +203,12 @@ export function DeptAttendancePage() {
 
   return (
     <div className="w-full p-4 sm:p-6 lg:p-8">
-      <div className="mb-6 flex items-center justify-between gap-3">
-        <h1 className="text-xl font-semibold tracking-tight">부서 근태 관리</h1>
-      </div>
+      <header className="mb-6">
+        <h1 className="text-[1.375rem] font-semibold tracking-tight">부서 근태 관리</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          부서원 월별 근태와 승인 대기 건을 관리합니다.
+        </p>
+      </header>
 
       {deptId === undefined ? (
         <Card className="h-fit">
@@ -228,6 +231,9 @@ export function DeptAttendancePage() {
                 DepartmentsExplorerLayout의 grid 패턴을 근태 목록 폭에 맞춰 좁게 조정한다. */}
             <div className="grid gap-4 lg:grid-cols-[minmax(280px,34%)_1fr]">
               <Card className="h-fit">
+                <CardHeader className="border-b">
+                  <CardTitle>부서원</CardTitle>
+                </CardHeader>
                 <CardContent className="space-y-4">
                   {/* 필터 툴바: 부서원 이름 검색 + 조회 월(yyyy-MM) + 근태 상태 필터 */}
                   <div className="flex flex-col gap-3">
@@ -338,6 +344,9 @@ export function DeptAttendancePage() {
                 전달되고(백엔드 반영 예정, useDeptAttendancePendingQuery 참고), 페이지네이션도
                 탭①과 동일하게 서버 page/size를 그대로 쓴다 — 클라이언트 전량 조회/재슬라이싱 없음. */}
             <Card className="h-fit">
+              <CardHeader className="border-b">
+                <CardTitle>근태 승인 대기</CardTitle>
+              </CardHeader>
               <CardContent className="space-y-4">
                 {pendingQuery.isLoading ? (
                   <p className="py-8 text-center text-sm text-muted-foreground">불러오는 중...</p>

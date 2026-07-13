@@ -93,23 +93,24 @@ describe('DeptAttendancePendingTable (F306)', () => {
     vi.clearAllMocks()
   })
 
-  it('사번/이름/직급/일자/상태배지/출근/퇴근을 한 행에 렌더한다', () => {
+  it('사원(이름+사번·직급)/일자/상태배지/출근/퇴근을 한 행에 렌더한다', () => {
     renderTable([makeRow()])
     // 상태 필터 select의 <option>도 동일한 상태 라벨("지각/조퇴")을 렌더하므로, 표 영역으로 쿼리
     // 범위를 좁혀 배지 텍스트와의 중복 매치를 피한다.
     const table = within(screen.getByRole('table'))
 
-    expect(table.getByText('사번')).toBeInTheDocument()
-    expect(table.getByText('이름')).toBeInTheDocument()
-    expect(table.getByText('직급')).toBeInTheDocument()
+    // 사번/이름/직급 3열은 목표 디자인 이식으로 아바타 person-cell 단일 "사원" 열로 합쳐졌다.
+    expect(table.getByText('사원')).toBeInTheDocument()
     expect(table.getByText('일자')).toBeInTheDocument()
     expect(table.getByText('상태')).toBeInTheDocument()
     expect(table.getByText('출근')).toBeInTheDocument()
     expect(table.getByText('퇴근')).toBeInTheDocument()
 
-    expect(table.getByText('10000001')).toBeInTheDocument()
     expect(table.getByText('홍길동')).toBeInTheDocument()
-    expect(table.getByText('팀원')).toBeInTheDocument()
+    // 사번·직급은 한 줄("사번 · 직급")로 합쳐 렌더되므로 결합 텍스트로 확인한다.
+    expect(
+      table.getByText((_, element) => element?.textContent === '10000001 · 팀원'),
+    ).toBeInTheDocument()
     expect(table.getByText('2026-07-01')).toBeInTheDocument()
     expect(table.getByText('지각/조퇴')).toBeInTheDocument()
     expect(table.getByText('10:15')).toBeInTheDocument()
@@ -292,18 +293,20 @@ describe('DeptAttendancePendingTable (F306)', () => {
   })
 
   describe('행 체크박스/전체선택(T3.4-b 확장)', () => {
-    it('행 체크박스를 선택하면 "선택 N건 일괄 승인" 버튼의 건수·활성화 상태가 갱신된다', async () => {
+    it('행 체크박스를 선택하면 선택 액션 바가 나타나고 "선택 승인" 버튼이 활성화된다', async () => {
       const user = userEvent.setup()
       renderTable([
         makeRow({ attendanceId: 1 }, { empId: 1, empName: '지각자1' }),
         makeRow({ attendanceId: 2 }, { empId: 2, empName: '지각자2' }),
       ])
 
-      expect(screen.getByRole('button', { name: '선택 0건 일괄 승인' })).toBeDisabled()
+      // 선택 0건이면 선택 액션 바(선택 승인 버튼)는 렌더되지 않는다(목표 디자인 pendbar).
+      expect(screen.queryByRole('button', { name: '선택 승인' })).not.toBeInTheDocument()
 
       await user.click(screen.getByRole('checkbox', { name: '지각자1 근태 선택' }))
 
-      expect(screen.getByRole('button', { name: '선택 1건 일괄 승인' })).not.toBeDisabled()
+      expect(screen.getByText('1개 선택')).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: '선택 승인' })).not.toBeDisabled()
     })
 
     it('isApproved===true인 행은 체크박스가 비활성화되어 선택할 수 없다', () => {
@@ -341,10 +344,10 @@ describe('DeptAttendancePendingTable (F306)', () => {
   })
 
   describe('일괄 승인(T3.4-b 확장)', () => {
-    it('선택 0건이면 일괄 승인 버튼이 비활성화된다', () => {
+    it('선택 0건이면 선택 액션 바(선택 승인 버튼)가 렌더되지 않는다', () => {
       renderTable([makeRow({ attendanceId: 1 }, { empId: 1, empName: '지각자1' })])
 
-      expect(screen.getByRole('button', { name: '선택 0건 일괄 승인' })).toBeDisabled()
+      expect(screen.queryByRole('button', { name: '선택 승인' })).not.toBeInTheDocument()
     })
 
     it('일괄 승인 클릭 시 선택된 각 attendanceId에 대해 승인 요청이 개별적으로 전송된다', async () => {
@@ -362,7 +365,7 @@ describe('DeptAttendancePendingTable (F306)', () => {
       ])
 
       await user.click(screen.getByRole('checkbox', { name: '전체 선택' }))
-      await user.click(screen.getByRole('button', { name: '선택 2건 일괄 승인' }))
+      await user.click(screen.getByRole('button', { name: '선택 승인' }))
 
       await waitFor(() => expect(approvedIds.sort()).toEqual([1, 2]))
     })
