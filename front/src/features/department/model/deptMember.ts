@@ -30,3 +30,13 @@ export interface Page<T> {
 }
 
 export type DeptMembersPage = Page<DeptMemberResponse>
+
+/**
+ * 전사 사원 이름 검색(useEmployeeNameSearchQuery) 결과 1건. 부서별 DEPT_MEMBERS 팬아웃 조회
+ * 결과에, 조회 시점에 이미 알고 있는 deptId/deptName을 함께 얹은 화면 전용 타입이다
+ * (EMPLOYEE 권한으로 쓸 수 있는 전사 사원 검색 API가 없어 헤더 사원 검색 오버레이 전용으로 도입).
+ */
+export interface DeptMemberSearchResult extends DeptMemberResponse {
+  deptId: number
+  deptName: string
+}

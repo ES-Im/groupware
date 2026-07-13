@@ -8,7 +8,7 @@ import { hasRequiredRole } from '@/shared/lib/hasRequiredRole'
 import { usePageState } from '@/shared/lib/usePageState'
 import { useDepartmentInfoQuery } from '../api/useDepartmentInfoQuery'
 import { useDepartmentMembersQuery } from '../api/useDepartmentMembersQuery'
-import { DepartmentDetailView } from '../components/DepartmentDetailView'
+import { DepartmentMembersView } from '../components/DepartmentMembersView'
 import { getPrimaryDeptId } from '../lib/getPrimaryDeptId'
 
 /**
@@ -37,11 +37,12 @@ import { getPrimaryDeptId } from '../lib/getPrimaryDeptId'
 export function DepartmentMembersPage() {
   const navigate = useNavigate()
   const roles = useAuthStore((state) => state.roles)
-  const canManageMembers = hasRequiredRole(roles, 'DEPT_MANAGER') || hasRequiredRole(roles, 'HR')
-  // 부서 근태 보드는 DEPT_MANAGER 전용 API(DEPT_ATTENDANCE_MONTHLY/_PENDING)를 쓰므로 HR을 포함하는
-  // canManageMembers와 별도로 계산한다(code-reviewer 지적, HR 뷰어에게 위젯을 보이면 403이 조용히
-  // 삼켜져 "근태 기록 없음"으로 오인 표시됨).
-  const canViewAttendanceBoard = hasRequiredRole(roles, 'DEPT_MANAGER')
+  // 정보 수정 모달을 HR 폼으로 열지 부서매니저 폼으로 열지 결정하는 두 플래그(EmployeeDetailPage와
+  // 동일 우선순위: HR/ADMIN이 DEPT_MANAGER보다 우선). canManageMembers("관리" 컬럼 노출)는 두 값의
+  // OR로 파생한다(= HR || DEPT_MANAGER, ADMIN은 RoleHierarchy로 각 판정에 포함).
+  const canManageAsHr = hasRequiredRole(roles, 'HR')
+  const canManageAsDeptManager = !canManageAsHr && hasRequiredRole(roles, 'DEPT_MANAGER')
+  const canManageMembers = canManageAsHr || canManageAsDeptManager
   const meQuery = useMeQuery()
   //todo : [이 페이지는 getPrimaryDeptId로 deptId를 로그인 사용자의 소속 부서로 고정 도출하고 라우트 파라미터를 쓰지 않는다. 그러나 docs/prd/3.department-management-prd.md(F202/F203, "부서 상세 페이지")는 "부서 목록 페이지 행 클릭 → 부서 상세 페이지"로 임의 부서(deptId route param)를 열람하는 화면을 요구하는데, 이는 별도 페이지(DepartmentDetailPage, T7.1)로 이미 구현되어 있다. 두 페이지가 공존하는 것이 의도된 설계인지, 이 페이지(F104)를 그대로 유지할지 재확인 필요]
   const deptId = meQuery.data ? getPrimaryDeptId(meQuery.data.currentDepts) : undefined
@@ -163,13 +164,22 @@ export function DepartmentMembersPage() {
     return null
   }
 
+  // deptInfoQuery.data는 위 isLoading/error 게이트를 통과한 시점엔 확보돼 있지만, 오프라인·paused
+  // pending(isLoading=false·error=null·data=undefined)에서도 게이트를 통과할 수 있어 렌더 직전
+  // 최종 가드를 둔다(형제 EmployeeDetailPage와 동일 패턴 — `!` 단언 제거).
+  if (!deptInfoQuery.data) {
+    return null
+  }
+
   return (
     <div className="w-full p-4 sm:p-6 lg:p-8">
-      <h1 className="mb-6 text-xl font-semibold tracking-tight">부서 상세</h1>
-      {/* //todo : [deptInfoQuery.data! non-null 단언이 오직 위 isLoading 게이트에만 의존함. 오프라인·paused pending(status=pending, fetchStatus=paused)에서는 isLoading=false·error=null이라 게이트를 통과하는데 data는 undefined → data!.deptInfoResponse에서 런타임 크래시. 형제 페이지 EmployeeDetailPage처럼 렌더 직전 `if (!deptInfoQuery.data) return null` 최종 가드를 두어 !단언 없이 좁힐 것] */}
-      <DepartmentDetailView
-        deptInfo={deptInfoQuery.data!.deptInfoResponse}
-        deptLeader={deptInfoQuery.data!.deptLeader}
+      <header className="mb-6">
+        <h1 className="text-[1.375rem] font-semibold tracking-tight">부서 구성원</h1>
+        <p className="mt-1 text-sm text-muted-foreground">내 소속 부서의 구성원을 조회합니다.</p>
+      </header>
+      <DepartmentMembersView
+        deptInfo={deptInfoQuery.data.deptInfoResponse}
+        deptLeader={deptInfoQuery.data.deptLeader}
         members={membersQuery.data?.content ?? []}
         pageInfo={
           membersQuery.data ?? {
@@ -185,7 +195,9 @@ export function DepartmentMembersPage() {
           }
         }
         canManageMembers={canManageMembers}
-        canViewAttendanceBoard={canViewAttendanceBoard}
+        canManageAsHr={canManageAsHr}
+        canManageAsDeptManager={canManageAsDeptManager}
+        deptId={deptId}
         keyword={keyword}
         onKeywordChange={(value) => {
           setKeyword(value)
