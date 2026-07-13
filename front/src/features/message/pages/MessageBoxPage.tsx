@@ -243,6 +243,9 @@ export function MessageBoxPage() {
       <header className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
           <h1 className="text-xl font-semibold tracking-tight">쪽지함</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            받은·보낸·임시보관·휴지통 쪽지를 한 곳에서 관리하세요
+          </p>
         </div>
         <Button
           type="button"

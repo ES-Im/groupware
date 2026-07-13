@@ -82,28 +82,23 @@ describe('MessageBoxTable (F1501) - 받은함 컬럼 렌더', () => {
     vi.clearAllMocks()
   })
 
-  it('제목/보낸 사람/수발신일시/읽음/첨부/액션 컬럼을 렌더하고 미읽음은 안읽음 배지를 보여준다', async () => {
+  it('발신자·부서·제목·일시를 렌더하고 미읽음은 좌측 강조와 안읽음 점을 보여준다', async () => {
     mockList('received', [makeRow({ senderDeptName: '개발팀', senderName: '김철수' })])
     renderTable('received')
 
     expect(await screen.findByText('점심 회의 안내')).toBeInTheDocument()
     expect(screen.getByText('개발팀 김철수')).toBeInTheDocument()
     expect(screen.getByText('2026-07-10 09:00')).toBeInTheDocument()
-    expect(screen.getByText('보낸 사람')).toBeInTheDocument()
-    // "읽음"/"안읽음"은 받은함 전용 읽음 상태 필터 버튼 라벨과도 겹치므로 표(table) 스코프로 좁힌다.
-    const table = within(screen.getByRole('table'))
-    expect(table.getByText('안읽음')).toBeInTheDocument()
-    expect(table.getByText('읽음')).toBeInTheDocument() // 헤더 텍스트
+    // 텍스트 배지 대신 시각 강조(좌측 바+굵게+점)로 표현한다 — 점에는 접근성 라벨을 둔다.
+    expect(screen.getByLabelText('읽지 않음')).toBeInTheDocument()
   })
 
-  it('읽은 쪽지는 "읽음" 배지(outline)를 보여준다', async () => {
+  it('읽은 쪽지는 안읽음 강조 표시를 보여주지 않는다', async () => {
     mockList('received', [makeRow({ isRead: true })])
     renderTable('received')
 
     await screen.findByText('점심 회의 안내')
-    // 표 안에서 헤더 "읽음" + 배지 "읽음" 2곳이 텍스트로 존재한다(필터 버튼 "읽음"은 표 밖).
-    const table = within(screen.getByRole('table'))
-    expect(table.getAllByText('읽음')).toHaveLength(2)
+    expect(screen.queryByLabelText('읽지 않음')).not.toBeInTheDocument()
   })
 
   it('첨부가 있으면 개수를 aria-label로 노출하고, 없으면 대시로 표기한다', async () => {
@@ -154,7 +149,6 @@ describe('MessageBoxTable (F1502) - 보낸함 상대방 표기', () => {
     renderTable('sent')
 
     expect(await screen.findByText('이영희 외 2명')).toBeInTheDocument()
-    expect(screen.getByText('받는 사람')).toBeInTheDocument()
   })
 
   it('수신자가 1명이면 이름만 표기한다', async () => {
@@ -173,7 +167,7 @@ describe('MessageBoxTable (F1502) - 보낸함 상대방 표기', () => {
     renderTable('sent')
 
     await screen.findByText('점심 회의 안내')
-    expect(screen.getByRole('cell', { name: '-' })).toBeInTheDocument()
+    expect(screen.getByText('-')).toBeInTheDocument()
   })
 
   it('보낸함은 읽음 컬럼을 렌더하지 않는다', async () => {
@@ -195,7 +189,7 @@ describe('MessageBoxTable (F1503) - 임시보관함', () => {
     renderTable('drafts')
 
     await screen.findByText('점심 회의 안내')
-    expect(screen.getByRole('cell', { name: '-' })).toBeInTheDocument()
+    expect(screen.getByText('-')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '발송' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '삭제' })).toBeInTheDocument()
   })

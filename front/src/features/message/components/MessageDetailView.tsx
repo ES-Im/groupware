@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import dayjs from 'dayjs'
 import { ArrowLeft, Reply, Trash2, Undo2 } from 'lucide-react'
 import { toast } from 'sonner'
+import { BlobAvatar } from '@/shared/components/BlobAvatar'
 import { isForbidden, isNotFound, normalizeApiError } from '@/shared/lib/apiError'
 import {
   AlertDialog,
@@ -16,7 +17,8 @@ import {
 } from '@/shared/ui/alert-dialog'
 import { Badge } from '@/shared/ui/badge'
 import { Button } from '@/shared/ui/button'
-import { Card, CardContent, CardHeader } from '@/shared/ui/card'
+import { Card, CardContent } from '@/shared/ui/card'
+import { Separator } from '@/shared/ui/separator'
 import { useMarkMessageReadMutation } from '../api/useMarkMessageReadMutation'
 import { useMessageDetailQuery } from '../api/useMessageDetailQuery'
 import type { MailBox } from '../model/messageTypes'
@@ -82,7 +84,7 @@ function MessageDetailActions({
         </Button>
         <AlertDialog>
           <AlertDialogTrigger asChild>
-            <Button type="button" variant="outline" size="sm" disabled={onDelete == null}>
+            <Button type="button" variant="destructive" size="sm" disabled={onDelete == null}>
               <Trash2 />
               완전 삭제
             </Button>
@@ -105,13 +107,7 @@ function MessageDetailActions({
   return (
     <div className="flex flex-wrap items-center gap-2">
       {box === 'received' && (
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={onReply}
-          disabled={onReply == null}
-        >
+        <Button type="button" size="sm" onClick={onReply} disabled={onReply == null}>
           <Reply />
           답장
         </Button>
@@ -250,17 +246,32 @@ export function MessageDetailView({
       </div>
 
       <Card className="min-w-0">
-        <CardHeader className="border-b">
-          <h2 className="text-lg font-semibold tracking-tight break-all">{detail.title}</h2>
-          <p className="text-sm text-muted-foreground">
-            보낸 사람: {formatPersonName(detail.senderDeptName, detail.senderName)}
-          </p>
-          <p className="text-xs text-muted-foreground tabular-nums">
-            {formatMessageDateTime(detail.sentAt)}
-          </p>
-        </CardHeader>
+        <CardContent className="space-y-5">
+          <h2 className="text-xl font-bold tracking-tight break-all text-foreground">
+            {detail.title}
+          </h2>
 
-        <CardContent className="space-y-6">
+          {/* 발신자 정보 줄: 아바타 + 이름/부서 + 우측 정렬 일시(레퍼런스 메일함 톤). */}
+          <div className="flex items-center gap-3">
+            <BlobAvatar
+              empId={undefined}
+              fileId={undefined}
+              fallbackText={detail.senderName}
+              className="size-11"
+            />
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-bold text-foreground">{detail.senderName}</p>
+              {detail.senderDeptName && (
+                <p className="truncate text-xs text-muted-foreground">{detail.senderDeptName}</p>
+              )}
+            </div>
+            <time className="shrink-0 text-xs text-muted-foreground tabular-nums">
+              {formatMessageDateTime(detail.sentAt)}
+            </time>
+          </div>
+
+          <Separator />
+
           <section className="space-y-3">
             <h3 className="text-sm font-semibold text-muted-foreground">받는 사람</h3>
             {detail.receivers.length === 0 ? (
@@ -288,9 +299,11 @@ export function MessageDetailView({
             )}
           </section>
 
+          <Separator />
+
           <section className="space-y-3">
             <h3 className="text-sm font-semibold text-muted-foreground">내용</h3>
-            <div className="min-h-[160px] rounded-lg border bg-muted/30 p-4 text-sm break-words whitespace-pre-wrap">
+            <div className="min-h-[160px] rounded-lg bg-muted/40 p-4 text-sm leading-7 break-words whitespace-pre-wrap">
               {detail.content}
             </div>
           </section>

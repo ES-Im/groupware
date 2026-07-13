@@ -503,9 +503,9 @@ export function MessageComposeView({
         </Button>
       </div>
 
-      {/* 작성 헤더(쪽지함 메인 헤더 3요소와 톤 통일): 제목 + 부제(레퍼런스 메일함 작성 화면 참고). */}
+      {/* 작성 헤더(상세 뷰 제목과 톤 통일): 제목 + 부제(레퍼런스 메일함 작성 화면 참고). */}
       <div className="min-w-0">
-        <h2 className="text-base font-semibold tracking-tight text-foreground">
+        <h2 className="text-xl font-bold tracking-tight text-foreground">
           {isEditMode ? '쪽지 수정' : '새 쪽지 작성'}
         </h2>
         <p className="text-xs text-muted-foreground">
