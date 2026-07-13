@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import dayjs from 'dayjs'
 import { http, HttpResponse } from 'msw'
 import { MemoryRouter } from 'react-router'
@@ -11,15 +12,15 @@ import { FranchiseEducationCalendarPage } from './FranchiseEducationCalendarPage
 
 /**
  * FranchiseEducationCalendarPage(F1609, ROADMAP(FRANCHISE) T4.1, P4) 회귀 방지 테스트.
- * MyMeetingCalendarPage.test.tsx의 패턴(MSW server.use + QueryClient + MemoryRouter,
- * FullCalendar 실제 렌더)을 복제한다.
+ * UI 개편(2026-07-13, 목업 기준)으로 FullCalendar → **교육 목록 테이블**로 재구성됐다. 데이터원은
+ * 여전히 범위 기반 교육 캘린더 조회(FRANCHISE_EDUCATION_CALENDAR)이며, 상태 컬럼은 보유 필드
+ * (isActive/isFull/date)에서 파생한다(유형·신청/정원 컬럼은 계약에 데이터가 없어 제거 — 정책 A).
  *
  * 검증 대상:
- * - 조회 데이터가 `제목 · 장소` 형식 이벤트로 캘린더에 렌더된다.
- * - 비활성(isActive=false)/정원 마감(isFull=true) 교육은 opacity-50 클래스로 시각 구분되고,
- *   활성+여석 교육에는 붙지 않는다.
- * - 이벤트 클릭 시 /franchise-educations/:educationId로 navigate.
- * - 조회 실패 시 handleApiError를 통한 에러 토스트.
+ * - 조회 데이터가 테이블 행(교육명·교육일·장소·상태 pill)으로 렌더된다.
+ * - 파생 상태: 활성+여석 → 접수중, 비활성 → 비활성, 정원 마감 → 정원 마감.
+ * - 행 클릭 시 /franchise-educations/:educationId, [교육 등록] → /franchise-educations/new.
+ * - 조회 실패 시 handleApiError 토스트.
  */
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
@@ -38,9 +39,8 @@ function makeItem(
 ): FranchiseEducationCalendarItem {
   return {
     id,
-    // FullCalendar 초기 뷰(dayGridMonth)가 현재월(테스트 실행 시점 실제 시스템 날짜)을 보여주므로,
-    // 이벤트가 초기 뷰에 실제로 렌더되도록 오늘 날짜로 고정한다(다른 달로 고정하면 초기 뷰에
-    // 렌더되지 않아 findByText가 타임아웃난다).
+    // 기본 조회 월(당월) 범위에 들어오도록 오늘 날짜로 고정한다. (상태 파생상 과거일이면 "종료"가
+    // 되므로 오늘로 두어 활성/마감/비활성 파생을 그대로 검증한다.)
     date: dayjs().format('YYYY-MM-DD'),
     place: '본사 교육장',
     title,
@@ -48,6 +48,12 @@ function makeItem(
     isActive: true,
     ...overrides,
   }
+}
+
+function mockCalendar(items: FranchiseEducationCalendarItem[]) {
+  server.use(
+    http.get(`${BASE_URL}/api/franchise-educations/calendar`, () => HttpResponse.json(items)),
+  )
 }
 
 function renderPage() {
@@ -61,74 +67,78 @@ function renderPage() {
   )
 }
 
-describe('FranchiseEducationCalendarPage - 정상 렌더', () => {
-  it('교육 목록이 `제목 · 장소` 형식 캘린더 이벤트로 반영된다', async () => {
-    server.use(
-      http.get(`${BASE_URL}/api/franchise-educations/calendar`, () =>
-        HttpResponse.json([makeItem(1, '위생 교육')]),
-      ),
-    )
+/** 교육명 셀이 든 <tr> 스코프를 좁힌다. */
+function rowByTitle(title: string) {
+  const row = screen.getByText(title).closest('tr')
+  if (!row) {
+    throw new Error(`행(${title})을 찾을 수 없습니다`)
+  }
+  return within(row)
+}
+
+describe('FranchiseEducationCalendarPage - 목록 테이블', () => {
+  it('교육이 테이블 행(교육명·교육일·장소·상태)으로 렌더된다', async () => {
+    mockCalendar([makeItem(1, '위생 교육')])
 
     renderPage()
 
-    expect(await screen.findByText('위생 교육 · 본사 교육장')).toBeInTheDocument()
+    await screen.findByText('위생 교육')
+    const row = rowByTitle('위생 교육')
+    expect(row.getByText('본사 교육장')).toBeInTheDocument()
+    expect(row.getByText(dayjs().format('YYYY-MM-DD'))).toBeInTheDocument()
+    expect(row.getByText('접수중')).toBeInTheDocument()
   })
 
-  it('활성이고 정원 여유가 있는 교육에는 opacity-50 클래스가 붙지 않는다', async () => {
-    server.use(
-      http.get(`${BASE_URL}/api/franchise-educations/calendar`, () =>
-        HttpResponse.json([makeItem(2, '신메뉴 교육')]),
-      ),
-    )
+  it('활성이고 정원 여유가 있는 교육은 "접수중"으로 파생된다', async () => {
+    mockCalendar([makeItem(2, '신메뉴 교육')])
 
     renderPage()
 
-    const eventEl = await screen.findByText(/신메뉴 교육/)
-    const eventRoot = eventEl.closest('.fc-event')
-    expect(eventRoot).not.toHaveClass('opacity-50')
+    await screen.findByText('신메뉴 교육')
+    expect(rowByTitle('신메뉴 교육').getByText('접수중')).toBeInTheDocument()
   })
 
-  it('비활성(isActive=false) 교육은 opacity-50 클래스로 시각 구분된다', async () => {
-    server.use(
-      http.get(`${BASE_URL}/api/franchise-educations/calendar`, () =>
-        HttpResponse.json([makeItem(3, '비활성 교육', { isActive: false })]),
-      ),
-    )
+  it('비활성(isActive=false) 교육은 "비활성"으로 파생된다', async () => {
+    mockCalendar([makeItem(3, '비활성 교육', { isActive: false })])
 
     renderPage()
 
-    const eventEl = await screen.findByText(/비활성 교육/)
-    expect(eventEl.closest('.fc-event')).toHaveClass('opacity-50')
+    await screen.findByText('비활성 교육')
+    expect(rowByTitle('비활성 교육').getByText('비활성')).toBeInTheDocument()
   })
 
-  it('정원 마감(isFull=true) 교육은 opacity-50 클래스로 시각 구분된다', async () => {
-    server.use(
-      http.get(`${BASE_URL}/api/franchise-educations/calendar`, () =>
-        HttpResponse.json([makeItem(4, '마감 교육', { isFull: true })]),
-      ),
-    )
+  it('정원 마감(isFull=true) 교육은 "정원 마감"으로 파생된다', async () => {
+    mockCalendar([makeItem(4, '마감 교육', { isFull: true })])
 
     renderPage()
 
-    const eventEl = await screen.findByText(/마감 교육/)
-    expect(eventEl.closest('.fc-event')).toHaveClass('opacity-50')
+    await screen.findByText('마감 교육')
+    expect(rowByTitle('마감 교육').getByText('정원 마감')).toBeInTheDocument()
   })
 })
 
 describe('FranchiseEducationCalendarPage - 라우팅', () => {
-  it('이벤트 클릭 시 /franchise-educations/{educationId}로 이동한다', async () => {
-    server.use(
-      http.get(`${BASE_URL}/api/franchise-educations/calendar`, () =>
-        HttpResponse.json([makeItem(5, '위생 교육')]),
-      ),
-    )
+  it('행 클릭 시 /franchise-educations/{educationId}로 이동한다', async () => {
+    mockCalendar([makeItem(5, '위생 교육')])
+    const user = userEvent.setup()
 
     renderPage()
 
-    const eventEl = await screen.findByText(/위생 교육/)
-    eventEl.click()
+    await screen.findByText('위생 교육')
+    await user.click(screen.getByText('위생 교육'))
 
     await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith('/franchise-educations/5'))
+  })
+
+  it('[교육 등록] 버튼 클릭 시 /franchise-educations/new로 이동한다', async () => {
+    mockCalendar([])
+    const user = userEvent.setup()
+
+    renderPage()
+
+    await user.click(screen.getByRole('button', { name: '교육 등록' }))
+
+    expect(mockNavigate).toHaveBeenCalledWith('/franchise-educations/new')
   })
 })
 

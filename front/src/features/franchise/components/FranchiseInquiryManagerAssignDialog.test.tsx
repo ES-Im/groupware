@@ -10,12 +10,12 @@ import { FranchiseInquiryManagerAssignDialog } from './FranchiseInquiryManagerAs
 /**
  * FranchiseInquiryManagerAssignDialog(F1620, `FRANCHISE_INQUIRY_ASSIGN_ANSWER`,
  * ROADMAP(FRANCHISE) T5.3) 회귀 방지 테스트.
- * FranchiseCreateDialog.test.tsx의 mockDeptPickers 헬퍼(EmployeePicker 부서/부서원 목킹)와
- * MeetingParticipantsReplaceDialog.test.tsx의 성공/실패 검증 패턴을 그대로 복제한다.
+ * 사원 선택은 FranchiseManagerPicker(FRANCHISE 권한 사원 평면 목록, FRANCHISE_ASSIGNABLE_MANAGERS)로
+ * 이뤄진다 — 부서→부서원 드릴다운이 아니라 후보 목록에서 바로 이름을 고른다.
  *
  * 검증 대상:
  * - 미선택 상태에서는 [배정] 버튼이 비활성이다.
- * - 현재 담당자(currentManagerEmpId)는 부서원 목록에서 선택 불가(disabled)로 표시된다.
+ * - 현재 담당자(currentManagerEmpId)는 후보 목록에서 선택 불가(disabled)로 표시된다.
  * - 사원 1명 선택 후 [배정] 클릭 시 PATCH .../assign-answer?assignedEmpId={value}로 호출되고
  *   성공 토스트 + onOpenChange(false).
  * - 서버 판정 실패(도메인 위반) 시 handleApiError 토스트만 뜨고 onOpenChange(false)는 호출되지 않는다.
@@ -26,70 +26,17 @@ vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))
 
-function pageOf(items: unknown[]) {
-  return {
-    content: items,
-    totalElements: items.length,
-    totalPages: 1,
-    number: 0,
-    size: 50,
-    numberOfElements: items.length,
-    first: true,
-    last: true,
-    empty: items.length === 0,
-  }
-}
-
 /**
- * EmployeePicker가 마운트 시 호출하는 부서(DEPTS)/부서원(DEPT_MEMBERS) 목.
- * 부서원은 2명 구성 — empId 7(현재 담당자, disabledEmpIds로 비활성 확인용)과 empId 101(선택 대상).
+ * FranchiseManagerPicker가 마운트 시 호출하는 배정 후보(FRANCHISE_ASSIGNABLE_MANAGERS) 목.
+ * empId 7(현재 담당자, disabledEmpIds로 비활성 확인용)과 empId 101(선택 대상) 2명.
  */
-function mockDeptPickers() {
+function mockAssignableManagers() {
   server.use(
-    http.get(`${BASE_URL}/api/departments`, () =>
-      HttpResponse.json(
-        pageOf([
-          {
-            deptInfoResponse: {
-              deptId: 1,
-              deptCode: '001',
-              deptName: '영업팀',
-              isActive: true,
-              parentDeptId: null,
-            },
-            deptLeader: {
-              empId: null,
-              empNo: null,
-              empName: null,
-              extensionNo: null,
-              email: null,
-              position: null,
-            },
-          },
-        ]),
-      ),
-    ),
-    http.get(`${BASE_URL}/api/departments/1/members`, () =>
-      HttpResponse.json(
-        pageOf([
-          {
-            empId: 7,
-            empNo: 'E007',
-            empName: '김담당',
-            extensionNo: null,
-            email: 'kim@haruon.com',
-            position: '과장',
-          },
-          {
-            empId: 101,
-            empNo: 'E101',
-            empName: '박신입',
-            extensionNo: null,
-            email: 'park@haruon.com',
-            position: '사원',
-          },
-        ]),
-      ),
+    http.get(`${BASE_URL}/api/franchises/assignable-managers`, () =>
+      HttpResponse.json([
+        { empId: 7, empName: '김담당' },
+        { empId: 101, empName: '박신입' },
+      ]),
     ),
   )
 }
@@ -125,18 +72,15 @@ function renderDialog(open = true) {
 
 describe('FranchiseInquiryManagerAssignDialog - 선택 게이팅', () => {
   it('미선택 상태에서는 [배정] 버튼이 비활성이다', async () => {
-    mockDeptPickers()
+    mockAssignableManagers()
     renderDialog()
 
     expect(screen.getByRole('button', { name: '배정' })).toBeDisabled()
   })
 
-  it('현재 담당자(currentManagerEmpId)는 부서원 목록에서 선택 불가(disabled)로 표시된다', async () => {
-    mockDeptPickers()
-    const user = userEvent.setup()
+  it('현재 담당자(currentManagerEmpId)는 후보 목록에서 선택 불가(disabled)로 표시된다', async () => {
+    mockAssignableManagers()
     renderDialog()
-
-    await user.click(await screen.findByRole('button', { name: '영업팀' }))
 
     const currentManagerButton = await screen.findByRole('button', { name: /김담당/ })
     expect(currentManagerButton).toBeDisabled()
@@ -148,7 +92,7 @@ describe('FranchiseInquiryManagerAssignDialog - 선택 게이팅', () => {
 
 describe('FranchiseInquiryManagerAssignDialog - 배정 성공', () => {
   it('사원 1명 선택 후 [배정] 클릭 시 PATCH가 assignedEmpId 쿼리 파라미터로 호출되고 성공 토스트 + onOpenChange(false)', async () => {
-    mockDeptPickers()
+    mockAssignableManagers()
     let requestedQuery: string | null = null
     server.use(
       http.patch(`${BASE_URL}/api/franchise-inquiries/1/assign-answer`, ({ request }) => {
@@ -160,7 +104,6 @@ describe('FranchiseInquiryManagerAssignDialog - 배정 성공', () => {
     const user = userEvent.setup()
     const { onOpenChange } = renderDialog()
 
-    await user.click(await screen.findByRole('button', { name: '영업팀' }))
     await user.click(await screen.findByRole('button', { name: /박신입/ }))
     expect(screen.getByRole('button', { name: '박신입 선택 해제' })).toBeInTheDocument()
 
@@ -178,7 +121,7 @@ describe('FranchiseInquiryManagerAssignDialog - 배정 성공', () => {
 
 describe('FranchiseInquiryManagerAssignDialog - 배정 실패', () => {
   it('서버 도메인 위반(409) 시 handleApiError 토스트만 뜨고 onOpenChange(false)는 호출되지 않는다', async () => {
-    mockDeptPickers()
+    mockAssignableManagers()
     server.use(
       http.patch(`${BASE_URL}/api/franchise-inquiries/1/assign-answer`, () =>
         HttpResponse.json(
@@ -195,7 +138,6 @@ describe('FranchiseInquiryManagerAssignDialog - 배정 실패', () => {
     const user = userEvent.setup()
     const { onOpenChange } = renderDialog()
 
-    await user.click(await screen.findByRole('button', { name: '영업팀' }))
     await user.click(await screen.findByRole('button', { name: /박신입/ }))
     await user.click(screen.getByRole('button', { name: '배정' }))
 
@@ -207,7 +149,7 @@ describe('FranchiseInquiryManagerAssignDialog - 배정 실패', () => {
   })
 
   it('배정 요청 중에는 Esc로 닫을 수 없고, 응답 도착 후에 닫힌다', async () => {
-    mockDeptPickers()
+    mockAssignableManagers()
     let resolveResponse: (() => void) | undefined
     const gate = new Promise<void>((resolve) => {
       resolveResponse = resolve
@@ -221,7 +163,6 @@ describe('FranchiseInquiryManagerAssignDialog - 배정 실패', () => {
     const user = userEvent.setup()
     const { onOpenChange } = renderDialog()
 
-    await user.click(await screen.findByRole('button', { name: '영업팀' }))
     await user.click(await screen.findByRole('button', { name: /박신입/ }))
     await user.click(screen.getByRole('button', { name: '배정' }))
 

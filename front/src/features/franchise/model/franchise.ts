@@ -37,6 +37,16 @@ export interface Page<T> {
 export type FranchisesPage = Page<Franchise>
 
 /**
+ * 가맹점 담당자/답변 담당 배정 후보 사원 1건(`FRANCHISE_ASSIGNABLE_MANAGERS`).
+ * 배정 UI(FranchiseManagerPicker)에서 FRANCHISE 권한 사원만 후보로 노출하기 위한 경량 타입.
+ * 필드는 back/build/generated-snippets/FRANCHISE_ASSIGNABLE_MANAGERS/response-fields.adoc 실측 기준(배열 루트).
+ */
+export interface AssignableManager {
+  empId: number
+  empName: string
+}
+
+/**
  * 영업 상태(BusinessStatus) enum 코드 5종(백엔드 BusinessStatus.java 실측,
  * PRD §참조 계약 매핑 P2 영업상태 변경 행 — Open Q#2 해소 근거).
  * 목록 필터·영업상태 변경(FRANCHISE_STATUS_UPDATE)의 `status` 파라미터로 전송하는 값이다.

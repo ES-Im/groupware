@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { submitWithErrorMapping, useZodForm } from '@/shared/lib/form'
-import { EmployeePicker, type EmployeePickerEmployee } from '@/shared/components/EmployeePicker'
+import { type EmployeePickerEmployee } from '@/shared/components/EmployeePicker'
+import { FranchiseManagerPicker } from './FranchiseManagerPicker'
 import { Button } from '@/shared/ui/button'
 import {
   Dialog,
@@ -30,9 +31,9 @@ interface FranchiseCreateDialogProps {
  * 가맹점 등록 다이얼로그(`FRANCHISE_CREATE`, F1603, ROADMAP(FRANCHISE) T2.2).
  *
  * MeetingRoomCreateDialog와 동형인 useZodForm/submitWithErrorMapping 표준 폼 패턴이다.
- * 담당자(managerEmpId, 선택)는 폼 Input이 아니라 EmployeePicker(단일 선택) 로컬 상태로 관리하고
- * 제출 시 `selected[0]?.empId`를 payload에 합성한다(EmployeePicker는 배열 selected/onChange
- * 계약이라 optional 단일 필드 어댑팅이 필요).
+ * 담당자(managerEmpId, 선택)는 폼 Input이 아니라 FranchiseManagerPicker(FRANCHISE 권한 사원만
+ * 노출하는 단일 선택) 로컬 상태로 관리하고 제출 시 `selected[0]?.empId`를 payload에 합성한다
+ * (배열 selected/onChange 계약이라 optional 단일 필드 어댑팅이 필요).
  *
  * 성공(201 {franchiseId}) 시 mutation이 목록을 invalidate하므로 이 컴포넌트는 성공 토스트 +
  * 다이얼로그 닫기만 담당하고 목록에 머문다(회의실 등록의 "생성 상세로 이동"과 달리 P2 이동 없음 —
@@ -219,7 +220,7 @@ export function FranchiseCreateDialog({ open, onOpenChange }: FranchiseCreateDia
 
           <div className="flex flex-col gap-1.5">
             <Label>담당자 (선택)</Label>
-            <EmployeePicker
+            <FranchiseManagerPicker
               selected={selectedManager}
               onChange={setSelectedManager}
               multiple={false}

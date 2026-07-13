@@ -2,13 +2,14 @@ import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router'
 import { toast } from 'sonner'
 import dayjs from 'dayjs'
-import { X } from 'lucide-react'
+import { MessageSquare, Search, Store, User, X } from 'lucide-react'
 import { createColumnHelper, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { handleApiError } from '@/shared/lib/apiError'
 import { usePageState } from '@/shared/lib/usePageState'
 import type { PageMeta } from '@/shared/components/PaginationControls'
 import { PaginationControls } from '@/shared/components/PaginationControls'
-import { EmployeePicker, type EmployeePickerEmployee } from '@/shared/components/EmployeePicker'
+import { type EmployeePickerEmployee } from '@/shared/components/EmployeePicker'
+import { useMeQuery } from '@/features/employee/api/useMeQuery'
 import { Badge } from '@/shared/ui/badge'
 import { Button } from '@/shared/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
@@ -23,7 +24,9 @@ import {
 import { Input } from '@/shared/ui/input'
 import { cn } from '@/shared/lib/utils'
 import { useFranchiseInquiriesQuery } from '../api/useFranchiseInquiriesQuery'
+import { FranchiseManagerPicker } from '../components/FranchiseManagerPicker'
 import { FranchisePageHeader } from '../components/FranchisePageHeader'
+import { FranchiseStatusPill } from '../components/FranchiseStatusPill'
 import type { FranchiseInquiry } from '../model/franchise'
 
 /** 검색 디바운스 지연(ms). FranchiseListPage 등 목록 페이지 공통 값. */
@@ -62,6 +65,25 @@ export function FranchiseInquiryListPage() {
   const [to, setTo] = useState('')
 
   const { page, size, onPageChange, resetPage } = usePageState()
+
+  // 세그먼트(전체 문의 / 내 담당 문의) 전용 본인 정보. 담당자 필터(manager)를 나로 세팅/해제하는
+  // 얇은 시각 토글이며, 데이터 파이프라인은 기존 담당자 필터(assignedManagerId)를 그대로 재사용한다
+  // (신규 쿼리·상태 추가 없음 — 브리프 §7 최소 배선). empId/이름은 EmployeePickerEmployee 형태로 맞춘다.
+  const meQuery = useMeQuery()
+  const myEmpId = meQuery.data?.empBasicInfo.empId
+  const myName = meQuery.data?.empBasicInfo.name
+
+  // 세그먼트 건수 배지(목업 cbadge): 전체=필터 없는 totalElements, 내 담당=assignedManagerId=me의
+  // totalElements(size=1 count 쿼리). myEmpId 로딩 전에는 assignedManagerId undefined라 전체 쿼리와
+  // 동일 캐시를 공유해 추가 요청이 없고, 내 담당 배지는 myEmpId가 있을 때만 노출한다.
+  const allCountQuery = useFranchiseInquiriesQuery({ page: 0, size: 1 })
+  const mineCountQuery = useFranchiseInquiriesQuery({
+    assignedManagerId: myEmpId ?? undefined,
+    page: 0,
+    size: 1,
+  })
+  const allCount = allCountQuery.data?.totalElements
+  const mineCount = myEmpId != null ? mineCountQuery.data?.totalElements : undefined
 
   // 검색 입력 디바운스: 300ms 유예 후에만 확정된 keyword로 반영하고 페이지를 0으로 리셋한다.
   useEffect(() => {
@@ -126,6 +148,28 @@ export function FranchiseInquiryListPage() {
     resetPage()
   }
 
+  // 세그먼트 활성 상태 파생: 담당자 필터가 비었으면 '전체', 나로 지정됐으면 '내 담당'. 제3의
+  // 담당자가 지정된 경우 어느 쪽도 활성화되지 않는다(담당자 버튼 라벨이 그 상태를 대신 표시).
+  const isMineScope = manager != null && myEmpId != null && manager.empId === myEmpId
+  const isAllScope = manager == null
+
+  function handleScopeAll() {
+    if (manager == null) {
+      return
+    }
+    setManager(null)
+    resetPage()
+  }
+
+  function handleScopeMine() {
+    // 본인 정보 로딩 전이거나 이미 나로 지정된 상태면 무시한다.
+    if (myEmpId == null || myName == null || manager?.empId === myEmpId) {
+      return
+    }
+    setManager({ empId: myEmpId, empName: myName })
+    resetPage()
+  }
+
   // 필터 초기화(Ubold [초기화] 이식): 기존 상태 setter만 조합해 검색어·답변여부·담당자·기간을
   // 비운다(데이터 로직 신설 없음 — 순수 UI 편의).
   function handleResetFilters() {
@@ -151,13 +195,19 @@ export function FranchiseInquiryListPage() {
   const columns = useMemo(
     () => [
       columnHelper.accessor('franchiseName', {
-        // 가맹점명(강조) + 외부 식별자(externalId, 보조 텍스트)를 한 셀에 합친다(Ubold 셀 구조 이식).
+        // 가맹점명(강조) + 외부 식별자(externalId, 보조 텍스트)를 한 셀에 합친다(A안 톤 `.who` 셀 —
+        // 좌측 store 아이콘 타일 + 이름/식별자).
         header: '가맹점',
         cell: (info) => (
-          <div className="min-w-0">
-            <div className="truncate font-medium text-foreground">{info.getValue()}</div>
-            <div className="truncate text-xs text-muted-foreground">
-              {info.row.original.externalId}
+          <div className="flex items-center gap-3">
+            <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary [&_svg]:size-4">
+              <Store aria-hidden />
+            </span>
+            <div className="min-w-0">
+              <div className="truncate font-medium text-foreground">{info.getValue()}</div>
+              <div className="truncate text-xs text-muted-foreground">
+                {info.row.original.externalId}
+              </div>
             </div>
           </div>
         ),
@@ -172,9 +222,9 @@ export function FranchiseInquiryListPage() {
       columnHelper.accessor('isAnswered', {
         header: '답변여부',
         cell: (info) => (
-          <Badge variant={info.getValue() ? 'default' : 'secondary'}>
+          <FranchiseStatusPill variant={info.getValue() ? 'default' : 'secondary'}>
             {info.getValue() ? '답변완료' : '미답변'}
-          </Badge>
+          </FranchiseStatusPill>
         ),
       }),
       columnHelper.accessor('assignedManagerName', {
@@ -209,25 +259,93 @@ export function FranchiseInquiryListPage() {
         description="가맹점 문의를 답변 여부와 담당자 기준으로 확인합니다."
       />
 
+      {/* 세그먼트: 전체 문의 / 내 담당 문의(담당자 필터를 나로 토글하는 얇은 시각 레이어). */}
+      <div className="flex flex-wrap items-center gap-3">
+        <div
+          role="tablist"
+          aria-label="문의 범위"
+          className="inline-flex items-center rounded-lg bg-muted p-1"
+        >
+          <button
+            type="button"
+            role="tab"
+            aria-selected={isAllScope}
+            onClick={handleScopeAll}
+            className={cn(
+              'inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
+              isAllScope
+                ? 'bg-background text-foreground shadow-sm'
+                : 'text-muted-foreground hover:text-foreground',
+            )}
+          >
+            전체 문의
+            {allCount !== undefined && (
+              <span
+                className={cn(
+                  'ml-0.5 rounded-full px-1.5 text-xs font-semibold tabular-nums',
+                  isAllScope ? 'bg-primary/15 text-primary' : 'bg-foreground/10 text-muted-foreground',
+                )}
+              >
+                {allCount}
+              </span>
+            )}
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={isMineScope}
+            onClick={handleScopeMine}
+            disabled={myEmpId == null}
+            className={cn(
+              'inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors disabled:opacity-50',
+              isMineScope
+                ? 'bg-background text-foreground shadow-sm'
+                : 'text-muted-foreground hover:text-foreground',
+            )}
+          >
+            <User className="size-3.5" aria-hidden />
+            내 담당 문의
+            {mineCount !== undefined && (
+              <span
+                className={cn(
+                  'ml-0.5 rounded-full px-1.5 text-xs font-semibold tabular-nums',
+                  isMineScope ? 'bg-primary/15 text-primary' : 'bg-foreground/10 text-muted-foreground',
+                )}
+              >
+                {mineCount}
+              </span>
+            )}
+          </button>
+        </div>
+      </div>
+
       <Card className="h-fit">
         <CardHeader className="border-b">
           <div className="flex flex-wrap items-center gap-2">
-            <CardTitle>문의 목록</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <MessageSquare className="size-4 text-primary" aria-hidden />
+              문의 목록
+            </CardTitle>
             {inquiriesQuery.data && (
-              <Badge variant="secondary">{pageInfo.totalElements}건</Badge>
+              <Badge variant="secondary" className="tabular-nums">
+                {pageInfo.totalElements}건
+              </Badge>
             )}
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* 필터 툴바: 검색어 + 답변여부 + 담당자 + 기간(from/to) + 초기화 */}
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-            <Input
-              value={searchInput}
-              onChange={(event) => setSearchInput(event.target.value)}
-              placeholder="문의 제목 검색"
-              aria-label="문의 제목 검색"
-              className="h-8 w-full sm:w-64"
-            />
+            <div className="relative w-full sm:w-64">
+              <Search className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={searchInput}
+                onChange={(event) => setSearchInput(event.target.value)}
+                placeholder="문의 제목 검색"
+                aria-label="문의 제목 검색"
+                className="h-9 w-full pl-8"
+              />
+            </div>
             <div className="flex items-center gap-2">
               <label htmlFor="franchise-inquiry-answered" className="sr-only">
                 답변여부 필터
@@ -238,7 +356,7 @@ export function FranchiseInquiryListPage() {
                 onChange={(event) =>
                   handleAnsweredFilterChange(event.target.value as AnsweredFilter)
                 }
-                className="h-8 rounded-lg border border-input bg-transparent px-2.5 text-sm text-foreground transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
+                className="h-9 rounded-lg border border-input bg-transparent px-2.5 text-sm text-foreground transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
               >
                 <option value="all">답변여부 전체</option>
                 <option value="true">답변완료</option>
@@ -249,7 +367,7 @@ export function FranchiseInquiryListPage() {
               <Button
                 type="button"
                 variant="outline"
-                size="sm"
+                size="lg"
                 onClick={() => setManagerDialogOpen(true)}
               >
                 {manager ? `담당자: ${manager.empName}` : '담당자 전체'}
@@ -258,7 +376,7 @@ export function FranchiseInquiryListPage() {
                 <Button
                   type="button"
                   variant="ghost"
-                  size="icon-sm"
+                  size="icon-lg"
                   onClick={handleManagerClear}
                   aria-label="담당자 필터 해제"
                 >
@@ -276,7 +394,7 @@ export function FranchiseInquiryListPage() {
                 value={from}
                 onChange={(event) => handleFromChange(event.target.value)}
                 aria-label="조회 시작일"
-                className="h-8 w-40"
+                className="h-9 w-40"
               />
               <span className="text-sm text-muted-foreground">~</span>
               <label htmlFor="franchise-inquiry-to" className="sr-only">
@@ -288,13 +406,13 @@ export function FranchiseInquiryListPage() {
                 value={to}
                 onChange={(event) => handleToChange(event.target.value)}
                 aria-label="조회 종료일"
-                className="h-8 w-40"
+                className="h-9 w-40"
               />
             </div>
             <Button
               type="button"
               variant="outline"
-              size="sm"
+              size="lg"
               onClick={handleResetFilters}
               className="sm:ml-auto"
             >
@@ -371,7 +489,8 @@ export function FranchiseInquiryListPage() {
         </CardContent>
       </Card>
 
-      {/* 담당자 필터 다이얼로그: Popover 프리미티브 부재로 Dialog+EmployeePicker(단일 선택) 조합. */}
+      {/* 담당자 필터 다이얼로그: Popover 프리미티브 부재로 Dialog + FranchiseManagerPicker(FRANCHISE
+          권한 사원만 노출하는 단일 선택) 조합. */}
       <Dialog open={managerDialogOpen} onOpenChange={setManagerDialogOpen}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
@@ -382,7 +501,7 @@ export function FranchiseInquiryListPage() {
             </DialogDescription>
           </DialogHeader>
 
-          <EmployeePicker selected={managerDraft} onChange={setManagerDraft} multiple={false} />
+          <FranchiseManagerPicker selected={managerDraft} onChange={setManagerDraft} multiple={false} />
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setManagerDialogOpen(false)}>

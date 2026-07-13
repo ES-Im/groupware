@@ -9,8 +9,8 @@ import { FranchiseCreateDialog } from './FranchiseCreateDialog'
 
 /**
  * FranchiseCreateDialog(F1603, ROADMAP(FRANCHISE) T2.2) 검증.
- * MeetingRoomCreateDialog.test.tsx와 동형 패턴 + EmployeePicker 부서/부서원 목킹은
- * MeetingParticipantsReplaceDialog.test.tsx의 mockDeptPickers 헬퍼를 복제한다.
+ * MeetingRoomCreateDialog.test.tsx와 동형 패턴. 담당자 선택은 FranchiseManagerPicker(FRANCHISE
+ * 권한 사원 평면 목록, FRANCHISE_ASSIGNABLE_MANAGERS)로 이뤄지므로 해당 엔드포인트를 목킹한다.
  *
  * - zod 클라 사전검증(필수 6필드) 실패 시 role=alert 인라인 에러 + 요청 미발생.
  * - 담당자 미선택 제출 시 POST body에서 managerEmpId 키 생략, 선택 시 selected[0].empId 합성.
@@ -24,59 +24,14 @@ vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))
 
-function pageOf(items: unknown[]) {
-  return {
-    content: items,
-    totalElements: items.length,
-    totalPages: 1,
-    number: 0,
-    size: 50,
-    numberOfElements: items.length,
-    first: true,
-    last: true,
-    empty: items.length === 0,
-  }
-}
-
-/** EmployeePicker가 마운트 시 호출하는 부서(DEPTS)/부서원(DEPT_MEMBERS) 목. */
-function mockDeptPickers() {
+/**
+ * FranchiseManagerPicker가 마운트 시 호출하는 배정 후보(FRANCHISE_ASSIGNABLE_MANAGERS) 목.
+ * 담당자 선택 대상은 empId 101(김담당) 1명.
+ */
+function mockAssignableManagers() {
   server.use(
-    http.get(`${BASE_URL}/api/departments`, () =>
-      HttpResponse.json(
-        pageOf([
-          {
-            deptInfoResponse: {
-              deptId: 1,
-              deptCode: '001',
-              deptName: '영업팀',
-              isActive: true,
-              parentDeptId: null,
-            },
-            deptLeader: {
-              empId: null,
-              empNo: null,
-              empName: null,
-              extensionNo: null,
-              email: null,
-              position: null,
-            },
-          },
-        ]),
-      ),
-    ),
-    http.get(`${BASE_URL}/api/departments/1/members`, () =>
-      HttpResponse.json(
-        pageOf([
-          {
-            empId: 101,
-            empNo: 'E101',
-            empName: '김담당',
-            extensionNo: null,
-            email: 'kim@haruon.com',
-            position: '사원',
-          },
-        ]),
-      ),
+    http.get(`${BASE_URL}/api/franchises/assignable-managers`, () =>
+      HttpResponse.json([{ empId: 101, empName: '김담당' }]),
     ),
   )
 }
@@ -118,7 +73,7 @@ describe('FranchiseCreateDialog - 클라 사전검증', () => {
   })
 
   it('빈 값 제출 시 필수 6필드의 zod 메시지가 role=alert로 노출되고 POST 요청이 발생하지 않는다', async () => {
-    mockDeptPickers()
+    mockAssignableManagers()
     let postCalls = 0
     server.use(
       http.post(`${BASE_URL}/api/franchises`, () => {
@@ -147,7 +102,7 @@ describe('FranchiseCreateDialog - 클라 사전검증', () => {
   })
 
   it('사업자번호 형식(000-00-00000) 위반 시 형식 메시지가 노출되고 POST 요청이 발생하지 않는다', async () => {
-    mockDeptPickers()
+    mockAssignableManagers()
     let postCalls = 0
     server.use(
       http.post(`${BASE_URL}/api/franchises`, () => {
@@ -176,7 +131,7 @@ describe('FranchiseCreateDialog - 제출 성공', () => {
   })
 
   it('담당자 미선택 제출 시 body에서 managerEmpId가 생략되고 성공 토스트 + onOpenChange(false)', async () => {
-    mockDeptPickers()
+    mockAssignableManagers()
     let requestedBody: Record<string, unknown> | undefined
     server.use(
       http.post(`${BASE_URL}/api/franchises`, async ({ request }) => {
@@ -207,8 +162,8 @@ describe('FranchiseCreateDialog - 제출 성공', () => {
     expect(onOpenChange).toHaveBeenCalledWith(false)
   })
 
-  it('EmployeePicker로 담당자를 선택해 제출하면 body에 selected[0].empId가 managerEmpId로 합성된다', async () => {
-    mockDeptPickers()
+  it('FranchiseManagerPicker로 담당자를 선택해 제출하면 body에 selected[0].empId가 managerEmpId로 합성된다', async () => {
+    mockAssignableManagers()
     let requestedBody: Record<string, unknown> | undefined
     server.use(
       http.post(`${BASE_URL}/api/franchises`, async ({ request }) => {
@@ -219,8 +174,7 @@ describe('FranchiseCreateDialog - 제출 성공', () => {
     const user = userEvent.setup()
     const { onOpenChange } = renderDialog()
 
-    // 부서 → 부서원 순으로 탐색해 단일 선택(multiple=false).
-    await user.click(await screen.findByRole('button', { name: '영업팀' }))
+    // FranchiseManagerPicker 후보 목록에서 바로 단일 선택(multiple=false).
     await user.click(await screen.findByRole('button', { name: /김담당/ }))
     expect(screen.getByRole('button', { name: '김담당 선택 해제' })).toBeInTheDocument()
 
@@ -236,7 +190,7 @@ describe('FranchiseCreateDialog - 제출 성공', () => {
   })
 
   it('제출 중에는 Esc/취소로 닫을 수 없고, 응답 도착 후에 닫힌다', async () => {
-    mockDeptPickers()
+    mockAssignableManagers()
     let resolveResponse: (() => void) | undefined
     const gate = new Promise<void>((resolve) => {
       resolveResponse = resolve
@@ -269,7 +223,7 @@ describe('FranchiseCreateDialog - 서버 판정 실패', () => {
   })
 
   it('VALIDATION_ERROR 시 root 에러가 role=alert로 표시되고 닫히지 않으며 입력값이 유지된다', async () => {
-    mockDeptPickers()
+    mockAssignableManagers()
     server.use(
       http.post(`${BASE_URL}/api/franchises`, () =>
         HttpResponse.json(
@@ -305,12 +259,11 @@ describe('FranchiseCreateDialog - 닫기/재오픈 리셋', () => {
   })
 
   it('닫았다 다시 열면 이전 입력값과 담당자 선택이 남지 않는다', async () => {
-    mockDeptPickers()
+    mockAssignableManagers()
     const user = userEvent.setup()
     const { setOpen } = renderDialog()
 
     await user.type(screen.getByLabelText(/가맹점명/), 'HARUON 강남점')
-    await user.click(await screen.findByRole('button', { name: '영업팀' }))
     await user.click(await screen.findByRole('button', { name: /김담당/ }))
     expect(screen.getByRole('button', { name: '김담당 선택 해제' })).toBeInTheDocument()
 

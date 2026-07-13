@@ -18,6 +18,8 @@ export const franchiseKeys = {
   }) => [...franchiseKeys.all, 'list', params] as const,
   /** 가맹점 상세 조회(FRANCHISE_DETAIL). */
   detail: (franchiseId: number) => [...franchiseKeys.all, 'detail', franchiseId] as const,
+  /** 배정 후보(FRANCHISE 권한 사원) 목록(FRANCHISE_ASSIGNABLE_MANAGERS). 파라미터 없는 단일 목록. */
+  assignableManagers: () => [...franchiseKeys.all, 'assignableManagers'] as const,
   /** 월 매출 조회(FRANCHISE_SALES_MONTHLY). yearMonth는 요청 경로와 동일한 `yyyy-MM` 문자열. */
   monthlySales: (franchiseId: number, yearMonth: string) =>
     [...franchiseKeys.all, 'monthlySales', franchiseId, yearMonth] as const,

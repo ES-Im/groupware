@@ -1,39 +1,75 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router'
 import { toast } from 'sonner'
-import { CalendarDays, CircleCheck, Users } from 'lucide-react'
-import type { EventClickArg, EventInput } from '@fullcalendar/core'
+import dayjs from 'dayjs'
+import { BookOpen, Search } from 'lucide-react'
 import { handleApiError } from '@/shared/lib/apiError'
 import { Badge } from '@/shared/ui/badge'
 import { Button } from '@/shared/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
+import { Input } from '@/shared/ui/input'
+import { cn } from '@/shared/lib/utils'
 import { useFranchiseEducationCalendarQuery } from '../api/useFranchiseEducationCalendarQuery'
-import { FranchiseEducationCalendar } from '../components/FranchiseEducationCalendar'
-import { FranchiseEducationCreateDialog } from '../components/FranchiseEducationCreateDialog'
-import { FranchiseMetricCard } from '../components/FranchiseMetricCard'
 import { FranchisePageHeader } from '../components/FranchisePageHeader'
-import { buildFranchiseCalendarRangeParams, type CalendarRangeParams } from '../lib/calendarRange'
+import { FranchiseStatusPill } from '../components/FranchiseStatusPill'
+import type { FranchiseEducationCalendarItem } from '../model/franchise'
+
+/** 상태 필터 값. 'all'은 전체(파생 상태와 무관). */
+type EducationStatusFilter = 'all' | '접수중' | '정원 마감' | '비활성' | '종료'
+
+/** 파생 상태 pill 변형. FranchiseStatusPill 변형만 사용(코드 발명 없음). */
+type PillVariant = 'default' | 'secondary' | 'outline' | 'destructive'
 
 /**
- * P4 가맹점 교육 캘린더 페이지(F1609, ROADMAP(FRANCHISE) T4.1 — MyMeetingCalendarPage 동형).
+ * 교육 목록 항목의 파생 상태. 교육 목록(FRANCHISE_EDUCATION_CALENDAR)은 유형·신청/정원 필드가 없어
+ * (계약 실측), 보유 필드(isActive/isFull/date)만으로 상태를 도출한다: 비활성 → 종료(과거) → 정원
+ * 마감 → 접수중 우선순위. 하드코딩 없이 데이터에서 파생한다.
+ */
+function deriveEducationStatus(item: FranchiseEducationCalendarItem): {
+  label: EducationStatusFilter
+  variant: PillVariant
+} {
+  if (!item.isActive) {
+    return { label: '비활성', variant: 'outline' }
+  }
+  if (dayjs(item.date).isBefore(dayjs(), 'day')) {
+    return { label: '종료', variant: 'secondary' }
+  }
+  if (item.isFull) {
+    return { label: '정원 마감', variant: 'destructive' }
+  }
+  return { label: '접수중', variant: 'default' }
+}
+
+const STATUS_OPTIONS: EducationStatusFilter[] = ['접수중', '정원 마감', '비활성', '종료']
+
+/**
+ * P4 가맹점 교육 관리 페이지(F1609, ROADMAP(FRANCHISE) T4.1).
+ * /franchise-educations 라우트에 마운트된다(export명은 라우터/테스트 참조 유지를 위해 종전대로 두되,
+ * UI 개편(2026-07-13, 목업 기준)으로 FullCalendar를 걷어내고 **교육 목록 테이블**로 재구성했다).
  *
- * T4.1 래퍼(FranchiseEducationCalendar)에 교육 캘린더 조회 결과를 이벤트로 바인딩한다.
- * 월 이동 시 datesSet → buildFranchiseCalendarRangeParams로 range state가 갱신되고 queryKey가
- * 바뀌어 자동 재조회된다(최초 마운트는 range undefined → 서버 당월 기본값 위임).
- *
- * 이벤트에는 제목·장소를 표기하고, 비활성(isActive=false) 또는 정원 마감(isFull=true) 교육은
- * classNames(opacity-50)로만 최소 시각 구분한다(스타일링은 adapt-ui 단계로 미룸 — 내 예약
- * 캘린더의 취소건 구분과 동일 방식). 이벤트 클릭 시 P5 상세(`/franchise-educations/:educationId`)
- * 라우트 문자열만 내비게이션한다.
- *
- * `[교육 등록]` 다이얼로그(F1612, T4.2, MeetingRoomManagementPage의 등록 버튼 배선과 동형)는
- * 헤더에 트리거 버튼을 두고, 성공 시 생성된 교육의 P5(상세)로 자동 이동한다.
+ * 교육 목록 데이터원은 여전히 범위 기반 교육 캘린더 조회(FRANCHISE_EDUCATION_CALENDAR — 페이지네이션
+ * 목록 엔드포인트가 없다)다. 월 선택(기본 당월)으로 조회 범위를 바꾸고, 상태·검색은 배열에 대한
+ * 클라이언트 필터로 처리한다(서버 필터 파라미터 부재). 상태 컬럼은 보유 필드에서 파생하며, 목업의
+ * 유형·신청/정원 컬럼은 계약에 데이터가 없어 제거했다(정책 A). 행 클릭 → P5 상세, `[교육 등록]` →
+ * 전용 페이지(/franchise-educations/new).
  */
 export function FranchiseEducationCalendarPage() {
   const navigate = useNavigate()
-  const [range, setRange] = useState<CalendarRangeParams | undefined>(undefined)
-  const [createDialogOpen, setCreateDialogOpen] = useState(false)
-  const { data, error } = useFranchiseEducationCalendarQuery(range?.start, range?.end)
+
+  const [month, setMonth] = useState(() => dayjs().format('YYYY-MM'))
+  const [statusFilter, setStatusFilter] = useState<EducationStatusFilter>('all')
+  const [keyword, setKeyword] = useState('')
+
+  // 월 선택으로 캘린더 조회 범위를 만든다(start 포함·end 미포함, yyyy-MM-dd'T'HH:mm:ss). 월 입력이
+  // 비면 범위를 생략해 서버 당월 기본값에 위임한다.
+  const hasMonth = /^\d{4}-\d{2}$/.test(month)
+  const start = hasMonth ? `${month}-01T00:00:00` : undefined
+  const end = hasMonth
+    ? `${dayjs(`${month}-01`).add(1, 'month').format('YYYY-MM-DD')}T00:00:00`
+    : undefined
+
+  const { data, isLoading, error } = useFranchiseEducationCalendarQuery(start, end)
 
   useEffect(() => {
     if (!error) {
@@ -42,83 +78,168 @@ export function FranchiseEducationCalendarPage() {
     handleApiError(error, { toast })
   }, [error])
 
-  // 캘린더 조회 결과는 페이지네이션이 아니라 표시 범위 전체 배열이므로, KPI를 실데이터로 정확히
-  // 집계할 수 있다(교육 수·활성·정원 마감).
   const items = data ?? []
-  const activeCount = items.filter((item) => item.isActive).length
-  const fullCount = items.filter((item) => item.isFull).length
 
-  const events: EventInput[] = items.map((item) => ({
-    id: String(item.id),
-    title: `${item.title} · ${item.place}`,
-    start: item.date,
-    classNames: !item.isActive || item.isFull ? ['opacity-50'] : [],
-  }))
-
-  function handleRangeChange(nextRange: { start: Date; end: Date }) {
-    setRange(buildFranchiseCalendarRangeParams(nextRange.start, nextRange.end))
-  }
-
-  function handleEventClick(info: EventClickArg) {
-    navigate(`/franchise-educations/${info.event.id}`)
-  }
+  // 클라이언트 필터: 상태(파생) + 검색(교육명 contains).
+  const filtered = useMemo(() => {
+    const trimmed = keyword.trim().toLowerCase()
+    return items.filter((item) => {
+      const status = deriveEducationStatus(item).label
+      if (statusFilter !== 'all' && status !== statusFilter) {
+        return false
+      }
+      if (trimmed && !item.title.toLowerCase().includes(trimmed)) {
+        return false
+      }
+      return true
+    })
+  }, [items, statusFilter, keyword])
 
   return (
-    <div className="w-full space-y-6 p-4 sm:p-6 lg:p-8">
+    <div className="flex w-full flex-col gap-6 p-4 sm:p-6 lg:p-8 lg:min-h-full">
       <FranchisePageHeader
         title="가맹점 교육"
-        description="교육 일정과 마감·활성 상태를 캘린더 기준으로 살펴봅니다."
+        description="가맹점 대상 교육을 등록하고 신청 현황을 관리합니다."
       >
-        <Button type="button" onClick={() => setCreateDialogOpen(true)}>
+        <Button type="button" onClick={() => navigate('/franchise-educations/new')}>
           교육 등록
         </Button>
       </FranchisePageHeader>
 
-      {/* KPI: 표시 범위 전체 배열에서 집계(페이지네이션 아님). */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <FranchiseMetricCard
-          title="교육 수"
-          value={`${items.length}건`}
-          description="현재 캘린더 범위 기준"
-          icon={<CalendarDays />}
-          accent="primary"
-        />
-        <FranchiseMetricCard
-          title="활성 교육"
-          value={`${activeCount}건`}
-          description="신청 가능 상태"
-          icon={<CircleCheck />}
-          accent="muted"
-        />
-        <FranchiseMetricCard
-          title="정원 마감"
-          value={`${fullCount}건`}
-          description="만석 교육 수"
-          icon={<Users />}
-          accent="destructive"
-        />
-      </div>
-
-      <Card className="h-fit">
+      <Card className="lg:flex-1">
         <CardHeader className="border-b">
-          <CardTitle>교육 일정</CardTitle>
+          <div className="flex flex-wrap items-center gap-2">
+            <CardTitle className="flex items-center gap-2">
+              <BookOpen className="size-4 text-primary" aria-hidden />
+              교육 목록
+            </CardTitle>
+            {data && (
+              <Badge variant="secondary" className="tabular-nums">
+                {filtered.length}건
+              </Badge>
+            )}
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* 범례: 이벤트 흐림 처리(비활성/정원 마감) 의미 안내. */}
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="default">진행 예정</Badge>
-            <Badge variant="destructive">정원 마감</Badge>
-            <Badge variant="outline">비활성</Badge>
+          {/* 필터 툴바: 월 선택 + 상태 + 검색. */}
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+            <div>
+              <label htmlFor="franchise-education-month" className="sr-only">
+                조회 월
+              </label>
+              <Input
+                id="franchise-education-month"
+                type="month"
+                value={month}
+                onChange={(event) => setMonth(event.target.value)}
+                aria-label="조회 월"
+                className="h-9 w-44"
+              />
+            </div>
+            <div>
+              <label htmlFor="franchise-education-status" className="sr-only">
+                상태 필터
+              </label>
+              <select
+                id="franchise-education-status"
+                value={statusFilter}
+                onChange={(event) => setStatusFilter(event.target.value as EducationStatusFilter)}
+                className="h-9 rounded-lg border border-input bg-transparent px-2.5 text-sm text-foreground transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
+              >
+                <option value="all">전체 상태</option>
+                {STATUS_OPTIONS.map((status) => (
+                  <option key={status} value={status}>
+                    {status}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="relative w-full sm:w-64">
+              <Search className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={keyword}
+                onChange={(event) => setKeyword(event.target.value)}
+                placeholder="교육명 검색"
+                aria-label="교육명 검색"
+                className="h-9 w-full pl-8"
+              />
+            </div>
           </div>
-          <FranchiseEducationCalendar
-            events={events}
-            onRangeChange={handleRangeChange}
-            onEventClick={handleEventClick}
-          />
+
+          {isLoading ? (
+            <p className="py-8 text-center text-sm text-muted-foreground">불러오는 중...</p>
+          ) : error ? (
+            <p className="py-8 text-center text-sm text-muted-foreground">
+              교육 목록을 불러오지 못했습니다.
+            </p>
+          ) : filtered.length === 0 ? (
+            <p className="py-8 text-center text-sm text-muted-foreground">
+              조회 조건에 해당하는 교육이 없습니다.
+            </p>
+          ) : (
+            <div className="w-full overflow-x-auto">
+              <table className="w-full border-collapse text-sm">
+                <thead>
+                  <tr className="border-b border-border">
+                    <th className="px-3 py-2.5 text-left text-xs font-medium whitespace-nowrap text-muted-foreground">
+                      교육명
+                    </th>
+                    <th className="px-3 py-2.5 text-left text-xs font-medium whitespace-nowrap text-muted-foreground">
+                      교육일
+                    </th>
+                    <th className="px-3 py-2.5 text-left text-xs font-medium whitespace-nowrap text-muted-foreground">
+                      장소
+                    </th>
+                    <th className="px-3 py-2.5 text-right text-xs font-medium whitespace-nowrap text-muted-foreground">
+                      상태
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filtered.map((item) => {
+                    const status = deriveEducationStatus(item)
+                    return (
+                      <tr
+                        key={item.id}
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => navigate(`/franchise-educations/${item.id}`)}
+                        onKeyDown={(event) => {
+                          if (event.key === 'Enter') {
+                            navigate(`/franchise-educations/${item.id}`)
+                          }
+                        }}
+                        className={cn(
+                          'cursor-pointer border-b border-border transition-colors last:border-0',
+                          'hover:bg-muted/50 focus-visible:bg-muted/50 focus-visible:outline-none',
+                        )}
+                      >
+                        <td className="px-3 py-3 align-middle">
+                          <div className="flex items-center gap-3">
+                            <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary [&_svg]:size-4">
+                              <BookOpen aria-hidden />
+                            </span>
+                            <span className="font-medium text-foreground">{item.title}</span>
+                          </div>
+                        </td>
+                        <td className="px-3 py-3 align-middle whitespace-nowrap text-muted-foreground tabular-nums">
+                          {item.date}
+                        </td>
+                        <td className="px-3 py-3 align-middle text-muted-foreground">{item.place}</td>
+                        <td className="px-3 py-3 text-right align-middle whitespace-nowrap">
+                          <FranchiseStatusPill variant={status.variant}>
+                            {status.label}
+                          </FranchiseStatusPill>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
         </CardContent>
       </Card>
-
-      <FranchiseEducationCreateDialog open={createDialogOpen} onOpenChange={setCreateDialogOpen} />
     </div>
   )
 }

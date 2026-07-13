@@ -1,16 +1,18 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router'
 import { toast } from 'sonner'
+import { MessageSquare, Send, Store } from 'lucide-react'
 import { isNotFound, normalizeApiError } from '@/shared/lib/apiError'
 import { useMeQuery } from '@/features/employee/api/useMeQuery'
-import { Badge } from '@/shared/ui/badge'
 import { Button } from '@/shared/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
 import { useFranchiseInquiryAnswerQuery } from '../api/useFranchiseInquiryAnswerQuery'
 import { useFranchiseInquiryDetailQuery } from '../api/useFranchiseInquiryDetailQuery'
+import { FranchiseBackLink } from '../components/FranchiseBackLink'
+import { FranchiseInfoList, type FranchiseInfoItem } from '../components/FranchiseInfoList'
 import { FranchiseInquiryAnswerForm } from '../components/FranchiseInquiryAnswerForm'
 import { FranchiseInquiryManagerAssignDialog } from '../components/FranchiseInquiryManagerAssignDialog'
-import { FranchisePageHeader } from '../components/FranchisePageHeader'
+import { FranchiseStatusPill } from '../components/FranchiseStatusPill'
 
 /**
  * P7 가맹점 문의 상세 페이지(F1618·F1619, ROADMAP(FRANCHISE) T5.2).
@@ -120,97 +122,130 @@ export function FranchiseInquiryDetailPage() {
   const isOwner = isAssigned && myEmpId === inquiry.assignedManagerId
   const canEditAnswer = isOwner && !answer?.isSubmitted
 
+  // 우측 가맹점 정보 요약 infolist(목업 가맹점 요약). 역조회 API 부재로 "이 가맹점 최근 문의"
+  // 리스트는 제외한다. 담당자(답변 담당)는 목업 배치대로 답변 카드 헤더로 옮겼다.
+  const summaryItems: FranchiseInfoItem[] = [
+    { label: '가맹점', value: inquiry.franchiseName },
+    { label: '코드', value: inquiry.externalId, mono: true },
+    { label: '문의자 연락처', value: inquiry.inquirerContact, mono: true },
+    { label: '문의일시', value: inquiry.inquiryAt, mono: true },
+  ]
+
   return (
     <div className="w-full space-y-6 p-4 sm:p-6 lg:p-8">
-      <FranchisePageHeader
-        title="가맹점 문의 상세"
-        description="문의 본문과 답변 상태를 확인하고 담당자·답변을 처리합니다."
-      />
+      <FranchiseBackLink to="/franchise-inquiries">문의 관리</FranchiseBackLink>
 
-      <Card>
-        <CardHeader className="border-b">
-          <div className="flex flex-col gap-2">
-            <div className="flex flex-wrap items-center gap-2">
-              <CardTitle className="text-lg">{inquiry.inquiryTitle}</CardTitle>
-              {inquiry.isDeleted && <Badge variant="destructive">삭제 요청</Badge>}
-            </div>
-            {/* 가맹점명·문의일시를 개별 span으로 분리해 각 값을 독립 텍스트 노드로 유지한다
-                (가운뎃점은 장식). */}
-            <p className="text-sm text-muted-foreground">
-              <span>{inquiry.franchiseName}</span>
-              <span aria-hidden className="px-1.5">
-                ·
-              </span>
-              <span>{inquiry.inquiryAt}</span>
-            </p>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <div className="rounded-lg border border-border bg-muted/40 p-3">
-              <dt className="text-xs text-muted-foreground">문의자 연락처</dt>
-              <dd className="mt-1 font-medium break-words">{inquiry.inquirerContact}</dd>
-            </div>
-            <div className="rounded-lg border border-border bg-muted/40 p-3">
-              <dt className="text-xs text-muted-foreground">담당자</dt>
-              <dd className="mt-1 flex flex-wrap items-center gap-2">
-                <span className="font-medium">{inquiry.assignedManagerName ?? '미배정'}</span>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setAssignDialogOpen(true)}
-                >
-                  담당자 배정
-                </Button>
-              </dd>
-            </div>
-            <div className="rounded-lg border border-border bg-muted/40 p-3 sm:col-span-2">
-              <dt className="text-xs text-muted-foreground">문의 내용</dt>
-              <dd className="mt-1 text-sm whitespace-pre-wrap">{inquiry.inquiryContent}</dd>
-            </div>
-          </dl>
-        </CardContent>
-      </Card>
+      {/* 본문 grid-cd: 좌 넓게 문의 본문 + 답변, 우 좁게 가맹점 정보 요약. */}
+      <div className="grid items-start gap-4 lg:grid-cols-[1fr_360px]">
+        <div className="space-y-4">
+          {/* 문의 본문 카드. */}
+          <Card>
+            <CardHeader className="border-b">
+              <div className="flex flex-wrap items-center gap-2">
+                <CardTitle className="flex min-w-0 items-center gap-2">
+                  <MessageSquare className="size-4 shrink-0 text-primary" aria-hidden />
+                  <span className="truncate">{inquiry.inquiryTitle}</span>
+                </CardTitle>
+                <div className="ml-auto flex items-center gap-2">
+                  {!answerQuery.isLoading && (
+                    <FranchiseStatusPill variant={answer?.isSubmitted ? 'default' : 'secondary'}>
+                      {answer?.isSubmitted ? '답변완료' : '미답변'}
+                    </FranchiseStatusPill>
+                  )}
+                  {inquiry.isDeleted && (
+                    <FranchiseStatusPill variant="destructive">삭제 요청</FranchiseStatusPill>
+                  )}
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* 가맹점명·문의일시를 개별 span으로 분리해 각 값을 독립 텍스트 노드로 유지한다
+                  (가운뎃점은 장식). */}
+              <p className="text-sm text-muted-foreground">
+                <span>{inquiry.franchiseName}</span>
+                <span aria-hidden className="px-1.5">
+                  ·
+                </span>
+                <span>{inquiry.inquiryAt}</span>
+              </p>
+              <p className="text-sm leading-relaxed whitespace-pre-wrap">{inquiry.inquiryContent}</p>
+            </CardContent>
+          </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">답변</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {answerQuery.isLoading || meQuery.isLoading ? (
-            <p className="text-sm text-muted-foreground">불러오는 중...</p>
-          ) : !isAssigned ? (
-            <p className="text-sm text-muted-foreground">
-              담당자가 배정되지 않아 답변을 작성할 수 없습니다. 위 담당자 배정 버튼으로 먼저
-              담당자를 지정해주세요.
-            </p>
-          ) : canEditAnswer ? (
-            <FranchiseInquiryAnswerForm inquiryId={inquiryId} answer={answer} />
-          ) : answer ? (
-            <dl className="grid grid-cols-1 gap-x-8 gap-y-3 sm:grid-cols-2">
-              <div className="space-y-0.5 sm:col-span-2">
-                <dt className="text-xs text-muted-foreground">내용</dt>
-                <dd className="text-sm whitespace-pre-wrap">{answer.content}</dd>
+          {/* 답변 카드(담당자 미배정/본인아님·발송됨/본인·미발송 3분기 — 배선 유지). 목업대로 답변
+              담당(배정)을 카드 헤더에 인라인 배치하되, 사원 선택은 기존 배정 다이얼로그를 재사용한다. */}
+          <Card>
+            <CardHeader className="border-b">
+              <div className="flex flex-wrap items-center gap-2">
+                <CardTitle className="flex items-center gap-2">
+                  <Send className="size-4 text-primary" aria-hidden />
+                  답변
+                </CardTitle>
+                <div className="ml-auto flex items-center gap-2 text-sm text-muted-foreground">
+                  <span>답변 담당</span>
+                  <span className="font-medium text-foreground">
+                    {inquiry.assignedManagerName ?? '미배정'}
+                  </span>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setAssignDialogOpen(true)}
+                  >
+                    담당자 배정
+                  </Button>
+                </div>
               </div>
-              <div className="space-y-0.5">
-                <dt className="text-xs text-muted-foreground">제출 여부</dt>
-                <dd className="text-sm">{answer.isSubmitted ? '제출됨' : '미제출'}</dd>
-              </div>
-              <div className="space-y-0.5">
-                <dt className="text-xs text-muted-foreground">제출 일시</dt>
-                <dd className="text-sm">{answer.answeredAt}</dd>
-              </div>
-              <div className="space-y-0.5">
-                <dt className="text-xs text-muted-foreground">답변 담당자</dt>
-                <dd className="text-sm">{answer.answeredEmpName}</dd>
-              </div>
-            </dl>
-          ) : (
-            <p className="text-sm text-muted-foreground">아직 작성된 답변이 없습니다.</p>
-          )}
-        </CardContent>
-      </Card>
+            </CardHeader>
+            <CardContent>
+              {answerQuery.isLoading || meQuery.isLoading ? (
+                <p className="text-sm text-muted-foreground">불러오는 중...</p>
+              ) : !isAssigned ? (
+                <p className="text-sm text-muted-foreground">
+                  담당자가 배정되지 않아 답변을 작성할 수 없습니다. 위 담당자 배정 버튼으로 먼저
+                  담당자를 지정해주세요.
+                </p>
+              ) : canEditAnswer ? (
+                <FranchiseInquiryAnswerForm inquiryId={inquiryId} answer={answer} />
+              ) : answer ? (
+                <dl className="grid grid-cols-1 gap-x-8 gap-y-3 sm:grid-cols-2">
+                  <div className="space-y-0.5 sm:col-span-2">
+                    <dt className="text-xs text-muted-foreground">내용</dt>
+                    <dd className="text-sm whitespace-pre-wrap">{answer.content}</dd>
+                  </div>
+                  <div className="space-y-0.5">
+                    <dt className="text-xs text-muted-foreground">제출 여부</dt>
+                    <dd className="text-sm">{answer.isSubmitted ? '제출됨' : '미제출'}</dd>
+                  </div>
+                  <div className="space-y-0.5">
+                    <dt className="text-xs text-muted-foreground">제출 일시</dt>
+                    <dd className="text-sm">{answer.answeredAt}</dd>
+                  </div>
+                  <div className="space-y-0.5">
+                    <dt className="text-xs text-muted-foreground">답변 담당자</dt>
+                    <dd className="text-sm">{answer.answeredEmpName}</dd>
+                  </div>
+                </dl>
+              ) : (
+                <p className="text-sm text-muted-foreground">아직 작성된 답변이 없습니다.</p>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* 우측: 가맹점 정보 요약. */}
+        <Card>
+          <CardHeader className="border-b">
+            <CardTitle className="flex items-center gap-2">
+              <Store className="size-4 text-primary" aria-hidden />
+              가맹점 정보
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <FranchiseInfoList items={summaryItems} />
+          </CardContent>
+        </Card>
+      </div>
 
       <FranchiseInquiryManagerAssignDialog
         open={assignDialogOpen}

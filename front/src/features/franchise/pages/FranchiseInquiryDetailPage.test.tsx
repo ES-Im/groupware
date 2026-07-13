@@ -183,24 +183,31 @@ describe('FranchiseInquiryDetailPage (F1618·F1619) - 상세·답변 성공', ()
     // 응답 도착 전에는 로딩 문구가 보인다.
     expect(screen.getByText('불러오는 중...')).toBeInTheDocument()
 
-    await screen.findByText('테스트강남점')
+    await screen.findByText('환불 문의')
 
-    const detailCard = getCardByHeading('테스트강남점')
+    const detailCard = getCardByHeading('환불 문의')
     // 제목(CardTitle)은 이제 inquiryTitle이며, 가맹점명·문의일시는 라벨 없이 부제 span으로 노출된다.
     expect(detailCard.getByText('환불 문의')).toBeInTheDocument()
     expect(detailCard.getByText('테스트강남점')).toBeInTheDocument()
     expect(detailCard.getByText('2026-07-01T10:30:00')).toBeInTheDocument()
     // isDeleted가 false이면 "삭제 요청" 배지 자체가 렌더되지 않는다.
     expect(detailCard.queryByText('삭제 요청')).not.toBeInTheDocument()
-    expect(detailCard.getByText('문의자 연락처')).toBeInTheDocument()
-    expect(detailCard.getByText('010-1234-5678')).toBeInTheDocument()
-    expect(detailCard.getByText('담당자')).toBeInTheDocument()
-    expect(detailCard.getByText('문의 내용')).toBeInTheDocument()
+    // 본문(inquiryContent)은 라벨 없는 <p>로 노출된다("문의 내용" dt 라벨은 제거됨).
     expect(detailCard.getByText('환불 요청드립니다.')).toBeInTheDocument()
-    // '담당자' dt 값은 두 카드에 동명(김담당)으로 등장할 수 있어 상세 카드 스코프로만 확인한다.
-    expect(detailCard.getAllByText('김담당').length).toBeGreaterThan(0)
+
+    // 문의자 연락처·코드는 우측 "가맹점 정보" 요약 카드(infolist)에 있다(담당자는 답변 카드 헤더로 이동).
+    const summaryCard = getCardByHeading('가맹점 정보')
+    expect(summaryCard.getByText('문의자 연락처')).toBeInTheDocument()
+    expect(summaryCard.getByText('010-1234-5678')).toBeInTheDocument()
+    expect(summaryCard.getByText('코드')).toBeInTheDocument()
+    expect(summaryCard.getByText('EXT-1')).toBeInTheDocument()
+    // 담당자는 더 이상 요약 카드에 없다(답변 카드 헤더의 "답변 담당"으로 이동).
+    expect(summaryCard.queryByText('담당자')).not.toBeInTheDocument()
 
     const answerCard = getCardByHeading('답변')
+    // 답변 카드 헤더의 "답변 담당"에 배정 담당자(김담당)와 배정 버튼이 있다.
+    expect(answerCard.getByText('답변 담당')).toBeInTheDocument()
+    expect(answerCard.getByRole('button', { name: '담당자 배정' })).toBeInTheDocument()
     expect(answerCard.getByText('내용')).toBeInTheDocument()
     expect(answerCard.getByText('환불 처리 완료했습니다.')).toBeInTheDocument()
     expect(answerCard.getByText('제출 여부')).toBeInTheDocument()
@@ -208,7 +215,8 @@ describe('FranchiseInquiryDetailPage (F1618·F1619) - 상세·답변 성공', ()
     expect(answerCard.getByText('제출 일시')).toBeInTheDocument()
     expect(answerCard.getByText('2026-07-02T09:00:00')).toBeInTheDocument()
     expect(answerCard.getByText('답변 담당자')).toBeInTheDocument()
-    expect(answerCard.getByText('김담당')).toBeInTheDocument()
+    // 김담당은 답변 카드 헤더(답변 담당)와 읽기전용 dl(답변 담당자) 두 곳에 등장한다.
+    expect(answerCard.getAllByText('김담당').length).toBeGreaterThan(0)
 
     const { toast } = await import('sonner')
     expect(toast.error).not.toHaveBeenCalled()
@@ -220,8 +228,8 @@ describe('FranchiseInquiryDetailPage (F1618·F1619) - 상세·답변 성공', ()
 
     renderPage('1')
 
-    await screen.findByText('테스트강남점')
-    const detailCard = getCardByHeading('테스트강남점')
+    await screen.findByText('환불 문의')
+    const detailCard = getCardByHeading('환불 문의')
     expect(detailCard.getByText('삭제 요청')).toBeInTheDocument()
   })
 })
@@ -238,7 +246,7 @@ describe('FranchiseInquiryDetailPage (F1618·F1619) - 답변 미작성(정상 �
 
     renderPage('1')
 
-    await screen.findByText('테스트강남점')
+    await screen.findByText('환불 문의')
     expect(
       await screen.findByText('아직 작성된 답변이 없습니다.'),
     ).toBeInTheDocument()
@@ -253,7 +261,7 @@ describe('FranchiseInquiryDetailPage (F1618·F1619) - 답변 미작성(정상 �
 
     renderPage('1')
 
-    await screen.findByText('테스트강남점')
+    await screen.findByText('환불 문의')
     expect(
       await screen.findByText('아직 작성된 답변이 없습니다.'),
     ).toBeInTheDocument()
@@ -325,7 +333,7 @@ describe('FranchiseInquiryDetailPage (F1618·F1619) - 답변 조회 실패(404 �
     renderPage('1')
 
     // 상세는 정상 렌더된다(에러 경로 아님).
-    await screen.findByText('테스트강남점')
+    await screen.findByText('환불 문의')
 
     const { toast } = await import('sonner')
     await waitFor(() =>
@@ -361,7 +369,7 @@ describe('FranchiseInquiryDetailPage (F1618·F1619) - 담당자 배정(F1620, T5
     const user = userEvent.setup()
     renderPage('1')
 
-    await screen.findByText('테스트강남점')
+    await screen.findByText('환불 문의')
     await user.click(screen.getByRole('button', { name: '담당자 배정' }))
 
     expect(await screen.findByText('답변 담당자 배정')).toBeInTheDocument()
@@ -381,7 +389,7 @@ describe('FranchiseInquiryDetailPage (F1618·F1619) - 답변 작성/수정/발�
 
     renderPage('1')
 
-    await screen.findByText('테스트강남점')
+    await screen.findByText('환불 문의')
     expect(
       await screen.findByText(/담당자가 배정되지 않아 답변을 작성할 수 없습니다/),
     ).toBeInTheDocument()
@@ -494,7 +502,7 @@ describe('FranchiseInquiryDetailPage (F1618·F1619) - 답변 작성/수정/발�
 
     renderPage('1')
 
-    await screen.findByText('테스트강남점')
+    await screen.findByText('환불 문의')
     expect(screen.queryByLabelText('답변 내용')).not.toBeInTheDocument()
     const answerCard = getCardByHeading('답변')
     expect(answerCard.getByText('제출됨')).toBeInTheDocument()
@@ -507,7 +515,7 @@ describe('FranchiseInquiryDetailPage (F1618·F1619) - 답변 작성/수정/발�
 
     renderPage('1')
 
-    await screen.findByText('테스트강남점')
+    await screen.findByText('환불 문의')
     expect(screen.queryByLabelText('답변 내용')).not.toBeInTheDocument()
     const answerCard = getCardByHeading('답변')
     expect(answerCard.getByText('미제출')).toBeInTheDocument()

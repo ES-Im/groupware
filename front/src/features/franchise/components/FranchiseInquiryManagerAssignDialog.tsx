@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { handleApiError } from '@/shared/lib/apiError'
-import { EmployeePicker, type EmployeePickerEmployee } from '@/shared/components/EmployeePicker'
+import { type EmployeePickerEmployee } from '@/shared/components/EmployeePicker'
+import { FranchiseManagerPicker } from './FranchiseManagerPicker'
 import { Button } from '@/shared/ui/button'
 import {
   Dialog,
@@ -32,9 +33,10 @@ interface FranchiseInquiryManagerAssignDialogProps {
  * EmployeePicker(multiple=false)를 Dialog에 넣은 단일 배정형이다. null 배정은 쿼리 파라미터
  * 필수라 불가하므로 미선택 시 확정 버튼을 비활성화한다.
  *
- * 새 담당자의 활성·FRANCHISE 권한 여부는 서버가 판정한다 — 프론트는 사전 필터링 없이 empId를
- * 그대로 보내고, 도메인 위반은 handleApiError 토스트로 노출한다(발명 금지). 현재 담당자만
- * disabledEmpIds로 비활성 처리해 무의미한 "같은 담당자로 재배정" 요청을 막는다.
+ * 후보는 FranchiseManagerPicker가 **FRANCHISE 권한 사원만** 노출하도록 사전 필터링한다
+ * (FRANCHISE_ASSIGNABLE_MANAGERS 소비). 활성·권한 최종 판정은 여전히 서버가 담당하며, 도메인
+ * 위반은 handleApiError 토스트로 노출한다(발명 금지). 현재 담당자만 disabledEmpIds로 비활성
+ * 처리해 무의미한 "같은 담당자로 재배정" 요청을 막는다.
  * 성공(204) 시 useFranchiseInquiryAssignAnswerMutation이 상세/목록을 invalidate하므로 이
  * 컴포넌트는 성공 토스트 + 다이얼로그 닫기만 담당한다.
  */
@@ -95,7 +97,7 @@ export function FranchiseInquiryManagerAssignDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <EmployeePicker
+        <FranchiseManagerPicker
           selected={selected}
           onChange={setSelected}
           multiple={false}
