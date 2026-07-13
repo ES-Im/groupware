@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react'
 import dayjs from 'dayjs'
-import { Search } from 'lucide-react'
+import { Search, Users } from 'lucide-react'
+import { Cell, Pie, PieChart, ResponsiveContainer } from 'recharts'
 import { toast } from 'sonner'
 import { useDepartmentsQuery } from '@/features/department/api/useDepartmentsQuery'
 import { handleApiError } from '@/shared/lib/apiError'
 import { usePageState } from '@/shared/lib/usePageState'
 import type { PageMeta } from '@/shared/components/PaginationControls'
 import { PaginationControls } from '@/shared/components/PaginationControls'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card'
+import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card'
 import { Input } from '@/shared/ui/input'
 import { useEmpLeaveSummaryQuery } from '../api/useEmpLeaveSummaryQuery'
 import { useEmpLeaveUsageSummaryQuery } from '../api/useEmpLeaveUsageSummaryQuery'
@@ -19,12 +20,16 @@ import type { AdjustGrantDaysTarget } from '../model/leave'
 const SEARCH_DEBOUNCE_MS = 300
 
 /**
- * 관리자 휴가 현황 페이지(F747·F748·F749·F750, ROADMAP(LEAVE) M5 T5.3, ADMIN 전용).
+ * 관리자 휴가 관리 페이지(F747·F748·F749·F750, ROADMAP(LEAVE) M5 T5.3, ADMIN 전용).
+ *
+ * 목표 디자인(admin-page_1.html · A안 톤)에 맞춰 전사(또는 선택 부서) 연차 사용률 도넛(Recharts)과
+ * 대상 사원 수 지표, 사원 휴가 요약 표로 재구성했다. 본부별 사용률 막대·연차 부여/사용 합계 KPI·
+ * 특별/포상 전사 집계는 백엔드 집계 API가 없어 제외했다(팀 결정: 실데이터만 재구성).
  *
  * 연차 사용률 카드(useEmpLeaveUsageSummaryQuery, T5.1)는 deptId 미지정 시 회사 전체, 지정 시
- * 해당 부서 기준으로 단일 값을 보여준다. deptId 후보 목록은 신규 조회를 만들지 않고 기존
- * `useDepartmentsQuery`(department 도메인, EmployeePicker가 이미 쓰는 DEPTS 조회)를 그대로
- * 재사용한다(ROADMAP §신규 확인 "관리자 부서 필터 목록 출처").
+ * 해당 부서 기준으로 단일 값(annualLeaveUsagePercent)을 보여준다. deptId 후보 목록은 신규 조회를
+ * 만들지 않고 기존 `useDepartmentsQuery`(department 도메인, EmployeePicker가 이미 쓰는 DEPTS
+ * 조회)를 그대로 재사용한다(ROADMAP §신규 확인 "관리자 부서 필터 목록 출처").
  *
  * 전사 사원 휴가 요약 표(useEmpLeaveSummaryQuery, T5.1, Page<T> 표준 페이징)는 keyword·year(둘 다
  * 300ms 디바운스)·deptId 필터와 PaginationControls/usePageState로 연동한다(DeptAttendancePage와
@@ -117,70 +122,94 @@ export function AdminLeavePage() {
     last: true,
   }
 
-  return (
-    <div className="w-full p-4 sm:p-6 lg:p-8">
-      <div className="mb-6 flex items-center justify-between gap-3">
-        <h1 className="text-xl font-semibold tracking-tight">관리자 휴가 현황</h1>
-      </div>
+  const deptLabel =
+    deptId === undefined
+      ? '회사 전체'
+      : depts.find((d) => d.deptInfoResponse.deptId === deptId)?.deptInfoResponse.deptName ?? '선택 부서'
+  const totalEmployees = summaryQuery.data?.totalElements ?? 0
 
-      <Card className="mb-6 h-fit">
+  return (
+    <div className="w-full space-y-5 p-4 sm:p-6 lg:p-8">
+      <header className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="text-xl font-semibold tracking-tight">휴가 관리</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            전사 휴가 사용 현황과 사원별 부여·사용을 관리합니다.
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <label htmlFor="admin-leave-usage-year" className="text-sm text-muted-foreground">
+            조회 연도
+          </label>
+          <Input
+            id="admin-leave-usage-year"
+            type="number"
+            value={yearInput}
+            onChange={(event) => setYearInput(event.target.value)}
+            className="w-24"
+          />
+        </div>
+      </header>
+
+      {/* 연차 사용률 개요: 도넛 + 사용률·대상 사원 지표 */}
+      <Card>
         <CardHeader className="border-b">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <CardTitle>연차 사용률</CardTitle>
-              <CardDescription>
-                {deptId === undefined ? '회사 전체' : depts.find((d) => d.deptInfoResponse.deptId === deptId)?.deptInfoResponse.deptName ?? '선택 부서'} 기준 기본 연차 사용률입니다.
-              </CardDescription>
-            </div>
-            <div className="flex items-center gap-2">
-              <label htmlFor="admin-leave-usage-dept" className="sr-only">
-                부서 선택
-              </label>
-              <select
-                id="admin-leave-usage-dept"
-                value={deptId ?? ''}
-                onChange={(event) => handleDeptChange(event.target.value)}
-                className="h-8 rounded-lg border border-input bg-transparent px-2.5 text-sm text-foreground transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
-              >
-                <option value="">회사 전체</option>
-                {depts.map((dept) => (
-                  <option key={dept.deptInfoResponse.deptId} value={dept.deptInfoResponse.deptId}>
-                    {dept.deptInfoResponse.deptName}
-                  </option>
-                ))}
-              </select>
-              <label htmlFor="admin-leave-usage-year" className="sr-only">
-                조회 연도
-              </label>
-              <Input
-                id="admin-leave-usage-year"
-                type="number"
-                value={yearInput}
-                onChange={(event) => setYearInput(event.target.value)}
-                className="w-24"
-              />
-            </div>
-          </div>
+          <CardTitle>연차 사용률</CardTitle>
+          <CardDescription>{deptLabel} 기준 기본 연차 사용률입니다.</CardDescription>
+          <CardAction>
+            <label htmlFor="admin-leave-usage-dept" className="sr-only">
+              부서 선택
+            </label>
+            <select
+              id="admin-leave-usage-dept"
+              value={deptId ?? ''}
+              onChange={(event) => handleDeptChange(event.target.value)}
+              className="h-8 rounded-lg border border-input bg-transparent px-2.5 text-sm text-foreground transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
+            >
+              <option value="">회사 전체</option>
+              {depts.map((dept) => (
+                <option key={dept.deptInfoResponse.deptId} value={dept.deptInfoResponse.deptId}>
+                  {dept.deptInfoResponse.deptName}
+                </option>
+              ))}
+            </select>
+          </CardAction>
         </CardHeader>
         <CardContent>
           {usageQuery.isLoading ? (
-            <p className="py-4 text-center text-sm text-muted-foreground">불러오는 중...</p>
+            <p className="py-8 text-center text-sm text-muted-foreground">불러오는 중...</p>
           ) : usageQuery.data === undefined ? (
-            <p className="py-4 text-center text-sm text-muted-foreground">
+            <p className="py-8 text-center text-sm text-muted-foreground">
               연차 사용률 정보를 불러오지 못했습니다.
             </p>
           ) : (
-            <p className="text-3xl font-semibold tabular-nums text-foreground">
-              {usageQuery.data.annualLeaveUsagePercent}%
-            </p>
+            <div className="flex flex-col items-center gap-6 sm:flex-row sm:gap-8">
+              <UsageDonut percent={usageQuery.data.annualLeaveUsagePercent} />
+              <div className="space-y-3">
+                <div className="flex items-baseline gap-2">
+                  <span className="text-3xl font-bold tabular-nums text-primary">
+                    {usageQuery.data.annualLeaveUsagePercent}%
+                  </span>
+                  <span className="text-sm text-muted-foreground">연차 사용률</span>
+                </div>
+                <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                  <Users className="size-4" aria-hidden />
+                  {deptLabel} 대상 사원{' '}
+                  <span className="font-semibold text-foreground tabular-nums">{totalEmployees}명</span>
+                </p>
+              </div>
+            </div>
           )}
         </CardContent>
       </Card>
 
-      <Card className="h-fit">
+      {/* 사원 휴가 요약: 검색 + 표 + 페이지네이션 */}
+      <Card>
         <CardHeader className="border-b">
-          <CardTitle>전사 사원 휴가 요약</CardTitle>
-          <CardDescription>사원별 연차·특별·포상 휴가 부여·사용 현황을 조회하고 부여일수를 조정합니다.</CardDescription>
+          <CardTitle>사원 휴가 요약</CardTitle>
+          <CardDescription>
+            사원별 연차·특별·포상 휴가 부여·사용 현황을 조회하고 부여일수를 조정합니다.
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
@@ -229,6 +258,43 @@ export function AdminLeavePage() {
         }}
         target={adjustTarget}
       />
+    </div>
+  )
+}
+
+/**
+ * 연차 사용률 도넛(Recharts PieChart). 사용분(primary)/잔여(muted) 2조각 링에 중앙 정수 %를 겹쳐
+ * 표시한다. 색은 FranchiseSalesOverview와 동일하게 테마 적응형 CSS 변수(var(--primary)/var(--muted))만
+ * 쓴다. 값은 0~100으로 클램프해 음수/초과 입력에도 링이 깨지지 않게 한다.
+ */
+function UsageDonut({ percent }: { percent: number }) {
+  const clamped = Math.max(0, Math.min(100, percent))
+  const data = [
+    { name: 'used', value: clamped },
+    { name: 'rest', value: 100 - clamped },
+  ]
+  return (
+    <div className="relative size-32 shrink-0">
+      <ResponsiveContainer width="100%" height="100%">
+        <PieChart>
+          <Pie
+            data={data}
+            dataKey="value"
+            innerRadius="72%"
+            outerRadius="100%"
+            startAngle={90}
+            endAngle={-270}
+            stroke="none"
+            isAnimationActive={false}
+          >
+            <Cell fill="var(--primary)" />
+            <Cell fill="var(--muted)" />
+          </Pie>
+        </PieChart>
+      </ResponsiveContainer>
+      <div className="absolute inset-0 flex items-center justify-center">
+        <span className="text-2xl font-bold tabular-nums">{Math.round(clamped)}%</span>
+      </div>
     </div>
   )
 }
