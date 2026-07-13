@@ -21,7 +21,11 @@ vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))
 
-function renderButton(isAvailable: boolean, onParentClick: () => void) {
+function renderButton(
+  isAvailable: boolean,
+  onParentClick: () => void,
+  variant?: 'switch' | 'button',
+) {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
   })
@@ -29,7 +33,7 @@ function renderButton(isAvailable: boolean, onParentClick: () => void) {
     <QueryClientProvider client={queryClient}>
       {/* onClick으로 감싸 부모(행) 클릭 핸들러 역할을 흉내낸다(stopPropagation 검증용). */}
       <div onClick={onParentClick}>
-        <MeetingRoomActiveToggleButton meetingRoomId={1} isAvailable={isAvailable} />
+        <MeetingRoomActiveToggleButton meetingRoomId={1} isAvailable={isAvailable} variant={variant} />
       </div>
     </QueryClientProvider>,
   )
@@ -95,6 +99,46 @@ describe('MeetingRoomActiveToggleButton', () => {
 
     const { toast } = await import('sonner')
     await waitFor(() => expect(toast.success).toHaveBeenCalledWith('회의실을 활성화했습니다'))
+  })
+
+  it('variant="switch"는 role="switch" 트리거를 노출하고 aria-checked로 활성 상태를 반영한다', () => {
+    renderButton(true, vi.fn(), 'switch')
+    const sw = screen.getByRole('switch', { name: '회의실 비활성화' })
+    expect(sw).toBeInTheDocument()
+    expect(sw).toHaveAttribute('aria-checked', 'true')
+  })
+
+  it('variant="switch" 조작만으로는 요청이 없고 확인 다이얼로그가 열리며, 부모 클릭도 트리거되지 않는다', async () => {
+    const patchSpy = vi.fn()
+    server.use(
+      http.patch(`${BASE_URL}/api/meeting-rooms/1/deactivate`, () => {
+        patchSpy()
+        return new HttpResponse(null, { status: 204 })
+      }),
+    )
+    const onParentClick = vi.fn()
+    const user = userEvent.setup()
+    renderButton(true, onParentClick, 'switch')
+
+    await user.click(screen.getByRole('switch', { name: '회의실 비활성화' }))
+
+    expect(await screen.findByText('회의실을 비활성화하시겠습니까?')).toBeInTheDocument()
+    expect(patchSpy).not.toHaveBeenCalled()
+    expect(onParentClick).not.toHaveBeenCalled()
+  })
+
+  it('variant="switch" 확인 클릭 시 deactivate mutation이 호출되고 성공 토스트가 뜬다', async () => {
+    server.use(
+      http.patch(`${BASE_URL}/api/meeting-rooms/1/deactivate`, () => new HttpResponse(null, { status: 204 })),
+    )
+    const user = userEvent.setup()
+    renderButton(true, vi.fn(), 'switch')
+
+    await user.click(screen.getByRole('switch', { name: '회의실 비활성화' }))
+    await user.click(screen.getByRole('button', { name: '비활성화' }))
+
+    const { toast } = await import('sonner')
+    await waitFor(() => expect(toast.success).toHaveBeenCalledWith('회의실을 비활성화했습니다'))
   })
 
   it('실패 시 handleApiError로 에러 토스트가 노출된다', async () => {

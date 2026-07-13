@@ -96,15 +96,21 @@ export interface MeetingRoomSummary {
 export type AvailableMeetingRoomsPage = Page<MeetingRoomSummary>
 
 /**
- * 예약 가능 회의실 검색 쿼리 파라미터(§참조 계약 매핑 · query-parameters.adoc 실측).
- * date/startAt/endAt/capacity 4개는 계약상 전부 필수다. 시각은 PRD Open Q#5 확정대로
- * `HH:mm`로 전송한다.
+ * 예약 가능 회의실 검색 쿼리 파라미터(§참조 계약 매핑 · query-parameters.adoc).
+ *
+ * date/startAt/endAt/capacity는 모두 선택값이다 — 사용자가 입력한 조건만 필터로 적용하기 위해
+ * 미입력 항목은 쿼리스트링에서 생략한다(서버는 생략된 파라미터를 null로 받아 해당 필터를 적용하지
+ * 않는다). 시각은 PRD Open Q#5 확정대로 `HH:mm`로 전송한다.
+ *
+ * 주의: 실제 "예약"(MEETING_RESERVATION_CREATE)에는 meetingDate/startAt/endAt이 필수이므로,
+ * 날짜·시간 없이 검색해 회의실만 둘러본 경우 예약 폼(MeetingReservationCreatePage)이 제출을
+ * 막는다 — 검색 완화는 조회 편의를 위한 것이고 예약 계약을 우회하지 않는다.
  */
 export interface AvailableMeetingRoomsSearchParams {
-  date: string
-  startAt: string
-  endAt: string
-  capacity: number
+  date?: string
+  startAt?: string
+  endAt?: string
+  capacity?: number
   page?: number
   size?: number
 }

@@ -7,6 +7,7 @@ import { Button } from '@/shared/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
 import { useMyMeetingReservationsCalendarQuery } from '../api/useMyMeetingReservationsCalendarQuery'
 import { MeetingCalendar } from '../components/MeetingCalendar'
+import { MeetingReservationDetailPanel } from '../components/MeetingReservationDetailPanel'
 import { buildCalendarRangeParams, type CalendarRangeParams } from '../lib/calendarRange'
 
 /**
@@ -21,6 +22,7 @@ import { buildCalendarRangeParams, type CalendarRangeParams } from '../lib/calen
 export function MyMeetingCalendarPage() {
   const navigate = useNavigate()
   const [range, setRange] = useState<CalendarRangeParams | undefined>(undefined)
+  const [selectedMeetingId, setSelectedMeetingId] = useState<number | undefined>(undefined)
   const { data, error } = useMyMeetingReservationsCalendarQuery(range)
 
   useEffect(() => {
@@ -42,8 +44,9 @@ export function MyMeetingCalendarPage() {
     setRange(buildCalendarRangeParams(nextRange.start, nextRange.end))
   }
 
+  // 이벤트 클릭 시 상세 "페이지"로 이동하는 대신, 선택된 예약을 캘린더 아래 인라인 상세 패널로 표시한다.
   function handleEventClick(info: EventClickArg) {
-    navigate(`/meetings/${info.event.id}`)
+    setSelectedMeetingId(Number(info.event.id))
   }
 
   return (
@@ -55,14 +58,23 @@ export function MyMeetingCalendarPage() {
         </Button>
       </div>
 
-      <Card className="h-fit">
-        <CardHeader className="border-b">
-          <CardTitle>내가 예약한 회의</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <MeetingCalendar events={events} onRangeChange={handleRangeChange} onEventClick={handleEventClick} />
-        </CardContent>
-      </Card>
+      <div className="space-y-6">
+        <Card className="h-fit">
+          <CardHeader className="border-b">
+            <CardTitle>내가 예약한 회의</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <MeetingCalendar
+              events={events}
+              onRangeChange={handleRangeChange}
+              onEventClick={handleEventClick}
+              compactCells
+            />
+          </CardContent>
+        </Card>
+
+        <MeetingReservationDetailPanel meetingId={selectedMeetingId} />
+      </div>
     </div>
   )
 }

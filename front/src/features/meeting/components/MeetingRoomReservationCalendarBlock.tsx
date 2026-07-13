@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { isNotFound, normalizeApiError } from '@/shared/lib/apiError'
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card'
 import { useMeetingRoomReservationsCalendarQuery } from '../api/useMeetingRoomReservationsCalendarQuery'
 import { MeetingCalendar } from './MeetingCalendar'
 import { buildCalendarRangeParams, type CalendarRangeParams } from '../lib/calendarRange'
@@ -42,8 +42,9 @@ export function MeetingRoomReservationCalendarBlock({ meetingRoomId }: MeetingRo
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>예약 현황</CardTitle>
+      <CardHeader className="border-b">
+        <CardTitle>기간별 예약 현황</CardTitle>
+        <CardDescription>타 부서 예약은 점유 시간대만 표시되며 제목은 공개되지 않습니다.</CardDescription>
       </CardHeader>
       <CardContent>
         <MeetingCalendar events={mapMeetingRoomReservationsToEvents(data ?? [])} onRangeChange={handleRangeChange} />

@@ -1,18 +1,19 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router'
 import { toast } from 'sonner'
+import { Plus } from 'lucide-react'
 import { createColumnHelper, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { handleApiError } from '@/shared/lib/apiError'
 import { usePageState } from '@/shared/lib/usePageState'
 import type { PageMeta } from '@/shared/components/PaginationControls'
 import { PaginationControls } from '@/shared/components/PaginationControls'
-import { Badge } from '@/shared/ui/badge'
 import { Button } from '@/shared/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
+import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
 import { cn } from '@/shared/lib/utils'
 import { useMeetingRoomManagementListQuery } from '../api/useMeetingRoomManagementListQuery'
 import { MeetingRoomActiveToggleButton } from '../components/MeetingRoomActiveToggleButton'
 import { MeetingRoomCreateDialog } from '../components/MeetingRoomCreateDialog'
+import { CapacityLabel, CountPill, StatusPill } from '../components/meetingUiKit'
 import type { MeetingRoomManagementItem } from '../model/meeting'
 
 /** 활성상태 필터 값. 'all'은 available 쿼리 파라미터 생략(전체)을 의미한다(DepartmentsPage 동일 패턴). */
@@ -91,18 +92,22 @@ export function MeetingRoomManagementPage() {
     () => [
       columnHelper.accessor('name', {
         header: '이름',
-        cell: (info) => <span className="font-medium text-foreground">{info.getValue()}</span>,
+        cell: (info) => (
+          <span className="font-semibold text-foreground underline-offset-4 group-hover/row:underline">
+            {info.getValue()}
+          </span>
+        ),
       }),
       columnHelper.accessor('capacity', {
         header: '수용인원',
-        cell: (info) => <span className="tabular-nums">{info.getValue()}</span>,
+        cell: (info) => <CapacityLabel value={info.getValue()} />,
       }),
       columnHelper.accessor('isAvailable', {
         header: '활성여부',
         cell: (info) => (
-          <Badge variant={info.getValue() ? 'default' : 'outline'}>
+          <StatusPill tone={info.getValue() ? 'green' : 'slate'}>
             {info.getValue() ? '활성' : '비활성'}
-          </Badge>
+          </StatusPill>
         ),
       }),
       columnHelper.display({
@@ -112,6 +117,7 @@ export function MeetingRoomManagementPage() {
           <MeetingRoomActiveToggleButton
             meetingRoomId={row.original.meetingRoomId}
             isAvailable={row.original.isAvailable}
+            variant="switch"
           />
         ),
       }),
@@ -125,66 +131,70 @@ export function MeetingRoomManagementPage() {
     getCoreRowModel: getCoreRowModel(),
   })
 
+  const selectClassName =
+    'h-9 rounded-lg border border-input bg-transparent px-3 text-sm text-muted-foreground transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30'
+
   return (
-    <div className="w-full p-4 sm:p-6 lg:p-8">
-      <div className="mb-6 flex items-center justify-between gap-4">
-        <h1 className="text-xl font-semibold tracking-tight">회의실 관리</h1>
+    <div className="w-full space-y-6 p-4 sm:p-6 lg:p-8">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">회의실 관리</h1>
+          <p className="mt-1.5 text-sm text-muted-foreground">
+            회의실 등록·수용 인원·활성 상태를 관리합니다 (FACILITY)
+          </p>
+        </div>
         <Button type="button" onClick={() => setCreateDialogOpen(true)}>
+          <Plus />
           회의실 등록
         </Button>
       </div>
 
-      <Card className="h-fit">
+      <Card>
         <CardHeader className="border-b">
-          <CardTitle>회의실 목록</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* 필터 툴바: 활성상태 + 향후예약 여부 */}
-          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-            <div className="flex items-center gap-2">
-              <label htmlFor="meeting-room-management-available" className="sr-only">
-                활성상태 필터
-              </label>
-              <select
-                id="meeting-room-management-available"
-                value={availableFilter}
-                onChange={(event) =>
-                  handleAvailableFilterChange(event.target.value as AvailableFilter)
-                }
-                className="h-8 rounded-lg border border-input bg-transparent px-2.5 text-sm text-foreground transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
-              >
-                <option value="all">활성상태 전체</option>
-                <option value="available">활성</option>
-                <option value="unavailable">비활성</option>
-              </select>
-            </div>
-            <div className="flex items-center gap-2">
-              <label htmlFor="meeting-room-management-booked" className="sr-only">
-                향후예약 필터
-              </label>
-              <select
-                id="meeting-room-management-booked"
-                value={bookedInFutureFilter}
-                onChange={(event) =>
-                  handleBookedInFutureFilterChange(event.target.value as BookedInFutureFilter)
-                }
-                className="h-8 rounded-lg border border-input bg-transparent px-2.5 text-sm text-foreground transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
-              >
-                <option value="all">향후예약 전체</option>
-                <option value="booked">향후예약 있음</option>
-                <option value="notBooked">향후예약 없음</option>
-              </select>
-            </div>
+          <div className="flex items-center gap-2.5">
+            <CardTitle>회의실 목록</CardTitle>
+            <CountPill>총 {pageInfo.totalElements}개</CountPill>
           </div>
-
+          <CardAction className="flex flex-wrap gap-2">
+            <label htmlFor="meeting-room-management-available" className="sr-only">
+              활성상태 필터
+            </label>
+            <select
+              id="meeting-room-management-available"
+              value={availableFilter}
+              onChange={(event) => handleAvailableFilterChange(event.target.value as AvailableFilter)}
+              className={selectClassName}
+            >
+              <option value="all">활성상태 전체</option>
+              <option value="available">활성</option>
+              <option value="unavailable">비활성</option>
+            </select>
+            <label htmlFor="meeting-room-management-booked" className="sr-only">
+              향후예약 필터
+            </label>
+            <select
+              id="meeting-room-management-booked"
+              value={bookedInFutureFilter}
+              onChange={(event) =>
+                handleBookedInFutureFilterChange(event.target.value as BookedInFutureFilter)
+              }
+              className={selectClassName}
+            >
+              <option value="all">향후예약 전체</option>
+              <option value="booked">향후예약 있음</option>
+              <option value="notBooked">향후예약 없음</option>
+            </select>
+          </CardAction>
+        </CardHeader>
+        <CardContent>
           {roomManagementQuery.isLoading ? (
-            <p className="py-8 text-center text-sm text-muted-foreground">불러오는 중...</p>
+            <p className="py-10 text-center text-sm text-muted-foreground">불러오는 중...</p>
           ) : roomManagementQuery.error ? (
-            <p className="py-8 text-center text-sm text-muted-foreground">
+            <p className="py-10 text-center text-sm text-muted-foreground">
               회의실 목록을 불러오지 못했습니다.
             </p>
           ) : rows.length === 0 ? (
-            <p className="py-8 text-center text-sm text-muted-foreground">
+            <p className="py-10 text-center text-sm text-muted-foreground">
               조회 조건에 해당하는 회의실이 없습니다.
             </p>
           ) : (
@@ -196,7 +206,10 @@ export function MeetingRoomManagementPage() {
                       {headerGroup.headers.map((header) => (
                         <th
                           key={header.id}
-                          className="px-3 py-2.5 text-left text-xs font-medium whitespace-nowrap text-muted-foreground"
+                          className={cn(
+                            'px-3 py-2.5 text-left text-xs font-medium tracking-wide whitespace-nowrap text-muted-foreground',
+                            header.column.id === 'actions' && 'text-right',
+                          )}
                         >
                           {flexRender(header.column.columnDef.header, header.getContext())}
                         </th>
@@ -217,14 +230,17 @@ export function MeetingRoomManagementPage() {
                         }
                       }}
                       className={cn(
-                        'cursor-pointer border-b border-border transition-colors last:border-0',
-                        'hover:bg-muted/50 focus-visible:bg-muted/50 focus-visible:outline-none',
+                        'group/row cursor-pointer border-b border-border transition-colors last:border-0',
+                        'hover:bg-primary/5 focus-visible:bg-primary/5 focus-visible:outline-none',
                       )}
                     >
                       {row.getVisibleCells().map((cell) => (
                         <td
                           key={cell.id}
-                          className="px-3 py-3 align-middle whitespace-nowrap text-muted-foreground"
+                          className={cn(
+                            'px-3 py-3.5 align-middle whitespace-nowrap text-muted-foreground',
+                            cell.column.id === 'actions' && 'text-right',
+                          )}
                         >
                           {flexRender(cell.column.columnDef.cell, cell.getContext())}
                         </td>
@@ -237,7 +253,7 @@ export function MeetingRoomManagementPage() {
           )}
 
           <PaginationControls
-            className="border-t pt-4"
+            className="mt-2 border-t pt-4"
             pageInfo={pageInfo}
             page={page}
             onPageChange={onPageChange}

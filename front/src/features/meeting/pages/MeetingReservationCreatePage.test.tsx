@@ -1,12 +1,17 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import dayjs from 'dayjs'
 import { http, HttpResponse } from 'msw'
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { BASE_URL } from '@/shared/api/client'
 import { server } from '@/test/mocks/server'
 import { MeetingReservationCreatePage } from './MeetingReservationCreatePage'
+
+// 신청 일시는 "현재 이후"라야 스키마 검증을 통과하므로, 하드코딩 대신 항상 미래인 날짜를 쓴다
+// (과거 고정일이 지나면 실패하던 회귀 방지).
+const FUTURE_DATE = dayjs().add(3, 'day').format('YYYY-MM-DD')
 
 /**
  * MeetingReservationCreatePage(F802+F803, ROADMAP T3.3-b, P2) 회귀 방지 테스트.
@@ -78,6 +83,11 @@ function mockBaseline({ reserverEmpId = 7 }: { reserverEmpId?: number } = {}) {
     http.get(`${BASE_URL}/api/meeting-rooms/available`, () =>
       HttpResponse.json(pageOf([{ meetingRoomId: 3, name: '대회의실', capacity: 1, isAvailable: true }])),
     ),
+    // 회의실 선택 시 좌측 카드가 회의실 정보(상세)와 첨부 이미지(파일 목록)를 조회한다.
+    http.get(`${BASE_URL}/api/meeting-rooms/3`, () =>
+      HttpResponse.json({ meetingRoomId: 3, name: '대회의실', description: '3층 대회의실', capacity: 1, isAvailable: true }),
+    ),
+    http.get(`${BASE_URL}/api/meeting-rooms/3/files`, () => HttpResponse.json([])),
   )
 }
 
@@ -111,7 +121,7 @@ function renderPage() {
 }
 
 async function selectRoom(user: ReturnType<typeof userEvent.setup>) {
-  fireEvent.change(screen.getByLabelText('날짜'), { target: { value: '2026-07-11' } })
+  fireEvent.change(screen.getByLabelText('날짜'), { target: { value: FUTURE_DATE } })
   fireEvent.change(screen.getByLabelText('시작 시각'), { target: { value: '10:00' } })
   fireEvent.change(screen.getByLabelText('종료 시각'), { target: { value: '11:00' } })
   fireEvent.change(screen.getByLabelText('최소 수용인원'), { target: { value: '1' } })
@@ -124,19 +134,21 @@ describe('MeetingReservationCreatePage - 회의실 선택 전', () => {
     mockBaseline()
     renderPage()
 
-    expect(screen.getByText('회의실을 선택하면 제목·참여자를 입력할 수 있습니다.')).toBeInTheDocument()
+    expect(screen.getByText('회의실을 선택하면 예약 정보를 입력할 수 있습니다.')).toBeInTheDocument()
   })
 })
 
 describe('MeetingReservationCreatePage - 회의실 선택 시 날짜/시각 동기화', () => {
-  it('선택된 검색 조건(meetingDate/startAt/endAt)이 안내 문구에 반영된다', async () => {
+  it('선택된 검색 조건(meetingDate/startAt/endAt)이 예약 폼 입력값으로 프리필된다(편집 가능)', async () => {
     mockBaseline()
     const user = userEvent.setup()
     renderPage()
 
     await selectRoom(user)
 
-    expect(screen.getByText('2026-07-11 10:00~11:00 · 수용 인원 1명')).toBeInTheDocument()
+    expect(await screen.findByLabelText('신청 날짜')).toHaveValue(FUTURE_DATE)
+    expect(screen.getByLabelText('예약 시작 시각')).toHaveValue('10:00')
+    expect(screen.getByLabelText('예약 종료 시각')).toHaveValue('11:00')
   })
 })
 
@@ -211,6 +223,10 @@ describe('MeetingReservationCreatePage - reserverId 미확정 fail-closed', () =
       http.get(`${BASE_URL}/api/meeting-rooms/available`, () =>
         HttpResponse.json(pageOf([{ meetingRoomId: 3, name: '대회의실', capacity: 1, isAvailable: true }])),
       ),
+      http.get(`${BASE_URL}/api/meeting-rooms/3`, () =>
+        HttpResponse.json({ meetingRoomId: 3, name: '대회의실', description: '3층 대회의실', capacity: 1, isAvailable: true }),
+      ),
+      http.get(`${BASE_URL}/api/meeting-rooms/3/files`, () => HttpResponse.json([])),
     )
     const user = userEvent.setup()
     renderPage()
@@ -252,7 +268,7 @@ describe('MeetingReservationCreatePage - 정상 입력 해피패스', () => {
         meetingRoomId: 3,
         reserverId: 7,
         title: '주간 회의',
-        meetingDate: '2026-07-11',
+        meetingDate: FUTURE_DATE,
         startAt: '10:00',
         endAt: '11:00',
         participantIds: [101],

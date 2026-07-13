@@ -3,7 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import dayjs from 'dayjs'
 import { http, HttpResponse } from 'msw'
-import { MemoryRouter, Route, Routes, useParams } from 'react-router'
+import { MemoryRouter, Route, Routes } from 'react-router'
 import { describe, expect, it, vi } from 'vitest'
 import { BASE_URL } from '@/shared/api/client'
 import { server } from '@/test/mocks/server'
@@ -59,9 +59,37 @@ function mockManagementDefault(items: unknown[] = [makeItem(1, '주간 회의')]
   server.use(http.get(`${BASE_URL}/api/meetings`, () => HttpResponse.json(makePage(items))))
 }
 
-function DetailPlaceholder() {
-  const { meetingId } = useParams()
-  return <div>회의 상세 화면 meetingId={meetingId}</div>
+function makeDetail(meetingId: number) {
+  return {
+    meetingId,
+    meetingRoomId: 1,
+    meetingRoomName: '대회의실',
+    reserverId: 2,
+    reserverDeptName: '기획팀',
+    reserverEmpName: '김철수',
+    title: '전략 회의',
+    meetingDate: '2026-07-10',
+    startAt: '10:00',
+    endAt: '11:00',
+    isCanceled: false,
+    participantCount: 3,
+    participants: [{ empId: 101, deptName: '기획팀', empName: '박영수' }],
+  }
+}
+
+function meFixture(empId: number) {
+  return {
+    empBasicInfo: {
+      empId,
+      empNo: '000000001',
+      name: '홍길동',
+      loginId: 'test1234',
+      email: 'test1234@haruon.com',
+      extensionNo: null,
+    },
+    activeFiles: [],
+    currentDepts: [],
+  }
 }
 
 function renderPage() {
@@ -71,7 +99,6 @@ function renderPage() {
       <MemoryRouter initialEntries={['/meetings/management']}>
         <Routes>
           <Route path="/meetings/management" element={<MeetingReservationManagementPage />} />
-          <Route path="/meetings/:meetingId" element={<DetailPlaceholder />} />
         </Routes>
       </MemoryRouter>
     </QueryClientProvider>,
@@ -108,9 +135,13 @@ describe('MeetingReservationManagementPage (F810) - 로딩/에러/빈 상태', (
   })
 })
 
-describe('MeetingReservationManagementPage (F810) - 행 클릭 내비게이션', () => {
-  it('행 클릭 시 /meetings/:meetingId 상세 페이지로 이동한다', async () => {
+describe('MeetingReservationManagementPage (F810) - 행 클릭 → 인라인 상세 패널', () => {
+  it('행 클릭 시 상세 페이지로 이동하지 않고 하단에 인라인 상세 패널이 표시된다(FACILITY 조회 전용)', async () => {
     mockManagementDefault([makeItem(42, '전략 회의', '김철수')])
+    server.use(
+      http.get(`${BASE_URL}/api/meetings/42`, () => HttpResponse.json(makeDetail(42))),
+      http.get(`${BASE_URL}/api/employees/me`, () => HttpResponse.json(meFixture(999))),
+    )
 
     const user = userEvent.setup()
     renderPage()
@@ -118,7 +149,10 @@ describe('MeetingReservationManagementPage (F810) - 행 클릭 내비게이션',
     const row = await screen.findByRole('button', { name: /김철수/ })
     await user.click(row)
 
-    expect(await screen.findByText('회의 상세 화면 meetingId=42')).toBeInTheDocument()
+    // 하단 인라인 패널에 상세(예약자)가 표시되고, 남의 예약이라 관리 액션은 노출되지 않는다.
+    expect(await screen.findByText('기획팀 · 김철수')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '회의 정보 수정' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '참가자 교체' })).not.toBeInTheDocument()
   })
 })
 

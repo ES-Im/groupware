@@ -1,0 +1,20 @@
+/*
+ * 회의 도메인 FullCalendar(MeetingCalendar) 전용 스코프드 스타일.
+ * schedule/scheduleCalendar.css와 동일한 원칙 — 전역 index.css를 오염시키지 않도록 이 파일에서만
+ * 정의하고 MeetingCalendar.tsx에서 import한다. 모든 규칙은 .meeting-calendar 루트로 스코프를 제한한다.
+ *
+ * 이 래퍼는 P1(내 예약 캘린더)과 P7(회의실 예약 캘린더)이 공유하므로, 날짜 셀 크기 조정은
+ * P1에서만 켜는 .meeting-calendar--compact 수식자 하위로만 한정한다(compactCells prop 옵트인).
+ * 기본 .meeting-calendar 클래스에는 규칙을 걸지 않아 P7 캘린더 렌더는 종전과 동일하게 유지된다.
+ */
+
+/*
+ * 날짜 셀 높이를 셀 너비의 50%(가로:세로 = 2:1)로 만든다. 셀 너비(테이블 레이아웃상 캘린더 너비의
+ * 1/7)를 기준으로 aspect-ratio가 높이를 산출하므로, 셀이 콘텐츠 높이로 과하게 세로로 길어지지 않고
+ * 월 그리드가 적당한 높이로 유지된다. height="auto"가 만든 콘텐츠 높이 대신 이 비율을 우선하도록
+ * min-height를 0으로 눌러준다(이벤트가 많은 셀은 콘텐츠 높이가 커져 2:1보다 세로로 늘어날 수 있다).
+ */
+.meeting-calendar--compact .fc-daygrid-day-frame {
+  aspect-ratio: 2 / 1;
+  min-height: 0;
+}

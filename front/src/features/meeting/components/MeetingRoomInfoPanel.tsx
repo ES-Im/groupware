@@ -1,9 +1,10 @@
 import { useEffect } from 'react'
+import { DoorOpen, Users } from 'lucide-react'
 import { toast } from 'sonner'
 import { isNotFound, normalizeApiError } from '@/shared/lib/apiError'
-import { Badge } from '@/shared/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
 import { useMeetingRoomDetailQuery } from '../api/useMeetingRoomDetailQuery'
+import { StatusPill } from './meetingUiKit'
 
 interface MeetingRoomInfoPanelProps {
   meetingRoomId: number
@@ -66,17 +67,26 @@ export function MeetingRoomInfoPanel({ meetingRoomId }: MeetingRoomInfoPanelProp
 
   return (
     <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between gap-3">
-          <CardTitle>{data.name}</CardTitle>
-          <Badge variant={data.isAvailable ? 'secondary' : 'outline'}>
+      <CardContent className="space-y-5">
+        <div className="flex flex-wrap items-start justify-between gap-4 border-b pb-5">
+          <div className="flex items-center gap-3.5">
+            <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <DoorOpen className="size-5" />
+            </span>
+            <div>
+              <p className="text-xs font-semibold text-muted-foreground">회의실</p>
+              <h2 className="mt-1 text-xl font-bold tracking-tight text-foreground">{data.name}</h2>
+            </div>
+          </div>
+          <StatusPill tone={data.isAvailable ? 'green' : 'slate'}>
             {data.isAvailable ? '사용 가능' : '비활성'}
-          </Badge>
+          </StatusPill>
         </div>
-      </CardHeader>
-      <CardContent className="space-y-2 text-sm">
-        <p className="whitespace-pre-wrap text-muted-foreground">{data.description}</p>
-        <p>수용 인원 {data.capacity}명</p>
+        <p className="flex items-center gap-1.5 text-sm font-medium text-foreground">
+          <Users className="size-4 text-muted-foreground" />
+          수용 인원 {data.capacity}명
+        </p>
+        <p className="border-t pt-5 leading-7 whitespace-pre-wrap text-muted-foreground">{data.description}</p>
       </CardContent>
     </Card>
   )

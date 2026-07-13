@@ -45,6 +45,42 @@ function makeItem(meetingId: number, title: string, isCanceled = false) {
   }
 }
 
+function makeDetail(meetingId: number) {
+  return {
+    meetingId,
+    meetingRoomId: 3,
+    meetingRoomName: '대회의실',
+    reserverId: 1,
+    reserverDeptName: '개발팀',
+    reserverEmpName: '홍길동',
+    title: '주간 회의',
+    meetingDate: dayjs().format('YYYY-MM-DD'),
+    startAt: '10:00:00',
+    endAt: '11:00:00',
+    isCanceled: false,
+    participantCount: 2,
+    participants: [
+      { empId: 101, deptName: '개발팀', empName: '김철수' },
+      { empId: 102, deptName: '기획팀', empName: '이영희' },
+    ],
+  }
+}
+
+function meFixture(empId: number) {
+  return {
+    empBasicInfo: {
+      empId,
+      empNo: '000000001',
+      name: '홍길동',
+      loginId: 'test1234',
+      email: 'test1234@haruon.com',
+      extensionNo: null,
+    },
+    activeFiles: [],
+    currentDepts: [],
+  }
+}
+
 function renderPage() {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return render(
@@ -117,11 +153,13 @@ describe('MyMeetingCalendarPage - 라우팅', () => {
     expect(mockNavigate).toHaveBeenCalledWith('/meetings/new')
   })
 
-  it('이벤트 클릭 시 /meetings/{meetingId}로 이동한다', async () => {
+  it('이벤트 클릭 시 상세 페이지로 이동하지 않고 하단에 인라인 상세 패널이 표시된다', async () => {
     server.use(
       http.get(`${BASE_URL}/api/meetings/my/reservations/calendar`, () =>
         HttpResponse.json([makeItem(10, '주간 회의')]),
       ),
+      http.get(`${BASE_URL}/api/meetings/10`, () => HttpResponse.json(makeDetail(10))),
+      http.get(`${BASE_URL}/api/employees/me`, () => HttpResponse.json(meFixture(999))),
     )
 
     renderPage()
@@ -129,6 +167,8 @@ describe('MyMeetingCalendarPage - 라우팅', () => {
     const eventEl = await screen.findByText(/주간 회의/)
     eventEl.click()
 
-    await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith('/meetings/10'))
+    // 상세 "페이지"로의 navigate는 발생하지 않고, 캘린더 아래 인라인 패널에 상세(예약자)가 표시된다.
+    expect(await screen.findByText('개발팀 · 홍길동')).toBeInTheDocument()
+    expect(mockNavigate).not.toHaveBeenCalledWith('/meetings/10')
   })
 })

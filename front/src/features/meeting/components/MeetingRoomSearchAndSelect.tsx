@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { Search } from 'lucide-react'
+import { DoorOpen, Search } from 'lucide-react'
 import { useNavigate } from 'react-router'
 import { toast } from 'sonner'
 import { normalizeApiError } from '@/shared/lib/apiError'
@@ -8,10 +8,10 @@ import { usePageState } from '@/shared/lib/usePageState'
 import type { PageMeta } from '@/shared/components/PaginationControls'
 import { PaginationControls } from '@/shared/components/PaginationControls'
 import { Button } from '@/shared/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
 import { Input } from '@/shared/ui/input'
 import { Label } from '@/shared/ui/label'
 import { useAvailableMeetingRoomsQuery } from '../api/useAvailableMeetingRoomsQuery'
+import { CapacityLabel, StatusPill } from './meetingUiKit'
 import type { MeetingRoomSummary } from '../model/meeting'
 
 interface ConfirmedSearchParams {
@@ -69,17 +69,24 @@ export function MeetingRoomSearchAndSelect({
   const [endAt, setEndAt] = useState('')
   const [capacityInput, setCapacityInput] = useState('')
   const [confirmedParams, setConfirmedParams] = useState<ConfirmedSearchParams>({})
+  // date/startAt/endAt/capacity가 모두 선택값이라 파라미터만으로는 "검색을 실행했는지"를 알 수
+  // 없다(전부 비워도 유효한 검색). 검색 버튼을 한 번이라도 눌렀는지를 별도 플래그로 들고, 이 값을
+  // 훅의 enabled로 넘겨 초기 진입 시 요청을 지연한다.
+  const [hasSearched, setHasSearched] = useState(false)
   const [selectedRoomId, setSelectedRoomId] = useState<number | undefined>(undefined)
   const { page, size, onPageChange, resetPage } = usePageState()
 
-  const availableRoomsQuery = useAvailableMeetingRoomsQuery({
-    date: confirmedParams.date,
-    startAt: confirmedParams.startAt,
-    endAt: confirmedParams.endAt,
-    capacity: confirmedParams.capacity,
-    page,
-    size,
-  })
+  const availableRoomsQuery = useAvailableMeetingRoomsQuery(
+    {
+      date: confirmedParams.date,
+      startAt: confirmedParams.startAt,
+      endAt: confirmedParams.endAt,
+      capacity: confirmedParams.capacity,
+      page,
+      size,
+    },
+    { enabled: hasSearched },
+  )
 
   useEffect(() => {
     if (!availableRoomsQuery.error) {
@@ -90,7 +97,8 @@ export function MeetingRoomSearchAndSelect({
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    // startAt/endAt은 HH:mm 문자열이라 사전순 비교가 시각 순서 비교와 동일하다.
+    // 시작/종료가 둘 다 입력된 경우에만 순서를 검증한다(둘 다 선택값이라 한쪽만 있거나 비어 있으면
+    // 구간이 성립하지 않아 검증 대상이 아니다). HH:mm 문자열이라 사전순 비교가 시각 순서와 동일하다.
     if (startAt !== '' && endAt !== '' && endAt <= startAt) {
       toast.error('종료 시각은 시작 시각보다 이후여야 합니다')
       return
@@ -104,6 +112,7 @@ export function MeetingRoomSearchAndSelect({
       endAt: endAt || undefined,
       capacity: trimmedCapacity === '' ? undefined : Number(trimmedCapacity),
     })
+    setHasSearched(true)
     // 새 검색으로 목록이 바뀌면 이전 선택은 더 이상 유효하지 않으므로, 내부 하이라이트뿐 아니라
     // 상위에도 선택 해제를 알려 stale 회의실이 제출되지 않게 한다.
     setSelectedRoomId(undefined)
@@ -121,8 +130,6 @@ export function MeetingRoomSearchAndSelect({
     }
   }
 
-  const hasSearched = confirmedParams.date !== undefined
-
   const pageInfo: PageMeta = availableRoomsQuery.data ?? {
     totalElements: 0,
     totalPages: 0,
@@ -131,6 +138,20 @@ export function MeetingRoomSearchAndSelect({
     numberOfElements: 0,
     first: true,
     last: true,
+  }
+
+  // 검색 결과 요약: 입력한 조건만 앞에 덧붙인다(날짜+시간 구간 / 최소 수용인원). 아무 조건 없이
+  // 검색했으면 조건 문구 없이 개수만 표시한다.
+  const summaryParts: string[] = []
+  if (confirmedParams.date) {
+    summaryParts.push(
+      confirmedParams.startAt && confirmedParams.endAt
+        ? `${confirmedParams.date} ${confirmedParams.startAt}~${confirmedParams.endAt}`
+        : confirmedParams.date,
+    )
+  }
+  if (confirmedParams.capacity != null) {
+    summaryParts.push(`${confirmedParams.capacity}명 이상`)
   }
 
   return (
@@ -143,7 +164,6 @@ export function MeetingRoomSearchAndSelect({
             type="date"
             value={date}
             onChange={(event) => setDate(event.target.value)}
-            required
           />
         </div>
         <div className="space-y-1">
@@ -153,7 +173,6 @@ export function MeetingRoomSearchAndSelect({
             type="time"
             value={startAt}
             onChange={(event) => setStartAt(event.target.value)}
-            required
           />
         </div>
         <div className="space-y-1">
@@ -163,7 +182,6 @@ export function MeetingRoomSearchAndSelect({
             type="time"
             value={endAt}
             onChange={(event) => setEndAt(event.target.value)}
-            required
           />
         </div>
         <div className="space-y-1">
@@ -174,7 +192,6 @@ export function MeetingRoomSearchAndSelect({
             min={0}
             value={capacityInput}
             onChange={(event) => setCapacityInput(event.target.value)}
-            required
           />
         </div>
         <div className="col-span-2 sm:col-span-4">
@@ -201,34 +218,68 @@ export function MeetingRoomSearchAndSelect({
         </p>
       ) : (
         <>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {availableRoomsQuery.data?.content.map((room) => (
-              <Card
-                key={room.meetingRoomId}
-                className={cn(selectedRoomId === room.meetingRoomId && 'ring-2 ring-primary')}
-              >
-                {/* 선택 트리거는 실제 <button>으로 둬 키보드 접근성을 브라우저 기본 동작에 맡긴다.
-                    "상세 보기" 버튼은 이 button 밖의 형제 요소라 인터랙티브 요소 중첩이 없다. */}
-                <button type="button" onClick={() => handleSelectRoom(room)} className="w-full text-left">
-                  <CardHeader>
-                    <CardTitle>{room.name}</CardTitle>
-                  </CardHeader>
-                </button>
-                <CardContent className="flex items-center justify-between gap-2">
-                  <p className="text-sm text-muted-foreground">수용 인원 {room.capacity}명</p>
-                  {showRoomDetailLink && (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => navigate(`/meeting-rooms/${room.meetingRoomId}`)}
-                    >
-                      상세 보기
-                    </Button>
+          <p className="text-xs text-muted-foreground">
+            {summaryParts.length > 0 ? `${summaryParts.join(' · ')} · ` : ''}예약 가능 회의실{' '}
+            <b className="font-semibold text-primary">{pageInfo.totalElements}곳</b>
+          </p>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            {availableRoomsQuery.data?.content.map((room) => {
+              const selected = selectedRoomId === room.meetingRoomId
+              return (
+                <div
+                  key={room.meetingRoomId}
+                  className={cn(
+                    'rounded-xl border bg-card p-4 transition-colors',
+                    selected
+                      ? 'border-primary ring-2 ring-primary/30'
+                      : 'border-border hover:border-primary/40',
                   )}
-                </CardContent>
-              </Card>
-            ))}
+                >
+                  <div className="flex items-start justify-between">
+                    <span className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                      <DoorOpen className="size-4" />
+                    </span>
+                    <StatusPill tone="green">예약 가능</StatusPill>
+                  </div>
+                  {/* 선택 트리거. 접근성 이름이 정확히 회의실명이어야 상위(예약 생성 폼) 동기화와
+                      회귀 테스트가 유지되므로, 이 버튼은 이름만 감싼다(아이콘·필·수용인원은 형제). */}
+                  <button
+                    type="button"
+                    onClick={() => handleSelectRoom(room)}
+                    className="mt-4 block text-left text-[15px] font-bold text-foreground underline-offset-4 hover:underline focus-visible:underline focus-visible:outline-none"
+                  >
+                    {room.name}
+                  </button>
+                  <div className="mt-1.5">
+                    <CapacityLabel value={room.capacity} />
+                  </div>
+                  <div className="mt-4 flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleSelectRoom(room)}
+                      className={cn(
+                        'flex-1 rounded-full py-2 text-sm font-semibold transition-colors',
+                        selected
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-primary/10 text-primary hover:bg-primary/20',
+                      )}
+                    >
+                      {selected ? '선택됨' : '선택'}
+                    </button>
+                    {showRoomDetailLink && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => navigate(`/meeting-rooms/${room.meetingRoomId}`)}
+                      >
+                        상세 보기
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              )
+            })}
           </div>
           <PaginationControls pageInfo={pageInfo} page={page} onPageChange={onPageChange} unit="개" />
         </>

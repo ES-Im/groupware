@@ -117,7 +117,8 @@ describe('MeetingRoomManagementPage (F811) - 행 클릭 내비게이션', () => 
     renderPage()
 
     await screen.findByText('소회의실')
-    await user.click(screen.getByRole('button', { name: '비활성화' }))
+    // 관리 컬럼 토글은 스위치 변형(role="switch")이며, 조작 시 즉시 반영이 아니라 확인 다이얼로그를 연다.
+    await user.click(screen.getByRole('switch', { name: '회의실 비활성화' }))
 
     // AlertDialog 확인창은 떠야 하지만, 상세 페이지로는 이동하지 않아야 한다.
     expect(await screen.findByText('회의실을 비활성화하시겠습니까?')).toBeInTheDocument()

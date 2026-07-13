@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { useParams } from 'react-router'
+import { Link, useParams } from 'react-router'
+import { ChevronLeft, SquarePen } from 'lucide-react'
 import { isNotFound, normalizeApiError } from '@/shared/lib/apiError'
 import { Button } from '@/shared/ui/button'
 import { useMeetingRoomDetailQuery } from '../api/useMeetingRoomDetailQuery'
@@ -36,33 +37,44 @@ export function MeetingRoomManagementDetailPage() {
 
   const { data, error } = useMeetingRoomDetailQuery(meetingRoomId)
 
+  const backLink = (
+    <Link
+      to="/meeting-rooms/management"
+      className="inline-flex items-center gap-1 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+    >
+      <ChevronLeft className="size-4" />
+      회의실 목록
+    </Link>
+  )
+
   if (meetingRoomId === undefined || (error && isNotFound(normalizeApiError(error)))) {
     return (
-      <div className="w-full p-4 sm:p-6 lg:p-8">
-        <h1 className="mb-2 text-xl font-semibold tracking-tight">회의실 관리 상세</h1>
+      <div className="w-full space-y-4 p-4 sm:p-6 lg:p-8">
+        {backLink}
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">회의실 관리 상세</h1>
         <p className="text-sm text-muted-foreground">회의실을 찾을 수 없습니다.</p>
       </div>
     )
   }
 
   return (
-    <div className="w-full space-y-6 p-4 sm:p-6 lg:p-8">
-      <div className="flex items-center justify-between gap-3">
-        <h1 className="text-xl font-semibold tracking-tight">회의실 관리 상세</h1>
-        <div className="flex items-center gap-2">
+    <div className="w-full space-y-5 p-4 sm:p-6 lg:p-8">
+      {backLink}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">회의실 관리 상세</h1>
+        <div className="flex flex-wrap items-center gap-2">
           {data ? (
             <Button type="button" variant="outline" onClick={() => setIsUpdateDialogOpen(true)}>
+              <SquarePen />
               정보 수정
             </Button>
           ) : null}
           {data ? <MeetingRoomActiveToggleButton meetingRoomId={meetingRoomId} isAvailable={data.isAvailable} /> : null}
+          {data ? <MeetingRoomImageUploadButton meetingRoomId={meetingRoomId} /> : null}
         </div>
       </div>
 
       <MeetingRoomInfoPanel meetingRoomId={meetingRoomId} />
-      <div className="flex justify-end">
-        <MeetingRoomImageUploadButton meetingRoomId={meetingRoomId} />
-      </div>
       <MeetingRoomImageGallery meetingRoomId={meetingRoomId} showDeleteAction />
       <MeetingRoomReservationCalendarBlock meetingRoomId={meetingRoomId} />
 

@@ -1,3 +1,4 @@
+import dayjs from 'dayjs'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { meetingReservationCreateSchema } from './meetingReservationCreateSchema'
 
@@ -12,7 +13,9 @@ import { meetingReservationCreateSchema } from './meetingReservationCreateSchema
 function validValues(overrides: Partial<Record<string, unknown>> = {}) {
   return {
     title: '주간 회의',
-    meetingDate: '2026-07-11',
+    // "현재 이후" refine을 항상 통과하도록 하드코딩 대신 미래(내일) 날짜를 쓴다. meetingDate+startAt
+    // 조합 경계를 검증하는 아래 describe는 vi.setSystemTime + 명시적 meetingDate override로 별도 고정한다.
+    meetingDate: dayjs().add(1, 'day').format('YYYY-MM-DD'),
     startAt: '10:00',
     endAt: '11:00',
     participantIds: [101],
