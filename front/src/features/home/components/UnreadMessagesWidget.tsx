@@ -49,12 +49,25 @@ export function UnreadMessagesWidget() {
           </div>
         ) : (
           items.map((item) => (
-            <div key={item.messageId} className="rounded-lg border p-3">
-              <p className="truncate font-medium">{item.title}</p>
-              <p className="mt-1 text-sm text-muted-foreground">{item.senderName}</p>
-              <p className="text-sm text-muted-foreground">
-                {item.sentAt ? dayjs(item.sentAt).format('YYYY-MM-DD HH:mm') : '-'}
-              </p>
+            <div
+              key={item.messageId}
+              className="flex items-center gap-3 rounded-lg border p-3 transition-colors hover:bg-muted/50"
+            >
+              {/* 발신인 이니셜 아바타(레퍼런스 .msg .av — 10px 라운드 정사각). */}
+              <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-muted text-sm font-semibold text-muted-foreground">
+                {item.senderName.slice(0, 1)}
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="truncate font-medium">{item.title}</p>
+                <p className="truncate text-sm text-muted-foreground">{item.senderName}</p>
+              </div>
+              <div className="flex shrink-0 flex-col items-end gap-1.5">
+                <time className="text-xs text-muted-foreground">
+                  {item.sentAt ? dayjs(item.sentAt).format('MM-DD HH:mm') : '-'}
+                </time>
+                {/* 미확인 표시 dot: 목록은 isRead=false만 조회하므로 전 항목에 표기(무채색 최고 강조=primary). */}
+                <span className="size-2 rounded-full bg-primary" aria-hidden />
+              </div>
             </div>
           ))
         )}
