@@ -155,35 +155,22 @@ public class DocumentBoxQueryRepositoryAdapter implements DocumentBoxQueryReposi
                 .join(approval.approvers, approver)
                 .join(draft.emp, emp)
                 .join(emp.empBelongings, empBelongings)
-                .where(
-                        empBelongings.dept.id.in(deptIds).and(approval.status.eq(ApprovalStatus.APPROVED))
-                                .or(circulation.viewer.id.eq(empId).and(approval.status.eq(ApprovalStatus.APPROVED)))
-                                .or(approver.approver.id.eq(empId)),
-                        empBelongings.endAt.isNull(),
-                        approval.status.eq(ApprovalStatus.APPROVED),
-                        keywordContains(keyword)
-                )
+                .where(accessibleConditions(empId, deptIds), keywordContains(keyword))
                 .fetchOne();
 
         long totalRow = rows == null? 0 : rows;
         if(totalRow == 0) return new PageImpl<>(List.of(), pageable, 0);
 
         List<DocumentBoxResponse> responses = query
-                .selectDistinct(documentBoxResponseConstructorExpression(false))
+                .selectDistinct(documentBoxResponseConstructorExpression(true))
                 .from(draft)
                 .leftJoin(draft.circulations, circulation)
                 .join(draft.approval, approval)
                 .join(approval.approvers, approver)
                 .join(draft.emp, emp)
                 .join(emp.empBelongings, empBelongings)
-                .where(
-                        empBelongings.dept.id.in(deptIds).and(approval.status.eq(ApprovalStatus.APPROVED))
-                            .or(circulation.viewer.id.eq(empId).and(approval.status.eq(ApprovalStatus.APPROVED)))
-                            .or(approver.approver.id.eq(empId)),
-                        empBelongings.endAt.isNull(),
-                        approval.status.eq(ApprovalStatus.APPROVED),
-                        keywordContains(keyword)
-                ).orderBy(draft.submittedAt.desc(), draft.id.desc())
+                .where(accessibleConditions(empId, deptIds), keywordContains(keyword))
+                .orderBy(draft.submittedAt.desc(), draft.id.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
@@ -239,13 +226,7 @@ public class DocumentBoxQueryRepositoryAdapter implements DocumentBoxQueryReposi
                 .join(approval.approvers, approver)
                 .join(draft.emp, emp)
                 .join(emp.empBelongings, empBelongings)
-                .where(
-                        empBelongings.dept.id.in(deptIds).and(approval.status.eq(ApprovalStatus.APPROVED))
-                                .or(circulation.viewer.id.eq(empId).and(approval.status.eq(ApprovalStatus.APPROVED)))
-                                .or(approver.approver.id.eq(empId)),
-                        empBelongings.endAt.isNull(),
-                        approval.status.eq(ApprovalStatus.APPROVED)
-                )
+                .where(accessibleConditions(empId, deptIds))
                 .fetchOne();
 
         return rows == null ? 0L : rows;
@@ -255,6 +236,18 @@ public class DocumentBoxQueryRepositoryAdapter implements DocumentBoxQueryReposi
         return keyword == null || keyword.isBlank()
                 ? null
                 : draft.title.containsIgnoreCase(keyword);
+    }
+
+    private BooleanExpression accessibleConditions(Long empId, List<Long> deptIds) {
+        BooleanExpression approvedOrRejected =
+                approval.status.in(ApprovalStatus.APPROVED, ApprovalStatus.REJECTED);
+
+        return empBelongings.dept.id.in(deptIds).and(approval.status.eq(ApprovalStatus.APPROVED))
+                .or(circulation.viewer.id.eq(empId).and(approval.status.eq(ApprovalStatus.APPROVED)))
+                .or(approver.approver.id.eq(empId).and(approvedOrRejected))
+                .or(draft.emp.id.eq(empId).and(approval.status.eq(ApprovalStatus.REJECTED)))
+                .and(empBelongings.endAt.isNull())
+                .and(approvedOrRejected);
     }
 
     private ConstructorExpression<DocumentBoxResponse> documentBoxResponseConstructorExpression(boolean isAvailableRejectedDraft) {

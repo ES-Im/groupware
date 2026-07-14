@@ -236,6 +236,51 @@ public class DocumentBoxQueryApiTest extends IntegrationTestSupport {
                 .andExpect(jsonPath("$.totalElements").value(3));
     }
 
+    @Test
+    @DisplayName("내 조회 가능 문서 목록 조회 - 내가 기안했거나 결재자로 참여한 반려 문서도 조회한다")
+    void myAccessibleDocuments_includesRejectedForDrafterAndApprover() throws Exception {
+        String password = "!Q2w3e4r5t";
+        String loginId = "employee12345";
+        registerEmpHavingAllInfo(loginId, password);
+        Emp emp = empRepository.findByLoginId(loginId).orElseThrow();
+
+        Dept it = getDept("002", "IT");
+        Dept fin = getDept("003", "FIN");
+        Emp sameDeptDrafter = saveEmpWithDept(empRepository, deptRepository, "202604001", "sameDeptDrafter", it);
+        Emp otherDeptDrafter = saveEmpWithDept(empRepository, deptRepository, "202604002", "otherDeptDrafter", fin);
+
+        String approverLoginId = "approver12345";
+        activatedEmp(approverLoginId, password);
+        Emp approver = empRepository.findByLoginId(approverLoginId).orElseThrow();
+
+        // 내가 기안한 반려 문서 → 노출(기안자 경로)
+        GeneralDraft myRejectedDraft = saveRejectedDraft(
+                emp, "반려 내가 기안 문서", List.of(approver), LocalDateTime.of(2026, 4, 3, 9, 0));
+        // 내가 결재자로 참여한 반려 문서 → 노출(결재자 경로)
+        GeneralDraft approverRejectedDraft = saveRejectedDraft(
+                otherDeptDrafter, "반려 결재자 문서", List.of(emp), LocalDateTime.of(2026, 4, 2, 9, 0));
+        // 같은 부서지만 내가 기안자/결재자가 아닌 반려 문서 → 제외(부서 경로는 결재완료만 노출)
+        saveRejectedDraft(
+                sameDeptDrafter, "반려 부서만 문서", List.of(approver), LocalDateTime.of(2026, 4, 1, 9, 0));
+
+        String accessToken = loginByIdAndPw(loginId, password);
+
+        mockMvc.perform(
+                        get("/api/document-boxes/me/accessible-documents")
+                                .header("Authorization", BEARER + accessToken)
+                                .param("keyword", "반려")
+                                .param("page", "0")
+                                .param("size", "10")
+                ).andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content.length()").value(2))
+                .andExpect(jsonPath("$.content[0].draftId").value(myRejectedDraft.getId()))
+                .andExpect(jsonPath("$.content[1].draftId").value(approverRejectedDraft.getId()))
+                .andExpect(jsonPath("$.content[0].approvalStatus").value("반려"))
+                .andExpect(jsonPath("$.totalElements").value(2));
+    }
+
     private GeneralDraft saveUnsubmittedDraft(Emp drafter, String title, List<Emp> approvers) {
         GeneralDraft draft = GeneralDraft.createDraft(
                 drafter,
@@ -302,6 +347,19 @@ public class DocumentBoxQueryApiTest extends IntegrationTestSupport {
         for (int i = 0; i < approvers.size(); i++) {
             draft.approve(approvers.get(i), submittedAt.plusHours(i + 1));
         }
+        draftRepository.save(draft);
+        return draft;
+    }
+
+    private GeneralDraft saveRejectedDraft(
+            Emp drafter,
+            String title,
+            List<Emp> approvers,
+            LocalDateTime submittedAt
+    ) {
+        GeneralDraft draft = saveSubmittedDraft(drafter, title, approvers, submittedAt);
+        // 첫 차례(order 1) 결재자가 반려한다 — 반려 시 approval.status = REJECTED로 전이된다.
+        draft.reject(approvers.get(0), "반려 사유", submittedAt.plusHours(1));
         draftRepository.save(draft);
         return draft;
     }
