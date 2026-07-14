@@ -246,70 +246,78 @@ export function MeetingReservationManagementPage() {
           </div>
         </CardHeader>
         <CardContent>
-          {managementQuery.isLoading ? (
-            <p className="py-10 text-center text-sm text-muted-foreground">불러오는 중...</p>
-          ) : managementQuery.error ? (
-            <p className="py-10 text-center text-sm text-muted-foreground">
-              예약 목록을 불러오지 못했습니다.
-            </p>
-          ) : rows.length === 0 ? (
-            <p className="py-10 text-center text-sm text-muted-foreground">
-              조회 조건에 해당하는 예약이 없습니다.
-            </p>
-          ) : (
-            <div className="w-full overflow-x-auto">
-              <table className="w-full min-w-[820px] border-collapse text-sm">
-                <thead>
-                  {table.getHeaderGroups().map((headerGroup) => (
-                    <tr key={headerGroup.id} className="border-b border-border">
-                      {headerGroup.headers.map((header) => (
-                        <th
-                          key={header.id}
-                          className={cn(
-                            'px-3 py-2.5 text-left text-xs font-medium tracking-wide whitespace-nowrap text-muted-foreground',
-                            alignByColumn[header.column.id],
-                          )}
-                        >
-                          {flexRender(header.column.columnDef.header, header.getContext())}
-                        </th>
-                      ))}
-                    </tr>
-                  ))}
-                </thead>
-                <tbody>
-                  {table.getRowModel().rows.map((row) => (
-                    <tr
-                      key={row.id}
-                      role="button"
-                      tabIndex={0}
-                      onClick={() => setSelectedMeetingId(row.original.meetingId)}
-                      onKeyDown={(event) => {
-                        if (event.key === 'Enter') {
-                          setSelectedMeetingId(row.original.meetingId)
-                        }
-                      }}
-                      className={cn(
-                        'cursor-pointer border-b border-border transition-colors last:border-0',
-                        'hover:bg-primary/5 focus-visible:bg-primary/5 focus-visible:outline-none',
-                      )}
-                    >
-                      {row.getVisibleCells().map((cell) => (
-                        <td
-                          key={cell.id}
-                          className={cn(
-                            'px-3 py-3.5 align-middle whitespace-nowrap text-muted-foreground',
-                            alignByColumn[cell.column.id],
-                          )}
-                        >
-                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+          {/* 목록 영역을 usePageState 기본 size(10)행 기준 높이로 고정한다(헤더 행 약 2.25rem +
+           * 본문 행 약 3rem×10 ≈ 32.25rem, 여유를 더해 34rem). 조회 결과가 10건 미만이어도 카드
+           * 높이가 줄지 않아 하단 페이지네이션·상세 패널 위치가 페이지마다 들쭉날쭉해지지 않는다
+           * (스크롤이 아닌 순수 높이 고정 — 남는 공간은 빈 여백으로 유지된다). */}
+          <div className="flex min-h-[34rem] flex-col">
+            {managementQuery.isLoading ? (
+              <div className="flex flex-1 items-center justify-center">
+                <p className="text-sm text-muted-foreground">불러오는 중...</p>
+              </div>
+            ) : managementQuery.error ? (
+              <div className="flex flex-1 items-center justify-center">
+                <p className="text-sm text-muted-foreground">예약 목록을 불러오지 못했습니다.</p>
+              </div>
+            ) : rows.length === 0 ? (
+              <div className="flex flex-1 items-center justify-center">
+                <p className="text-sm text-muted-foreground">조회 조건에 해당하는 예약이 없습니다.</p>
+              </div>
+            ) : (
+              <div className="w-full overflow-x-auto">
+                <table className="w-full min-w-[820px] border-collapse text-sm">
+                  <thead>
+                    {table.getHeaderGroups().map((headerGroup) => (
+                      <tr key={headerGroup.id} className="border-b border-border">
+                        {headerGroup.headers.map((header) => (
+                          <th
+                            key={header.id}
+                            className={cn(
+                              'px-3 py-2.5 text-left text-xs font-medium tracking-wide whitespace-nowrap text-muted-foreground',
+                              alignByColumn[header.column.id],
+                            )}
+                          >
+                            {flexRender(header.column.columnDef.header, header.getContext())}
+                          </th>
+                        ))}
+                      </tr>
+                    ))}
+                  </thead>
+                  <tbody>
+                    {table.getRowModel().rows.map((row) => (
+                      <tr
+                        key={row.id}
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => setSelectedMeetingId(row.original.meetingId)}
+                        onKeyDown={(event) => {
+                          if (event.key === 'Enter') {
+                            setSelectedMeetingId(row.original.meetingId)
+                          }
+                        }}
+                        className={cn(
+                          'cursor-pointer border-b border-border transition-colors last:border-0',
+                          'hover:bg-primary/5 focus-visible:bg-primary/5 focus-visible:outline-none',
+                        )}
+                      >
+                        {row.getVisibleCells().map((cell) => (
+                          <td
+                            key={cell.id}
+                            className={cn(
+                              'px-3 py-3.5 align-middle whitespace-nowrap text-muted-foreground',
+                              alignByColumn[cell.column.id],
+                            )}
+                          >
+                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
 
           <PaginationControls
             className="mt-2 border-t pt-4"
@@ -321,7 +329,7 @@ export function MeetingReservationManagementPage() {
         </CardContent>
       </Card>
 
-      <MeetingReservationDetailPanel meetingId={selectedMeetingId} />
+      <MeetingReservationDetailPanel meetingId={selectedMeetingId} orientation="split" />
     </div>
   )
 }

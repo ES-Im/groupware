@@ -23,6 +23,14 @@ interface MeetingCalendarProps {
    * 렌더가 유지된다.
    */
   compactCells?: boolean
+  /**
+   * true면 FullCalendar height를 "auto"(콘텐츠 높이) 대신 "100%"로 두어 부모 높이를 꽉 채운다
+   * (래퍼에 h-full 부여). P4/P7 회의실 예약 카드처럼 카드가 좌측 컬럼 높이에 맞춰 늘어나는 곳에서
+   * 캘린더가 카드 하단까지 채우도록 하는 옵트인이다. 기본 false(=height="auto")라 P1(내 예약,
+   * 페이지가 캘린더 콘텐츠 높이로 흐름) 소비처는 종전 그대로다. 켤 때는 부모가 확정 높이를 가져야
+   * height="100%"가 성립한다(부모 확정 높이 없이 켜면 캘린더가 0으로 접힌다).
+   */
+  fillHeight?: boolean
 }
 
 export function MeetingCalendar({
@@ -30,13 +38,20 @@ export function MeetingCalendar({
   onRangeChange,
   onEventClick,
   compactCells = false,
+  fillHeight = false,
 }: MeetingCalendarProps) {
   return (
-    <div className={cn('meeting-calendar', compactCells && 'meeting-calendar--compact')}>
+    <div
+      className={cn(
+        'meeting-calendar',
+        compactCells && 'meeting-calendar--compact',
+        fillHeight && 'h-full',
+      )}
+    >
       <FullCalendar
         plugins={[dayGridPlugin, interactionPlugin]}
         initialView="dayGridMonth"
-        height="auto"
+        height={fillHeight ? '100%' : 'auto'}
         events={events}
         datesSet={(arg: DatesSetArg) => onRangeChange({ start: arg.view.activeStart, end: arg.view.activeEnd })}
         eventClick={onEventClick}

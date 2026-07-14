@@ -26,6 +26,12 @@ interface MeetingRoomActiveToggleButtonProps {
    * 확인을 거친다 — 목록에서의 오조작을 막기 위함(사용자 확정).
    */
   variant?: 'switch' | 'button'
+  /**
+   * variant='button'일 때 트리거 버튼에 얹을 추가 클래스(순수 시각). P7 관리 상세가 기본정보 하단
+   * 우측으로 옮긴 이 버튼을 "정보 수정"과 동일한 강조 크기(약 1.3배)로 키우기 위해 넘긴다(사용자
+   * 요청). variant='switch'에는 영향이 없다.
+   */
+  buttonClassName?: string
 }
 
 /**
@@ -47,6 +53,7 @@ export function MeetingRoomActiveToggleButton({
   meetingRoomId,
   isAvailable,
   variant = 'button',
+  buttonClassName,
 }: MeetingRoomActiveToggleButtonProps) {
   const [open, setOpen] = useState(false)
   const activateMutation = useMeetingRoomActivateMutation()
@@ -92,7 +99,7 @@ export function MeetingRoomActiveToggleButton({
           </button>
         ) : (
           <AlertDialogTrigger asChild>
-            <Button type="button" variant="outline" size="sm">
+            <Button type="button" variant="outline" size="sm" className={buttonClassName}>
               {isAvailable ? '비활성화' : '활성화'}
             </Button>
           </AlertDialogTrigger>

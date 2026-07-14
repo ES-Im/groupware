@@ -17,6 +17,12 @@ import { canManageReservation } from '../lib/canManageReservation'
 interface MeetingReservationDetailPanelProps {
   /** 선택된 예약 식별자. undefined면(아직 선택 안 함) 안내 플레이스홀더를 렌더한다. */
   meetingId: number | undefined
+  /**
+   * 회의 정보·참가자 2카드의 배치 방향. 기본값 'stack'(세로: 상단=회의 정보/하단=참가자) —
+   * P1(내 예약 캘린더)의 좁은 7:3 우측 컬럼에 맞춘 배치다. 'split'이면 가로 2분할(좌=회의 정보/
+   * 우=참가자, 좁은 화면은 세로로 반응형) — 페이지 폭을 넓게 쓰는 P5(회의 예약 관리)가 옵트인한다.
+   */
+  orientation?: 'stack' | 'split'
 }
 
 /**
@@ -24,17 +30,21 @@ interface MeetingReservationDetailPanelProps {
  * 대체하는 재사용 컴포넌트. P1(내 예약 캘린더)·P5(예약 관리)가 이벤트/행 선택 시 이 패널을 목록
  * 아래에 인라인으로 렌더한다.
  *
- * 좌측 카드(회의 정보)에 [회의 정보 수정]·[예약 취소], 우측 카드(참가자)에 [참가자 교체]를 각각 카드
- * 우측 하단(CardFooter)에 배치한다. 세 액션 모두 canManageReservation(예약자 본인 + 미취소 + 회의일
- * 내일 이후)이 참일 때만 노출되므로, FACILITY가 P5에서 남의 예약을 조회할 때는 자연히 조회 전용이
- * 된다(별도 role 분기 불필요).
+ * 첫 번째 카드(회의 정보)에 [회의 정보 수정]·[예약 취소], 두 번째 카드(참가자)에 [참가자 교체]를 각각
+ * 카드 우측 하단(CardFooter)에 배치한다. 세 액션 모두 canManageReservation(예약자 본인 + 미취소 +
+ * 회의일 내일 이후)이 참일 때만 노출되므로, FACILITY가 P5에서 남의 예약을 조회할 때는 자연히 조회
+ * 전용이 된다(별도 role 분기 불필요).
  *
  * 데이터 배관(useMeetingReservationDetailQuery/각 다이얼로그 mutation)은 기존 P3와 동일하다 — 이
- * 컴포넌트는 "페이지 → 인라인 패널" 재배치만 담당한다. 시각 구성(2카드 레이아웃·A안 톤)은
- * ux-ui-stylist가 다듬되, data-testid("reservation-detail-panel")와 버튼 접근성 이름은 회귀 방지를
- * 위해 보존한다.
+ * 컴포넌트는 "페이지 → 인라인 패널" 재배치만 담당한다. 시각 구성은 orientation prop으로 소비처별
+ * 배치를 분기한다 — 기본값 'stack'(P1, 7:3 우측 컬럼에 맞춘 상하 세로 스택), 'split'(P5, 좌우
+ * 가로 2분할). data-testid("reservation-detail-panel")와 버튼 접근성 이름은 두 배치 모두 동일하게
+ * 보존한다.
  */
-export function MeetingReservationDetailPanel({ meetingId }: MeetingReservationDetailPanelProps) {
+export function MeetingReservationDetailPanel({
+  meetingId,
+  orientation = 'stack',
+}: MeetingReservationDetailPanelProps) {
   const [isUpdateDialogOpen, setIsUpdateDialogOpen] = useState(false)
   const [isParticipantsDialogOpen, setIsParticipantsDialogOpen] = useState(false)
   const detailQuery = useMeetingReservationDetailQuery(meetingId)
@@ -86,8 +96,8 @@ export function MeetingReservationDetailPanel({ meetingId }: MeetingReservationD
 
   return (
     <div data-testid="reservation-detail-panel">
-      <div className="grid gap-4 lg:grid-cols-2">
-        {/* 좌: 회의 정보 */}
+      <div className={cn('grid grid-cols-1 gap-4', orientation === 'split' && 'lg:grid-cols-2')}>
+        {/* 회의 정보 카드: stack이면 상단, split이면 좌측 */}
         <Card className="flex flex-col">
           <CardHeader className="border-b">
             <div className="flex flex-wrap items-start justify-between gap-3">
@@ -138,7 +148,7 @@ export function MeetingReservationDetailPanel({ meetingId }: MeetingReservationD
           )}
         </Card>
 
-        {/* 우: 참가자 */}
+        {/* 참가자 카드: stack이면 하단, split이면 우측 */}
         <Card className="flex flex-col">
           <CardHeader className="border-b">
             <CardTitle>참가자 {detail.participantCount}명</CardTitle>
