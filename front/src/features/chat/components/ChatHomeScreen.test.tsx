@@ -81,7 +81,7 @@ describe('ChatHomeScreen', () => {
     render(<ChatHomeScreen />, { wrapper: createWrapper() })
 
     expect(await screen.findByPlaceholderText('채팅방 검색')).toBeInTheDocument()
-    expect(screen.queryByLabelText('사원 이름 검색')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('부서·사원 검색')).not.toBeInTheDocument()
   })
 
   it('사원목록 탭 클릭 시 setActiveTab이 호출되어 activeTab이 employees로 바뀌고 ChatEmployeeListPanel이 마운트된다', async () => {
@@ -110,6 +110,6 @@ describe('ChatHomeScreen', () => {
     await user.click(screen.getByRole('tab', { name: '사원목록' }))
 
     expect(useChatOverlayStore.getState().activeTab).toBe('employees')
-    expect(await screen.findByLabelText('사원 이름 검색')).toBeInTheDocument()
+    expect(await screen.findByLabelText('부서·사원 검색')).toBeInTheDocument()
   })
 })

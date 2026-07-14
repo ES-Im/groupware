@@ -164,10 +164,10 @@ export function CompanyInfoPage() {
 /** 페이지 공통 셸(헤더 + 본문). 로딩/에러/미등록/등록됨 4개 분기가 동일한 헤더를 공유한다. */
 function PageShell({ children }: { children: ReactNode }) {
   return (
-    <div className="w-full space-y-5 p-4 sm:p-6 lg:p-8">
+    <div className="w-full space-y-6 p-4 sm:p-6 lg:p-8">
       <header>
-        <h1 className="text-xl font-semibold tracking-tight">회사 관리</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">회사 관리</h1>
+        <p className="mt-1.5 text-sm text-muted-foreground">
           회사 기본정보·연락처·홈페이지 정보를 관리합니다.
         </p>
       </header>

@@ -12,9 +12,11 @@ import { ChatEmployeeListPanel } from './ChatEmployeeListPanel'
 /**
  * ChatEmployeeListPanel(홈 화면 '사원목록' 탭) 검증.
  *
- * 부서 select + 이름 검색 2단 구조를 단일 검색창으로 통합했다:
+ * 헤더 "부서·사원 검색"과 동일하게 단일 검색창에서 사원 이름과 부서명을 함께 찾는다:
  * - 검색어 없음: 본인 주 소속 부서(me.currentDepts primary) 멤버를 기본 노출.
- * - 검색어 있음(디바운스): useEmployeeNameSearchQuery로 전사 사원 이름 검색.
+ * - 검색어 있음(디바운스): 부서명 부분일치(useDepartmentsQuery 필터) + 전사 사원 이름 검색
+ *   (useEmployeeNameSearchQuery)을 부서/사원 두 섹션으로 노출한다.
+ * - 부서 결과 클릭: 그 부서 멤버 목록으로 파고들어(drill) 사원을 고른다.
  *
  * chatOverlayStore.inviteTargetRoomId로 두 동작 모드를 분기한다:
  * - null(일반 브라우징): 사원 클릭 → useCreateChatRoomMutation(POST /api/chat/rooms) →
@@ -147,18 +149,40 @@ describe('ChatEmployeeListPanel', () => {
     expect(screen.getByRole('button', { name: /김철수/ })).not.toBeDisabled()
   })
 
-  it('검색어를 입력하면 전사 이름 검색 결과가 부서·직급과 함께 노출된다', async () => {
+  it('검색어를 입력하면 전사 이름 검색 결과가 사원 섹션에 부서·직급과 함께 노출된다', async () => {
     mockBaseEndpoints()
     render(<ChatEmployeeListPanel />, { wrapper: createWrapper() })
     const user = userEvent.setup()
 
     await screen.findByText('김철수') // 먼저 본인 부서 기본 목록이 뜬다.
 
-    await user.type(screen.getByLabelText('사원 이름 검색'), '김')
+    await user.type(screen.getByLabelText('부서·사원 검색'), '김')
 
-    // 디바운스 후 검색 모드로 전환되어 "검색 결과 · N명" 라벨과 부서·직급 보조 라벨이 나타난다.
-    await screen.findByText(/검색 결과 ·/)
+    // 디바운스 후 검색 모드로 전환되어 "사원 N명" 섹션 라벨과 부서·직급 보조 라벨이 나타난다.
+    await screen.findByText(/사원 \d+명/)
     expect(screen.getByText('개발팀 · 팀장')).toBeInTheDocument()
+  })
+
+  it('부서명으로 검색하면 부서 섹션이 나오고, 부서를 클릭하면 그 부서 멤버로 파고든다', async () => {
+    mockBaseEndpoints()
+    render(<ChatEmployeeListPanel />, { wrapper: createWrapper() })
+    const user = userEvent.setup()
+
+    await screen.findByText('김철수') // 기본 목록
+
+    await user.type(screen.getByLabelText('부서·사원 검색'), '개발')
+
+    // 부서명 부분일치로 '개발팀'이 부서 섹션에 나온다.
+    await screen.findByText('부서 1건')
+
+    // 부서 행(접근명: 부서명 + 부서코드) 클릭 → 그 부서 멤버로 파고든다. flex span 사이 공백 유무가
+    // 접근명 계산에 따라 달라질 수 있어 정규식으로 견고하게 매칭한다(사원 행에는 DEV 코드가 없어 유일).
+    await user.click(screen.getByRole('button', { name: /개발팀\s*DEV/ }))
+
+    // drill 화면: "부서명 · N명" 헤더 + 멤버 목록 + '검색 결과로' 뒤로가기.
+    await screen.findByText('개발팀 · 3명')
+    expect(screen.getByRole('button', { name: '검색 결과로' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /김철수/ })).toBeInTheDocument()
   })
 
   it('inviteTargetRoomId가 null(일반 브라우징)일 때 사원 클릭 시 방 생성 후 selectRoom이 호출된다', async () => {

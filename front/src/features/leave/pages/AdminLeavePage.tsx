@@ -129,11 +129,11 @@ export function AdminLeavePage() {
   const totalEmployees = summaryQuery.data?.totalElements ?? 0
 
   return (
-    <div className="w-full space-y-5 p-4 sm:p-6 lg:p-8">
+    <div className="w-full space-y-6 p-4 sm:p-6 lg:p-8">
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-xl font-semibold tracking-tight">휴가 관리</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">휴가 관리</h1>
+          <p className="mt-1.5 text-sm text-muted-foreground">
             전사 휴가 사용 현황과 사원별 부여·사용을 관리합니다.
           </p>
         </div>

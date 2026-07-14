@@ -267,14 +267,15 @@ export function DeptLeavePage() {
                   {yearMonth} 이력만 표시됩니다. 다른 달을 보려면 조회 월을 변경하세요.
                 </p>
 
+                <div className="flex min-h-[38rem] flex-col">
                 {historyQuery.isLoading ? (
-                  <p className="py-8 text-center text-sm text-muted-foreground">불러오는 중...</p>
+                  <p className="flex flex-1 items-center justify-center text-center text-sm text-muted-foreground">불러오는 중...</p>
                 ) : historyQuery.error ? (
-                  <p className="py-8 text-center text-sm text-muted-foreground">
+                  <p className="flex flex-1 items-center justify-center text-center text-sm text-muted-foreground">
                     부서 휴가 이력을 불러오지 못했습니다.
                   </p>
                 ) : historyRows.length === 0 ? (
-                  <p className="py-8 text-center text-sm text-muted-foreground">
+                  <p className="flex flex-1 items-center justify-center text-center text-sm text-muted-foreground">
                     조회 조건에 해당하는 휴가 신청 이력이 없습니다.
                   </p>
                 ) : (
@@ -356,6 +357,7 @@ export function DeptLeavePage() {
                     </table>
                   </div>
                 )}
+                </div>
 
                 <PaginationControls
                   className="border-t pt-4"

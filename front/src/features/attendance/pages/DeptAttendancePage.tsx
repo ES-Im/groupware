@@ -281,19 +281,23 @@ export function DeptAttendancePage() {
                     </div>
                   </div>
 
-                  {monthlyQuery.isLoading ? (
-                    <p className="py-8 text-center text-sm text-muted-foreground">불러오는 중...</p>
-                  ) : monthlyQuery.error ? (
-                    <p className="py-8 text-center text-sm text-muted-foreground">
-                      부서 근태 목록을 불러오지 못했습니다.
-                    </p>
-                  ) : (
-                    <DeptAttendanceMemberList
-                      data={monthlyRows}
-                      selectedEmpId={selectedEmpId}
-                      onSelect={setSelectedEmpId}
-                    />
-                  )}
+                  <div className="flex min-h-[36rem] flex-col">
+                    {monthlyQuery.isLoading ? (
+                      <p className="flex flex-1 items-center justify-center text-center text-sm text-muted-foreground">
+                        불러오는 중...
+                      </p>
+                    ) : monthlyQuery.error ? (
+                      <p className="flex flex-1 items-center justify-center text-center text-sm text-muted-foreground">
+                        부서 근태 목록을 불러오지 못했습니다.
+                      </p>
+                    ) : (
+                      <DeptAttendanceMemberList
+                        data={monthlyRows}
+                        selectedEmpId={selectedEmpId}
+                        onSelect={setSelectedEmpId}
+                      />
+                    )}
+                  </div>
 
                   <PaginationControls
                     className="border-t pt-4"
@@ -305,8 +309,11 @@ export function DeptAttendancePage() {
                 </CardContent>
               </Card>
 
-              {/* 우측 상세: 선택 사원의 근태 캘린더. height="100%" 성립을 위해 카드에 고정 높이를 준다. */}
-              <Card className="h-[440px] lg:sticky lg:top-4 lg:h-[560px]">
+              {/* 우측 상세: 선택 사원의 근태 캘린더. lg에서는 고정 높이 대신 h-auto로 두어 grid의
+                  기본 align-items:stretch가 좌측 부서원 카드(h-fit=내용 높이) 높이에 맞춰 카드를
+                  늘려준다 → 카드 높이가 확정되므로 캘린더 height="100%"도 그만큼 커진다. 모바일
+                  단일 컬럼에서는 stretch가 성립하지 않아(각 행에 카드 하나) h-[440px] 기본값을 유지한다. */}
+              <Card className="h-[440px] lg:h-auto">
                 <CardContent className="flex h-full min-h-0 flex-col">
                   {selectedRow ? (
                     <>
