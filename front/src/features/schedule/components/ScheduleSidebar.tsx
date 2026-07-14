@@ -1,7 +1,8 @@
 import type { CSSProperties } from 'react'
-import { Ban, Info } from 'lucide-react'
+import { Ban, CalendarPlus, Info } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
 import { Badge } from '@/shared/ui/badge'
+import { Button } from '@/shared/ui/button'
 import { Card, CardContent } from '@/shared/ui/card'
 import { Checkbox } from '@/shared/ui/checkbox'
 import { Label } from '@/shared/ui/label'
@@ -31,6 +32,8 @@ interface ScheduleSidebarProps {
   onToggleShowCanceled: () => void
   /** 오늘 날짜에 해당하는 일정(현재 range 데이터에서 필터링된 결과, showCanceled 반영됨). */
   todayItems: ScheduleCalendarItem[]
+  /** "새 일정 등록" 클릭 콜백. 다이얼로그 open 로직은 페이지 소유(여기선 자리에 연결만). */
+  onCreateClick: () => void
 }
 
 /** 'HH:mm:ss' → 'HH:mm'(초 절삭). 종일 일정은 상위에서 '종일'로 대체 표기한다. */
@@ -51,6 +54,7 @@ export function ScheduleSidebar({
   showCanceled,
   onToggleShowCanceled,
   todayItems,
+  onCreateClick,
 }: ScheduleSidebarProps) {
   return (
     <aside className="flex flex-col gap-3.5 lg:w-[300px] lg:shrink-0 lg:self-start">
@@ -165,6 +169,12 @@ export function ScheduleSidebar({
           )}
         </CardContent>
       </Card>
+
+      {/* 새 일정 등록: "오늘 일정" 카드 하단에 배치(페이지 헤더에서 이동). 클릭 로직은 페이지 소유. */}
+      <Button type="button" onClick={onCreateClick} className="w-full">
+        <CalendarPlus />
+        새 일정 등록
+      </Button>
 
       {/* 안내 callout: 카드가 아닌 옅은 강조색 배너. 회의·휴가·출장은 타 업무에서 자동 반영됨을 안내. */}
       <p className="flex items-start gap-2 rounded-xl bg-primary/10 p-3 text-xs leading-relaxed text-muted-foreground">

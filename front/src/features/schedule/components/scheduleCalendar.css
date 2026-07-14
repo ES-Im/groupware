@@ -13,7 +13,10 @@
 .schedule-calendar {
   /* FullCalendar 기본 팔레트를 shadcn 토큰에 맞춘다. */
   --fc-border-color: var(--border);
-  --fc-page-bg-color: var(--card);
+  /* 캘린더 그리드 배경을 감싸는 카드(--card)와 다른 톤(--muted)으로 깔아, 카드 안에서 캘린더 영역이
+     또렷한 패널로 분리돼 보이게 한다(가시성 개선). 라이트=옅은 회색/다크=한 톤 밝은 회색으로 두 테마
+     모두 카드와 대비된다. */
+  --fc-page-bg-color: var(--muted);
   --fc-neutral-bg-color: var(--muted);
   --fc-today-bg-color: color-mix(in oklch, var(--foreground) 4%, transparent);
   --fc-now-indicator-color: var(--destructive);

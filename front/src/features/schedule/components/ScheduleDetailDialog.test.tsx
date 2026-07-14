@@ -10,10 +10,14 @@ import { ScheduleDetailDialog } from './ScheduleDetailDialog'
 
 /**
  * ScheduleDetailDialog(ROADMAP(SCHEDULE) T2.2, SCHEDULE_DETAIL) 회귀 방지 테스트.
- * - 4개 scheduleType 전부 조회 전용으로 기본 필드가 렌더된다.
- * - 액션 영역(schedule-detail-actions)은 MANUAL + isEditable + 미취소 조합에서만 DOM에 나타난다.
- * - (T4.3) 인라인 ScheduleEditForm: 전환/프리필, 취소, 저장(scope 쿼리·성공 시 재조회), 제출 중
- *   다이얼로그 닫힘 방지, 서버 검증 실패 표시.
+ * - 4개 scheduleType 전부 우선 "조회 뷰"로 기본 필드가 렌더된다.
+ * - 액션 영역(schedule-detail-actions)은 MANUAL + isEditable + 미취소 조합에서만 조회 뷰 우측 하단에
+ *   [일정 수정]·[일정 삭제] 버튼으로 나타난다.
+ * - [일정 수정] → "수정 뷰"로 전환: ① 일정 정보 수정 폼(T4.3) · ② 참여자 추가(T5.2) · ③ 참여자
+ *   제외(T5.3)가 함께 렌더된다. 각 편집 기능의 계약(요청 URL/scope 쿼리/바디, 성공·실패 처리)은
+ *   구조 변경과 무관하게 그대로 검증한다. 수정 뷰 진입 흐름(먼저 [일정 수정] 클릭)에 맞춰 절차만 갱신.
+ * - [일정 삭제] → AlertDialog 확인 후 소프트 취소(PATCH /cancellation). 라벨/문구만 "삭제" 톤이고
+ *   엔드포인트는 취소 그대로다.
  */
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
@@ -82,13 +86,13 @@ function member(empId: number, empName: string) {
 }
 
 /**
- * canManage=true 조합(MANUAL+isEditable+미취소)에서는 항상 노출되는 참여자 추가 섹션이
- * EmployeePicker를 마운트해 GET /api/departments를 즉시 호출한다. MSW onUnhandledRequest:'error'
- * 정책상 목이 없으면 콘솔 에러가 찍히므로(선례: MeetingParticipantsReplaceDialog.test.tsx의
- * mockDeptPickers), canManage=true가 되는 모든 테스트가 renderDialog() 이전에 이 헬퍼를 호출한다.
- * 개발팀(deptId=1)에 소유자(empId=100 김철수)+신규후보(301 이민수), 영업팀(deptId=2)에 기존
- * 참여자(empId=201 박영희)+신규후보(302 최유진)를 배치해, T5.2 disabledEmpIds 검증(소유자·기존
- * 참여자가 부서원 목록에서 disabled로 렌더되는지)까지 이 하나의 헬퍼로 커버한다.
+ * 수정 뷰의 참여자 추가 섹션이 EmployeePicker를 마운트하면 GET /api/departments를 즉시 호출한다. MSW
+ * onUnhandledRequest:'error' 정책상 목이 없으면 콘솔 에러가 찍히므로(선례: MeetingParticipantsReplaceDialog.
+ * test.tsx의 mockDeptPickers), 수정 뷰로 진입하는(=[일정 수정] 클릭) 모든 테스트가 renderDialog() 이전에
+ * 이 헬퍼를 호출한다. 조회 뷰만 검증하는 테스트(기본 필드/게이팅/삭제)는 EmployeePicker를 마운트하지
+ * 않으므로 이 목이 필요 없다. 개발팀(deptId=1)에 소유자(empId=100 김철수)+신규후보(301 이민수),
+ * 영업팀(deptId=2)에 기존 참여자(empId=201 박영희)+신규후보(302 최유진)를 배치해, T5.2 disabledEmpIds
+ * 검증(소유자·기존 참여자가 부서원 목록에서 disabled로 렌더되는지)까지 이 하나의 헬퍼로 커버한다.
  */
 function mockDeptPickers() {
   server.use(
@@ -136,6 +140,14 @@ function renderDialog(scheduleId = 1, { open = true, onOpenChange = vi.fn() } = 
   }
 }
 
+/**
+ * 조회 뷰의 [일정 수정] 버튼을 눌러 수정 뷰로 진입한다. 버튼이 뜨려면 상세 조회가 끝나야 하므로
+ * findByRole로 로드를 함께 기다린다(canManage=true 조합에서만 노출).
+ */
+async function openEditView(user: ReturnType<typeof userEvent.setup>) {
+  await user.click(await screen.findByRole('button', { name: '일정 수정' }))
+}
+
 describe('ScheduleDetailDialog - 타입별 기본 필드 렌더', () => {
   it.each([
     ['MANUAL', 'MANUAL'],
@@ -143,8 +155,9 @@ describe('ScheduleDetailDialog - 타입별 기본 필드 렌더', () => {
     ['LEAVE', 'LEAVE'],
     ['BUSINESS_TRIP', 'BUSINESS_TRIP'],
   ] as const)('scheduleType=%s일 때 제목/내용/날짜 등 기본 필드가 렌더된다', async (_label, scheduleType) => {
+    // 조회 뷰는 정보만 렌더한다(참여자 추가/제외는 수정 뷰로 이동) → EmployeePicker가 마운트되지 않아
+    // GET /api/departments 목이 필요 없다.
     mockDetail(1, detail({ scheduleType }))
-    mockDeptPickers() // scheduleType=MANUAL 케이스는 canManage=true라 참여자 추가 섹션이 마운트된다.
 
     renderDialog()
 
@@ -153,8 +166,8 @@ describe('ScheduleDetailDialog - 타입별 기본 필드 렌더', () => {
     expect(screen.getByText(new RegExp(`${scheduleType} · 개발팀 김철수`))).toBeInTheDocument()
     expect(screen.getByText(/2026-07-15 10:00:00~11:00:00/)).toBeInTheDocument()
     expect(screen.getByText('참여자 1명')).toBeInTheDocument()
-    // canManage=true(MANUAL)면 참여자 제외 섹션(T5.3)도 같은 참여자명을 체크리스트로 렌더하므로
-    // 조회 전용 참여자 목록(schedule-detail-participants)으로 스코프해 유일하게 매칭한다.
+    // 참여자 제외 체크리스트(T5.3)는 이제 수정 뷰에만 있어 조회 뷰에는 없지만, 조회 전용 참여자 목록
+    // (schedule-detail-participants)으로 스코프해 안정적으로 매칭한다.
     expect(within(screen.getByTestId('schedule-detail-participants')).getByText('영업팀 박영희')).toBeInTheDocument()
   })
 })
@@ -162,7 +175,6 @@ describe('ScheduleDetailDialog - 타입별 기본 필드 렌더', () => {
 describe('ScheduleDetailDialog - 액션 영역 게이팅', () => {
   it('MANUAL + isEditable=true + isCanceled=false면 schedule-detail-actions가 나타난다', async () => {
     mockDetail(1, detail({ scheduleType: 'MANUAL', isEditable: true, isCanceled: false }))
-    mockDeptPickers()
 
     renderDialog()
 
@@ -198,14 +210,14 @@ describe('ScheduleDetailDialog - 액션 영역 게이팅', () => {
   })
 })
 
-describe('ScheduleDetailDialog - 수정 폼 전환/프리필', () => {
-  it('수정 버튼을 클릭하면 인라인 폼으로 전환되고 조회 값으로 프리필된다', async () => {
+describe('ScheduleDetailDialog - 수정 뷰 전환/프리필', () => {
+  it('일정 수정 버튼을 클릭하면 수정 뷰로 전환되고 조회 값으로 프리필된다', async () => {
     mockDetail(1, detail())
     mockDeptPickers()
     const user = userEvent.setup()
     renderDialog()
 
-    await user.click(await screen.findByRole('button', { name: '수정' }))
+    await openEditView(user)
 
     expect(screen.getByLabelText('제목')).toHaveValue('팀 회의 일정')
     expect(screen.getByLabelText('내용')).toHaveValue('주간 스크럼 진행')
@@ -215,7 +227,7 @@ describe('ScheduleDetailDialog - 수정 폼 전환/프리필', () => {
     expect(screen.getByRole('radio', { name: /일정 수정 적용 범위:\s*동일 일정 전체/ })).not.toBeChecked()
   })
 
-  it('취소 버튼을 클릭하면 폼이 닫히고 변경사항이 저장되지 않는다', async () => {
+  it('뒤로를 클릭하면 수정 뷰가 닫히고 변경사항이 저장되지 않는다', async () => {
     mockDetail(1, detail())
     mockDeptPickers()
     let patchCalled = false
@@ -228,12 +240,13 @@ describe('ScheduleDetailDialog - 수정 폼 전환/프리필', () => {
     const user = userEvent.setup()
     renderDialog()
 
-    await user.click(await screen.findByRole('button', { name: '수정' }))
+    await openEditView(user)
     await user.clear(screen.getByLabelText('제목'))
     await user.type(screen.getByLabelText('제목'), '변경해볼 제목')
-    await user.click(screen.getByRole('button', { name: '취소' }))
+    // 수정 뷰 상단/하단 두 곳에 "뒤로"가 있어 getAllByRole로 첫 번째(상단)를 클릭한다.
+    await user.click(screen.getAllByRole('button', { name: '뒤로' })[0])
 
-    expect(await screen.findByRole('button', { name: '수정' })).toBeInTheDocument()
+    expect(await screen.findByRole('button', { name: '일정 수정' })).toBeInTheDocument()
     expect(screen.getByText('팀 회의 일정')).toBeInTheDocument()
     expect(screen.queryByLabelText('제목')).not.toBeInTheDocument()
     expect(patchCalled).toBe(false)
@@ -241,7 +254,7 @@ describe('ScheduleDetailDialog - 수정 폼 전환/프리필', () => {
 })
 
 describe('ScheduleDetailDialog - 수정 저장', () => {
-  it('저장 시 scope=SINGLE(기본값) 쿼리와 함께 PATCH하고, 성공하면 폼이 닫히고 상세가 재조회된다', async () => {
+  it('저장 시 scope=SINGLE(기본값) 쿼리와 함께 PATCH하고, 성공하면 조회 뷰로 돌아가고 상세가 재조회된다', async () => {
     mockDeptPickers()
     let getCallCount = 0
     server.use(
@@ -262,7 +275,7 @@ describe('ScheduleDetailDialog - 수정 저장', () => {
     const user = userEvent.setup()
     renderDialog()
 
-    await user.click(await screen.findByRole('button', { name: '수정' }))
+    await openEditView(user)
     await waitFor(() => expect(getCallCount).toBe(1))
 
     await user.clear(screen.getByLabelText('제목'))
@@ -278,7 +291,8 @@ describe('ScheduleDetailDialog - 수정 저장', () => {
       endAt: '11:00:00',
     })
 
-    expect(await screen.findByRole('button', { name: '수정' })).toBeInTheDocument()
+    // 저장 성공 시 수정 뷰가 닫히고 조회 뷰([일정 수정] 버튼)로 복귀한다.
+    expect(await screen.findByRole('button', { name: '일정 수정' })).toBeInTheDocument()
     await waitFor(() => expect(getCallCount).toBeGreaterThanOrEqual(2))
 
     const { toast } = await import('sonner')
@@ -298,14 +312,14 @@ describe('ScheduleDetailDialog - 수정 저장', () => {
     const user = userEvent.setup()
     renderDialog()
 
-    await user.click(await screen.findByRole('button', { name: '수정' }))
+    await openEditView(user)
     await user.click(screen.getByRole('radio', { name: /일정 수정 적용 범위:\s*동일 일정 전체/ }))
     await user.click(screen.getByRole('button', { name: '저장' }))
 
     await waitFor(() => expect(scopeParam).toBe('SERIES'))
   })
 
-  it('저장 실패(400 VALIDATION_ERROR) 시 폼에 에러 메시지가 표시되고 폼이 유지된다', async () => {
+  it('저장 실패(400 VALIDATION_ERROR) 시 폼에 에러 메시지가 표시되고 수정 뷰가 유지된다', async () => {
     mockDetail(1, detail())
     mockDeptPickers()
     server.use(
@@ -324,7 +338,7 @@ describe('ScheduleDetailDialog - 수정 저장', () => {
     const user = userEvent.setup()
     const { onOpenChange } = renderDialog()
 
-    await user.click(await screen.findByRole('button', { name: '수정' }))
+    await openEditView(user)
     await user.click(screen.getByRole('button', { name: '저장' }))
 
     expect(await screen.findByText('종료 시각은 시작 시각보다 이후여야 합니다')).toBeInTheDocument()
@@ -350,7 +364,7 @@ describe('ScheduleDetailDialog - 수정 제출 중 다이얼로그 닫힘 방지
     const user = userEvent.setup()
     const { onOpenChange } = renderDialog()
 
-    await user.click(await screen.findByRole('button', { name: '수정' }))
+    await openEditView(user)
     await user.click(screen.getByRole('button', { name: '저장' }))
 
     await waitFor(() => expect(screen.getByRole('button', { name: '저장' })).toBeDisabled())
@@ -359,27 +373,26 @@ describe('ScheduleDetailDialog - 수정 제출 중 다이얼로그 닫힘 방지
 
     resolvePatch?.()
 
-    expect(await screen.findByRole('button', { name: '수정' })).toBeInTheDocument()
+    // 제출이 끝나면 조회 뷰([일정 수정] 버튼)로 복귀하고, 그 사이 다이얼로그는 닫히지 않았다.
+    expect(await screen.findByRole('button', { name: '일정 수정' })).toBeInTheDocument()
     expect(onOpenChange).not.toHaveBeenCalledWith(false)
   })
 })
 
 describe('ScheduleDetailDialog - 참여자 추가(ROADMAP(SCHEDULE) T5.2, SCHEDULE_PARTICIPANTS_ADD)', () => {
-  it('참여자 추가 섹션은 수정 폼 토글과 무관하게 항상 렌더된다', async () => {
+  it('수정 뷰에 진입하면 일정 정보 수정 폼과 참여자 추가 섹션이 함께 렌더된다', async () => {
     mockDetail(1, detail())
     mockDeptPickers()
     const user = userEvent.setup()
     renderDialog()
 
+    await openEditView(user)
+
+    // 같은 수정 뷰 안에 수정 폼(제목 입력)과 참여자 추가 섹션(헤딩 p + EmployeePicker의 "부서")이 공존한다.
     // "참여자 추가"는 섹션 헤딩(p)과 버튼(button) 양쪽에 동일 텍스트가 있어 selector로 헤딩만 좁힌다.
-    expect(await screen.findByText('참여자 추가', { selector: 'p' })).toBeInTheDocument()
-    expect(screen.getByText('부서')).toBeInTheDocument()
-
-    await user.click(screen.getByRole('button', { name: '수정' }))
-
-    // 수정 폼이 펼쳐진 뒤에도 참여자 추가 섹션은 토글 없이 그대로 남아있다.
-    expect(screen.getByText('참여자 추가', { selector: 'p' })).toBeInTheDocument()
     expect(screen.getByLabelText('제목')).toBeInTheDocument()
+    expect(screen.getByText('참여자 추가', { selector: 'p' })).toBeInTheDocument()
+    expect(screen.getByText('부서')).toBeInTheDocument()
   })
 
   it('부서→부서원을 선택하기 전에는 참여자 추가 버튼이 비활성이고, 선택하면 활성화된다', async () => {
@@ -388,6 +401,7 @@ describe('ScheduleDetailDialog - 참여자 추가(ROADMAP(SCHEDULE) T5.2, SCHEDU
     const user = userEvent.setup()
     renderDialog()
 
+    await openEditView(user)
     // "참여자 추가" 텍스트는 헤딩·버튼 양쪽에 있어, 곧바로 상호작용할 버튼을 기준으로 로드를 기다린다.
     await screen.findByRole('button', { name: '참여자 추가' })
     expect(screen.getByRole('button', { name: '참여자 추가' })).toBeDisabled()
@@ -404,6 +418,7 @@ describe('ScheduleDetailDialog - 참여자 추가(ROADMAP(SCHEDULE) T5.2, SCHEDU
     const user = userEvent.setup()
     renderDialog()
 
+    await openEditView(user)
     // "참여자 추가" 텍스트는 헤딩·버튼 양쪽에 있어, 곧바로 상호작용할 버튼을 기준으로 로드를 기다린다.
     await screen.findByRole('button', { name: '참여자 추가' })
 
@@ -439,6 +454,7 @@ describe('ScheduleDetailDialog - 참여자 추가(ROADMAP(SCHEDULE) T5.2, SCHEDU
     const user = userEvent.setup()
     renderDialog()
 
+    await openEditView(user)
     // "참여자 추가" 텍스트는 헤딩·버튼 양쪽에 있어, 곧바로 상호작용할 버튼을 기준으로 로드를 기다린다.
     await screen.findByRole('button', { name: '참여자 추가' })
     await waitFor(() => expect(getCallCount).toBe(1))
@@ -456,7 +472,7 @@ describe('ScheduleDetailDialog - 참여자 추가(ROADMAP(SCHEDULE) T5.2, SCHEDU
     const { toast } = await import('sonner')
     await waitFor(() => expect(toast.success).toHaveBeenCalledWith('참여자를 추가했습니다'))
 
-    // 선택 목록이 초기화되어 칩이 사라지고 버튼이 다시 비활성으로 돌아간다.
+    // 선택 목록이 초기화되어 칩이 사라지고 버튼이 다시 비활성으로 돌아간다(수정 뷰는 그대로 유지).
     await waitFor(() =>
       expect(screen.queryByRole('button', { name: '이민수 선택 해제' })).not.toBeInTheDocument(),
     )
@@ -476,6 +492,7 @@ describe('ScheduleDetailDialog - 참여자 추가(ROADMAP(SCHEDULE) T5.2, SCHEDU
     const user = userEvent.setup()
     renderDialog()
 
+    await openEditView(user)
     // "참여자 추가" 텍스트는 헤딩·버튼 양쪽에 있어, 곧바로 상호작용할 버튼을 기준으로 로드를 기다린다.
     await screen.findByRole('button', { name: '참여자 추가' })
     await user.click(await screen.findByRole('button', { name: '개발팀' }))
@@ -507,6 +524,7 @@ describe('ScheduleDetailDialog - 참여자 추가(ROADMAP(SCHEDULE) T5.2, SCHEDU
     const user = userEvent.setup()
     renderDialog()
 
+    await openEditView(user)
     // "참여자 추가" 텍스트는 헤딩·버튼 양쪽에 있어, 곧바로 상호작용할 버튼을 기준으로 로드를 기다린다.
     await screen.findByRole('button', { name: '참여자 추가' })
     await user.click(await screen.findByRole('button', { name: '개발팀' }))
@@ -530,6 +548,7 @@ describe('ScheduleDetailDialog - 참여자 제외(ROADMAP(SCHEDULE) T5.3, SCHEDU
     const user = userEvent.setup()
     renderDialog()
 
+    await openEditView(user)
     await screen.findByText('참여자 제외', { selector: 'p' })
 
     const ownerCheckbox = screen.getByRole('checkbox', { name: '개발팀 김철수 (소유자)' })
@@ -558,6 +577,7 @@ describe('ScheduleDetailDialog - 참여자 제외(ROADMAP(SCHEDULE) T5.3, SCHEDU
     const user = userEvent.setup()
     renderDialog()
 
+    await openEditView(user)
     await screen.findByText('참여자 제외', { selector: 'p' })
     await user.click(screen.getByRole('checkbox', { name: '영업팀 박영희' }))
     await user.click(screen.getByRole('checkbox', { name: '영업팀 최유진' }))
@@ -581,6 +601,7 @@ describe('ScheduleDetailDialog - 참여자 제외(ROADMAP(SCHEDULE) T5.3, SCHEDU
     const user = userEvent.setup()
     renderDialog()
 
+    await openEditView(user)
     await screen.findByText('참여자 제외', { selector: 'p' })
     await user.click(screen.getByRole('checkbox', { name: '영업팀 박영희' }))
     await user.click(screen.getByRole('radio', { name: /참여자 제외 적용 범위:\s*동일 일정 전체/ }))
@@ -604,6 +625,7 @@ describe('ScheduleDetailDialog - 참여자 제외(ROADMAP(SCHEDULE) T5.3, SCHEDU
     const user = userEvent.setup()
     renderDialog()
 
+    await openEditView(user)
     await screen.findByText('참여자 제외', { selector: 'p' })
     await waitFor(() => expect(getCallCount).toBe(1))
 
@@ -644,6 +666,7 @@ describe('ScheduleDetailDialog - 참여자 제외(ROADMAP(SCHEDULE) T5.3, SCHEDU
     const { toast } = await import('sonner')
     const successCallCountBefore = vi.mocked(toast.success).mock.calls.length
 
+    await openEditView(user)
     await screen.findByText('참여자 제외', { selector: 'p' })
     const memberCheckbox = screen.getByRole('checkbox', { name: '영업팀 박영희' })
     await user.click(memberCheckbox)
@@ -659,47 +682,40 @@ describe('ScheduleDetailDialog - 참여자 제외(ROADMAP(SCHEDULE) T5.3, SCHEDU
   })
 })
 
-describe('ScheduleDetailDialog - 일정 취소(ROADMAP(SCHEDULE) T6.2, SCHEDULE_CANCEL)', () => {
-  it('participantCount>1이면 취소 버튼이 disabled이고 안내 문구가 보이며, participantCount=1이면 활성 상태다', async () => {
+describe('ScheduleDetailDialog - 일정 삭제(ROADMAP(SCHEDULE) T6.2, SCHEDULE_CANCEL, 소프트 취소)', () => {
+  it('participantCount>1이면 일정 삭제 버튼이 disabled이고 안내 문구가 보인다', async () => {
     mockDetail(1, detail({ participantCount: 2 }))
-    mockDeptPickers()
     renderDialog()
 
-    await screen.findByText('일정 취소', { selector: 'p' })
-    expect(screen.getByText('참가자를 먼저 제외해야 취소할 수 있습니다.')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '일정 취소' })).toBeDisabled()
+    expect(await screen.findByRole('button', { name: '일정 삭제' })).toBeDisabled()
+    expect(screen.getByText('참가자를 먼저 제외해야 삭제할 수 있습니다.')).toBeInTheDocument()
   })
 
-  it('participantCount=1(소유자만)이면 취소 버튼이 활성 상태이고 안내 문구가 없다', async () => {
+  it('participantCount=1(소유자만)이면 일정 삭제 버튼이 활성 상태이고 안내 문구가 없다', async () => {
     mockDetail(1, detail({ participantCount: 1 }))
-    mockDeptPickers()
     renderDialog()
 
-    await screen.findByText('일정 취소', { selector: 'p' })
-    expect(screen.queryByText('참가자를 먼저 제외해야 취소할 수 있습니다.')).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '일정 취소' })).not.toBeDisabled()
+    expect(await screen.findByRole('button', { name: '일정 삭제' })).not.toBeDisabled()
+    expect(screen.queryByText('참가자를 먼저 제외해야 삭제할 수 있습니다.')).not.toBeInTheDocument()
   })
 
-  it('취소 버튼을 클릭하면 확인 다이얼로그가 열리고, 취소 확정 버튼과 scope 라디오(SINGLE 기본)가 보인다', async () => {
+  it('일정 삭제 버튼을 클릭하면 확인 다이얼로그가 열리고, 삭제 버튼과 scope 라디오(SINGLE 기본)가 보인다', async () => {
     mockDetail(1, detail({ participantCount: 1 }))
-    mockDeptPickers()
     const user = userEvent.setup()
     renderDialog()
 
-    await screen.findByText('일정 취소', { selector: 'p' })
-    await user.click(screen.getByRole('button', { name: '일정 취소' }))
+    await user.click(await screen.findByRole('button', { name: '일정 삭제' }))
 
-    expect(await screen.findByText('일정을 취소하시겠습니까?')).toBeInTheDocument()
-    expect(screen.getByText('취소한 일정은 되돌릴 수 없습니다.')).toBeInTheDocument()
-    expect(screen.getByRole('radio', { name: /일정 취소 적용 범위:\s*이 날짜만/ })).toBeChecked()
-    expect(screen.getByRole('radio', { name: /일정 취소 적용 범위:\s*동일 일정 전체/ })).not.toBeChecked()
+    expect(await screen.findByText('일정을 삭제하시겠습니까?')).toBeInTheDocument()
+    expect(screen.getByText('삭제한 일정은 되돌릴 수 없습니다.')).toBeInTheDocument()
+    expect(screen.getByRole('radio', { name: /일정 삭제 적용 범위:\s*이 날짜만/ })).toBeChecked()
+    expect(screen.getByRole('radio', { name: /일정 삭제 적용 범위:\s*동일 일정 전체/ })).not.toBeChecked()
     expect(screen.getByRole('button', { name: '돌아가기' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '취소 확정' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '삭제' })).toBeInTheDocument()
   })
 
-  it('취소 확정 클릭 시 scope=SINGLE(기본값) 쿼리로 PATCH하고, 요청 본문은 없다', async () => {
+  it('삭제 확정 클릭 시 scope=SINGLE(기본값) 쿼리로 PATCH하고, 요청 본문은 없다', async () => {
     mockDetail(1, detail({ participantCount: 1 }))
-    mockDeptPickers()
     let patchUrl: string | undefined
     let patchBodyText: string
     server.use(
@@ -712,10 +728,9 @@ describe('ScheduleDetailDialog - 일정 취소(ROADMAP(SCHEDULE) T6.2, SCHEDULE_
     const user = userEvent.setup()
     renderDialog()
 
-    await screen.findByText('일정 취소', { selector: 'p' })
-    await user.click(screen.getByRole('button', { name: '일정 취소' }))
-    await screen.findByText('일정을 취소하시겠습니까?')
-    await user.click(screen.getByRole('button', { name: '취소 확정' }))
+    await user.click(await screen.findByRole('button', { name: '일정 삭제' }))
+    await screen.findByText('일정을 삭제하시겠습니까?')
+    await user.click(screen.getByRole('button', { name: '삭제' }))
 
     await waitFor(() => expect(patchUrl).toBeDefined())
     expect(new URL(patchUrl as string).searchParams.get('scope')).toBe('SINGLE')
@@ -724,7 +739,6 @@ describe('ScheduleDetailDialog - 일정 취소(ROADMAP(SCHEDULE) T6.2, SCHEDULE_
 
   it("적용 범위를 '동일 일정 전체'로 선택하고 확정하면 scope=SERIES 쿼리로 PATCH된다", async () => {
     mockDetail(1, detail({ participantCount: 1 }))
-    mockDeptPickers()
     let scopeParam: string | null = null
     server.use(
       http.patch(`${BASE_URL}/api/schedules/1/cancellation`, async ({ request }) => {
@@ -735,37 +749,33 @@ describe('ScheduleDetailDialog - 일정 취소(ROADMAP(SCHEDULE) T6.2, SCHEDULE_
     const user = userEvent.setup()
     renderDialog()
 
-    await screen.findByText('일정 취소', { selector: 'p' })
-    await user.click(screen.getByRole('button', { name: '일정 취소' }))
-    await screen.findByText('일정을 취소하시겠습니까?')
-    await user.click(screen.getByRole('radio', { name: /일정 취소 적용 범위:\s*동일 일정 전체/ }))
-    await user.click(screen.getByRole('button', { name: '취소 확정' }))
+    await user.click(await screen.findByRole('button', { name: '일정 삭제' }))
+    await screen.findByText('일정을 삭제하시겠습니까?')
+    await user.click(screen.getByRole('radio', { name: /일정 삭제 적용 범위:\s*동일 일정 전체/ }))
+    await user.click(screen.getByRole('button', { name: '삭제' }))
 
     await waitFor(() => expect(scopeParam).toBe('SERIES'))
   })
 
   it('성공(204) 시 성공 토스트가 뜨고 onOpenChange(false)가 호출되어 다이얼로그가 닫힌다', async () => {
     mockDetail(1, detail({ participantCount: 1 }))
-    mockDeptPickers()
     server.use(
       http.patch(`${BASE_URL}/api/schedules/1/cancellation`, () => new HttpResponse(null, { status: 204 })),
     )
     const user = userEvent.setup()
     const { onOpenChange } = renderDialog()
 
-    await screen.findByText('일정 취소', { selector: 'p' })
-    await user.click(screen.getByRole('button', { name: '일정 취소' }))
-    await screen.findByText('일정을 취소하시겠습니까?')
-    await user.click(screen.getByRole('button', { name: '취소 확정' }))
+    await user.click(await screen.findByRole('button', { name: '일정 삭제' }))
+    await screen.findByText('일정을 삭제하시겠습니까?')
+    await user.click(screen.getByRole('button', { name: '삭제' }))
 
     const { toast } = await import('sonner')
-    await waitFor(() => expect(toast.success).toHaveBeenCalledWith('일정을 취소했습니다'))
+    await waitFor(() => expect(toast.success).toHaveBeenCalledWith('일정을 삭제했습니다'))
     await waitFor(() => expect(onOpenChange).toHaveBeenCalledWith(false))
   })
 
   it('실패(400 VALIDATION_ERROR) 시 에러 토스트만 뜨고 다이얼로그는 닫히지 않는다', async () => {
     mockDetail(1, detail({ participantCount: 1 }))
-    mockDeptPickers()
     server.use(
       http.patch(`${BASE_URL}/api/schedules/1/cancellation`, () =>
         HttpResponse.json(
@@ -788,10 +798,9 @@ describe('ScheduleDetailDialog - 일정 취소(ROADMAP(SCHEDULE) T6.2, SCHEDULE_
     const { toast } = await import('sonner')
     const successCallCountBefore = vi.mocked(toast.success).mock.calls.length
 
-    await screen.findByText('일정 취소', { selector: 'p' })
-    await user.click(screen.getByRole('button', { name: '일정 취소' }))
-    await screen.findByText('일정을 취소하시겠습니까?')
-    await user.click(screen.getByRole('button', { name: '취소 확정' }))
+    await user.click(await screen.findByRole('button', { name: '일정 삭제' }))
+    await screen.findByText('일정을 삭제하시겠습니까?')
+    await user.click(screen.getByRole('button', { name: '삭제' }))
 
     await waitFor(() => expect(toast.error).toHaveBeenCalledWith('참가자가 있어 취소할 수 없습니다'))
     expect(vi.mocked(toast.success).mock.calls.length).toBe(successCallCountBefore)
