@@ -55,6 +55,8 @@ export interface BoardDetailResponse {
   viewCount: number
   commentCount: number
   isDraft: boolean
+  /** 로그인 사용자의 좋아요 여부. 서버가 empId 기준 BoardLike 존재(exists)로 판별해 내려준다. */
+  isLiked: boolean
 }
 
 /**

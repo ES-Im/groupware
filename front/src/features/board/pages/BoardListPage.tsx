@@ -16,6 +16,7 @@ import {
 } from '@/shared/ui/card'
 import { Input } from '@/shared/ui/input'
 import { useCategoriesQuery } from '@/features/category/api/useCategoriesQuery'
+import { CategoryManagementTrigger } from '@/features/category/components/CategoryManagementTrigger'
 import { useBoardListQuery } from '../api/useBoardListQuery'
 import { BoardCategoryFilter } from '../components/BoardCategoryFilter'
 import { BoardCreateForm } from '../components/BoardCreateForm'
@@ -163,6 +164,11 @@ export function BoardListPage() {
                 <Tags className="size-4 text-muted-foreground" aria-hidden="true" />
                 카테고리
               </CardTitle>
+              {/* 카테고리 관리(ADMIN 전용) 진입점 — 게이팅/모달 배선은 이 컴포넌트가 캡슐화한다
+                  (비-ADMIN에게는 아예 렌더되지 않는다). */}
+              <CardAction>
+                <CategoryManagementTrigger />
+              </CardAction>
             </CardHeader>
             <CardContent>
               {/* 카테고리가 있을 때만 nav 목록을 노출한다(로딩/빈 상태 안내 문구는 우측 카드에서 처리). */}
@@ -179,32 +185,44 @@ export function BoardListPage() {
             <FilePlus />
             게시글 작성
           </Button>
+          {/* 목록 복귀 버튼: 상세/작성 뷰를 보고 있을 때만 "게시글 작성" 버튼 아래에 노출한다
+              (사용자 요청 — 이전에는 우측 카드 상단에 있었다). 작성/상세를 모두 닫고 목록으로 돌아간다. */}
+          {(isComposing || selectedBoardId !== undefined) && (
+            <Button
+              type="button"
+              variant="outline"
+              size="lg"
+              className="w-full"
+              onClick={() => {
+                setIsComposing(false)
+                setSelectedBoardId(undefined)
+              }}
+            >
+              <ChevronLeft />
+              목록
+            </Button>
+          )}
         </div>
 
         {/* 우측: 게시글 목록 ↔ 상세 ↔ 작성 — 셋 중 하나만 같은 그리드 셀(=동일 높이·폭)을 차지한다.
             작성이 목록/상세보다 우선한다. */}
         {isComposing ? (
-          <div className="flex flex-col lg:min-h-0 lg:flex-1">
-            <div className="mb-4 shrink-0">
-              <Button type="button" variant="outline" size="sm" onClick={() => setIsComposing(false)}>
-                <ChevronLeft />
-                목록
-              </Button>
-            </div>
-            <Card className="lg:min-h-[22rem] lg:flex-1">
-              <CardHeader className="border-b">
-                <CardTitle>게시글 작성</CardTitle>
-              </CardHeader>
-              <div className="px-(--card-spacing) pt-(--card-spacing) lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
-                <BoardCreateForm
-                  onSuccess={() => setIsComposing(false)}
-                  defaultCategoryId={selectedCategoryId}
-                />
-              </div>
-            </Card>
-          </div>
+          // 작성 카드: 그리드 셀 높이를 채우는 풀높이 단일 카드. CardContent가 flex-1로 남는 높이를
+          // 확보하고, BoardCreateForm이 그 안에서 본문(flex-1)을 늘려 액션바를 카드 최하단으로 민다
+          // (사용자 요청). "목록" 버튼은 좌측 컬럼으로 옮겼다.
+          <Card className="flex flex-col lg:min-h-0 lg:flex-1">
+            <CardHeader className="border-b">
+              <CardTitle>게시글 작성</CardTitle>
+            </CardHeader>
+            <CardContent className="flex min-h-0 flex-1 flex-col">
+              <BoardCreateForm
+                onSuccess={() => setIsComposing(false)}
+                defaultCategoryId={selectedCategoryId}
+              />
+            </CardContent>
+          </Card>
         ) : selectedBoardId !== undefined ? (
-          <BoardDetailView boardId={selectedBoardId} onBack={() => setSelectedBoardId(undefined)} />
+          <BoardDetailView boardId={selectedBoardId} inline />
         ) : (
           // lg에서 카드 프레임이 그리드 셀 전체 높이를 차지하고(그리드 기본 stretch, lg:flex-1은
           // 안전 차원의 잔존 클래스), 헤더·페이지네이션은 스크롤 밖에 고정한 채 표 영역만 내부

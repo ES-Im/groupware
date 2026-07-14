@@ -52,6 +52,7 @@ function detailFixture(overrides: Record<string, unknown> = {}) {
     viewCount: 1,
     commentCount: 0,
     isDraft: false,
+    isLiked: false,
     ...overrides,
   }
 }

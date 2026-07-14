@@ -1,24 +1,26 @@
 import { useEffect } from 'react'
 import { Link } from 'react-router'
-import { ChevronLeft, Download, Eye, Heart, MessageCircle, Paperclip, Pencil, Send } from 'lucide-react'
+import { Download, Eye, Heart, MessageCircle, Paperclip, Pencil, Send } from 'lucide-react'
 import dayjs from 'dayjs'
 import { toast } from 'sonner'
 import { useAuthStore } from '@/features/auth/store/authStore'
 import { isForbidden, isNotFound, normalizeApiError } from '@/shared/lib/apiError'
 import { hasRequiredRole } from '@/shared/lib/hasRequiredRole'
+import { cn } from '@/shared/lib/utils'
 import { Button } from '@/shared/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
+import { Separator } from '@/shared/ui/separator'
 import { useCategoriesQuery } from '@/features/category/api/useCategoriesQuery'
 import { downloadBoardFile } from '../api/downloadBoardFile'
 import { useBoardDetailQuery } from '../api/useBoardDetailQuery'
 import { useBoardFilePreviewUrl } from '../api/useBoardFilePreviewUrl'
 import { useBoardFilesQuery } from '../api/useBoardFilesQuery'
+import { useBoardLikeMutation } from '../api/useBoardLikeMutation'
 import { useBoardPublishMutation } from '../api/useBoardPublishMutation'
 import { isImageExtension } from '../lib/isImageExtension'
 import type { BoardFileInfo } from '../model/board'
 import { CategoryBadge } from './CategoryBadge'
 import { CommentSection } from './CommentSection'
-import { InitialsAvatar } from './InitialsAvatar'
 
 /** 바이트 크기를 사람이 읽는 단위 문자열로 변환한다(목표 디자인의 "248 KB" / "1.8 MB" 표기).
  * 1MB 이상은 MB(소수 1자리), 그 미만은 KB(반올림, 최소 1KB)로 보인다. */
@@ -56,7 +58,8 @@ function BoardFileCard({ file, onDownload }: { file: BoardFileInfo; onDownload: 
   )
 }
 
-/** 좋아요/조회/댓글 수를 표시하는 읽기 전용 알약. 아이콘 + 숫자만 — 좋아요는 §열린항목1에 따라 토글 불가(읽기 표시만). */
+/** 조회/댓글 수를 표시하는 읽기 전용 알약(헤더용). 아이콘 + 숫자만 — 좋아요는 본문 하단
+ * LikeToggleButton으로 분리했으므로 이 알약에서는 제외한다(중복 방지). */
 function StatPill({
   icon: Icon,
   label,
@@ -72,6 +75,46 @@ function StatPill({
       <span className="sr-only">{label}</span>
       {value.toLocaleString()}
     </span>
+  )
+}
+
+/**
+ * 좋아요 토글 버튼(프레젠테이셔널). 좋아요/취소 REST(POST/DELETE /api/boards/{boardId}/likes)에
+ * 연결되지만, 실제 mutation·onClick 로직과 초기 isLiked 판별 배선은 상위(메인)가 담당한다 — 이
+ * 컴포넌트는 상태(isLiked)·동작(onToggleLike)·제출중(isPending)을 props로만 받아 두 상태의 시각
+ * 표현만 한다(로직 없음).
+ *
+ * - 활성(isLiked=true): default 버튼 variant(primary 톤: bg-primary/text-primary-foreground) +
+ *   채워진 하트(fill-current).
+ * - 비활성(isLiked=false): outline variant + 빈 하트(테두리만).
+ * - isPending 동안 disabled 처리로 중복 제출을 막는다(shadcn Button이 disabled 흐림·클릭 차단·
+ *   포커스링을 보장). aria-pressed로 토글 상태를 보조기기에 알린다.
+ */
+function LikeToggleButton({
+  isLiked,
+  likeCount,
+  onToggleLike,
+  isPending,
+}: {
+  isLiked: boolean
+  likeCount: number
+  onToggleLike: () => void
+  isPending: boolean
+}) {
+  return (
+    <Button
+      type="button"
+      size="lg"
+      variant={isLiked ? 'default' : 'outline'}
+      onClick={onToggleLike}
+      disabled={isPending}
+      aria-pressed={isLiked}
+      aria-label={`좋아요 ${likeCount.toLocaleString()}개${isLiked ? ' (누름)' : ''}`}
+      className="rounded-full px-5"
+    >
+      <Heart className={cn('size-4', isLiked && 'fill-current')} aria-hidden="true" />
+      좋아요 {likeCount.toLocaleString()}
+    </Button>
   )
 }
 
@@ -117,11 +160,12 @@ interface BoardDetailViewProps {
   /** 조회할 게시글 ID. route param 검증은 상위 페이지가 담당하므로 여기서는 항상 유효한 값만 받는다. */
   boardId: number
   /**
-   * "← 목록" 버튼 클릭 콜백. 제공되면 상세 카드 헤더(및 로딩/에러 분기 상단)에 목록 복귀 버튼을
-   * 렌더한다 — 인라인 목록↔상세 전환 컨텍스트(BoardListPage)에서만 주입한다. 미제공(전용 상세
-   * 페이지 진입)이면 버튼을 렌더하지 않고, 상위 페이지의 상단 backLink로만 복귀한다.
+   * 인라인 목록↔상세 전환(BoardListPage) 컨텍스트 여부. true면 본문+댓글을 하나의 풀높이 카드로
+   * 합쳐 그리드 셀을 채우고 본문이 길면 카드가 늘어난다. 미지정(전용 상세 페이지)이면 문서 흐름의
+   * 단일 카드로 렌더한다. 목록 복귀("목록") 버튼은 상위(BoardListPage 좌측 컬럼)가 소유하므로 이
+   * 뷰는 렌더하지 않는다.
    */
-  onBack?: () => void
+  inline?: boolean
 }
 
 /**
@@ -135,8 +179,10 @@ interface BoardDetailViewProps {
  * useBoardDetailQuery/useBoardFilesQuery(T11.1)로 본문·메타·첨부를 렌더하고, extension으로 이미지
  * 여부를 판별해 이미지는 인라인 미리보기(T11.2-b)·그 외는 다운로드(T11.2-a)로 분기한다.
  *
- * **좋아요는 `likeCount` 읽기 표시만 한다(§열린항목1)** — `api-endpoint.md`에 좋아요 토글
- * 엔드포인트가 없어 토글 버튼/mutation을 만들지 않는다(근거 없는 발명 금지).
+ * **좋아요는 본문 하단 토글 버튼(`LikeToggleButton`)으로 표시한다** — 좋아요/취소 REST(POST/DELETE
+ * `/api/boards/{boardId}/likes`)가 계약에 존재한다. 다만 이 뷰(시각/레이아웃 담당)는 상태·동작을
+ * props로 주입받는 프레젠테이션 버튼만 두고, 실제 mutation·onClick·초기 `isLiked` 판별 배선은
+ * 상위(메인)가 붙인다 — 현재는 기본 비활성·no-op 스텁으로 렌더한다(아래 `//todo` 참조).
  *
  * **작성자 게이팅 제약(신규 발견, §리스크7과 동형 공백)**: PRD는 "상세 응답 empId와 authStore
  * 본인 식별자 비교"로 "수정"/"발행" 버튼을 게이팅하라고 하지만, `RETRIEVE_ME_INFO` 응답
@@ -156,31 +202,23 @@ interface BoardDetailViewProps {
  * 그대로 구현해 두지만, 현재 백엔드 동작상 이 화면에서는 도달 불가능한 방어적 코드다 — 실제
  * 발행 진입점은 M15(내 임시저장함 목록)가 될 것으로 보인다.
  *
- * 댓글 영역(F313~F317, ROADMAP T14.2)은 하단에 `CommentSection`으로 분리 마운트한다 — 이
- * 뷰 자체는 게시글 본문/첨부만 다루고 댓글 목록·등록·대댓글·수정·삭제는 전부
+ * 댓글 영역(F313~F317, ROADMAP T14.2)은 본문과 **같은 카드 안에** `CommentSection`(embedded)으로
+ * 이어 붙인다 — 이 뷰 자체는 게시글 본문/첨부만 다루고 댓글 목록·등록·대댓글·수정·삭제는 전부
  * `CommentSection`/`CommentItem`/`CommentForm`이 캡슐화한다.
  */
-export function BoardDetailView({ boardId, onBack }: BoardDetailViewProps) {
+export function BoardDetailView({ boardId, inline }: BoardDetailViewProps) {
   const roles = useAuthStore((state) => state.roles)
   const canEdit = hasRequiredRole(roles, 'ADMIN')
 
   const detailQuery = useBoardDetailQuery(boardId)
   const filesQuery = useBoardFilesQuery(boardId)
   const publishMutation = useBoardPublishMutation()
+  const likeMutation = useBoardLikeMutation(boardId)
 
   // 카테고리 표기를 목록(pill 필터·CategoryBadge)과 일관되게 맞추기 위해, 상세 응답의 categoryId를
   // 이름으로 해석한다(F302 useCategoriesQuery 재사용 — 신규 API/로직 발명 없음). 이름을 아직 못
   // 구했으면(로딩/실패) 배지를 생략한다(본문 렌더에는 영향 없음).
   const categoriesQuery = useCategoriesQuery()
-
-  // "← 목록" 버튼: 인라인 전환(BoardListPage)에서만 onBack이 주입돼 렌더된다. 로딩/에러 분기 상단과
-  // 성공 카드 헤더 액션 영역에서 동일한 버튼을 재사용한다(전용 페이지에서는 onBack 미주입 → null).
-  const backButton = onBack ? (
-    <Button type="button" variant="outline" size="sm" onClick={onBack}>
-      <ChevronLeft />
-      목록
-    </Button>
-  ) : null
 
   // not-found/forbidden은 아래에서 전용 UX로 렌더하므로, 그 외 실패만 토스트로 알린다
   // (EmployeeDetailPage/DepartmentDetailPage와 동일 컨벤션). forbidden 분기의 실제 도달
@@ -225,12 +263,7 @@ export function BoardDetailView({ boardId, onBack }: BoardDetailViewProps) {
   }
 
   if (detailQuery.isLoading) {
-    return (
-      <>
-        {backButton && <div className="mb-4">{backButton}</div>}
-        <p className="text-sm text-muted-foreground">게시글을 불러오는 중...</p>
-      </>
-    )
+    return <p className="text-sm text-muted-foreground">게시글을 불러오는 중...</p>
   }
 
   if (detailQuery.error) {
@@ -238,7 +271,6 @@ export function BoardDetailView({ boardId, onBack }: BoardDetailViewProps) {
     if (isNotFound(apiError)) {
       return (
         <>
-          {backButton && <div className="mb-4">{backButton}</div>}
           <h1 className="mb-2 text-xl font-semibold tracking-tight">게시글 상세</h1>
           <p className="text-sm text-muted-foreground">게시글을 찾을 수 없습니다.</p>
         </>
@@ -254,7 +286,6 @@ export function BoardDetailView({ boardId, onBack }: BoardDetailViewProps) {
     if (isForbidden(apiError)) {
       return (
         <>
-          {backButton && <div className="mb-4">{backButton}</div>}
           <h1 className="mb-2 text-xl font-semibold tracking-tight">게시글 상세</h1>
           <p className="text-sm text-muted-foreground">이 게시글을 조회할 권한이 없습니다.</p>
         </>
@@ -263,7 +294,6 @@ export function BoardDetailView({ boardId, onBack }: BoardDetailViewProps) {
     // not-found/forbidden이 아닌 실패는 위 useEffect가 토스트로 알렸으므로 화면은 빈 상태로만 표시한다.
     return (
       <>
-        {backButton && <div className="mb-4">{backButton}</div>}
         <h1 className="mb-2 text-xl font-semibold tracking-tight">게시글 상세</h1>
         <p className="text-sm text-muted-foreground">게시글을 불러오지 못했습니다.</p>
       </>
@@ -282,8 +312,9 @@ export function BoardDetailView({ boardId, onBack }: BoardDetailViewProps) {
     (category) => category.categoryId === board.categoryId,
   )?.categoryName
 
-  // 카드 헤더(제목/작성자/액션/통계)는 인라인·전용 페이지 공통이며, 인라인 모드에서는 스크롤 밖
-  // 상단에 고정된다(아래 onBack 분기).
+  // 카드 헤더(제목/액션)는 인라인·전용 페이지 공통이며, 인라인 모드에서는 스크롤 밖 상단에
+  // 고정된다(아래 onBack 분기). 메일함 상세(MessageDetailView) 톤에 맞춰 헤더에는 제목과
+  // 우측 액션만 좌우로 두고, 작성자/일시/통계는 본문(cardBody)의 메타 영역으로 내린다.
   const cardHeader = (
     <CardHeader className="border-b">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -291,8 +322,10 @@ export function BoardDetailView({ boardId, onBack }: BoardDetailViewProps) {
           {/* 카테고리 표기(목록 pill 필터와 동일한 폴더 아이콘 언어의 CategoryBadge) — 이름을
               해석했을 때만 노출한다. */}
           {categoryName && <CategoryBadge name={categoryName} className="mb-2" />}
-          {/* 목표 디자인(board-page.html): 상세 제목은 목록보다 크고 굵게(2xl bold) 강조한다. */}
-          <CardTitle className="text-2xl font-bold tracking-tight">{board.title}</CardTitle>
+          {/* 메일함 상세 제목 톤(xl bold + break-all)에 맞춘다. */}
+          <CardTitle className="text-xl font-bold tracking-tight break-all text-foreground">
+            {board.title}
+          </CardTitle>
         </div>
 
         {/* 우측 액션: (작성자·ADMIN) "수정" + (임시저장 글) "발행". 인라인 전환의 "← 목록"
@@ -315,84 +348,141 @@ export function BoardDetailView({ boardId, onBack }: BoardDetailViewProps) {
           )}
         </div>
       </div>
-
-      {/* 작성자 메타(이니셜 아바타 + 이름 + 발행/수정 일시)와 통계(조회·좋아요·댓글)를 한 줄에
-          좌우로 배치한다(목표 디자인). BoardDetailResponse에는 작성자 부서 필드가 없어(계약 실측)
-          레퍼런스의 부서 표기는 생략한다(발명 금지). 좋아요는 토글 엔드포인트가 없어(클래스 주석
-          §열린항목1) 여기서도 읽기 전용 통계로만 표시하고 별도 좋아요 버튼은 만들지 않는다. */}
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <InitialsAvatar name={board.authorName} className="size-10" />
-          <div>
-            <p className="text-sm font-semibold text-foreground">{board.authorName}</p>
-            <p className="mt-0.5 text-xs text-muted-foreground">
-              발행 {dayjs(board.publishedAt).format('YYYY-MM-DD HH:mm')}
-              {showModifiedAt && ` · 수정 ${dayjs(board.modifiedAt).format('YYYY-MM-DD HH:mm')}`}
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center gap-4">
-          <StatPill icon={Eye} label="조회수" value={board.viewCount} />
-          <StatPill icon={Heart} label="좋아요 수" value={board.likeCount} />
-          <StatPill icon={MessageCircle} label="댓글 수" value={board.commentCount} />
-        </div>
-      </div>
     </CardHeader>
   )
 
-  // 본문+첨부(제목/작성자 등 메타는 위 cardHeader가 담당).
-  const cardBody = (
-    <CardContent className="space-y-6">
-      {/* longtext 본문. 작성 폼(BoardCreatePage)이 Textarea로 받은 순수 텍스트이므로
-          dangerouslySetInnerHTML 없이 whitespace-pre-wrap으로만 줄바꿈을 보존한다.
-          긴 본문 가독성을 위해 leading-relaxed로 행간을 넓히고, 짧은 글도 본문 영역이
-          허전하지 않도록 최소 높이를 준다. */}
-      <p className="min-h-24 text-sm leading-7 whitespace-pre-wrap text-foreground">
-        {board.content}
-      </p>
+  // 좋아요 토글: BOARD_DETAIL 응답의 isLiked를 초기 상태로 쓰고, 클릭 시 현재 상태의 반대
+  // 동작(좋아요/취소)을 호출한다. 성공 시 훅이 캐시의 isLiked/likeCount만 직접 갱신한다 —
+  // 상세를 refetch하면 서버가 viewCount를 올리는 부작용이 있어(useBoardLikeMutation 주석) 이를
+  // 피한다. 400(이미 눌림/안 눌림, BOARD_006/007)은 동시성 등 예외 상황이라 메시지를 토스트로
+  // 노출한다(정상 흐름에선 isLiked로 분기하므로 발생하지 않는다).
+  const isLiked = board.isLiked
+  const isLikePending = likeMutation.isPending
+  const handleToggleLike = () => {
+    likeMutation.mutate(board.isLiked, {
+      onError: (error) => {
+        toast.error(normalizeApiError(error).message)
+      },
+    })
+  }
 
-      {/* 첨부 목록(F304): 이미지 확장자는 인라인 미리보기(F311), 그 외는 다운로드(F310). */}
-      {filesQuery.isLoading ? (
-        <p className="text-sm text-muted-foreground">첨부파일을 불러오는 중...</p>
-      ) : files.length > 0 ? (
-        <div className="space-y-3 border-t pt-4">
-          <h3 className="flex items-center gap-1.5 text-sm font-semibold text-muted-foreground">
-            <Paperclip className="size-4" />
-            첨부파일 {files.length}개
-          </h3>
-          <div className="flex flex-wrap gap-3">
-            {files.map((file) =>
-              isImageExtension(file.extension) ? (
-                <BoardImagePreview key={file.fileId} boardId={boardId} file={file} />
-              ) : (
-                <BoardFileCard
-                  key={file.fileId}
-                  file={file}
-                  onDownload={() => handleDownload(file)}
-                />
-              ),
-            )}
+  // 본문 카드 내용. 메일함 상세(MessageDetailView) 구조를 따른다: 상단 메타(라벨+칩) →
+  // Separator → "내용" 섹션 → "첨부파일" 섹션 → (하단 고정)좋아요. 제목/액션은 위 cardHeader가
+  // 담당한다. flex 컬럼으로 채워(인라인 모드에서 본문 영역 flex-[7]을 flex-1로 흡수) 좋아요를
+  // mt-auto로 본문 영역 최하단(댓글 바로 위)에 고정한다(사용자 요청). 전용 페이지(높이 비제약)에서는
+  // 흡수할 여백이 없어 좋아요가 첨부 바로 아래 자연스럽게 붙는다.
+  const cardBody = (
+    <CardContent className="flex flex-1 flex-col gap-4">
+      {/* 메타(메일함 라벨+칩 톤): 작성자는 칩, 발행/수정 일시는 작은 회색 텍스트, 조회·댓글 통계는
+          우측 정렬. BoardDetailResponse에는 작성자 부서 필드가 없어(계약 실측) 부서 표기는 생략한다. */}
+      <div className="space-y-2.5 text-sm">
+        <div className="flex items-center gap-3">
+          <span className="w-14 shrink-0 text-muted-foreground">작성자</span>
+          <span className="rounded-md bg-muted px-2.5 py-1 font-medium text-foreground">
+            {board.authorName}
+          </span>
+        </div>
+        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5">
+          <p className="text-xs text-muted-foreground tabular-nums">
+            발행 {dayjs(board.publishedAt).format('YYYY-MM-DD HH:mm')}
+            {showModifiedAt && ` · 수정 ${dayjs(board.modifiedAt).format('YYYY-MM-DD HH:mm')}`}
+          </p>
+          <div className="flex items-center gap-4">
+            <StatPill icon={Eye} label="조회수" value={board.viewCount} />
+            <StatPill icon={MessageCircle} label="댓글 수" value={board.commentCount} />
           </div>
         </div>
+      </div>
+
+      <Separator />
+
+      {/* 내용(메일함 "내용" 섹션 톤): 라벨 + longtext 본문. 작성 폼이 Textarea로 받은 순수
+          텍스트이므로 dangerouslySetInnerHTML 없이 whitespace-pre-wrap으로만 줄바꿈을 보존한다.
+          짧은 글도 본문 영역이 허전하지 않도록 최소 높이를 준다. */}
+      <section className="space-y-2">
+        <h3 className="text-sm font-semibold text-muted-foreground">내용</h3>
+        <p className="min-h-24 text-sm leading-7 whitespace-pre-wrap break-words text-foreground">
+          {board.content}
+        </p>
+      </section>
+
+      {/* 첨부(메일함 "첨부" 섹션 톤): 이미지 확장자는 인라인 미리보기(F311), 그 외는 다운로드(F310). */}
+      {filesQuery.isLoading ? (
+        <>
+          <Separator />
+          <p className="text-sm text-muted-foreground">첨부파일을 불러오는 중...</p>
+        </>
+      ) : files.length > 0 ? (
+        <>
+          <Separator />
+          <div className="space-y-3">
+            <h3 className="flex items-center gap-1.5 text-sm font-semibold text-muted-foreground">
+              <Paperclip className="size-4" />
+              첨부파일 {files.length}개
+            </h3>
+            <div className="flex flex-wrap gap-3">
+              {files.map((file) =>
+                isImageExtension(file.extension) ? (
+                  <BoardImagePreview key={file.fileId} boardId={boardId} file={file} />
+                ) : (
+                  <BoardFileCard
+                    key={file.fileId}
+                    file={file}
+                    onDownload={() => handleDownload(file)}
+                  />
+                ),
+              )}
+            </div>
+          </div>
+        </>
       ) : null}
+
+      {/* 좋아요: 본문 영역 최하단(댓글 바로 위)에 고정한다(사용자 요청 — 이전엔 본문 바로 아래였다).
+          mt-auto가 본문 영역(flex-[7])의 남는 높이를 위로 밀어 이 토글을 맨 아래로 내린다. 좋아요/취소
+          REST(POST/DELETE /api/boards/{boardId}/likes)에 연결된 인터랙티브 토글이며 상태·동작은
+          LikeToggleButton에 props로 주입한다. 상단 border-t로 본문과 구분한다. */}
+      <div className="mt-auto flex justify-center border-t pt-4">
+        <LikeToggleButton
+          isLiked={isLiked}
+          likeCount={board.likeCount}
+          onToggleLike={handleToggleLike}
+          isPending={isLikePending}
+        />
+      </div>
     </CardContent>
   )
 
-  // 인라인 전환(BoardListPage): 상세 본문+첨부+댓글을 하나의 Card 안에 담아 "한 뭉텅이"로 보이게 한다
-  // (사용자 요청 — 카드 경계가 아니라 CommentSection의 구분선만으로 나눈다). 카드 프레임은 남는
-  // 높이에 고정되고(lg), 헤더는 스크롤 밖 상단에, 본문+첨부+댓글만 내부 스크롤된다(B-2). "← 목록"
-  // 버튼은 카드 바깥 최상단에 고정한다. 전용 상세 페이지(onBack 미주입)는 상세 Card와 댓글 Card를
-  // 분리된 기존 문서 흐름 그대로 유지한다(기존 동작 무변경).
-  if (onBack) {
+  // 인라인 전환(BoardListPage): 상세 본문과 댓글을 **하나의 카드**에 합친다(사용자 요청 — 이전의
+  // 본문 카드 + 댓글 카드 2분할을 폐지). 카드는 그리드 셀(=main 영역) 높이를 최소로 채우되
+  // (lg:flex-1) min-height:auto를 유지해(min-h-0·overflow 미부여) 콘텐츠가 길면 카드가 늘어나고
+  // main이 스크롤된다. 카드 안에서 본문 영역은 카드의 70%(lg:flex-[7]), 댓글 영역은 30%
+  // (lg:flex-[3])를 기본 비율로 차지한다 — flex-basis 0 + grow 비율이라 콘텐츠가 짧으면 남는 높이가
+  // 7:3으로 분배돼 본문이 정확히 70%를 채우고, 본문/댓글이 그 공간보다 길면 내부 스크롤 없이 각
+  // 영역이 콘텐츠 높이로 늘어나며 카드가 함께 커진다("본문이 이 공간보다 길면 카드 길이를 늘린다").
+  // 본문/댓글 구분선은 CommentSection embedded 헤더의 border-t가 담당하므로 별도 Separator는 두지
+  // 않는다. "← 목록" 버튼은 카드 바깥 최상단에 둔다. 모바일(lg 미만)에서는 비율 제약 없이 자연스러운
+  // 문서 흐름으로 쌓인다. 전용 상세 페이지(onBack 미주입)도 아래에서 동일하게 단일 카드로 합치되,
+  // 풀스크린 높이/비율 제약은 걸지 않고 문서 흐름을 따른다.
+  if (inline) {
     return (
-      <div className="flex flex-col lg:min-h-0 lg:flex-1">
-        <div className="mb-4 shrink-0">{backButton}</div>
-        {/* min-h-0 대신 구체적인 최소 높이(BoardListPage 목록 카드와 동일 값) — "게시글 작성" 카드가
-            펼쳐진 채로 상세 진입하면 이 카드도 같은 이유로 0에 가깝게 눌릴 수 있어 최소 높이를 둔다. */}
-        <Card className="lg:min-h-[22rem] lg:flex-1">
+      // lg에서 이 래퍼는 그리드 우측 셀의 그리드 아이템이다. 높이 퍼센트(min-h-full)는 auto 그리드
+      // 행과 순환 참조해 카드가 과성장하므로 쓰지 않고, 높이 클래스를 두지 않아 그리드 기본 stretch가
+      // 셀 높이를 채워주게 한다(짧은 글이면 카드가 화면을 꼭 채움). min-height:auto(min-h-0 미부여)를
+      // 유지하므로 콘텐츠가 길면 셀·카드가 함께 늘어나 main이 스크롤된다. "목록" 버튼은 상위
+      // (BoardListPage 좌측 컬럼)가 소유하므로 여기서는 렌더하지 않는다.
+      <div className="flex flex-col">
+        {/* lg:overflow-visible — Card 기본 overflow-hidden은 flex item의 자동 최소 크기를 0으로
+            만들어(본문이 길면) 카드가 콘텐츠를 자르고 고정 높이에 갇힌다. overflow를 풀어야
+            min-height:auto가 살아나 본문이 길 때 카드가 늘어나고 main이 스크롤된다. */}
+        <Card className="flex flex-col lg:flex-1 lg:overflow-visible">
           {cardHeader}
-          <div className="lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
-            {cardBody}
+          {/* 본문 영역: 카드의 70%(flex-[7]). 내부 스크롤을 두지 않아 본문이 이 공간보다 길면
+              콘텐츠 높이로 늘어나고, 카드(min-height:auto)와 함께 커지며 main이 스크롤된다. */}
+          <div className="flex flex-col lg:flex-[7]">{cardBody}</div>
+          {/* 댓글 영역: 카드의 30%(flex-[3])로 고정하고, 댓글이 많으면 이 영역만 내부 스크롤한다
+              (min-h-0 + overflow-y-auto). 이렇게 캡해야 댓글 수와 무관하게 본문 영역이 70%를 유지하고,
+              "본문 길이"만 카드를 늘린다. embedded 헤더의 border-t가 본문과의 구분선을 겸한다. */}
+          <div className="flex flex-col lg:min-h-0 lg:flex-[3] lg:overflow-y-auto">
             <CommentSection boardId={boardId} variant="embedded" />
           </div>
         </Card>
@@ -401,13 +491,13 @@ export function BoardDetailView({ boardId, onBack }: BoardDetailViewProps) {
   }
 
   return (
-    <>
-      <Card>
-        {cardHeader}
-        {cardBody}
-      </Card>
-      {/* 댓글 영역(F313~F317, ROADMAP T14.2) — 전용 상세 페이지는 별도 Card로 분리해 마운트한다. */}
-      <CommentSection boardId={boardId} />
-    </>
+    // 전용 상세 페이지(F313~F317, ROADMAP T14.2): 상세 본문과 댓글을 하나의 카드로 합친다
+    // (인라인과 동일 — 사용자 요청). 문서 흐름이라 높이 비율은 두지 않고, CommentSection은 embedded로
+    // 같은 카드 안에 이어 붙인다(embedded 헤더 border-t가 본문과의 구분선).
+    <Card>
+      {cardHeader}
+      {cardBody}
+      <CommentSection boardId={boardId} variant="embedded" />
+    </Card>
   )
 }

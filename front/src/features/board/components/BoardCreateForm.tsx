@@ -258,46 +258,51 @@ export function BoardCreateForm({ onSuccess, defaultCategoryId }: BoardCreateFor
     }
 
     const editMode = editModeQuery.data
+    // 임시저장 편집도 게시글 작성 폼과 동일한 레이아웃/톤으로 통일한다(사용자 요청) — BoardEditForm이
+    // 인라인 카테고리·본문 확장·하단 액션바를 갖추고, 첨부(BoardEditAttachments)는 슬롯으로 본문과
+    // 액션바 사이에 끼운다. flex-1 폼이라 작성 카드 CardContent(flex-1)를 그대로 채운다. key로 다른
+    // 임시저장글 선택 시 RHF가 새 defaultValues로 재초기화되도록 강제 리마운트한다.
     return (
-      <div className="flex flex-col gap-4">
-        {/* 편집 폼/첨부는 게시글 수정 페이지와 동일한 컴포넌트를 재사용한다. key로 다른 임시저장글
-            선택 시 RHF가 새 defaultValues로 재초기화되도록 강제 리마운트한다. */}
-        <BoardEditForm
-          key={editingBoardId}
-          cancel={{ type: 'button', onClick: () => setEditingBoardId(undefined) }}
-          categories={categories}
-          defaultValues={{
-            categoryId: String(editMode.categoryId),
-            title: editMode.title,
-            content: editMode.content,
-          }}
-          // 인라인 편집은 같은 작성 카드 자리를 오가므로 create 모드 폼과 시각적으로 동일하게 맞춘다:
-          // 액션 행은 강조(큰 버튼+구분선), 첨부는 카드 래퍼 없이 평평하게.
-          emphasizeActions
-          getModifiedAt={getModifiedAt}
-          isModifiedAtReady={getModifiedAt() !== undefined}
-          onSubmitPayload={handleEditSubmit}
-        />
-        <BoardEditAttachments boardId={editingBoardId} flat />
-      </div>
+      <BoardEditForm
+        key={editingBoardId}
+        cancel={{ type: 'button', onClick: () => setEditingBoardId(undefined) }}
+        categories={categories}
+        defaultValues={{
+          categoryId: String(editMode.categoryId),
+          title: editMode.title,
+          content: editMode.content,
+        }}
+        attachmentsSlot={<BoardEditAttachments boardId={editingBoardId} flat />}
+        getModifiedAt={getModifiedAt}
+        isModifiedAtReady={getModifiedAt() !== undefined}
+        onSubmitPayload={handleEditSubmit}
+      />
     )
   }
 
   // ===== create 모드 =====
+  // 폼을 flex 컬럼으로 채워(작성 카드가 풀스크린일 때) 본문 입력이 남는 높이를 흡수하고 액션바가
+  // 카드 최하단에 붙게 한다(사용자 요청). 카드가 콘텐츠 높이인 소비처(전용 작성 페이지)에서는 flex-1이
+  // 흡수할 여백이 없어 자연스러운 콘텐츠 높이로 접힌다.
   return (
-    <form noValidate onSubmit={(event) => event.preventDefault()} className="flex flex-col gap-4">
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="board-category">
+    <form
+      noValidate
+      onSubmit={(event) => event.preventDefault()}
+      className="flex flex-1 flex-col gap-4"
+    >
+      {/* 카테고리: "카테고리 : [선택]" 인라인 배치 + 고정 너비 셀렉트(full-width 늘림 아님, 사용자 요청). */}
+      <div className="flex flex-wrap items-center gap-2">
+        <Label htmlFor="board-category" className="shrink-0">
           카테고리 <span className="text-destructive">*</span>
         </Label>
         <select
           id="board-category"
           aria-invalid={!!errors.categoryId}
           disabled={categories.length === 0}
-          className="h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm text-foreground transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:bg-input/30"
+          className="h-8 w-56 rounded-lg border border-input bg-transparent px-2.5 text-sm text-foreground transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:bg-input/30"
           {...register('categoryId')}
         >
-          <option value="">카테고리를 선택해주세요</option>
+          <option value="">카테고리 선택</option>
           {categories.map((category) => (
             <option key={category.categoryId} value={category.categoryId}>
               {category.categoryName}
@@ -305,7 +310,7 @@ export function BoardCreateForm({ onSuccess, defaultCategoryId }: BoardCreateFor
           ))}
         </select>
         {errors.categoryId && (
-          <p role="alert" className="text-sm text-destructive">
+          <p role="alert" className="w-full text-sm text-destructive">
             {errors.categoryId.message}
           </p>
         )}
@@ -329,14 +334,16 @@ export function BoardCreateForm({ onSuccess, defaultCategoryId }: BoardCreateFor
         )}
       </div>
 
-      <div className="flex flex-col gap-1.5">
+      {/* 본문: 남는 높이를 흡수해(flex-1) 액션바를 카드 최하단으로 민다. resize-y로 사용자가 직접
+          높이를 조절할 수도 있다(사용자 요청 "이는 사용자가 수정 가능"). */}
+      <div className="flex min-h-0 flex-1 flex-col gap-1.5">
         <Label htmlFor="board-content">
           본문 <span className="text-destructive">*</span>
         </Label>
         <Textarea
           id="board-content"
           placeholder="본문을 입력해주세요"
-          className="min-h-48"
+          className="min-h-48 flex-1 resize-y"
           aria-invalid={!!errors.content}
           {...register('content')}
         />
@@ -408,39 +415,17 @@ export function BoardCreateForm({ onSuccess, defaultCategoryId }: BoardCreateFor
         </p>
       </div>
 
-      {/* 액션 행: 좌측 임시저장·발행 그룹 + 우측 "임시저장글" 호버 드롭다운. 세 버튼 모두 size="lg"
-          + 넓은 좌우 여백으로 존재감을 키운다(발행=primary 강조, 임시저장=outline, 임시저장글=
-          secondary로 발행과 색으로 구분). */}
-      <div className="flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-col-reverse gap-2 sm:flex-row">
-          <Button
-            type="button"
-            variant="outline"
-            size="lg"
-            className="px-5"
-            disabled={isSubmitting}
-            onClick={() => void submitDraft()}
-          >
-            <Save />
-            임시저장
-          </Button>
-          <Button
-            type="button"
-            size="lg"
-            className="px-5 font-semibold"
-            disabled={isSubmitting}
-            onClick={() => void submitPublish()}
-          >
-            <Send />
-            발행
-          </Button>
-        </div>
-
+      {/* 액션 바: 메일함 작성 뷰(MessageComposeView) 하단 액션바 톤(bg-muted/50 + border)으로
+          묶는다. 좌측 "임시저장글" 호버 드롭다운, 우측 임시저장·발행 그룹(발행=primary 강조,
+          임시저장=outline). 인라인 작성 카드는 세로 스크롤 컨테이너 안이라 네거티브 마진으로
+          카드 끝까지 bleed시키면 가로 스크롤이 생길 수 있어, 여기서는 콘텐츠 폭 안에 담기는
+          rounded 바로 둔다. */}
+      <div className="mt-2 flex flex-col-reverse gap-3 rounded-xl border bg-muted/50 p-3 sm:flex-row sm:items-center sm:justify-between">
         <HoverCard openDelay={100} closeDelay={150} onOpenChange={setIsDraftsOpen}>
           <HoverCardTrigger asChild>
-            <Button type="button" variant="secondary" size="lg" className="px-5">
+            <Button type="button" variant="secondary">
               <FileClock />
-              임시저장글
+              임시저장글 불러오기
             </Button>
           </HoverCardTrigger>
           {/* 드롭다운: 제목 | 작성일시 컬럼(요청은 "카테고리 | 제목 | 작성일시"였으나, BOARD_DRAFTS
@@ -449,7 +434,8 @@ export function BoardCreateForm({ onSuccess, defaultCategoryId }: BoardCreateFor
               실측. 백엔드가 필드를 추가하면 그때 열을 더한다). 제목은 10자를 넘으면 말줄임
               (truncateDraftTitle), 작성일시는 "YY-MM-DD HH:mm"(2자리 연도) — 12시간제(hh)는 오전/오후
               표기 없이는 시각이 모호해져 24시간제(HH)를 그대로 쓴다. 행 클릭 시 인라인 편집으로 진입한다. */}
-          <HoverCardContent align="end" className="w-80 overflow-hidden p-0">
+          {/* 액션바가 카드 최하단에 있으므로 드롭다운은 버튼 위쪽(side="top")으로 펼친다(사용자 요청). */}
+          <HoverCardContent side="top" align="start" className="w-80 overflow-hidden p-0">
             <div className="grid grid-cols-[1fr_auto] gap-3 border-b bg-muted/40 px-3 py-2 text-xs font-medium text-muted-foreground">
               <span>제목</span>
               <span>작성일시</span>
@@ -483,6 +469,28 @@ export function BoardCreateForm({ onSuccess, defaultCategoryId }: BoardCreateFor
             )}
           </HoverCardContent>
         </HoverCard>
+
+        {/* 임시저장·발행: 메일함 하단 액션바처럼 우측 정렬. 발행=primary 강조, 임시저장=outline. */}
+        <div className="flex flex-col-reverse gap-2 sm:flex-row">
+          <Button
+            type="button"
+            variant="outline"
+            disabled={isSubmitting}
+            onClick={() => void submitDraft()}
+          >
+            <Save />
+            임시저장
+          </Button>
+          <Button
+            type="button"
+            className="font-semibold"
+            disabled={isSubmitting}
+            onClick={() => void submitPublish()}
+          >
+            <Send />
+            발행
+          </Button>
+        </div>
       </div>
     </form>
   )

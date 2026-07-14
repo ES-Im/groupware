@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { http, HttpResponse } from 'msw'
 import { MemoryRouter, Route, Routes } from 'react-router'
 import { afterEach, describe, expect, it } from 'vitest'
@@ -31,6 +32,7 @@ function detailFixture(overrides: Record<string, unknown> = {}) {
     viewCount: 10,
     commentCount: 2,
     isDraft: false,
+    isLiked: false,
     ...overrides,
   }
 }
@@ -150,5 +152,57 @@ describe('BoardDetailPage (F303) - refetchOnWindowFocus:false 회귀 방지', ()
     // 재조회가 "일어나지 않는다"는 부정 단언이므로, 충분한 유예 뒤에도 콜 카운트가 그대로인지 확인한다.
     await new Promise((resolve) => setTimeout(resolve, 100))
     expect(callCount).toBe(1)
+  })
+})
+
+describe('BoardDetailPage (F303) - 좋아요 토글', () => {
+  afterEach(() => {
+    useAuthStore.setState({ accessToken: null, user: null, roles: [], status: 'idle' })
+  })
+
+  it('좋아요 버튼을 누르면 POST 후 하트가 활성화되고 좋아요 수가 1 증가한다', async () => {
+    const user = userEvent.setup()
+    server.use(
+      http.get(`${BASE_URL}/api/boards/1`, () =>
+        HttpResponse.json(detailFixture({ likeCount: 3, isLiked: false })),
+      ),
+      http.get(`${BASE_URL}/api/boards/1/files`, () => HttpResponse.json([])),
+      http.get(`${BASE_URL}/api/boards/1/comments`, () => HttpResponse.json(emptyCommentsPage)),
+      http.post(`${BASE_URL}/api/boards/1/likes`, () => new HttpResponse(null, { status: 201 })),
+    )
+
+    renderDetail(1)
+
+    const likeButton = await screen.findByRole('button', { name: /좋아요 3개/ })
+    expect(likeButton).toHaveAttribute('aria-pressed', 'false')
+
+    await user.click(likeButton)
+
+    // 성공 시 상세를 refetch하지 않고 캐시(likeCount/isLiked)만 낙관적으로 갱신한다
+    // (BOARD_DETAIL 재조회 시 viewCount가 오르는 부작용 회피 — useBoardLikeMutation 주석).
+    const likedButton = await screen.findByRole('button', { name: /좋아요 4개/ })
+    expect(likedButton).toHaveAttribute('aria-pressed', 'true')
+  })
+
+  it('이미 좋아요한 글에서 버튼을 누르면 DELETE 후 하트가 비활성화되고 좋아요 수가 1 감소한다', async () => {
+    const user = userEvent.setup()
+    server.use(
+      http.get(`${BASE_URL}/api/boards/1`, () =>
+        HttpResponse.json(detailFixture({ likeCount: 3, isLiked: true })),
+      ),
+      http.get(`${BASE_URL}/api/boards/1/files`, () => HttpResponse.json([])),
+      http.get(`${BASE_URL}/api/boards/1/comments`, () => HttpResponse.json(emptyCommentsPage)),
+      http.delete(`${BASE_URL}/api/boards/1/likes`, () => new HttpResponse(null, { status: 204 })),
+    )
+
+    renderDetail(1)
+
+    const likedButton = await screen.findByRole('button', { name: /좋아요 3개 \(누름\)/ })
+    expect(likedButton).toHaveAttribute('aria-pressed', 'true')
+
+    await user.click(likedButton)
+
+    const unlikedButton = await screen.findByRole('button', { name: /좋아요 2개$/ })
+    expect(unlikedButton).toHaveAttribute('aria-pressed', 'false')
   })
 })

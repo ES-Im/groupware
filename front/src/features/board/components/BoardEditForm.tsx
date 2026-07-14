@@ -1,8 +1,8 @@
+import type { ReactNode } from 'react'
 import { Link } from 'react-router'
 import { Save } from 'lucide-react'
 import { toast } from 'sonner'
 import { submitWithErrorMapping, useZodForm } from '@/shared/lib/form'
-import { cn } from '@/shared/lib/utils'
 import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
 import { Label } from '@/shared/ui/label'
@@ -21,10 +21,17 @@ type BoardEditCancel =
   | { type: 'button'; onClick: () => void }
 
 /**
- * 편집 폼 자체(카테고리/제목/본문 + 저장). editModeQuery.data가 확정된 뒤에만 부모
+ * 편집 폼 자체(카테고리/제목/본문/첨부 + 저장). editModeQuery.data가 확정된 뒤에만 부모
  * (BoardEditPage/BoardCreateForm)가 이 컴포넌트를 마운트한다 — UpdateMePage/UpdateMeForm과
  * 동일하게 RHF가 마운트 시점의 defaultValues를 그대로 신뢰하도록 해, 데이터 도착 후 수동 reset()을
  * 두지 않는다.
+ *
+ * **레이아웃은 게시글 작성 폼(BoardCreateForm)과 동일하게 통일한다(사용자 요청)**: 카테고리는
+ * "카테고리 : [고정너비 select]" 인라인, 본문 Textarea는 flex-1로 남는 높이를 흡수(+resize-y로
+ * 사용자 조절)해 하단 액션바가 카드 최하단에 붙는다. 첨부(BoardEditAttachments)는 작성 폼처럼 본문과
+ * 액션바 사이에 오도록 `attachmentsSlot`으로 주입받는다. 다만 작성 폼과 달리 버튼은 [취소][저장]만
+ * 두고(임시저장글 불러오기·임시저장 제외), 저장 동작은 기존 BOARD_UPDATE(dirtyFields+modifiedAt)를
+ * 그대로 유지한다.
  *
  * `getModifiedAt`은 부모가 매 렌더 시점의 최신 detailQuery 상태로 계산해 내려주는 게터다 —
  * 저장 시점에 호출해 그 순간 확정된 modifiedAt(또는 초안 폴백값)을 읽는다. `isModifiedAtReady`가
@@ -34,7 +41,7 @@ export function BoardEditForm({
   cancel,
   categories,
   defaultValues,
-  emphasizeActions = false,
+  attachmentsSlot,
   getModifiedAt,
   isModifiedAtReady,
   onSubmitPayload,
@@ -43,12 +50,10 @@ export function BoardEditForm({
   categories: CategoryItem[]
   defaultValues: BoardEditFormValues
   /**
-   * 액션 행(취소/저장) 시각 강조 여부(순수 프레젠테이션 분기 — 제출/검증 로직에는 영향 없음).
-   * 목록 인라인 편집(BoardCreateForm)에서 소비될 때 true로 주어, 같은 카드 자리를 오가는 create
-   * 모드 폼과 동일하게 상단 구분선 + 큰 버튼(size="lg")으로 렌더한다(저장=primary 강조). 전용 수정
-   * 페이지(BoardEditPage)는 미지정(false)으로 기존 기본 크기 버튼 스타일을 그대로 유지한다.
+   * 본문과 하단 액션바 사이에 끼워 넣을 첨부 섹션(BoardEditAttachments flat). 작성 폼과 동일하게
+   * 첨부가 액션바 바로 위에 오도록 슬롯으로 받는다(미주입 시 첨부 영역 없이 렌더).
    */
-  emphasizeActions?: boolean
+  attachmentsSlot?: ReactNode
   getModifiedAt: () => string | undefined
   isModifiedAtReady: boolean
   onSubmitPayload: (payload: BoardUpdateRequest) => Promise<void>
@@ -90,19 +95,24 @@ export function BoardEditForm({
   const submitEdit = submitWithErrorMapping(form, submit)
 
   return (
-    <form noValidate onSubmit={(event) => event.preventDefault()} className="flex flex-col gap-4">
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="board-edit-category">
+    <form
+      noValidate
+      onSubmit={(event) => event.preventDefault()}
+      className="flex flex-1 flex-col gap-4"
+    >
+      {/* 카테고리: 작성 폼과 동일하게 "카테고리 : [고정너비 select]" 인라인 배치. */}
+      <div className="flex flex-wrap items-center gap-2">
+        <Label htmlFor="board-edit-category" className="shrink-0">
           카테고리 <span className="text-destructive">*</span>
         </Label>
         <select
           id="board-edit-category"
           aria-invalid={!!errors.categoryId}
           disabled={categories.length === 0}
-          className="h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm text-foreground transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:bg-input/30"
+          className="h-8 w-56 rounded-lg border border-input bg-transparent px-2.5 text-sm text-foreground transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:bg-input/30"
           {...register('categoryId')}
         >
-          <option value="">카테고리를 선택해주세요</option>
+          <option value="">카테고리 선택</option>
           {categories.map((category) => (
             <option key={category.categoryId} value={category.categoryId}>
               {category.categoryName}
@@ -110,7 +120,7 @@ export function BoardEditForm({
           ))}
         </select>
         {errors.categoryId && (
-          <p role="alert" className="text-sm text-destructive">
+          <p role="alert" className="w-full text-sm text-destructive">
             {errors.categoryId.message}
           </p>
         )}
@@ -134,14 +144,15 @@ export function BoardEditForm({
         )}
       </div>
 
-      <div className="flex flex-col gap-1.5">
+      {/* 본문: 작성 폼과 동일하게 flex-1로 남는 높이를 흡수(+resize-y)해 액션바를 하단으로 민다. */}
+      <div className="flex min-h-0 flex-1 flex-col gap-1.5">
         <Label htmlFor="board-edit-content">
           본문 <span className="text-destructive">*</span>
         </Label>
         <Textarea
           id="board-edit-content"
           placeholder="본문을 입력해주세요"
-          className="min-h-48"
+          className="min-h-48 flex-1 resize-y"
           aria-invalid={!!errors.content}
           {...register('content')}
         />
@@ -158,41 +169,25 @@ export function BoardEditForm({
         </p>
       )}
 
-      {/* emphasizeActions=true(목록 인라인 편집): create 모드 액션 행과 동일하게 상단 구분선 +
-          우측 정렬 + 큰 버튼. false(전용 수정 페이지): 구분선 없는 기존 기본 크기 버튼 그대로. */}
-      <div
-        className={
-          emphasizeActions
-            ? 'flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-end'
-            : 'flex flex-col-reverse gap-2 sm:flex-row sm:justify-end'
-        }
-      >
-        {/* cancel은 소비처가 컨텍스트에 맞게 주입한다: 전용 수정 페이지는 유효 경로 Link(발행 글이면
-            상세, 초안이면 목록), 목록 인라인 편집은 create 모드로 되돌리는 버튼. */}
+      {/* 첨부 섹션(부모가 BoardEditAttachments를 주입) — 작성 폼처럼 본문과 액션바 사이에 온다. */}
+      {attachmentsSlot}
+
+      {/* 액션바: 작성 폼과 동일한 톤(bg-muted/50 rounded 바)이되 버튼은 [취소][저장]만 우측 정렬.
+          cancel은 소비처가 컨텍스트에 맞게 주입한다(전용 수정 페이지=유효 경로 Link, 목록 인라인
+          편집=create 모드 복귀 버튼). */}
+      <div className="mt-2 flex flex-col-reverse gap-3 rounded-xl border bg-muted/50 p-3 sm:flex-row sm:items-center sm:justify-end">
         {cancel.type === 'link' ? (
-          <Button
-            asChild
-            variant="outline"
-            size={emphasizeActions ? 'lg' : undefined}
-            className={cn(emphasizeActions && 'px-5')}
-          >
+          <Button asChild variant="outline">
             <Link to={cancel.path}>취소</Link>
           </Button>
         ) : (
-          <Button
-            type="button"
-            variant="outline"
-            size={emphasizeActions ? 'lg' : undefined}
-            className={cn(emphasizeActions && 'px-5')}
-            onClick={cancel.onClick}
-          >
+          <Button type="button" variant="outline" onClick={cancel.onClick}>
             취소
           </Button>
         )}
         <Button
           type="button"
-          size={emphasizeActions ? 'lg' : undefined}
-          className={cn(emphasizeActions && 'px-5 font-semibold')}
+          className="font-semibold"
           disabled={isSubmitting || !isModifiedAtReady}
           onClick={() => void submitEdit()}
         >

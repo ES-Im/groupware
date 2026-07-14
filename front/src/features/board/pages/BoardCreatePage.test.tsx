@@ -206,7 +206,7 @@ describe('BoardCreatePage (F308) - 임시저장글 인라인 편집', () => {
     renderPage()
 
     await screen.findByRole('option', { name: '공지' })
-    await user.hover(screen.getByRole('button', { name: '임시저장글' }))
+    await user.hover(screen.getByRole('button', { name: /임시저장글/ }))
 
     expect(await screen.findByText('이어쓰던 초안')).toBeInTheDocument()
 
@@ -225,7 +225,7 @@ describe('BoardCreatePage (F308) - 임시저장글 인라인 편집', () => {
     renderPage()
 
     await screen.findByRole('option', { name: '공지' })
-    await user.hover(screen.getByRole('button', { name: '임시저장글' }))
+    await user.hover(screen.getByRole('button', { name: /임시저장글/ }))
 
     expect(await screen.findByText('임시저장한 글이 없습니다.')).toBeInTheDocument()
   })

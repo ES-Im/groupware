@@ -4,7 +4,7 @@ import { SquarePen } from 'lucide-react'
 import dayjs from 'dayjs'
 import { toast } from 'sonner'
 import { isForbidden, isNotFound, normalizeApiError } from '@/shared/lib/apiError'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
 import { useCategoriesQuery } from '@/features/category/api/useCategoriesQuery'
 import { useBoardDetailQuery } from '../api/useBoardDetailQuery'
 import { useBoardEditModeQuery } from '../api/useBoardEditModeQuery'
@@ -191,22 +191,24 @@ export function BoardEditPage() {
   const editMode = editModeQuery.data
 
   return (
-    <div className="mx-auto w-full max-w-2xl p-4 sm:p-6 lg:p-8">
-      <h1 className="mb-6 text-xl font-semibold tracking-tight">게시글 수정</h1>
+    // 게시글 작성 폼과 동일한 풀높이 레이아웃(사용자 요청): 페이지가 main 높이를 채우고, 카드가
+    // 그리드 셀 전체 높이를 차지해 본문 Textarea가 남는 높이를 흡수하고 액션바가 카드 최하단에 붙는다.
+    <div className="flex w-full flex-col p-4 sm:p-6 lg:h-full lg:p-8">
+      <div className="mb-6">
+        <h1 className="text-xl font-semibold tracking-tight">게시글 수정</h1>
+        <p className="mt-1 text-sm text-muted-foreground">카테고리·제목·본문을 수정한 뒤 저장합니다.</p>
+      </div>
 
-      {/* 게시글 작성 페이지(BoardCreatePage)와 동일하게 폼+첨부를 하나의 카드 공간 안에 담는다 —
-          이전에는 첨부(BoardEditAttachments)가 별도 카드로 아래에 떨어져 있었다(사용자 요청으로 통합).
-          BoardEditAttachments의 flat prop(순수 프레젠테이션 분기, 인라인 편집 때 이미 도입)을 그대로
-          재사용해 카드 래퍼 없이 렌더한다. */}
-      <Card>
+      {/* 작성 폼과 동일하게 폼(카테고리·제목·본문)+첨부+액션바를 하나의 풀높이 카드에 담는다.
+          BoardEditForm이 첨부를 attachmentsSlot으로 받아 본문과 액션바 사이에 렌더한다. */}
+      <Card className="flex flex-col lg:min-h-0 lg:flex-1">
         <CardHeader className="border-b">
           <CardTitle className="flex items-center gap-1.5">
             <SquarePen className="size-4" />
             게시글 정보
           </CardTitle>
-          <CardDescription>카테고리·제목·본문을 수정한 뒤 저장합니다.</CardDescription>
         </CardHeader>
-        <CardContent className="flex flex-col gap-4">
+        <CardContent className="flex min-h-0 flex-1 flex-col">
           {/* //todo : [minor] cancel(link)는 매 렌더 계산되는데 detailQuery는 editMode 성공 후에야 발화한다 — detail 로딩 창에서는 초안이어도 detailQuery.error가 없어 /boards/:boardId(상세)로 계산돼, 그 사이 "취소"를 누른 초안은 여전히 상세 404에 착지한다(저장은 isModifiedAtReady로 게이팅되나 취소 Link는 항상 활성이라 비대칭). detail이 resolve될 때까지 취소도 함께 게이팅/보류하는 방향 검토 */}
           <BoardEditForm
             cancel={{ type: 'link', path: resolveEditTargetPath() }}
@@ -216,11 +218,11 @@ export function BoardEditPage() {
               title: editMode.title,
               content: editMode.content,
             }}
+            attachmentsSlot={<BoardEditAttachments boardId={boardId} flat />}
             getModifiedAt={getModifiedAt}
             isModifiedAtReady={getModifiedAt() !== undefined}
             onSubmitPayload={handleSubmitPayload}
           />
-          <BoardEditAttachments boardId={boardId} flat />
         </CardContent>
       </Card>
     </div>
