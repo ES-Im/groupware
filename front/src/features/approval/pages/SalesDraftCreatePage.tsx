@@ -8,6 +8,7 @@ import { franchiseKeys } from '@/features/franchise/model/queryKeys'
 import { handleApiError } from '@/shared/lib/apiError'
 import { submitWithErrorMapping, useZodForm } from '@/shared/lib/form'
 import { Button } from '@/shared/ui/button'
+import { Card, CardContent } from '@/shared/ui/card'
 import { Input } from '@/shared/ui/input'
 import { Label } from '@/shared/ui/label'
 import { Textarea } from '@/shared/ui/textarea'
@@ -284,130 +285,148 @@ export function SalesDraftCreatePage() {
     >
       {/* form onSubmit은 기본 액션([생성 후 상신])으로 둔다. [임시저장]은 type=button으로 분리. */}
       <form noValidate onSubmit={handleCreateAndSubmit} className="flex flex-1 flex-col gap-4">
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="sales-draft-title">
-            제목 <span className="text-destructive">*</span>
-          </Label>
-          <Input
-            id="sales-draft-title"
-            placeholder="제목을 입력해주세요"
-            aria-invalid={!!errors.title}
-            {...register('title')}
-          />
-          {errors.title && (
-            <p role="alert" className="text-sm text-destructive">
-              {errors.title.message}
-            </p>
-          )}
-        </div>
-
-        {/* 유형 필드를 본문보다 앞에 둔다(레퍼런스 필드 순서: 제목 → 유형 필드 → 기안 내용). */}
-        <div className="flex flex-col gap-1.5">
-          <Label>
-            대상 가맹점 <span className="text-destructive">*</span>
-          </Label>
-          <FranchisePicker selected={franchiseSelection} onChange={handleFranchiseChange} />
-          {errors.franchiseId && (
-            <p role="alert" className="text-sm text-destructive">
-              {errors.franchiseId.message}
-            </p>
-          )}
-        </div>
-
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="sales-draft-report-month">
-              매출 보고월 <span className="text-destructive">*</span>
-            </Label>
-            <Input
-              id="sales-draft-report-month"
-              type="month"
-              aria-invalid={!!errors.reportMonth}
-              {...register('reportMonth')}
-            />
-            {errors.reportMonth && (
-              <p role="alert" className="text-sm text-destructive">
-                {errors.reportMonth.message}
-              </p>
-            )}
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            <div className="flex items-center justify-between gap-2">
-              <Label htmlFor="sales-draft-sales-amount">
-                매출액(원) <span className="text-destructive">*</span>
+        {/* 폼 본문을 세로 80%/20%로 분할한다(사용자 요청 2026-07-14): 위쪽 입력 필드 / 아래쪽
+            결재선·공람 카드. fr 그리드라 남는 세로 공간을 정확히 4:1로 나누고, 각 행은
+            min-h-0으로 트랙 밖으로 내용이 넘치는 대신 안쪽에서 줄어들 수 있게 한다. */}
+        <div className="grid min-h-0 flex-1 grid-rows-[4fr_1fr] gap-4">
+          <div className="flex min-h-0 flex-col gap-4">
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="sales-draft-title">
+                제목 <span className="text-destructive">*</span>
               </Label>
-              {/* 레퍼런스의 라벨 우측 [매출액 불러오기] 링크 버튼 이식(여기서는 실 API 연동). */}
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="h-auto px-1 py-0 text-xs text-primary"
-                disabled={isSalesAmountLoading}
-                onClick={() => void handleLoadSalesAmount()}
-              >
-                <RefreshCw className={isSalesAmountLoading ? 'animate-spin' : undefined} />
-                {isSalesAmountLoading ? '불러오는 중...' : '매출액 불러오기'}
-              </Button>
+              <Input
+                id="sales-draft-title"
+                placeholder="제목을 입력해주세요"
+                aria-invalid={!!errors.title}
+                {...register('title')}
+              />
+              {errors.title && (
+                <p role="alert" className="text-sm text-destructive">
+                  {errors.title.message}
+                </p>
+              )}
             </div>
-            <Input
-              id="sales-draft-sales-amount"
-              type="number"
-              min={1}
-              step={1}
-              placeholder="매출액을 입력해주세요"
-              aria-invalid={!!errors.salesAmount}
-              {...register('salesAmount', { valueAsNumber: true })}
-            />
-            {errors.salesAmount && (
-              <p role="alert" className="text-sm text-destructive">
-                {errors.salesAmount.message}
-              </p>
-            )}
+
+            {/* 유형 필드를 본문보다 앞에 둔다(레퍼런스 필드 순서: 제목 → 유형 필드 → 기안 내용). */}
+            <div className="flex flex-col gap-1.5">
+              <Label>
+                대상 가맹점 <span className="text-destructive">*</span>
+              </Label>
+              <FranchisePicker selected={franchiseSelection} onChange={handleFranchiseChange} />
+              {errors.franchiseId && (
+                <p role="alert" className="text-sm text-destructive">
+                  {errors.franchiseId.message}
+                </p>
+              )}
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="sales-draft-report-month">
+                  매출 보고월 <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id="sales-draft-report-month"
+                  type="month"
+                  aria-invalid={!!errors.reportMonth}
+                  {...register('reportMonth')}
+                />
+                {errors.reportMonth && (
+                  <p role="alert" className="text-sm text-destructive">
+                    {errors.reportMonth.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <div className="flex items-center justify-between gap-2">
+                  <Label htmlFor="sales-draft-sales-amount">
+                    매출액(원) <span className="text-destructive">*</span>
+                  </Label>
+                  {/* 레퍼런스의 라벨 우측 [매출액 불러오기] 링크 버튼 이식(여기서는 실 API 연동). */}
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-auto px-1 py-0 text-xs text-primary"
+                    disabled={isSalesAmountLoading}
+                    onClick={() => void handleLoadSalesAmount()}
+                  >
+                    <RefreshCw className={isSalesAmountLoading ? 'animate-spin' : undefined} />
+                    {isSalesAmountLoading ? '불러오는 중...' : '매출액 불러오기'}
+                  </Button>
+                </div>
+                <Input
+                  id="sales-draft-sales-amount"
+                  type="number"
+                  min={1}
+                  step={1}
+                  placeholder="매출액을 입력해주세요"
+                  aria-invalid={!!errors.salesAmount}
+                  {...register('salesAmount', { valueAsNumber: true })}
+                />
+                {errors.salesAmount && (
+                  <p role="alert" className="text-sm text-destructive">
+                    {errors.salesAmount.message}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* 남는 높이는 기안 내용 Textarea가 흡수한다(flex-1 min-h-0 — min-h-48은 바닥값으로 유지). */}
+            <div className="flex min-h-0 flex-1 flex-col gap-1.5">
+              <Label htmlFor="sales-draft-content">
+                기안 내용 <span className="text-destructive">*</span>
+              </Label>
+              <Textarea
+                id="sales-draft-content"
+                placeholder="기안 내용을 입력해주세요"
+                className="min-h-48 flex-1"
+                aria-invalid={!!errors.content}
+                {...register('content', {
+                  // 직접 수정이 시작되면 자동 입력을 중단한다(setValue는 이 onChange를 타지 않는다).
+                  onChange: () => setIsContentManuallyEdited(true),
+                })}
+              />
+              {errors.content && (
+                <p role="alert" className="text-sm text-destructive">
+                  {errors.content.message}
+                </p>
+              )}
+            </div>
           </div>
-        </div>
 
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="sales-draft-content">
-            기안 내용 <span className="text-destructive">*</span>
-          </Label>
-          <Textarea
-            id="sales-draft-content"
-            placeholder="기안 내용을 입력해주세요"
-            className="min-h-48"
-            aria-invalid={!!errors.content}
-            {...register('content', {
-              // 직접 수정이 시작되면 자동 입력을 중단한다(setValue는 이 onChange를 타지 않는다).
-              onChange: () => setIsContentManuallyEdited(true),
-            })}
-          />
-          {errors.content && (
-            <p role="alert" className="text-sm text-destructive">
-              {errors.content.message}
-            </p>
-          )}
-        </div>
-
-        <div className="flex flex-col gap-4 border-t pt-4">
-          <EmployeeSelectField
-            label="결재선"
-            description="결재 순서대로 처리됩니다."
-            ordered
-            roleOptions={APPROVAL_ROLE_OPTIONS}
-            rolesByEmpId={approverRoles}
-            onRoleChange={handleApproverRoleChange}
-            emptyText="결재선에 지정된 결재자가 없습니다."
-            selected={approverSelection}
-            onChange={handleApproverSelectionChange}
-          />
-          {/* 공람자는 생성 요청에 실을 수 없어(계약) 생성 성공 후 addCirculation으로 등록한다. */}
-          <EmployeeSelectField
-            label="공람 (선택)"
-            description="문서를 공람할 사원을 지정합니다."
-            emptyText="지정된 공람자가 없습니다."
-            selected={circulationSelection}
-            onChange={setCirculationSelection}
-          />
+          {/* 결재선(좌) / 공람(우) 각각 별도 카드로 감싼다. 카드 내부는 min-h-0 +
+              overflow-y-auto로 행이 많아져도 카드가 20% 트랙 밖으로 깨지지 않는다. */}
+          <div className="grid min-h-0 grid-cols-1 gap-4 border-t pt-4 md:grid-cols-2">
+            <Card className="flex h-full min-h-0 flex-col rounded-xl">
+              <CardContent className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+                <EmployeeSelectField
+                  label="결재선"
+                  description="결재 순서대로 처리됩니다."
+                  ordered
+                  roleOptions={APPROVAL_ROLE_OPTIONS}
+                  rolesByEmpId={approverRoles}
+                  onRoleChange={handleApproverRoleChange}
+                  emptyText="결재선에 지정된 결재자가 없습니다."
+                  selected={approverSelection}
+                  onChange={handleApproverSelectionChange}
+                />
+              </CardContent>
+            </Card>
+            {/* 공람자는 생성 요청에 실을 수 없어(계약) 생성 성공 후 addCirculation으로 등록한다. */}
+            <Card className="flex h-full min-h-0 flex-col rounded-xl">
+              <CardContent className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+                <EmployeeSelectField
+                  label="공람 (선택)"
+                  description="문서를 공람할 사원을 지정합니다."
+                  emptyText="지정된 공람자가 없습니다."
+                  selected={circulationSelection}
+                  onChange={setCirculationSelection}
+                />
+              </CardContent>
+            </Card>
+          </div>
         </div>
 
         {errors.root && (

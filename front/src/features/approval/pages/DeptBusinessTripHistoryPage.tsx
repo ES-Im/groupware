@@ -175,18 +175,21 @@ export function DeptBusinessTripHistoryPage() {
               {yearMonth} 이력만 표시됩니다. 다른 달을 보려면 조회 월을 변경하세요.
             </p>
 
-            {historyQuery.isLoading ? (
-              <p className="py-8 text-center text-sm text-muted-foreground">불러오는 중...</p>
-            ) : historyQuery.error ? (
-              <p className="py-8 text-center text-sm text-muted-foreground">
-                부서 출장 이력을 불러오지 못했습니다.
-              </p>
-            ) : rows.length === 0 ? (
-              <p className="py-8 text-center text-sm text-muted-foreground">
-                출장 이력이 없습니다.
-              </p>
-            ) : (
-              <div className="w-full overflow-x-auto">
+            <div className="flex min-h-[38rem] flex-col">
+              {historyQuery.isLoading ? (
+                <p className="flex flex-1 items-center justify-center text-center text-sm text-muted-foreground">
+                  불러오는 중...
+                </p>
+              ) : historyQuery.error ? (
+                <p className="flex flex-1 items-center justify-center text-center text-sm text-muted-foreground">
+                  부서 출장 이력을 불러오지 못했습니다.
+                </p>
+              ) : rows.length === 0 ? (
+                <p className="flex flex-1 items-center justify-center text-center text-sm text-muted-foreground">
+                  출장 이력이 없습니다.
+                </p>
+              ) : (
+                <div className="w-full overflow-x-auto">
                 <table className="w-full border-collapse text-sm">
                   <thead>
                     <tr className="border-b border-border">
@@ -261,6 +264,7 @@ export function DeptBusinessTripHistoryPage() {
                 </table>
               </div>
             )}
+            </div>
 
             <PaginationControls
               className="border-t pt-4"

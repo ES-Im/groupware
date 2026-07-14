@@ -4,6 +4,7 @@ import { toast } from 'sonner'
 import { useMeQuery } from '@/features/employee/api/useMeQuery'
 import { normalizeApiError } from '@/shared/lib/apiError'
 import { Button } from '@/shared/ui/button'
+import { resolveApprovalStatus } from '../../lib/approvalStatusBadge'
 import { downloadDraftFile } from '../../api/downloadDraftFile'
 import { useDraftFileDeleteMutation } from '../../api/useDraftFileDeleteMutation'
 import { useDraftFilePreviewUrl } from '../../api/useDraftFilePreviewUrl'
@@ -73,6 +74,13 @@ export function AttachmentSection({ draft }: DraftDetailSectionProps) {
   const myEmpId = meQuery.data?.empBasicInfo.empId
   // 기안자 본인 판정: numeric empId 매칭. empId 미확정 시 업로드/삭제 미노출(undefined 방어).
   const isDrafter = myEmpId != null && myEmpId === draft.drafter.empId
+  // 첨부 변경(추가·삭제)은 **상신 전(UNSUBMITTED)** 에만 허용한다(사용자 요청 2026-07-14 — 상신
+  // 이후에는 첨부를 붙일 수 없으므로 버튼 자체를 숨긴다). 작성 화면은 파일을 업로드하지 않고
+  // 미리보기 목록만 보관하므로(DraftCreateFrame), 실제 업로드는 여전히 이 화면의 임시저장(미상신)
+  // 상태에서 이뤄진다 — 그 흐름은 유지하고 상신된 문서에서만 변경 UI를 닫는다. 조회/다운로드/이미지
+  // 미리보기는 상태와 무관하게 조회 가능자 전원에게 그대로 노출한다. 최종 판정은 서버가 한다.
+  const isUnsubmitted = resolveApprovalStatus(draft.approvalStatus) === 'UNSUBMITTED'
+  const canModifyFiles = isDrafter && isUnsubmitted
 
   const uploadMutation = useDraftFileUploadMutation()
   const deleteMutation = useDraftFileDeleteMutation()
@@ -141,8 +149,9 @@ export function AttachmentSection({ draft }: DraftDetailSectionProps) {
           <Paperclip className="size-4 text-muted-foreground" />
           첨부파일{files.length > 0 ? ` ${files.length}개` : ''}
         </h3>
-        {/* (기안자 본인) 첨부 업로드(F716). 다중 선택은 mutation이 파일별 순차 PATCH로 처리한다. */}
-        {isDrafter && (
+        {/* (기안자 본인 + 미상신) 첨부 업로드(F716). 상신 이후에는 숨긴다. 다중 선택은 mutation이
+            파일별 순차 PATCH로 처리한다. */}
+        {canModifyFiles && (
           <>
             <input
               ref={fileInputRef}
@@ -201,8 +210,9 @@ export function AttachmentSection({ draft }: DraftDetailSectionProps) {
                       다운로드
                     </Button>
                   )}
-                  {/* (기안자 본인) 첨부 삭제(F717). 파일별 삭제 진행 상태를 개별 스피너로 표시한다. */}
-                  {isDrafter && (
+                  {/* (기안자 본인 + 미상신) 첨부 삭제(F717). 상신 이후에는 숨긴다(첨부 확정). 파일별
+                      삭제 진행 상태를 개별 스피너로 표시한다. */}
+                  {canModifyFiles && (
                     <Button
                       type="button"
                       variant="destructive"

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router'
 import { toast } from 'sonner'
 import { submitWithErrorMapping, useZodForm } from '@/shared/lib/form'
+import { Card, CardContent } from '@/shared/ui/card'
 import { Input } from '@/shared/ui/input'
 import { Label } from '@/shared/ui/label'
 import { Textarea } from '@/shared/ui/textarea'
@@ -28,8 +29,8 @@ import { generalDraftSchema, type GeneralDraftFormValues } from '../model/genera
  * 일반 기안 작성 페이지(F720 `GENERAL_DRAFT_CREATE(_SUBMISSION)`, ROADMAP(DRAFT-COMMON) T1.3,
  * docs/prd/8.general-draft-prd.md §일반 기안 작성 페이지).
  *
- * ①공통 `CancellationDraftDialog`의 폼 로직(제목·본문 RHF+zod + EmployeePicker 결재선 + 2버튼 +
- * approverSelection→ApproverParam[] 매핑 + 성공 후 상세 이동)을 페이지로 이식한 것이다.
+ * 취소기안 작성 폼과 동일 계열의 폼 로직(제목·본문 RHF+zod + 결재선/공람 EmployeeSelectField +
+ * 2버튼 + approverSelection→ApproverParam[] 매핑 + 성공 후 상세 이동)을 공유한다.
  * 레이아웃은 공통 `DraftCreateFrame`(좌측 종류 선택 카드 + 우측 폼 카드)을 따른다. 첨부 UI는
  * 없다(Minor m3 — 첨부는 생성 후 상세 AttachmentSection에서 관리).
  *
@@ -169,62 +170,80 @@ export function GeneralDraftCreatePage() {
     >
       {/* form onSubmit은 기본 액션([생성 후 상신])으로 둔다. [임시저장]은 type=button으로 분리. */}
       <form noValidate onSubmit={handleCreateAndSubmit} className="flex flex-1 flex-col gap-6">
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="general-draft-title" className="text-sm font-semibold">
-            제목 <span className="text-destructive">*</span>
-          </Label>
-          <Input
-            id="general-draft-title"
-            placeholder="제목을 입력해주세요"
-            aria-invalid={!!errors.title}
-            className="h-11 rounded-xl"
-            {...register('title')}
-          />
-          {errors.title && (
-            <p role="alert" className="text-sm text-destructive">
-              {errors.title.message}
-            </p>
-          )}
-        </div>
+        {/* 폼 본문을 세로 80%/20%로 분할한다(사용자 요청 2026-07-14): 위쪽 입력 필드 / 아래쪽
+            결재선·공람 카드. fr 그리드라 남는 세로 공간을 정확히 4:1로 나누고, 각 행은
+            min-h-0으로 트랙 밖으로 내용이 넘치는 대신 안쪽에서 줄어들 수 있게 한다. */}
+        <div className="grid min-h-0 flex-1 grid-rows-[4fr_1fr] gap-6">
+          <div className="flex min-h-0 flex-col gap-6">
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="general-draft-title" className="text-sm font-semibold">
+                제목 <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                id="general-draft-title"
+                placeholder="제목을 입력해주세요"
+                aria-invalid={!!errors.title}
+                className="h-11 rounded-xl"
+                {...register('title')}
+              />
+              {errors.title && (
+                <p role="alert" className="text-sm text-destructive">
+                  {errors.title.message}
+                </p>
+              )}
+            </div>
 
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="general-draft-content" className="text-sm font-semibold">
-            기안 내용 <span className="text-destructive">*</span>
-          </Label>
-          <Textarea
-            id="general-draft-content"
-            placeholder="기안 내용을 입력해주세요"
-            className="min-h-48 rounded-xl leading-7"
-            aria-invalid={!!errors.content}
-            {...register('content')}
-          />
-          {errors.content && (
-            <p role="alert" className="text-sm text-destructive">
-              {errors.content.message}
-            </p>
-          )}
-        </div>
+            {/* 남는 높이는 기안 내용 Textarea가 흡수한다(flex-1 min-h-0 — min-h-48은 바닥값으로 유지). */}
+            <div className="flex min-h-0 flex-1 flex-col gap-2">
+              <Label htmlFor="general-draft-content" className="text-sm font-semibold">
+                기안 내용 <span className="text-destructive">*</span>
+              </Label>
+              <Textarea
+                id="general-draft-content"
+                placeholder="기안 내용을 입력해주세요"
+                className="min-h-48 flex-1 rounded-xl leading-7"
+                aria-invalid={!!errors.content}
+                {...register('content')}
+              />
+              {errors.content && (
+                <p role="alert" className="text-sm text-destructive">
+                  {errors.content.message}
+                </p>
+              )}
+            </div>
+          </div>
 
-        <div className="flex flex-col gap-6 border-t pt-6">
-          <EmployeeSelectField
-            label="결재선"
-            description="결재 순서대로 처리됩니다."
-            ordered
-            roleOptions={APPROVAL_ROLE_OPTIONS}
-            rolesByEmpId={approverRoles}
-            onRoleChange={handleApproverRoleChange}
-            emptyText="결재선에 지정된 결재자가 없습니다."
-            selected={approverSelection}
-            onChange={handleApproverSelectionChange}
-          />
-          {/* 공람자는 생성 요청에 실을 수 없어(계약) 생성 성공 후 addCirculation으로 등록한다. */}
-          <EmployeeSelectField
-            label="공람 (선택)"
-            description="문서를 공람할 사원을 지정합니다."
-            emptyText="지정된 공람자가 없습니다."
-            selected={circulationSelection}
-            onChange={setCirculationSelection}
-          />
+          {/* 결재선(좌) / 공람(우) 각각 별도 카드로 감싼다. 카드 내부는 min-h-0 +
+              overflow-y-auto로 행이 많아져도 카드가 20% 트랙 밖으로 깨지지 않는다. */}
+          <div className="grid min-h-0 grid-cols-1 gap-4 border-t pt-6 md:grid-cols-2">
+            <Card className="flex h-full min-h-0 flex-col rounded-xl">
+              <CardContent className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+                <EmployeeSelectField
+                  label="결재선"
+                  description="결재 순서대로 처리됩니다."
+                  ordered
+                  roleOptions={APPROVAL_ROLE_OPTIONS}
+                  rolesByEmpId={approverRoles}
+                  onRoleChange={handleApproverRoleChange}
+                  emptyText="결재선에 지정된 결재자가 없습니다."
+                  selected={approverSelection}
+                  onChange={handleApproverSelectionChange}
+                />
+              </CardContent>
+            </Card>
+            {/* 공람자는 생성 요청에 실을 수 없어(계약) 생성 성공 후 addCirculation으로 등록한다. */}
+            <Card className="flex h-full min-h-0 flex-col rounded-xl">
+              <CardContent className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+                <EmployeeSelectField
+                  label="공람 (선택)"
+                  description="문서를 공람할 사원을 지정합니다."
+                  emptyText="지정된 공람자가 없습니다."
+                  selected={circulationSelection}
+                  onChange={setCirculationSelection}
+                />
+              </CardContent>
+            </Card>
+          </div>
         </div>
 
         {errors.root && (

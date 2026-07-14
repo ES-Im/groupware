@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { useNavigate } from 'react-router'
 import { toast } from 'sonner'
 import { handleApiError } from '@/shared/lib/apiError'
@@ -11,7 +10,6 @@ import { isGeneralDraft } from '../../lib/isGeneralDraft'
 import { isLeaveDraft } from '../../lib/isLeaveDraft'
 import { isSalesDraft } from '../../lib/isSalesDraft'
 import { resolveDrafterActions } from '../../lib/resolveDrafterActions'
-import { CancellationDraftDialog } from './CancellationDraftDialog'
 import type { DraftDetailSectionProps } from './types'
 
 /**
@@ -20,7 +18,7 @@ import type { DraftDetailSectionProps } from './types'
  * 기안자 본인의 상태별 액션을 노출한다(판정=resolveDrafterActions, T4.1):
  *   - UNSUBMITTED → [상신](F702) / [수정](유형별 작성 PRD — 미구현 폴백, Open Q#3)
  *   - WAITING·IN_PROGRESS → [상신 철회](F703)
- *   - APPROVED + 취소기안 없음 → [취소 기안 작성](F704 다이얼로그, T4.5)
+ *   - APPROVED + 취소기안 없음 → [취소 기안 작성](F704 전용 페이지로 이동 — 모달 아님, 2026-07-14)
  * 상신/철회 성공 시 mutation onSuccess가 approvalKeys.all을 invalidate해 상세·문서함이 즉시 갱신되고,
  * 규칙 위반(차례/상태/기안자)은 handleApiError가 토스트로 위임한다(최종 판단은 서버 — PRD §접근 권한).
  *
@@ -33,7 +31,6 @@ import type { DraftDetailSectionProps } from './types'
  */
 export function DrafterActions({ draft }: DraftDetailSectionProps) {
   const navigate = useNavigate()
-  const [cancelOpen, setCancelOpen] = useState(false)
   const meQuery = useMeQuery()
   const submitMutation = useDraftSubmitMutation()
   const withdrawMutation = useDraftSubmissionWithdrawalMutation()
@@ -128,22 +125,15 @@ export function DrafterActions({ draft }: DraftDetailSectionProps) {
         </Button>
       )}
       {availability.canCancel && (
-        <>
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            className="rounded-lg"
-            onClick={() => setCancelOpen(true)}
-          >
-            취소 기안 작성
-          </Button>
-          <CancellationDraftDialog
-            sourceDraftId={draft.draftId}
-            open={cancelOpen}
-            onOpenChange={setCancelOpen}
-          />
-        </>
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          className="rounded-lg"
+          onClick={() => navigate(`/approval/drafts/${draft.draftId}/cancellation`)}
+        >
+          취소 기안 작성
+        </Button>
       )}
     </>
   )

@@ -165,13 +165,14 @@ export function DocumentBoxHomePage() {
 
   return (
     // min-h-full 플렉스 컬럼: 콘텐츠가 짧아도 탭 카드(flex-1)가 남는 높이를 흡수해
-    // 카드 하단과 푸터 사이 간격이 페이지 인셋(p-3)만 남는다.
-    <div className="flex min-h-full w-full flex-col gap-6 p-3">
+    // 카드 하단과 푸터 사이 간격이 페이지 인셋만 남는다.
+    <div className="flex min-h-full w-full flex-col gap-6 p-4 sm:p-6 lg:p-8">
       {/* 헤더: 페이지 타이틀 + 새 기안서 작성 진입 */}
       <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        {/* //todo : 기존 "E-APPROVAL" eyebrow는 메인 레이아웃 타이틀 표준(타이틀+서브타이틀만)에
+            맞춰 제거했다. 의도된 브랜드 요소라면 표준을 확장할지 사용자 확인 후 복원 필요. */}
         <div className="min-w-0">
-          <p className="mb-1.5 text-sm font-medium text-primary">E-APPROVAL</p>
-          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">문서함 요약</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">문서함 요약</h1>
           <p className="mt-1.5 text-sm text-muted-foreground">
             내 결재 대기·상신·임시저장 문서를 한 곳에서 관리하세요
           </p>

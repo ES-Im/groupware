@@ -5,6 +5,7 @@ import { RegisterPage } from '@/features/auth/pages/RegisterPage'
 import { MyAttendancePage } from '@/features/attendance/pages/MyAttendancePage'
 import { DeptAttendancePage } from '@/features/attendance/pages/DeptAttendancePage'
 import { DocumentBoxHomePage } from '@/features/approval/pages/DocumentBoxHomePage'
+import { CancellationDraftCreatePage } from '@/features/approval/pages/CancellationDraftCreatePage'
 import { DraftCreatePreviewPage } from '@/features/approval/pages/DraftCreatePreviewPage'
 import { DraftDetailPage } from '@/features/approval/pages/DraftDetailPage'
 import { DraftPrintPreviewPage } from '@/features/approval/pages/DraftPrintPreviewPage'
@@ -337,6 +338,13 @@ export const router = createBrowserRouter([
         // 페이지의 [수정] 액션이 실제 이동 목적지로 이어진다.
         path: 'approval/drafts/:draftId/edit',
         element: <GeneralDraftEditPage />,
+      },
+      {
+        // 취소 기안 작성 페이지(F704): 상세 [취소 기안 작성] 액션이 모달 대신 이 전용 페이지로
+        // 이동한다(사용자 요청 2026-07-14). :draftId는 취소 대상 원본 기안이다. 'edit'와 동일한
+        // 4세그먼트지만 마지막 리터럴('cancellation' vs 'edit')로 구분되어 랭킹 충돌이 없다.
+        path: 'approval/drafts/:draftId/cancellation',
+        element: <CancellationDraftCreatePage />,
       },
       {
         // 출장 기안 수정 페이지: ROADMAP(DRAFT-BUSINESSTRIP) M2(T2.4)에서

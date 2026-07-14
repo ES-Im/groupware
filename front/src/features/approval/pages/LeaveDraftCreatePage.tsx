@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router'
 import dayjs from 'dayjs'
 import { toast } from 'sonner'
 import { submitWithErrorMapping, useZodForm } from '@/shared/lib/form'
+import { Card, CardContent } from '@/shared/ui/card'
 import { Input } from '@/shared/ui/input'
 import { Label } from '@/shared/ui/label'
 import { Textarea } from '@/shared/ui/textarea'
@@ -345,150 +346,168 @@ export function LeaveDraftCreatePage() {
     >
       {/* form onSubmit은 기본 액션([생성 후 상신])으로 둔다. [임시저장]은 type=button으로 분리. */}
       <form noValidate onSubmit={handleCreateAndSubmit} className="flex flex-1 flex-col gap-4">
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="leave-draft-title">
-            제목 <span className="text-destructive">*</span>
-          </Label>
-          <Input
-            id="leave-draft-title"
-            placeholder="제목을 입력해주세요"
-            aria-invalid={!!errors.title}
-            {...register('title')}
-          />
-          {errors.title && (
-            <p role="alert" className="text-sm text-destructive">
-              {errors.title.message}
-            </p>
-          )}
-        </div>
+        {/* 폼 본문을 세로 80%/20%로 분할한다(사용자 요청 2026-07-14): 위쪽 입력 필드 / 아래쪽
+            결재선·공람 카드. fr 그리드라 남는 세로 공간을 정확히 4:1로 나누고, 각 행은
+            min-h-0으로 트랙 밖으로 내용이 넘치는 대신 안쪽에서 줄어들 수 있게 한다. */}
+        <div className="grid min-h-0 flex-1 grid-rows-[4fr_1fr] gap-4">
+          <div className="flex min-h-0 flex-col gap-4">
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="leave-draft-title">
+                제목 <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                id="leave-draft-title"
+                placeholder="제목을 입력해주세요"
+                aria-invalid={!!errors.title}
+                {...register('title')}
+              />
+              {errors.title && (
+                <p role="alert" className="text-sm text-destructive">
+                  {errors.title.message}
+                </p>
+              )}
+            </div>
 
-        {/* 유형 필드를 본문보다 앞에 둔다(레퍼런스 필드 순서: 제목 → 유형 필드 → 기안 내용).
-            유형이 4시간 단위 모드(반차 경계 시각 제한·사용 일수 계산)를 결정하므로 첫 칸에 둔다. */}
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="leave-draft-leave-type">
-              휴가 유형 <span className="text-destructive">*</span>
-            </Label>
-            <select
-              id="leave-draft-leave-type"
-              aria-invalid={!!errors.leaveType}
-              defaultValue=""
-              className="h-8 rounded-lg border border-input bg-transparent px-2.5 text-sm text-foreground transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
-              {...register('leaveType')}
-            >
-              <option value="" disabled>
-                휴가 유형을 선택해주세요
-              </option>
-              {leaveTypeOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-            {/* 4시간 단위 유형(DRAFT_005 미러) 안내 + 유형별 잔여 휴가 — 유형을 고르는 순간
-                규칙과 잔여를 함께 보여준다(사용자 요청 2026-07-11). */}
-            {isFourHourUnit && (
-              <p className="text-xs text-muted-foreground">
-                연차·특별휴가·대체휴무는 0.5일(4시간) 단위로만 사용할 수 있습니다. 사용 일수는
-                시작·종료 일시로 자동 계산되어 본문에 표시됩니다.
-              </p>
-            )}
-            {isFourHourUnit && (
-              <p className="text-xs text-muted-foreground">
-                {remainingDays !== null ? (
-                  <>
-                    잔여{' '}
-                    {leaveTypeOptions.find((option) => option.value === leaveTypeValue)?.label}:{' '}
-                    <span className="font-medium text-foreground">
-                      {formatLeaveDays(remainingDays)}
-                    </span>
-                    {usedLeaveDays !== null && (
-                      <> · 이번 신청 사용: {formatLeaveDays(usedLeaveDays)}</>
-                    )}
-                  </>
-                ) : (
-                  '잔여 휴가 정보를 불러올 수 없습니다.'
+            {/* 유형 필드를 본문보다 앞에 둔다(레퍼런스 필드 순서: 제목 → 유형 필드 → 기안 내용).
+                유형이 4시간 단위 모드(반차 경계 시각 제한·사용 일수 계산)를 결정하므로 첫 칸에 둔다. */}
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="leave-draft-leave-type">
+                  휴가 유형 <span className="text-destructive">*</span>
+                </Label>
+                <select
+                  id="leave-draft-leave-type"
+                  aria-invalid={!!errors.leaveType}
+                  defaultValue=""
+                  className="h-8 rounded-lg border border-input bg-transparent px-2.5 text-sm text-foreground transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
+                  {...register('leaveType')}
+                >
+                  <option value="" disabled>
+                    휴가 유형을 선택해주세요
+                  </option>
+                  {leaveTypeOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+                {/* 4시간 단위 유형(DRAFT_005 미러) 안내 + 유형별 잔여 휴가 — 유형을 고르는 순간
+                    규칙과 잔여를 함께 보여준다(사용자 요청 2026-07-11). */}
+                {isFourHourUnit && (
+                  <p className="text-xs text-muted-foreground">
+                    연차·특별휴가·대체휴무는 0.5일(4시간) 단위로만 사용할 수 있습니다. 사용
+                    일수는 시작·종료 일시로 자동 계산되어 본문에 표시됩니다.
+                  </p>
                 )}
-              </p>
-            )}
-            {errors.leaveType && (
-              <p role="alert" className="text-sm text-destructive">
-                {errors.leaveType.message}
-              </p>
-            )}
+                {isFourHourUnit && (
+                  <p className="text-xs text-muted-foreground">
+                    {remainingDays !== null ? (
+                      <>
+                        잔여{' '}
+                        {leaveTypeOptions.find((option) => option.value === leaveTypeValue)?.label}:{' '}
+                        <span className="font-medium text-foreground">
+                          {formatLeaveDays(remainingDays)}
+                        </span>
+                        {usedLeaveDays !== null && (
+                          <> · 이번 신청 사용: {formatLeaveDays(usedLeaveDays)}</>
+                        )}
+                      </>
+                    ) : (
+                      '잔여 휴가 정보를 불러올 수 없습니다.'
+                    )}
+                  </p>
+                )}
+                {errors.leaveType && (
+                  <p role="alert" className="text-sm text-destructive">
+                    {errors.leaveType.message}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* 시작·종료 일시는 항상 같은 행에 배치한다(sm 이상 2열 — 사용자 요청 2026-07-11).
+                4시간 단위 유형은 시각 옵션을 반차 경계(시작 09/13, 종료 13/18)로 제한하고, 병가·
+                공가는 근무시간(09~18시) 전체를 1시간 단위로 허용한다. */}
+            <div className="grid gap-4 sm:grid-cols-2">
+              <LeaveDateHourField
+                id="leave-draft-start-at"
+                label="휴가 시작 일시"
+                hourAriaLabel="휴가 시작 시간"
+                dateValue={startDate}
+                hourValue={startHour}
+                minDate={todayDate}
+                error={errors.startAt?.message}
+                hourOptions={isFourHourUnit ? LEAVE_START_HOUR_OPTIONS : undefined}
+                onChange={handleStartChange}
+              />
+
+              <LeaveDateHourField
+                id="leave-draft-end-at"
+                label="휴가 종료 일시"
+                hourAriaLabel="휴가 종료 시간"
+                dateValue={endDate}
+                hourValue={endHour}
+                minDate={startDate || todayDate}
+                error={errors.endAt?.message}
+                hourOptions={isFourHourUnit ? LEAVE_END_HOUR_OPTIONS : undefined}
+                onChange={handleEndChange}
+              />
+            </div>
+
+            {/* 남는 높이는 기안 내용 Textarea가 흡수한다(flex-1 min-h-0 — min-h-48은 바닥값으로 유지). */}
+            <div className="flex min-h-0 flex-1 flex-col gap-1.5">
+              <Label htmlFor="leave-draft-content">
+                기안 내용 <span className="text-destructive">*</span>
+              </Label>
+              <Textarea
+                id="leave-draft-content"
+                placeholder="기안 내용을 입력해주세요"
+                className="min-h-48 flex-1"
+                aria-invalid={!!errors.content}
+                {...register('content', {
+                  // 직접 수정이 시작되면 자동 입력을 중단한다(setValue는 이 onChange를 타지 않는다).
+                  onChange: () => setIsContentManuallyEdited(true),
+                })}
+              />
+              {errors.content && (
+                <p role="alert" className="text-sm text-destructive">
+                  {errors.content.message}
+                </p>
+              )}
+            </div>
           </div>
-        </div>
 
-        {/* 시작·종료 일시는 항상 같은 행에 배치한다(sm 이상 2열 — 사용자 요청 2026-07-11).
-            4시간 단위 유형은 시각 옵션을 반차 경계(시작 09/13, 종료 13/18)로 제한하고, 병가·
-            공가는 근무시간(09~18시) 전체를 1시간 단위로 허용한다. */}
-        <div className="grid gap-4 sm:grid-cols-2">
-          <LeaveDateHourField
-            id="leave-draft-start-at"
-            label="휴가 시작 일시"
-            hourAriaLabel="휴가 시작 시간"
-            dateValue={startDate}
-            hourValue={startHour}
-            minDate={todayDate}
-            error={errors.startAt?.message}
-            hourOptions={isFourHourUnit ? LEAVE_START_HOUR_OPTIONS : undefined}
-            onChange={handleStartChange}
-          />
-
-          <LeaveDateHourField
-            id="leave-draft-end-at"
-            label="휴가 종료 일시"
-            hourAriaLabel="휴가 종료 시간"
-            dateValue={endDate}
-            hourValue={endHour}
-            minDate={startDate || todayDate}
-            error={errors.endAt?.message}
-            hourOptions={isFourHourUnit ? LEAVE_END_HOUR_OPTIONS : undefined}
-            onChange={handleEndChange}
-          />
-        </div>
-
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="leave-draft-content">
-            기안 내용 <span className="text-destructive">*</span>
-          </Label>
-          <Textarea
-            id="leave-draft-content"
-            placeholder="기안 내용을 입력해주세요"
-            className="min-h-48"
-            aria-invalid={!!errors.content}
-            {...register('content', {
-              // 직접 수정이 시작되면 자동 입력을 중단한다(setValue는 이 onChange를 타지 않는다).
-              onChange: () => setIsContentManuallyEdited(true),
-            })}
-          />
-          {errors.content && (
-            <p role="alert" className="text-sm text-destructive">
-              {errors.content.message}
-            </p>
-          )}
-        </div>
-
-        <div className="flex flex-col gap-4 border-t pt-4">
-          <EmployeeSelectField
-            label="결재선"
-            description="결재 순서대로 처리됩니다."
-            ordered
-            roleOptions={APPROVAL_ROLE_OPTIONS}
-            rolesByEmpId={approverRoles}
-            onRoleChange={handleApproverRoleChange}
-            emptyText="결재선에 지정된 결재자가 없습니다."
-            selected={approverSelection}
-            onChange={handleApproverSelectionChange}
-          />
-          {/* 공람자는 생성 요청에 실을 수 없어(계약) 생성 성공 후 addCirculation으로 등록한다. */}
-          <EmployeeSelectField
-            label="공람 (선택)"
-            description="문서를 공람할 사원을 지정합니다."
-            emptyText="지정된 공람자가 없습니다."
-            selected={circulationSelection}
-            onChange={setCirculationSelection}
-          />
+          {/* 결재선(좌) / 공람(우) 각각 별도 카드로 감싼다. 카드 내부는 min-h-0 +
+              overflow-y-auto로 행이 많아져도 카드가 20% 트랙 밖으로 깨지지 않는다. */}
+          <div className="grid min-h-0 grid-cols-1 gap-4 border-t pt-4 md:grid-cols-2">
+            <Card className="flex h-full min-h-0 flex-col rounded-xl">
+              <CardContent className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+                <EmployeeSelectField
+                  label="결재선"
+                  description="결재 순서대로 처리됩니다."
+                  ordered
+                  roleOptions={APPROVAL_ROLE_OPTIONS}
+                  rolesByEmpId={approverRoles}
+                  onRoleChange={handleApproverRoleChange}
+                  emptyText="결재선에 지정된 결재자가 없습니다."
+                  selected={approverSelection}
+                  onChange={handleApproverSelectionChange}
+                />
+              </CardContent>
+            </Card>
+            {/* 공람자는 생성 요청에 실을 수 없어(계약) 생성 성공 후 addCirculation으로 등록한다. */}
+            <Card className="flex h-full min-h-0 flex-col rounded-xl">
+              <CardContent className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+                <EmployeeSelectField
+                  label="공람 (선택)"
+                  description="문서를 공람할 사원을 지정합니다."
+                  emptyText="지정된 공람자가 없습니다."
+                  selected={circulationSelection}
+                  onChange={setCirculationSelection}
+                />
+              </CardContent>
+            </Card>
+          </div>
         </div>
 
         {errors.root && (

@@ -1,6 +1,6 @@
 import { useId, type ReactNode } from 'react'
 import { Link } from 'react-router'
-import { Check, FileText, FileUp, Inbox, Paperclip, Plus, X } from 'lucide-react'
+import { Check, FileText, FileUp, Inbox, Paperclip, Plus, X, type LucideIcon } from 'lucide-react'
 import { useAuthStore } from '@/features/auth/store/authStore'
 import { Badge } from '@/shared/ui/badge'
 import { Button } from '@/shared/ui/button'
@@ -18,21 +18,47 @@ import { DRAFT_TYPES, getDraftTypeMeta, type DraftTypeKey } from '../lib/draftTy
 interface DraftCreateFrameProps {
   /** 현재 작성 중인 기안서 타입(좌측 카드 강조·우측 헤더 아이콘/문구의 기준). */
   currentType: DraftTypeKey
-  /** 첨부 예정 파일 목록(소유·유지는 페이지 — 미리보기 payload에 파일명이 실린다). */
-  attachments: File[]
-  /** 첨부 목록 변경 콜백(추가/제거 모두 이 콜백으로 반영). */
-  onAttachmentsChange: (next: File[]) => void
+  /**
+   * 첨부 예정 파일 목록(소유·유지는 페이지 — 미리보기 payload에 파일명이 실린다). 기본 좌측
+   * 컬럼(sidebar 미지정)에서만 사용한다. 커스텀 sidebar를 넘기는 화면(취소기안·수정)은 생략 가능.
+   */
+  attachments?: File[]
+  /** 첨부 목록 변경 콜백(추가/제거 모두 이 콜백으로 반영). attachments와 짝으로만 의미가 있다. */
+  onAttachmentsChange?: (next: File[]) => void
   /** 우측 폼 카드 본문에 렌더할 폼(제출·검증 로직은 페이지 소유). */
   children: ReactNode
+  /** 페이지 헤더 제목(기본 "새 기안서"). 취소기안/수정 화면이 문맥에 맞게 덮어쓴다. */
+  title?: string
+  /** 페이지 헤더 부제(기본 작성 안내 문구). */
+  subtitle?: string
+  /** 우측 폼 카드 헤더 아이콘(기본 currentType 메타 아이콘). */
+  formIcon?: LucideIcon
+  /** 우측 폼 카드 헤더 제목(기본 currentType 메타 라벨). */
+  formTitle?: string
+  /** 우측 폼 카드 헤더 부제(기본 currentType 메타 설명). */
+  formDescription?: string
+  /** 우측 폼 카드 우상단 상태 배지 문구(기본 "작성 중"). */
+  headerBadge?: string
+  /**
+   * 좌측 컬럼 전체를 대체하는 커스텀 노드(취소기안=원본 문서 카드, 수정=문서 정보 카드).
+   * 미지정 시 기본 좌측 컬럼(기안서 종류 선택 + 첨부파일 카드)을 렌더한다.
+   */
+  sidebar?: ReactNode
+  /** 우측 폼 카드 본문 최상단 배너(취소기안 "원본 문서번호에 대한 취소 기안" 안내 등). */
+  banner?: ReactNode
 }
 
 /**
- * 기안서 작성 4종 공통 프레임(레퍼런스 "기안서 작성" 화면의 콘텐츠 프레임 이식).
+ * 기안서 작성/취소기안/수정 공통 프레임(레퍼런스 "기안서 작성" 화면의 콘텐츠 프레임 이식).
  *
  * 순수 시각 계층만 담당한다: 페이지 헤더 + 2열 레이아웃(좌측 종류 선택·첨부파일 카드 / 우측 폼
  * 카드). 우측 카드의 본문(children)에 각 페이지가 자기 폼을 주입하며, 폼의 검증·제출·네비게이션
  * 로직은 페이지가 소유한다. 좌측 종류 전환은 라우트 이동(navigate)이라 각 작성 페이지가 새로
  * 마운트되며 로컬 입력 상태는 자연히 리셋된다.
+ *
+ * 4종 작성 페이지는 기본 인자(currentType + attachments)만으로 기존 레이아웃을 그대로 얻고,
+ * 취소기안 작성·임시저장 수정 화면은 헤더/배지/좌측 컬럼(sidebar)/배너를 덮어써 "새 기안서 형식을
+ * 그대로 차용"하면서도 종류 선택이 무의미한 문맥(유형 고정)을 표현한다.
  *
  * 첨부파일 카드는 레퍼런스와 동일하게 **화면 보관·미리보기 표시까지만** 담당한다 — 백엔드 생성
  * 계약(GENERAL_DRAFT_CREATE 등)에 파일 필드가 없어 생성 요청에는 실리지 않고, 실제 업로드는
@@ -43,23 +69,30 @@ export function DraftCreateFrame({
   attachments,
   onAttachmentsChange,
   children,
+  title = '새 기안서',
+  subtitle = '결재 양식을 선택하고 필요한 내용을 작성하세요',
+  formIcon,
+  formTitle,
+  formDescription,
+  headerBadge = '작성 중',
+  sidebar,
+  banner,
 }: DraftCreateFrameProps) {
   const meta = getDraftTypeMeta(currentType)
-  const HeaderIcon = meta.icon
+  const HeaderIcon = formIcon ?? meta.icon
 
   return (
     // 레퍼런스는 콘텐츠 영역 전체 폭을 사용한다 — 고정폭(max-w) 없이 LayoutShell main 폭에 맞춘다.
-    // 공통 인셋은 p-3 하나로 통일(LayoutShell main은 패딩이 없어 각 페이지 래퍼가 인셋을 소유).
+    // 공통 인셋은 표준 반응형 패딩(p-4 sm:p-6 lg:p-8)으로 통일(메인 레이아웃 타이틀·패딩 표준화).
     // min-h-full 플렉스 컬럼: 폼이 짧아도 그리드(flex-1)가 남는 높이를 흡수해 카드 하단과 푸터
-    // 사이 간격이 페이지 인셋(p-3)만 남는다.
-    <div className="flex min-h-full w-full flex-col gap-6 p-3">
+    // 사이 간격이 페이지 인셋만 남는다.
+    <div className="flex min-h-full w-full flex-col gap-6 p-4 sm:p-6 lg:p-8">
       <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        {/* //todo : 기존 "E-APPROVAL" eyebrow는 메인 레이아웃 타이틀 표준(타이틀+서브타이틀만)에
+            맞춰 제거했다. 의도된 브랜드 요소라면 표준을 확장할지 사용자 확인 후 복원 필요. */}
         <div className="min-w-0">
-          <p className="mb-1.5 text-sm font-medium text-primary">E-APPROVAL</p>
-          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">새 기안서</h1>
-          <p className="mt-1.5 text-sm text-muted-foreground">
-            결재 양식을 선택하고 필요한 내용을 작성하세요
-          </p>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">{title}</h1>
+          <p className="mt-1.5 text-sm text-muted-foreground">{subtitle}</p>
         </div>
         <Button asChild variant="outline" className="shrink-0 rounded-xl">
           <Link to="/approval/box">
@@ -73,9 +106,17 @@ export function DraftCreateFrame({
           긴 값이 컬럼을 밀어내지 않게 오버플로를 가둔다. flex-1이라 남는 세로 공간을 그리드 행이
           흡수하고(align-content 기본 stretch), 우측 폼 카드가 그 높이를 채운다. */}
       <div className="grid flex-1 grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] xl:grid-cols-[minmax(0,1fr)_minmax(0,3fr)]">
+        {/* 좌측 컬럼: 기본은 종류 선택 + 첨부 카드. 커스텀 sidebar가 오면 그대로 대체한다
+            (취소기안=원본 문서 카드, 수정=문서 정보 카드 — 종류 선택이 무의미한 문맥). */}
         <div className="flex flex-col gap-4">
-          <DraftTypeSelector currentType={currentType} />
-          <DraftAttachmentsCard attachments={attachments} onChange={onAttachmentsChange} />
+          {sidebar ?? (
+            <>
+              <DraftTypeSelector currentType={currentType} />
+              {attachments && onAttachmentsChange && (
+                <DraftAttachmentsCard attachments={attachments} onChange={onAttachmentsChange} />
+              )}
+            </>
+          )}
         </div>
 
         <Card className="min-w-0 rounded-2xl">
@@ -85,20 +126,24 @@ export function DraftCreateFrame({
                 <HeaderIcon className="size-5" />
               </span>
               <span className="flex min-w-0 flex-col">
-                <span className="truncate text-base font-bold">{meta.label}</span>
+                <span className="truncate text-base font-bold">{formTitle ?? meta.label}</span>
                 <span className="truncate text-xs font-normal text-muted-foreground">
-                  {meta.description}
+                  {formDescription ?? meta.description}
                 </span>
               </span>
             </CardTitle>
             <CardAction>
               <Badge className="rounded-full border-0 bg-amber-100 text-amber-700 hover:bg-amber-100 dark:bg-amber-950/40 dark:text-amber-400">
-                작성 중
+                {headerBadge}
               </Badge>
             </CardAction>
           </CardHeader>
-          {/* 카드가 그리드 행 높이만큼 늘어날 때 폼(flex-1)도 같이 늘어나 액션 바가 카드 하단에 붙는다. */}
-          <CardContent className="flex flex-1 flex-col">{children}</CardContent>
+          {/* 카드가 그리드 행 높이만큼 늘어날 때 폼(flex-1)도 같이 늘어나 액션 바가 카드 하단에 붙는다.
+              배너(banner)가 있으면 폼 위 최상단에 shrink-0로 고정 표시한다(취소기안 원본 문서 안내). */}
+          <CardContent className="flex flex-1 flex-col gap-4">
+            {banner}
+            {children}
+          </CardContent>
         </Card>
       </div>
     </div>
@@ -179,8 +224,9 @@ function formatFileSize(size: number): string {
 /**
  * 좌측 "첨부파일" 카드(레퍼런스 좌측 첨부 카드 이식). 같은 이름+크기 파일은 중복 추가하지 않는다.
  * 선택 즉시 업로드하지 않고 목록만 보관한다 — 파일명은 미리보기 문서의 "첨부 문서" 목록에 실린다.
+ * 취소기안 작성 화면이 커스텀 sidebar 안에서 이 카드를 그대로 재사용한다(export).
  */
-function DraftAttachmentsCard({
+export function DraftAttachmentsCard({
   attachments,
   onChange,
 }: {
