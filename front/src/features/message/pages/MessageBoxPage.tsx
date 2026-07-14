@@ -236,14 +236,14 @@ export function MessageBoxPage() {
 
   return (
     // min-h-full 플렉스 컬럼: 콘텐츠가 짧아도 탭 카드(flex-1)가 남는 높이를 흡수해
-    // 카드 하단과 푸터 사이 간격이 페이지 인셋(p-3)만 남는다(문서함 레이아웃 컨벤션).
-    <div className="flex min-h-full w-full flex-col p-3">
+    // 카드 하단과 푸터 사이 간격이 페이지 인셋만 남는다(문서함 레이아웃 컨벤션).
+    <div className="flex min-h-full w-full flex-col p-4 sm:p-6 lg:p-8">
       {/* 헤더: 페이지 타이틀 + 새 쪽지 작성 진입. xl 이상에서는 좌측 박스 네비의 [새 쪽지 작성]
           버튼이 이 역할을 대체하므로 여기서는 숨긴다(xl:hidden). */}
-      <header className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+      <header className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
-          <h1 className="text-xl font-semibold tracking-tight">쪽지함</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">쪽지함</h1>
+          <p className="mt-1.5 text-sm text-muted-foreground">
             받은·보낸·임시보관·휴지통 쪽지를 한 곳에서 관리하세요
           </p>
         </div>
@@ -270,6 +270,8 @@ export function MessageBoxPage() {
           userDept={userDept}
           onCompose={() => openCompose()}
           onSelectBox={selectBox}
+          onBack={backToList}
+          showBack={activeView !== 'list'}
           className="sticky top-3 hidden w-52 shrink-0 self-start xl:flex"
         />
 

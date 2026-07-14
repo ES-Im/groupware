@@ -30,7 +30,7 @@ import {
   AlertDialogTrigger,
 } from '@/shared/ui/alert-dialog'
 import { Button } from '@/shared/ui/button'
-import { Card, CardContent } from '@/shared/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card'
 import {
   Dialog,
   DialogContent,
@@ -496,26 +496,28 @@ export function MessageComposeView({
 
   return (
     <div className="flex flex-1 flex-col gap-4">
-      <div className="flex flex-wrap items-center gap-2">
+      {/* 목록 복귀: xl 이상에서는 좌측 박스 네비 하단의 "목록으로" 버튼이 담당하므로 숨긴다
+          (쪽지 상세 뷰와 동일 패턴). xl 미만(박스 네비 미노출)에서만 노출한다. */}
+      <div className="xl:hidden">
         <Button type="button" variant="outline" size="sm" onClick={onBack}>
           <ArrowLeft />
           목록으로
         </Button>
       </div>
 
-      {/* 작성 헤더(상세 뷰 제목과 톤 통일): 제목 + 부제(레퍼런스 메일함 작성 화면 참고). */}
-      <div className="min-w-0">
-        <h2 className="text-xl font-bold tracking-tight text-foreground">
-          {isEditMode ? '쪽지 수정' : '새 쪽지 작성'}
-        </h2>
-        <p className="text-xs text-muted-foreground">
-          {isEditMode
-            ? '임시 저장한 쪽지를 이어서 수정합니다.'
-            : '여러 사원에게 동시에 쪽지를 보낼 수 있습니다.'}
-        </p>
-      </div>
-
+      {/* 작성 카드: 쪽지 상세 뷰와 톤을 통일한다 — 제목/부제를 카드 헤더에 두어 카드가 좌측 네비와
+          같은 높이에서 시작하고, 메인 영역을 flex-1로 꽉 채운다(내용 입력이 남는 높이를 흡수). */}
       <Card className="flex min-h-0 min-w-0 flex-1 flex-col">
+        <CardHeader className="border-b">
+          <CardTitle className="text-xl font-bold tracking-tight text-foreground">
+            {isEditMode ? '쪽지 수정' : '새 쪽지 작성'}
+          </CardTitle>
+          <CardDescription className="text-xs">
+            {isEditMode
+              ? '임시 저장한 쪽지를 이어서 수정합니다.'
+              : '여러 사원에게 동시에 쪽지를 보낼 수 있습니다.'}
+          </CardDescription>
+        </CardHeader>
         <CardContent className="flex min-h-0 flex-1 flex-col">
           <form
             noValidate

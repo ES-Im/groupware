@@ -1,4 +1,4 @@
-import { Info, MailPlus } from 'lucide-react'
+import { ArrowLeft, Info, MailPlus } from 'lucide-react'
 import { BlobAvatar } from '@/shared/components/BlobAvatar'
 import { cn } from '@/shared/lib/utils'
 import { Badge } from '@/shared/ui/badge'
@@ -20,6 +20,10 @@ interface MailboxNavProps {
   onCompose: () => void
   /** 박스 선택 — 상위가 /messages/:box로 navigate(라우팅 로직은 상위 소유). */
   onSelectBox: (box: MailBox) => void
+  /** 상세/작성 뷰에서 목록으로 복귀 — 상위(MessageBoxPage)가 backToList를 주입. */
+  onBack?: () => void
+  /** 목록으로 버튼 노출 여부(상세/작성 뷰일 때만 true). */
+  showBack?: boolean
   className?: string
 }
 
@@ -36,6 +40,8 @@ export function MailboxNav({
   userDept,
   onCompose,
   onSelectBox,
+  onBack,
+  showBack,
   className,
 }: MailboxNavProps) {
   const receivedCount = counts?.receivedCount ?? 0
@@ -147,6 +153,16 @@ export function MailboxNav({
           />
         </div>
       </div>
+
+      {/* 목록으로: 상세/작성 뷰에서만 노출(사용자 요청 — 게시글 상세의 좌측 하단 "목록" 버튼과 동일
+          패턴). 좌측 네비 최하단(읽지 않은 쪽지 카드 아래)에 두어, 우측 상세 카드는 상단 목록 버튼
+          없이 좌측 네비와 같은 높이에서 시작하게 한다. */}
+      {showBack && onBack && (
+        <Button type="button" variant="outline" onClick={onBack} className="w-full">
+          <ArrowLeft />
+          목록으로
+        </Button>
+      )}
     </aside>
   )
 }

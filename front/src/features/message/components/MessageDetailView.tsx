@@ -2,7 +2,6 @@ import { useEffect, useRef } from 'react'
 import dayjs from 'dayjs'
 import { ArrowLeft, Reply, Trash2, Undo2 } from 'lucide-react'
 import { toast } from 'sonner'
-import { BlobAvatar } from '@/shared/components/BlobAvatar'
 import { isForbidden, isNotFound, normalizeApiError } from '@/shared/lib/apiError'
 import {
   AlertDialog,
@@ -17,7 +16,7 @@ import {
 } from '@/shared/ui/alert-dialog'
 import { Badge } from '@/shared/ui/badge'
 import { Button } from '@/shared/ui/button'
-import { Card, CardContent } from '@/shared/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
 import { Separator } from '@/shared/ui/separator'
 import { useMarkMessageReadMutation } from '../api/useMarkMessageReadMutation'
 import { useMessageDetailQuery } from '../api/useMessageDetailQuery'
@@ -204,7 +203,7 @@ export function MessageDetailView({
   if (detailQuery.isLoading) {
     return (
       <div className="flex flex-1 flex-col gap-4">
-        <div>{backButton}</div>
+        <div className="xl:hidden">{backButton}</div>
         <p className="py-8 text-center text-sm text-muted-foreground">쪽지를 불러오는 중...</p>
       </div>
     )
@@ -220,7 +219,7 @@ export function MessageDetailView({
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-3 py-10">
         <p className="text-sm text-muted-foreground">{guidance}</p>
-        {backButton}
+        <div className="xl:hidden">{backButton}</div>
       </div>
     )
   }
@@ -232,88 +231,91 @@ export function MessageDetailView({
 
   return (
     <div className="flex flex-1 flex-col gap-4">
-      {/* 상단 액션 바: 좌 목록 복귀 / 우 박스별 액션 셸(DraftDetailPage 액션 바 배치 동형). */}
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        {backButton}
-        <MessageDetailActions
-          box={box}
-          isTrashedByMe={detail.isTrashedByMe}
-          onReply={onReply}
-          onTrash={onTrash}
-          onRestore={onRestore}
-          onDelete={onDelete}
-        />
-      </div>
+      {/* 목록 복귀: xl 이상에서는 좌측 박스 네비 하단의 "목록으로" 버튼이 담당하므로 숨긴다
+          (사용자 요청 — 게시글 상세와 동일 패턴). xl 미만(박스 네비 미노출)에서만 노출한다. */}
+      <div className="xl:hidden">{backButton}</div>
 
-      <Card className="min-w-0">
-        <CardContent className="space-y-5">
-          <h2 className="text-xl font-bold tracking-tight break-all text-foreground">
+      {/* 상세 카드: 메인 영역 높이를 flex-1로 채워(사용자 요청 "메인이 꽉차게") 좌측 네비와 높이를
+          맞춘다. 제목과 박스별 액션(답장/휴지통 등)은 카드 헤더에 좌우로 배치해 상단 별도 액션바를
+          없앤다 — 카드가 좌측 네비와 같은 높이에서 시작한다. */}
+      <Card className="flex min-w-0 flex-1 flex-col">
+        <CardHeader className="flex flex-row items-start justify-between gap-3 border-b">
+          <CardTitle className="min-w-0 text-xl font-bold tracking-tight break-all text-foreground">
             {detail.title}
-          </h2>
-
-          {/* 발신자 정보 줄: 아바타 + 이름/부서 + 우측 정렬 일시(레퍼런스 메일함 톤). */}
-          <div className="flex items-center gap-3">
-            <BlobAvatar
-              empId={undefined}
-              fileId={undefined}
-              fallbackText={detail.senderName}
-              className="size-11"
+          </CardTitle>
+          <div className="shrink-0">
+            <MessageDetailActions
+              box={box}
+              isTrashedByMe={detail.isTrashedByMe}
+              onReply={onReply}
+              onTrash={onTrash}
+              onRestore={onRestore}
+              onDelete={onDelete}
             />
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-bold text-foreground">{detail.senderName}</p>
-              {detail.senderDeptName && (
-                <p className="truncate text-xs text-muted-foreground">{detail.senderDeptName}</p>
+          </div>
+        </CardHeader>
+
+        {/* 메타(보낸사람/받는사람/발송일시) + 내용(7) + 첨부(3). 메일함 레퍼런스(메일함.png) 구조대로
+            상단은 아바타 대신 라벨+값(칩) 리스트로 두고 발송일시는 그 아래 작은 회색 텍스트로 둔다.
+            내용과 첨부는 메타 아래 남는 높이를 7:3으로 나눠 각자 내부 스크롤한다(사용자 요청). */}
+        <CardContent className="flex min-h-0 flex-1 flex-col gap-4">
+          <div className="shrink-0 space-y-2.5 text-sm">
+            {/* 보낸사람: 라벨 + 값 칩 */}
+            <div className="flex items-start gap-3">
+              <span className="w-16 shrink-0 pt-1 text-muted-foreground">보낸사람</span>
+              <span className="rounded-md bg-muted px-2.5 py-1 font-medium text-foreground">
+                {formatPersonName(detail.senderDeptName, detail.senderName)}
+              </span>
+            </div>
+            {/* 받는사람: 라벨 + 값 칩들(보낸함이면 수신자별 읽음 배지) */}
+            <div className="flex items-start gap-3">
+              <span className="w-16 shrink-0 pt-1 text-muted-foreground">받는사람</span>
+              {detail.receivers.length === 0 ? (
+                <span className="pt-1 text-muted-foreground">지정된 수신자가 없습니다.</span>
+              ) : (
+                <div className="flex flex-wrap gap-1.5">
+                  {detail.receivers.map((receiver) => (
+                    <span
+                      key={receiver.receiverId}
+                      className="inline-flex items-center gap-1.5 rounded-md bg-muted px-2.5 py-1"
+                    >
+                      <span className="font-medium text-foreground">
+                        {formatPersonName(receiver.receiverDeptName, receiver.receiverName)}
+                      </span>
+                      {/* 수신자별 읽음 현황은 발신자 관점 정보라 보낸함에서만 표기한다(F1502·PRD). */}
+                      {box === 'sent' &&
+                        (receiver.isRead ? (
+                          <Badge variant="secondary">읽음</Badge>
+                        ) : (
+                          <Badge variant="outline">미열람</Badge>
+                        ))}
+                    </span>
+                  ))}
+                </div>
               )}
             </div>
-            <time className="shrink-0 text-xs text-muted-foreground tabular-nums">
+            {/* 발송일시(레퍼런스 하단 회색 일시) */}
+            <p className="text-xs text-muted-foreground tabular-nums">
               {formatMessageDateTime(detail.sentAt)}
-            </time>
+            </p>
           </div>
 
-          <Separator />
+          <Separator className="shrink-0" />
 
-          <section className="space-y-3">
-            <h3 className="text-sm font-semibold text-muted-foreground">받는 사람</h3>
-            {detail.receivers.length === 0 ? (
-              <p className="text-sm text-muted-foreground">지정된 수신자가 없습니다.</p>
-            ) : (
-              <ul className="flex flex-wrap gap-2">
-                {detail.receivers.map((receiver) => (
-                  <li
-                    key={receiver.receiverId}
-                    className="flex items-center gap-2 rounded-lg border bg-card px-3 py-1.5 text-sm"
-                  >
-                    <span className="font-medium text-foreground">
-                      {formatPersonName(receiver.receiverDeptName, receiver.receiverName)}
-                    </span>
-                    {/* 수신자별 읽음 현황은 발신자 관점 정보라 보낸함에서만 표기한다(F1502·PRD). */}
-                    {box === 'sent' &&
-                      (receiver.isRead ? (
-                        <Badge variant="secondary">읽음</Badge>
-                      ) : (
-                        <Badge variant="outline">미열람</Badge>
-                      ))}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
-
-          <Separator />
-
-          <section className="space-y-3">
-            <h3 className="text-sm font-semibold text-muted-foreground">내용</h3>
-            <div className="min-h-[160px] rounded-lg bg-muted/40 p-4 text-sm leading-7 break-words whitespace-pre-wrap">
+          {/* 내용(7): 메타 아래 남는 높이의 70%를 차지하고 넘칠 때 내부 스크롤한다. */}
+          <section className="flex min-h-0 flex-[7] flex-col gap-2">
+            <h3 className="shrink-0 text-sm font-semibold text-muted-foreground">내용</h3>
+            <div className="min-h-0 flex-1 overflow-y-auto text-sm leading-7 break-words whitespace-pre-wrap text-foreground">
               {detail.content}
             </div>
           </section>
-        </CardContent>
-      </Card>
 
-      {/* 첨부 섹션(T3.3-b 소유): messageId 단일 prop 계약으로 마운트한다. */}
-      <Card>
-        <CardContent>
-          <MessageAttachmentSection messageId={messageId} />
+          <Separator className="shrink-0" />
+
+          {/* 첨부(3): 남는 높이의 30%를 차지하고 넘칠 때 내부 스크롤한다(T3.3-b 소유 컴포넌트). */}
+          <div className="min-h-0 flex-[3] overflow-y-auto">
+            <MessageAttachmentSection messageId={messageId} />
+          </div>
         </CardContent>
       </Card>
     </div>
