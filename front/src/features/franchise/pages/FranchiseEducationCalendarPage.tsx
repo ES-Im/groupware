@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
 import { Input } from '@/shared/ui/input'
 import { cn } from '@/shared/lib/utils'
 import { useFranchiseEducationCalendarQuery } from '../api/useFranchiseEducationCalendarQuery'
+import { FranchiseEducationCreateDialog } from '../components/FranchiseEducationCreateDialog'
 import { FranchisePageHeader } from '../components/FranchisePageHeader'
 import { FranchiseStatusPill } from '../components/FranchiseStatusPill'
 import type { FranchiseEducationCalendarItem } from '../model/franchise'
@@ -52,7 +53,8 @@ const STATUS_OPTIONS: EducationStatusFilter[] = ['접수중', '정원 마감', '
  * 목록 엔드포인트가 없다)다. 월 선택(기본 당월)으로 조회 범위를 바꾸고, 상태·검색은 배열에 대한
  * 클라이언트 필터로 처리한다(서버 필터 파라미터 부재). 상태 컬럼은 보유 필드에서 파생하며, 목업의
  * 유형·신청/정원 컬럼은 계약에 데이터가 없어 제거했다(정책 A). 행 클릭 → P5 상세, `[교육 등록]` →
- * 전용 페이지(/franchise-educations/new).
+ * 등록 모달(FranchiseEducationCreateDialog) — 사용자 요청으로 전용 페이지(/franchise-educations/new)
+ * 대신 모달로 띄운다. 모달은 "등록 시 비활성 상태로 생성됨"을 안내하고, 등록 성공 시 상세로 이동한다.
  */
 export function FranchiseEducationCalendarPage() {
   const navigate = useNavigate()
@@ -60,6 +62,8 @@ export function FranchiseEducationCalendarPage() {
   const [month, setMonth] = useState(() => dayjs().format('YYYY-MM'))
   const [statusFilter, setStatusFilter] = useState<EducationStatusFilter>('all')
   const [keyword, setKeyword] = useState('')
+  // 교육 등록 모달 열림 상태. [교육 등록] 버튼으로 열고, 등록 성공/취소 시 닫는다.
+  const [createOpen, setCreateOpen] = useState(false)
 
   // 월 선택으로 캘린더 조회 범위를 만든다(start 포함·end 미포함, yyyy-MM-dd'T'HH:mm:ss). 월 입력이
   // 비면 범위를 생략해 서버 당월 기본값에 위임한다.
@@ -101,10 +105,21 @@ export function FranchiseEducationCalendarPage() {
         title="가맹점 교육"
         description="가맹점 대상 교육을 등록하고 신청 현황을 관리합니다."
       >
-        <Button type="button" onClick={() => navigate('/franchise-educations/new')}>
+        <Button type="button" onClick={() => setCreateOpen(true)}>
           교육 등록
         </Button>
       </FranchisePageHeader>
+
+      {/* 교육 등록 모달: 등록 성공 시 모달을 닫고 생성된 교육 상세로 이동한다(mutation이 캘린더
+          캐시를 invalidate하므로 목록도 갱신된다). */}
+      <FranchiseEducationCreateDialog
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+        onCreated={(educationId) => {
+          setCreateOpen(false)
+          navigate(`/franchise-educations/${educationId}`)
+        }}
+      />
 
       <Card className="lg:flex-1">
         <CardHeader className="border-b">

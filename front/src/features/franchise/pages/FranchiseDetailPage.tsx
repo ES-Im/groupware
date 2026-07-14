@@ -61,7 +61,7 @@ export function FranchiseDetailPage() {
   if (franchiseId === undefined) {
     return (
       <div className="w-full p-4 sm:p-6 lg:p-8">
-        <h1 className="mb-2 text-xl font-semibold tracking-tight">가맹점 상세</h1>
+        <h1 className="mb-2 text-2xl font-bold tracking-tight text-foreground">가맹점 상세</h1>
         <p className="text-sm text-muted-foreground">잘못된 가맹점 식별자입니다.</p>
       </div>
     )
@@ -79,7 +79,7 @@ export function FranchiseDetailPage() {
     if (isNotFound(normalizeApiError(query.error))) {
       return (
         <div className="w-full p-4 sm:p-6 lg:p-8">
-          <h1 className="mb-2 text-xl font-semibold tracking-tight">가맹점 상세</h1>
+          <h1 className="mb-2 text-2xl font-bold tracking-tight text-foreground">가맹점 상세</h1>
           <p className="text-sm text-muted-foreground">가맹점을 찾을 수 없습니다.</p>
         </div>
       )
@@ -87,7 +87,7 @@ export function FranchiseDetailPage() {
     // not-found가 아닌 실패는 위 useEffect가 토스트로 알렸으므로 화면은 안내 문구만 표시한다.
     return (
       <div className="w-full p-4 sm:p-6 lg:p-8">
-        <h1 className="mb-2 text-xl font-semibold tracking-tight">가맹점 상세</h1>
+        <h1 className="mb-2 text-2xl font-bold tracking-tight text-foreground">가맹점 상세</h1>
         <p className="text-sm text-muted-foreground">가맹점 정보를 불러오지 못했습니다.</p>
       </div>
     )
@@ -113,6 +113,15 @@ export function FranchiseDetailPage() {
   return (
     <div className="flex w-full flex-col gap-6 p-4 sm:p-6 lg:p-8 lg:min-h-full">
       <FranchiseBackLink to="/franchises">가맹점 목록</FranchiseBackLink>
+
+      {/* 메인 레이아웃 타이틀 표준(기준: MeetingReservationManagementPage). 가맹점명은 아래 hero
+          카드(FranchiseDetailHero)가 그대로 표시하고, 이 타이틀은 페이지 레벨 라벨로 둔다. */}
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">가맹점 상세</h1>
+        <p className="mt-1.5 text-sm text-muted-foreground">
+          가맹점 기본정보와 매출 현황을 확인합니다
+        </p>
+      </div>
 
       {/* 헤더 hero: store 아이콘 타일 + 이름 + 상태 pill + meta + 우측 액션(상태변경/정보수정/담당자변경). */}
       <Card>
@@ -179,7 +188,10 @@ export function FranchiseDetailPage() {
         </Card>
       </div>
 
-      {/* 담당자 메모 카드. */}
+      {/* 담당자 메모 카드. 상세 응답의 memo(특이사항, FRANCHISE_DETAIL/response-fields.adoc 실측)를
+          본문으로 표시하고, 그 아래 수정/삭제 액션을 둔다. 이전에는 액션 버튼만 렌더해 실제 메모
+          내용이 화면에 조회되지 않던 문제를 수정한다(사용자 요청). 메모가 비어 있으면 점선 empty
+          state로 안내한다(다른 도메인 빈 상태 컨벤션과 동일). */}
       <Card className="lg:flex-1">
         <CardHeader className="border-b">
           <CardTitle className="flex items-center gap-2">
@@ -187,7 +199,14 @@ export function FranchiseDetailPage() {
             담당자 메모
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
+          {franchise.memo ? (
+            <p className="text-sm leading-7 whitespace-pre-wrap text-foreground">{franchise.memo}</p>
+          ) : (
+            <p className="rounded-lg border border-dashed px-3 py-6 text-center text-sm text-muted-foreground">
+              등록된 메모가 없습니다.
+            </p>
+          )}
           <FranchiseMemoActions franchiseId={franchise.id} currentMemo={franchise.memo} />
         </CardContent>
       </Card>

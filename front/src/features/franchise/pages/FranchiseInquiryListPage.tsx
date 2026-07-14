@@ -420,18 +420,21 @@ export function FranchiseInquiryListPage() {
             </Button>
           </div>
 
-          {inquiriesQuery.isLoading ? (
-            <p className="py-8 text-center text-sm text-muted-foreground">불러오는 중...</p>
-          ) : inquiriesQuery.error ? (
-            <p className="py-8 text-center text-sm text-muted-foreground">
-              문의 목록을 불러오지 못했습니다.
-            </p>
-          ) : rows.length === 0 ? (
-            <p className="py-8 text-center text-sm text-muted-foreground">
-              조회 조건에 해당하는 문의가 없습니다.
-            </p>
-          ) : (
-            <div className="w-full overflow-x-auto">
+          <div className="flex min-h-[56rem] flex-col">
+            {inquiriesQuery.isLoading ? (
+              <p className="flex flex-1 items-center justify-center text-center text-sm text-muted-foreground">
+                불러오는 중...
+              </p>
+            ) : inquiriesQuery.error ? (
+              <p className="flex flex-1 items-center justify-center text-center text-sm text-muted-foreground">
+                문의 목록을 불러오지 못했습니다.
+              </p>
+            ) : rows.length === 0 ? (
+              <p className="flex flex-1 items-center justify-center text-center text-sm text-muted-foreground">
+                조회 조건에 해당하는 문의가 없습니다.
+              </p>
+            ) : (
+              <div className="w-full overflow-x-auto">
               <table className="w-full border-collapse text-sm">
                 <thead>
                   {table.getHeaderGroups().map((headerGroup) => (
@@ -478,6 +481,7 @@ export function FranchiseInquiryListPage() {
               </table>
             </div>
           )}
+          </div>
 
           <PaginationControls
             className="border-t pt-4"

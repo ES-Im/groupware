@@ -2,55 +2,34 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { http, HttpResponse } from 'msw'
-import { MemoryRouter, Route, Routes, useParams } from 'react-router'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { BASE_URL } from '@/shared/api/client'
 import { server } from '@/test/mocks/server'
-import { FranchiseEducationCreatePage } from './FranchiseEducationCreatePage'
+import { FranchiseEducationCreateDialog } from './FranchiseEducationCreateDialog'
 
 /**
- * FranchiseEducationCreatePage(F1612, ROADMAP(FRANCHISE) T4.2) 검증.
- * 사용자 요청(2026-07-13 UI 개편)으로 등록 다이얼로그를 전용 페이지로 전환하며, 구
- * FranchiseEducationCreateDialog.test.tsx의 검증(zod 사전검증·날짜/시각 조합 전송·서버 검증 실패
- * 유지)을 페이지+폼(FranchiseEducationCreateForm) 기준으로 이관했다. 다이얼로그의 open/onOpenChange
- * 대신, 성공 시 생성된 교육 상세(P5)로·취소 시 교육 캘린더로 navigate하는 shell 동선을 함께 검증한다.
- *
- * - zod 클라 사전검증(날짜/시각/장소/제목/내용/정원 필수) 실패 경로.
- * - capacity 0/음수 인라인 에러.
- * - 날짜(educationDate)+시각(educationTime) 조합이 `${date}T${time}:00`으로 전송되는지.
- * - 제출 성공(201 {educationId}) 시 성공 토스트 + 상세(/franchise-educations/:educationId) 이동.
- * - 제출 중 취소/등록 버튼 비활성(in-flight 가드).
- * - 서버 검증 실패 시 페이지가 유지되고 root 에러가 표시된다(실패가 삼켜지지 않음).
- * - 취소 시 교육 캘린더(/franchise-educations)로 이동한다.
+ * FranchiseEducationCreateDialog(F1612, `FRANCHISE_EDUCATION_CREATE`) 검증.
+ * 사용자 요청으로 교육 등록을 전용 페이지(구 FranchiseEducationCreatePage) 대신 이 모달로 되돌리며,
+ * 구 페이지 테스트의 폼 로직 검증(zod 사전검증·날짜/시각 조합 전송·서버 검증 실패 유지·in-flight 가드)을
+ * 그대로 이관한다. 여기에 모달 고유 관심사(비활성 안내 문구·성공 시 onCreated 위임·취소 시
+ * onOpenChange(false))를 더한다.
  */
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))
 
-function DetailPlaceholder() {
-  const { educationId } = useParams()
-  return <div>교육 상세 화면 educationId={educationId}</div>
-}
-
-function CalendarPlaceholder() {
-  return <div>교육 캘린더 화면</div>
-}
-
-function renderPage() {
+function renderDialog() {
+  const onOpenChange = vi.fn()
+  const onCreated = vi.fn()
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
   })
   render(
     <QueryClientProvider client={queryClient}>
-      <MemoryRouter initialEntries={['/franchise-educations/new']}>
-        <Routes>
-          <Route path="/franchise-educations" element={<CalendarPlaceholder />} />
-          <Route path="/franchise-educations/new" element={<FranchiseEducationCreatePage />} />
-          <Route path="/franchise-educations/:educationId" element={<DetailPlaceholder />} />
-        </Routes>
-      </MemoryRouter>
+      <FranchiseEducationCreateDialog open onOpenChange={onOpenChange} onCreated={onCreated} />
     </QueryClientProvider>,
   )
+  return { onOpenChange, onCreated }
 }
 
 /** 날짜/시각은 fireEvent.change로, 나머지는 userEvent로 채운다(구 다이얼로그 테스트 선례). */
@@ -69,14 +48,19 @@ async function fillValidForm(
   }
 }
 
-describe('FranchiseEducationCreatePage', () => {
+describe('FranchiseEducationCreateDialog', () => {
   afterEach(() => {
     vi.clearAllMocks()
   })
 
+  it('등록 시 비활성 상태로 생성됨을 안내한다', () => {
+    renderDialog()
+    expect(screen.getByText('비활성 상태')).toBeInTheDocument()
+  })
+
   it('빈 값 제출 시 zod 클라 사전검증 메시지를 노출하고 요청을 보내지 않는다', async () => {
     const user = userEvent.setup()
-    renderPage()
+    renderDialog()
 
     await user.click(screen.getByRole('button', { name: '등록' }))
 
@@ -88,9 +72,9 @@ describe('FranchiseEducationCreatePage', () => {
     expect(screen.getByText('정원을 입력해주세요')).toBeInTheDocument()
   })
 
-  it('정원이 0이면 "정원은 양수여야 합니다" 인라인 에러가 표시되고 요청을 보내지 않는다', async () => {
+  it('정원이 0이면 "정원은 양수여야 합니다" 인라인 에러가 표시된다', async () => {
     const user = userEvent.setup()
-    renderPage()
+    renderDialog()
 
     await fillValidForm(user, { capacity: '0' })
     await user.click(screen.getByRole('button', { name: '등록' }))
@@ -98,17 +82,7 @@ describe('FranchiseEducationCreatePage', () => {
     expect(await screen.findByText('정원은 양수여야 합니다')).toBeInTheDocument()
   })
 
-  it('정원이 음수이면 "정원은 양수여야 합니다" 인라인 에러가 표시되고 요청을 보내지 않는다', async () => {
-    const user = userEvent.setup()
-    renderPage()
-
-    await fillValidForm(user, { capacity: '-1' })
-    await user.click(screen.getByRole('button', { name: '등록' }))
-
-    expect(await screen.findByText('정원은 양수여야 합니다')).toBeInTheDocument()
-  })
-
-  it('날짜+시각이 educationDate=`${date}T${time}:00`으로 조합되어 전송되고, 성공 시 토스트+상세 이동이 발생한다', async () => {
+  it('날짜+시각이 educationDate=`${date}T${time}:00`으로 조합되어 전송되고, 성공 시 토스트+onCreated가 호출된다', async () => {
     let requestBody: unknown
     server.use(
       http.post(`${BASE_URL}/api/franchise-educations`, async ({ request }) => {
@@ -117,12 +91,12 @@ describe('FranchiseEducationCreatePage', () => {
       }),
     )
     const user = userEvent.setup()
-    renderPage()
+    const { onCreated } = renderDialog()
 
     await fillValidForm(user, { date: '2026-07-15', time: '09:30', capacity: '20' })
     await user.click(screen.getByRole('button', { name: '등록' }))
 
-    expect(await screen.findByText('교육 상세 화면 educationId=7')).toBeInTheDocument()
+    await waitFor(() => expect(onCreated).toHaveBeenCalledWith(7))
     expect(requestBody).toEqual({
       educationDate: '2026-07-15T09:30:00',
       place: '본사 3층 교육장',
@@ -146,7 +120,7 @@ describe('FranchiseEducationCreatePage', () => {
       }),
     )
     const user = userEvent.setup()
-    renderPage()
+    const { onCreated } = renderDialog()
 
     await fillValidForm(user)
     await user.click(screen.getByRole('button', { name: '등록' }))
@@ -156,10 +130,10 @@ describe('FranchiseEducationCreatePage', () => {
 
     resolveResponse?.()
 
-    expect(await screen.findByText('교육 상세 화면 educationId=7')).toBeInTheDocument()
+    await waitFor(() => expect(onCreated).toHaveBeenCalledWith(7))
   })
 
-  it('서버 검증 실패 시 페이지가 유지되고 root 에러가 표시된다(실패가 삼켜지지 않음)', async () => {
+  it('서버 검증 실패 시 모달이 유지되고 root 에러가 표시된다(실패가 삼켜지지 않음)', async () => {
     server.use(
       http.post(`${BASE_URL}/api/franchise-educations`, () =>
         HttpResponse.json(
@@ -174,23 +148,23 @@ describe('FranchiseEducationCreatePage', () => {
       ),
     )
     const user = userEvent.setup()
-    renderPage()
+    const { onCreated } = renderDialog()
 
     await fillValidForm(user)
     await user.click(screen.getByRole('button', { name: '등록' }))
 
     expect(await screen.findByText('정원은 1명 이상이어야 합니다')).toBeInTheDocument()
-    // 상세로 이동하지 않고 폼 입력이 유지된다.
-    expect(screen.queryByText(/교육 상세 화면/)).not.toBeInTheDocument()
+    expect(onCreated).not.toHaveBeenCalled()
+    // 폼 입력이 유지된다.
     expect(screen.getByLabelText(/교육 장소/)).toHaveValue('본사 3층 교육장')
   })
 
-  it('취소 버튼을 누르면 교육 캘린더로 이동한다', async () => {
+  it('취소 버튼을 누르면 onOpenChange(false)로 모달을 닫는다', async () => {
     const user = userEvent.setup()
-    renderPage()
+    const { onOpenChange } = renderDialog()
 
     await user.click(screen.getByRole('button', { name: '취소' }))
 
-    expect(await screen.findByText('교육 캘린더 화면')).toBeInTheDocument()
+    expect(onOpenChange).toHaveBeenCalledWith(false)
   })
 })

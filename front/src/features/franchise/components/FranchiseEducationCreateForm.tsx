@@ -20,8 +20,8 @@ interface FranchiseEducationCreateFormProps {
 /**
  * 교육 등록 폼(`FRANCHISE_EDUCATION_CREATE`, F1612, ROADMAP(FRANCHISE) T4.2).
  *
- * 기존 FranchiseEducationCreateDialog의 폼 로직을 그대로 옮겨 전용 페이지(FranchiseEducationCreatePage)에서
- * 재사용한다(BoardCreateForm 분리 패턴 동형 — 페이지 chrome과 폼 본문을 분리). useZodForm/submitWithErrorMapping
+ * 폼 본문만 담은 재사용 컴포넌트다. 현재 소비처는 교육 목록의 등록 모달(FranchiseEducationCreateDialog)이며
+ * (다이얼로그 chrome·비활성 안내는 그쪽이 담당), 폼은 본문/검증/제출만 소유한다. useZodForm/submitWithErrorMapping
  * 표준 폼 패턴이며, educationDate(날짜)+educationTime(시각) 두 필드로 입력받아 제출 시
  * `${date}T${time}:00`(yyyy-MM-dd'T'HH:mm:ss)로 조합해 전송한다(HTML time input이 초 단위를 반환하지 않아
  * `:00` 고정 보정). 성공(201 {educationId}) 시 mutation이 교육 캘린더 캐시를 invalidate하고, 이 컴포넌트는

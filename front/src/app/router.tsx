@@ -46,7 +46,6 @@ import { MeetingRoomManagementDetailPage } from '@/features/meeting/pages/Meetin
 import { FranchiseListPage } from '@/features/franchise/pages/FranchiseListPage'
 import { FranchiseDetailPage } from '@/features/franchise/pages/FranchiseDetailPage'
 import { FranchiseEducationCalendarPage } from '@/features/franchise/pages/FranchiseEducationCalendarPage'
-import { FranchiseEducationCreatePage } from '@/features/franchise/pages/FranchiseEducationCreatePage'
 import { FranchiseEducationDetailPage } from '@/features/franchise/pages/FranchiseEducationDetailPage'
 import { FranchiseInquiryListPage } from '@/features/franchise/pages/FranchiseInquiryListPage'
 import { FranchiseInquiryDetailPage } from '@/features/franchise/pages/FranchiseInquiryDetailPage'
@@ -505,18 +504,11 @@ export const router = createBrowserRouter([
         element: <FranchiseEducationCalendarPage />,
       },
       {
-        // 가맹점 교육 등록 페이지(F1612): 사용자 요청(2026-07-13 UI 개편)으로 등록 다이얼로그를
-        // 전용 페이지로 전환하며 추가했다. 아래 'franchise-educations/:educationId'(2세그먼트,
-        // 동적)와 세그먼트 깊이가 같으므로 정적 'new'를 동적 페어보다 앞에 등록해 랭킹 모호성을
-        // 피한다(기존 도메인 컨벤션 동형). 캘린더 페이지 [교육 등록] 버튼의 이동 목적지다.
-        path: 'franchise-educations/new',
-        element: <FranchiseEducationCreatePage />,
-      },
-      {
         // 가맹점 교육 상세 페이지(P5): ROADMAP(FRANCHISE) T1.2에서
         // FranchiseEducationDetailPage(F1610·F1611·F1613~F1616)로 연결했다. 위
-        // 'franchise-educations'(1세그먼트, 정적)·'franchise-educations/new'(2세그먼트, 정적)보다
-        // 뒤에 등록해 랭킹 충돌을 피한다. 캘린더 이벤트 클릭·교육 등록 성공 직후의 이동 목적지다.
+        // 'franchise-educations'(1세그먼트, 정적)보다 뒤에 등록해 랭킹 충돌을 피한다. 캘린더 이벤트
+        // 클릭·교육 등록 성공 직후의 이동 목적지다. (교육 등록은 사용자 요청으로 전용 페이지 대신
+        // 캘린더 페이지의 모달(FranchiseEducationCreateDialog)로 전환해 'new' 라우트는 제거했다.)
         path: 'franchise-educations/:educationId',
         element: <FranchiseEducationDetailPage />,
       },

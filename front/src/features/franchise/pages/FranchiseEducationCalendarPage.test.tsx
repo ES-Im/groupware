@@ -19,7 +19,8 @@ import { FranchiseEducationCalendarPage } from './FranchiseEducationCalendarPage
  * 검증 대상:
  * - 조회 데이터가 테이블 행(교육명·교육일·장소·상태 pill)으로 렌더된다.
  * - 파생 상태: 활성+여석 → 접수중, 비활성 → 비활성, 정원 마감 → 정원 마감.
- * - 행 클릭 시 /franchise-educations/:educationId, [교육 등록] → /franchise-educations/new.
+ * - 행 클릭 시 /franchise-educations/:educationId, [교육 등록] → 등록 모달 열림(사용자 요청으로
+ *   전용 페이지 이동 대신 모달로 전환, 비활성 안내 포함).
  * - 조회 실패 시 handleApiError 토스트.
  */
 vi.mock('sonner', () => ({
@@ -130,15 +131,25 @@ describe('FranchiseEducationCalendarPage - 라우팅', () => {
     await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith('/franchise-educations/5'))
   })
 
-  it('[교육 등록] 버튼 클릭 시 /franchise-educations/new로 이동한다', async () => {
+  it('[교육 등록] 버튼 클릭 시 페이지 이동 없이 등록 모달이 열리고 비활성 안내가 표시된다', async () => {
     mockCalendar([])
     const user = userEvent.setup()
 
     renderPage()
+    // mockNavigate는 모듈 레벨 공유라 앞선 테스트 호출이 누적된다 — 모달 오픈이 이동을 일으키지
+    // 않음을 정확히 검증하기 위해 클릭 직전에 초기화한다.
+    mockNavigate.mockClear()
 
     await user.click(screen.getByRole('button', { name: '교육 등록' }))
 
-    expect(mockNavigate).toHaveBeenCalledWith('/franchise-educations/new')
+    // 전용 페이지로 이동하지 않고 모달을 띄운다(사용자 요청).
+    const dialog = await screen.findByRole('dialog')
+    expect(within(dialog).getByRole('heading', { name: '교육 등록' })).toBeInTheDocument()
+    // 등록 시 비활성 상태로 생성됨을 안내한다(도메인 규칙: 교육은 생성 시 비활성 상태로 생성된다).
+    expect(within(dialog).getByText('비활성 상태')).toBeInTheDocument()
+    // 등록 폼 필드가 함께 렌더된다.
+    expect(within(dialog).getByLabelText(/교육 제목/)).toBeInTheDocument()
+    expect(mockNavigate).not.toHaveBeenCalled()
   })
 })
 
