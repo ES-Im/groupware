@@ -4,8 +4,7 @@ import { ArrowRight, CalendarDays } from 'lucide-react'
 import { buildCalendarRangeParams } from '@/features/meeting/lib/calendarRange'
 import { useScheduleCalendarQuery } from '@/features/schedule/api/useScheduleCalendarQuery'
 import { Badge } from '@/shared/ui/badge'
-import { Button } from '@/shared/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/shared/ui/card'
 
 const SCHEDULE_TYPE_LABEL: Record<string, string> = {
   MANUAL: '일정',
@@ -38,27 +37,23 @@ export function MyScheduleWidget() {
     .sort((a, b) => a.startAt.localeCompare(b.startAt))
 
   return (
-    <Card>
-      <CardHeader className="flex items-start justify-between gap-3">
-        <div className="flex min-w-0 items-start gap-3">
-          <span className="grid size-9 shrink-0 place-items-center rounded-full bg-muted text-foreground [&_svg]:size-4">
-            <CalendarDays />
-          </span>
-          <div className="min-w-0">
-            <CardTitle className="truncate">오늘 일정</CardTitle>
-            <p className="mt-1 truncate text-sm text-muted-foreground">{dayjs().format('M월 D일 (ddd)')}</p>
-          </div>
+    // 고정 높이(h-[420px]) + Card 기본 flex-col: header 고정 · content flex-1 스크롤 · footer 바닥 고정.
+    <Card className="h-[420px]">
+      <CardHeader className="flex shrink-0 items-start gap-3">
+        <span className="grid size-9 shrink-0 place-items-center rounded-full bg-muted text-foreground [&_svg]:size-4">
+          <CalendarDays />
+        </span>
+        <div className="min-w-0">
+          <CardTitle className="truncate">오늘 일정</CardTitle>
+          <p className="mt-1 truncate text-sm text-muted-foreground">{dayjs().format('M월 D일 (ddd)')}</p>
         </div>
-        <Button asChild variant="ghost" size="sm" className="shrink-0">
-          <Link to="/schedules">
-            전체 보기
-            <ArrowRight />
-          </Link>
-        </Button>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex min-h-0 flex-1 flex-col overflow-y-auto">
         {todayItems.length === 0 ? (
-          <p className="py-10 text-center text-sm text-muted-foreground">오늘 일정이 없습니다.</p>
+          // flex-1: 내용이 없을 때 남는 공간을 채워 안내를 세로 중앙에 둔다.
+          <p className="flex flex-1 items-center justify-center py-10 text-center text-sm text-muted-foreground">
+            오늘 일정이 없습니다.
+          </p>
         ) : (
           <div className="flex flex-col">
             {todayItems.map((item) => (
@@ -90,6 +85,16 @@ export function MyScheduleWidget() {
           </div>
         )}
       </CardContent>
+      {/* "더 보기" 링크는 세 카드 공통으로 하단 footer에 고정한다(내용량과 무관하게 바닥 정렬). */}
+      <CardFooter className="justify-end">
+        <Link
+          to="/schedules"
+          className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+        >
+          전체 보기
+          <ArrowRight className="size-3.5" />
+        </Link>
+      </CardFooter>
     </Card>
   )
 }

@@ -8,7 +8,6 @@ import { FranchiseInquiryPreviewWidget } from '../components/FranchiseInquiryPre
 import { FranchiseManagedSliceWidget } from '../components/FranchiseManagedSliceWidget'
 import { FranchiseSalesComparisonWidget } from '../components/FranchiseSalesComparisonWidget'
 import { MeetingRoomStatusWidget } from '../components/MeetingRoomStatusWidget'
-import { MyLeaveSummaryWidget } from '../components/MyLeaveSummaryWidget'
 import { MyScheduleWidget } from '../components/MyScheduleWidget'
 import { NewEmployeeApprovalPreviewWidget } from '../components/NewEmployeeApprovalPreviewWidget'
 import { RoleBandHeader } from '../components/RoleBandHeader'
@@ -20,7 +19,7 @@ import { WelcomeAttendanceCard } from '../components/WelcomeAttendanceCard'
  *
  * 사용자가 첨부한 레퍼런스(dashboard-roles.html, "A안 · 권한별 대시보드")를 승인된 계획
  * (mighty-frolicking-squirrel)에 따라 이식했다 — 전 직원 공통 섹션(환영+출퇴근 · KPI 4종 ·
- * 전자결재 2탭 · 오늘 일정 · 최근 쪽지 · 내 휴가 요약)에 로그인 사용자의 업무 권한(Layer 2:
+ * 전자결재 현황 · 안읽은 쪽지함 · 오늘 일정 3카드)에 로그인 사용자의 업무 권한(Layer 2:
  * HR/FACILITY/FRANCHISE)에 따라 노출되는 3개 역할 밴드를 이어 붙인다. roles는 authStore
  * (WelcomeAttendanceCard와 동일 소스)에서, 게이팅은 라우트 가드와 동일한
  * hasRequiredRole(roles, minRole)로 판정한다(신규 유틸 없음, ADMIN은 계층상 전 역할 자동 포함).
@@ -45,14 +44,14 @@ export function HomePage() {
 
       <DashboardKpiRow />
 
-      <div className="grid gap-4 xl:grid-cols-[1.55fr_1fr]">
+      {/* 전자결재 현황(A)·안읽은 쪽지함(B)·오늘 일정(C)을 동일 너비 3등분 한 줄로 배치한다
+          (2026-07-14 확정) — 기본 1열(모바일 세로 스택) → xl에서 3열. 세 카드는 각자 동일한
+          고정 높이(h-[420px])를 가져 내용량과 무관하게 높이가 일치한다. 이전의 A+C·B+휴가요약
+          2줄 구성과 MyLeaveSummaryWidget(내 휴가 요약)은 사용자 확정으로 제거했다. */}
+      <div className="grid gap-4 xl:grid-cols-3">
         <ApprovalStatusWidget />
-        <MyScheduleWidget />
-      </div>
-
-      <div className="grid gap-4 lg:grid-cols-2">
         <UnreadMessagesWidget />
-        <MyLeaveSummaryWidget />
+        <MyScheduleWidget />
       </div>
 
       {isHr && (

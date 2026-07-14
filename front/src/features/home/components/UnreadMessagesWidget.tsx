@@ -2,8 +2,7 @@ import dayjs from 'dayjs'
 import { Link } from 'react-router'
 import { ArrowRight, Mail, MailOpen } from 'lucide-react'
 import { useMessagesQuery } from '@/features/message/api/useMessagesQuery'
-import { Button } from '@/shared/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/shared/ui/card'
 
 const WIDGET_ITEM_LIMIT = 3
 
@@ -21,27 +20,21 @@ export function UnreadMessagesWidget() {
   const items = data?.content ?? []
 
   return (
-    <Card>
-      <CardHeader className="flex items-start justify-between gap-3">
-        <div className="flex items-start gap-3">
-          <span className="grid size-9 shrink-0 place-items-center rounded-full bg-muted text-foreground [&_svg]:size-4">
-            <Mail />
-          </span>
-          <div>
-            <CardTitle>안읽은 쪽지함</CardTitle>
-            <p className="mt-1 text-sm text-muted-foreground">미확인 쪽지</p>
-          </div>
+    // 고정 높이(h-[420px]) + Card 기본 flex-col: header 고정 · content flex-1 스크롤 · footer 바닥 고정.
+    <Card className="h-[420px]">
+      <CardHeader className="flex shrink-0 items-start gap-3">
+        <span className="grid size-9 shrink-0 place-items-center rounded-full bg-muted text-foreground [&_svg]:size-4">
+          <Mail />
+        </span>
+        <div>
+          <CardTitle>안읽은 쪽지함</CardTitle>
+          <p className="mt-1 text-sm text-muted-foreground">미확인 쪽지</p>
         </div>
-        <Button asChild variant="ghost" size="sm" className="shrink-0">
-          <Link to="/messages">
-            쪽지함 보기
-            <ArrowRight />
-          </Link>
-        </Button>
       </CardHeader>
-      <CardContent className="flex flex-col gap-3">
+      <CardContent className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto">
         {items.length === 0 ? (
-          <div className="flex flex-col items-center justify-center gap-2 py-10 text-center">
+          // flex-1: 내용이 없을 때 남는 공간을 채워 안내를 세로 중앙에 둔다.
+          <div className="flex flex-1 flex-col items-center justify-center gap-2 py-10 text-center">
             <span className="grid size-10 place-items-center rounded-full bg-muted text-muted-foreground [&_svg]:size-5">
               <MailOpen />
             </span>
@@ -72,6 +65,16 @@ export function UnreadMessagesWidget() {
           ))
         )}
       </CardContent>
+      {/* "더 보기" 링크는 세 카드 공통으로 하단 footer에 고정한다(내용량과 무관하게 바닥 정렬). */}
+      <CardFooter className="justify-end">
+        <Link
+          to="/messages"
+          className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+        >
+          쪽지함 보기
+          <ArrowRight className="size-3.5" />
+        </Link>
+      </CardFooter>
     </Card>
   )
 }

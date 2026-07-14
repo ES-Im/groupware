@@ -3,6 +3,7 @@ import type { FormEvent } from 'react'
 import { Bell, ChevronDown, LogOut, MessagesSquare, Moon, Search, Sun, UserRound } from 'lucide-react'
 import { Link } from 'react-router'
 import { HeaderAttendanceQuickPanel } from '@/features/attendance/components/HeaderAttendanceQuickPanel'
+import { useChatRoomsQuery } from '@/features/chat/api/useChatRoomsQuery'
 import { useChatOverlayStore } from '@/features/chat/lib/chatOverlayStore'
 import { useEmployeeSearchOverlayStore } from '@/features/employee/lib/employeeSearchOverlayStore'
 import { HeaderUnreadMessagesPanel } from '@/features/message/components/HeaderUnreadMessagesPanel'
@@ -60,7 +61,7 @@ interface HeaderProps {
   /** 데스크톱에서 사원 이름 클릭 시 좌측 프로필 패널을 여닫는 토글 핸들러(상위 소유). */
   onToggleProfileRail: () => void
   /** 로그인 사용자(RETRIEVE_ME_INFO 응답). 미로딩 시 사용자 클러스터를 렌더하지 않는다. */
-  me: { empBasicInfo: { name: string } } | undefined
+  me: { empBasicInfo: { empId: number; name: string } } | undefined
   /** 활성 PROFILE_PICTURE fileId(상위에서 도출). */
   profilePictureFileId?: number
   onLogout: () => void
@@ -95,6 +96,13 @@ export function Header({
   const [employeeSearchInput, setEmployeeSearchInput] = useState('')
   const mailboxCountsQuery = useMailboxCountsQuery()
   const unreadCount = mailboxCountsQuery.data?.unreadReceivedCount ?? 0
+  // 안읽은 채팅 존재 여부(S4 배지): 채팅방 목록(useChatRoomsQuery, 캐시 공유)에서 unreadMessageCount가
+  // 1건이라도 있는지만 본다(건수는 표시하지 않음 — 요구사항). 채팅을 읽으면 useUpdateReadPositionMutation이
+  // rooms 쿼리를 invalidate하므로 이 배지도 자동으로 사라진다.
+  const chatRoomsQuery = useChatRoomsQuery()
+  const hasUnreadChat = (chatRoomsQuery.data ?? []).some(
+    (room) => (room.unreadMessageCount ?? 0) > 0,
+  )
 
   /** 사원 찾기(F1xx): Enter 제출 또는 검색 아이콘 클릭 시 오버레이를 연다(빈 검색어는 무시). */
   function handleSubmitEmployeeSearch(event: FormEvent<HTMLFormElement>) {
@@ -155,14 +163,22 @@ export function Header({
       </DropdownMenu>
       {/* 채팅 버튼(S4): 클릭 시 채팅 오버레이 패널을 토글한다(재클릭하면 닫힘). 순수 UI
           내비게이션 상태(chatOverlayStore)라 상위(LayoutShell)에서 props로 주입하지 않고
-          Header가 훅으로 직접 구독한다. */}
+          Header가 훅으로 직접 구독한다. 안읽은 채팅이 있으면 알림 벨과 동일한 빨간 배지(bg-destructive)를
+          아이콘 우상단에 겹쳐 표시하되, 건수 대신 'New'만 노출한다(요구사항). 폭이 좁아 'New'가 길게
+          느껴지는 뷰포트(< lg)에서는 'N'으로 축약해 동그라미 형태를 유지한다. */}
       <button
         type="button"
         onClick={toggleChatOverlay}
-        aria-label="채팅"
-        className={chromeIconButtonClass}
+        aria-label={hasUnreadChat ? '채팅 (읽지 않은 메시지 있음)' : '채팅'}
+        className={cn(chromeIconButtonClass, 'relative')}
       >
         <MessagesSquare className="size-4 lg:size-5" aria-hidden="true" />
+        {hasUnreadChat && (
+          <span className="absolute top-0.5 right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] leading-none font-medium text-destructive-foreground">
+            <span className="lg:hidden">N</span>
+            <span className="hidden lg:inline">New</span>
+          </span>
+        )}
       </button>
       {/* 다크모드 on/off 토글: 참고 스크린샷의 태양 아이콘 위치(알림/채팅 옆) 재현. */}
       <button
@@ -191,13 +207,11 @@ export function Header({
               >
                 {/*
                   프로필 아바타(F101, ROADMAP T5.3): T5.1의 BlobAvatar 공유 프리미티브를 연결한다.
-                  본인 case는 RETRIEVE_ME_INFO/RETRIEVE_FILES_INFOS 응답 어디에도 numeric empId가
-                  없다(empBasicInfo.empNo는 문자열, §리스크7 실측 확정). EMP_FILE_PREVIEW는 경로에
-                  numeric {empId}를 요구하므로 현재는 이미지 로딩이 불가능해 이니셜 폴백에 머문다.
+                  RETRIEVE_ME_INFO 응답의 empBasicInfo.empId(numeric PK)와 활성 PROFILE_PICTURE
+                  fileId를 함께 넘겨 EMP_FILE_PREVIEW로 실제 프로필사진을 로드한다(없으면 이니셜 폴백).
                 */}
-                {/* todo: 본인 preview용 numeric empId 소스 확정(서버가 me 전용 preview 기능 제공 or me 응답에 empId 추가) 필요 */}
                 <BlobAvatar
-                  empId={undefined}
+                  empId={me.empBasicInfo.empId}
                   fileId={profilePictureFileId}
                   fallbackText={me.empBasicInfo.name}
                   className="bg-primary-foreground/15 text-primary-foreground dark:bg-card-foreground/15 dark:text-card-foreground"
@@ -249,9 +263,8 @@ export function Header({
               profileRailOpen && 'bg-primary-foreground/10 dark:bg-card-foreground/10',
             )}
           >
-            {/* todo: 본인 preview용 numeric empId 소스 확정(서버가 me 전용 preview 기능 제공 or me 응답에 empId 추가) 필요 */}
             <BlobAvatar
-              empId={undefined}
+              empId={me.empBasicInfo.empId}
               fileId={profilePictureFileId}
               fallbackText={me.empBasicInfo.name}
               className="bg-primary-foreground/15 text-primary-foreground lg:size-9 lg:text-sm dark:bg-card-foreground/15 dark:text-card-foreground"

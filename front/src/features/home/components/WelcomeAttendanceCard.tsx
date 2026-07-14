@@ -7,6 +7,8 @@ import { useCheckOutMutation } from '@/features/attendance/api/useCheckOutMutati
 import { useMyAttendanceMonthlyQuery } from '@/features/attendance/api/useMyAttendanceMonthlyQuery'
 import { deriveTodayAttendanceButtonState } from '@/features/attendance/lib/deriveTodayAttendanceButtonState'
 import { useMeQuery } from '@/features/employee/api/useMeQuery'
+import { BlobAvatar } from '@/shared/components/BlobAvatar'
+import { getActiveProfilePicture } from '@/shared/lib/activeFiles'
 import { Badge } from '@/shared/ui/badge'
 import { Button } from '@/shared/ui/button'
 import { Card, CardContent } from '@/shared/ui/card'
@@ -135,14 +137,20 @@ export function WelcomeAttendanceCard() {
   const checkOutMutation = useCheckOutMutation()
 
   const primaryDept = me?.currentDepts.find((dept) => dept.isPrimary) ?? me?.currentDepts[0]
+  // 프로필사진 미리보기(EMP_FILE_PREVIEW): me 응답의 activeFiles에서 활성 PROFILE_PICTURE fileId를
+  // 도출해 empBasicInfo.empId와 함께 BlobAvatar에 넘긴다(둘 다 있으면 인증 blob 이미지, 없으면 이니셜).
+  const profilePictureFileId = getActiveProfilePicture(me?.activeFiles ?? [])
 
   return (
     <Card className="overflow-hidden bg-gradient-to-br from-muted/50 to-card">
       <CardContent className="grid gap-6 lg:grid-cols-[1.4fr_1fr] lg:items-center">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-          <div className="grid size-16 shrink-0 place-items-center rounded-full bg-primary/10 text-2xl font-bold text-primary ring-4 ring-primary/5">
-            {me?.empBasicInfo.name.slice(0, 1) ?? ''}
-          </div>
+          <BlobAvatar
+            empId={me?.empBasicInfo.empId}
+            fileId={profilePictureFileId}
+            fallbackText={me?.empBasicInfo.name ?? ''}
+            className="size-16 bg-primary/10 text-2xl font-bold text-primary ring-4 ring-primary/5"
+          />
           <div className="min-w-0">
             <p className="text-xs font-semibold tracking-wide text-primary uppercase">
               Welcome Back

@@ -9,7 +9,7 @@ import {
   resolveApprovalStatus,
 } from '@/features/approval/lib/approvalStatusBadge'
 import { Badge } from '@/shared/ui/badge'
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/shared/ui/card'
 import { Tabs, TabsList, TabsTrigger } from '@/shared/ui/tabs'
 
 const WIDGET_ITEM_LIMIT = 3
@@ -21,7 +21,8 @@ type ApprovalTab = 'submitted' | 'pending'
 
 function EmptyState({ message }: { message: string }) {
   return (
-    <div className="flex flex-col items-center justify-center gap-2 py-10 text-center">
+    // flex-1: 카드 고정 높이에서 내용이 없을 때 남는 공간을 채워 안내를 세로 중앙에 둔다.
+    <div className="flex flex-1 flex-col items-center justify-center gap-2 py-10 text-center">
       <span className="grid size-10 place-items-center rounded-full bg-muted text-muted-foreground [&_svg]:size-5">
         <Inbox />
       </span>
@@ -59,8 +60,11 @@ export function ApprovalStatusWidget() {
   const moreLink = tab === 'submitted' ? '/approval/box/submitted' : '/approval/box/pending'
 
   return (
-    <Card>
-      <CardHeader className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
+    // 고정 높이(h-[420px]) + Card 기본 flex-col: header 고정 · content flex-1 스크롤 · footer 바닥 고정.
+    <Card className="h-[420px]">
+      {/* 3등분 카드 폭(~1/3)에서는 아이콘+제목과 탭을 가로로 나란히 둘 공간이 없어 항상 세로로 쌓는다
+          (뷰포트 기준 sm:flex-row는 카드 폭과 무관해 제목이 줄바꿈되던 문제를 제거). */}
+      <CardHeader className="flex shrink-0 flex-col items-start gap-3">
         <div className="flex items-start gap-3">
           <span className="grid size-9 shrink-0 place-items-center rounded-full bg-muted text-foreground [&_svg]:size-4">
             <ClipboardList />
@@ -87,7 +91,7 @@ export function ApprovalStatusWidget() {
           </TabsList>
         </Tabs>
       </CardHeader>
-      <CardContent className="flex flex-col gap-3">
+      <CardContent className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto">
         {activeItems.length === 0 ? (
           <EmptyState
             message={tab === 'submitted' ? '진행 중인 상신 문서가 없습니다.' : '결재 대기 중인 문서가 없습니다.'}
@@ -143,14 +147,17 @@ export function ApprovalStatusWidget() {
             </table>
           </div>
         )}
+      </CardContent>
+      {/* "더 보기" 링크는 세 카드 공통으로 하단 footer에 고정한다(내용량과 무관하게 바닥 정렬). */}
+      <CardFooter className="justify-end">
         <Link
           to={moreLink}
-          className="inline-flex items-center gap-1 self-end text-sm font-medium text-primary hover:underline"
+          className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
         >
           문서함 전체 보기
           <ArrowRight className="size-3.5" />
         </Link>
-      </CardContent>
+      </CardFooter>
     </Card>
   )
 }

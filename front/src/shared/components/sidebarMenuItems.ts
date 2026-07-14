@@ -178,18 +178,24 @@ export const sidebarMenuItems: SidebarMenuItem[] = [
   {
     // 관리자 그룹(사용자 확정, 2026-07-13): 이미 존재하던 조직도·관리자 휴가 현황·설정(회사 정보)
     // 3개 뷰를 한데 묶은 순수 배치 이동이다(라벨은 각각 조직 관리/휴가 관리/회사 관리로 재명명).
-    // 그룹 자체의 minRole은 자식 중 가장 낮은 권한(EMPLOYEE)으로 둔다 — 다른 관리 섹션 그룹과
-    // 동일한 선례 패턴이며, 조직 관리(EMPLOYEE, 전사 부서 디렉터리 조회)는 기존처럼 전 사원이
-    // 계속 볼 수 있고, 휴가 관리·회사 관리(ADMIN)만 관리자에게 노출된다.
+    // 조직 관리(/departments)는 이후 사용자 확정(2026-07-14)으로 ADMIN 전용으로 좁혔다 — 이제
+    // 세 자식 전부 ADMIN이라 EMPLOYEE는 이 그룹 자체가 노출되지 않는다(SidebarMenuGroup이 보이는
+    // children 0개면 그룹을 렌더하지 않는다). 그룹 자체의 minRole 필드는 "자식 중 가장 낮은 권한"
+    // 관례를 그대로 따르면 ADMIN이 맞지만, 위 자기-은닉 로직 덕에 실제 노출에는 영향이 없어 이번
+    // 변경 범위(조직 관리 minRole 한 줄)를 넘지 않도록 EMPLOYEE로 남겨 두었다.
+    // 조직 관리(/departments)의 라우트 가드(router.tsx)는 손대지 않는다 — GET /api/departments/**는
+    // "인증만"(authenticated) 요구이지 ADMIN 전용이 아니므로(security.md 인증만 행), 이번 변경은
+    // 사이드바 메뉴 노출만 ADMIN으로 좁히고 조회 자체는 기존처럼 전 사원에게 열려 있다.
     // 회사 관리(/settings/company)는 실제 라우트 가드가 EMPLOYEE 수준이다 — 조회 API가 permitAll이라
     // 비-ADMIN이 URL을 직접 입력해도 읽기 전용 뷰가 정상 렌더되어야 하므로 의도된 비대칭이다
-    // (router.tsx 주석 참고, 사이드바 메뉴 노출만 ADMIN으로 좁힌다).
+    // (router.tsx 주석 참고, 사이드바 메뉴 노출만 ADMIN으로 좁힌다) — 조직 관리도 근거 조항만 다를 뿐
+    // 동일한 "메뉴만 좁히고 라우트는 유지" 비대칭 패턴을 따른다.
     label: '관리자',
     minRole: 'EMPLOYEE',
     icon: Settings,
     section: '관리',
     children: [
-      { label: '조직 관리', to: '/departments', minRole: 'EMPLOYEE' },
+      { label: '조직 관리', to: '/departments', minRole: 'ADMIN' },
       { label: '휴가 관리', to: '/leaves/admin', minRole: 'ADMIN' },
       { label: '회사 관리', to: '/settings/company', minRole: 'ADMIN' },
     ],

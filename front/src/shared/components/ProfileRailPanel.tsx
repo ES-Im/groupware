@@ -13,7 +13,7 @@ const FALLBACK_COMPANY_NAME = '하루온 그룹(HARUON Group)'
 interface ProfileRailPanelProps {
   me:
     | {
-        empBasicInfo: { name: string; empNo: string }
+        empBasicInfo: { empId: number; name: string; empNo: string }
         currentDepts: CurrentDept[]
       }
     | undefined
@@ -67,7 +67,7 @@ export function ProfileRailPanel({ me, profilePictureFileId, onLogout, logoutPen
       <div className="px-4 pt-6 pb-4">
         <div className="flex flex-col items-center gap-2 pb-4 text-center">
           <BlobAvatar
-            empId={undefined}
+            empId={me.empBasicInfo.empId}
             fileId={profilePictureFileId}
             fallbackText={me.empBasicInfo.name}
             className="size-14 bg-primary-foreground/15 text-base text-primary-foreground dark:bg-card-foreground/15 dark:text-card-foreground"
