@@ -52,9 +52,10 @@ public class BoardQueryApi {
     // 게시글 상세 조회
     @GetMapping("/boards/{boardId}")
     public ResponseEntity<BoardDetailResponse> getBoardDetail(
+            @AuthenticationPrincipal EmpDetails details,
             @PathVariable Long boardId
     ) {
-        BoardDetailResponse response = boardAndCommentRetriever.retrieveBoardDetail(boardId);
+        BoardDetailResponse response = boardAndCommentRetriever.retrieveBoardDetail(boardId, details.getEmpId());
 
         return ResponseEntity.ok().body(response);
     }

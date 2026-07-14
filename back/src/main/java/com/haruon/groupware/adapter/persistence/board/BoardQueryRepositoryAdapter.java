@@ -6,9 +6,11 @@ import com.haruon.groupware.application.file.service.query.dto.FileListInfo;
 import com.haruon.groupware.domain.board.QBoard;
 import com.haruon.groupware.domain.board.QBoardComment;
 import com.haruon.groupware.domain.board.QBoardFile;
+import com.haruon.groupware.domain.board.QBoardLike;
 import com.haruon.groupware.domain.employee.QEmp;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.Nullable;
@@ -27,6 +29,7 @@ public class BoardQueryRepositoryAdapter implements BoardQueryRepository {
     private final QBoard board = QBoard.board;
     private final QBoardComment comment = QBoardComment.boardComment;
     private final QBoardFile boardFile = QBoardFile.boardFile;
+    private final QBoardLike boardLike = QBoardLike.boardLike;
     private final QEmp emp = QEmp.emp;
 
     @Override
@@ -95,22 +98,20 @@ public class BoardQueryRepositoryAdapter implements BoardQueryRepository {
     }
 
     @Override
-    public BoardDetailResponse findBoardByIdAndIsDraftFalse(Long boardId) {
+    public BoardDetailResponse findBoardByIdAndIsDraftFalse(Long boardId, Long empId) {
         return query
                 .select(Projections.constructor(
                         BoardDetailResponse.class,
-                        board.id,
-                        board.category.id,
-                        board.emp.id,
-                        emp.empName,
-                        board.title,
-                        board.content,
-                        board.publishedAt,
-                        board.modifiedAt,
-                        board.likeCount,
-                        board.viewCount,
-                        board.commentCount,
-                        board.isDraft
+                        board.id, board.category.id, board.emp.id, emp.empName,
+                        board.title, board.content, board.publishedAt, board.modifiedAt,
+                        board.likeCount, board.viewCount, board.commentCount, board.isDraft,
+                        JPAExpressions.selectOne()
+                                .from(boardLike)
+                                .where(
+                                        boardLike.board.id.eq(boardId),
+                                        boardLike.emp.id.eq(empId)
+                                )
+                                .exists()
                 ))
                 .from(board)
                 .join(board.emp, emp)

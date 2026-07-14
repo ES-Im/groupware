@@ -19,7 +19,8 @@ public record BoardDetailResponse(
         Long likeCount,
         Long viewCount,
         Long commentCount,
-        Boolean isDraft
+        Boolean isDraft,
+        Boolean isLiked
 ) {
 
     public BoardDetailResponse applyDirtyReactionCounters(
@@ -37,7 +38,8 @@ public record BoardDetailResponse(
                 applyCount(this.likeCount, delta.likeCount()),
                 applyCount(this.viewCount, delta.viewCount()),
                 applyCount(this.commentCount, delta.commentCount()),
-                this.isDraft
+                this.isDraft,
+                this.isLiked
         );
     }
 

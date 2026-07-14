@@ -60,8 +60,8 @@ public class BoardAndCommentQueryService implements BoardAndCommentRetriever {
     }
 
     @Override
-    public BoardDetailResponse retrieveBoardDetail(Long boardId) {
-        BoardDetailResponse board = boardQueryRepository.findBoardByIdAndIsDraftFalse(boardId);
+    public BoardDetailResponse retrieveBoardDetail(Long boardId, Long empId) {
+        BoardDetailResponse board = boardQueryRepository.findBoardByIdAndIsDraftFalse(boardId, empId);
         if(board == null) throw new BoardNotFoundException();
 
         boardReactionCounter.increaseViewCount(boardId);

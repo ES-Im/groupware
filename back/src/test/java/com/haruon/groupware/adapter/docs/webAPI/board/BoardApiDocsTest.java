@@ -401,10 +401,10 @@ class BoardApiDocsTest extends RestDocsSupport {
     @DisplayName("게시글 상세 조회")
     void getBoardDetail() throws Exception {
         BoardDetailResponse response = new BoardDetailResponse(
-                1L, 1L, 1L, "홍길동", "공지사항", "게시글 본문", PUBLISHED_AT, MODIFIED_AT, 2L, 10L, 1L, false
+                1L, 1L, 1L, "홍길동", "공지사항", "게시글 본문", PUBLISHED_AT, MODIFIED_AT, 2L, 10L, 1L, false, true
         );
 
-        when(boardAndCommentRetriever.retrieveBoardDetail(eq(1L)))
+        when(boardAndCommentRetriever.retrieveBoardDetail(eq(1L), any()))
                 .thenReturn(response);
 
         mockMvc.perform(
@@ -434,7 +434,8 @@ class BoardApiDocsTest extends RestDocsSupport {
                                 fieldWithPath("likeCount").type(JsonFieldType.NUMBER).description("좋아요 수"),
                                 fieldWithPath("viewCount").type(JsonFieldType.NUMBER).description("조회 수"),
                                 fieldWithPath("commentCount").type(JsonFieldType.NUMBER).description("댓글 수"),
-                                fieldWithPath("isDraft").type(JsonFieldType.BOOLEAN).description("임시저장 여부")
+                                fieldWithPath("isDraft").type(JsonFieldType.BOOLEAN).description("임시저장 여부"),
+                                fieldWithPath("isLiked").type(JsonFieldType.BOOLEAN).description("로그인 사용자의 좋아요 여부")
                         )
                 ));
     }

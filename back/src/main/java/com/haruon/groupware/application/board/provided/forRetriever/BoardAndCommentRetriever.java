@@ -22,7 +22,7 @@ public interface BoardAndCommentRetriever {
     );
 
     BoardDetailResponse retrieveBoardDetail(
-            Long boardId
+            Long boardId, Long empId
     );
 
     Page<BoardCommentResponse> retrieveBoardComments(

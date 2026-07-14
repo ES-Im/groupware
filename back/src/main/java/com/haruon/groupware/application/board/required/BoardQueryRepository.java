@@ -18,7 +18,7 @@ public interface BoardQueryRepository {
             Long categoryId, Long limit
     );
 
-    BoardDetailResponse findBoardByIdAndIsDraftFalse(Long boardId);
+    BoardDetailResponse findBoardByIdAndIsDraftFalse(Long boardId, Long empId);
 
     Page<BoardCommentResponse> findCommentsByBoardId(Long boardId, Pageable pageable);
 
