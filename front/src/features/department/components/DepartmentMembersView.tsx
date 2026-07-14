@@ -180,12 +180,13 @@ export function DepartmentMembersView({
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          {members.length === 0 ? (
-            <p className="py-8 text-center text-sm text-muted-foreground">
-              {keyword ? '검색 결과가 없습니다.' : '부서 멤버가 없습니다.'}
-            </p>
-          ) : (
-            <div className="w-full overflow-x-auto">
+          <div className="flex min-h-[56rem] flex-col">
+            {members.length === 0 ? (
+              <p className="flex flex-1 items-center justify-center text-center text-sm text-muted-foreground">
+                {keyword ? '검색 결과가 없습니다.' : '부서 멤버가 없습니다.'}
+              </p>
+            ) : (
+              <div className="w-full overflow-x-auto">
               <table className="w-full border-collapse text-sm">
                 <thead>
                   <tr className="border-b border-border">
@@ -278,6 +279,7 @@ export function DepartmentMembersView({
               </table>
             </div>
           )}
+          </div>
 
           <PaginationControls
             className="border-t pt-4"

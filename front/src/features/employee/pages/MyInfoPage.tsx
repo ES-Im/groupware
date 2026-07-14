@@ -60,7 +60,7 @@ export function MyInfoPage() {
   if (query.error) {
     return (
       <div className="w-full p-4 sm:p-6 lg:p-8">
-        <h1 className="mb-2 text-xl font-semibold tracking-tight">내 정보</h1>
+        <h1 className="mb-2 text-2xl font-bold tracking-tight text-foreground">내 정보</h1>
         <p className="text-sm text-muted-foreground">내 정보를 불러오지 못했습니다.</p>
       </div>
     )
@@ -74,7 +74,14 @@ export function MyInfoPage() {
   const empId = empBasicInfo.empId
 
   return (
-    <div className="w-full p-4 sm:p-6 lg:p-8">
+    <div className="w-full space-y-6 p-4 sm:p-6 lg:p-8">
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">내 정보</h1>
+        <p className="mt-1.5 text-sm text-muted-foreground">
+          내 계정과 소속 정보를 확인합니다
+        </p>
+      </div>
+
       <div className="grid gap-6 lg:grid-cols-[320px_1fr]">
         {/* 좌측 레일: 요약 카드(역할 배지+정보/비밀번호 수정) + 전자서명 카드 */}
         <div className="space-y-6">

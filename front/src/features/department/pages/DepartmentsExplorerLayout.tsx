@@ -65,10 +65,10 @@ export function DepartmentsExplorerLayout() {
   }
 
   return (
-    <div className="w-full space-y-5 p-4 sm:p-6 lg:p-8">
+    <div className="w-full space-y-6 p-4 sm:p-6 lg:p-8">
       <header>
-        <h1 className="text-xl font-semibold tracking-tight">조직 관리</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">조직 관리</h1>
+        <p className="mt-1.5 text-sm text-muted-foreground">
           부서 구조를 조회하고 생성·이동·부서장 임명 등을 관리합니다.
         </p>
       </header>

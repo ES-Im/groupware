@@ -28,6 +28,12 @@ interface DepartmentMembersTableProps {
   // canManage: dept-manager/admin 여부. role 계산은 상위 페이지(react-router-developer 담당)에서
   // 수행해 prop으로 주입한다. optional(기본 false)이라 아직 주입 전이어도 타입/렌더 회귀가 없다.
   canManage?: boolean
+  /**
+   * 컬럼을 사번·이름·직위 3개로 축약한다(기본 false — 사번/이름/내선번호/이메일/직위 5열).
+   * 헤더 검색 오버레이(EmployeeSearchOverlay)처럼 폭이 좁은 곳에서 핵심 3열만 보이도록 opt-in한다
+   * (사용자 요청). 미지정(부서 상세/멤버 페이지)은 종전 5열 그대로라 회귀가 없다.
+   */
+  compact?: boolean
 }
 
 /** 부서 멤버 1페이지(content)만 렌더하는 표. 행 클릭 시 사원 상세로 이동하도록 onRowClick을 위임받는다. */
@@ -35,13 +41,19 @@ export function DepartmentMembersTable({
   data,
   onRowClick,
   canManage = false,
+  compact = false,
 }: DepartmentMembersTableProps) {
   const columns = useMemo(
     () => [
       columnHelper.accessor('empNo', { header: '사번' }),
       columnHelper.accessor('empName', { header: '이름' }),
-      columnHelper.accessor('extensionNo', { header: '내선번호' }),
-      columnHelper.accessor('email', { header: '이메일' }),
+      // compact(오버레이)면 내선번호·이메일을 생략하고 직위만 남겨 3열로 축약한다.
+      ...(compact
+        ? []
+        : [
+            columnHelper.accessor('extensionNo', { header: '내선번호' }),
+            columnHelper.accessor('email', { header: '이메일' }),
+          ]),
       columnHelper.accessor('position', { header: '직위' }),
       // canManage가 true일 때만 마지막에 "관리" 액션 컬럼을 추가한다. 값 접근이 없는 열이므로
       // accessor가 아닌 display 컬럼으로 정의한다.
@@ -69,7 +81,7 @@ export function DepartmentMembersTable({
           ]
         : []),
     ],
-    [canManage, onRowClick],
+    [canManage, onRowClick, compact],
   )
 
   const table = useReactTable({

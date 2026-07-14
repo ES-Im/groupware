@@ -11,7 +11,6 @@ import { OrgChartExplorer } from '@/features/department/components/OrgChartExplo
 import { buildDepartmentTree } from '@/features/department/lib/buildDepartmentTree'
 import type { DeptMemberSearchResult } from '@/features/department/model/deptMember'
 import { BlobAvatar } from '@/shared/components/BlobAvatar'
-import { usePageState } from '@/shared/lib/usePageState'
 import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
 import { Sheet, SheetContent, SheetTitle } from '@/shared/ui/sheet'
@@ -24,6 +23,13 @@ const SEARCH_DEBOUNCE_MS = 300
 
 /** 전체 부서를 한 페이지에 담기 위한 size. DepartmentsExplorerLayout의 ALL_DEPARTMENTS_PAGE_SIZE와 동일 값. */
 const ALL_DEPARTMENTS_PAGE_SIZE = 500
+
+/**
+ * 오버레이의 부서 멤버 카드는 검색/페이징 UI 없이 선택 부서의 멤버 '전원'을 한 번에 보여주므로
+ * (사용자 요청), 한 페이지에 전체를 담는 큰 size로 조회한다. 페이징이 없으므로 이 값보다 멤버가
+ * 많으면 잘릴 수 있어, 부서 목록 조회의 ALL_DEPARTMENTS_PAGE_SIZE와 동일하게 넉넉히 잡는다.
+ */
+const ALL_DEPT_MEMBERS_PAGE_SIZE = 500
 
 /** 미선택 상태 플레이스홀더 공통 박스(선택적 아이콘 + 안내 문구). */
 function Placeholder({ icon, children }: { icon?: ReactNode; children: ReactNode }) {
@@ -97,14 +103,13 @@ function EmployeeSearchOverlayContent() {
       ? departments.filter((dept) => dept.deptInfoResponse.deptName.includes(debouncedKeyword))
       : []
 
-  // 우측 하단 부서 멤버 카드(DepartmentMembersPage와 동일 배선, 조회 전용).
-  const [deptMembersKeyword, setDeptMembersKeyword] = useState('')
-  const { page, size, onPageChange, onSizeChange, resetPage } = usePageState()
+  // 우측 하단 부서 멤버 카드(조회 전용). 오버레이에서는 검색/총원/페이징 UI를 노출하지 않으므로
+  // (overlayLayout), 검색어 없이 첫 페이지에 멤버 전원을 담는 큰 size로 한 번만 조회한다.
   const deptInfoQuery = useDepartmentInfoQuery(selectedDeptId)
   const deptMembersQuery = useDepartmentMembersQuery(selectedDeptId, {
-    keyword: deptMembersKeyword,
-    page,
-    size,
+    keyword: '',
+    page: 0,
+    size: ALL_DEPT_MEMBERS_PAGE_SIZE,
   })
 
   // 우측 상단 사원 프로필.
@@ -112,14 +117,10 @@ function EmployeeSearchOverlayContent() {
 
   function handleSelectDept(deptId: number) {
     selectDept(deptId)
-    setDeptMembersKeyword('')
-    resetPage()
   }
 
   function handleSelectSearchResult(item: DeptMemberSearchResult) {
     selectEmployee(item.empId, item.deptId)
-    setDeptMembersKeyword('')
-    resetPage()
   }
 
   return (
@@ -250,7 +251,12 @@ function EmployeeSearchOverlayContent() {
             ) : employeeQuery.isLoading || !employeeQuery.data ? (
               <Placeholder>불러오는 중...</Placeholder>
             ) : (
-              <EmployeeSummaryCard data={employeeQuery.data} empId={selectedEmpId} viewerIsSelf={false} />
+              <EmployeeSummaryCard
+                data={employeeQuery.data}
+                empId={selectedEmpId}
+                viewerIsSelf={false}
+                variant="horizontal"
+              />
             )}
 
             {/* 우측 하단: 부서 멤버 목록 카드 */}
@@ -271,7 +277,7 @@ function EmployeeSearchOverlayContent() {
                     totalElements: 0,
                     totalPages: 0,
                     number: 0,
-                    size,
+                    size: ALL_DEPT_MEMBERS_PAGE_SIZE,
                     first: true,
                     last: true,
                     numberOfElements: 0,
@@ -280,15 +286,15 @@ function EmployeeSearchOverlayContent() {
                 }
                 canManageMembers={false}
                 canViewAttendanceBoard={false}
-                keyword={deptMembersKeyword}
-                onKeywordChange={(value) => {
-                  setDeptMembersKeyword(value)
-                  resetPage()
-                }}
-                page={page}
-                onPageChange={onPageChange}
-                size={size}
-                onSizeChange={onSizeChange}
+                overlayLayout
+                // overlayLayout이라 검색/총원/페이징 UI가 렌더되지 않으므로, 관련 props는
+                // 정적 기본값과 no-op으로 채운다(DepartmentDetailView 시그니처 유지용).
+                keyword=""
+                onKeywordChange={() => {}}
+                page={0}
+                onPageChange={() => {}}
+                size={ALL_DEPT_MEMBERS_PAGE_SIZE}
+                onSizeChange={() => {}}
                 onRowClick={(empId) => selectEmployee(empId, selectedDeptId)}
               />
             )}

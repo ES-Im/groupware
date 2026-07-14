@@ -77,8 +77,8 @@ export function NewEmployeeApprovalListPage() {
   return (
     <div className="w-full space-y-6 p-4 sm:p-6 lg:p-8">
       <div>
-        <h1 className="text-xl font-semibold tracking-tight">신규 사원 승인</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">신규 사원 승인</h1>
+        <p className="mt-1.5 text-sm text-muted-foreground">
           가입 대기 중인 사원을 승인하고 조직 소속을 배정합니다 (HR · ADMIN)
         </p>
       </div>
@@ -107,22 +107,26 @@ export function NewEmployeeApprovalListPage() {
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          {newEmployeesQuery.isLoading ? (
-            <p className="py-8 text-center text-sm text-muted-foreground">불러오는 중...</p>
-          ) : newEmployeesQuery.error ? (
-            <p className="py-8 text-center text-sm text-muted-foreground">
-              가입대기자 목록을 불러오지 못했습니다.
-            </p>
-          ) : rows.length === 0 ? (
-            <p className="py-8 text-center text-sm text-muted-foreground">
-              가입 대기 중인 사원이 없습니다.
-            </p>
-          ) : (
-            <NewEmployeesTable
-              data={rows}
-              onApprove={(empId, name, loginId) => setSelected({ empId, name, loginId })}
-            />
-          )}
+          <div className="flex min-h-[56rem] flex-col">
+            {newEmployeesQuery.isLoading ? (
+              <p className="flex flex-1 items-center justify-center text-center text-sm text-muted-foreground">
+                불러오는 중...
+              </p>
+            ) : newEmployeesQuery.error ? (
+              <p className="flex flex-1 items-center justify-center text-center text-sm text-muted-foreground">
+                가입대기자 목록을 불러오지 못했습니다.
+              </p>
+            ) : rows.length === 0 ? (
+              <p className="flex flex-1 items-center justify-center text-center text-sm text-muted-foreground">
+                가입 대기 중인 사원이 없습니다.
+              </p>
+            ) : (
+              <NewEmployeesTable
+                data={rows}
+                onApprove={(empId, name, loginId) => setSelected({ empId, name, loginId })}
+              />
+            )}
+          </div>
 
           <PaginationControls
             className="border-t pt-4"

@@ -48,7 +48,7 @@ export function EmployeeDetailPage() {
   if (!isValidEmpId) {
     return (
       <div className="w-full p-4 sm:p-6 lg:p-8">
-        <h1 className="mb-2 text-xl font-semibold tracking-tight">사원 상세</h1>
+        <h1 className="mb-2 text-2xl font-bold tracking-tight text-foreground">사원 상세</h1>
         <p className="text-sm text-muted-foreground">잘못된 사원 식별자입니다.</p>
       </div>
     )
@@ -67,7 +67,7 @@ export function EmployeeDetailPage() {
     if (isNotFound(apiError)) {
       return (
         <div className="w-full p-4 sm:p-6 lg:p-8">
-          <h1 className="mb-2 text-xl font-semibold tracking-tight">사원 상세</h1>
+          <h1 className="mb-2 text-2xl font-bold tracking-tight text-foreground">사원 상세</h1>
           <p className="text-sm text-muted-foreground">사원 정보를 찾을 수 없습니다.</p>
         </div>
       )
@@ -75,7 +75,7 @@ export function EmployeeDetailPage() {
     if (isForbidden(apiError)) {
       return (
         <div className="w-full p-4 sm:p-6 lg:p-8">
-          <h1 className="mb-2 text-xl font-semibold tracking-tight">사원 상세</h1>
+          <h1 className="mb-2 text-2xl font-bold tracking-tight text-foreground">사원 상세</h1>
           <p className="text-sm text-muted-foreground">이 사원 정보를 조회할 권한이 없습니다.</p>
         </div>
       )
@@ -83,7 +83,7 @@ export function EmployeeDetailPage() {
     // not-found/forbidden이 아닌 실패는 위 useEffect가 토스트로 알렸으므로 화면은 빈 상태로만 표시한다.
     return (
       <div className="w-full p-4 sm:p-6 lg:p-8">
-        <h1 className="mb-2 text-xl font-semibold tracking-tight">사원 상세</h1>
+        <h1 className="mb-2 text-2xl font-bold tracking-tight text-foreground">사원 상세</h1>
         <p className="text-sm text-muted-foreground">사원 정보를 불러오지 못했습니다.</p>
       </div>
     )
@@ -96,10 +96,18 @@ export function EmployeeDetailPage() {
   const deptId = getPrimaryDeptId(query.data.currentDepts)
 
   return (
-    <div className="w-full p-4 sm:p-6 lg:p-8">
+    <div className="w-full space-y-6 p-4 sm:p-6 lg:p-8">
+      {/* 메인 레이아웃 타이틀 표준(기준: MeetingReservationManagementPage). 사원명/사번은 아래
+          EmployeeSummaryCard가 직접 표시하고, 이 타이틀은 페이지 레벨 라벨로 둔다(MyInfoPage와 동일). */}
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">사원 상세</h1>
+        <p className="mt-1.5 text-sm text-muted-foreground">
+          사원의 프로필과 소속 정보를 확인합니다
+        </p>
+      </div>
+
       {/*
-        EmployeeSummaryCard가 이름/사번을 직접 표시해 <h1> 제목 바가 불필요해졌다. 타 사원
-        조회이므로 viewerIsSelf={false}로 아이디(loginId)/파일 탭/활성 파일 섹션을 숨겨
+        타 사원 조회이므로 viewerIsSelf={false}로 아이디(loginId)/파일 탭/활성 파일 섹션을 숨겨
         개인정보 노출을 막는다(본인 조회 페이지인 MyInfoPage와의 핵심 차이점).
         레이아웃은 MyInfoPage와 동일한 2열 그리드(320px+1fr)를 직접 조립한다 — 좌측 컬럼에
         요약 카드+관리 섹션(canManage, HR/DEPT_MANAGER), 우측 컬럼에 프로필 탭+기록 위젯

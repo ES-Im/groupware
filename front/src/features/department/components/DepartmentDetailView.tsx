@@ -17,6 +17,7 @@ import {
 } from 'lucide-react'
 import { BlobAvatar } from '@/shared/components/BlobAvatar'
 import { PaginationControls } from '@/shared/components/PaginationControls'
+import { cn } from '@/shared/lib/utils'
 import { Button } from '@/shared/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card'
 import { Input } from '@/shared/ui/input'
@@ -90,6 +91,14 @@ interface DepartmentDetailViewProps {
   onSizeChange: (size: number) => void
   /** 행 클릭 시 사원 상세로 이동시키는 콜백(네비게이션 로직은 상위가 주입). */
   onRowClick: (empId: number) => void
+  /**
+   * 헤더 검색 오버레이(EmployeeSearchOverlay) 전용 좁은-폭 레이아웃(기본 false). 켜면 사용자 요청에
+   * 맞춰 세 가지가 함께 적용된다: (1) 좌측 부서 카드를 우측 멤버 카드 높이만큼 채우고(h-full) 내부
+   * 섹션을 세로로 분산(justify-between)해 카드가 꽉 차 보이게 한다, (2) 멤버 목록 카드의 서브 설명
+   * 문구를 숨긴다, (3) 멤버 표를 사번·이름·직위 3열로 축약한다(compact). 미지정(부서 상세/멤버
+   * 페이지)은 종전 레이아웃 그대로라 회귀가 없다.
+   */
+  overlayLayout?: boolean
 }
 
 /** 좌측 카드의 아이콘+라벨+값 한 줄(부서 기본 정보·부서장 연락처). 값이 길면 truncate로 넘침을 막는다. */
@@ -173,6 +182,7 @@ export function DepartmentDetailView({
   size,
   onSizeChange,
   onRowClick,
+  overlayLayout = false,
 }: DepartmentDetailViewProps) {
   // 검색 입력 원문값은 컴포넌트 로컬로 관리하고, 디바운스 후에만 상위 onKeywordChange로 반영한다.
   const [searchInput, setSearchInput] = useState(keyword)
@@ -189,9 +199,16 @@ export function DepartmentDetailView({
 
   return (
     <div className="grid gap-6 lg:grid-cols-[320px_1fr]">
-      {/* 좌측: 부서 요약 카드 */}
-      <Card className="h-fit">
-        <CardContent className="space-y-5">
+      {/* 좌측: 부서 요약 카드. overlayLayout이면 h-full로 우측 멤버 카드 높이에 맞춰 늘리고(grid
+          stretch), 내부 섹션을 justify-between으로 세로 분산해 부서 정보·부서장이 아래로 당겨져 카드가
+          꽉 차 보이게 한다(사용자 요청). 기본(부서 상세/멤버 페이지)은 h-fit + space-y-5 그대로다. */}
+      <Card className={cn(overlayLayout ? 'h-full' : 'h-fit')}>
+        <CardContent
+          className={cn(
+            'space-y-5',
+            overlayLayout && 'flex h-full flex-col justify-between gap-5 space-y-0',
+          )}
+        >
           {/* 부서명 + 부서코드 + 활성/비활성 배지 */}
           <div className="flex flex-col items-center gap-3 text-center">
             <div className="min-w-0">
@@ -359,44 +376,51 @@ export function DepartmentDetailView({
         <Card className="h-fit">
           <CardHeader className="border-b">
             <CardTitle>부서 멤버 목록</CardTitle>
-            <CardDescription>부서 현황을 확인하고 필요한 멤버를 상세 화면에서 관리합니다.</CardDescription>
+            {/* overlayLayout(헤더 검색 오버레이)에서는 서브 설명 문구를 숨긴다(사용자 요청). */}
+            {!overlayLayout && (
+              <CardDescription>부서 현황을 확인하고 필요한 멤버를 상세 화면에서 관리합니다.</CardDescription>
+            )}
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* 툴바: 검색 + 총원 배지 + 페이지 크기 select */}
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div className="relative w-full sm:max-w-xs">
-                <Search className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
-                <label htmlFor="member-search" className="sr-only">
-                  부서 멤버 검색
-                </label>
-                <Input
-                  id="member-search"
-                  type="search"
-                  value={searchInput}
-                  onChange={(event) => setSearchInput(event.target.value)}
-                  placeholder="사원명, 사번, 이메일 검색..."
-                  className="pl-8"
-                />
+            {/* 툴바: 검색 + 총원 배지 + 페이지 크기 select.
+                overlayLayout(헤더 검색 오버레이)에서는 멤버 검색·총원·페이지 크기 select를 모두
+                숨겨(사용자 요청) 선택한 부서의 멤버 목록만 담백하게 보여준다. */}
+            {!overlayLayout && (
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="relative w-full sm:max-w-xs">
+                  <Search className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
+                  <label htmlFor="member-search" className="sr-only">
+                    부서 멤버 검색
+                  </label>
+                  <Input
+                    id="member-search"
+                    type="search"
+                    value={searchInput}
+                    onChange={(event) => setSearchInput(event.target.value)}
+                    placeholder="사원명, 사번, 이메일 검색..."
+                    className="pl-8"
+                  />
+                </div>
+                <div className="flex items-center gap-2">
+                  <Pill>총 {pageInfo.totalElements}명</Pill>
+                  <label htmlFor="member-page-size" className="sr-only">
+                    페이지 크기
+                  </label>
+                  <select
+                    id="member-page-size"
+                    value={size}
+                    onChange={(event) => onSizeChange(Number(event.target.value))}
+                    className="h-8 rounded-lg border border-input bg-transparent px-2.5 text-sm text-foreground transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
+                  >
+                    {PAGE_SIZE_OPTIONS.map((option) => (
+                      <option key={option} value={option}>
+                        {option}개씩
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Pill>총 {pageInfo.totalElements}명</Pill>
-                <label htmlFor="member-page-size" className="sr-only">
-                  페이지 크기
-                </label>
-                <select
-                  id="member-page-size"
-                  value={size}
-                  onChange={(event) => onSizeChange(Number(event.target.value))}
-                  className="h-8 rounded-lg border border-input bg-transparent px-2.5 text-sm text-foreground transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
-                >
-                  {PAGE_SIZE_OPTIONS.map((option) => (
-                    <option key={option} value={option}>
-                      {option}개씩
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
+            )}
 
             {/* 표 영역: 멤버 조회 실패 → 인라인 에러, 없음 → 검색 여부별 빈 상태, 있음 → 기존 표 재사용. */}
             {membersErrorMessage ? (
@@ -410,17 +434,22 @@ export function DepartmentDetailView({
                 data={members}
                 onRowClick={onRowClick}
                 canManage={canManageMembers}
+                compact={overlayLayout}
               />
             )}
 
-            {/* 하단 페이지네이션(ROADMAP T10.1, 공유 표준 컴포넌트) */}
-            <PaginationControls
-              className="border-t pt-4"
-              pageInfo={pageInfo}
-              page={page}
-              onPageChange={onPageChange}
-              unit="명"
-            />
+            {/* 하단 페이지네이션(ROADMAP T10.1, 공유 표준 컴포넌트).
+                overlayLayout(헤더 검색 오버레이)에서는 페이징 UI를 숨기고 멤버 전원을 한 번에 보여준다
+                (소비처가 전체를 담는 큰 size로 조회 — EmployeeSearchOverlay 참조). */}
+            {!overlayLayout && (
+              <PaginationControls
+                className="border-t pt-4"
+                pageInfo={pageInfo}
+                page={page}
+                onPageChange={onPageChange}
+                unit="명"
+              />
+            )}
           </CardContent>
         </Card>
 

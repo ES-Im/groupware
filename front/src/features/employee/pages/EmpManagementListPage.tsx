@@ -109,8 +109,8 @@ export function EmpManagementListPage() {
   return (
     <div className="w-full space-y-6 p-4 sm:p-6 lg:p-8">
       <div>
-        <h1 className="text-xl font-semibold tracking-tight">사원 관리</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">사원 관리</h1>
+        <p className="mt-1.5 text-sm text-muted-foreground">
           전사 사원의 근무 상태·소속·시스템 권한을 관리합니다 (HR · ADMIN)
         </p>
       </div>
@@ -168,19 +168,27 @@ export function EmpManagementListPage() {
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          {empsQuery.isLoading ? (
-            <p className="py-8 text-center text-sm text-muted-foreground">불러오는 중...</p>
-          ) : empsQuery.error ? (
-            <p className="py-8 text-center text-sm text-muted-foreground">사원 목록을 불러오지 못했습니다.</p>
-          ) : rows.length === 0 ? (
-            <p className="py-8 text-center text-sm text-muted-foreground">조회된 사원이 없습니다.</p>
-          ) : (
-            <EmpManagementTable
-              data={rows}
-              onRowClick={(record) => navigate(`/employees/${record.empId}`)}
-              onManage={(record, action) => openManage(record.empId, action)}
-            />
-          )}
+          <div className="flex min-h-[56rem] flex-col">
+            {empsQuery.isLoading ? (
+              <p className="flex flex-1 items-center justify-center text-center text-sm text-muted-foreground">
+                불러오는 중...
+              </p>
+            ) : empsQuery.error ? (
+              <p className="flex flex-1 items-center justify-center text-center text-sm text-muted-foreground">
+                사원 목록을 불러오지 못했습니다.
+              </p>
+            ) : rows.length === 0 ? (
+              <p className="flex flex-1 items-center justify-center text-center text-sm text-muted-foreground">
+                조회된 사원이 없습니다.
+              </p>
+            ) : (
+              <EmpManagementTable
+                data={rows}
+                onRowClick={(record) => navigate(`/employees/${record.empId}`)}
+                onManage={(record, action) => openManage(record.empId, action)}
+              />
+            )}
+          </div>
 
           <PaginationControls
             className="border-t pt-4"

@@ -22,6 +22,13 @@ interface EmployeeSummaryCardProps {
    * 렌더하지 않는다.
    */
   onEditClick?: () => void
+  /**
+   * 레이아웃 변형(기본 'default' — 아바타 중앙, 계정 정보·현재 부서를 세로로 쌓는 카드).
+   * 'horizontal'은 헤더 검색 오버레이(EmployeeSearchOverlay) 전용으로, 넓은 상단 폭을 활용해
+   * [아바타+이름·사번] | [계정 정보] | [현재 부서]를 가로 3단으로 배치하고 폭에 맞춰 글자 크기를
+   * 줄인다(사용자 요청). MyInfoPage/EmployeeDetailPage는 미지정이라 종전 세로 카드 그대로다.
+   */
+  variant?: 'default' | 'horizontal'
 }
 
 /** 아이콘+라벨+값 한 줄(계정 정보 섹션). */
@@ -89,12 +96,89 @@ export function EmployeeSummaryCard({
   empId,
   viewerIsSelf = true,
   onEditClick,
+  variant = 'default',
 }: EmployeeSummaryCardProps) {
   const { empBasicInfo, currentDepts, activeFiles } = data
   const profilePictureFileId = getActiveProfilePicture(activeFiles)
   // 세션 roles(JWT 스냅샷)는 본인 소유 정보라 타 사원 상세(viewerIsSelf=false)에서는 조회 대상과
   // 무관하므로 렌더하지 않는다 — RETRIEVE_EMP_INFO 응답에도 역할 필드가 없다(추측 금지).
   const roles = useAuthStore((state) => state.roles)
+
+  // 계정 정보 rows·현재 부서 목록은 default/horizontal 두 레이아웃이 공유하는 내용이라 변수로 추출한다.
+  const accountRows = (
+    <div className="space-y-2.5">
+      {/* 아이디: 본인 조회일 때만 노출(타 사원 프로필 미노출). */}
+      {viewerIsSelf && <InfoRow icon={IdCard} label="아이디" value={empBasicInfo.loginId} />}
+      <InfoRow
+        icon={Mail}
+        label="이메일"
+        value={
+          <a href={`mailto:${empBasicInfo.email}`} className="hover:underline">
+            {empBasicInfo.email}
+          </a>
+        }
+      />
+      <InfoRow icon={Phone} label="직통번호" value={empBasicInfo.extensionNo || '-'} />
+    </div>
+  )
+
+  const deptListContent =
+    currentDepts.length === 0 ? (
+      <p className="text-sm text-muted-foreground">소속된 부서가 없습니다.</p>
+    ) : (
+      <ul className="space-y-2">
+        {currentDepts.map((dept) => (
+          <li key={dept.deptId} className="flex items-center justify-between gap-2">
+            <div className="min-w-0">
+              <p className="truncate text-sm text-foreground">{dept.deptName}</p>
+              <p className="truncate text-xs text-muted-foreground">{dept.positionName}</p>
+            </div>
+            <Pill tone={dept.isPrimary ? 'primary' : 'muted'}>{dept.isPrimary ? '대표' : '겸직'}</Pill>
+          </li>
+        ))}
+      </ul>
+    )
+
+  // horizontal(오버레이 전용): 카드 자체를 @container로 삼아 카드 폭이 넉넉하면(@min-[560px]) 3단
+  // 가로 배치로 펼치고, 좁으면 세로로 접는다. 오버레이는 viewerIsSelf=false라 프로필 열에는 부서/역할
+  // 배지 대신 아바타·이름·사번만 두고(부서는 우측 '현재 부서' 열과 중복이므로 생략) 폭에 맞춰 글자를 줄인다.
+  if (variant === 'horizontal') {
+    return (
+      <Card className="@container/emp h-fit">
+        <CardContent className="flex flex-col gap-5 @min-[560px]/emp:flex-row @min-[560px]/emp:items-stretch">
+          {/* 좌: 프로필(아바타 + 이름 + 사번) */}
+          <div className="flex items-center gap-3 @min-[560px]/emp:w-48 @min-[560px]/emp:shrink-0 @min-[560px]/emp:flex-col @min-[560px]/emp:items-center @min-[560px]/emp:gap-3 @min-[560px]/emp:border-r @min-[560px]/emp:pr-5 @min-[560px]/emp:text-center">
+            <BlobAvatar
+              empId={empId}
+              fileId={profilePictureFileId}
+              fallbackText={empBasicInfo.name}
+              className="size-14 text-xl @min-[560px]/emp:size-20 @min-[560px]/emp:text-3xl"
+            />
+            <div className="min-w-0">
+              <h3 className="truncate text-base font-semibold tracking-tight @min-[560px]/emp:text-lg">
+                {empBasicInfo.name}
+              </h3>
+              <p className="truncate text-xs text-muted-foreground @min-[560px]/emp:text-sm">
+                사번 {empBasicInfo.empNo}
+              </p>
+            </div>
+          </div>
+
+          {/* 중: 계정 정보 */}
+          <div className="min-w-0 flex-1 space-y-3">
+            <SectionHeading icon={Contact}>계정 정보</SectionHeading>
+            {accountRows}
+          </div>
+
+          {/* 우: 현재 부서 */}
+          <div className="min-w-0 flex-1 space-y-3 @min-[560px]/emp:border-l @min-[560px]/emp:pl-5">
+            <SectionHeading icon={Building2}>현재 부서</SectionHeading>
+            {deptListContent}
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
 
   return (
     <Card className="h-fit">
@@ -138,40 +222,13 @@ export function EmployeeSummaryCard({
         {/* 계정 정보 섹션 */}
         <div className="space-y-3 border-t pt-5">
           <SectionHeading icon={Contact}>계정 정보</SectionHeading>
-          <div className="space-y-2.5">
-            {/* 아이디: 본인 조회일 때만 노출(타 사원 프로필 미노출). */}
-            {viewerIsSelf && <InfoRow icon={IdCard} label="아이디" value={empBasicInfo.loginId} />}
-            <InfoRow
-              icon={Mail}
-              label="이메일"
-              value={
-                <a href={`mailto:${empBasicInfo.email}`} className="hover:underline">
-                  {empBasicInfo.email}
-                </a>
-              }
-            />
-            <InfoRow icon={Phone} label="직통번호" value={empBasicInfo.extensionNo || '-'} />
-          </div>
+          {accountRows}
         </div>
 
         {/* 현재 부서 섹션 */}
         <div className="space-y-3 border-t pt-5">
           <SectionHeading icon={Building2}>현재 부서</SectionHeading>
-          {currentDepts.length === 0 ? (
-            <p className="text-sm text-muted-foreground">소속된 부서가 없습니다.</p>
-          ) : (
-            <ul className="space-y-2">
-              {currentDepts.map((dept) => (
-                <li key={dept.deptId} className="flex items-center justify-between gap-2">
-                  <div className="min-w-0">
-                    <p className="truncate text-sm text-foreground">{dept.deptName}</p>
-                    <p className="truncate text-xs text-muted-foreground">{dept.positionName}</p>
-                  </div>
-                  <Pill tone={dept.isPrimary ? 'primary' : 'muted'}>{dept.isPrimary ? '대표' : '겸직'}</Pill>
-                </li>
-              ))}
-            </ul>
-          )}
+          {deptListContent}
         </div>
       </CardContent>
     </Card>
