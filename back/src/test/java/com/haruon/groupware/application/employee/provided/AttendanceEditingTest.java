@@ -332,8 +332,7 @@ record AttendanceEditingTest(
         LocalTime leaveStartAt = companyPolicy.getStartTime().plusHours(companyPolicy.getWorkHours() / 2);
         LocalTime leaveEndAt = companyPolicy.getEndTime();
 
-        int requiredWorkMinutes =
-                (companyPolicy.getWorkHours() - companyPolicy.getBreakHours()) * 60;
+        int requiredWorkMinutes = companyPolicy.getWorkHours() * 60;
         long requiredHalfWorkMinutes = requiredWorkMinutes / 2;
 
         return Stream.of(
@@ -435,8 +434,7 @@ record AttendanceEditingTest(
 
         LocalTime companyStartTime = companyPolicy.getStartTime();
         LocalTime companyEndTime = companyPolicy.getEndTime();
-        int breakMinutes = companyPolicy.getBreakHours() * 60;
-        int workMinutes = companyPolicy.getWorkHours()*60 - breakMinutes;
+        int workMinutes = companyPolicy.getWorkHours() * 60;
 
         LocalTime halfEndTime = companyStartTime.plusMinutes(workMinutes / 2);
         LocalTime lessThanHalfEndTime =companyStartTime.plusMinutes((workMinutes / 2) - 1);

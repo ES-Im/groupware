@@ -55,12 +55,11 @@ record AttendanceClosingTest(
 
     private Stream<Arguments> attendanceWithoutSchedulesArguments() {
 
-        Integer requiredTime = companyPolicy.getWorkHours();
         LocalTime companyStartTime = companyPolicy.getStartTime();
         LocalTime companyEndTime = companyPolicy.getEndTime();
 
-        LocalTime halfEndTime = companyStartTime.plusHours(requiredTime / 2);
-        LocalTime lessThanHalfEndTime = companyStartTime.plusMinutes(requiredTime / 2).minusMinutes(1);
+        LocalTime lateEarlyEndTime = companyStartTime.plusHours(4);
+        LocalTime absentEndTime = lateEarlyEndTime.minusMinutes(1);
 
         return Stream.of(
                 Arguments.of("근무시간을 소정근로시간 100% 채우면, 근태상태는 'NORMAL(정상출근)'이다"
@@ -68,11 +67,11 @@ record AttendanceClosingTest(
                 ), Arguments.of("근무시간을 소정근로시간 중 50%이상, 100%미만으로 채우면, 근태상태는 'LATE_EARLY(지각 및 조퇴)'이다"
                         , AttendanceStatus.LATE_EARLY
                         , companyStartTime
-                        , halfEndTime
+                        , lateEarlyEndTime
                 ), Arguments.of("근무시간을 소정근로시간 50% 미만이면, 근태상태는 'ABSENT(결근)'이다."
                         , AttendanceStatus.ABSENT
                         , companyStartTime
-                        , lessThanHalfEndTime
+                        , absentEndTime
                 ), Arguments.of("출근기록만 있고, 퇴근기록이 없는 경우, 근태상태는 'ABSENT(결근)'이다."
                         , AttendanceStatus.ABSENT
                         , companyStartTime
@@ -102,12 +101,11 @@ record AttendanceClosingTest(
     }
 
     private Stream<Arguments> attendanceWithBusinessTripSchedulesPartOfDayArguments() {
-        Integer requiredTime = companyPolicy.getWorkHours();
         LocalTime companyStartTime = companyPolicy.getStartTime();
         LocalTime companyEndTime = companyPolicy.getEndTime();
 
-        LocalTime halfEndTime = companyStartTime.plusHours(requiredTime / 2);
-        LocalTime lessThanHalfEndTime = companyStartTime.plusMinutes(requiredTime / 2).minusMinutes(1);
+        LocalTime lateEarlyEndTime = companyStartTime.plusHours(4);
+        LocalTime absentEndTime = lateEarlyEndTime.minusMinutes(1);
 
         return Stream.of(
                 Arguments.of(
@@ -133,16 +131,16 @@ record AttendanceClosingTest(
                 ),
                 Arguments.of(
                         "출장시간 반영 후 소정근로시간 50% 이상 100% 미만이면 LATE_EARLY",
-                        companyStartTime, halfEndTime,
+                        companyStartTime, lateEarlyEndTime,
                         null, null,
-                        companyStartTime, halfEndTime,
+                        companyStartTime, lateEarlyEndTime,
                         AttendanceStatus.LATE_EARLY
                 ),
                 Arguments.of(
                         "출장시간 반영 후 소정근로시간 50% 미만이면 ABSENT",
-                        companyStartTime, lessThanHalfEndTime,
+                        companyStartTime, absentEndTime,
                         null, null,
-                        companyStartTime, lessThanHalfEndTime,
+                        companyStartTime, absentEndTime,
                         AttendanceStatus.ABSENT
                 )
         );
@@ -197,15 +195,16 @@ record AttendanceClosingTest(
     ) {}
 
     private Stream<Arguments> attendanceWithLeaveSchedulesPartOfDayArguments() {
-        Integer requiredTime = companyPolicy.getWorkHours();
         LocalTime companyStartTime = companyPolicy.getStartTime();
         LocalTime companyEndTime = companyPolicy.getEndTime();
 
         LocalTime leaveStartAt = companyStartTime;
-        LocalTime leaveEndAt = companyStartTime.plusHours(requiredTime / 2);
+        LocalTime leaveEndAt = companyStartTime.plusHours(companyPolicy.getWorkHours() / 2);
 
-        LocalTime workStartAt = leaveEndAt.minusMinutes(1);
+        LocalTime workStartAt = leaveEndAt;
         LocalTime normalWorkEndAt = companyEndTime;
+        LocalTime lateEarlyWorkEndAt = workStartAt.plusHours(2);
+        LocalTime absentWorkEndAt = lateEarlyWorkEndAt.minusMinutes(1);
 
         return Stream.of(
                 Arguments.of(
@@ -227,11 +226,11 @@ record AttendanceClosingTest(
                                 .leaveStartAt(leaveStartAt)
                                 .leaveEndAt(leaveEndAt)
                                 .workStartAt(workStartAt)
-                                .workEndAt(normalWorkEndAt.minusMinutes(5))
+                                .workEndAt(lateEarlyWorkEndAt)
                                 .expectedLeaveStartAt(leaveStartAt)
                                 .expectedLeaveEndAt(leaveEndAt)
                                 .expectedWorkStartAt(workStartAt)
-                                .expectedWorkEndAt(normalWorkEndAt.minusMinutes(5))
+                                .expectedWorkEndAt(lateEarlyWorkEndAt)
                                 .expectedAttendanceStatus(AttendanceStatus.LATE_EARLY)
                                 .build()
                 ), Arguments.of(
@@ -240,11 +239,11 @@ record AttendanceClosingTest(
                                 .leaveStartAt(leaveStartAt)
                                 .leaveEndAt(leaveEndAt)
                                 .workStartAt(workStartAt)
-                                .workEndAt(normalWorkEndAt.minusMinutes(5))
+                                .workEndAt(absentWorkEndAt)
                                 .expectedLeaveStartAt(leaveStartAt)
                                 .expectedLeaveEndAt(leaveEndAt)
                                 .expectedWorkStartAt(workStartAt)
-                                .expectedWorkEndAt(workStartAt.plusMinutes(5))
+                                .expectedWorkEndAt(absentWorkEndAt)
                                 .expectedAttendanceStatus(AttendanceStatus.ABSENT)
                                 .build()
                 ), Arguments.of(

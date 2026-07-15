@@ -6,6 +6,7 @@ import com.haruon.groupware.application.employee.attendance.service.query.dto.At
 import com.haruon.groupware.application.employee.attendance.service.query.dto.DeptAttendanceEmpInfo;
 import com.haruon.groupware.application.employee.attendance.service.query.dto.result.DeptAttendanceResponse;
 import com.haruon.groupware.application.employee.attendance.service.query.dto.result.DeptPendingAttendanceResponse;
+import com.haruon.groupware.application.employee.attendance.service.support.AttendanceUtils;
 import com.haruon.groupware.application.utils.required.CompanyPolicyPort;
 import com.haruon.groupware.domain.employee.Attendance;
 import com.haruon.groupware.domain.employee.QAttendance;
@@ -23,13 +24,13 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
-import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.YearMonth;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Repository
@@ -100,9 +101,7 @@ public class AttendanceQueryRepositoryAdapter implements AttendanceQueryReposito
                 .count();
         int totalCount = attendances.size();
 
-        int overtimeMinutes = attendances.stream()
-                .mapToInt(attendance -> calculateOvertimeMinutes(attendance.getStartAt(), attendance.getEndAt()))
-                .sum();
+        int overtimeMinutes = calculateOvertimeMinutesForAttendances(attendances);
 
         return new AttendanceInfoSummaryResponse(
                 approvedCount,
@@ -226,7 +225,26 @@ public class AttendanceQueryRepositoryAdapter implements AttendanceQueryReposito
                 .orderBy(qEmp.empNo.asc(), qAttendance.attendanceDate.asc())
                 .fetch();
 
-        return new PageImpl<>(toDeptAttendanceResponses(flats), pageable, totalRows);
+        Map<Long, Set<LocalDate>> halfLeaveDatesByEmpId = query
+                .select(qEmp.id, qAttendance.attendanceDate)
+                .from(qAttendance)
+                .join(qAttendance.emp, qEmp)
+                .join(qEmp.empBelongings, qEmpBelongings)
+                .where(
+                        qEmp.id.in(empIds),
+                        qEmpBelongings.dept.id.eq(deptId),
+                        qEmpBelongings.endAt.isNull(),
+                        attendanceDateBetween(targetYearMonth),
+                        qAttendance.attendanceStatus.eq(AttendanceStatus.HALF_DAY_LEAVE)
+                )
+                .fetch()
+                .stream()
+                .collect(Collectors.groupingBy(
+                        tuple -> tuple.get(qEmp.id),
+                        Collectors.mapping(tuple -> tuple.get(qAttendance.attendanceDate), Collectors.toSet())
+                ));
+
+        return new PageImpl<>(toDeptAttendanceResponses(flats, halfLeaveDatesByEmpId), pageable, totalRows);
     }
 
     private Expression<AttendanceInfoResponse> attendanceInfoExpression() {
@@ -260,7 +278,10 @@ public class AttendanceQueryRepositoryAdapter implements AttendanceQueryReposito
                 .otherwise(false);
     }
 
-    private List<DeptAttendanceResponse> toDeptAttendanceResponses(List<DeptAttendanceFlat> flats) {
+    private List<DeptAttendanceResponse> toDeptAttendanceResponses(
+            List<DeptAttendanceFlat> flats,
+            Map<Long, Set<LocalDate>> halfLeaveDatesByEmpId
+    ) {
         Map<Long, List<DeptAttendanceFlat>> rowsByEmpId = flats.stream()
                 .collect(Collectors.groupingBy(
                         DeptAttendanceFlat::empId,
@@ -283,20 +304,29 @@ public class AttendanceQueryRepositoryAdapter implements AttendanceQueryReposito
                                     first.deptName(),
                                     first.positionName()
                             ),
-                            toSummary(attendanceInfos),
+                            toSummary(attendanceInfos, halfLeaveDatesByEmpId.getOrDefault(first.empId(), Set.of())),
                             attendanceInfos
                     );
                 })
                 .toList();
     }
 
-    private AttendanceInfoSummaryResponse toSummary(List<AttendanceInfoResponse> attendanceInfos) {
+    private AttendanceInfoSummaryResponse toSummary(
+            List<AttendanceInfoResponse> attendanceInfos,
+            Set<LocalDate> halfLeaveDates
+    ) {
         int approvedCount = (int) attendanceInfos.stream()
                 .filter(AttendanceInfoResponse::isApproved)
                 .count();
         int totalCount = attendanceInfos.size();
         int overtimeMinutes = attendanceInfos.stream()
-                .mapToInt(attendanceInfo -> calculateOvertimeMinutes(attendanceInfo.startAt(), attendanceInfo.endAt()))
+                .mapToInt(attendanceInfo -> AttendanceUtils.calculateOvertimeMinutes(
+                        attendanceInfo.attendanceStatus(),
+                        attendanceInfo.startAt(),
+                        attendanceInfo.endAt(),
+                        companyPolicy.getWorkHours(),
+                        halfLeaveDates.contains(attendanceInfo.attendanceDate())
+                ))
                 .sum();
 
         return new AttendanceInfoSummaryResponse(
@@ -307,13 +337,26 @@ public class AttendanceQueryRepositoryAdapter implements AttendanceQueryReposito
         );
     }
 
-    private int calculateOvertimeMinutes(@Nullable LocalTime startAt, @Nullable LocalTime endAt) {
-        if(startAt == null || endAt == null) return 0;
+    private int calculateOvertimeMinutesForAttendances(List<Attendance> attendances) {
+        Map<LocalDate, List<Attendance>> attendancesByDate = attendances.stream()
+                .collect(Collectors.groupingBy(Attendance::getAttendanceDate));
 
-        int workMinutes = (companyPolicy.getWorkHours() - companyPolicy.getBreakHours()) * 60;
-        int attendanceMinutes = (int) Duration.between(startAt, endAt).toMinutes();
+        return attendancesByDate.values().stream()
+                .mapToInt(dailyAttendances -> {
+                    boolean includeHalfLeave = dailyAttendances.stream()
+                            .anyMatch(attendance -> attendance.getAttendanceStatus() == AttendanceStatus.HALF_DAY_LEAVE);
 
-        return Math.max(attendanceMinutes - workMinutes, 0);
+                    return dailyAttendances.stream()
+                            .mapToInt(attendance -> AttendanceUtils.calculateOvertimeMinutes(
+                                    attendance.getAttendanceStatus(),
+                                    attendance.getStartAt(),
+                                    attendance.getEndAt(),
+                                    companyPolicy.getWorkHours(),
+                                    includeHalfLeave
+                            ))
+                            .sum();
+                })
+                .sum();
     }
 
     private BooleanExpression attendanceDateBetween(YearMonth yearMonth) {

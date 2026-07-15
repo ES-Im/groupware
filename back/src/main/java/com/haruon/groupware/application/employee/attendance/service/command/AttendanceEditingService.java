@@ -63,8 +63,6 @@ public class AttendanceEditingService implements AttendanceEditing {
 
         if(!targetEmp.equals(attendance.getEmp())) throw new AttendanceEmpMismatchException();
 
-        int requiredWorkHours = companyPolicy.getWorkHours() - companyPolicy.getBreakHours();
-
         LocalTime editedStartAt =
                 param.startAt() != null ? param.startAt() : attendance.getStartAt();
         LocalTime editedEndAt =
@@ -87,7 +85,7 @@ public class AttendanceEditingService implements AttendanceEditing {
         AttendanceStatus editedStatus = getStatusByRecognizedHours(
                 editedStartAt,
                 editedEndAt,
-                requiredWorkHours,
+                companyPolicy.getWorkHours(),
                 includeHalfLeaveInDay
         );
 

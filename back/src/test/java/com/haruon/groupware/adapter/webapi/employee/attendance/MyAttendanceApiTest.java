@@ -86,6 +86,7 @@ public class MyAttendanceApiTest extends IntegrationTestSupport {
         attendanceRepository.save(approved);
 
         saveAttendance(emp, LocalDate.of(2026, 4, 2), AttendanceStatus.LATE_EARLY, LocalTime.of(10, 0), LocalTime.of(15, 0));
+        saveAttendance(emp, LocalDate.of(2026, 4, 3), AttendanceStatus.ALL_DAY_LEAVE, LocalTime.of(9, 0), LocalTime.of(18, 0));
         saveAttendance(emp, LocalDate.of(2026, 5, 1), AttendanceStatus.NORMAL, LocalTime.of(9, 0), LocalTime.of(18, 0));
 
         String accessToken = loginByIdAndPw(loginId, password);
@@ -98,9 +99,9 @@ public class MyAttendanceApiTest extends IntegrationTestSupport {
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.approvedAttendanceCount").value(1))
-                .andExpect(jsonPath("$.pendingAttendanceCount").value(1))
-                .andExpect(jsonPath("$.totalAttendanceCount").value(2))
-                .andExpect(jsonPath("$.overtimeMinutes").value(180));
+                .andExpect(jsonPath("$.pendingAttendanceCount").value(2))
+                .andExpect(jsonPath("$.totalAttendanceCount").value(3))
+                .andExpect(jsonPath("$.overtimeMinutes").value(120));
     }
 
     @Test
