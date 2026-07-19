@@ -52,6 +52,9 @@ import { FranchiseInquiryDetailPage } from '@/features/franchise/pages/Franchise
 import { ScheduleCalendarPage } from '@/features/schedule/pages/ScheduleCalendarPage'
 import { ProtectedRoute } from '@/shared/components/ProtectedRoute'
 import { LayoutShell } from '@/shared/components/LayoutShell'
+import { RouteErrorBoundary } from '@/shared/components/errors/RouteErrorBoundary'
+import { NotFoundPage } from '@/shared/components/errors/NotFoundPage'
+import { MaintenancePage } from '@/shared/components/errors/MaintenancePage'
 
 /**
  * Router 트리(ROADMAP T0.5·T0.7 / §A-5, §B).
@@ -199,6 +202,20 @@ import { LayoutShell } from '@/shared/components/LayoutShell'
  * 라우트가 없다. 1세그먼트 정적 라우트라 위 'employees/new'·'employees/:empId'(둘 다 2세그먼트)와
  * 랭킹 충돌이 없다. minRole HR 게이팅은 사이드바에서만 처리하고, 라우트 자체는 ProtectedRoute
  * (인증 가드)만 적용한다 — 최종 권한 판단은 서버(403 ROLE_003)에 위임한다.
+ * 에러 화면 배선(전면 전환): 루트 라우트('/')에 errorElement로 RouteErrorBoundary를 붙였다 —
+ * 자식 라우트(LayoutShell 하위 전부)의 렌더 크래시가 버블링되어 여기서 잡힌다. 루트에 둔 것은
+ * 의도적이다 — errorElement가 걸리면 그 라우트 전체(및 그 element)가 통째로 교체되므로, 루트에
+ * 둬야 LayoutShell(사이드바 셸)도 함께 언마운트되어 "500/크래시는 셸 밖" 정책과 맞는다. 자식
+ * 라우트(children 배열 내부)에 개별 errorElement를 추가로 걸지 않는다 — 그러면 크래시가 그
+ * 라우트에서 멈춰 셸이 유지된 채로 렌더되어 위 정책과 어긋난다. children 배열 맨 끝에는
+ * { path: '*', element: <NotFoundPage /> }를 추가했다 — LayoutShell(ProtectedRoute 하위) 안의
+ * 모든 미매칭 경로를 잡으므로 사이드바가 유지된 채 404가 보인다. NotFoundPage의 기본 variant가
+ * embedded라 props 없이 그대로 둔다. 미인증 상태로 미매칭 경로에 접근하면 ProtectedRoute가 먼저
+ * /login으로 리다이렉트하므로(자식보다 부모 가드가 먼저 평가) 이 splat까지 도달하지 않는데, 이는
+ * 의도한 동작이다. 셸 밖(최상위 배열)에는 splat을 두지 않는다 — 셸 안의 이 '*'가 모든 미매칭
+ * 경로를 이미 잡으므로 중복이다. /maintenance는 최상위 배열(셸 밖, ProtectedRoute로 감싸지 않음)에
+ * MaintenancePage로 연결했다 — /login·/register와 동일하게 인증 여부와 무관하게 보여야 하는 화면이라
+ * 같은 계층에 둔다.
  */
 export const router = createBrowserRouter([
   {
@@ -208,6 +225,9 @@ export const router = createBrowserRouter([
         <LayoutShell />
       </ProtectedRoute>
     ),
+    // 자식 라우트(LayoutShell 하위 전부)의 렌더 크래시가 버블링되어 여기서 잡힌다. 루트에 둬야
+    // errorElement가 이 라우트 전체(LayoutShell 포함)를 교체해 셸까지 함께 언마운트된다.
+    errorElement: <RouteErrorBoundary />,
     children: [
       {
         // 홈 대시보드: adapt-ui(2026-07-12)에서 Ubold 레퍼런스(localhost:5174/apps/groupware/dashboard)
@@ -526,6 +546,13 @@ export const router = createBrowserRouter([
         path: 'franchise-inquiries/:inquiryId',
         element: <FranchiseInquiryDetailPage />,
       },
+      {
+        // 셸 안 404: LayoutShell(ProtectedRoute 하위) 아래에서 위 라우트 전부와 매칭되지 않으면
+        // 여기로 온다. 사이드바가 유지된 채 본문만 404 카드로 교체되는 것이 자연스러우므로 셸
+        // 안(children 맨 끝)에 둔다 — NotFoundPage의 기본 variant(embedded)를 그대로 쓴다.
+        path: '*',
+        element: <NotFoundPage />,
+      },
     ],
   },
   {
@@ -535,6 +562,12 @@ export const router = createBrowserRouter([
   {
     path: '/register',
     element: <RegisterPage />,
+  },
+  {
+    // 점검 안내 화면: 인증 여부와 무관하게 보여야 하므로 /login·/register와 동일하게 셸 밖·
+    // ProtectedRoute 없이 최상위 배열에 둔다.
+    path: '/maintenance',
+    element: <MaintenancePage />,
   },
   {
     path: '/approval/drafts/:draftId/print',

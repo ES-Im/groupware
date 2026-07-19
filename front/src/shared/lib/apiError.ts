@@ -80,6 +80,21 @@ export const isForbidden = (error: ApiError): boolean => error.httpStatus === 40
 
 export const isNotFound = (error: ApiError): boolean => error.httpStatus === 404
 
+export type ErrorViewKind = 'notFound' | 'forbidden' | 'server' | 'network'
+
+/**
+ * 전면 에러 화면(RouteErrorBoundary)으로 전환할 대상인지 판정한다. null이면 전환 대상이
+ * 아니다(토스트/폼 에러로 처리, handleApiError의 기존 분기가 그대로 담당). 기존 isForbidden·
+ * isNotFound 판별자를 재사용해 404/403 판정 로직을 중복 작성하지 않는다.
+ */
+export function resolveErrorView(error: ApiError): ErrorViewKind | null {
+  if (error.code === 'NETWORK_ERROR') return 'network'
+  if (isForbidden(error)) return 'forbidden'
+  if (isNotFound(error)) return 'notFound'
+  if (error.httpStatus >= 500) return 'server'
+  return null
+}
+
 export interface HandleApiErrorContext {
   setError?: (name: 'root', error: { message: string }) => void
   toast?: { error: (message: string) => void }
