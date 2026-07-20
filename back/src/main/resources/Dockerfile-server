@@ -1,0 +1,11 @@
+# --- build stage ---
+FROM eclipse-temurin:21-jdk-alpine AS build-stage
+WORKDIR /app
+COPY . .
+RUN ./gradlew bootJar --no-daemon -x test -x asciidoctor
+
+# --- run stage ---
+FROM eclipse-temurin:21-jre AS run-stage
+WORKDIR /app
+COPY --from=build-stage /app/build/libs/*.jar app.jar
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]

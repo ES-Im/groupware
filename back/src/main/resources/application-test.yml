@@ -14,6 +14,8 @@ spring:
 #        format_sql: true
 #        show_sql: true
 #        use_sql_comments: true
+  flyway:
+    enabled: false
 
 
   batch:
@@ -25,3 +27,4 @@ spring:
   docker:
     compose:
       lifecycle-management: none
+
