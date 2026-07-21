@@ -28,7 +28,7 @@ import { setChatStompStatus } from './chatConnectionStatus'
  * 콜백(`onConnect`/`onWebSocketClose`)과 `connectChatStomp`가 그 상태를 갱신한다.
  */
 
-const CHAT_WS_URL = 'ws://localhost:8080/ws-chat'
+const CHAT_WS_URL = `${import.meta.env.VITE_WS_URL}/ws-chat`
 
 let chatStompClient: Client | null = null
 

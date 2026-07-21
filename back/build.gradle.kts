@@ -111,6 +111,8 @@ dependencies {
     implementation("org.flywaydb:flyway-core")
     implementation("org.flywaydb:flyway-mysql")
 
+    // actuator
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
 }
 
 // nullaway + errorprone

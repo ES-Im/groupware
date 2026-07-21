@@ -14,7 +14,7 @@ spring:
     import:
       - optional:env.yml
   profiles:
-    active: prod # dev / prod / test
+    active: dev # dev / prod / test
 
   servlet:
     multipart:
@@ -55,4 +55,10 @@ spring:
     job:
       enabled: false
 
+  # health check (actuator)
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
 

@@ -1,6 +1,7 @@
 package com.haruon.groupware.adapter.websocket;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
@@ -15,9 +16,12 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     private final StompJwtInterceptor interceptor;
 
+    @Value("${FRONT_BASE_URL}")
+    private String frontUrl;
+
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/ws-chat").setAllowedOrigins("http://localhost:5173");    //todo 배포 시, 수정
+        registry.addEndpoint("/ws-chat").setAllowedOrigins(frontUrl);
     }
 
     @Override
