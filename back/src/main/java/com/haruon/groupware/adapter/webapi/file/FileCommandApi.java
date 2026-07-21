@@ -17,6 +17,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 
 import static com.haruon.groupware.application.file.service.command.FileDeleteRequest.toFileDeleteRequest;
@@ -53,7 +54,7 @@ public class FileCommandApi {
             @PathVariable Long empId,
             @RequestParam("fileType") FileType fileType,
             @RequestPart("file") MultipartFile file
-    ) {
+    ) throws IOException {
         if (!details.getEmpId().equals(empId)) throw new PermissionDeniedException();
 
         EmpFileUploadRequest request = toEmpFileUploadRequest(empId, fileType, MultipartFileConverter.from(file));
@@ -86,7 +87,7 @@ public class FileCommandApi {
             @AuthenticationPrincipal EmpDetails details,
             @PathVariable Long draftId,
             @RequestPart("file") MultipartFile file
-    ) {
+    ) throws IOException {
         DraftFileUploadRequest request = toDraftFileUploadRequest(draftId, details.getEmpId(), MultipartFileConverter.from(file));
 
         FileUpload<DraftFileUploadRequest> upload = getUploadImpl(FileDomain.DRAFT);
@@ -114,7 +115,7 @@ public class FileCommandApi {
             @AuthenticationPrincipal EmpDetails details,
             @PathVariable Long boardId,
             @RequestPart("file") MultipartFile file
-    ) {
+    ) throws IOException {
         BoardFileUploadRequest request = toBoardFileUploadRequest(boardId, details.getEmpId(), MultipartFileConverter.from(file), LocalDateTime.now(ZONE_SEOUL));
 
         FileUpload<BoardFileUploadRequest> upload = getUploadImpl(FileDomain.BOARD);
@@ -143,7 +144,7 @@ public class FileCommandApi {
             @AuthenticationPrincipal EmpDetails details,
             @PathVariable Long messageId,
             @RequestPart("file") MultipartFile file
-    ) {
+    ) throws IOException {
         MessageFileUploadRequest request = toMessageFileUploadRequest(details.getEmpId(), messageId, MultipartFileConverter.from(file));
 
         FileUpload<MessageFileUploadRequest> upload = getUploadImpl(FileDomain.MESSAGE);
@@ -171,7 +172,7 @@ public class FileCommandApi {
             @AuthenticationPrincipal EmpDetails details,
             @PathVariable Long educationId,
             @RequestPart("file") MultipartFile file
-    ) {
+    ) throws IOException {
         EducationFileUploadRequest request = toEducationFileUploadRequest(educationId, details.getEmpId(), MultipartFileConverter.from(file));
 
         FileUpload<EducationFileUploadRequest> upload = getUploadImpl(FileDomain.EDUCATION);
@@ -200,7 +201,7 @@ public class FileCommandApi {
             @AuthenticationPrincipal EmpDetails details,
             @PathVariable Long meetingRoomId,
             @RequestPart("file") MultipartFile file
-    ) {
+    ) throws IOException {
         MeetingRoomFileUploadRequest request = toMeetingRoomFileUploadRequest(details.getEmpId(), meetingRoomId, MultipartFileConverter.from(file));
 
         FileUpload<MeetingRoomFileUploadRequest> upload = getUploadImpl(FileDomain.MEETING_ROOM);

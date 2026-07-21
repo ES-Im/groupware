@@ -113,6 +113,9 @@ dependencies {
 
     // actuator
     implementation("org.springframework.boot:spring-boot-starter-actuator")
+
+    // Amazon S3 SDK
+    implementation("software.amazon.awssdk:s3:2.47.5")
 }
 
 // nullaway + errorprone

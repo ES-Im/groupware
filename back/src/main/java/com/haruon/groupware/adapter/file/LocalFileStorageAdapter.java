@@ -6,6 +6,7 @@ import com.haruon.groupware.application.file.required.FileStorage;
 import com.haruon.groupware.application.file.service.command.dto.FileDto;
 import com.haruon.groupware.application.file.service.command.dto.StoreFile;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Component;
@@ -18,9 +19,10 @@ import java.nio.file.Path;
 import java.util.UUID;
 
 @Component
-public class FileStorageAdapter implements FileStorage {
+@Profile("!prod")
+public class LocalFileStorageAdapter implements FileStorage {
 
-    @Value("${FILE_UPLOAD_ROOT_DIR}")
+    @Value("${LOCAL_FILE_UPLOAD_ROOT_DIR}")
     private String FILE_UPLOAD_ROOT_DIR;
 
     private Path getPath(String fileType) {
@@ -33,6 +35,7 @@ public class FileStorageAdapter implements FileStorage {
 
     @Override
     public StoreFile store(FileDto fileDto, String type) {
+        InputStream inputStream = null;
         try {
             Path storedPath = getPath(type);
             Files.createDirectories(storedPath);
@@ -40,7 +43,7 @@ public class FileStorageAdapter implements FileStorage {
 
             Path storedFilePath = storedPath.resolve(storedFileName);
 
-            InputStream inputStream = fileDto.resource().getInputStream();
+            inputStream = fileDto.resource().getInputStream();
             Files.copy(inputStream, storedFilePath);
 
             return new StoreFile(
@@ -54,6 +57,11 @@ public class FileStorageAdapter implements FileStorage {
 
         } catch (IOException e) {
             throw new FileStoreFailedException();
+        } finally {
+            if(inputStream != null) {
+                try {    inputStream.close();   }
+                catch (IOException ignore) {}
+            }
         }
 
     }

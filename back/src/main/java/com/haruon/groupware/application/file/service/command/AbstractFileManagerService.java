@@ -11,6 +11,7 @@ import com.haruon.groupware.application.file.service.command.dto.StoreFile;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.util.Locale;
 
 @RequiredArgsConstructor
@@ -34,7 +35,7 @@ public abstract class AbstractFileManagerService<T extends FileUploadRequest> im
     }
 
     @Override
-    public void uploadResource(T uploadRequest) {
+    public void uploadResource(T uploadRequest) throws IOException {
         StoreFile storedFile = fileStorage.store(uploadRequest.file(), uploadRequest.domain().name().toLowerCase(Locale.ROOT));
 
         try {

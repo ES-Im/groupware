@@ -4,9 +4,11 @@ import com.haruon.groupware.application.file.service.command.dto.FileDto;
 import com.haruon.groupware.application.file.service.command.dto.StoreFile;
 import org.springframework.core.io.Resource;
 
+import java.io.IOException;
+
 
 public interface FileStorage {
-    StoreFile store(FileDto fileDto, String fileType);
+    StoreFile store(FileDto fileDto, String fileType) throws IOException;
 
     Resource loadAsResource(String storedPath, String storedName);
 

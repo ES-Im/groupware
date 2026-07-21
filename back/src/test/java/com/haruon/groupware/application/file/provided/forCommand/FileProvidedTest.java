@@ -87,7 +87,7 @@ record FileProvidedTest(
 
     @Test
     @DisplayName("사원 파일 업로드 테스트 - 사원은 프로필 이미지를 추가할 수 있다")
-    void upload_emp_file_success() {
+    void upload_emp_file_success() throws IOException {
         Emp emp = approvedEmp("emp");
         FileDto file = imageFile(unique("profile") + ".png");
 
@@ -110,7 +110,7 @@ record FileProvidedTest(
 
     @Test
     @DisplayName("기안서 파일 업로드 테스트 - 기안자는 임시저장 기안서에 첨부파일을 추가할 수 있다")
-    void upload_draft_file_success() {
+    void upload_draft_file_success() throws IOException {
         Emp drafter = approvedEmp("drafter");
         Long draftId = createDraft(drafter);
         FileDto file = pdfFile(unique("draft") + ".pdf");
@@ -127,7 +127,7 @@ record FileProvidedTest(
 
     @Test
     @DisplayName("게시글 파일 업로드 테스트 - 작성자는 게시글에 첨부파일을 추가할 수 있다")
-    void upload_board_file_success() {
+    void upload_board_file_success() throws IOException {
         Emp admin = saveAdmin(empRepository);
         Emp author = approvedEmp("board-author");
         Long boardId = createBoard(admin, author);
@@ -145,7 +145,7 @@ record FileProvidedTest(
 
     @Test
     @DisplayName("쪽지 파일 업로드 테스트 - 작성자는 쪽지 초안에 첨부파일을 추가할 수 있다")
-    void upload_message_file_success() {
+    void upload_message_file_success() throws IOException {
         Emp writer = approvedEmp("message-writer");
         Long messageId = createMessageDraft(writer);
         FileDto file = pdfFile(unique("message") + ".pdf");
@@ -162,7 +162,7 @@ record FileProvidedTest(
 
     @Test
     @DisplayName("교육 파일 업로드 테스트 - 교육 등록자는 교육에 첨부파일을 추가할 수 있다")
-    void upload_education_file_success() {
+    void upload_education_file_success() throws IOException {
         Emp register = roleEmp(SystemRoleCode.FRANCHISE, "franchise-register");
         Long educationId = createEducation(register);
         FileDto file = pdfFile(unique("education") + ".pdf");
@@ -179,7 +179,7 @@ record FileProvidedTest(
 
     @Test
     @DisplayName("회의실 파일 업로드 테스트 - 시설 담당자는 회의실 이미지를 추가할 수 있다")
-    void upload_meeting_room_file_success() {
+    void upload_meeting_room_file_success() throws IOException {
         Emp facility = roleEmp(SystemRoleCode.FACILITY, "facility-editor");
         Long meetingRoomId = createMeetingRoom(facility);
         FileDto file = imageFile(unique("meeting-room") + ".png");
@@ -196,7 +196,7 @@ record FileProvidedTest(
 
     @Test
     @DisplayName("사원 파일 삭제 테스트 - 사원은 본인의 파일을 삭제할 수 있다")
-    void delete_emp_file_success() {
+    void delete_emp_file_success() throws IOException {
         Emp emp = approvedEmp("emp-delete");
         FileDto file = imageFile(unique("profile-delete") + ".png");
         upload(FileDomain.EMP, EmpFileUploadRequest.builder()
@@ -219,7 +219,7 @@ record FileProvidedTest(
 
     @Test
     @DisplayName("기안서 파일 삭제 테스트 - 기안자는 임시저장 기안서의 첨부파일을 삭제할 수 있다")
-    void delete_draft_file_success() {
+    void delete_draft_file_success() throws IOException {
         Emp drafter = approvedEmp("draft-delete");
         Long draftId = createDraft(drafter);
         FileDto file = pdfFile(unique("draft-delete") + ".pdf");
@@ -238,7 +238,7 @@ record FileProvidedTest(
 
     @Test
     @DisplayName("게시글 파일 삭제 테스트 - 작성자는 게시글 첨부파일을 삭제할 수 있다")
-    void delete_board_file_success() {
+    void delete_board_file_success() throws IOException {
         Emp admin = saveAdmin(empRepository);
         Emp author = approvedEmp("board-delete");
         Long boardId = createBoard(admin, author);
@@ -258,7 +258,7 @@ record FileProvidedTest(
 
     @Test
     @DisplayName("쪽지 파일 삭제 테스트 - 작성자는 쪽지 초안 첨부파일을 삭제할 수 있다")
-    void delete_message_file_success() {
+    void delete_message_file_success() throws IOException {
         Emp writer = approvedEmp("message-delete");
         Long messageId = createMessageDraft(writer);
         FileDto file = pdfFile(unique("message-delete") + ".pdf");
@@ -277,7 +277,7 @@ record FileProvidedTest(
 
     @Test
     @DisplayName("교육 파일 삭제 테스트 - 교육 등록자는 교육 첨부파일을 삭제할 수 있다")
-    void delete_education_file_success() {
+    void delete_education_file_success() throws IOException {
         Emp register = roleEmp(SystemRoleCode.FRANCHISE, "education-delete");
         Long educationId = createEducation(register);
         FileDto file = pdfFile(unique("education-delete") + ".pdf");
@@ -296,7 +296,7 @@ record FileProvidedTest(
 
     @Test
     @DisplayName("회의실 파일 삭제 테스트 - 시설 담당자는 회의실 이미지를 삭제할 수 있다")
-    void delete_meeting_room_file_success() {
+    void delete_meeting_room_file_success() throws IOException {
         Emp facility = roleEmp(SystemRoleCode.FACILITY, "meeting-room-delete");
         Long meetingRoomId = createMeetingRoom(facility);
         FileDto file = imageFile(unique("meeting-room-delete") + ".png");
@@ -352,7 +352,7 @@ record FileProvidedTest(
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
-    private void upload(FileDomain domain, FileUploadRequest request) {
+    private void upload(FileDomain domain, FileUploadRequest request) throws IOException {
         FileUpload upload = uploadResolver.getManager(domain);
         upload.uploadResource(request);
     }
@@ -362,7 +362,7 @@ record FileProvidedTest(
                 .deleteStoredResource(toFileDeleteRequest(requesterEmpId, domainPkId, fileId));
     }
 
-    private void uploadDraftFile(Emp drafter, Long draftId, FileDto file) {
+    private void uploadDraftFile(Emp drafter, Long draftId, FileDto file) throws IOException {
         upload(FileDomain.DRAFT, DraftFileUploadRequest.builder()
                 .draftId(draftId)
                 .drafterId(drafter.getId())
@@ -371,7 +371,7 @@ record FileProvidedTest(
         );
     }
 
-    private void uploadBoardFile(Emp author, Long boardId, FileDto file) {
+    private void uploadBoardFile(Emp author, Long boardId, FileDto file) throws IOException {
         upload(FileDomain.BOARD, BoardFileUploadRequest.builder()
                 .boardId(boardId)
                 .requesterId(author.getId())
@@ -381,7 +381,7 @@ record FileProvidedTest(
         );
     }
 
-    private void uploadMessageFile(Emp writer, Long messageId, FileDto file) {
+    private void uploadMessageFile(Emp writer, Long messageId, FileDto file) throws IOException {
         upload(FileDomain.MESSAGE, MessageFileUploadRequest.builder()
                 .writerId(writer.getId())
                 .messageDraftId(messageId)
@@ -390,7 +390,7 @@ record FileProvidedTest(
         );
     }
 
-    private void uploadEducationFile(Emp register, Long educationId, FileDto file) {
+    private void uploadEducationFile(Emp register, Long educationId, FileDto file) throws IOException {
         upload(FileDomain.EDUCATION, EducationFileUploadRequest.builder()
                 .educationId(educationId)
                 .registerId(register.getId())
@@ -399,7 +399,7 @@ record FileProvidedTest(
         );
     }
 
-    private void uploadMeetingRoomFile(Emp facility, Long meetingRoomId, FileDto file) {
+    private void uploadMeetingRoomFile(Emp facility, Long meetingRoomId, FileDto file) throws IOException {
         upload(FileDomain.MEETING_ROOM, MeetingRoomFileUploadRequest.builder()
                 .editorId(facility.getId())
                 .meetingRoomId(meetingRoomId)
