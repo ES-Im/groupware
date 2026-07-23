@@ -24,19 +24,4 @@ public class S3Config {
                 .build();
     }
 
-    //todo - 확인용 연결만 확인하면 이부분 지우면 됌
-    public static void listBuckets(S3Client s3) {
-        try {
-            ListBucketsResponse response = s3.listBuckets();
-            List<Bucket> bucketList = response.buckets();
-            bucketList.forEach(bucket -> {
-                System.out.println("Bucket Name: " + bucket.name());
-            });
-
-        } catch (S3Exception e) {
-            System.err.println(e.awsErrorDetails().errorMessage());
-            System.exit(1);
-        }
-    }
-
 }

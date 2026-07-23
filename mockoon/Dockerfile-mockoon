@@ -1,0 +1,4 @@
+FROM mockoon/cli:9
+COPY franchise-api.json /data/franchise-api.json
+CMD ["--data", "/data/franchise-api.json", "--port", "3000"]
+# ENTRYPOINT ["mockoon-cli", "start"] 기본값
