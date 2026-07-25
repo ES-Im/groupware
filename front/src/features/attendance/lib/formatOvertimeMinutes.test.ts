@@ -1,11 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { formatOvertimeMinutes } from './formatOvertimeMinutes'
 
-/**
- * formatOvertimeMinutes(ROADMAP2.md M1 T1.3) 단위 테스트.
- * 이번 태스크에서 확정한 표기 가정(0분 단독 표기·60분 미만 분만 표기·60분 이상 "n시간 m분",
- * 분이 0이어도 생략 안 함, 반올림 없음)의 경계값을 검증한다.
- */
 
 describe('formatOvertimeMinutes', () => {
   it('0분이면 "0분"을 반환한다', () => {

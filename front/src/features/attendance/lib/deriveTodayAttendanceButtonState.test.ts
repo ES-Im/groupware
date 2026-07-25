@@ -3,12 +3,6 @@ import { describe, expect, it } from 'vitest'
 import { deriveTodayAttendanceButtonState } from './deriveTodayAttendanceButtonState'
 import type { AttendanceItem } from '@/features/attendance/model/attendance'
 
-/**
- * deriveTodayAttendanceButtonState(ROADMAP2.md M2 T2.1, F301/F302 · Open Question #3) 단위 테스트.
- * "오늘"은 dayjs().format('YYYY-MM-DD')로 매 실행 시 구해 픽스처에 사용한다(하드코딩 금지 —
- * 시스템 날짜와 무관하게 항상 통과해야 한다).
- */
-
 const today = dayjs().format('YYYY-MM-DD')
 const yesterday = dayjs().subtract(1, 'day').format('YYYY-MM-DD')
 

@@ -2,11 +2,6 @@ import { describe, expect, it } from 'vitest'
 import type { AttendanceStatus } from '../model/attendance'
 import { attendanceStatusBadgeMap, getAttendanceStatusBadge } from './attendanceStatusBadge'
 
-/**
- * attendanceStatusBadge(ROADMAP2.md M1 T1.3) 단위 테스트.
- * AttendanceStatus 6개 리터럴 전부에 대해 label/variant 매핑이 PRD 가정값과 일치하는지 확인한다.
- */
-
 describe('attendanceStatusBadgeMap / getAttendanceStatusBadge', () => {
   it.each([
     ['NORMAL', '정상', 'default'],

@@ -8,20 +8,6 @@ import { BASE_URL } from '@/shared/api/client'
 import { server } from '@/test/mocks/server'
 import { MyAttendancePage } from './MyAttendancePage'
 
-/**
- * MyAttendancePage(F303·F304, ROADMAP2.md T1.5) 회귀 방지 테스트.
- *
- * 검증 대상:
- * - 정상 렌더: 요약 카드 4개 지표 + 표 행 데이터.
- * - 로딩 상태: 목록 조회 중 "불러오는 중..." 노출.
- * - 에러 상태: handleApiError → toast.error 호출 + "근태 목록을 불러오지 못했습니다." 노출.
- * - 빈 상태: content: [] → AttendanceTable의 "근태 기록이 없습니다." 노출.
- * - 필터(월/상태) 변경 시 두 쿼리에 새 파라미터가 반영되고 page가 0으로 리셋된다.
- *
- * useMyAttendanceMonthlyQuery.test.tsx/useMyAttendanceMonthlySummaryQuery.test.tsx가 이미 확립한
- * MSW 엔드포인트(GET /api/employees/attendances/me/monthly, .../monthly/summary)를 그대로
- * 재사용한다(신규 목 레이어 구축 금지).
- */
 
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
