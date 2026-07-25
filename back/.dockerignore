@@ -1,0 +1,9 @@
+build/
+.gradle/
+.git/
+
+env.yml
+.env.docker
+.env*
+
+*.md

@@ -35,3 +35,5 @@ lerna-debug.log*
 
 # Playwright MCP 디버그 산출물 (콘솔 로그·스크린샷)
 .playwright-mcp/
+
+/docs/

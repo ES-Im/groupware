@@ -71,3 +71,8 @@ front/*.sw?
 front/.vscode/*
 !front/.vscode/extensions.json
 /files/
+
+# docker 로컬 실행용 env
+back/.env.docker
+.env.docker
+/.claude/settings.local.json
