@@ -1,32 +1,12 @@
-import axios, {
-  AxiosError,
-  type AxiosInstance,
-  type InternalAxiosRequestConfig,
-} from 'axios'
-import { getAccessToken, setAccessToken } from './tokenStore'
+import axios, {AxiosError, type AxiosInstance, type InternalAxiosRequestConfig,} from 'axios'
+import {getAccessToken, setAccessToken} from './tokenStore'
 
-/**
- * 단일 axios 인스턴스 + 인터셉터 (ROADMAP T0.1 / §A-1).
- *
- * 전역 계약(CLAUDE.md §7):
- * - Base URL: http://localhost:8080 (context path 없음, 모든 API는 /api/...).
- * - withCredentials: true 필수 — refreshToken(httpOnly 쿠키) 송수신 및 CORS allowCredentials 대응.
- *   빠뜨리면 재발급 쿠키가 오가지 않아 인증이 깨진다.
- *
- * 재발급(reissue) 정책(error-response.md / shrimp-rules.md §4):
- * - 재발급 트리거는 오직 `401 && error.code === 'ROLE_002'`(토큰 무효)로만 한정한다.
- * - AUTH_001(로그인 실패)·ROLE_003(권한 부족)은 재발급 대상이 아니다 → 그대로 reject.
- */
+export const BASE_URL = `${import.meta.env.VITE_BASE_URL}`
 
-export const BASE_URL = 'http://localhost:8080'
-
-/** 재발급 엔드포인트 경로(REISSUE_TOKEN 기능ID). 이 요청 자체는 재발급 재귀 대상에서 제외한다. */
 const REISSUE_PATH = '/api/auth/reissue'
 
-/** 재발급 트리거 에러코드(토큰 무효). 이 코드일 때만 reissue를 시도한다. */
 const REISSUE_TRIGGER_CODE = 'ROLE_002'
 
-/** 백엔드 정규화 에러 응답 구조(error-response.md). 에러일 때만 이 형태로 온다. */
 interface ApiErrorBody {
   code: string
   name: string
@@ -34,19 +14,10 @@ interface ApiErrorBody {
   message: string
 }
 
-/** 재발급 성공 응답(REISSUE_TOKEN response-body). */
 interface ReissueResponse {
   accessToken: string
 }
 
-/**
- * 에러 응답 바디에서 code를 안전하게 추출한다.
- * WHY(ROADMAP T5.1 리뷰 보완): `responseType:'blob'`로 요청한 경우(예: EMP_FILE_PREVIEW) axios는
- * 401 에러 응답 바디조차 Blob으로 파싱해버려 `response.data.code`가 항상 undefined가 된다.
- * 그 결과 blob 요청은 ROLE_002를 만나도 재발급 경로를 타지 못하는 문제가 있었다. Blob이면 text()로
- * 읽어 JSON 파싱해 code를 복원하고, 파싱 실패 시 undefined(=재발급 대상 아님)로 안전하게 폴백한다.
- * 재발급 자체의 로직(단일 in-flight 공유, _retried 마킹)은 건드리지 않는다.
- */
 async function extractErrorCode(data: unknown): Promise<string | undefined> {
   if (typeof Blob !== 'undefined' && data instanceof Blob) {
     try {
@@ -62,10 +33,7 @@ async function extractErrorCode(data: unknown): Promise<string | undefined> {
   return undefined
 }
 
-/**
- * 원요청 config에 부착하는 커스텀 플래그.
- * WHY: 재발급 후 재시도한 요청이 다시 401을 받았을 때 무한 재시도(재귀)를 막는다.
- */
+
 interface RetriableRequestConfig extends InternalAxiosRequestConfig {
   _retried?: boolean
 }
@@ -75,7 +43,6 @@ export const apiClient: AxiosInstance = axios.create({
   withCredentials: true,
 })
 
-// 요청 인터셉터: 인메모리 accessToken이 있으면 Authorization 헤더를 부착한다.
 apiClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const token = getAccessToken()
   if (token) {
@@ -84,19 +51,10 @@ apiClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   return config
 })
 
-/**
- * 진행 중인 단일 재발급 프라미스.
- * WHY: 동시에 여러 요청이 401을 받아도 reissue 호출은 단 1회만 발생해야 한다.
- * 첫 401이 재발급을 시작하면 이후 401들은 같은 프라미스를 await로 공유한다.
- */
+
 let reissuePromise: Promise<string> | null = null
 
-/**
- * refreshToken 쿠키로 새 accessToken을 재발급받는다(단일 in-flight 공유용).
- * export하는 이유: authStore.bootstrap()(T1.4, 부팅/새로고침 세션 복원)도 동일한 REISSUE_TOKEN
- * 호출을 수행해야 하는데, 이 in-flight 프라미스를 공유해야 401 인터셉터 경로와 부팅 경로가
- * 동시에 겹치더라도(이론상) reissue 네트워크 호출이 1회로만 나간다.
- */
+
 export function requestReissue(): Promise<string> {
   reissuePromise ??= apiClient
     .post<ReissueResponse>(REISSUE_PATH)
