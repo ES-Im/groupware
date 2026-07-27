@@ -1,0 +1,15 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Build Playwright image') {
+            steps {
+                sh '''
+                    docker build \
+                        -f Dockerfile-playwright \
+                        -t my-playwright .
+                '''
+            }
+        }
+    }
+}

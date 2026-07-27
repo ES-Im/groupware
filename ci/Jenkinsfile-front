@@ -1,0 +1,77 @@
+pipeline {
+    agent any
+
+    environment {
+        AWS_DEFAULT_REGION = 'ap-northeast-2'
+        S3_FRONT_BUCKET = credentials('front-bucket-name')
+        CLOUDFRONT_DISTRIBUTION_ID = credentials('cloudfront-distribution-id')
+        E2E_BASE_URL = 'https://h4ruon.com'
+        CI = 'true'
+        E2E_USER = credentials('e2e-user-id')
+        E2E_PASS = credentials('e2e-user-pw')
+    }
+
+    stages {
+        stage('Build') {
+            agent {
+                docker {
+                    image 'node:22-alpine'
+                    reuseNode true
+                }
+            }
+            steps {
+                dir('front') {
+                    sh '''
+                        npm ci
+                        npm run build
+                    '''
+                }
+            }
+        }
+
+        stage('S3 sync') {
+            steps { sh 'aws s3 sync front/dist/ s3://$S3_FRONT_BUCKET --delete' }
+        }
+
+        stage('CloudFront invalidation') {
+            steps {
+               sh '''
+                   INVALIDATION_ID=$(aws cloudfront create-invalidation \
+                       --distribution-id $CLOUDFRONT_DISTRIBUTION_ID \
+                       --paths "/*" \
+                       --query Invalidation.Id --output text)
+                   aws cloudfront wait invalidation-completed \
+                       --distribution-id $CLOUDFRONT_DISTRIBUTION_ID \
+                       --id $INVALIDATION_ID
+               '''
+            }
+        }
+
+        stage('E2E Test') {
+            agent {
+                docker {
+                    image 'my-playwright'
+                    reuseNode true
+                }
+            }
+            steps{
+                dir('front') {
+                    sh 'npx playwright test'
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            publishHTML([allowMissing: true, alwaysLinkToLastBuild: false,
+                icon: '', keepAll: false, reportDir: 'front/playwright-report',
+                reportFiles: 'index.html', reportName: 'Playwright HTML Report',
+                reportTitles: '', useWrapperFileDirectly: true]
+            )
+        }
+        failure {
+            echo 'E2E 실패 - Playwright report 확인 후 롤백 필요'
+        }
+    }
+}
