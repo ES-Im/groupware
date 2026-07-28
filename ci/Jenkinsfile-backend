@@ -1,3 +1,78 @@
 pipeline {
+    agent any
+
+    environment {
+        AWS_DEFAULT_REGION = 'ap-northeast-2'
+        AWS_ACCOUNT_ID = credentials('aws-account-id')
+        ECR_REGISTRY = credentials('aws-ecr-registry-uri')
+    }
+
+    stages {
+
+        stage('ECR LOGIN') {
+            steps {
+                sh '''
+                    aws ecr get-login-password  \
+                        --region $AWS_DEFAULT_REGION |   \
+                    docker login \
+                        --username AWS \
+                        --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+                '''
+            }
+        }
+
+        stage('BUILD BACKEND IMAGE - ECR PUSH') {
+            steps {
+                sh '''
+                    docker build \
+                        -f back/src/main/resources/Dockerfile-server \
+                        -t $ECR_REGISTRY/haruon/groupware-backend:latest back/
+                    docker push $ECR_REGISTRY/haruon/groupware-backend:latest
+                '''
+            }
+        }
+
+        stage('BUILD MOCKOON IMAGE - ECR PUSH') {
+            //todo -- 첫배포 후 주석 삭제
+            // when { changeset "mockoon/**" }
+
+            steps {
+                    sh '''
+                        docker build \
+                            -f mockoon/Dockerfile-mockoon \
+                            -t $ECR_REGISTRY/haruon/groupware-mockoon:latest mockoon/
+                        docker push $ECR_REGISTRY/haruon/groupware-mockoon:latest
+                    '''
+            }
+        }
+
+        stage('ECS - UPDATE SERVICE') {
+            steps {
+                sh '''
+                    aws ecs update-service \
+                        --cluster groupware-cluster \
+                        --service groupware-service \
+                        --task-definition groupware-task \
+                        --force-new-deployment
+                    aws ecs wait services-stable \
+                        --cluster groupware-cluster \
+                        --services groupware-service
+                '''
+            }
+        }
+
+        stage('HEALTH CHECK') {
+            steps {
+                sh 'curl -fsS https://api.h4ruon.com/actuator/health'
+            }
+        }
+
+    }
+
+    post {
+        failure {
+            echo 'ECS 대상 배포 실패'
+        }
+    }
 
 }
