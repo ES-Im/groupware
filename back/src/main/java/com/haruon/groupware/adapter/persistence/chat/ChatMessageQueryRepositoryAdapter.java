@@ -62,7 +62,7 @@ public class ChatMessageQueryRepositoryAdapter implements ChatMessageQueryReposi
                         ltCursor(cursor)
                 )
                 .limit(size)
-                .orderBy(message.id.desc())
+                .orderBy(message.id.asc())
                 .fetch();
 
         if(messageResponses.isEmpty()) return new ChatMessagesResponse(List.of(), null, false);
