@@ -33,8 +33,7 @@ pipeline {
         }
 
         stage('BUILD MOCKOON IMAGE - ECR PUSH') {
-            //todo -- 첫배포 후 주석 삭제
-            // when { changeset "mockoon/**" }
+            when { changeset "mockoon/**" }
 
             steps {
                     sh '''
