@@ -6,7 +6,7 @@ pipeline {
             steps {
                 sh '''
                     docker build \
-                        -f Dockerfile-playwright \
+                        -f ci/Dockerfile-playwright \
                         -t my-playwright .
                 '''
             }
