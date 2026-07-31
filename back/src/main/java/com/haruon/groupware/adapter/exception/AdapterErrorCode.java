@@ -1,4 +1,4 @@
-package com.haruon.groupware.adapter.webapi.exception;
+package com.haruon.groupware.adapter.exception;
 
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
@@ -10,8 +10,10 @@ public enum AdapterErrorCode {
 
     // 파일
     FILE_CONVERT_FAILED_EXCEPTION(HttpStatus.BAD_REQUEST, "FILE_001", "파일 변환에 실패했습니다."),
-    FILE_STORE_FAILED_EXCEPTION(HttpStatus.INTERNAL_SERVER_ERROR, "FILE_002", "파일 저장에 실패했습니다")
+    FILE_STORE_FAILED_EXCEPTION(HttpStatus.INTERNAL_SERVER_ERROR, "FILE_002", "파일 저장에 실패했습니다"),
 
+    // 배치
+    BATCH_JOB_FAILED_EXCEPTION(HttpStatus.INTERNAL_SERVER_ERROR, "BATCH_001", "Job 처리에 실패했습니다")
     ;
 
     private final HttpStatus status;

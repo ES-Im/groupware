@@ -1,4 +1,4 @@
-package com.haruon.groupware.adapter.webapi.exception;
+package com.haruon.groupware.adapter.exception;
 
 import com.haruon.groupware.application.exception.ApplicationErrorCode;
 import org.springframework.http.HttpStatus;

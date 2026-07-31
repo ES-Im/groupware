@@ -1,6 +1,6 @@
 package com.haruon.groupware.adapter.file;
 
-import com.haruon.groupware.adapter.webapi.exception.auth.FileStoreFailedException;
+import com.haruon.groupware.adapter.exception.file.FileStoreFailedException;
 import com.haruon.groupware.application.exception.file.FileNotFoundException;
 import com.haruon.groupware.application.file.required.FileStorage;
 import com.haruon.groupware.application.file.service.command.dto.FileDto;

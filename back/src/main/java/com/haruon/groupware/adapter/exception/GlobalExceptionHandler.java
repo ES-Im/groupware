@@ -1,6 +1,6 @@
-package com.haruon.groupware.adapter.webapi.exception;
+package com.haruon.groupware.adapter.exception;
 
-import com.haruon.groupware.adapter.webapi.exception.auth.InvalidLoginException;
+import com.haruon.groupware.adapter.exception.auth.InvalidLoginException;
 import com.haruon.groupware.application.exception.ApplicationException;
 import com.haruon.groupware.application.exception.file.FileSizeLimitExceededException;
 import jakarta.validation.ConstraintViolationException;

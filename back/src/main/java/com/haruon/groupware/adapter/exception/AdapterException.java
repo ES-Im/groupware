@@ -1,4 +1,4 @@
-package com.haruon.groupware.adapter.webapi.exception;
+package com.haruon.groupware.adapter.exception;
 
 import lombok.Getter;
 
