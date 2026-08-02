@@ -1,5 +1,6 @@
 package com.haruon.groupware.adapter.batch.board;
 
+import com.haruon.groupware.adapter.exception.batch.BatchJobFailedException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
@@ -11,6 +12,8 @@ import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
+
+import java.util.Map;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -37,12 +40,20 @@ public class BoardReactionDeltasApplyConfig {
                 .tasklet((contribution, chunkContext) -> {
                     log.info("Board reaction delta DB apply tasklet 시작");
 
-                    long appliedDirtyReactionToBoard = applyService.applyDirtyReactionToBoard();
+                    Map<String, Long> appliedDirtyReactionToBoardResult = applyService.applyDirtyReactionToBoard();
+
+                    Long failedCount = appliedDirtyReactionToBoardResult.getOrDefault("failed", 0L);
+                    if(failedCount > 0) {
+                        String detailMessage = String.format(
+                                "%s job batch 실패 : 실패건수 %d건", "boardReactionApplyStep", failedCount);
+
+                        throw new BatchJobFailedException(detailMessage);
+                    }
 
                     long countRemainingDirtyReactions = applyService.countRemainingDirtyReactions();
 
                     log.info("Board reaction delta DB apply tasklet 완료. [결과] dbAppliedBoardCount = {}, remainingDirtyBoardCount = {}",
-                            appliedDirtyReactionToBoard, countRemainingDirtyReactions);
+                            appliedDirtyReactionToBoardResult.getOrDefault("applied", 0L), countRemainingDirtyReactions);
 
                     return RepeatStatus.FINISHED;
                 }, transactionManager)
