@@ -36,7 +36,7 @@ def call(String jobName, List<String> jobParameters = []) {
                 --cluster "$CLUSTER" \
                 --task-definition "$TASK_DEF" \
                 --launch-type FARGATE \
-                --network-configuration "awsvpcConfiguration={subnets=[$SUBNETS],securityGroups=[$SG],assignPublicIp=DISABLED}" \
+                --network-configuration "awsvpcConfiguration={subnets=[$SUBNETS],securityGroups=[$SG],assignPublicIp=ENABLED}" \
                 --overrides "file://$OVERRIDES_FILE" \
                 --query 'tasks[0].taskArn' \
                 --output text
