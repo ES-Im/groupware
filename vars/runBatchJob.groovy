@@ -14,7 +14,7 @@ def call(String jobName, List<String> jobParameters = []) {
 
     def overrides = [
             containerOverrides: [[
-                 name: 'app',
+                 name: containerName,
                  command: commandArgs
             ]]
     ]
@@ -24,20 +24,26 @@ def call(String jobName, List<String> jobParameters = []) {
             text: JsonOutput.toJson(overrides)
     )
 
-    def taskArn = sh(
-            script: """
-            aws ecs run-task \
-              --cluster ${cluster} \
-              --task-definition ${taskDef} \
-              --launch-type FARGATE \
-              --network-configuration \
-                "awsvpcConfiguration={subnets=[${env.SUBNETS}],securityGroups=[${env.SG}],assignPublicIp=DISABLED}" \
-              --overrides file://${overrideFileName} \
-              --query 'tasks[0].taskArn' \
-              --output text
-        """,
+    def taskArn = 'None'
+    withEnv([
+            "CLUSTER=${cluster}",
+            "TASK_DEF=${taskDef}",
+            "OVERRIDES_FILE=${overrideFileName}"
+    ]) {
+        taskArn = sh(
+            script: '''
+              aws ecs run-task \
+                --cluster "$CLUSTER" \
+                --task-definition "$TASK_DEF" \
+                --launch-type FARGATE \
+                --network-configuration "awsvpcConfiguration={subnets=[$SUBNETS],securityGroups=[$SG],assignPublicIp=DISABLED}" \
+                --overrides "file://$OVERRIDES_FILE" \
+                --query 'tasks[0].taskArn' \
+                --output text
+            ''',
             returnStdout: true
-    ).trim()
+        ).trim()
+    }
 
     if (!taskArn || taskArn == 'None') {
         error("run-task 미기동: ${jobName}")
