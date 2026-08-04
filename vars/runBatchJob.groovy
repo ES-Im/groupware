@@ -20,8 +20,8 @@ def call(String jobName, List<String> jobParameters = []) {
     ]
 
     writeFile(
-            file: overrideFileName,
-            text: JsonOutput.toJson(overrides)
+        file: overrideFileName,
+        text: JsonOutput.toJson(overrides)
     )
 
     def taskArn = 'None'
@@ -67,7 +67,21 @@ def call(String jobName, List<String> jobParameters = []) {
     ).trim()
 
     if (exitCode != '0') {
-        error("배치 실패: ${jobName}, exitCode=${exitCode}")
+        def failureInfo = sh(
+            script: """
+                aws ecs describe-tasks \
+                  --cluster ${cluster} \
+                  --tasks ${taskArn} \
+                  --query "tasks[0].{stopCode:stopCode,stoppedReason:stoppedReason}" \
+                  --output json
+            """,
+            returnStdout: true
+        ).trim()
+
+        def failFileName = overrideFileName.replace('.json', '_fail.json')
+        writeFile(file: failFileName, text: failureInfo)
+
+        error("배치 실패: ${jobName}, exitCode=${exitCode}, detailFile=${failFileName}, detail=${failureInfo}")
     }
 
     echo "배치 성공: ${jobName}"
