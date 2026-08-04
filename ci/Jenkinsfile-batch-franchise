@@ -1,0 +1,71 @@
+@Library('runBatchJob') _
+
+pipeline {
+    agent any
+
+    options {
+        timeout(time: 30, unit: 'MINUTES')
+    }
+
+    environment {
+        SG = credentials('ecs-sg')
+        SUBNETS = credentials('ecs-subnets-a')
+    }
+
+    stages {
+        stage('franchise-data-sync-batch') { parallel {
+
+            stage('dailySales') {
+                steps { script {
+                    try { runBatchJob('syncDailySalesJob') }
+                    catch (e) {
+                        try { runBatchJob('retryDailySalesSyncJob') }
+                        catch (retryEx) { error("dailySales sync/retry 모두 실패: ${retryEx.message}") }
+                    }
+                } }
+            }
+
+            stage('education') {
+                stages {
+                    stage('educationApplication') {
+                        steps { script {
+                                try { runBatchJob('syncEducationApplicationJob') }
+                                catch (e) {
+                                    try { runBatchJob('retryEducationApplicationSyncJob') }
+                                    catch (retryEx) { error("educationApplication sync/retry 모두 실패: ${retryEx.message}") }
+                                }
+                        } }
+                    }
+
+                    stage('educationApplication-cancellation') {
+                            steps { script {
+                                try { runBatchJob('syncEducationCancellationJob') }
+                                catch (e) {
+                                    try { runBatchJob('retryEducationCancellationSyncJob') }
+                                    catch (retryEx) { error("educationCancellation sync/retry 모두 실패: ${retryEx.message}") }
+                                }
+                            } }
+                    }
+                }
+            }
+
+            stage('inquiry') {
+                steps { script {
+                    try { runBatchJob('syncInquiryJob') }
+                    catch (e) {
+                        try { runBatchJob('retryInquirySyncJob') }
+                        catch (retryEx) { error("inquiry sync/retry 모두 실패: ${retryEx.message}") }
+                    }
+                } }
+            }
+
+        }}
+
+    }
+
+    post {
+        failure {
+           echo 'franchise mockoon api sync 배치 파이프라인 실패 — 실패한 스테이지 로그 확인'
+        }
+    }
+}
