@@ -692,7 +692,7 @@
     <entity class="com.haruon.groupware.domain.franchise.Franchise" access="FIELD">
         <attributes>
             <basic name="businessNumber">
-                <column name="business_number" nullable="false" length="12"/>
+                <column name="business_number" nullable="false" length="10"/>
             </basic>
             <basic name="franchiseName">
                 <column name="franchise_name" nullable="false" length="50"/>
