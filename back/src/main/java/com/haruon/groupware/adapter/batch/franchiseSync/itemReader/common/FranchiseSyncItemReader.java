@@ -1,4 +1,4 @@
-package com.haruon.groupware.adapter.batch.franchiseSync.itemReader;
+package com.haruon.groupware.adapter.batch.franchiseSync.itemReader.common;
 
 import com.haruon.groupware.adapter.mockapi.FranchiseSyncResponse;
 import org.springframework.batch.item.ItemReader;
@@ -15,7 +15,9 @@ public abstract class FranchiseSyncItemReader<T> implements ItemReader<Franchise
         if (iterator == null) {
             FranchiseSyncResponse<T> response = collect();
             this.endpointPath = response.endpointPath();
-            this.iterator = response.items().iterator();
+            this.iterator = response.items().stream()
+                    .filter(this::shouldRead)
+                    .iterator();
         }
 
         if (!iterator.hasNext()) {
@@ -26,5 +28,9 @@ public abstract class FranchiseSyncItemReader<T> implements ItemReader<Franchise
     }
 
     protected abstract FranchiseSyncResponse<T> collect();
+
+    protected boolean shouldRead(T item) {
+        return true;
+    }
 
 }

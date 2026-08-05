@@ -1,8 +1,8 @@
-package com.haruon.groupware.adapter.batch.franchiseSync;
+package com.haruon.groupware.adapter.batch.franchiseSync.primaryConfig;
 
-import com.haruon.groupware.adapter.batch.franchiseSync.itemProcessor.SyncInquiryItemProcessor;
-import com.haruon.groupware.adapter.batch.franchiseSync.itemReader.FranchiseSyncBatchItem;
-import com.haruon.groupware.adapter.batch.franchiseSync.itemReader.InquiryItemReader;
+import com.haruon.groupware.adapter.batch.franchiseSync.itemProcessor.primary.SyncInquiryItemProcessor;
+import com.haruon.groupware.adapter.batch.franchiseSync.itemReader.common.FranchiseSyncBatchItem;
+import com.haruon.groupware.adapter.batch.franchiseSync.itemReader.primary.InquiryItemReader;
 import com.haruon.groupware.adapter.batch.franchiseSync.itemWriter.SyncInquiryItemWriter;
 import com.haruon.groupware.application.franchise.service.command.dto.InquiryRequest;
 import com.haruon.groupware.application.syncRequest.service.dto.FranchiseSyncCommand;
@@ -17,7 +17,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import static com.haruon.groupware.adapter.batch.franchiseSync.common.FranchiseSyncBatchProperties.CHUNK_SIZE;
+import static com.haruon.groupware.adapter.batch.franchiseSync.FranchiseSyncBatchProperties.CHUNK_SIZE;
 
 @Configuration
 @RequiredArgsConstructor

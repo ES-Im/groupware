@@ -1,4 +1,4 @@
-package com.haruon.groupware.adapter.batch.franchiseSync.retry;
+package com.haruon.groupware.adapter.batch.franchiseSync.retryConfig;
 
 import com.haruon.groupware.adapter.batch.franchiseSync.itemProcessor.retry.EducationApplicationRetryItemProcessor;
 import com.haruon.groupware.adapter.batch.franchiseSync.itemReader.retry.EducationApplicationRetryItemReader;
@@ -19,7 +19,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import static com.haruon.groupware.adapter.batch.franchiseSync.common.FranchiseSyncBatchProperties.CHUNK_SIZE;
+import static com.haruon.groupware.adapter.batch.franchiseSync.FranchiseSyncBatchProperties.CHUNK_SIZE;
 
 @Slf4j
 @Configuration

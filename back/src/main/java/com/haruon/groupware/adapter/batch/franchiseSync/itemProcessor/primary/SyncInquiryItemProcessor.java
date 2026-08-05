@@ -1,6 +1,6 @@
-package com.haruon.groupware.adapter.batch.franchiseSync.itemProcessor;
+package com.haruon.groupware.adapter.batch.franchiseSync.itemProcessor.primary;
 
-import com.haruon.groupware.adapter.batch.franchiseSync.itemReader.FranchiseSyncBatchItem;
+import com.haruon.groupware.adapter.batch.franchiseSync.itemReader.common.FranchiseSyncBatchItem;
 import com.haruon.groupware.application.franchise.service.command.dto.InquiryRequest;
 import com.haruon.groupware.application.syncRequest.provided.FranchiseSyncProcessor;
 import com.haruon.groupware.application.syncRequest.service.dto.FranchiseSyncCommand;

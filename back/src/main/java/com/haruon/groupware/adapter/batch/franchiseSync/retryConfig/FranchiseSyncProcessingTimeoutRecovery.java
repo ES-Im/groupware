@@ -1,4 +1,4 @@
-package com.haruon.groupware.adapter.batch.franchiseSync.retry;
+package com.haruon.groupware.adapter.batch.franchiseSync.retryConfig;
 
 import com.haruon.groupware.application.syncRequest.provided.SyncTaskManager;
 import com.haruon.groupware.application.syncRequest.required.FranchiseSyncRequestRepository;
@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
 
-import static com.haruon.groupware.adapter.batch.franchiseSync.common.FranchiseSyncBatchProperties.MAX_TRY_COUNT;
+import static com.haruon.groupware.adapter.batch.franchiseSync.FranchiseSyncBatchProperties.MAX_TRY_COUNT;
 
 @Component
 @RequiredArgsConstructor
