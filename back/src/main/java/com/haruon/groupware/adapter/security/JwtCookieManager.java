@@ -20,7 +20,7 @@ public class JwtCookieManager {
         cookie.setHttpOnly(true);
         cookie.setPath("/");
         cookie.setMaxAge(jwtTokenProvider.getRefreshTokenExpiresIn().intValue() / 1000);
-        cookie.setSecure(false);    //todo HTTPS 환경에서 true로 변경 필요
+        cookie.setSecure(true);
 
         response.addCookie(cookie);
     }

@@ -74,11 +74,9 @@ public class GlobalExceptionHandler {
                 .body(ErrorResponse.from(ex.getErrorCode()));
     }
 
-    //todo - 운영환경에서는 지우기
     @ExceptionHandler(UnknownPathException.class)
     public ResponseEntity<ErrorResponse> handle(UnknownPathException e) {
-        log.error("쿼리 잘못함 =============================");
-
+        log.error("처리하지 않은 커스텀 에러 로그 확인 필요");
         return ResponseEntity.status(500)
                 .body(ErrorResponse.from(e));
     }
