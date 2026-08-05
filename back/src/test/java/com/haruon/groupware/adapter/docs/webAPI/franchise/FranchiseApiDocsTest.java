@@ -770,7 +770,7 @@ public class FranchiseApiDocsTest extends RestDocsSupport {
 
     private FieldDescriptor[] franchiseCreateRequestFields() {
         return new FieldDescriptor[]{
-                fieldWithPath("businessNumber").type(JsonFieldType.STRING).attributes(key("constraints").value("12자 사업자번호 형식")).description("사업자번호"),
+                fieldWithPath("businessNumber").type(JsonFieldType.STRING).attributes(key("constraints").value("10자 사업자번호 형식")).description("사업자번호"),
                 fieldWithPath("franchiseName").type(JsonFieldType.STRING).attributes(key("constraints").value("50자 이하")).description("가맹점명"),
                 fieldWithPath("address").type(JsonFieldType.STRING).attributes(key("constraints").value("200자 이하")).description("주소"),
                 fieldWithPath("ownerName").type(JsonFieldType.STRING).attributes(key("constraints").value("50자 이하")).description("대표자명"),

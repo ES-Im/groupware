@@ -16,7 +16,7 @@ import static com.haruon.groupware.domain.shared.RegexpUtil.EMAIL_PATTERN_MESSAG
 public record FranchiseCreateRequest(
 
         @NotBlank
-        @Size(max = 12, min = 12)
+        @Size(max = 10, min = 10)
         String businessNumber,
 
         @NotBlank

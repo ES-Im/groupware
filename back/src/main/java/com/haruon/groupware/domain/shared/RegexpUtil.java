@@ -20,8 +20,8 @@ public class RegexpUtil {
     public final static String DEPT_CODE_PATTERN = "^[0-9]{3}$";
     public final static String DEPT_CODE_PATTERN_MESSAGE = "부서코드는 숫자 3자리여야 합니다.";
 
-    public final static String BUSINESS_NUMBER_PATTERN = "^\\d{3}-\\d{2}-\\d{5}$";
-    public final static String BUSINESS_NUMBER_PATTERN_MESSAGE = "사업자 등록번호는 000-00-00000 형식입니다.";
+    public final static String BUSINESS_NUMBER_PATTERN = "^\\d{10}$";
+    public final static String BUSINESS_NUMBER_PATTERN_MESSAGE = "사업자 등록번호는 0000000000 형식입니다.";
 
     public final static String CONTACT_NUMBER_PATTERN = "^010-\\d{3,4}-\\d{4}$";
     public final static String CONTACT_NUMBER_PATTERN_MESSAGE = "연락처는 010-000(0)-0000 형식입니다.";
