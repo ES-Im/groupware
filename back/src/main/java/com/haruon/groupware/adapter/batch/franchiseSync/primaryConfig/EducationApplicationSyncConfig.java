@@ -1,8 +1,8 @@
 package com.haruon.groupware.adapter.batch.franchiseSync.primaryConfig;
 
 import com.haruon.groupware.adapter.batch.franchiseSync.itemProcessor.primary.SyncEducationApplicationItemProcessor;
-import com.haruon.groupware.adapter.batch.franchiseSync.itemReader.primary.EducationApplicationItemReader;
 import com.haruon.groupware.adapter.batch.franchiseSync.itemReader.common.FranchiseSyncBatchItem;
+import com.haruon.groupware.adapter.batch.franchiseSync.itemReader.primary.EducationApplicationItemReader;
 import com.haruon.groupware.adapter.batch.franchiseSync.itemWriter.SyncEducationApplicationItemWriter;
 import com.haruon.groupware.application.franchise.service.command.dto.ApplicationRequest;
 import com.haruon.groupware.application.syncRequest.service.dto.FranchiseSyncCommand;

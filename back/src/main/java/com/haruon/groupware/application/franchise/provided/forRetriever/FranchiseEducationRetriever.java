@@ -3,7 +3,6 @@ package com.haruon.groupware.application.franchise.provided.forRetriever;
 import com.haruon.groupware.application.franchise.service.query.dto.education.EducationApplicantsResponse;
 import com.haruon.groupware.application.franchise.service.query.dto.education.EducationDetailResponse;
 import com.haruon.groupware.application.franchise.service.query.dto.education.EducationsResponse;
-import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

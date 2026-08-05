@@ -2,8 +2,8 @@ package com.haruon.groupware.adapter.batch.franchiseSync.primaryConfig;
 
 import com.haruon.groupware.adapter.batch.franchiseSync.FranchiseSyncBatchProperties;
 import com.haruon.groupware.adapter.batch.franchiseSync.itemProcessor.primary.SyncEducationCancellationItemProcessor;
-import com.haruon.groupware.adapter.batch.franchiseSync.itemReader.primary.EducationCancellationItemReader;
 import com.haruon.groupware.adapter.batch.franchiseSync.itemReader.common.FranchiseSyncBatchItem;
+import com.haruon.groupware.adapter.batch.franchiseSync.itemReader.primary.EducationCancellationItemReader;
 import com.haruon.groupware.adapter.batch.franchiseSync.itemWriter.SyncEducationCancellationItemWriter;
 import com.haruon.groupware.application.franchise.service.command.dto.CancellationRequest;
 import com.haruon.groupware.application.syncRequest.service.dto.FranchiseSyncCommand;
