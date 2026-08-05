@@ -14,7 +14,7 @@ spring:
     import:
       - optional:env.yml
   profiles:
-    active: dev # dev / prod / test
+    active: prod # dev / prod / test
 
   servlet:
     multipart:
@@ -48,7 +48,7 @@ spring:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT}
 
-  # batch //todo jenkins 스케쥴링 연동 - 배치
+  # batch
   batch:
     jdbc:
       initialize-schema: never
