@@ -19,19 +19,13 @@ public class EducationCancellationRetryItemProcessor
     public FranchiseSyncCommand<CancellationRequest> process(FranchiseSyncTask task) {
         EducationCancellationSyncItem item = singleItem(
                 collector.collectEducationApplicationCancellations(task.getExternalId(), task.getItemIdx()),
-                task,
-                EducationCancellationSyncItem::externalId,
-                EducationCancellationSyncItem::itemIdx
+                task
         );
 
         return new FranchiseSyncCommand<>(
                 task,
                 task.getFranchise().getId(),
-                new CancellationRequest(
-                        task.getFranchise().getId(),
-                        educationId(task),
-                        item.externalId()
-                )
+                item.toRequest(task.getFranchise().getId(), educationId(task))
         );
     }
 }

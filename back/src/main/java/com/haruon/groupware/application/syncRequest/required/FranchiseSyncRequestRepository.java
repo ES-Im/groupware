@@ -15,6 +15,12 @@ public interface FranchiseSyncRequestRepository extends Repository<FranchiseSync
 
     Optional<FranchiseSyncTask> findById(Long id);
 
+    Optional<FranchiseSyncTask> findByTypeAndExternalIdAndItemIdx(
+            SyncType type,
+            String externalId,
+            int itemIdx
+    );
+
     List<FranchiseSyncTask> findByStatusAndTypeOrderByIdAsc(SyncStatus status, SyncType type);
 
     List<FranchiseSyncTask> findByStatusAndTypeAndStartedAtLessThanEqualOrderByIdAsc(

@@ -8,7 +8,7 @@ import org.springframework.batch.item.Chunk;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.stereotype.Component;
 
-import static com.haruon.groupware.adapter.batch.franchiseSync.common.FranchiseSyncBatchProperties.MAX_TRY_COUNT;
+import static com.haruon.groupware.adapter.batch.franchiseSync.FranchiseSyncBatchProperties.MAX_TRY_COUNT;
 
 @Component
 @RequiredArgsConstructor
@@ -18,8 +18,16 @@ public class SyncEducationApplicationItemWriter implements ItemWriter<FranchiseS
 
     @Override
     public void write(Chunk<? extends FranchiseSyncCommand<ApplicationRequest>> chunk) {
+        boolean allSucceeded = true;
+
         for (FranchiseSyncCommand<ApplicationRequest> command : chunk) {
-            syncWriter.writeEducationApplication(command, MAX_TRY_COUNT);
+            if (!syncWriter.writeEducationApplication(command, MAX_TRY_COUNT)) {
+                allSucceeded = false;
+            }
+        }
+
+        if (!allSucceeded) {
+            throw new IllegalStateException("EducationApplication sync 처리 중 실패한 항목이 있습니다.");
         }
     }
 }

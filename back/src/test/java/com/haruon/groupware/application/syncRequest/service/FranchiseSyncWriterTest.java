@@ -1,9 +1,6 @@
 package com.haruon.groupware.application.syncRequest.service;
 
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
-import com.haruon.groupware.application.franchise.provided.forImport.EducationApplicationImporter;
-import com.haruon.groupware.application.franchise.provided.forImport.FranchiseDailySalesImporter;
-import com.haruon.groupware.application.franchise.provided.forImport.InquiryImporter;
 import com.haruon.groupware.application.franchise.service.command.dto.DailySalesRequest;
 import com.haruon.groupware.application.syncRequest.provided.SyncTaskManager;
 import com.haruon.groupware.application.syncRequest.service.dto.FranchiseSyncCommand;
@@ -21,6 +18,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -29,15 +27,11 @@ class FranchiseSyncWriterTest {
     private static final int MAX_RETRY_COUNT = 3;
 
     private final SyncTaskManager syncTaskManager = mock(SyncTaskManager.class);
-    private final FranchiseDailySalesImporter dailySalesImporter = mock(FranchiseDailySalesImporter.class);
-    private final EducationApplicationImporter educationApplicationImporter = mock(EducationApplicationImporter.class);
-    private final InquiryImporter inquiryImporter = mock(InquiryImporter.class);
+    private final FranchiseSyncImportExecutor importExecutor = mock(FranchiseSyncImportExecutor.class);
 
     private final FranchiseSyncWriterService writer = new FranchiseSyncWriterService(
             syncTaskManager,
-            dailySalesImporter,
-            educationApplicationImporter,
-            inquiryImporter
+            importExecutor
     );
 
     @Test
@@ -45,14 +39,14 @@ class FranchiseSyncWriterTest {
     void writeDailySale_success() {
         FranchiseSyncCommand<DailySalesRequest> command = command();
 
-        writer.writeDailySale(command, MAX_RETRY_COUNT);
+        boolean success = writer.writeDailySale(command, MAX_RETRY_COUNT);
 
-        InOrder inOrder = inOrder(syncTaskManager, dailySalesImporter);
+        assertThat(success).isTrue();
+        InOrder inOrder = inOrder(syncTaskManager, importExecutor);
         inOrder.verify(syncTaskManager).start(eq(command.syncTask()), any(LocalDateTime.class));
-        inOrder.verify(dailySalesImporter).importDailySales(command.franchiseId(), command.request());
+        inOrder.verify(importExecutor).importDailySales(command.franchiseId(), command.request());
         inOrder.verify(syncTaskManager).complete(eq(command.syncTask()), any(LocalDateTime.class));
         verify(syncTaskManager, never()).fail(any(), any(), anyString(), anyInt());
-        verifyNoInteractions(educationApplicationImporter, inquiryImporter);
     }
 
     @ParameterizedTest(name = "{index} ==> expected={1}")
@@ -61,14 +55,15 @@ class FranchiseSyncWriterTest {
     void writeDailySale_fail(Exception exception, String expectedErrorMessage) {
         FranchiseSyncCommand<DailySalesRequest> command = command();
         doThrow(exception)
-                .when(dailySalesImporter)
+                .when(importExecutor)
                 .importDailySales(command.franchiseId(), command.request());
 
-        writer.writeDailySale(command, MAX_RETRY_COUNT);
+        boolean success = writer.writeDailySale(command, MAX_RETRY_COUNT);
 
-        InOrder inOrder = inOrder(syncTaskManager, dailySalesImporter);
+        assertThat(success).isFalse();
+        InOrder inOrder = inOrder(syncTaskManager, importExecutor);
         inOrder.verify(syncTaskManager).start(eq(command.syncTask()), any(LocalDateTime.class));
-        inOrder.verify(dailySalesImporter).importDailySales(command.franchiseId(), command.request());
+        inOrder.verify(importExecutor).importDailySales(command.franchiseId(), command.request());
         inOrder.verify(syncTaskManager).fail(
                 eq(command.syncTask()),
                 any(LocalDateTime.class),
@@ -76,7 +71,6 @@ class FranchiseSyncWriterTest {
                 eq(MAX_RETRY_COUNT)
         );
         verify(syncTaskManager, never()).complete(any(), any());
-        verifyNoInteractions(educationApplicationImporter, inquiryImporter);
     }
 
     private static Stream<Arguments> importFailures() {

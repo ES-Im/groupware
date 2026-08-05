@@ -19,98 +19,98 @@ import com.haruon.groupware.application.syncRequest.service.dto.items.InquirySyn
 import com.haruon.groupware.domain.franchise.Education;
 import com.haruon.groupware.domain.franchise.Franchise;
 import com.haruon.groupware.domain.sync.FranchiseSyncTask;
+import com.haruon.groupware.domain.sync.SyncStatus;
 import com.haruon.groupware.domain.sync.SyncType;
 import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
+import java.util.Optional;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
 public class FranchiseSyncProcessorService implements FranchiseSyncProcessor {
 
-    private static final ZoneId SEOUL_ZONE = ZoneId.of("Asia/Seoul");
-
     private final SyncTaskManager syncTaskManager;
     private final FranchiseRepository franchiseRepository;
     private final EducationRepository educationRepository;
 
     @Override
+    @Nullable
     public FranchiseSyncCommand<DailySalesRequest> processForDailySalesData(
             String endpointPath, DailySalesSyncItem item
     ) {
         validateRequired(endpointPath, item);
 
         Franchise franchise = getFranchiseByBusinessNumber(item.businessNumber());
-        FranchiseSyncTask syncTask = createSyncTask(SyncType.DAILY_SALES, endpointPath, item.externalId(), item.itemIdx(), franchise);
+
+        DailySalesRequest dailySalesRequest = item.toRequest();
+
+        FranchiseSyncTask syncTask = prepareSyncTask(
+                SyncType.DAILY_SALES, endpointPath, item.externalId(), item.itemIdx(), franchise
+        );
+        if (syncTask == null) {
+            return null;
+        }
 
         return new FranchiseSyncCommand<>(
                 syncTask,
                 franchise.getId(),
-                new DailySalesRequest(
-                        item.externalId(),
-                        item.salesDate(),
-                        item.salesAmount(),
-                        item.orderCount()
-                )
+                dailySalesRequest
         );
     }
 
     @Override
+    @Nullable
     public FranchiseSyncCommand<InquiryRequest> processForInquiryData(String endpointPath, InquirySyncItem item) {
         validateRequired(endpointPath, item);
 
         Franchise franchise = getFranchiseByBusinessNumber(item.businessNumber());
-        FranchiseSyncTask syncTask = createSyncTask(SyncType.INQUIRY, endpointPath, item.externalId(), item.itemIdx(), franchise);
+        InquiryRequest inquiryRequest = item.toRequest();
 
-        LocalDateTime inquiredAt = toLocalDateTime(item.inquiryAt());
+        FranchiseSyncTask syncTask = prepareSyncTask(
+                SyncType.INQUIRY, endpointPath, item.externalId(), item.itemIdx(), franchise
+        );
+        if (syncTask == null) {
+            return null;
+        }
 
         return new FranchiseSyncCommand<>(
                 syncTask,
                 franchise.getId(),
-                new InquiryRequest(
-                        item.externalId(),
-                        item.inquirerContact(),
-                        inquiredAt,
-                        item.inquiryTitle(),
-                        item.inquiryContent(),
-                        item.type()
-                )
+                inquiryRequest
         );
     }
 
     @Override
+    @Nullable
     public FranchiseSyncCommand<ApplicationRequest> processEducationApplyData(String endpointPath, EducationApplicationSyncItem item) {
         validateRequired(endpointPath, item);
 
         Franchise franchise = getFranchiseByBusinessNumber(item.businessNumber());
         Education education = getEducationByEducationCode(item.educationCode());
+        ApplicationRequest applicationRequest = item.toRequest(franchise.getId(), education.getId());
 
-        FranchiseSyncTask syncTask = createSyncTask(
+        FranchiseSyncTask syncTask = prepareSyncTask(
                 SyncType.EDUCATION_APPLICATION, endpointPath, item.externalId(), item.itemIdx(), franchise, education
         );
+        if (syncTask == null) {
+            return null;
+        }
 
-        LocalDateTime appliedAt = toLocalDateTime(item.appliedAt());
 
         return new FranchiseSyncCommand<>(
                 syncTask,
                 franchise.getId(),
-                new ApplicationRequest(
-                        item.externalId(),
-                        franchise.getId(),
-                        education.getId(),
-                        item.appliedCount(),
-                        appliedAt
-                )
+                applicationRequest
         );
     }
 
 
     @Override
+    @Nullable
     public FranchiseSyncCommand<CancellationRequest> processEducationCancelData(
             String endpointPath,
             EducationCancellationSyncItem item
@@ -120,18 +120,19 @@ public class FranchiseSyncProcessorService implements FranchiseSyncProcessor {
         Franchise franchise = getFranchiseByBusinessNumber(item.businessNumber());
         Education education = getEducationByEducationCode(item.educationCode());
 
-        FranchiseSyncTask syncTask = createSyncTask(
+        CancellationRequest cancellationRequest = item.toRequest(franchise.getId(), education.getId());
+
+        FranchiseSyncTask syncTask = prepareSyncTask(
                 SyncType.EDUCATION_APPLICATION_CANCEL, endpointPath, item.externalId(), item.itemIdx(), franchise, education
         );
+        if (syncTask == null) {
+            return null;
+        }
 
         return new FranchiseSyncCommand<>(
                 syncTask,
                 franchise.getId(),
-                new CancellationRequest(
-                        franchise.getId(),
-                        education.getId(),
-                        item.externalId()
-                )
+                cancellationRequest
         );
     }
 
@@ -141,14 +142,20 @@ public class FranchiseSyncProcessorService implements FranchiseSyncProcessor {
         }
     }
 
-    private FranchiseSyncTask createSyncTask(
+    @Nullable
+    private FranchiseSyncTask prepareSyncTask(
             SyncType type,
             String endpointPath,
             String externalId,
             Integer itemIdx,
             Franchise franchise
     ) {
-        return syncTaskManager.create(
+        Optional<FranchiseSyncTask> existingTask = syncTaskManager.find(type, externalId, itemIdx);
+        if (existingTask.isPresent()) {
+            return canProcess(existingTask.get()) ? existingTask.get() : null;
+        }
+
+        return new FranchiseSyncTask(
                 type,
                 externalId,
                 itemIdx,
@@ -158,7 +165,8 @@ public class FranchiseSyncProcessorService implements FranchiseSyncProcessor {
         );
     }
 
-    private FranchiseSyncTask createSyncTask(
+    @Nullable
+    private FranchiseSyncTask prepareSyncTask(
             SyncType type,
             String endpointPath,
             String externalId,
@@ -166,7 +174,12 @@ public class FranchiseSyncProcessorService implements FranchiseSyncProcessor {
             Franchise franchise,
             Education education
     ) {
-        return syncTaskManager.create(
+        Optional<FranchiseSyncTask> existingTask = syncTaskManager.find(type, externalId, itemIdx);
+        if (existingTask.isPresent()) {
+            return canProcess(existingTask.get()) ? existingTask.get() : null;
+        }
+
+        return new FranchiseSyncTask(
                 type,
                 externalId,
                 itemIdx,
@@ -190,10 +203,10 @@ public class FranchiseSyncProcessorService implements FranchiseSyncProcessor {
     }
 
 
-    private LocalDateTime toLocalDateTime(OffsetDateTime targetTime) {
-        return targetTime.atZoneSameInstant(SEOUL_ZONE).toLocalDateTime();
+    private boolean canProcess(FranchiseSyncTask syncTask) {
+        return syncTask.getStatus() == SyncStatus.PENDING
+                || syncTask.getStatus() == SyncStatus.RETRY;
     }
-
 
     private String buildEndpointPath(String endpointPath, String externalId, Integer itemIdx) {
         return String.format("%s?externalId=%s&itemIdx=%d", endpointPath, externalId, itemIdx);

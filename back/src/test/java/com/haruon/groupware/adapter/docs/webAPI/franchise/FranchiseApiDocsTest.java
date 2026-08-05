@@ -164,7 +164,7 @@ public class FranchiseApiDocsTest extends RestDocsSupport {
     @DisplayName("가맹점 등록")
     void createFranchise() throws Exception {
         FranchiseCreateRequest request = FranchiseCreateRequest.builder()
-                .businessNumber("000-00-00000")
+                .businessNumber("0000000000")
                 .franchiseName("테스트강남점")
                 .address("서울특별시 강남구")
                 .ownerName("홍길동")

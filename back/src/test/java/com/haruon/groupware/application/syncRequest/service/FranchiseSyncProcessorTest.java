@@ -23,7 +23,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.mockito.ArgumentCaptor;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -33,8 +32,6 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.*;
 
 class FranchiseSyncProcessorTest {
@@ -59,28 +56,16 @@ class FranchiseSyncProcessorTest {
         String businessNumber = "1108167890";
         DailySalesSyncItem item = dailySalesItem(itemIdx, externalId, businessNumber);
         Franchise franchise = franchise(1L);
-        FranchiseSyncTask syncTask = new FranchiseSyncTask(
-                SyncType.DAILY_SALES,
-                externalId,
-                itemIdx,
-                expectedEndpointPath,
-                franchise,
-                null
-        );
-
         when(franchiseRepository.findByBusinessNumber(businessNumber)).thenReturn(Optional.of(franchise));
-        when(syncTaskManager.create(
-                eq(SyncType.DAILY_SALES),
-                eq(externalId),
-                eq(itemIdx),
-                eq(expectedEndpointPath),
-                eq(franchise),
-                isNull()
-        )).thenReturn(syncTask);
 
         FranchiseSyncCommand<DailySalesRequest> command = processor.processForDailySalesData("/api/daily-sales", item);
 
-        assertThat(command.syncTask()).isSameAs(syncTask);
+        assertThat(command.syncTask()).extracting(
+                FranchiseSyncTask::getType,
+                FranchiseSyncTask::getExternalId,
+                FranchiseSyncTask::getItemIdx,
+                FranchiseSyncTask::getEndpointPath
+        ).containsExactly(SyncType.DAILY_SALES, externalId, itemIdx, expectedEndpointPath);
         assertThat(command.franchiseId()).isEqualTo(1L);
         assertThat(command.request()).extracting(
                 DailySalesRequest::externalId,
@@ -93,17 +78,6 @@ class FranchiseSyncProcessorTest {
                 item.salesAmount(),
                 item.orderCount()
         );
-
-        ArgumentCaptor<String> endpointPathCaptor = ArgumentCaptor.forClass(String.class);
-        verify(syncTaskManager).create(
-                eq(SyncType.DAILY_SALES),
-                eq(externalId),
-                eq(itemIdx),
-                endpointPathCaptor.capture(),
-                eq(franchise),
-                isNull()
-        );
-        assertThat(endpointPathCaptor.getValue()).isEqualTo(expectedEndpointPath);
     }
 
     @Test
@@ -114,28 +88,11 @@ class FranchiseSyncProcessorTest {
         InquirySyncItem item = inquiryItem(0, externalId, businessNumber);
         Franchise franchise = franchise(1L);
         String expectedEndpointPath = "/api/inquiries?externalId=INQUIRY-1108167890-20250101&itemIdx=0";
-        FranchiseSyncTask syncTask = new FranchiseSyncTask(
-                SyncType.INQUIRY,
-                externalId,
-                item.itemIdx(),
-                expectedEndpointPath,
-                franchise,
-                null
-        );
-
         when(franchiseRepository.findByBusinessNumber(businessNumber)).thenReturn(Optional.of(franchise));
-        when(syncTaskManager.create(
-                eq(SyncType.INQUIRY),
-                eq(externalId),
-                eq(item.itemIdx()),
-                eq(expectedEndpointPath),
-                eq(franchise),
-                isNull()
-        )).thenReturn(syncTask);
 
         FranchiseSyncCommand<InquiryRequest> command = processor.processForInquiryData("/api/inquiries", item);
 
-        assertThat(command.syncTask()).isSameAs(syncTask);
+        assertThat(command.syncTask().getEndpointPath()).isEqualTo(expectedEndpointPath);
         assertThat(command.franchiseId()).isEqualTo(1L);
         assertThat(command.request()).extracting(
                 InquiryRequest::externalId,
@@ -162,32 +119,16 @@ class FranchiseSyncProcessorTest {
         Franchise franchise = franchise(1L);
         Education education = mock(Education.class);
         String expectedEndpointPath = "/api/education-applications?externalId=EDU-APP-1108167890-20250101&itemIdx=0";
-        FranchiseSyncTask syncTask = new FranchiseSyncTask(
-                SyncType.EDUCATION_APPLICATION,
-                externalId,
-                item.itemIdx(),
-                expectedEndpointPath,
-                franchise,
-                education
-        );
-
         when(franchiseRepository.findByBusinessNumber(businessNumber)).thenReturn(Optional.of(franchise));
         when(educationRepository.findByEducationCode(educationCode)).thenReturn(Optional.of(education));
-        when(syncTaskManager.create(
-                eq(SyncType.EDUCATION_APPLICATION),
-                eq(externalId),
-                eq(item.itemIdx()),
-                eq(expectedEndpointPath),
-                eq(franchise),
-                eq(education)
-        )).thenReturn(syncTask);
 
         FranchiseSyncCommand<ApplicationRequest> command = processor.processEducationApplyData(
                 "/api/education-applications",
                 item
         );
 
-        assertThat(command.syncTask()).isSameAs(syncTask);
+        assertThat(command.syncTask().getEndpointPath()).isEqualTo(expectedEndpointPath);
+        assertThat(command.syncTask().getEducation()).isSameAs(education);
         assertThat(command.franchiseId()).isEqualTo(1L);
         assertThat(command.request()).extracting(
                 ApplicationRequest::externalId,
@@ -212,32 +153,16 @@ class FranchiseSyncProcessorTest {
         Franchise franchise = franchise(1L);
         Education education = mock(Education.class);
         String expectedEndpointPath = "/api/education-application-cancellations?externalId=EDU-CANCEL-1108167890-20250101&itemIdx=0";
-        FranchiseSyncTask syncTask = new FranchiseSyncTask(
-                SyncType.EDUCATION_APPLICATION_CANCEL,
-                externalId,
-                item.itemIdx(),
-                expectedEndpointPath,
-                franchise,
-                education
-        );
-
         when(franchiseRepository.findByBusinessNumber(businessNumber)).thenReturn(Optional.of(franchise));
         when(educationRepository.findByEducationCode(educationCode)).thenReturn(Optional.of(education));
-        when(syncTaskManager.create(
-                eq(SyncType.EDUCATION_APPLICATION_CANCEL),
-                eq(externalId),
-                eq(item.itemIdx()),
-                eq(expectedEndpointPath),
-                eq(franchise),
-                eq(education)
-        )).thenReturn(syncTask);
 
         FranchiseSyncCommand<CancellationRequest> command = processor.processEducationCancelData(
                 "/api/education-application-cancellations",
                 item
         );
 
-        assertThat(command.syncTask()).isSameAs(syncTask);
+        assertThat(command.syncTask().getEndpointPath()).isEqualTo(expectedEndpointPath);
+        assertThat(command.syncTask().getEducation()).isSameAs(education);
         assertThat(command.franchiseId()).isEqualTo(1L);
         assertThat(command.request()).extracting(
                 CancellationRequest::franchiseId,
@@ -270,6 +195,59 @@ class FranchiseSyncProcessorTest {
                 .isInstanceOf(RequiredValueMissingException.class);
 
         verifyNoInteractions(syncTaskManager, franchiseRepository, educationRepository);
+    }
+
+    @Test
+    @DisplayName("이미 완료된 sync 항목은 다시 처리하지 않는다")
+    void processForDailySalesData_skip_whenAlreadyDone() {
+        DailySalesSyncItem item = dailySalesItem(0, "SALES-1108167890-20250101", "1108167890");
+        Franchise franchise = franchise(1L);
+        FranchiseSyncTask completedTask = new FranchiseSyncTask(
+                SyncType.DAILY_SALES,
+                item.externalId(),
+                item.itemIdx(),
+                "/api/daily-sales?externalId=SALES-1108167890-20250101&itemIdx=0",
+                franchise,
+                null
+        );
+        completedTask.start(LocalDateTime.now());
+        completedTask.complete(LocalDateTime.now());
+
+        when(franchiseRepository.findByBusinessNumber(item.businessNumber())).thenReturn(Optional.of(franchise));
+        when(syncTaskManager.find(SyncType.DAILY_SALES, item.externalId(), item.itemIdx()))
+                .thenReturn(Optional.of(completedTask));
+
+        FranchiseSyncCommand<DailySalesRequest> command = processor.processForDailySalesData("/api/daily-sales", item);
+
+        assertThat(command).isNull();
+        verify(syncTaskManager).find(SyncType.DAILY_SALES, item.externalId(), item.itemIdx());
+    }
+
+    @Test
+    @DisplayName("RETRY 상태인 sync 항목은 기존 SyncTask로 다시 처리한다")
+    void processForDailySalesData_reuse_whenRetry() {
+        DailySalesSyncItem item = dailySalesItem(0, "SALES-1108167890-20250101", "1108167890");
+        Franchise franchise = franchise(1L);
+        FranchiseSyncTask retryTask = new FranchiseSyncTask(
+                SyncType.DAILY_SALES,
+                item.externalId(),
+                item.itemIdx(),
+                "/api/daily-sales?externalId=SALES-1108167890-20250101&itemIdx=0",
+                franchise,
+                null
+        );
+        retryTask.start(LocalDateTime.now());
+        retryTask.fail(LocalDateTime.now(), "실패", 3);
+
+        when(franchiseRepository.findByBusinessNumber(item.businessNumber())).thenReturn(Optional.of(franchise));
+        when(syncTaskManager.find(SyncType.DAILY_SALES, item.externalId(), item.itemIdx()))
+                .thenReturn(Optional.of(retryTask));
+
+        FranchiseSyncCommand<DailySalesRequest> command = processor.processForDailySalesData("/api/daily-sales", item);
+
+        assertThat(command).isNotNull();
+        assertThat(command.syncTask()).isSameAs(retryTask);
+        verify(syncTaskManager).find(SyncType.DAILY_SALES, item.externalId(), item.itemIdx());
     }
 
     private Franchise franchise(long id) {

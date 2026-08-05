@@ -2,17 +2,15 @@ package com.haruon.groupware.application.syncRequest.service;
 
 import com.haruon.groupware.application.syncRequest.provided.SyncTaskManager;
 import com.haruon.groupware.application.syncRequest.required.FranchiseSyncRequestRepository;
-import com.haruon.groupware.domain.franchise.Education;
-import com.haruon.groupware.domain.franchise.Franchise;
 import com.haruon.groupware.domain.sync.FranchiseSyncTask;
 import com.haruon.groupware.domain.sync.SyncType;
 import lombok.RequiredArgsConstructor;
-import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -22,25 +20,9 @@ public class SyncTaskManagerService implements SyncTaskManager {
     private final FranchiseSyncRequestRepository franchiseSyncRequestRepository;
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public FranchiseSyncTask create(
-            SyncType type,
-            String externalId,
-            int itemIdx,
-            String endpointPath,
-            Franchise franchise,
-            @Nullable Education education
-    ) {
-        FranchiseSyncTask syncTask = new FranchiseSyncTask(
-                type,
-                externalId,
-                itemIdx,
-                endpointPath,
-                franchise,
-                education
-        );
-
-        return franchiseSyncRequestRepository.save(syncTask);
+    @Transactional(readOnly = true)
+    public Optional<FranchiseSyncTask> find(SyncType type, String externalId, int itemIdx) {
+        return franchiseSyncRequestRepository.findByTypeAndExternalIdAndItemIdx(type, externalId, itemIdx);
     }
 
     @Override

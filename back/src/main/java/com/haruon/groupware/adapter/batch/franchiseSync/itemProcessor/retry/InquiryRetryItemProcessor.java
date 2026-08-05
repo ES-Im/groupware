@@ -19,22 +19,13 @@ public class InquiryRetryItemProcessor
     public FranchiseSyncCommand<InquiryRequest> process(FranchiseSyncTask task) {
         InquirySyncItem item = singleItem(
                 collector.collectInquiries(task.getExternalId(), task.getItemIdx()),
-                task,
-                InquirySyncItem::externalId,
-                InquirySyncItem::itemIdx
+                task
         );
 
         return new FranchiseSyncCommand<>(
                 task,
                 task.getFranchise().getId(),
-                new InquiryRequest(
-                        item.externalId(),
-                        item.inquirerContact(),
-                        toLocalDateTime(item.inquiryAt()),
-                        item.inquiryTitle(),
-                        item.inquiryContent(),
-                        item.type()
-                )
+                item.toRequest()
         );
     }
 }

@@ -19,21 +19,13 @@ public class EducationApplicationRetryItemProcessor
     public FranchiseSyncCommand<ApplicationRequest> process(FranchiseSyncTask task) {
         EducationApplicationSyncItem item = singleItem(
                 collector.collectEducationApplications(task.getExternalId(), task.getItemIdx()),
-                task,
-                EducationApplicationSyncItem::externalId,
-                EducationApplicationSyncItem::itemIdx
+                task
         );
 
         return new FranchiseSyncCommand<>(
                 task,
                 task.getFranchise().getId(),
-                new ApplicationRequest(
-                        item.externalId(),
-                        task.getFranchise().getId(),
-                        educationId(task),
-                        item.appliedCount(),
-                        toLocalDateTime(item.appliedAt())
-                )
+                item.toRequest(task.getFranchise().getId(), educationId(task))
         );
     }
 }

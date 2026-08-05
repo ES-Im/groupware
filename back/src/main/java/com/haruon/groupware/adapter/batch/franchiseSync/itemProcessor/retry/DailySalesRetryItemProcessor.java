@@ -19,20 +19,13 @@ public class DailySalesRetryItemProcessor
     public FranchiseSyncCommand<DailySalesRequest> process(FranchiseSyncTask task) {
         DailySalesSyncItem item = singleItem(
                 collector.collectDailySales(task.getExternalId(), task.getItemIdx()),
-                task,
-                DailySalesSyncItem::externalId,
-                DailySalesSyncItem::itemIdx
+                task
         );
 
         return new FranchiseSyncCommand<>(
                 task,
                 task.getFranchise().getId(),
-                new DailySalesRequest(
-                        item.externalId(),
-                        item.salesDate(),
-                        item.salesAmount(),
-                        item.orderCount()
-                )
+                item.toRequest()
         );
     }
 }

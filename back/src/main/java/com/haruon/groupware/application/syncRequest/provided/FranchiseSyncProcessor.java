@@ -9,6 +9,7 @@ import com.haruon.groupware.application.syncRequest.service.dto.items.DailySales
 import com.haruon.groupware.application.syncRequest.service.dto.items.EducationApplicationSyncItem;
 import com.haruon.groupware.application.syncRequest.service.dto.items.EducationCancellationSyncItem;
 import com.haruon.groupware.application.syncRequest.service.dto.items.InquirySyncItem;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Mock Url에서 불러온 데이터(item)을
@@ -18,18 +19,22 @@ import com.haruon.groupware.application.syncRequest.service.dto.items.InquirySyn
  */
 public interface FranchiseSyncProcessor {
 
+    @Nullable
     FranchiseSyncCommand<DailySalesRequest> processForDailySalesData (
             String endpointPath, DailySalesSyncItem item
     );
 
+    @Nullable
     FranchiseSyncCommand<InquiryRequest> processForInquiryData (
             String endpointPath, InquirySyncItem item
     );
 
+    @Nullable
     FranchiseSyncCommand<ApplicationRequest> processEducationApplyData (
             String endpointPath, EducationApplicationSyncItem item
     );
 
+    @Nullable
     FranchiseSyncCommand<CancellationRequest> processEducationCancelData (
             String endpointPath, EducationCancellationSyncItem item
     );

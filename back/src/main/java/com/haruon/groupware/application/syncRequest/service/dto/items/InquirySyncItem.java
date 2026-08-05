@@ -2,10 +2,15 @@ package com.haruon.groupware.application.syncRequest.service.dto.items;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.haruon.groupware.application.franchise.service.command.dto.InquiryRequest;
 import com.haruon.groupware.domain.franchise.InquiryType;
 import jakarta.validation.constraints.*;
 
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
+
+import static com.haruon.groupware.domain.shared.RegexpUtil.BUSINESS_NUMBER_PATTERN;
+import static com.haruon.groupware.domain.shared.RegexpUtil.BUSINESS_NUMBER_PATTERN_MESSAGE;
 
 public record InquirySyncItem(
         @NotNull
@@ -16,7 +21,7 @@ public record InquirySyncItem(
         String externalId,
 
         @NotBlank
-        @Pattern(regexp = "\\d{10}", message = "외부 businessNumber는 하이픈 없는 숫자 10자리여야 합니다.")
+        @Pattern(regexp = BUSINESS_NUMBER_PATTERN, message = BUSINESS_NUMBER_PATTERN_MESSAGE)
         String businessNumber,
 
         @NotBlank
@@ -42,8 +47,16 @@ public record InquirySyncItem(
         @NotNull
         @JsonProperty("type")
         InquiryType type
-) {
+) implements FranchiseSyncItem {
 
-
-
+    public InquiryRequest toRequest() {
+        return new InquiryRequest(
+                externalId,
+                inquirerContact,
+                inquiryAt.atZoneSameInstant(ZoneId.of("Asia/Seoul")).toLocalDateTime(),
+                inquiryTitle,
+                inquiryContent,
+                type
+        );
+    }
 }

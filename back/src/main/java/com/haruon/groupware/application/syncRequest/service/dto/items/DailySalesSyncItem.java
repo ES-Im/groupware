@@ -1,8 +1,12 @@
 package com.haruon.groupware.application.syncRequest.service.dto.items;
 
+import com.haruon.groupware.application.franchise.service.command.dto.DailySalesRequest;
 import jakarta.validation.constraints.*;
 
 import java.time.LocalDate;
+
+import static com.haruon.groupware.domain.shared.RegexpUtil.BUSINESS_NUMBER_PATTERN;
+import static com.haruon.groupware.domain.shared.RegexpUtil.BUSINESS_NUMBER_PATTERN_MESSAGE;
 
 public record DailySalesSyncItem(
         @NotNull
@@ -13,7 +17,7 @@ public record DailySalesSyncItem(
         String externalId,
 
         @NotBlank
-        @Pattern(regexp = "\\d{10}", message = "외부 businessNumber는 하이픈 없는 숫자 10자리여야 합니다.")
+        @Pattern(regexp = BUSINESS_NUMBER_PATTERN, message = BUSINESS_NUMBER_PATTERN_MESSAGE)
         String businessNumber,
 
         @NotBlank
@@ -24,12 +28,13 @@ public record DailySalesSyncItem(
         LocalDate salesDate,
 
         @NotNull
-        @PositiveOrZero
         Long salesAmount,
 
         @NotNull
-        @PositiveOrZero
         Long orderCount
-) {
+) implements FranchiseSyncItem {
 
+    public DailySalesRequest toRequest() {
+        return new DailySalesRequest(externalId, salesDate, salesAmount, orderCount);
+    }
 }

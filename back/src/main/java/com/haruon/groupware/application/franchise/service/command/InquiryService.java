@@ -31,6 +31,7 @@ public class InquiryService implements InquiryImporter {
 
         switch (request.type()) {
             case NEW -> {
+                if(franchiseInquiryRepository.findByExternalId(request.externalId()).isPresent()) { return 0L; }
                 return createInquiry(franchise, request);
             }
 

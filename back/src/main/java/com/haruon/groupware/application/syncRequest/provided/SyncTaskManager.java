@@ -1,25 +1,20 @@
 package com.haruon.groupware.application.syncRequest.provided;
 
-import com.haruon.groupware.domain.franchise.Education;
-import com.haruon.groupware.domain.franchise.Franchise;
 import com.haruon.groupware.domain.sync.FranchiseSyncTask;
 import com.haruon.groupware.domain.sync.SyncType;
-import org.jspecify.annotations.Nullable;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 /**
  * FranchiseSyncTask(외부 API 데이터 저장 로그성 엔티티) 생성과 상태 전이를 처리하는 Port.
  */
 public interface SyncTaskManager {
 
-    FranchiseSyncTask create(
+    Optional<FranchiseSyncTask> find(
             SyncType type,
             String externalId,
-            int itemIdx,
-            String endpointPath,
-            Franchise franchise,
-            @Nullable Education education
+            int itemIdx
     );
 
     void start(FranchiseSyncTask request, LocalDateTime startedAt);
