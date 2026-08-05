@@ -76,3 +76,6 @@ front/.vscode/*
 back/.env.docker
 .env.docker
 /.claude/settings.local.json
+
+# mockoon
+mockoon/*.md
