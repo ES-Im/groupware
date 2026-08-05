@@ -79,7 +79,7 @@
             </basic>
 
             <basic name="lastErrorMessage">
-                <column name="last_error_message"/>
+                <column name="last_error_message" length="65535"/>
             </basic>
 
             <basic name="startedAt">
