@@ -15,15 +15,7 @@ pipeline {
     stages {
         stage('franchise-data-sync-batch') { parallel {
 
-            stage('dailySales') {
-                steps { script {
-                    try { runBatchJob('syncDailySalesJob') }
-                    catch (e) {
-                        try { runBatchJob('retryDailySalesSyncJob') }
-                        catch (retryEx) { error("dailySales sync/retry 모두 실패: ${retryEx.message}") }
-                    }
-                } }
-            }
+
 
             stage('education') {
                 stages {

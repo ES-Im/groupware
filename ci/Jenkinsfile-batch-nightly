@@ -23,9 +23,20 @@ pipeline {
         } } }
 
         stage('batch') { parallel {
+            stage('dailySales') {
+                steps { script {
+                    try { runBatchJob('syncDailySalesJob') }
+                    catch (e) {
+                        try { runBatchJob('retryDailySalesSyncJob') }
+                        catch (retryEx) { error("dailySales sync/retry 모두 실패: ${retryEx.message}") }
+                    }
+                } }
+            }
+
             stage('closingAttendance') { steps {
                 runBatchJob('closingAttendanceJob', ["attendanceDate=${env.YESTERDAY}"])
             } }
+
             stage('cleanUpChatRoom')   { steps {
                 runBatchJob('cleanUpChatRoomJob', ["cleanUpDate=${env.YESTERDAY}"])
             } }
