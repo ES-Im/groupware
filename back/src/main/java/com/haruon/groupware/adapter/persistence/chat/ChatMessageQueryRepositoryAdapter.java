@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collections;
 import java.util.List;
 
 @Repository
@@ -62,7 +63,7 @@ public class ChatMessageQueryRepositoryAdapter implements ChatMessageQueryReposi
                         ltCursor(cursor)
                 )
                 .limit(size)
-                .orderBy(message.id.asc())
+                .orderBy(message.id.desc())
                 .fetch();
 
         if(messageResponses.isEmpty()) return new ChatMessagesResponse(List.of(), null, false);
@@ -84,6 +85,7 @@ public class ChatMessageQueryRepositoryAdapter implements ChatMessageQueryReposi
                 )
                 .fetchFirst() != null;
 
+        Collections.reverse(messageResponses);
 
         return new ChatMessagesResponse(messageResponses, nextCursor, hasNext);
     }
