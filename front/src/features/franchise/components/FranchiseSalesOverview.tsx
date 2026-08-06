@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import dayjs from 'dayjs'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
 import {
@@ -20,22 +20,14 @@ import { useFranchiseDailySalesQuery } from '../api/useFranchiseDailySalesQuery'
 import { useFranchiseMonthlySalesQuery } from '../api/useFranchiseMonthlySalesQuery'
 import { useFranchiseYearlySalesQuery } from '../api/useFranchiseYearlySalesQuery'
 
-// salesMonth(yyyyMM)·salesDate(yyyyMMdd)는 숫자라 String() 변환 후 포맷 지정 파싱이 필요하다
-// (§계약 실측 메모). 포맷 인자 파싱은 customParseFormat 플러그인이 있어야 동작한다.
 dayjs.extend(customParseFormat)
 
-/** 조회 단위. 연/월/일 탭 전환 축(F1624~F1626 각 1:1 대응). */
 type SalesUnit = 'year' | 'month' | 'day'
 
-/** 원화 표기(SalesDraftCreatePage 포맷 선례 동형). */
 function formatCurrency(value: number) {
   return `${value.toLocaleString('ko-KR')}원`
 }
 
-/**
- * 매출 KPI 1건(목업 `.sale-kpi` — 라벨 + 큰 수치 + 보조 delta). shadcn 토큰만 쓰므로 상승/하락
- * 색 구분 대신 부호(+/-)로 방향을 나타낸다(성공/경고 토큰 부재 — FranchiseMetricCard 정책 동일).
- */
 function SalesKpi({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
     <div className="min-w-0">
@@ -48,17 +40,14 @@ function SalesKpi({ label, value, hint }: { label: string; value: string; hint?:
   )
 }
 
-/**
- * 매출액 막대 차트(목업 매출 현황 막대). 단일 시리즈라 범례 없이 상위 제목이 시리즈명을 대신하고,
- * 색은 테마 적응형 `var(--primary)`. highlightLabel과 일치하는 막대만 진하게, 나머지는 흐리게 칠해
- * "최근 구간" 강조(목업 `.bars .bar.on`)를 재현한다. Tooltip이 호버 값(원화)을 보여준다.
- */
 function SalesBarChart({
   points,
-  highlightLabel,
+  highlightIndex,
+  onBarClick,
 }: {
   points: Array<{ label: string; salesAmount: number }>
-  highlightLabel?: string
+  highlightIndex?: number
+  onBarClick?: (index: number) => void
 }) {
   return (
     <div className="h-64 w-full">
@@ -77,14 +66,18 @@ function SalesBarChart({
             cursor={{ fill: 'var(--muted)' }}
             formatter={(value) => formatCurrency(Number(value))}
           />
-          <Bar dataKey="salesAmount" name="매출액" radius={[4, 4, 0, 0]}>
-            {points.map((point) => (
+          <Bar
+            dataKey="salesAmount"
+            name="매출액"
+            radius={[4, 4, 0, 0]}
+            className={onBarClick ? 'cursor-pointer' : undefined}
+            onClick={(_data, index) => onBarClick?.(index)}
+          >
+            {points.map((point, index) => (
               <Cell
                 key={point.label}
                 fill="var(--primary)"
-                fillOpacity={
-                  highlightLabel === undefined || point.label === highlightLabel ? 1 : 0.25
-                }
+                fillOpacity={highlightIndex === undefined || index === highlightIndex ? 1 : 0.25}
               />
             ))}
           </Bar>
@@ -94,17 +87,10 @@ function SalesBarChart({
   )
 }
 
-/** 매출 없음/로딩/에러 공통 빈 상태 문구. */
 function SalesEmpty({ message }: { message: string }) {
   return <p className="text-sm text-muted-foreground">{message}</p>
 }
 
-/**
- * 연 매출 패널(F1624). 목업 매출 현황의 기본 뷰 — 12개월 막대 + KPI(최근 월·전월·연 누적 YTD).
- * salesMonth는 yyyyMM 숫자라 String() 변환 후 customParseFormat으로 파싱해 라벨을 만든다.
- * "최근 월/전월"은 monthlySales를 오름차순 정렬해 마지막/그 이전 포인트로 파생한다(연도별로
- * 실제 존재하는 월 기준 — 하드코딩 없이 데이터에서 도출).
- */
 function YearlySalesPanel({
   franchiseId,
   year,
@@ -113,6 +99,10 @@ function YearlySalesPanel({
   year: number | undefined
 }) {
   const query = useFranchiseYearlySalesQuery(franchiseId, year)
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
+  useEffect(() => {
+    setSelectedIndex(null)
+  }, [year])
 
   if (year === undefined) {
     return <SalesEmpty message="조회 연도를 입력하세요." />
@@ -124,7 +114,6 @@ function YearlySalesPanel({
     return <p className="text-sm text-destructive">{normalizeApiError(query.error).message}</p>
   }
   const data = query.data
-  // 매출 없음은 204 빈 바디 → axios data가 빈 문자열(T3.1 실측). 에러가 아닌 빈 상태로 렌더.
   if (!data || typeof data === 'string' || data.monthlySales.length === 0) {
     return <SalesEmpty message="선택한 기간의 매출 데이터가 없습니다." />
   }
@@ -134,8 +123,12 @@ function YearlySalesPanel({
     label: dayjs(String(point.salesMonth), 'YYYYMM').format('M월'),
     salesAmount: point.salesAmount,
   }))
-  const recent = sorted[sorted.length - 1]
-  const previous = sorted.length > 1 ? sorted[sorted.length - 2] : undefined
+  const activeIndex =
+    selectedIndex !== null && selectedIndex >= 0 && selectedIndex < sorted.length
+      ? selectedIndex
+      : sorted.length - 1
+  const recent = sorted[activeIndex]
+  const previous = activeIndex > 0 ? sorted[activeIndex - 1] : undefined
   const recentLabel = dayjs(String(recent.salesMonth), 'YYYYMM').format('YYYY-MM')
   const previousLabel = previous
     ? dayjs(String(previous.salesMonth), 'YYYYMM').format('YYYY-MM')
@@ -167,19 +160,16 @@ function YearlySalesPanel({
       <div>
         <h4 className="mb-2 text-sm font-medium">
           {data.salesYear}년 월별 매출
-          <span className="ml-1.5 text-xs font-normal text-muted-foreground">단위: 원</span>
+          <span className="ml-1.5 text-xs font-normal text-muted-foreground">
+            단위: 원 · 막대를 클릭해 월별 KPI를 전환
+          </span>
         </h4>
-        <SalesBarChart points={points} highlightLabel={points[points.length - 1]?.label} />
+        <SalesBarChart points={points} highlightIndex={activeIndex} onBarClick={setSelectedIndex} />
       </div>
     </div>
   )
 }
 
-/**
- * 월 매출 패널(F1625). 일별 매출 막대 + KPI 3종.
- * (내부 포인트의) salesDate는 yyyyMMdd 숫자라 String() 변환 후 파싱한다 — 일 매출 단건 응답의
- * salesDate(yyyy-MM-dd 문자열)와 타입이 다르므로 혼동 금지.
- */
 function MonthlySalesPanel({ franchiseId, month }: { franchiseId: number; month: string }) {
   const query = useFranchiseMonthlySalesQuery(franchiseId, month || undefined)
 
@@ -220,11 +210,6 @@ function MonthlySalesPanel({ franchiseId, month }: { franchiseId: number; month:
   )
 }
 
-/**
- * 일 매출 패널(F1626). 단건 응답이라 차트 없이 KPI 카드 2종(매출액·주문 수)만 렌더한다.
- * salesDate는 이미 `yyyy-MM-dd` **문자열**이라 연/월 패널의 숫자 파싱(String()+customParseFormat)이
- * 필요 없다(§계약 실측 메모 — 타입 오용 방지).
- */
 function DailySalesPanel({ franchiseId, day }: { franchiseId: number; day: string }) {
   const query = useFranchiseDailySalesQuery(franchiseId, day || undefined)
 
@@ -250,16 +235,9 @@ function DailySalesPanel({ franchiseId, day }: { franchiseId: number; day: strin
   )
 }
 
-/**
- * 가맹점 매출 요약(연/월/일 탭 전환, F1624~F1626). 가맹점 상세 페이지(P2)에 임베드된다.
- * 목업 "매출 현황" 카드 — 세그먼트 + 막대 차트 + KPI. franchiseId만 주어지면 자체 상태(단위·기간)로
- * 독립 동작한다(기본 연 단위 = 당해 12개월 막대 + 최근 월/전월/YTD).
- */
 export function FranchiseSalesOverview({ franchiseId }: { franchiseId: number }) {
   const [unit, setUnit] = useState<SalesUnit>('year')
 
-  // 단위별 기간 입력 상태. 기본값은 오늘 기준(dayjs). 연은 <input type="number">가 비워질 수
-  // 있어 undefined 허용, 월/일은 <input type="month"|"date">가 빈 문자열을 내므로 string 유지.
   const [year, setYear] = useState<number | undefined>(() => dayjs().year())
   const [month, setMonth] = useState(() => dayjs().format('YYYY-MM'))
   const [day, setDay] = useState(() => dayjs().format('YYYY-MM-DD'))
@@ -316,9 +294,11 @@ export function FranchiseSalesOverview({ franchiseId }: { franchiseId: number })
         )}
       </div>
 
-      {unit === 'year' && <YearlySalesPanel franchiseId={franchiseId} year={year} />}
-      {unit === 'month' && <MonthlySalesPanel franchiseId={franchiseId} month={month} />}
-      {unit === 'day' && <DailySalesPanel franchiseId={franchiseId} day={day} />}
+      <div className="min-h-[24rem]">
+        {unit === 'year' && <YearlySalesPanel franchiseId={franchiseId} year={year} />}
+        {unit === 'month' && <MonthlySalesPanel franchiseId={franchiseId} month={month} />}
+        {unit === 'day' && <DailySalesPanel franchiseId={franchiseId} day={day} />}
+      </div>
     </div>
   )
 }
