@@ -14,20 +14,8 @@ import { useNewEmployeesQuery } from '../api/useNewEmployeesQuery'
 import { EmpApprovalWizardDialog } from '../components/EmpApprovalWizardDialog'
 import { NewEmployeesTable } from '../components/NewEmployeesTable'
 
-/** 검색 디바운스 지연(ms). BoardListPage/DepartmentsPage와 동일 값. */
 const SEARCH_DEBOUNCE_MS = 300
 
-/**
- * 가입대기자 목록 페이지(F001, ROADMAP T1.6, /employees/new — 라우트 배선은 T1.7 소관).
- *
- * FranchiseInquiryListPage와 동형(단일 Card, 검색어 300ms 디바운스 + usePageState +
- * PaginationControls). 빈 목록 안내는 이 페이지가 전담한다 — NewEmployeesTable(T1.5)은
- * 빈 배열을 그대로 렌더(헤더만 있는 빈 표)하므로, 여기서 content.length===0을 먼저 가드한다.
- *
- * selected: [승인] 클릭 시 대상 empId·name·loginId를 보관하고 EmpApprovalWizardDialog를 호스팅한다
- * (ROADMAP T2.5). 승인 성공 시 다이얼로그가 내부적으로 2단계로 전진하고(2단계 본체는 M3),
- * 실패(도메인 에러) 시에는 에러 토스트를 띄운 뒤 다이얼로그를 닫고 가입대기자 목록을 재조회한다.
- */
 export function NewEmployeeApprovalListPage() {
   const queryClient = useQueryClient()
   const [searchInput, setSearchInput] = useState('')
@@ -67,7 +55,6 @@ export function NewEmployeeApprovalListPage() {
     last: true,
   }
 
-  /** 1단계 승인 실패(도메인 에러): 토스트로 알리고 다이얼로그를 닫은 뒤 가입대기자 목록을 재조회한다. */
   function handleApproveError(error: unknown) {
     handleApiError(error, { toast })
     setSelected(undefined)
@@ -75,15 +62,15 @@ export function NewEmployeeApprovalListPage() {
   }
 
   return (
-    <div className="w-full space-y-6 p-4 sm:p-6 lg:p-8">
-      <div>
+    <div className="flex w-full flex-col p-4 sm:p-6 lg:h-full lg:p-8">
+      <div className="mb-6">
         <h1 className="text-2xl font-bold tracking-tight text-foreground">신규 사원 승인</h1>
         <p className="mt-1.5 text-sm text-muted-foreground">
           가입 대기 중인 사원을 승인하고 조직 소속을 배정합니다 (HR · ADMIN)
         </p>
       </div>
 
-      <Card className="h-fit">
+      <Card className="flex flex-col lg:min-h-0 lg:flex-1">
         <CardHeader className="border-b">
           <div className="flex flex-wrap items-center gap-2">
             <CardTitle>가입 대기자 목록</CardTitle>
@@ -106,8 +93,8 @@ export function NewEmployeeApprovalListPage() {
             </div>
           </div>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex min-h-[56rem] flex-col">
+        <CardContent className="flex min-h-0 flex-1 flex-col gap-4">
+          <div className="flex min-h-[20rem] flex-col overflow-y-auto lg:min-h-0 lg:flex-1">
             {newEmployeesQuery.isLoading ? (
               <p className="flex flex-1 items-center justify-center text-center text-sm text-muted-foreground">
                 불러오는 중...
@@ -129,7 +116,7 @@ export function NewEmployeeApprovalListPage() {
           </div>
 
           <PaginationControls
-            className="border-t pt-4"
+            className="shrink-0 border-t pt-4"
             pageInfo={pageInfo}
             page={page}
             onPageChange={onPageChange}
@@ -150,8 +137,6 @@ export function NewEmployeeApprovalListPage() {
           empName={selected.name}
           loginId={selected.loginId}
           onApproveSuccess={() => {
-            // 2단계 본체는 M3(T3.7)이 채운다. 다이얼로그가 이미 내부적으로 2단계로 전진하므로
-            // 이 배선은 현재 아무 것도 하지 않는다.
           }}
           onApproveError={handleApproveError}
         />

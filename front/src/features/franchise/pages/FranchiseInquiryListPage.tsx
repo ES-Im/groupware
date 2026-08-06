@@ -29,27 +29,12 @@ import { FranchisePageHeader } from '../components/FranchisePageHeader'
 import { FranchiseStatusPill } from '../components/FranchiseStatusPill'
 import type { FranchiseInquiry } from '../model/franchise'
 
-/** 검색 디바운스 지연(ms). FranchiseListPage 등 목록 페이지 공통 값. */
 const SEARCH_DEBOUNCE_MS = 300
 
-/** 답변여부 필터 값. 'all'은 isAnswered 쿼리 파라미터 생략(전체)을 의미한다. */
 type AnsweredFilter = 'all' | 'true' | 'false'
 
 const columnHelper = createColumnHelper<FranchiseInquiry>()
 
-/**
- * P6 가맹점 문의 목록 페이지(F1617 FRANCHISE_INQUIRY_LIST, ROADMAP(FRANCHISE) T5.1).
- * /franchise-inquiries 라우트에 마운트된다(T1.2 배선 완료).
- *
- * FranchiseListPage(T2.1) 구조를 동형 복제한다: usePageState+PaginationControls 페이징 표
- * (react-table, board 표준 UI 페이지 번호 number+1), 검색어 300ms 디바운스, 담당자 필터는
- * Popover 프리미티브 부재로 Dialog+EmployeePicker(단일 선택) 조합. 필터 4종(답변여부 select·
- * 담당자·검색어·기간 from/to `yyyy-MM-dd`) 전부 변경 시 resetPage()로 페이지를 0으로 되돌린다.
- *
- * 문의 등록 버튼은 두지 않는다 — 문의는 외부 API 싱크로만 생성되며 등록 계약 자체가 없다
- * (PRD §범위 외). 행 클릭은 `/franchise-inquiries/:inquiryId`로 이동하는데, 식별자가 가맹점
- * 목록의 `id`와 달리 `inquiryId`다(§계약 실측 메모 '식별자 필드 상이').
- */
 export function FranchiseInquiryListPage() {
   const navigate = useNavigate()
 
@@ -58,24 +43,16 @@ export function FranchiseInquiryListPage() {
   const [answeredFilter, setAnsweredFilter] = useState<AnsweredFilter>('all')
   const [manager, setManager] = useState<EmployeePickerEmployee | null>(null)
   const [managerDialogOpen, setManagerDialogOpen] = useState(false)
-  // 다이얼로그 안에서 고르는 임시 선택값. [적용]을 눌러야만 실제 필터(manager)에 반영된다
-  // (탐색 중 클릭마다 목록이 재조회되는 것을 막는다).
   const [managerDraft, setManagerDraft] = useState<EmployeePickerEmployee[]>([])
   const [from, setFrom] = useState('')
   const [to, setTo] = useState('')
 
   const { page, size, onPageChange, resetPage } = usePageState()
 
-  // 세그먼트(전체 문의 / 내 담당 문의) 전용 본인 정보. 담당자 필터(manager)를 나로 세팅/해제하는
-  // 얇은 시각 토글이며, 데이터 파이프라인은 기존 담당자 필터(assignedManagerId)를 그대로 재사용한다
-  // (신규 쿼리·상태 추가 없음 — 브리프 §7 최소 배선). empId/이름은 EmployeePickerEmployee 형태로 맞춘다.
   const meQuery = useMeQuery()
   const myEmpId = meQuery.data?.empBasicInfo.empId
   const myName = meQuery.data?.empBasicInfo.name
 
-  // 세그먼트 건수 배지(목업 cbadge): 전체=필터 없는 totalElements, 내 담당=assignedManagerId=me의
-  // totalElements(size=1 count 쿼리). myEmpId 로딩 전에는 assignedManagerId undefined라 전체 쿼리와
-  // 동일 캐시를 공유해 추가 요청이 없고, 내 담당 배지는 myEmpId가 있을 때만 노출한다.
   const allCountQuery = useFranchiseInquiriesQuery({ page: 0, size: 1 })
   const mineCountQuery = useFranchiseInquiriesQuery({
     assignedManagerId: myEmpId ?? undefined,
@@ -85,7 +62,6 @@ export function FranchiseInquiryListPage() {
   const allCount = allCountQuery.data?.totalElements
   const mineCount = myEmpId != null ? mineCountQuery.data?.totalElements : undefined
 
-  // 검색 입력 디바운스: 300ms 유예 후에만 확정된 keyword로 반영하고 페이지를 0으로 리셋한다.
   useEffect(() => {
     const trimmed = searchInput.trim()
     if (trimmed === keyword) {
@@ -98,7 +74,6 @@ export function FranchiseInquiryListPage() {
     return () => clearTimeout(timer)
   }, [searchInput, keyword, resetPage])
 
-  // 다이얼로그를 열 때마다 현재 확정 필터로 임시 선택을 시드한다(취소 후 재진입 시 잔상 방지).
   useEffect(() => {
     if (managerDialogOpen) {
       setManagerDraft(manager ? [manager] : [])
@@ -148,8 +123,6 @@ export function FranchiseInquiryListPage() {
     resetPage()
   }
 
-  // 세그먼트 활성 상태 파생: 담당자 필터가 비었으면 '전체', 나로 지정됐으면 '내 담당'. 제3의
-  // 담당자가 지정된 경우 어느 쪽도 활성화되지 않는다(담당자 버튼 라벨이 그 상태를 대신 표시).
   const isMineScope = manager != null && myEmpId != null && manager.empId === myEmpId
   const isAllScope = manager == null
 
@@ -162,7 +135,6 @@ export function FranchiseInquiryListPage() {
   }
 
   function handleScopeMine() {
-    // 본인 정보 로딩 전이거나 이미 나로 지정된 상태면 무시한다.
     if (myEmpId == null || myName == null || manager?.empId === myEmpId) {
       return
     }
@@ -170,8 +142,6 @@ export function FranchiseInquiryListPage() {
     resetPage()
   }
 
-  // 필터 초기화(Ubold [초기화] 이식): 기존 상태 setter만 조합해 검색어·답변여부·담당자·기간을
-  // 비운다(데이터 로직 신설 없음 — 순수 UI 편의).
   function handleResetFilters() {
     setSearchInput('')
     setAnsweredFilter('all')
@@ -195,8 +165,6 @@ export function FranchiseInquiryListPage() {
   const columns = useMemo(
     () => [
       columnHelper.accessor('franchiseName', {
-        // 가맹점명(강조) + 외부 식별자(externalId, 보조 텍스트)를 한 셀에 합친다(A안 톤 `.who` 셀 —
-        // 좌측 store 아이콘 타일 + 이름/식별자).
         header: '가맹점',
         cell: (info) => (
           <div className="flex items-center gap-3">
@@ -229,11 +197,9 @@ export function FranchiseInquiryListPage() {
       }),
       columnHelper.accessor('assignedManagerName', {
         header: '담당자명',
-        // 담당 사원이 없는 가맹점에서 생성된 문의는 담당자 없이 조회될 수 있다(T5.4 실측).
         cell: (info) => info.getValue() ?? '미배정',
       }),
       columnHelper.accessor('isDeleted', {
-        // isDeleted는 "삭제 요청 여부"다(response-fields.adoc — 이미 삭제됨이 아님).
         header: '삭제 요청',
         cell: (info) =>
           info.getValue() ? (
@@ -253,13 +219,12 @@ export function FranchiseInquiryListPage() {
   })
 
   return (
-    <div className="w-full space-y-6 p-4 sm:p-6 lg:p-8">
+    <div className="flex w-full flex-col gap-6 p-4 sm:p-6 lg:h-full lg:p-8">
       <FranchisePageHeader
         title="가맹점 질의응답"
         description="가맹점 문의를 답변 여부와 담당자 기준으로 확인합니다."
       />
 
-      {/* 세그먼트: 전체 문의 / 내 담당 문의(담당자 필터를 나로 토글하는 얇은 시각 레이어). */}
       <div className="flex flex-wrap items-center gap-3">
         <div
           role="tablist"
@@ -319,7 +284,7 @@ export function FranchiseInquiryListPage() {
         </div>
       </div>
 
-      <Card className="h-fit">
+      <Card className="flex flex-col lg:min-h-0 lg:flex-1">
         <CardHeader className="border-b">
           <div className="flex flex-wrap items-center gap-2">
             <CardTitle className="flex items-center gap-2">
@@ -333,8 +298,7 @@ export function FranchiseInquiryListPage() {
             )}
           </div>
         </CardHeader>
-        <CardContent className="space-y-4">
-          {/* 필터 툴바: 검색어 + 답변여부 + 담당자 + 기간(from/to) + 초기화 */}
+        <CardContent className="flex min-h-0 flex-1 flex-col gap-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
             <div className="relative w-full sm:w-64">
               <Search className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -420,7 +384,7 @@ export function FranchiseInquiryListPage() {
             </Button>
           </div>
 
-          <div className="flex min-h-[56rem] flex-col">
+          <div className="flex min-h-[20rem] flex-col overflow-y-auto lg:min-h-0 lg:flex-1">
             {inquiriesQuery.isLoading ? (
               <p className="flex flex-1 items-center justify-center text-center text-sm text-muted-foreground">
                 불러오는 중...
@@ -484,7 +448,7 @@ export function FranchiseInquiryListPage() {
           </div>
 
           <PaginationControls
-            className="border-t pt-4"
+            className="shrink-0 border-t pt-4"
             pageInfo={pageInfo}
             page={page}
             onPageChange={onPageChange}
@@ -493,8 +457,6 @@ export function FranchiseInquiryListPage() {
         </CardContent>
       </Card>
 
-      {/* 담당자 필터 다이얼로그: Popover 프리미티브 부재로 Dialog + FranchiseManagerPicker(FRANCHISE
-          권한 사원만 노출하는 단일 선택) 조합. */}
       <Dialog open={managerDialogOpen} onOpenChange={setManagerDialogOpen}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
