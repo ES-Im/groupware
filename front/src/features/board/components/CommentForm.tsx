@@ -4,25 +4,14 @@ import { Textarea } from '@/shared/ui/textarea'
 import { commentSchema, type CommentFormValues } from '../model/commentSchema'
 
 interface CommentFormProps {
-  /** 등록/대댓글/수정 공용 제출 콜백. 실패 시 던진 에러는 submitWithErrorMapping이 처리한다. */
   onSubmit: (values: CommentFormValues) => Promise<void>
-  /** 취소(대댓글/수정 인라인 폼 닫기) 콜백. 최상위 등록 폼에는 취소 버튼이 없어 생략 가능. */
   onCancel?: () => void
-  /** 수정 폼의 초기값(기존 댓글 내용). 생략하면 빈 값으로 시작한다(등록/대댓글). */
   initialContent?: string
   submitLabel: string
   placeholder?: string
   autoFocus?: boolean
 }
 
-/**
- * 댓글 등록/대댓글/수정 공용 폼(ROADMAP T14.2, F314/F315/F316).
- *
- * 세 용도(최상위 등록·대댓글·수정) 모두 요청 바디가 content 단일 필드로 완전히 동일해
- * (T14.1 CommentPayload 주석 참조) 폼 컴포넌트를 하나로 공유한다 — 구분은 호출부가 넘기는
- * onSubmit/initialContent/submitLabel로만 한다. T1.1 표준(useZodForm+submitWithErrorMapping)을
- * 그대로 복제한다.
- */
 export function CommentForm({
   onSubmit,
   onCancel,

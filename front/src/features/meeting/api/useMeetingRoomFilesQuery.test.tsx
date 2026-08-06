@@ -8,9 +8,6 @@ import { server } from '@/test/mocks/server'
 import { meetingKeys } from '../model/meetingKeys'
 import { useMeetingRoomFilesQuery } from './useMeetingRoomFilesQuery'
 
-/**
- * useMeetingRoomFilesQuery(F808, ROADMAP T2.2) 실동작 검증.
- */
 function createWrapper() {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return {

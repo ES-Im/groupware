@@ -8,19 +8,6 @@ import { server } from '@/test/mocks/server'
 import { attendanceKeys } from '../model/queryKeys'
 import { useApproveAttendanceMutation } from './useApproveAttendanceMutation'
 
-/**
- * useApproveAttendanceMutation(F308·DEPT_ATTENDANCE_APPROVE, ROADMAP T4.4) 동작 검증.
- *
- * - 성공(204) 시 [...attendanceKeys.all, 'dept'] 접두 invalidate가 실제로 하위 쿼리
- *   (deptMonthly)를 재조회시키는지(useUpdateAttendanceMutation.test.tsx와 동일 패턴) +
- *   성공 토스트 호출을 확인한다.
- * - 실패 시 toast.success는 호출되지 않고, handleApiError 경로를 통해 toast.error가
- *   호출되는지 확인한다.
- * - 핵심: mutate 호출 시 실제 서버로 전달되는 approvedAt 쿼리 파라미터가
- *   `YYYY-MM-DDTHH:mm:ss` 형식(오프셋/Z/밀리초 없음)인지 MSW 핸들러에서 실제 요청 URL의
- *   query string을 가로채 검증한다.
- */
-
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))
@@ -145,7 +132,6 @@ describe('useApproveAttendanceMutation', () => {
     expect(capturedTargetEmpId).toBe(String(targetEmpId))
     expect(capturedApprovedAt).not.toBeNull()
     expect(capturedApprovedAt).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/)
-    // Z나 밀리초가 붙어있지 않다는 것을 명시적으로도 확인한다.
     expect(capturedApprovedAt).not.toMatch(/Z$/)
     expect(capturedApprovedAt).not.toMatch(/\./)
   })

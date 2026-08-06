@@ -1,14 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { manualScheduleCreateSchema } from './manualScheduleCreateSchema'
 
-/**
- * manualScheduleCreateSchema(F003 `MANUAL_SCHEDULE_CREATE`, ROADMAP(SCHEDULE) T3.2) 클라 사전검증
- * 단위 테스트. 검증 축:
- *   - title: trim 후 공백만 있으면 실패(min 1), 100자 초과 실패.
- *   - content: trim 후 공백만 있으면 실패(min 1), 길이 제한 없음.
- *   - startAt/endAt 필수 + endAt < startAt이면 refine 실패(엄격한 초과 비교, 경계값 불허).
- */
-
 function validPayload(overrides: Partial<Record<string, unknown>> = {}) {
   return {
     title: '팀 워크숍',

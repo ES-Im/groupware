@@ -8,24 +8,6 @@ import { BASE_URL } from '@/shared/api/client'
 import { server } from '@/test/mocks/server'
 import { BoardCreatePage } from './BoardCreatePage'
 
-/**
- * BoardCreatePage(F305/F308, ROADMAP T12.2) 회귀 방지 테스트.
- *
- * 방금 발견된 회귀 위험 지점(스타일링 리팩터 직후):
- * - 임시저장/발행 두 제출 경로가 registerBoard에 올바른 페이로드(publishedAt 포함 여부)로
- *   요청을 보내는지.
- * - 발행 시 publishedAt이 dayjs().format('YYYY-MM-DDTHH:mm:ss') 포맷(밀리초/Z 없음)인지.
- * - RHF+zod 사전검증(boardCreateSchema) 실패 경로.
- * - "임시저장글 불러오기" 목록 조회/선택 이동.
- *
- * 참고: 과제 설명에 언급된 "발행 액션에서 401(ROLE_002)을 받아도 handleApiError를 우회해
- * normalizeApiError+toast.error로 직접 토스트를 띄우는 특수 처리"는 실제 소스 상
- * BoardCreatePage.submit()이 아니라 BoardDraftsPage.handlePublish()에 구현되어 있다
- * (BoardCreatePage.submit은 submitWithErrorMapping의 표준 handleApiError 경로를 그대로
- * 사용하며, publishBoard가 아닌 registerBoard(=BOARD_REGISTER, publishedAt 포함)를 호출한다).
- * 해당 회귀 시나리오는 실제 구현 위치인 BoardDraftsPage.test.tsx에서 검증한다.
- */
-
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))
@@ -68,9 +50,6 @@ describe('BoardCreatePage (F305) - zod 사전검증', () => {
   })
 
   it('빈 값으로 "임시저장"을 눌러도 제목/본문 사전검증 메시지를 보여주고 API를 호출하지 않는다', async () => {
-    // 카테고리는 BoardCreateForm의 마운트 시 1회 동기화(§defaultCategoryId)로 categories[0]이
-    // 자동 선택되므로(사용자 요청: 좌측 선택 카테고리와 동기화), 빈 값 제출 시나리오에서도
-    // "카테고리를 선택해주세요"는 더 이상 재현되지 않는다 — 제목/본문만 검증한다.
     mockCategoriesAndDrafts()
     let registerCalled = false
     server.use(
@@ -169,7 +148,6 @@ describe('BoardCreatePage (F305) - 임시저장/발행 제출 페이로드', () 
       title: '새 글 제목',
       content: '새 글 본문입니다',
     })
-    // "2026-07-07T10:00:00" 형태만 허용 — 밀리초(.SSS)나 zone(Z) 접미사가 붙으면 실패한다.
     expect(registeredBody?.publishedAt).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/)
 
     expect(await screen.findByText('게시판 목록 화면')).toBeInTheDocument()
@@ -184,8 +162,6 @@ describe('BoardCreatePage (F308) - 임시저장글 인라인 편집', () => {
   })
 
   it('"임시저장글"에 마우스를 올리면 목록을 보여주고, 항목을 클릭하면 라우트 이동 없이 인라인 편집 폼으로 전환한다', async () => {
-    // 임시저장글 드롭다운은 클릭 토글이 아니라 HoverCard(마우스 오버)이며, 항목 선택 시 라우트 이동
-    // (수정 페이지) 대신 같은 카드 자리에서 인라인 편집(BoardEditForm+BoardEditAttachments)으로 전환한다.
     mockCategoriesAndDrafts([
       { boardId: 42, title: '이어쓰던 초안', updatedAt: '2026-07-01T09:00:00' },
     ])
@@ -193,7 +169,6 @@ describe('BoardCreatePage (F308) - 임시저장글 인라인 편집', () => {
       http.get(`${BASE_URL}/api/boards/42/edit-mode`, () =>
         HttpResponse.json({ boardId: 42, categoryId: 1, title: '이어쓰던 초안', content: '이어쓰던 본문' }),
       ),
-      // 초안은 BOARD_DETAIL에서 항상 404 — modifiedAt 폴백 신호로 소비된다(정상 경로).
       http.get(`${BASE_URL}/api/boards/42`, () =>
         HttpResponse.json(
           { code: 'RESOURCE_001', name: 'NOT_FOUND', httpStatus: 404, message: '게시글을 찾을 수 없습니다' },
@@ -212,7 +187,6 @@ describe('BoardCreatePage (F308) - 임시저장글 인라인 편집', () => {
 
     await user.click(screen.getByText('이어쓰던 초안'))
 
-    // 라우트 이동(수정 페이지) 대신 인라인 편집 폼이 뜬다: 편집 초기값이 채워지고 저장 버튼/첨부 섹션이 보인다.
     expect(await screen.findByRole('button', { name: '저장' })).toBeInTheDocument()
     expect(await screen.findByText('첨부파일이 없습니다.')).toBeInTheDocument()
     expect(screen.getByLabelText(/제목/)).toHaveValue('이어쓰던 초안')

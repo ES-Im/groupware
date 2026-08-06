@@ -17,15 +17,6 @@ function LeaveKpiTile({ label, value }: { label: string; value: number }) {
   )
 }
 
-/**
- * 내 휴가 요약 위젯(레퍼런스 dashboard-roles.html "내 휴가·근태 요약" 카드 이식 — 계획 문서 §계약상
- * 불가피한 축소에 따라 "내 휴가 요약"으로 축소했다).
- *
- * MY_EMP_LEAVE_SUMMARY 응답에는 연차 부여/사용 일수만 있고, 레퍼런스의 "이번 달 근무일수/시간"·
- * "지각·결근 횟수"에 대응하는 필드가 없어(MY_ATTENDANCE_MONTHLY_SUMMARY 실측) 표시하지 않는다
- * (계약에 없는 정보 발명 금지). 특별/보상 휴가는 계획 확정대로 이 위젯 범위에서 제외하고
- * 잔여/사용 연차 2종만 보여준다.
- */
 export function MyLeaveSummaryWidget() {
   const { data } = useMyLeaveSummaryQuery()
   const remainingAnnual = data ? data.annualBaseGrantDays - data.annualUsedDays : 0

@@ -9,16 +9,6 @@ import { server } from '@/test/mocks/server'
 import { meetingKeys } from '../model/meetingKeys'
 import { useManagementReservationsQuery } from './useManagementReservationsQuery'
 
-/**
- * useManagementReservationsQuery(F810, ROADMAP(MEETING-ROOMS) T5.1) 실동작 검증.
- *
- * - yearMonth/keyword/meetingRoomId/page/size 전부 선택값이라 항상 활성 상태로 조회되는지
- *   (enabled 가드 없이 파라미터 없이도 즉시 요청).
- * - meetingKeys.managementReservations(params)로 캐시되는지.
- * - 403(ROLE_003) 응답이 그대로 throw되어 error에 반영되고 normalizeApiError로 정규화 시
- *   isForbidden===true가 되는지.
- */
-
 function makeItem(meetingId: number, title: string) {
   return {
     meetingId,

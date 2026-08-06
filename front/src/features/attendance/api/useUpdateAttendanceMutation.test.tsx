@@ -8,16 +8,6 @@ import { server } from '@/test/mocks/server'
 import { attendanceKeys } from '../model/queryKeys'
 import { useUpdateAttendanceMutation } from './useUpdateAttendanceMutation'
 
-/**
- * useUpdateAttendanceMutation(F307·DEPT_ATTENDANCE_UPDATE, ROADMAP T4.2) 동작 검증.
- *
- * - 성공(204) 시 [...attendanceKeys.all, 'dept'] 접두 invalidate가 실제로 하위 쿼리
- *   (deptMonthly)를 재조회시키는지(useCheckOutMutation.test.tsx와 동일하게 실제 refetch를
- *   관찰해 블랙박스 검증) + 성공 토스트 호출을 확인한다.
- * - 실패(예: 이미 승인된 근태 수정 위반) 시 toast.success는 호출되지 않고, handleApiError
- *   경로를 통해 toast.error가 호출되는지 확인한다.
- */
-
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))

@@ -9,12 +9,6 @@ import { server } from '@/test/mocks/server'
 import type { MeetingReservationDetail } from '../model/meeting'
 import { MeetingReservationUpdateDialog } from './MeetingReservationUpdateDialog'
 
-/**
- * MeetingReservationUpdateDialog(F804, ROADMAP T4.3-b) 회귀 방지 테스트.
- * 핵심 불변식(팀리드 지시):
- * - 다이얼로그가 열릴 때만 detail을 스냅샷한다(라이브 쿼리 변경에 반응하지 않음).
- * - 회의실 변경 취소/재검색 해제 시 날짜/시간까지 함께 원래 값으로 되돌린다.
- */
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))
@@ -64,11 +58,6 @@ function renderDialog(detail: MeetingReservationDetail, { open = true, onOpenCha
   return { ...utils, onOpenChange, queryClient }
 }
 
-/**
- * MeetingRoomSearchAndSelect(T3.3-a 재사용)의 "시작 시각"/"종료 시각" 라벨이 이 다이얼로그 자체의
- * 필드(회의실 변경 토글 전부터 항상 렌더)와 텍스트가 겹쳐 getByLabelText로는 모호하다 — 검색
- * 패널의 input id(meeting-search-*)는 고유하므로 id로 직접 조회한다.
- */
 function getSearchInput(id: 'meeting-search-date' | 'meeting-search-start' | 'meeting-search-end' | 'meeting-search-capacity') {
   const el = document.getElementById(id)
   if (!el) throw new Error(`#${id} not found`)
@@ -103,8 +92,6 @@ describe('MeetingReservationUpdateDialog - 프리필/스냅샷', () => {
 
     expect(screen.getByLabelText('회의 제목')).toHaveValue('주간 회의')
 
-    // open은 true로 유지한 채 detail만 새 객체로 교체(예: 성공 후 meetingKeys.all invalidate로
-    // 인한 리페치를 흉내) — open 전이가 없으므로 reset이 재실행되면 안 된다.
     rerender(
       <QueryClientProvider client={queryClient}>
         <MemoryRouter>
@@ -133,8 +120,6 @@ describe('MeetingReservationUpdateDialog - 회의실 변경/되돌림', () => {
 
     await searchAndSelectRoom(user)
 
-    // 검색 패널(isChangingRoom=true)이 계속 열려 있어 "시작 시각"/"종료 시각" 라벨이 검색 패널과
-    // 중복되므로, 다이얼로그 자체 필드는 고유 id로 조회한다.
     expect(screen.getByLabelText('회의일')).toHaveValue('2026-07-20')
     expect(document.getElementById('meeting-update-start')).toHaveValue('13:00')
     expect(document.getElementById('meeting-update-end')).toHaveValue('14:00')
@@ -171,13 +156,9 @@ describe('MeetingReservationUpdateDialog - 회의실 변경/되돌림', () => {
     await searchAndSelectRoom(user)
     expect(screen.getByLabelText('회의일')).toHaveValue('2026-07-20')
 
-    // 같은 검색 패널에서 다시 검색(재제출) — MeetingRoomSearchAndSelect가 onRoomSelected(undefined)를
-    // 먼저 전달해 이전 선택을 해제한다.
     fireEvent.change(screen.getByLabelText('날짜'), { target: { value: '2026-07-25' } })
     await user.click(screen.getByRole('button', { name: '회의실 검색' }))
 
-    // 검색 패널(isChangingRoom)이 재검색 이후에도 계속 열려 있어 "시작 시각"/"종료 시각" 라벨이
-    // 검색 패널과 다이얼로그 자체 필드에 중복되므로, 다이얼로그 자체 필드는 고유 id로 조회한다.
     await waitFor(() => expect(document.getElementById('meeting-update-date')).toHaveValue('2026-07-15'))
     expect(document.getElementById('meeting-update-start')).toHaveValue('10:00')
     expect(document.getElementById('meeting-update-end')).toHaveValue('11:00')

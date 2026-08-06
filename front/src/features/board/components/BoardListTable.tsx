@@ -6,36 +6,16 @@ import { cn } from '@/shared/lib/utils'
 import type { BoardSummary } from '../model/board'
 import { InitialsAvatar } from './InitialsAvatar'
 
-/**
- * 게시판 목록 표(F301, ROADMAP T10.3). `DepartmentMembersTable`(T2.1-b)의 컬럼 헬퍼 패턴을
- * 그대로 복제한다: `createColumnHelper<BoardSummary>()` + `getCoreRowModel()`만 사용(정렬/필터
- * 로우모델은 이번 스코프 밖 — 정렬/필터는 서버 파라미터(keyword)로만 처리한다).
- *
- * 레퍼런스 목업 테이블(번호·카테고리·제목+요약·작성자·발행일·첨부)의 시각 패턴을 우리 계약
- * (BOARD_LIST response-fields.adoc)에 맞춰 재해석했다:
- * - 우리 BoardSummary에는 per-row 카테고리명·본문 요약 필드가 없다(목록은 단일 카테고리로 필터되어
- *   per-row 카테고리 배지가 중복 정보라 열을 두지 않고, 카테고리는 목록 헤더에서 한 번만 표기한다).
- *   //todo : [계약] per-row 본문 요약(레퍼런스의 회색 2줄)은 BOARD_LIST 응답에 없는 필드다 —
- *           요약을 노출하려면 백엔드 계약 확장이 필요(contract-conformance-reviewer 판단).
- * - 레퍼런스가 접은 조회/좋아요/댓글 수는 우리 실데이터라, 제목 아래 보조 줄(muted)로 옮겨 2줄
- *   리듬을 살리면서 정보를 유지한다.
- *
- * publishedAt은 서버가 `yyyy-MM-ddTHH:mm:ss` 원문(BOARD_LIST response-fields.adoc 실측)으로
- * 내려주므로 dayjs로 표시용 포맷(`YYYY-MM-DD HH:mm`)만 입혀 보여준다(값 자체는 가공하지 않음).
- */
 const columnHelper = createColumnHelper<BoardSummary>()
 
-/** 첨부 아이콘 셀만 중앙 정렬한다(그 외 텍스트 컬럼은 좌측 정렬). */
 const COLUMN_ALIGN: Record<string, string> = {
   isFileAttached: 'text-center',
 }
 
-/** 셀 정렬 클래스(맵에 없으면 좌측 정렬). 헤더·본문 셀이 동일 규칙을 공유한다. */
 function alignClass(columnId: string): string {
   return COLUMN_ALIGN[columnId] ?? 'text-left'
 }
 
-/** 게시글 지표(조회/좋아요/댓글) 한 항목. 제목 아래 보조 줄에 아이콘+숫자로 나열한다. */
 function MetricStat({ icon: Icon, value }: { icon: typeof Eye; value: number }) {
   return (
     <span className="inline-flex items-center gap-1 tabular-nums">
@@ -50,13 +30,11 @@ interface BoardListTableProps {
   onRowClick: (boardId: number) => void
 }
 
-/** 게시글 1페이지(content)만 렌더하는 표. 행 클릭 시 게시글 상세로 이동하도록 onRowClick을 위임받는다. */
 export function BoardListTable({ data, onRowClick }: BoardListTableProps) {
   const columns = useMemo(
     () => [
       columnHelper.accessor('boardId', {
         header: '번호',
-        // 목표 디자인(board-page.html): 번호는 모노스페이스 muted "#id"로 옅게 표기한다.
         cell: (info) => (
           <span className="font-mono text-xs text-muted-foreground tabular-nums">
             #{info.getValue()}
@@ -67,12 +45,9 @@ export function BoardListTable({ data, onRowClick }: BoardListTableProps) {
         header: '제목',
         cell: (info) => (
           <div className="flex min-w-0 flex-col gap-1">
-            {/* 제목이 메타(작성자·날짜)·지표보다 확실히 두드러지도록 semibold로 올리고, 행이 클릭
-                가능함을 알리는 hover 밑줄 피드백을 준다(행 <tr>의 group-hover에 연동). */}
             <span className="truncate font-semibold text-foreground group-hover:underline">
               {info.getValue()}
             </span>
-            {/* 레퍼런스의 회색 요약 2줄 슬롯을 실데이터(조회·좋아요·댓글)로 채워 2줄 리듬을 유지한다. */}
             <span className="flex items-center gap-3 text-xs text-muted-foreground">
               <MetricStat icon={Eye} value={info.row.original.viewCount} />
               <MetricStat icon={Heart} value={info.row.original.likeCount} />
@@ -83,8 +58,6 @@ export function BoardListTable({ data, onRowClick }: BoardListTableProps) {
       }),
       columnHelper.accessor('authorName', {
         header: '작성자',
-        // 목표 디자인(board-page.html): 작성자 셀은 이니셜 아바타 + 이름. BoardSummary에는 부서
-        // 필드가 없어(BOARD_LIST 계약 실측) 레퍼런스의 부서 보조 줄은 렌더하지 않는다(발명 금지).
         cell: (info) => (
           <div className="flex items-center gap-2.5">
             <InitialsAvatar name={info.getValue()} className="size-7" />
@@ -99,8 +72,6 @@ export function BoardListTable({ data, onRowClick }: BoardListTableProps) {
       columnHelper.accessor('isFileAttached', {
         header: '첨부',
         cell: (info) =>
-          // 첨부 개수는 BOARD_LIST 응답에 없고 boolean(isFileAttached)만 있다 — 레퍼런스의 "1"
-          // 같은 개수 대신 존재 여부만 아이콘/대시로 표기한다(근거 없는 개수 발명 금지).
           info.getValue() ? (
             <Paperclip className="inline size-4 text-muted-foreground" aria-label="첨부파일 있음" />
           ) : (

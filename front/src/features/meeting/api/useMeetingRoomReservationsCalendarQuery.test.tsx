@@ -8,9 +8,6 @@ import { server } from '@/test/mocks/server'
 import { meetingKeys } from '../model/meetingKeys'
 import { useMeetingRoomReservationsCalendarQuery } from './useMeetingRoomReservationsCalendarQuery'
 
-/**
- * useMeetingRoomReservationsCalendarQuery(F809, ROADMAP T2.3) 실동작 검증.
- */
 function createWrapper() {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return {

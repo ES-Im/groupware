@@ -2,15 +2,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { apiClient } from '@/shared/api/client'
 import { getCompanyInfo } from './getCompanyInfo'
 
-/**
- * getCompanyInfo(COMPANY_INFO, ROADMAP-COMPANY T1.1) 단위 테스트.
- *
- * apiClient.get을 직접 모킹해 이 도메인 특유의 "404=미등록 정상 상태" 정규화를 검증한다
- * (getFranchises.test.ts와 동일 패턴 — apiClient 모킹, MSW 미사용).
- *
- * axios.isAxiosError가 인식하는 최소 형태(isAxiosError 플래그 + response)만 흉내낸 가짜 에러
- * (CommentForm.test.tsx/LoginForm.test.tsx와 동일 패턴).
- */
 function fakeAxiosError(status: number, code: string, message: string) {
   return Object.assign(new Error(message), {
     isAxiosError: true,

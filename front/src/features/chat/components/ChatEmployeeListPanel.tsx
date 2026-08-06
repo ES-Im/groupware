@@ -14,40 +14,19 @@ import { useCreateChatRoomMutation } from '../api/useCreateChatRoomMutation'
 import { useInviteChatRoomMembersMutation } from '../api/useInviteChatRoomMembersMutation'
 import { useChatOverlayStore } from '../lib/chatOverlayStore'
 
-/** 사원 검색 디바운스 지연(ms). EmployeeSearchOverlay/EmployeePicker와 동일 값. */
 const SEARCH_DEBOUNCE_MS = 300
 
-/** 전체 부서를 한 페이지에 담기 위한 size. EmployeeSearchOverlay의 ALL_DEPARTMENTS_PAGE_SIZE와 동일 값. */
 const ALL_DEPARTMENTS_PAGE_SIZE = 500
 
-/** 두 데이터 소스(부서 멤버 / 전사 검색 결과)를 하나의 행 형태로 정규화한 뷰 모델. */
 interface EmployeeRow {
   empId: number
   empName: string
-  /** 아바타 아래 보조 라벨(부서 멤버 목록=직급, 사원 검색 결과=부서 · 직급). */
   secondary: string
 }
 
-/**
- * 채팅 오버레이 홈 화면의 '사원목록' 탭(ChatHomeScreen).
- *
- * 검색은 헤더 "부서·사원 검색"(EmployeeSearchOverlay)과 동일하게 사원 이름과 부서명을 함께 찾는다
- * (사용자 요청). 검색어 유무·부서 파고들기(drill) 상태로 데이터 소스를 3분기한다:
- *   - 검색어 없음: 본인 주 소속 부서 멤버를 기본 노출(useDepartmentMembersQuery).
- *   - 검색어 있음(디바운스): 부서명 부분일치 결과(useDepartmentsQuery에서 필터) + 전사 사원 이름
- *     검색 결과(useEmployeeNameSearchQuery)를 두 섹션으로 보여준다.
- *   - 부서 결과를 클릭(drill): 그 부서 멤버 목록으로 파고들어 그 안에서 사원을 고른다.
- * 사원 행 클릭 동작은 chatOverlayStore.inviteTargetRoomId로 분기한다:
- *   - non-null(멤버 초대 진입): 대상 방의 현재 멤버(useChatRoomDetailQuery)를 disabled 처리하고,
- *     행 클릭 시 useInviteChatRoomMembersMutation으로 초대한다.
- *   - null(일반 브라우징): 행 클릭 시 useCreateChatRoomMutation으로 그 사원과의 1:1 방을 만든다.
- * 두 mutation 훅 모두 항상 호출한다(Hooks 규칙) — roomId가 없는 초대 mutation은 0으로 폴백해
- * 훅 자체는 항상 구성하되, 실제 mutate 호출만 모드에 따라 분기한다.
- */
 export function ChatEmployeeListPanel() {
   const [searchInput, setSearchInput] = useState('')
   const [keyword, setKeyword] = useState('')
-  // 검색 결과에서 부서를 클릭하면 그 부서 멤버 목록으로 파고든다(null이면 검색 결과/기본 목록 화면).
   const [drillDept, setDrillDept] = useState<{ deptId: number; deptName: string } | null>(null)
 
   useEffect(() => {
@@ -59,7 +38,6 @@ export function ChatEmployeeListPanel() {
     return () => clearTimeout(timer)
   }, [searchInput, keyword])
 
-  // 검색어가 바뀌면 부서 파고들기를 해제해 검색 결과 화면으로 되돌린다.
   useEffect(() => {
     setDrillDept(null)
   }, [keyword])
@@ -73,7 +51,6 @@ export function ChatEmployeeListPanel() {
   const myPrimaryDeptId = myPrimaryDept?.deptId
   const myPrimaryDeptName = myPrimaryDept?.deptName
 
-  // 부서명 검색용 전체 부서 목록(헤더 "부서·사원 검색"과 동일 소스라 React Query 캐시를 공유한다).
   const departmentsQuery = useDepartmentsQuery({ size: ALL_DEPARTMENTS_PAGE_SIZE })
   const departments = departmentsQuery.data?.content ?? []
   const deptSearchResults =
@@ -81,19 +58,14 @@ export function ChatEmployeeListPanel() {
       ? departments.filter((dept) => dept.deptInfoResponse.deptName.includes(keyword))
       : []
 
-  // 표시할 부서 멤버 대상 deptId: 파고든 부서 > (검색 아닐 때) 본인 부서. 검색 중 & drill 아니면
-  // undefined로 넘겨 useDepartmentMembersQuery가 enabled:false로 대기한다(불필요한 요청 차단).
   const membersDeptId = drillDept ? drillDept.deptId : isSearching ? undefined : myPrimaryDeptId
   const deptMembersQuery = useDepartmentMembersQuery(membersDeptId, { size: 50 })
 
-  // 사원 이름 검색: 검색 중 & drill 아닐 때만 동작(drill 중엔 그 부서 멤버를 보여준다). 빈 키워드면
-  // 훅 내부에서 enabled:false로 대기하므로 '' 를 넘겨 비활성화한다.
   const searchQuery = useEmployeeNameSearchQuery(isSearching && !drillDept ? keyword : '')
 
   const inviteTargetRoomId = useChatOverlayStore((state) => state.inviteTargetRoomId)
   const selectRoom = useChatOverlayStore((state) => state.selectRoom)
 
-  // 초대 모드가 아니면 roomId가 없어 enabled:false로 대기한다(useChatRoomDetailQuery 가드).
   const detailQuery = useChatRoomDetailQuery(inviteTargetRoomId ?? undefined)
   const existingMemberIds = detailQuery.data?.members.map((member) => member.memberId) ?? []
 
@@ -117,7 +89,6 @@ export function ChatEmployeeListPanel() {
     )
   }
 
-  // 부서 멤버(기본/ drill)와 사원 검색 결과를 각각 공통 행 형태로 정규화한다.
   const memberRows: EmployeeRow[] = (deptMembersQuery.data?.content ?? []).map((member) => ({
     empId: member.empId,
     empName: member.empName,
@@ -142,7 +113,6 @@ export function ChatEmployeeListPanel() {
             disabled && 'cursor-not-allowed opacity-50 hover:bg-transparent',
           )}
         >
-          {/* 프로필 파일 필드가 없어(empId/empName/position) 이니셜 폴백만 렌더된다. */}
           <BlobAvatar empId={row.empId} fallbackText={row.empName} />
           <span className="flex min-w-0 flex-1 flex-col">
             <span className="truncate text-sm font-medium">{row.empName}</span>
@@ -155,7 +125,6 @@ export function ChatEmployeeListPanel() {
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-3 p-3">
-      {/* 통합 단일 검색창(헤더 "부서·사원 검색"과 동일 개념): 사원 이름과 부서명을 함께 찾는다. */}
       <div className="relative shrink-0">
         <Search
           className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
@@ -172,7 +141,6 @@ export function ChatEmployeeListPanel() {
 
       <div className="min-h-0 flex-1 overflow-y-auto">
         {drillDept ? (
-          // 부서 파고들기: 검색 결과에서 부서를 클릭한 상태. 그 부서 멤버를 보여주고 사원을 고른다.
           <div className="flex flex-col gap-1">
             <button
               type="button"
@@ -194,7 +162,6 @@ export function ChatEmployeeListPanel() {
             )}
           </div>
         ) : isSearching ? (
-          // 검색 모드: 부서 결과 + 사원 결과 두 섹션을 함께 보여준다.
           <div className="flex flex-col gap-3">
             {deptSearchResults.length > 0 && (
               <section>
@@ -251,7 +218,6 @@ export function ChatEmployeeListPanel() {
         ) : memberRows.length === 0 ? (
           <p className="p-2 text-sm text-muted-foreground">사원이 없습니다.</p>
         ) : (
-          // 기본 화면(검색어 없음): 본인 주 소속 부서 멤버.
           <div className="flex flex-col gap-1">
             <p className="px-1 text-xs font-medium text-muted-foreground">
               {myPrimaryDeptName ? `${myPrimaryDeptName} · ${memberRows.length}명` : `${memberRows.length}명`}

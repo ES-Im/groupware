@@ -12,34 +12,10 @@ import { Input } from '@/shared/ui/input'
 import { useMyLeaveHistoryQuery } from '../api/useMyLeaveHistoryQuery'
 import { useMyLeaveSummaryQuery } from '../api/useMyLeaveSummaryQuery'
 
-/** 결재 상태 필터 셀렉트 옵션(approvalStatusBadgeMap 키 그대로 파생 — MyBusinessTripHistoryPage 동형, 별도 배열 중복 선언 금지). */
 const STATUS_OPTIONS = Object.keys(approvalStatusBadgeMap) as ApprovalStatus[]
 
-/** 조회 연도 입력 디바운스 지연(ms). DepartmentsPage/DeptAttendancePage의 keyword 검색 디바운스와 동일 값을 재사용한다. */
 const SEARCH_DEBOUNCE_MS = 300
 
-/**
- * 내 휴가 페이지(F742·F743, ROADMAP(LEAVE) M3 T3.2, PRD §페이지별 상세(내 휴가 페이지)).
- *
- * 잔여 휴가 카드(useMyLeaveSummaryQuery, T3.1)는 연차/특별/포상 3종의 부여·사용 값을 받아 잔여를
- * 프론트에서 계산한다(부여−사용, §PRD에서 확정된 결정 — 서버가 잔여 필드를 내려주지 않는다).
- * year 기본값은 올해(dayjs().year()). `type=number` 입력은 keyword 검색(DepartmentsPage/
- * DeptAttendancePage)과 동일한 300ms 디바운스 패턴으로 처리한다 — 로컬 입력값(yearInput)을 즉시
- * 반영하되, 확정 `year`(쿼리 키)는 입력이 멈춘 뒤에만 갱신해 매 keystroke마다 쿼리가 발화하는
- * 것을 막는다(code-reviewer 지적, non-minor).
- *
- * 신청 이력(useMyLeaveHistoryQuery, T3.1, 배열 응답·페이징 없음)은 결재상태(enum 코드)/조회월
- * 필터와 연동한다. yearMonth는 미입력 시 서버가 현재 월로 응답하므로(§계약 실측 메모) 필터
- * 기본값을 당월로 맞추고 안내 문구를 노출한다 — MyBusinessTripHistoryPage/MyAttendancePage와
- * 동일한 톤(배열 응답이라 PaginationControls/usePageState 미사용).
- *
- * leaveType/approvalStatus는 이력 응답이 이미 표시명 문자열로 내려주므로 그대로 렌더한다(클라
- * 매핑 불필요). approvalStatus 배지만 approval `getApprovalStatusBadge`(표시명→코드 역매핑)를
- * 재사용해 variant를 얻는다.
- *
- * [휴가 신청] 버튼은 `/approval/drafts/leaves/new`(ROADMAP(LEAVE) M6 T6.1에서 배선 완료)로 navigate한다.
- * 행 클릭은 draftId로 기안서 상세(①공통, 이미 배선된 라우트)로 이동한다.
- */
 export function MyLeavePage() {
   const navigate = useNavigate()
   const [year, setYear] = useState(() => dayjs().year())
@@ -64,9 +40,6 @@ export function MyLeavePage() {
     handleApiError(historyQuery.error, { toast })
   }, [historyQuery.error])
 
-  // 조회 연도 입력 디바운스(DeptAttendancePage 검색 디바운스와 동일 패턴): 300ms 유예 후 유효한
-  // 연도일 때만 확정 year로 반영해 매 keystroke마다 요약 쿼리가 재요청되는 것을 막는다. 빈 문자열/
-  // 파싱 불가 값(예: "202" 입력 중)은 확정하지 않고 입력이 안정될 때까지 기다린다.
   useEffect(() => {
     const parsed = Number(yearInput)
     if (yearInput.trim() === '' || Number.isNaN(parsed) || parsed === year) {
@@ -169,7 +142,6 @@ export function MyLeavePage() {
           <CardDescription>내가 신청한 휴가 기안 이력을 조회합니다.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* 필터 툴바: 조회 월(yyyy-MM, 기본=당월) + 결재 상태 필터(MyBusinessTripHistoryPage 툴바 톤 유지) */}
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
             <div className="flex items-center gap-2">
               <label htmlFor="leave-history-month" className="sr-only">
@@ -206,12 +178,9 @@ export function MyLeavePage() {
             </p>
           </div>
 
-          {/* 표 영역: placeholderData: keepPreviousData가 필터 변경 중 이전 목록을 유지하므로
-              isLoading은 최초 로딩에서만 true가 되어 깜빡임이 없다. */}
           {historyQuery.isLoading ? (
             <p className="py-8 text-center text-sm text-muted-foreground">불러오는 중...</p>
           ) : historyQuery.error ? (
-            // 실패는 위 useEffect가 토스트로 알렸으므로 화면은 빈 상태 문구만 표시한다.
             <p className="py-8 text-center text-sm text-muted-foreground">
               휴가 이력을 불러오지 못했습니다.
             </p>

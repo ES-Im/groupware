@@ -10,25 +10,8 @@ import { useMyBusinessTripHistoryQuery } from '../api/useMyBusinessTripHistoryQu
 import { approvalStatusBadgeMap, getApprovalStatusBadge } from '../lib/approvalStatusBadge'
 import type { ApprovalStatus } from '../model/approval'
 
-/** 결재 상태 필터 셀렉트 옵션(approvalStatusBadgeMap 키 그대로 파생 — DeptBusinessTripHistoryPage 동형, 별도 배열 중복 선언 금지). */
 const STATUS_OPTIONS = Object.keys(approvalStatusBadgeMap) as ApprovalStatus[]
 
-/**
- * 내 출장 이력 페이지(F733, ROADMAP(DRAFT-BUSINESSTRIP) M4 T4.2, PRD §페이지별 상세(내 출장 이력 페이지)).
- *
- * `useMyBusinessTripHistoryQuery`(T4.1, 배열 응답·페이징 없음)를 상태(approvalStatus)/월(yearMonth) 필터와
- * 연동한다. yearMonth는 미입력 시 서버가 현재 월로 응답하므로(§계약 실측 메모) 필터 기본값을 당월로
- * 맞추고("이번 달 이력만 표시됩니다" 안내) 항상 값을 채워 보낸다(attendance MyAttendancePage의
- * yearMonth 기본값 관례 동형 — "전체 기간" 옵션은 계약에 없다).
- *
- * 배열 응답이라 PaginationControls/usePageState를 쓰지 않는다(문서함 4종·부서 출장 이력과의 차이).
- * 표 마크업은 DocumentBoxTable의 톤(테두리·정렬·hover 클래스)을 그대로 재사용하되, 검색 디바운스·
- * react-table 없이 배열을 직접 map한다 — 필터 2개뿐이고 정렬/페이징이 없는 단순 목록이라 react-table
- * 도입은 과함(태스크 지시 "UI는 최소로만").
- *
- * 조회 실패는 MyAttendancePage/DocumentBoxTable과 동일하게 handleApiError 단일 진입점(토스트)으로
- * 처리한다. 행 클릭은 상세 페이지(①공통)로 navigate — DocumentBoxTable.onRowClick과 동일 목적지 규약.
- */
 export function MyBusinessTripHistoryPage() {
   const navigate = useNavigate()
   const [yearMonth, setYearMonth] = useState(() => dayjs().format('YYYY-MM'))
@@ -60,7 +43,6 @@ export function MyBusinessTripHistoryPage() {
           <CardDescription>내가 신청한 출장 기안 이력을 조회합니다.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* 필터 툴바: 조회 월(yyyy-MM, 기본=당월) + 결재 상태 필터(MyAttendancePage 툴바 톤 유지) */}
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
             <div className="flex items-center gap-2">
               <label htmlFor="business-trip-history-month" className="sr-only">
@@ -97,12 +79,9 @@ export function MyBusinessTripHistoryPage() {
             </p>
           </div>
 
-          {/* 표 영역: placeholderData: keepPreviousData가 필터 변경 중 이전 목록을 유지하므로
-              isLoading은 최초 로딩에서만 true가 되어 깜빡임이 없다. */}
           {historyQuery.isLoading ? (
             <p className="py-8 text-center text-sm text-muted-foreground">불러오는 중...</p>
           ) : historyQuery.error ? (
-            // 실패는 위 useEffect가 토스트로 알렸으므로 화면은 빈 상태 문구만 표시한다.
             <p className="py-8 text-center text-sm text-muted-foreground">
               출장 이력을 불러오지 못했습니다.
             </p>

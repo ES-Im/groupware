@@ -2,9 +2,6 @@ import { describe, expect, it, vi } from 'vitest'
 import { apiClient } from '@/shared/api/client'
 import { cancelSchedule } from './cancelSchedule'
 
-/**
- * cancelSchedule(F007, ROADMAP(SCHEDULE) T6.1) 단위 테스트.
- */
 vi.mock('@/shared/api/client', () => ({
   apiClient: { patch: vi.fn().mockResolvedValue({ data: undefined }) },
 }))

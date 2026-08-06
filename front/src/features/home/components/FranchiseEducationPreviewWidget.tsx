@@ -7,14 +7,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
 
 const WIDGET_ITEM_LIMIT = 4
 
-/**
- * 가맹점 교육 미리보기 위젯(FRANCHISE, 레퍼런스 "가맹점 교육 신청 내역" 이식).
- *
- * 계획 문서 §계약상 불가피한 축소에 따라 담당 가맹점 한정이 아닌 전사 공통으로 노출한다
- * (FRANCHISE_EDUCATION_CALENDAR에 franchiseId 필터가 없다). 캘린더 응답에는 신청 인원 필드가
- * 없어(교육 상세 전용 appliedCount와 달리 캘린더 항목엔 없음) 레퍼런스의 "신청 24개점" 같은
- * 표기는 만들지 않는다(발명 금지) — 대신 일정·장소·활성/마감 상태만 보여준다.
- */
 export function FranchiseEducationPreviewWidget() {
   const { data } = useFranchiseEducationCalendarQuery()
   const items = [...(data ?? [])]

@@ -8,14 +8,6 @@ import { server } from '@/test/mocks/server'
 import { franchiseKeys } from '../model/queryKeys'
 import { useFranchiseEducationCalendarQuery } from './useFranchiseEducationCalendarQuery'
 
-/**
- * useFranchiseEducationCalendarQuery(FRANCHISE_EDUCATION_CALENDAR, ROADMAP(FRANCHISE) T4.1)
- * 실동작 검증(useMyMeetingReservationsCalendarQuery.test.tsx 동형).
- *
- * - franchiseKeys.education.calendar(start, end)로 캐시되는지.
- * - start/end 미전달(최초 마운트) 시 쿼리스트링 자체가 생략되는지.
- * - range가 바뀌면 queryKey가 달라져 새 start/end로 자동 재조회되는지.
- */
 function makeItem(id: number, title: string) {
   return {
     id,

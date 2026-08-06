@@ -2,22 +2,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { apiClient } from '@/shared/api/client'
 import { createFranchise } from './createFranchise'
 
-/**
- * createFranchise(FRANCHISE_CREATE, ROADMAP(FRANCHISE) T2.2, F1603) 단위 테스트.
- * createMeetingRoom.test.ts와 동일 패턴 — apiClient.post 직접 모킹으로 요청 URL/바디,
- * 응답 파싱(201 {franchiseId})을 검증한다.
- *
- * 핵심 계약:
- * - 요청 키는 franchiseName(목록/상세 응답의 name과 다름 — request-fields.adoc 실측).
- * - managerEmpId는 선택 필드로, 미지정(undefined) 시 body 키 자체를 생략한다.
- * - 응답 식별자 키는 franchiseId(목록/상세의 id와 다름 — response-fields.adoc 실측).
- */
-
 vi.mock('@/shared/api/client', () => ({
   apiClient: { post: vi.fn() },
 }))
 
-/** managerEmpId 없는 필수 6필드 payload 기준값. */
 const basePayload = {
   businessNumber: '123-45-67890',
   franchiseName: 'HARUON 강남점',

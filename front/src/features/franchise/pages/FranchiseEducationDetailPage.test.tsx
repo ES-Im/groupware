@@ -8,12 +8,6 @@ import { BASE_URL } from '@/shared/api/client'
 import { server } from '@/test/mocks/server'
 import { FranchiseEducationDetailPage } from './FranchiseEducationDetailPage'
 
-/**
- * FranchiseEducationDetailPage(F1610/F1611/F1613/F1614, ROADMAP(FRANCHISE) T4.3+T4.4) 검증.
- * MeetingRoomManagementDetailPage.test.tsx와 동형 패턴 — route param 가드, 조회 실패 분기,
- * 관리 액션(수정 버튼 노출 조건, 활성 토글 상시 노출) 배선만 다룬다. 신청자 표(react-table +
- * usePageState + PaginationControls)는 이 페이지 고유 배선이라 함께 다룬다.
- */
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))
@@ -285,7 +279,6 @@ describe('FranchiseEducationDetailPage - 수정 다이얼로그 연동', () => {
 
     expect(await screen.findByText('교육 수정')).toBeInTheDocument()
     expect(screen.getByLabelText('장소')).toHaveValue('본사 3층 강당')
-    // jsdom의 datetime-local 값 정규화 규칙상 초가 00이면 표시값에서 생략된다(HTML 표준 동작).
     expect(screen.getByLabelText('교육 일시')).toHaveValue('2026-05-01T10:00')
   })
 })

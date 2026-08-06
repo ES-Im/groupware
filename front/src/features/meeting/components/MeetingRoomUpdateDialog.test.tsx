@@ -8,19 +8,6 @@ import { server } from '@/test/mocks/server'
 import type { MeetingRoomDetail } from '../model/meeting'
 import { MeetingRoomUpdateDialog } from './MeetingRoomUpdateDialog'
 
-/**
- * MeetingRoomUpdateDialog(F813, ROADMAP(MEETING-ROOMS) T7.2-b) 검증.
- * RegisterDepartmentDialog.test.tsx/MeetingRoomCreateDialog.test.tsx와 동형 패턴.
- *
- * 핵심 검증 축:
- * - 열릴 때 detail 값으로 프리필된다.
- * - buildUpdatePayload: 바뀐 필드만 PATCH body에 담긴다(평탄화 아님, diff).
- * - capacity는 setValueAs 계약(빈 문자열→undefined) — 지워서 제출해도 zod 검증을 통과하고,
- *   payload에서 capacity가 생략된다(값 변경 안 함 의도 보존).
- * - 잘못된 capacity(0 이하)는 zod 에러로 제출이 막힌다.
- * - 서버 검증 실패 시 다이얼로그가 닫히지 않고 root 에러가 표시된다.
- * - 성공 시 성공 토스트 + 다이얼로그 닫힘.
- */
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))

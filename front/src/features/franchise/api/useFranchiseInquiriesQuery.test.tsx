@@ -9,17 +9,6 @@ import { server } from '@/test/mocks/server'
 import { franchiseKeys } from '../model/queryKeys'
 import { useFranchiseInquiriesQuery } from './useFranchiseInquiriesQuery'
 
-/**
- * useFranchiseInquiriesQuery(FRANCHISE_INQUIRY_LIST, ROADMAP(FRANCHISE) T5.1) 실동작 검증
- * (useFranchisesQuery.test.tsx와 동일 패턴).
- *
- * - franchiseKeys.inquiry.list(params)로 캐시되는지.
- * - Page<FranchiseInquiry> 응답이 그대로 노출되는지.
- * - params(답변여부 필터) 변경 시 keepPreviousData로 이전 목록을 유지해 isLoading이 다시
- *   true가 되지 않는지.
- * - 403(ROLE_003) 응답이 그대로 throw되어 normalizeApiError로 isForbidden 판정되는지.
- */
-
 function inquiry(id: number, title: string, isAnswered: boolean) {
   return {
     inquiryId: id,

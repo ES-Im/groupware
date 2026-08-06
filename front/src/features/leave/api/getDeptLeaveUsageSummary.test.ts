@@ -2,13 +2,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { apiClient } from '@/shared/api/client'
 import { getDeptLeaveUsageSummary } from './getDeptLeaveUsageSummary'
 
-/**
- * getDeptLeaveUsageSummary(F746, ROADMAP(LEAVE) M4 T4.2) 단위 테스트.
- *
- * apiClient.get을 직접 모킹해 axios 호출 인자(URL에 deptId path param 포함, params)만 검증한다.
- * year는 선택값이므로 미지정 시 params 객체에서 생략되어야 한다.
- */
-
 vi.mock('@/shared/api/client', () => ({
   apiClient: { get: vi.fn().mockResolvedValue({ data: undefined }) },
 }))

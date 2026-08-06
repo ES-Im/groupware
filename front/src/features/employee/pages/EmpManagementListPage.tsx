@@ -23,28 +23,11 @@ import { EmpManagementTable } from '../components/EmpManagementTable'
 import type { EmpStatus } from '../model/empManagement'
 import { empStatusLabels } from '../model/empManagement'
 
-/** 검색 디바운스 지연(ms). NewEmployeeApprovalListPage/BoardListPage와 동일 값. */
 const SEARCH_DEBOUNCE_MS = 300
-/** 부서 필터 후보 목록 조회 시 사용할 페이지 크기. EmpBelongingsAssignmentForm의 관례와 동일. */
 const DEPARTMENT_CANDIDATE_PAGE_SIZE = 100
-/** 헤더 툴바의 근무상태 셀렉트 클래스(EmployeeDetailPage 등 기존 native select 스타일과 동일). */
 const SELECT_CLASS =
   'h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm text-foreground transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 sm:w-auto dark:bg-input/30'
 
-/**
- * 사원 관리 목록 페이지(`EMPS_FOR_MANAGEMENT`, HR/ADMIN 전용, /employees).
- *
- * 목표 디자인(employee-page 레퍼런스)에 맞춰 재스타일링: 단일 Card의 헤더 한 줄에 제목·건수
- * 배지·부서(조직도 트리 팝업)/상태/이름 필터를 배치하고, 본문은 표(EmpManagementTable) +
- * PaginationControls만 둔다.
- *
- * 행 클릭은 사원 상세(/employees/:empId)로 이동한다. 관리(수정성 작업)는 관리 컬럼 드롭다운으로
- * 모은다 — 정보 수정 / 근무 상태 변경 / (소속 있으면)부서 이동·(소속 없으면)부서 배정.
- * selectedEmpId + activeDialog만 로컬 state로 들고 record는 매 렌더 rows에서 파생한다(별도 스냅샷
- * 없음): mutation 성공 시 empsForManagement 캐시가 invalidate되어 rows가 갱신되면 열려 있는 모달도
- * 자동으로 최신 데이터를 반영한다. 필터에 걸려 선택 사원이 rows에서 사라지면 selectedRecord가
- * undefined가 되어 모달이 언마운트(닫힘)된다.
- */
 export function EmpManagementListPage() {
   const navigate = useNavigate()
   const [searchInput, setSearchInput] = useState('')
@@ -95,7 +78,6 @@ export function EmpManagementListPage() {
   const selectedRecord = rows.find((row) => row.empId === selectedEmpId)
   const selectedPrimary = selectedRecord?.belongings.find((b) => b.isPrimary && b.endAt === null)
 
-  /** 관리 진입점(행 클릭 or 관리 드롭다운) 공통: 대상 사원과 열 모달을 지정한다. */
   function openManage(empId: number, action: EmpManageAction) {
     setSelectedEmpId(empId)
     setActiveDialog(action)

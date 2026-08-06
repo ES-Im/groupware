@@ -8,26 +8,6 @@ import { server } from '@/test/mocks/server'
 import type { DeptPendingRow } from '../model/deptAttendance'
 import { DeptAttendancePendingTable } from './DeptAttendancePendingTable'
 
-/**
- * DeptAttendancePendingTable(F306, ROADMAP2 T3.4-b/T4.3/T4.4) 컴포넌트 테스트.
- *
- * DeptAttendanceMonthlyTable(T3.4-a)에 대응하는 테스트가 아직 없어 신규로 작성한다. attendanceInfo가
- * 단건 객체라는 계약(DeptPendingRow, model/deptAttendance.ts)에 맞춰 컬럼 렌더(사번/이름/직급/일자/
- * 상태배지/출근/퇴근)와 빈 배열 안내 문구만 검증한다(정렬은 이 태스크 범위 밖).
- * [수정] 액션 버튼(T4.3)은 onEdit prop이 새로 필수가 되어 아래 케이스를 추가한다.
- *
- * T4.4(F308)부터 이 컴포넌트가 `useApproveAttendanceMutation`을 내부에서 직접 호출하므로
- * (컴포넌트 최상단 참조), 모든 렌더는 QueryClientProvider로 감싸야 한다("No QueryClient set" 회피).
- * MSW 핸들러/에러 토스트 검증은 useApproveAttendanceMutation.test.tsx의 표준 패턴을 그대로 재사용한다.
- *
- * `totalElements` prop(부모가 넘기는 서버 전체 미승인 건수) 추가와 상태 필터(select, controlled
- * prop)·행 체크박스·전체선택(indeterminate)·일괄 승인 기능 확장분 테스트를 하단에 추가한다.
- *
- * 상태 필터는 이 컴포넌트 로컬 상태가 아니다(서버 사이드 필터 예정, DeptAttendancePendingTable.tsx
- * JSDoc 참고) — `status`/`onStatusChange` controlled prop만 검증하고, `data` 자체를 필터링하는
- * 책임은 이 컴포넌트에 없다(호출부/서버 책임).
- */
-
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))
@@ -58,12 +38,6 @@ function makeRow(
   }
 }
 
-/**
- * totalElements 기본값은 data.length(대부분 테스트에서 서버 총건수=현재 페이지 건수로 충분).
- * status/onStatusChange는 상위(DeptAttendancePage)가 소유하는 서버 사이드 필터 상태를 그대로
- * 흉내낸 controlled prop이다. 기본값은 필터 미적용(undefined) + no-op 콜백이며, 필터 관련
- * 테스트에서만 명시적으로 override한다.
- */
 function renderTable(
   data: DeptPendingRow[],
   onEdit = vi.fn(),
@@ -95,11 +69,8 @@ describe('DeptAttendancePendingTable (F306)', () => {
 
   it('사원(이름+사번·직급)/일자/상태배지/출근/퇴근을 한 행에 렌더한다', () => {
     renderTable([makeRow()])
-    // 상태 필터 select의 <option>도 동일한 상태 라벨("지각/조퇴")을 렌더하므로, 표 영역으로 쿼리
-    // 범위를 좁혀 배지 텍스트와의 중복 매치를 피한다.
     const table = within(screen.getByRole('table'))
 
-    // 사번/이름/직급 3열은 목표 디자인 이식으로 아바타 person-cell 단일 "사원" 열로 합쳐졌다.
     expect(table.getByText('사원')).toBeInTheDocument()
     expect(table.getByText('일자')).toBeInTheDocument()
     expect(table.getByText('상태')).toBeInTheDocument()
@@ -107,7 +78,6 @@ describe('DeptAttendancePendingTable (F306)', () => {
     expect(table.getByText('퇴근')).toBeInTheDocument()
 
     expect(table.getByText('홍길동')).toBeInTheDocument()
-    // 사번·직급은 한 줄("사번 · 직급")로 합쳐 렌더되므로 결합 텍스트로 확인한다.
     expect(
       table.getByText((_, element) => element?.textContent === '10000001 · 팀원'),
     ).toBeInTheDocument()
@@ -261,7 +231,6 @@ describe('DeptAttendancePendingTable (F306)', () => {
       await user.selectOptions(screen.getByLabelText('근태 상태 필터'), '지각/조퇴')
 
       expect(onStatusChange).toHaveBeenCalledWith('LATE_EARLY')
-      // 필터링은 서버(호출부) 책임이라 data를 그대로 넘기면 이 컴포넌트는 재필터링하지 않는다.
       expect(screen.getByText('지각자')).toBeInTheDocument()
       expect(screen.getByText('결근자')).toBeInTheDocument()
     })
@@ -287,7 +256,6 @@ describe('DeptAttendancePendingTable (F306)', () => {
       expect(
         screen.getByText((_, element) => element?.textContent === '미승인 30건'),
       ).toBeInTheDocument()
-      // data가 비어도 필터를 해제(전체 선택)할 수 있어야 하므로 select는 숨기지 않는다.
       expect(screen.getByLabelText('근태 상태 필터')).toBeInTheDocument()
     })
   })
@@ -300,7 +268,6 @@ describe('DeptAttendancePendingTable (F306)', () => {
         makeRow({ attendanceId: 2 }, { empId: 2, empName: '지각자2' }),
       ])
 
-      // 선택 0건이면 선택 액션 바(선택 승인 버튼)는 렌더되지 않는다(목표 디자인 pendbar).
       expect(screen.queryByRole('button', { name: '선택 승인' })).not.toBeInTheDocument()
 
       await user.click(screen.getByRole('checkbox', { name: '지각자1 근태 선택' }))

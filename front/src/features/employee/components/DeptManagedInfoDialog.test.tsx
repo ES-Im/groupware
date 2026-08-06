@@ -9,12 +9,6 @@ import { server } from '@/test/mocks/server'
 import type { EmpManagementRecord } from '../model/empManagement'
 import { DeptManagedInfoDialog } from './DeptManagedInfoDialog'
 
-/**
- * DeptManagedInfoDialog(`DEPT_MANAGER_UPDATE_EMP_INFO`, DEPT_MANAGER 전용) 검증.
- * request-fields.adoc: "[FRANCHISE,IT,HR,FACILITY 중 부서 매니저가 가진 권한]" — 뷰어(authStore
- * 원본 roles)와 LAYER2_ROLE_CODES의 교집합만 후보로 추가되는지 확인한다.
- */
-
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))
@@ -143,9 +137,6 @@ describe('DeptManagedInfoDialog - 제출', () => {
     expect(toast.success).toHaveBeenCalledWith('사원 정보를 수정했습니다')
   })
 
-  // EmpUpdateRequestByDeptManager.java 실측: partial-update 계약이라 내선번호를 비워두면 요청
-  // 바디에서 아예 제외돼야 한다(실사용 검증 중 발견한 UX 결함 수정 — 권한만 바꾸려 해도 내선번호
-  // 재입력을 강제하던 문제).
   it('내선번호를 비워두면 검증을 통과하고 extensionNo 필드 없이 전송된다', async () => {
     useAuthStore.setState({ roles: ['DEPT_MANAGER'] })
     let capturedBody: unknown
@@ -165,12 +156,6 @@ describe('DeptManagedInfoDialog - 제출', () => {
     expect(capturedBody).toEqual({ systemRoleCode: ['EMPLOYEE'] })
   })
 
-  // 서버(EmpCommandService.validateAssignableRolesByDeptManager +
-  // EmpUpdateRequestByDeptManager 컴팩트 생성자)는 부서매니저가 자신의 후보 밖 권한(예: ADMIN,
-  // 본인이 갖지 않은 Layer-2)을 배열에 "포함해 재전송"하는 것도 하드 거부한다(새로 부여하려는
-  // 시도가 아니어도) — 체크박스로 제거된 걸로 보내면 조용히 제거되고, 보존하려 포함하면
-  // 거부되므로 이 다이얼로그는 후보 밖 권한이 있으면 권한 편집 자체를 잠그고 systemRoleCode를
-  // 아예 생략한다.
   it('대상 사원이 후보 밖 권한(ADMIN)을 이미 보유하면 권한 체크박스가 잠기고 제출 시 systemRoleCode가 생략된다', async () => {
     useAuthStore.setState({ roles: ['DEPT_MANAGER'] })
     const recordWithAdmin: EmpManagementRecord = { ...record, systemRoleCodeName: ['EMPLOYEE', 'ADMIN'] }

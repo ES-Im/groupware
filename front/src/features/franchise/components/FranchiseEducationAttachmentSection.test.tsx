@@ -8,14 +8,6 @@ import { server } from '@/test/mocks/server'
 import type { FranchiseEducationFileInfo } from '../model/franchise'
 import { FranchiseEducationAttachmentSection } from './FranchiseEducationAttachmentSection'
 
-/**
- * FranchiseEducationAttachmentSection(ROADMAP(FRANCHISE) T4.5) 검증.
- * approval AttachmentSection과 달리 업로드/삭제 버튼에 클라이언트 게이팅이 없다(서버 403 전담,
- * 컴포넌트 JSDoc §노출 판정 참조) — 따라서 useMeQuery 목이 필요 없다.
- *
- * 핵심 시나리오만 다룬다: 이미지/비이미지 분기 렌더, 업로드 성공/실패(사전검증 메시지 노출),
- * 삭제 성공.
- */
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))
@@ -65,7 +57,6 @@ describe('FranchiseEducationAttachmentSection - 렌더 분기', () => {
     renderSection([imageFile(), docFile()])
 
     expect(screen.getByText('첨부파일 2개')).toBeInTheDocument()
-    // 이미지 첨부: 인라인 미리보기(img)로 렌더되고 다운로드 버튼은 없다.
     await waitFor(() =>
       expect(screen.getByRole('img', { name: 'photo.jpg' })).toHaveAttribute(
         'src',
@@ -73,9 +64,7 @@ describe('FranchiseEducationAttachmentSection - 렌더 분기', () => {
       ),
     )
     expect(screen.queryByRole('button', { name: 'photo.jpg 다운로드' })).not.toBeInTheDocument()
-    // 비이미지 첨부: 다운로드 버튼이 노출된다.
     expect(screen.getByRole('button', { name: 'guide.pdf 다운로드' })).toBeInTheDocument()
-    // 업로드/삭제 버튼은 게이팅 없이 항상 노출된다.
     expect(screen.getByRole('button', { name: '파일 추가' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'photo.jpg 삭제' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'guide.pdf 삭제' })).toBeInTheDocument()

@@ -36,35 +36,12 @@ import {
   type Franchise,
 } from '../model/franchise'
 
-/** 검색 디바운스 지연(ms). department 도메인(DepartmentsPage 등)과 동일 값. */
 const SEARCH_DEBOUNCE_MS = 300
 
-/** 영업상태 필터 값. 'all'은 status 쿼리 파라미터 생략(전체)을 의미한다(DepartmentsPage 동일 패턴). */
 type StatusFilter = BusinessStatusCode | 'all'
 
 const columnHelper = createColumnHelper<Franchise>()
 
-/**
- * P1 가맹점 목록 페이지(F1601, ROADMAP(FRANCHISE) T2.1).
- *
- * 기존 useFranchisesQuery(keyword/status/managerId/page/size, keepPreviousData)를 확장 없이
- * 그대로 소비하고, react-table 페이징 표는 usePageState+PaginationControls(MeetingRoomManagementPage
- * 동형, board 표준 UI 페이지 번호 number+1)로 구성한다.
- *
- * 필터 3종:
- * - 검색어: 300ms 디바운스 후에만 keyword로 확정(DepartmentsPage 동형).
- * - 영업상태: 조회 응답은 한글 표시명이지만 **전송은 enum 코드**(§계약 실측 메모 — 두 축 혼용 금지).
- *   select 옵션은 T1.1-a의 BUSINESS_STATUS_CODES/LABEL 상수에서 파생한다.
- * - 담당자: 프로젝트에 Popover 프리미티브가 없어(실측) EmployeePicker(단일 선택)를 Dialog로 감싸는
- *   기존 컨벤션(CirculationAddDialog 동형)으로 구현한다. 매출조회용 FranchisePicker(T1.3)와는
- *   무관한 목록 필터다.
- * 세 필터 모두 변경 시 resetPage()로 페이지를 0으로 되돌린다.
- *
- * 행 클릭은 `/franchises/:franchiseId` 라우트 문자열만 내비게이션한다(P2 상세와 코드 의존 없음).
- * `[가맹점 등록]`(F1603, T2.2)은 헤더 트리거 버튼으로 FranchiseCreateDialog를 여닫는다 — 등록
- * 성공 시 다이얼로그 내부 mutation이 목록 캐시를 invalidate해 자동 재조회된다
- * (MeetingRoomManagementPage 헤더 버튼 배치 동형).
- */
 export function FranchiseListPage() {
   const navigate = useNavigate()
 
@@ -74,13 +51,10 @@ export function FranchiseListPage() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
   const [manager, setManager] = useState<EmployeePickerEmployee | null>(null)
   const [managerDialogOpen, setManagerDialogOpen] = useState(false)
-  // 다이얼로그 안에서 고르는 임시 선택값. [적용]을 눌러야만 실제 필터(manager)에 반영된다
-  // (탐색 중 클릭마다 목록이 재조회되는 것을 막는다).
   const [managerDraft, setManagerDraft] = useState<EmployeePickerEmployee[]>([])
 
   const { page, size, onPageChange, resetPage } = usePageState()
 
-  // 검색 입력 디바운스: 300ms 유예 후에만 확정된 keyword로 반영하고 페이지를 0으로 리셋한다.
   useEffect(() => {
     const trimmed = searchInput.trim()
     if (trimmed === keyword) {
@@ -93,7 +67,6 @@ export function FranchiseListPage() {
     return () => clearTimeout(timer)
   }, [searchInput, keyword, resetPage])
 
-  // 다이얼로그를 열 때마다 현재 확정 필터로 임시 선택을 시드한다(취소 후 재진입 시 잔상 방지).
   useEffect(() => {
     if (managerDialogOpen) {
       setManagerDraft(manager ? [manager] : [])
@@ -115,9 +88,6 @@ export function FranchiseListPage() {
     handleApiError(franchisesQuery.error, { toast })
   }, [franchisesQuery.error])
 
-  // 상단 KPI 집계: 목록 필터와 무관하게 "전체" 기준으로 본다. 전용 집계 API가 없어 기존 목록 훅에
-  // size=1을 넘겨 totalElements만 읽고(가맹점·미답변 문의), 진행중 교육은 당월 캘린더 배열에서 활성
-  // 수를 센다(전 가맹점 매출 집계 KPI는 계약상 데이터가 없어 두지 않는다 — 3장 구성).
   const kpiFranchisesQuery = useFranchisesQuery({ page: 0, size: 1 })
   const kpiUnansweredQuery = useFranchiseInquiriesQuery({ isAnswered: false, page: 0, size: 1 })
   const kpiEducationQuery = useFranchiseEducationCalendarQuery(undefined, undefined)
@@ -141,8 +111,6 @@ export function FranchiseListPage() {
     resetPage()
   }
 
-  // 필터 초기화(Ubold [초기화] 이식): 기존 상태 setter만 조합해 검색어·영업상태·담당자를 비운다
-  // (데이터 로직 신설 없음 — 순수 UI 편의).
   function handleResetFilters() {
     setSearchInput('')
     setStatusFilter('all')
@@ -164,8 +132,6 @@ export function FranchiseListPage() {
   const columns = useMemo(
     () => [
       columnHelper.accessor('name', {
-        // 가맹점명(강조) + 주소(보조 텍스트)를 한 셀에 합친다(A안 톤 `.who` 셀 이식 —
-        // 좌측 store 아이콘 타일 + 이름/주소). 응답 필드는 그대로 소비한다.
         header: '가맹점',
         cell: (info) => (
           <div className="flex items-center gap-3">
@@ -183,8 +149,6 @@ export function FranchiseListPage() {
         header: '대표자명',
       }),
       columnHelper.accessor('BusinessStatus', {
-        // 응답의 한글 표시명을 뱃지로 렌더한다(표시명 원문은 뱃지 안에서 그대로 노출 —
-        // 코드 역매핑·가공은 뱃지 변형 선택에만 쓰고 텍스트는 원문 유지).
         header: '영업상태',
         cell: (info) => <FranchiseBusinessStatusBadge status={info.getValue()} />,
       }),
@@ -213,7 +177,6 @@ export function FranchiseListPage() {
         </Button>
       </FranchisePageHeader>
 
-      {/* 상단 KPI(목업 kpis) — 계약상 데이터가 있는 3종만(이번달 매출 KPI는 전 가맹점 집계 API 부재로 제외). */}
       <div className="grid gap-4 sm:grid-cols-3">
         <FranchiseMetricCard
           title="담당 가맹점"
@@ -253,7 +216,6 @@ export function FranchiseListPage() {
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* 필터 툴바: 검색어 + 영업상태 + 담당자 + 초기화 */}
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
             <div className="relative w-full sm:w-64">
               <Search className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -384,8 +346,6 @@ export function FranchiseListPage() {
         </CardContent>
       </Card>
 
-      {/* 담당자 필터 다이얼로그: Popover 프리미티브 부재로 Dialog + FranchiseManagerPicker(FRANCHISE
-          권한 사원만 노출하는 단일 선택) 조합. */}
       <Dialog open={managerDialogOpen} onOpenChange={setManagerDialogOpen}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>

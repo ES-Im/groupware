@@ -7,11 +7,6 @@ import { BASE_URL } from '@/shared/api/client'
 import { server } from '@/test/mocks/server'
 import { UpdateDepartmentParentForm } from './UpdateDepartmentParentForm'
 
-/**
- * UpdateDepartmentParentForm(F207, T9.3) 검증.
- * 과거 모달에서 인라인 폼으로 전환됨(open 개념 없음, 후보 조회는 항상 활성화). 후보 목록 엣지케이스와
- * "최상위로 이동" optional 처리·실패 비삼킴 의도는 그대로 유지한다.
- */
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))
@@ -62,21 +57,12 @@ describe('UpdateDepartmentParentForm - 후보 목록 엣지케이스', () => {
 
     renderForm(2)
 
-    // 후보 목록(개발본부)이 실제로 도착할 때까지 기다린 뒤에야 폴백 주입 여부를 판정할 수 있다
-    // (도착 전에는 candidates가 빈 배열이라 일시적으로 폴백 옵션이 함께 나타날 수 있음).
     await screen.findByText('개발본부 (002)')
-    // 최종 settled 값은 올바르다 — reset useEffect가 candidatesQuery.isSuccess 전이 시 한 번 더
-    // 실행되어 값을 재적용한다(UpdateDepartmentParentForm.tsx 참조).
     expect(screen.getByRole('combobox')).toHaveValue('2')
     expect(screen.queryByText(/비활성 또는 목록 범위 밖/)).not.toBeInTheDocument()
   })
 
   it('[회귀] 폴백 옵션이 실제 후보 옵션으로 교체되는 순간, 네이티브 select가 일시적으로 선택값을 잃는다', async () => {
-    // 위 테스트가 검증하는 "최종 settled 값"과 별개로, 그 값에 도달하기까지의 과정에 실제 결함이 있다.
-    // GET /api/departments가 렌더 이후 비동기로 도착하도록(delay) 만들어 폴백 옵션 → 실제 후보 옵션
-    // 전환을 강제로 유도하고, MutationObserver로 그 전환이 일어나는 DOM 커밋 시점의 select.value를
-    // "동기적으로" 관찰한다. 결함 원인/수정 방향은 UpdateDepartmentParentForm.tsx의 reset useEffect
-    // 위 //todo 참조.
     server.use(
       http.get(`${BASE_URL}/api/departments`, async () => {
         await delay(10)
@@ -87,7 +73,6 @@ describe('UpdateDepartmentParentForm - 후보 목록 엣지케이스', () => {
     renderForm(2)
 
     const select = (await screen.findByRole('combobox')) as HTMLSelectElement
-    // 초기(폴백) 상태: 후보 목록이 아직 로딩 중이므로 폴백 옵션(value=2)으로 채워져 있어야 한다.
     expect(select).toHaveValue('2')
 
     const valuesObservedDuringOptionSwap: string[] = []
@@ -99,16 +84,12 @@ describe('UpdateDepartmentParentForm - 후보 목록 엣지케이스', () => {
     await screen.findByText('개발본부 (002)')
     observer.disconnect()
 
-    // 폴백 옵션이 실제 후보 옵션으로 교체되는 DOM 커밋 순간, 네이티브 select는 선택된 옵션 노드가
-    // 제거된 것으로 인식해 selectedIndex를 0("최상위로 이동", value='')으로 되돌린다.
     expect(valuesObservedDuringOptionSwap).toContain('')
 
-    // (참고) 이후 isSuccess 전이를 감지한 reset useEffect가 다시 실행되어 최종적으로는 올바른 값으로 복구된다.
     expect(select).toHaveValue('2')
   })
 
   it('현재 상위 부서가 후보 목록(활성/size100/자기제외)에 없으면 별도 옵션으로 주입해 select가 현재 값을 표시한다', async () => {
-    // 후보 목록에 현재 상위 부서(deptId=99)가 전혀 없는 상황(비활성이거나 100건 범위 밖).
     server.use(
       http.get(`${BASE_URL}/api/departments`, () =>
         HttpResponse.json(candidatesPage([deptSummary(2, '개발본부')])),

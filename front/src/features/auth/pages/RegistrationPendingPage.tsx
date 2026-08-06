@@ -2,17 +2,6 @@ import { CheckCircle2 } from 'lucide-react'
 import { Link } from 'react-router'
 import { AuthShell } from '../components/AuthShell'
 
-/**
- * 승인 대기 안내 화면(ROADMAP T1.5).
- *
- * 회원가입(REGISTER) 성공 직후(204) 노출되는 프레젠테이션 컴포넌트.
- * 안내 문구 근거: ../docs/도메인모델.md §Emp_Status·§Emp 규칙4
- * - 신규 가입 사원은 `PENDING`(승인보류) 상태로 생성되며, `PENDING` → `ACTIVE`는 인사과 가입
- *   승인 시에만 전이된다.
- * - 개인정보 수정·파일 변경·소속 변경 등은 `ACTIVE` 상태에서만 가능하다.
- * - 로그인 자체도 서버가 `status = ACTIVE`인 계정만 조회하므로(EmpDetailsService) 승인 전에는
- *   로그인할 수 없다.
- */
 export function RegistrationPendingPage() {
   return (
     <AuthShell
@@ -24,7 +13,6 @@ export function RegistrationPendingPage() {
       }
     >
       <div className="flex flex-col items-center gap-4 text-center">
-        {/* 접수 완료를 시각적으로 확인시키는 성공 아이콘(순수 시각 요소). */}
         <span className="flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary">
           <CheckCircle2 className="size-6" aria-hidden="true" />
         </span>

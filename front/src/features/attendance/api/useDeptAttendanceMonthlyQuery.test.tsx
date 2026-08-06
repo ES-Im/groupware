@@ -9,17 +9,6 @@ import { server } from '@/test/mocks/server'
 import { attendanceKeys } from '../model/queryKeys'
 import { useDeptAttendanceMonthlyQuery } from './useDeptAttendanceMonthlyQuery'
 
-/**
- * useDeptAttendanceMonthlyQuery(F305, ROADMAP T3.3) 실동작 검증.
- *
- * - deptId===undefined면 enabled:false로 대기해 요청 자체가 나가지 않는지
- *   (useDepartmentMembersQuery.test.tsx와 동일 패턴).
- * - deptId가 확정된 number일 때 attendanceKeys.deptMonthly(deptId, params)로 캐시되는지.
- * - 403(ROLE_003) 응답이 이 레이어에서 삼켜지지 않고 그대로 throw되어 result.current.error에
- *   반영되고, normalizeApiError로 정규화 시 isForbidden===true가 되는지(handleApiError는
- *   UI 레이어 몫이라 여기서는 정규화 가능 여부만 확인, 재구현 금지).
- */
-
 function makeRow(empId: number, empName: string) {
   return {
     empInfo: {

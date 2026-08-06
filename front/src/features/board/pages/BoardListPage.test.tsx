@@ -8,19 +8,6 @@ import { BASE_URL } from '@/shared/api/client'
 import { server } from '@/test/mocks/server'
 import { BoardListPage } from './BoardListPage'
 
-/**
- * BoardListPage(F301, ROADMAP T10.3) 회귀 방지 테스트.
- *
- * 방금 발견된 회귀 위험 지점(스타일링 리팩터 직후):
- * - 카테고리 로딩/목록 로딩 도중 "게시글이 없습니다" 오표시 플래시가 나오지 않는지
- *   (1프레임 깜빡임 방지 가드, BoardListPage.tsx L171-175 주석 참조).
- * - 페이지네이션 조작 시 목록이 올바른 page 파라미터로 갱신되는지.
- *
- * "게시글 작성"은 더 이상 상시 노출 카드가 아니라 좌측 "게시글 작성" 버튼으로 진입하는 별도 화면
- * 전환이다(사용자 요청 레이아웃 개편) — 기본 상태는 곧바로 "게시글 목록"이 렌더되므로, 이전
- * 라운드의 closeComposeCard 같은 사전 조작 없이 바로 목록 단언을 할 수 있다.
- */
-
 function boardSummary(overrides: Partial<Record<string, unknown>> = {}) {
   return {
     boardId: 1,
@@ -49,7 +36,6 @@ function pageOf(content: ReturnType<typeof boardSummary>[], overrides: Record<st
   }
 }
 
-/** resolve를 밖으로 노출해 언제든 응답을 확정지을 수 있는 지연 프라미스 헬퍼. */
 function deferred<T>() {
   let resolve!: (value: T) => void
   const promise = new Promise<T>((r) => {
@@ -81,8 +67,6 @@ describe('BoardListPage (F301) - 로딩 플래시 방지', () => {
     expect(await screen.findByText('불러오는 중...')).toBeInTheDocument()
     expect(screen.queryByText('게시글이 없습니다.')).not.toBeInTheDocument()
 
-    // 정리: 이 테스트에서는 응답을 확정하지 않고 종료해도 무방하지만(핸들러가 afterEach로
-    // 리셋됨), 지연된 프라미스가 unhandled rejection 경고를 남기지 않도록 확정한다.
     categoriesDeferred.resolve(HttpResponse.json([{ categoryId: 1, categoryName: '공지', isVisible: true }]) as never)
   })
 
@@ -97,8 +81,6 @@ describe('BoardListPage (F301) - 로딩 플래시 방지', () => {
 
     renderPage()
 
-    // 카테고리 pill이 렌더된 뒤에도, 목록 조회가 아직 끝나지 않았으므로
-    // "불러오는 중..."이 유지되어야 한다(빈 상태 오표시 금지).
     await waitFor(() => {
       expect(screen.getByRole('button', { name: '공지' })).toBeInTheDocument()
     })
@@ -107,7 +89,6 @@ describe('BoardListPage (F301) - 로딩 플래시 방지', () => {
 
     boardListDeferred.resolve(HttpResponse.json(pageOf([])))
 
-    // 실제 응답이 빈 목록으로 도착한 뒤에는 정상적으로 빈 상태 문구가 보여야 한다.
     expect(await screen.findByText('게시글이 없습니다.')).toBeInTheDocument()
   })
 })
@@ -141,14 +122,12 @@ describe('BoardListPage (F301) - 페이지네이션/카테고리 변경', () => 
     renderPage()
 
     await screen.findByText('글 A')
-    // 초기 요청: 첫 카테고리(1) + page 파라미터 미지정(=0 취급).
     expect(requests[0]).toMatchObject({ categoryId: '1' })
 
     await user.click(screen.getByRole('button', { name: '다음 페이지' }))
     await waitFor(() => expect(requests.some((r) => r.categoryId === '1' && r.page === '1')).toBe(true))
 
     await user.click(screen.getByRole('button', { name: '자유' }))
-    // 카테고리 변경 시 새 categoryId(2)로 재조회하며 page는 0으로 리셋되어야 한다(page 파라미터 생략 또는 '0').
     await waitFor(() =>
       expect(
         requests.some((r) => r.categoryId === '2' && (r.page === null || r.page === '0')),

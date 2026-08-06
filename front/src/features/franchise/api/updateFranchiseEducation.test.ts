@@ -2,11 +2,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { apiClient } from '@/shared/api/client'
 import { updateFranchiseEducation } from './updateFranchiseEducation'
 
-/**
- * updateFranchiseEducation(FRANCHISE_EDUCATION_UPDATE, ROADMAP(FRANCHISE) T4.4, F1613) 단위 테스트.
- * apiClient.patch를 직접 모킹해 요청 URL/바디, 204 무응답 처리를 검증한다.
- */
-
 vi.mock('@/shared/api/client', () => ({
   apiClient: { patch: vi.fn() },
 }))

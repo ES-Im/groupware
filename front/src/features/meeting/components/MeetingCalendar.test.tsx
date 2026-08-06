@@ -3,14 +3,6 @@ import { render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import { MeetingCalendar } from './MeetingCalendar'
 
-/**
- * MeetingCalendar(ROADMAP T1.2, FullCalendar 첫 소비처) 테스트.
- *
- * - 항상 마운트된다(FullCalendar 표준 DOM 구조가 렌더된다).
- * - events/onEventClick 등 props가 바뀌어도 리마운트되지 않는다(불변식) — FullCalendar 루트
- *   DOM 노드의 동일성(참조)으로 확인한다. 리마운트되면 datesSet이 다시 불려 range가 리셋되고,
- *   사용자가 이동해 둔 뷰(월)가 초기화되는 회귀가 생긴다.
- */
 describe('MeetingCalendar', () => {
   it('항상 마운트되어 FullCalendar 표준 DOM(테이블 뷰)이 렌더된다', () => {
     render(<MeetingCalendar events={[]} onRangeChange={vi.fn()} />)

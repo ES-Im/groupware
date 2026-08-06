@@ -2,19 +2,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { apiClient } from '@/shared/api/client'
 import { createSalesDraft, type SalesDraftPayload } from './createSalesDraft'
 
-/**
- * createSalesDraft(F760 `SALES_DRAFT_CREATE(_SUBMISSION)`, ROADMAP(SALES) T2.2) 단위 테스트.
- *
- * apiClient.post를 직접 모킹해 axios 호출 인자(URL, 바디)만 검증한다
- * (createLeaveDraft.test.ts와 동일 패턴).
- *
- * 핵심 검증 축:
- *   - submit=false → POST /api/drafts/sales / submit=true → POST /api/drafts/sales/submission.
- *   - body는 혼합 구조(title/content/approvers는 param 중첩, franchiseId/reportMonth/salesAmount는
- *     최상위 형제) — 평탄화되지 않고 그대로 전달되는지.
- *   - 응답 {draftId}가 그대로 반환되는지.
- */
-
 vi.mock('@/shared/api/client', () => ({
   apiClient: { post: vi.fn() },
 }))
@@ -73,7 +60,6 @@ describe('createSalesDraft', () => {
       reportMonth: '2026-07',
       salesAmount: 10000000,
     })
-    // 평탄화되어 title/content가 최상위로 올라와 있지 않은지 명시적으로 확인.
     expect(sentBody).not.toHaveProperty('title')
     expect(sentBody).not.toHaveProperty('content')
   })

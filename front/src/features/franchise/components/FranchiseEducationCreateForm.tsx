@@ -11,22 +11,10 @@ import {
 } from '../model/franchiseEducationCreateSchema'
 
 interface FranchiseEducationCreateFormProps {
-  /** 취소(폼 이탈) 시 호출. 상위 페이지가 목록으로 되돌린다. */
   onCancel: () => void
-  /** 등록 성공 시 생성된 교육 식별자와 함께 호출. 상위 페이지가 상세로 이동한다. */
   onSuccess: (educationId: number) => void
 }
 
-/**
- * 교육 등록 폼(`FRANCHISE_EDUCATION_CREATE`, F1612, ROADMAP(FRANCHISE) T4.2).
- *
- * 폼 본문만 담은 재사용 컴포넌트다. 현재 소비처는 교육 목록의 등록 모달(FranchiseEducationCreateDialog)이며
- * (다이얼로그 chrome·비활성 안내는 그쪽이 담당), 폼은 본문/검증/제출만 소유한다. useZodForm/submitWithErrorMapping
- * 표준 폼 패턴이며, educationDate(날짜)+educationTime(시각) 두 필드로 입력받아 제출 시
- * `${date}T${time}:00`(yyyy-MM-dd'T'HH:mm:ss)로 조합해 전송한다(HTML time input이 초 단위를 반환하지 않아
- * `:00` 고정 보정). 성공(201 {educationId}) 시 mutation이 교육 캘린더 캐시를 invalidate하고, 이 컴포넌트는
- * 성공 토스트 + onSuccess(educationId) 위임만 담당한다.
- */
 export function FranchiseEducationCreateForm({
   onCancel,
   onSuccess,
@@ -67,7 +55,6 @@ export function FranchiseEducationCreateForm({
       onSubmit={submitWithErrorMapping(form, handleSubmit)}
       className="grid grid-cols-1 gap-x-5 gap-y-4 sm:grid-cols-2"
     >
-      {/* 교육 제목: 전체 폭(레퍼런스 form-grid의 .fld.full). */}
       <div className="flex flex-col gap-1.5 sm:col-span-2">
         <Label htmlFor="franchise-education-create-title">
           교육 제목 <span className="text-destructive">*</span>
@@ -158,7 +145,6 @@ export function FranchiseEducationCreateForm({
         )}
       </div>
 
-      {/* 교육 내용: 전체 폭. */}
       <div className="flex flex-col gap-1.5 sm:col-span-2">
         <Label htmlFor="franchise-education-create-content">
           교육 내용 <span className="text-destructive">*</span>
@@ -183,7 +169,6 @@ export function FranchiseEducationCreateForm({
         </p>
       )}
 
-      {/* 하단 액션: 전체 폭 우측 정렬(레퍼런스 등록 폼 하단 버튼 바). */}
       <div className="flex justify-end gap-2 border-t pt-4 sm:col-span-2">
         <Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting}>
           취소

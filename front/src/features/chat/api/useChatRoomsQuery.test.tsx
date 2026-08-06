@@ -8,15 +8,6 @@ import { server } from '@/test/mocks/server'
 import type { ChatRoomListItem } from '../model/chatRoom'
 import { useChatRoomsQuery } from './useChatRoomsQuery'
 
-/**
- * useChatRoomsQuery(ROADMAP(CHAT) T1.1) 실동작 검증.
- *
- * - 응답이 plain array(Page 아님)일 때 배열 그대로 반환되어야 한다(response-body.adoc 실측).
- * - keyword/isBookmark 쿼리 파라미터가 요청에 그대로 반영되어야 한다.
- * - isBookmark 변경 시 keepPreviousData로 이전 목록을 유지해, 화면이 매번
- *   "불러오는 중..."으로 전면 교체(깜빡임)되지 않아야 한다.
- */
-
 function chatRoom(chatRoomId: number, roomName: string, isBookmarked: boolean): ChatRoomListItem {
   return {
     chatRoomId,
@@ -98,8 +89,6 @@ describe('useChatRoomsQuery', () => {
 
     rerender({ isBookmark: true })
 
-    // keepPreviousData가 적용되면 새 데이터가 도착하기 전에도 isLoading은 false로 유지되고
-    // (isFetching만 true), 화면에 표시되는 data는 새 응답이 오기 전까지 이전 값을 유지한다.
     expect(result.current.isLoading).toBe(false)
     expect(result.current.isPlaceholderData).toBe(true)
     expect(result.current.data?.[0]?.roomName).toBe('전체방')

@@ -8,12 +8,6 @@ import { BASE_URL } from '@/shared/api/client'
 import { server } from '@/test/mocks/server'
 import { CategoryManagementTrigger } from './CategoryManagementTrigger'
 
-/**
- * CategoryManagementTrigger 검증. 핵심 관심사는 ADMIN 게이팅이다 — BoardDetailView의
- * canEdit(hasRequiredRole(roles, 'ADMIN')) 선례를 그대로 복제했는지, 비-ADMIN에게는 "관리" 버튼
- * 자체가 렌더되지 않는지를 확인한다(BoardDetailPage.test.tsx의 useAuthStore.setState 패턴 재사용).
- */
-
 function renderTrigger() {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },

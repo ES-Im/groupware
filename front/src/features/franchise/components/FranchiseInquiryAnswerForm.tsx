@@ -23,20 +23,9 @@ import type { FranchiseInquiryAnswer } from '../model/franchise'
 
 interface FranchiseInquiryAnswerFormProps {
   inquiryId: number
-  /** 기존 미제출 초안(없으면 신규 생성 모드). 호출부가 isSubmitted=true 답변은 넘기지 않는다. */
   answer: FranchiseInquiryAnswer | undefined
 }
 
-/**
- * 문의 답변 생성/수정 폼(F1621·F1622, ROADMAP(FRANCHISE) T5.4). `answer` prop 유무로 생성/수정
- * mutation을 분기 제출하는 단일 폼이다(FranchiseMemoActions와 동일 useZodForm+
- * submitWithErrorMapping 조합). 초안이 있을 때만(미제출 상태) 발송 버튼을 노출한다 —
- * FranchiseEducationActiveToggleButton 동형 AlertDialog 확인 후 발송(F1623).
- *
- * 소유자(답변 담당자) 판정과 제출 후 수정 불가는 서버가 최종 판정하므로(§권한 분기점), 이 폼은
- * 호출부(FranchiseInquiryDetailPage)가 이미 노출 조건(assignedManagerId===myEmpId && 미제출)을
- * 걸러준 뒤에만 렌더된다는 전제로 별도 방어 로직을 두지 않는다(사전 필터링 발명 금지).
- */
 export function FranchiseInquiryAnswerForm({ inquiryId, answer }: FranchiseInquiryAnswerFormProps) {
   const createMutation = useFranchiseInquiryAnswerCreateMutation()
   const updateMutation = useFranchiseInquiryAnswerUpdateMutation()

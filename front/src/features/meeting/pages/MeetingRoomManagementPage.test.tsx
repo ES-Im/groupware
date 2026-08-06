@@ -8,18 +8,6 @@ import { BASE_URL } from '@/shared/api/client'
 import { server } from '@/test/mocks/server'
 import { MeetingRoomManagementPage } from './MeetingRoomManagementPage'
 
-/**
- * MeetingRoomManagementPage(F811+F812+F814, ROADMAP(MEETING-ROOMS) T6.3) 회귀 방지 테스트.
- * MeetingReservationManagementPage.test.tsx/DeptLeavePage.test.tsx의 헬퍼 패턴을 복제한다.
- *
- * 검증 대상:
- * - 로딩/에러/빈 상태 렌더.
- * - 활성상태/향후예약 tri-state select는 boolean이 false도 유효값이라 선택 즉시 반영(디바운스
- *   불필요) + page 0 리셋.
- * - 행 클릭 시 P7 상세(`/meeting-rooms/management/:meetingRoomId`)로 navigate.
- * - 행 내 활성/비활성 토글 버튼 클릭은 stopPropagation으로 행 내비게이션을 트리거하지 않는다.
- */
-
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))
@@ -117,10 +105,8 @@ describe('MeetingRoomManagementPage (F811) - 행 클릭 내비게이션', () => 
     renderPage()
 
     await screen.findByText('소회의실')
-    // 관리 컬럼 토글은 스위치 변형(role="switch")이며, 조작 시 즉시 반영이 아니라 확인 다이얼로그를 연다.
     await user.click(screen.getByRole('switch', { name: '회의실 비활성화' }))
 
-    // AlertDialog 확인창은 떠야 하지만, 상세 페이지로는 이동하지 않아야 한다.
     expect(await screen.findByText('회의실을 비활성화하시겠습니까?')).toBeInTheDocument()
     expect(screen.queryByText('회의실 관리 상세 화면 meetingRoomId=7')).not.toBeInTheDocument()
   })
@@ -160,7 +146,6 @@ describe('MeetingRoomManagementPage (F811) - 필터 2종(tri-state, 즉시 반�
     expect(requests[0].bookedInFuture).toBeNull()
     expect(requests[0].page).toBe('0')
 
-    // page를 1로 이동한 뒤 활성상태 필터를 바꾸면 즉시 반영 + page 0 리셋.
     await user.click(screen.getByRole('button', { name: '다음 페이지' }))
     await waitFor(() => expect(requests.some((r) => r.page === '1')).toBe(true))
 
@@ -171,7 +156,6 @@ describe('MeetingRoomManagementPage (F811) - 필터 2종(tri-state, 즉시 반�
       ).toBe(true),
     )
 
-    // 향후예약 필터도 동일하게 즉시 반영 + page 0 리셋.
     await user.click(screen.getByRole('button', { name: '다음 페이지' }))
     await waitFor(() =>
       expect(requests.some((r) => r.available === 'false' && r.page === '1')).toBe(true),

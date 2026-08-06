@@ -9,14 +9,6 @@ import { approvalKeys } from '../model/queryKeys'
 import type { SalesDraftPayload } from './createSalesDraft'
 import { useSalesDraftCreateMutation } from './useSalesDraftCreateMutation'
 
-/**
- * useSalesDraftCreateMutation(F760 `SALES_DRAFT_CREATE(_SUBMISSION)`, ROADMAP(SALES) T2.2)
- * 성공 시 invalidate 동작 테스트. departmentMutations.invalidate.test.tsx /
- * useCirculationReadMutation.invalidate.test.tsx 관행을 복제: mock을 가로채지 않고
- * "성공(201) 후 approvalKeys.all에 걸린 쿼리가 실제로 재조회되어 최신 값을 반영하는지"를
- * 블랙박스로 확인한다.
- */
-
 function createWrapper() {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
@@ -27,7 +19,6 @@ function createWrapper() {
   return { Wrapper }
 }
 
-/** approvalKeys.all 축에 매달린 임의의 쿼리(문서함 목록 대용) — invalidate 전파를 관측하기 위한 프로브. */
 function useProbeQuery() {
   return useQuery({
     queryKey: approvalKeys.draftDetail(55),
@@ -52,7 +43,7 @@ describe('useSalesDraftCreateMutation (SALES_DRAFT_CREATE, F760)', () => {
     server.use(
       http.get(`${BASE_URL}/api/drafts/55`, () => HttpResponse.json({ version })),
       http.post(`${BASE_URL}/api/drafts/sales`, () => {
-        version = 2 // 생성 후 서버 상태가 바뀐 것을 모사
+        version = 2
         return HttpResponse.json({ draftId: 55 }, { status: 201 })
       }),
     )

@@ -9,15 +9,6 @@ import { server } from '@/test/mocks/server'
 import { useNewEmployeesQuery } from './useNewEmployeesQuery'
 import { useApproveEmpRegistrationMutation } from './useApproveEmpRegistrationMutation'
 
-/**
- * useApproveEmpRegistrationMutation(HR_APPROVE_EMP_REGISTRATION) 실동작 검증.
- *
- * - 성공(204) 시 hiredAt이 쿼리 파라미터로 실제 전송되는지 + 이 훅은 캐시를 invalidate하지
- *   않는다는 소스 주석의 계약대로, 함께 마운트된 newEmployees 목록이 재조회되지 않는지 확인한다.
- * - 실패(EMP_001, 404 — 존재하지 않는 대상 승인 시도) 시 isError로 반영되고
- *   normalizeApiError/isNotFound로 판정 가능한지 확인한다(useFranchisesQuery.test.tsx와 동일 패턴).
- */
-
 function makePage(items: unknown[]) {
   return {
     content: items,
@@ -73,7 +64,6 @@ describe('useApproveEmpRegistrationMutation', () => {
 
     await waitFor(() => expect(result.current.mutation.isSuccess).toBe(true))
     expect(capturedHiredAt).toBe('2026-01-01')
-    // invalidate 호출이 없으므로 목록 재조회 카운트는 그대로여야 한다.
     expect(listFetchCount).toBe(1)
   })
 

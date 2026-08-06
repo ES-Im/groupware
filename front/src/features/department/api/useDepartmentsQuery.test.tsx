@@ -7,15 +7,6 @@ import { BASE_URL } from '@/shared/api/client'
 import { server } from '@/test/mocks/server'
 import { useDepartmentsQuery } from './useDepartmentsQuery'
 
-/**
- * useDepartmentsQuery(T6.2) 실동작 검증.
- *
- * - keyword/isActive/page/size 변경 시 keepPreviousData로 이전 목록을 유지해, 화면이 매번
- *   "불러오는 중..."으로 전면 교체(깜빡임)되지 않아야 한다(isLoading은 최초 1회만 true).
- * - 응답 content[].deptLeader가 all-null wire여도 normalizeDeptLeader에 의해 null로 정규화된다
- *   (T6.1 재사용 확인).
- */
-
 function makePage(items: unknown[], page: number) {
   return {
     content: items,
@@ -84,8 +75,6 @@ describe('useDepartmentsQuery', () => {
 
     rerender({ keyword: '개발' })
 
-    // keepPreviousData가 적용되면 새 데이터가 도착하기 전에도 isLoading은 false로 유지되고
-    // (isFetching만 true), 화면에 표시되는 content는 새 응답이 오기 전까지 이전 값을 유지한다.
     expect(result.current.isLoading).toBe(false)
     expect(result.current.isPlaceholderData).toBe(true)
     expect(result.current.data?.content[0].deptInfoResponse.deptName).toBe('본사')
@@ -94,7 +83,6 @@ describe('useDepartmentsQuery', () => {
       expect(result.current.data?.content[0].deptInfoResponse.deptName).toBe('개발팀'),
     )
     expect(result.current.isPlaceholderData).toBe(false)
-    // 검색 결과에 부서장이 지정된 데이터도 정상적으로 정규화되어 있어야 한다.
     expect(result.current.data?.content[0].deptLeader).not.toBeNull()
   })
 })

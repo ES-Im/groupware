@@ -7,18 +7,6 @@ import { server } from '@/test/mocks/server'
 import type { MailBox, MessageDetailResponse } from '../model/messageTypes'
 import { MessageDetailView } from './MessageDetailView'
 
-/**
- * MessageDetailView(ROADMAP(MESSAGE) T3.3-a, F1505·F1511) 회귀 방지 테스트.
- *
- * 검증 축:
- *   - 받은쪽지(box='received') 자동 읽음: 상세 로드 성공 시 1회만 markMessageRead 호출.
- *   - 그 외 박스는 자동 읽음을 호출하지 않는다.
- *   - 수신자별 읽음 배지는 보낸함(box='sent')에서만 표기한다.
- *   - 조회 실패: 404/403은 안내 문구(토스트 없음), 그 외는 토스트로만 알린다.
- *   - 박스별 액션 버튼 구성(drafts=null, trash는 isTrashedByMe 가드, received=답장+휴지통이동,
- *     sent=휴지통이동만)과 콜백 미제공 시 disabled.
- */
-
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))
@@ -78,7 +66,6 @@ describe('MessageDetailView (F1511) - 받은쪽지 자동 읽음', () => {
 
     await screen.findByText('점심 회의 안내')
     await waitFor(() => expect(readCallCount).toBe(1))
-    // invalidate로 인한 재조회가 있어도 ref 가드로 반복 호출되지 않는다.
     await new Promise((resolve) => setTimeout(resolve, 50))
     expect(readCallCount).toBe(1)
   })

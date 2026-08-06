@@ -1,15 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { parseChatBroadcastMessage } from './parseChatBroadcastMessage'
 
-/**
- * parseChatBroadcastMessage(ROADMAP(CHAT) T2.3-b) 검증.
- *
- * PRD Open Q#5(브로드캐스트 프레임 스키마)는 T2.4 실제 백엔드 연동 검증 중 실측으로 확정됐다
- * (parseChatBroadcastMessage.ts 상단 주석 참조) — 이벤트 봉투(`eventType: 'MESSAGE_CREATED'`,
- * 메시지 필드는 `data`, 식별자는 `chatId`) 구조를 기준으로 검증한다.
- */
-
-/** 실측 프레임 형태(2026-07-09 dev 서버 관찰)를 흉내내는 envelope 빌더. */
 function envelope(
   data: Record<string, unknown>,
   overrides: { eventType?: string } = {},

@@ -1,12 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { inquiryAnswerSchema } from './inquiryAnswerSchema'
 
-/**
- * inquiryAnswerSchema(FRANCHISE_INQUIRY_ANSWER_CREATE/_UPDATE, ROADMAP(FRANCHISE) T5.4, F1621·F1622)
- * 단위 테스트. franchiseMemoSchema와 동일 "공백 불가" refine 패턴이라 franchiseEducationUpdateSchema
- * .test.ts의 content 필드 검증 방식을 그대로 복제한다(safeParse + issues[0].message 단언).
- */
-
 describe('inquiryAnswerSchema', () => {
   it('빈 문자열이면 실패한다', () => {
     const result = inquiryAnswerSchema.safeParse({ answer: '' })

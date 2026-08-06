@@ -7,11 +7,6 @@ import { BASE_URL } from '@/shared/api/client'
 import { server } from '@/test/mocks/server'
 import { MeetingRoomImageGallery } from './MeetingRoomImageGallery'
 
-/**
- * MeetingRoomImageGallery(F808, ROADMAP T2.4-a / 삭제는 T7.2-c F816) 회귀 방지 테스트.
- * meetingRoomId props만으로 독립 렌더 가능한 공유 컴포넌트 — P4는 showDeleteAction 미지정(false),
- * P7만 true를 넘겨 삭제 액션을 활성화한다(opt-in).
- */
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))
@@ -165,7 +160,6 @@ describe('MeetingRoomImageGallery - 삭제 액션 opt-in', () => {
     await screen.findByAltText('a.png')
     await user.click(screen.getByRole('button', { name: 'a.png 삭제' }))
 
-    // 확인 다이얼로그가 뜨고, 실제 삭제 확정 버튼("삭제")을 눌러야 요청이 나간다(오클릭 방지).
     const confirmButton = await screen.findByRole('button', { name: '삭제' })
     await user.click(confirmButton)
 

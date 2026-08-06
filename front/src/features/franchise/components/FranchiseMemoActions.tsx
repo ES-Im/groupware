@@ -31,20 +31,9 @@ import { franchiseMemoSchema, type FranchiseMemoFormValues } from '../model/fran
 
 interface FranchiseMemoActionsProps {
   franchiseId: number
-  /** 현재 메모(프리필 기준값, FranchiseDetail.memo). */
   currentMemo: string
 }
 
-/**
- * 가맹점 메모 수정/삭제 액션(F1607 `FRANCHISE_MEMO_UPDATE` / F1608 `FRANCHISE_MEMO_CLEAR`,
- * ROADMAP(FRANCHISE) T2.4-d).
- *
- * 수정은 소형 다이얼로그 폼(memo 단일 필드, 공백 불가 — FranchiseUpdateDialog와 동일
- * useZodForm+submitWithErrorMapping 조합)이고, 삭제는 MeetingRoomActiveToggleButton 동형의
- * AlertDialog 확인 후에만 실행한다(무본문 PATCH — 되돌리기 어려운 액션이라 확인 필수).
- * 메모를 비우고 싶으면 수정 폼이 아니라 삭제를 쓴다(수정 body의 memo는 공백 불가 계약).
- * 성공(204) 시 각 mutation 훅이 상세/목록을 invalidate하므로 여기서는 토스트+닫기만 담당한다.
- */
 export function FranchiseMemoActions({ franchiseId, currentMemo }: FranchiseMemoActionsProps) {
   const updateMutation = useFranchiseMemoUpdateMutation()
   const clearMutation = useFranchiseMemoClearMutation()
@@ -57,8 +46,6 @@ export function FranchiseMemoActions({ franchiseId, currentMemo }: FranchiseMemo
     formState: { errors, isSubmitting },
   } = form
 
-  // 열릴 때마다 현재 메모로 프리필하고, 닫힐 때는 다음 오픈에 이전 입력값/에러가 남지 않도록
-  // 리셋한다(FranchiseUpdateDialog와 동일 이유 — 제어형 다이얼로그는 언마운트되지 않는다).
   useEffect(() => {
     if (editOpen) {
       reset({ memo: currentMemo })
@@ -85,7 +72,6 @@ export function FranchiseMemoActions({ franchiseId, currentMemo }: FranchiseMemo
     })
   }
 
-  // 제출 중에는 닫기를 무시한다(FranchiseUpdateDialog와 동일 이유).
   function handleEditOpenChange(nextOpen: boolean) {
     if (!nextOpen && isSubmitting) {
       return
@@ -101,7 +87,6 @@ export function FranchiseMemoActions({ franchiseId, currentMemo }: FranchiseMemo
 
       <AlertDialog>
         <AlertDialogTrigger asChild>
-          {/* 메모가 이미 비어 있으면 삭제할 대상이 없다 — 무의미한 요청을 막는다. */}
           <Button type="button" variant="outline" size="sm" disabled={!currentMemo}>
             메모 삭제
           </Button>

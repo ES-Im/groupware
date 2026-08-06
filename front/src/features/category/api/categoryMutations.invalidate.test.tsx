@@ -12,15 +12,6 @@ import { useCategoryManagementQuery } from './useCategoryManagementQuery'
 import { useCategoryRegisterMutation } from './useCategoryRegisterMutation'
 import { useCategoryUpdateNameMutation } from './useCategoryUpdateNameMutation'
 
-/**
- * 카테고리 관리 mutation 4종(CATEGORY_REGISTER/UPDATE_NAME/ACTIVATE/DEACTIVATE, ADMIN 전용) 성공
- * 후 invalidate 동작을 검증한다. boardFileMutations.invalidate.test.tsx와 동일 관행: mock을
- * 가로채지 않고 "성공 후 관리 목록 쿼리가 실제로 재조회되어 최신 값을 반영하는지"를 블랙박스로
- * 확인한다. 팀리드 브리프대로 4종 모두 categoryKeys.all 전체를 invalidate하므로, 관리 목록
- * (CATEGORY_MANAGEMENT)이 갱신되는지만 확인하면 충분하다(노출 목록 CATEGORY_LIST도 같은 접두어
- * 아래라 동일 메커니즘 — 개별 검증은 생략).
- */
-
 function pageOf(content: CategoryItem[]) {
   return {
     content,

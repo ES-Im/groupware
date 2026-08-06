@@ -8,12 +8,6 @@ import { BASE_URL } from '@/shared/api/client'
 import { server } from '@/test/mocks/server'
 import { CancelReservationAlertDialog } from './CancelReservationAlertDialog'
 
-/**
- * CancelReservationAlertDialog(F806, ROADMAP T4.3-c) 회귀 방지 테스트.
- * - 확인 다이얼로그를 거치지 않으면 취소 요청이 나가지 않는다(오클릭 방지).
- * - 성공 시 /meetings로 navigate + 성공 토스트.
- * - 실패(소유자 불일치 등 서버 위반) 시 handleApiError로 토스트만 뜨고 그대로 머문다.
- */
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))

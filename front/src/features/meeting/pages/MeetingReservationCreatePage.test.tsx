@@ -9,19 +9,8 @@ import { BASE_URL } from '@/shared/api/client'
 import { server } from '@/test/mocks/server'
 import { MeetingReservationCreatePage } from './MeetingReservationCreatePage'
 
-// 신청 일시는 "현재 이후"라야 스키마 검증을 통과하므로, 하드코딩 대신 항상 미래인 날짜를 쓴다
-// (과거 고정일이 지나면 실패하던 회귀 방지).
 const FUTURE_DATE = dayjs().add(3, 'day').format('YYYY-MM-DD')
 
-/**
- * MeetingReservationCreatePage(F802+F803, ROADMAP T3.3-b, P2) 회귀 방지 테스트.
- *
- * MeetingRoomSearchAndSelect(T3.3-a)가 이미 개별 테스트에서 검증되었으므로, 여기서는 조립 페이지의
- * 책임(회의실 선택 → meetingDate/startAt/endAt 동기화, zod 사전검증, capacity 초과 경고,
- * reserverId 미확정 fail-closed, 성공 시 payload 조합 + navigate)만 확인한다.
- * EmployeeSelectField(참여자)가 department 도메인 useDepartmentsQuery/useDepartmentMembersQuery를
- * 함께 조회하므로 GET /api/departments, /api/departments/:id/members 목이 필요하다.
- */
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))
@@ -68,7 +57,6 @@ function deptSummary(deptId: number, deptName: string) {
   }
 }
 
-/** GET /api/employees/me, /api/departments, /api/departments/1/members, /api/meeting-rooms/available를 등록한다. */
 function mockBaseline({ reserverEmpId = 7 }: { reserverEmpId?: number } = {}) {
   server.use(
     http.get(`${BASE_URL}/api/employees/me`, () => HttpResponse.json(meFixture(reserverEmpId))),
@@ -83,7 +71,6 @@ function mockBaseline({ reserverEmpId = 7 }: { reserverEmpId?: number } = {}) {
     http.get(`${BASE_URL}/api/meeting-rooms/available`, () =>
       HttpResponse.json(pageOf([{ meetingRoomId: 3, name: '대회의실', capacity: 1, isAvailable: true }])),
     ),
-    // 회의실 선택 시 좌측 카드가 회의실 정보(상세)와 첨부 이미지(파일 목록)를 조회한다.
     http.get(`${BASE_URL}/api/meeting-rooms/3`, () =>
       HttpResponse.json({ meetingRoomId: 3, name: '대회의실', description: '3층 대회의실', capacity: 1, isAvailable: true }),
     ),
@@ -197,7 +184,7 @@ describe('MeetingReservationCreatePage - 수용 인원 초과 경고', () => {
     const user = userEvent.setup()
     renderPage()
 
-    await selectRoom(user) // capacity=1인 대회의실 선택
+    await selectRoom(user)
 
     await user.click(screen.getByRole('button', { name: '참여자 추가' }))
     await user.click(await screen.findByRole('button', { name: '개발팀' }))

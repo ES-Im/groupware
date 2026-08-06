@@ -6,15 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
 
 const WIDGET_ITEM_LIMIT = 5
 
-/**
- * 신규 사원 가입 승인 밴드 위젯(HR, 레퍼런스 "신규 사원 가입 승인" 섹션 이식).
- * 밴드 타이틀(RoleBandHeader)은 HomePage가 렌더한다 — 이 컴포넌트는 카드 자체만 담당한다.
- *
- * 계획 문서 §계약상 불가피한 축소에 따라 미리보기 전용(액션 없음)이다 — 승인 처리는 항상
- * `/employees/new`(NewEmployeeApprovalListPage)에서만 가능하다. NewEmpRecord에는 부서·직급·
- * 신청일 필드가 없어(레퍼런스의 "신청 소속·직급"·"신청일" 컬럼 대응 불가) 이름/사번/이메일만
- * 표시한다. 반려 버튼은 백엔드에 대응 API 자체가 없어 완전히 제외한다.
- */
 export function NewEmployeeApprovalPreviewWidget() {
   const { data } = useNewEmployeesQuery({ page: 0, size: WIDGET_ITEM_LIMIT })
   const items = data?.content ?? []

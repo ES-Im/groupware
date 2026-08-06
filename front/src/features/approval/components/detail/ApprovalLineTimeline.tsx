@@ -6,16 +6,6 @@ import { formatDraftDateTime, getApprovalRoleLabel } from '../../lib/approvalSta
 import type { DraftApprover } from '../../model/draftDetail'
 import type { DraftDetailSectionProps } from './types'
 
-/**
- * 결재선 타임라인(ROADMAP(DRAFT) T2.3): approvers[]를 order 오름차순으로 나열하고 각 결재자의
- * 이름·역할(APPROVER/COOPERATOR 라벨)·처리 상태(승인/반려/대기)를 read-only로 표시한다.
- * 승인/반려 액션 버튼은 M3(ApproverActions)가 별도 슬롯에서 담당한다 — 여기서는 표시만 한다.
- *
- * 처리 상태 판정(응답 필드 파생, read-only):
- * - approvedAt != null → 승인(+일시)
- * - rejectedAt != null → 반려(+일시, rejectReason)
- * - 둘 다 null → 대기(미처리)
- */
 function approverStateBadge(approver: DraftApprover) {
   if (approver.approvedAt != null) {
     return { label: '승인', variant: 'default' as const }
@@ -27,11 +17,9 @@ function approverStateBadge(approver: DraftApprover) {
 }
 
 export function ApprovalLineTimeline({ draft }: DraftDetailSectionProps) {
-  // 서버 정렬을 신뢰하지 않고 order 오름차순으로 표시 정렬한다(원본 배열 불변 — 복사 후 정렬).
   const approvers = [...draft.approvers].sort((a, b) => a.order - b.order)
 
   return (
-    // 독립 카드(CardContent) 안에서 렌더되므로 자체 상단 구분선은 두지 않는다(레퍼런스 사이드 카드).
     <section className="space-y-3">
       <h3 className="text-base font-bold text-foreground">결재선</h3>
       {approvers.length === 0 ? (

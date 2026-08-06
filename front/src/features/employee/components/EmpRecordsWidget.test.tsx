@@ -9,14 +9,6 @@ import { BASE_URL } from '@/shared/api/client'
 import { server } from '@/test/mocks/server'
 import { EmpRecordsWidget } from './EmpRecordsWidget'
 
-/**
- * EmpRecordsWidget(EmployeeDetailPage 관리용 "근태·휴가·출장 조회" 위젯) 검증.
- * PersonalRecordsWidget과 동형 구조(월 선택 + 근태/연차/출장 3구역 세로 나열 + 요약 통계)이지만,
- * 부서 단위 목록 API(DEPT_ATTENDANCE_MONTHLY/DEPT_LEAVE_REQUEST_HISTORY/
- * DEPT_BUSINESS_TRIP_REQUEST_HISTORY)를 size=100으로 통째로 받아 대상 empId 행만 select/filter로
- * 골라내는 워크어라운드라, 응답에 다른 empId 행이 섞여 있어도 대상 사원 것만 보여주는지가 핵심이다.
- */
-
 const DEPT_ID = 1
 const EMP_ID = 7
 const ATTENDANCE_URL = `${BASE_URL}/api/employees/attendances/${DEPT_ID}/monthly`
@@ -123,12 +115,8 @@ describe('EmpRecordsWidget - 근태 구역(기본)', () => {
     expect(await screen.findByText('12건')).toBeInTheDocument()
     expect(screen.getByText('2건')).toBeInTheDocument()
     expect(screen.getByText('10건')).toBeInTheDocument()
-    // 다른 사원(99)의 통계(30건)는 렌더되지 않는다.
     expect(screen.queryByText('30건')).not.toBeInTheDocument()
 
-    // 근태/연차/출장 3구역이 항상 동시에 렌더되므로 "자세히 보기 →" 링크도 3개 동시 존재한다.
-    // 컴포넌트 렌더 순서(AttendanceSection → LeaveSection → BusinessTripSection)가 고정이라
-    // 인덱스로 각 구역의 링크를 구분한다.
     const links = screen.getAllByRole('link', { name: '자세히 보기 →' })
     expect(links).toHaveLength(3)
     expect(links[0]).toHaveAttribute('href', '/attendance/dept')
@@ -163,7 +151,6 @@ describe('EmpRecordsWidget - 연차 구역', () => {
     )
     renderWidget()
 
-    // empId=7 행 3건만 집계(99번 행은 제외) — 건수 3, 대기(결재대기+결재진행중) 2, 완료 1.
     await waitFor(() => expect(screen.getByText('3건')).toBeInTheDocument())
     expect(screen.getByText('2건')).toBeInTheDocument()
     expect(screen.getByText('1건')).toBeInTheDocument()
@@ -172,8 +159,6 @@ describe('EmpRecordsWidget - 연차 구역', () => {
   it('대상 empId 행이 없으면 건수/대기/완료가 모두 0건으로 표시된다(최근 목록이 사라져 별도 안내 문구는 없음)', async () => {
     mockAll()
     server.use(
-      // 근태·출장 구역은 0건이 섞이지 않도록 대상 empId에 0이 아닌 값을 채워 연차 구역의 0건 3개만
-      // 명확히 골라낼 수 있게 한다.
       http.get(ATTENDANCE_URL, () => HttpResponse.json(makePage([makeMonthlyRow(EMP_ID, 5, 1, 4, [])]))),
       http.get(LEAVE_URL, () => HttpResponse.json(makePage([makeLeaveRow(99, 1, '결재대기')]))),
       http.get(TRIP_URL, () =>
@@ -205,7 +190,6 @@ describe('EmpRecordsWidget - 출장 구역', () => {
     )
     renderWidget()
 
-    // empId=7 행 3건만 집계(99번 행은 제외) — 건수 3, 대기(결재대기+결재진행중) 2, 완료 1.
     await waitFor(() => expect(screen.getByText('3건')).toBeInTheDocument())
     expect(screen.getByText('2건')).toBeInTheDocument()
     expect(screen.getByText('1건')).toBeInTheDocument()

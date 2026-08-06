@@ -10,12 +10,6 @@ import { useEmployeeQuery } from './useEmployeeQuery'
 import { useUpdateDeptManagedInfoMutation } from './useUpdateDeptManagedInfoMutation'
 import { useUpdateHrManagedInfoMutation } from './useUpdateHrManagedInfoMutation'
 
-/**
- * useUpdateHrManagedInfoMutation/useUpdateDeptManagedInfoMutation 성공 후
- * employeeKeys.detail(empId)(RETRIEVE_EMP_INFO)·empsForManagement(EMPS_FOR_MANAGEMENT) 캐시가
- * 모두 invalidate되어 재조회되는지 검증한다(useEmpFileUploadMutation.invalidate.test.tsx와 동일 패턴).
- */
-
 function makeEmpDetail(name: string) {
   return {
     empBasicInfo: {
@@ -148,9 +142,6 @@ describe('useUpdateDeptManagedInfoMutation', () => {
   })
 
   it('empsForManagement invalidate는 접두 키(exact:false)라 deptId가 다른 캐시 엔트리도 함께 재조회된다', async () => {
-    // 이 훅은 정확한 params(deptId/size)를 모르므로 [...employeeKeys.all, 'empsForManagement']
-    // 접두 키로만 invalidate한다. deptId=1/deptId=2 두 캐시 엔트리를 동시에 마운트해 두고,
-    // empId=7(deptId=1 목록에 속함)을 수정했을 때 deptId=2 목록도 함께 재조회되는지 확인한다.
     let dept1Page = makeManagementPage('ACTIVE')
     let dept2FetchCount = 0
     server.use(

@@ -2,15 +2,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { apiClient } from '@/shared/api/client'
 import { getCategoryManagement } from './getCategoryManagement'
 
-/**
- * getCategoryManagement(CATEGORY_MANAGEMENT, ADMIN 전용) 단위 테스트.
- *
- * apiClient.get을 직접 모킹해 axios 호출 인자(URL, params)만 검증한다(getFranchises.test.ts와
- * 동일 패턴). keyword/isVisible/page/size는 모두 선택값이며, keyword는 truthy일 때만,
- * isVisible/page/size는 `!= null`일 때만(false·0도 포함) params에 채워져야 한다
- * (query-parameters.adoc 실측).
- */
-
 vi.mock('@/shared/api/client', () => ({
   apiClient: { get: vi.fn().mockResolvedValue({ data: undefined }) },
 }))

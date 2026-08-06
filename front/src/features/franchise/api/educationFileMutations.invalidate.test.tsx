@@ -11,22 +11,6 @@ import { useEducationFileDeleteMutation } from './useEducationFileDeleteMutation
 import { useEducationFileUploadMutation } from './useEducationFileUploadMutation'
 import { useFranchiseEducationDetailQuery } from './useFranchiseEducationDetailQuery'
 
-/**
- * 교육 첨부파일 업로드/삭제 mutation 훅(EDUCATION_FILE_UPLOAD/EDUCATION_FILE_DELETE)의
- * 성공(204) 후 invalidate 동작 + 사전검증 차단을 검증한다.
- * board boardFileMutations.invalidate.test.tsx와 동일 관행 — mock을 가로채지 않고 "성공 후
- * 교육 상세 쿼리(fileListInfoList)가 실제로 재조회되어 최신 값을 반영하는지"를 블랙박스로
- * 확인한다. franchise는 board/meeting과 달리 첨부 목록이 상세 응답(fileListInfoList)에
- * 포함되므로, useFranchiseEducationDetailQuery로 관찰한다.
- */
-
-/**
- * WHY: MSW(node)가 axios(XHR adapter, jsdom) 요청을 가로챌 때 내부적으로 undici 기반
- * FormData/File로 재구성하는데, jsdom File은 undici의 webidl 브랜드 체크를 통과하지 못해
- * multipart 파싱이 깨지는 테스트 인프라 한계가 있다(board와 동일 근거). 이 파일의 PATCH
- * 핸들러들은 그래서 request.formData()를 호출하지 않고 응답(204)과 호출 횟수만 관찰한다 —
- * "part명이 단수 file인지"는 uploadEducationFile.test.ts(apiClient 모킹)에서 별도 검증한다.
- */
 function makeFile(name: string, size: number): File {
   return new File([new Uint8Array(size)], name)
 }
@@ -118,7 +102,6 @@ describe('교육 첨부파일 mutation (EDUCATION_FILE_UPLOAD/EDUCATION_FILE_DEL
     })
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
-    // 다중 part 일괄 전송(1회 요청) 대신 파일별 순차 PATCH(요청 2회)인지를 호출 횟수로 확인한다.
     expect(patchSpy).toHaveBeenCalledTimes(2)
   })
 

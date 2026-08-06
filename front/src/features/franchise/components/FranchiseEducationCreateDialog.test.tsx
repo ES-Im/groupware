@@ -7,13 +7,6 @@ import { BASE_URL } from '@/shared/api/client'
 import { server } from '@/test/mocks/server'
 import { FranchiseEducationCreateDialog } from './FranchiseEducationCreateDialog'
 
-/**
- * FranchiseEducationCreateDialog(F1612, `FRANCHISE_EDUCATION_CREATE`) 검증.
- * 사용자 요청으로 교육 등록을 전용 페이지(구 FranchiseEducationCreatePage) 대신 이 모달로 되돌리며,
- * 구 페이지 테스트의 폼 로직 검증(zod 사전검증·날짜/시각 조합 전송·서버 검증 실패 유지·in-flight 가드)을
- * 그대로 이관한다. 여기에 모달 고유 관심사(비활성 안내 문구·성공 시 onCreated 위임·취소 시
- * onOpenChange(false))를 더한다.
- */
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))
@@ -32,7 +25,6 @@ function renderDialog() {
   return { onOpenChange, onCreated }
 }
 
-/** 날짜/시각은 fireEvent.change로, 나머지는 userEvent로 채운다(구 다이얼로그 테스트 선례). */
 async function fillValidForm(
   user: ReturnType<typeof userEvent.setup>,
   overrides: { date?: string; time?: string; capacity?: string } = {},
@@ -155,7 +147,6 @@ describe('FranchiseEducationCreateDialog', () => {
 
     expect(await screen.findByText('정원은 1명 이상이어야 합니다')).toBeInTheDocument()
     expect(onCreated).not.toHaveBeenCalled()
-    // 폼 입력이 유지된다.
     expect(screen.getByLabelText(/교육 장소/)).toHaveValue('본사 3층 교육장')
   })
 

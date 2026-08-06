@@ -23,19 +23,9 @@ interface AttendanceSlotProps {
   pending: boolean
   onClick: () => void
   variant: 'default' | 'secondary'
-  /**
-   * true면 기록이 있어도 버튼을 영구히 숨기지 않는다 — 평소엔 기록을 보여주다 그 영역에
-   * 마우스를 올리면(hover) 버튼으로 전환해 재기록할 수 있게 한다(퇴근 전용, 사용자 확인 완료).
-   */
   allowReRecordOnHover?: boolean
 }
 
-/**
- * 출근/퇴근 슬롯(사용자 확인, 2026-07-12) — 기록이 없으면 버튼만 노출하고, 클릭해 기록이
- * 생기면 그 자리가 "기록 표시"로 바뀐다. 퇴근 슬롯만 `allowReRecordOnHover`로 기록 표시 위에
- * 마우스를 올렸을 때 버튼을 다시 드러내 재클릭(재기록)할 수 있게 한다 — 출근은 재클릭 UI를
- * 제공하지 않는다(요구사항이 퇴근에만 한정).
- */
 function AttendanceSlot({
   icon,
   actionLabel,
@@ -97,22 +87,6 @@ function AttendanceSlot({
   )
 }
 
-/**
- * 환영 배너 + 출퇴근 카드(레퍼런스 dashboard/index.tsx의 Welcome Back 섹션 이식, F301/F302).
- *
- * 로그인 사용자명/소속/역할 뱃지는 GET /api/employees/me(useMeQuery)·authStore.roles로 채운다.
- * 출근 버튼의 활성 여부는 MyAttendancePage와 동일하게 "당월 전용 쿼리 +
- * deriveTodayAttendanceButtonState" 조합으로 파생한다(당일 단건 조회 API가 없어 월별 목록
- * 재사용이 전제 — MyAttendancePage.tsx 상단 JSDoc의 근거를 그대로 따른다). 레퍼런스는 체크인
- * 시각을 로컬 state로만 표시했지만, 우리는 실제 서버 기록(AttendanceItem.startAt/endAt)을
- * 표시해 새로고침해도 값이 유지된다.
- *
- * 퇴근은 deriveTodayAttendanceButtonState의 canCheckOut으로 막지 않는다(사용자 확인,
- * 2026-07-12) — 한 번 기록한 뒤에도 다시 기록할 수 있어야 하며, mutation.isPending(중복 클릭 중
- * 요청 방지)만 막는다. 재클릭 시 서버가 최종 판정한다(중복 퇴근 거부는 서버 책임). UI 자체도
- * AttendanceSlot(allowReRecordOnHover)로 hover 시에만 버튼을 다시 드러내는 방식으로 이 정책을
- * 반영한다.
- */
 export function WelcomeAttendanceCard() {
   const roles = useAuthStore((state) => state.roles)
   const { data: me } = useMeQuery()
@@ -137,8 +111,6 @@ export function WelcomeAttendanceCard() {
   const checkOutMutation = useCheckOutMutation()
 
   const primaryDept = me?.currentDepts.find((dept) => dept.isPrimary) ?? me?.currentDepts[0]
-  // 프로필사진 미리보기(EMP_FILE_PREVIEW): me 응답의 activeFiles에서 활성 PROFILE_PICTURE fileId를
-  // 도출해 empBasicInfo.empId와 함께 BlobAvatar에 넘긴다(둘 다 있으면 인증 blob 이미지, 없으면 이니셜).
   const profilePictureFileId = getActiveProfilePicture(me?.activeFiles ?? [])
 
   return (

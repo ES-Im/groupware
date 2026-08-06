@@ -8,19 +8,6 @@ import { BASE_URL } from '@/shared/api/client'
 import { server } from '@/test/mocks/server'
 import { MeetingRoomManagementDetailPage } from './MeetingRoomManagementDetailPage'
 
-/**
- * MeetingRoomManagementDetailPage(F813/F815/F816/F814, ROADMAP(MEETING-ROOMS) T7.2) 회귀 방지
- * 테스트.
- *
- * M2 공유 read 블록(MeetingRoomInfoPanel/MeetingRoomImageGallery/MeetingRoomReservationCalendarBlock)
- * 자체의 로딩/에러/정상 분기는 각 컴포넌트 테스트가 이미 다루므로, 이 페이지 테스트는 P7 전용
- * 배선 지점만 다룬다:
- * - route param 유효성 가드(비-10진 양의 정수) + 404 시 not-found UX.
- * - "정보 수정" 버튼/활성 토글 버튼은 상세 데이터가 도착한 뒤에만 노출된다.
- * - "정보 수정" 클릭 시 MeetingRoomUpdateDialog가 열린다.
- * - MeetingRoomImageGallery는 이 페이지에서 `showDeleteAction=true`로 배선되어 항목별 삭제
- *   버튼이 노출된다(P4 열람 화면과 달리 opt-in이 켜짐).
- */
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))

@@ -2,11 +2,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { apiClient } from '@/shared/api/client'
 import { adjustCompensatoryGrantDays } from './adjustCompensatoryGrantDays'
 
-/**
- * adjustCompensatoryGrantDays(F750, ROADMAP(LEAVE) M5 T5.2) 단위 테스트.
- * adjustSpecialGrantDays.test.ts와 동형 검증(URL·본문 없음·query·204 반환값 없음).
- */
-
 vi.mock('@/shared/api/client', () => ({
   apiClient: { patch: vi.fn().mockResolvedValue({ data: undefined }) },
 }))

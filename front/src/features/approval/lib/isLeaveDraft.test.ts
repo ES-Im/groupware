@@ -2,15 +2,6 @@ import { describe, expect, it } from 'vitest'
 import type { DraftDetailResponse } from '../model/draftDetail'
 import { isLeaveDraft } from './isLeaveDraft'
 
-/**
- * isLeaveDraft(ROADMAP(LEAVE) T2.1) 슬롯-null 판별 술어 단위 테스트.
- *
- * 판별 규칙(isLeaveDraft.ts 주석 · DraftTypeBody 동형):
- *   - leave 슬롯 non-null → 휴가 기안(true).
- *   - leave 슬롯 null → false(일반/출장/매출 등).
- * draftType 문자열은 판별에 쓰지 않는다(실측 outdated).
- */
-
 function draft(overrides: Partial<DraftDetailResponse> = {}): DraftDetailResponse {
   return {
     draftId: 1,

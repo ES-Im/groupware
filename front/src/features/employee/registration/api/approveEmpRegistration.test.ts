@@ -2,13 +2,6 @@ import { describe, expect, it, vi } from 'vitest'
 import { apiClient } from '@/shared/api/client'
 import { approveEmpRegistration } from './approveEmpRegistration'
 
-/**
- * approveEmpRegistration(HR_APPROVE_EMP_REGISTRATION) 단위 테스트.
- * apiClient.patch 직접 모킹으로 URL/바디/쿼리 파라미터만 검증한다(updateHrManagedInfo.test.ts와 동일 패턴).
- * hiredAt은 쿼리 파라미터로 전송하고, 바디 자리는 null을 명시 전달해야 한다(http-request.adoc 실측:
- * application/x-www-form-urlencoded, 바디 값 없음).
- */
-
 vi.mock('@/shared/api/client', () => ({
   apiClient: { patch: vi.fn().mockResolvedValue({ data: undefined }) },
 }))

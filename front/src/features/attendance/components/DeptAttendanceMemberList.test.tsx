@@ -4,14 +4,6 @@ import { describe, expect, it, vi } from 'vitest'
 import type { DeptAttendanceRow } from '../model/deptAttendance'
 import { DeptAttendanceMemberList } from './DeptAttendanceMemberList'
 
-/**
- * DeptAttendanceMemberList(F305 좌측 사원 목록, DeptAttendanceMonthlyTable(표) 대체) 테스트.
- *
- * 이 컴포넌트는 순수 선택형 리스트다 — [수정] 버튼 등 근태 수정 진입점이 없고(수정은 우측
- * AttendanceCalendar 이벤트 클릭으로 옮겨짐, mapAttendanceToEvents.test.ts 참조), 클릭 시
- * onSelect(empId) 호출과 선택 상태(aria-pressed) 반영만 검증한다.
- */
-
 function makeRow(overrides: Partial<DeptAttendanceRow> = {}): DeptAttendanceRow {
   return {
     empInfo: {

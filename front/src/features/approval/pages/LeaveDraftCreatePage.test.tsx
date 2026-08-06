@@ -13,21 +13,6 @@ import {
 } from '../model/draftPreview'
 import { LeaveDraftCreatePage } from './LeaveDraftCreatePage'
 
-/**
- * LeaveDraftCreatePage(F740 `LEAVE_DRAFT_CREATE(_SUBMISSION)`, ROADMAP(LEAVE) T1.3) 회귀 방지
- * 테스트. ③BusinessTripDraftCreatePage(F730)의 폼 로직을 동형 이식한 페이지라 검증 축도 동형이다:
- *   - zod 사전검증(빈 값 제출 시 인라인 에러, 두 버튼 모두 동일 검증) — API 미호출.
- *   - [생성 후 상신] 결재선 0명 클라 가드(root 에러) — API 미호출.
- *   - 정상 입력 + 결재선 1명 지정 후 [임시저장으로 생성] 성공 시 상세로 navigate + 성공 토스트.
- *   - 결재선 행 역할 select(결재/협조): COOPERATOR가 approvers[].role로 실리고, 전원 협조
- *     (APPROVER 0명)면 [생성 후 상신]이 root 에러로 차단된다(생성 API 미호출).
- *   - [기안서 미리보기]: localStorage payload에 approvers[].role·circulations가 적재된다.
- *
- * EmployeePicker(결재선)는 department 도메인의 useDepartmentsQuery/useDepartmentMembersQuery를
- * 그대로 재사용하므로, 이 페이지가 마운트되는 순간 GET /api/departments가 항상 나간다 — 모든
- * 테스트 케이스에서 목이 필요하다(onUnhandledRequest:'error').
- */
-
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))
@@ -59,11 +44,6 @@ function pageOf<T>(items: T[]) {
   }
 }
 
-/**
- * EmployeePicker가 항상 마운트 즉시 조회하는 부서 목록 + 부서 선택 후 조회하는 부서원 목록 목.
- * 부서원은 2명(김철수=결재선 선택용, 이영희=공람 선택용)이라 두 필드를 서로 다른 사원으로 채워
- * 결재선 행 버튼과 공람 다이얼로그 버튼의 접근 이름이 충돌하지 않는다.
- */
 function mockEmployeePicker() {
   server.use(
     http.get(`${BASE_URL}/api/departments`, () => HttpResponse.json(pageOf([deptSummary(1, '개발팀')]))),
@@ -83,10 +63,6 @@ function DetailPlaceholder() {
   return <div>기안 상세 화면 draftId={draftId}</div>
 }
 
-/**
- * 유형별 잔여 휴가(MY_EMP_LEAVE_SUMMARY) 목 — 페이지가 마운트 즉시 조회한다
- * (useMyLeaveSummaryQuery). 연차 잔여 = 15 − 0.5 = 14.5일.
- */
 function mockMyLeaveSummary() {
   server.use(
     http.get(`${BASE_URL}/api/employees/me/leaves/summary`, () =>
@@ -119,14 +95,9 @@ function renderPage() {
   )
 }
 
-/**
- * 테스트 기준 날짜 = 오늘. DatePickerField(shadcn Calendar 팝오버)는 minDate(오늘) 이전을
- * disabled하고 기본으로 이번 달을 펼치므로, 오늘을 고르면 달 네비게이션 없이 항상 클릭 가능하다.
- */
 const TODAY = dayjs()
 const TODAY_STR = TODAY.format('YYYY-MM-DD')
 
-/** DatePickerField 트리거(라벨 연결 버튼)를 열고 달력(ko locale)에서 해당 날짜를 클릭한다. */
 async function pickDate(
   user: ReturnType<typeof userEvent.setup>,
   triggerLabel: RegExp,
@@ -134,8 +105,6 @@ async function pickDate(
 ) {
   await user.click(screen.getByLabelText(triggerLabel))
   const grid = await screen.findByRole('grid')
-  // day 버튼 접근 이름은 ko locale 전체 날짜 표기("2026년 7월 11일 …")라 "M월 D일"로 좁힌다
-  // (outside day는 월이 달라 중복되지 않는다).
   await user.click(
     within(grid).getByRole('button', {
       name: new RegExp(`${date.month() + 1}월 ${date.date()}일`),
@@ -145,20 +114,15 @@ async function pickDate(
 
 async function fillValidForm(user: ReturnType<typeof userEvent.setup>) {
   await user.type(screen.getByLabelText(/^제목/), '연차 신청')
-  // 본문은 유형 필드 기반 자동 입력으로 이미 채워져 있어, 직접 작성 시나리오는 비우고 다시 쓴다
-  // (clear/type이 직접 수정으로 간주되어 이후 유형·기간 변경에도 본문이 덮이지 않는다).
   await user.clear(screen.getByLabelText(/^기안 내용/))
   await user.type(screen.getByLabelText(/^기안 내용/), '개인 사정으로 연차를 신청합니다')
   await user.selectOptions(screen.getByLabelText(/휴가 유형/), '연차')
-  // 연차(4시간 단위 유형)는 시각 옵션이 반차 경계(시작 09/13, 종료 13/18)로 제한된다 —
-  // 시작·종료를 직접 고른다(2026-07-11 폼 개편). 09:00 ~ 18:00 같은 날 = 1.0일(8시간).
   await pickDate(user, /휴가 시작 일시/, TODAY)
   await user.selectOptions(screen.getByLabelText('휴가 시작 시간'), '09')
   await pickDate(user, /휴가 종료 일시/, TODAY)
   await user.selectOptions(screen.getByLabelText('휴가 종료 시간'), '18')
 }
 
-/** 결재선 "추가" 버튼(접근 이름 "결재선 추가" — 공람 필드와 구분)으로 Dialog를 연 뒤 부서→부서원을 선택하고 "완료"로 닫는다. */
 async function selectOneApprover(user: ReturnType<typeof userEvent.setup>) {
   await user.click(screen.getByRole('button', { name: '결재선 추가' }))
   await user.click(await screen.findByRole('button', { name: '개발팀' }))
@@ -166,11 +130,6 @@ async function selectOneApprover(user: ReturnType<typeof userEvent.setup>) {
   await user.click(screen.getByRole('button', { name: '완료' }))
 }
 
-/**
- * 공람 "추가" 버튼(접근 이름 "공람 (선택) 추가")으로 Dialog를 연 뒤 부서→이영희를 선택하고
- * "완료"로 닫는다. 결재선에 이미 선택된 사원의 행 버튼(제거 등)과 접근 이름이 겹치지 않도록
- * 조회를 열린 다이얼로그 스코프로 한정한다.
- */
 async function selectOneCirculation(user: ReturnType<typeof userEvent.setup>) {
   await user.click(screen.getByRole('button', { name: '공람 (선택) 추가' }))
   const dialog = await screen.findByRole('dialog')
@@ -209,7 +168,6 @@ describe('LeaveDraftCreatePage (F740) - zod 사전검증(빈 값)', () => {
     expect(alertTexts).toContain('휴가 유형을 선택해주세요')
     expect(alertTexts).toContain('휴가 시작 일시를 입력해주세요')
     expect(alertTexts).toContain('휴가 종료 일시를 입력해주세요')
-    // 본문은 마운트 직후 자동 입력으로 채워지므로(레퍼런스 자동 구성 이식) 빈 값 에러가 뜨지 않는다.
     expect(alertTexts).not.toContain('기안 내용을 입력해주세요')
     expect(leaveCalled).toBe(false)
     expect(submissionCalled).toBe(false)
@@ -284,8 +242,6 @@ describe('LeaveDraftCreatePage (F740) - 기안 내용 자동 입력(레퍼런스
     )
 
     await user.selectOptions(screen.getByLabelText(/휴가 유형/), '특별휴가')
-    // 특별휴가(4시간 단위 유형)는 시작·종료를 반차 경계에서 직접 고르며, 그 조합으로 계산된
-    // 사용 일수(09~18 = 1.0일)가 본문 "사용 일수" 줄에 자동 반영된다(2026-07-11 폼 개편).
     await pickDate(user, /휴가 시작 일시/, TODAY)
     await user.selectOptions(screen.getByLabelText('휴가 시작 시간'), '09')
     await pickDate(user, /휴가 종료 일시/, TODAY)
@@ -378,7 +334,6 @@ describe('LeaveDraftCreatePage (F740) - 결재선 행 역할 select(결재/협�
     expect(registeredBody?.param).toMatchObject({
       approvers: [{ approverId: 101, role: 'COOPERATOR', order: 1 }],
     })
-    // 역할만 바뀌었을 뿐 생성 성공 흐름(상세 navigate)은 그대로 유지된다.
     expect(await screen.findByText('기안 상세 화면 draftId=60')).toBeInTheDocument()
   })
 
@@ -414,7 +369,6 @@ describe('LeaveDraftCreatePage (F740) - 결재선 행 역할 select(결재/협�
 
 describe('LeaveDraftCreatePage (F740) - [기안서 미리보기] localStorage 핸드오프(role·공람 포함)', () => {
   afterEach(() => {
-    // window.open spy는 restore로 원복하고, 미리보기 payload가 다른 테스트로 새지 않게 키를 지운다.
     vi.clearAllMocks()
     vi.restoreAllMocks()
     localStorage.removeItem(DRAFT_PRINT_PREVIEW_STORAGE_KEY)
@@ -422,7 +376,6 @@ describe('LeaveDraftCreatePage (F740) - [기안서 미리보기] localStorage �
 
   it('협조 결재자 + 공람자를 지정한 뒤 미리보기를 누르면 payload에 approvers[].role과 circulations가 적재된다', async () => {
     mockEmployeePicker()
-    // jsdom은 window.open 미구현 — 새 창 오픈은 스파이로 대체하고 호출 계약만 검증한다.
     const openSpy = vi.spyOn(window, 'open').mockReturnValue(null)
     const user = userEvent.setup()
     renderPage()

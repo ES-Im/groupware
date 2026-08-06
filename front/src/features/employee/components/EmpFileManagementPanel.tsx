@@ -26,26 +26,13 @@ function formatFileSizeMb(bytes: number): string {
 }
 
 interface EmpFileManagementPanelProps {
-  /** 사원 식별 번호. 활성화/삭제 경로에 필요 — 미확정이면 해당 액션 버튼을 비활성화한다. */
   empId: number | undefined
 }
 
-/**
- * "파일관리" 탭 패널(EmployeeProfileTabs의 viewerIsSelf 전용 탭, adapt-ui 리디자인 신규).
- *
- * `RETRIEVE_ME_INFO.activeFiles`(활성만)가 아니라 `RETRIEVE_FILES_INFOS`(활성+비활성 전체,
- * useFilesInfosQuery)를 데이터 소스로 쓴다 — 비활성 파일을 다시 활성화(ACTIVATE_ME_FILE)하려면
- * 목록에 애초에 보여야 하기 때문이다. 각 행에 활성화(비활성 파일만)/삭제 액션을 제공한다.
- *
- * 레퍼런스의 "보관 파일"(일반 첨부) 섹션은 렌더하지 않는다 — 사원 FileType은 PROFILE_PICTURE/
- * SIGNATURE 2종뿐이라(도메인모델.md 실측) 근거 없는 목업 요소이기 때문이다(사용자 확인 완료).
- */
 export function EmpFileManagementPanel({ empId }: EmpFileManagementPanelProps) {
   const filesQuery = useFilesInfosQuery(true)
   const activateMutation = useEmpFileActivateMutation()
   const deleteMutation = useEmpFileDeleteMutation()
-  // 처리 중인 fileId 집합(MeetingRoomImageGallery.deletingFileIds와 동일 이유) — 공유 mutation
-  // 인스턴스의 isPending만으로는 어느 행이 처리 중인지 구분할 수 없어 행별로 별도 추적한다.
   const [processingFileIds, setProcessingFileIds] = useState<Set<number>>(new Set())
 
   useEffect(() => {

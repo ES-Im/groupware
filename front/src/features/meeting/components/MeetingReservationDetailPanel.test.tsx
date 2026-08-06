@@ -8,14 +8,6 @@ import { BASE_URL } from '@/shared/api/client'
 import { server } from '@/test/mocks/server'
 import { MeetingReservationDetailPanel } from './MeetingReservationDetailPanel'
 
-/**
- * MeetingReservationDetailPanel(구 P3 상세 페이지 대체 인라인 패널) 검증.
- *
- * - meetingId 미선택 시 안내 플레이스홀더.
- * - 예약자 본인 + 미래 예약(canManageReservation=true)이면 좌측 카드에 [회의 정보 수정]·[예약 취소],
- *   우측 카드에 [참가자 교체]가 노출된다.
- * - 예약자 본인이 아니면(FACILITY 조회 전용) 관리 액션이 전혀 노출되지 않는다.
- */
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))
@@ -44,7 +36,6 @@ function makeDetail(overrides: Record<string, unknown> = {}) {
     reserverDeptName: '개발팀',
     reserverEmpName: '홍길동',
     title: '주간 회의',
-    // 회의일이 내일 이후여야 canManageReservation이 true가 될 수 있다(수정 가능 기간 힌트).
     meetingDate: dayjs().add(2, 'day').format('YYYY-MM-DD'),
     startAt: '10:00:00',
     endAt: '11:00:00',

@@ -8,13 +8,6 @@ import { server } from '@/test/mocks/server'
 import { messageKeys } from '../model/messageKeys'
 import { useMessageTrashMutation } from './useMessageTrashMutation'
 
-/**
- * useMessageTrashMutation(SENT_/RECEIVED_MESSAGE_TRASH, F1512, ROADMAP(MESSAGE) T3.4-a) 성공/실패
- * 동작 테스트. approval useCirculationReadMutation.invalidate.test.tsx 관행을 복제: mock을
- * 가로채지 않고 "성공(204) 후 messageKeys.all에 걸린 쿼리가 실제로 재조회되어 최신 값을
- * 반영하는지"를 블랙박스로 확인한다. 실패(도메인 에러)는 handleApiError → 에러 토스트 경로를 검증한다.
- */
-
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))
@@ -29,7 +22,6 @@ function createWrapper() {
   return { Wrapper }
 }
 
-/** messageKeys.all 축에 매달린 임의의 쿼리(상세 대용) — invalidate 전파를 관측하기 위한 프로브. */
 function useProbeQuery() {
   return useQuery({
     queryKey: messageKeys.detail(1),
@@ -50,7 +42,7 @@ describe('useMessageTrashMutation (SENT_/RECEIVED_MESSAGE_TRASH, F1512)', () => 
       http.get(`${BASE_URL}/api/messages/1`, () => HttpResponse.json({ version })),
       http.patch(`${BASE_URL}/api/messages/received/1/trash`, () => {
         patchSpy()
-        version = 2 // 휴지통 이동 후 서버 상태가 바뀐 것을 모사
+        version = 2
         return new HttpResponse(null, { status: 204 })
       }),
     )

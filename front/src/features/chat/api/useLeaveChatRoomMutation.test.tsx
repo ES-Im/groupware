@@ -8,16 +8,6 @@ import { server } from '@/test/mocks/server'
 import { chatKeys } from '../model/queryKeys'
 import { useLeaveChatRoomMutation } from './useLeaveChatRoomMutation'
 
-/**
- * useLeaveChatRoomMutation(F909, ROADMAP(CHAT) T4.4) 실동작 검증.
- *
- * - `PATCH /api/chat/rooms/{roomId}/leave`를 body 없이 호출한다(path-parameters.adoc 실측:
- *   roomId만 사용).
- * - 성공(204) 후 chatKeys.all이 invalidate되어 목록 쿼리가 재조회된다(useToggleBookmarkMutation.
- *   test.tsx와 동일하게 invalidateQueries를 mock으로 가로채지 않고 "재조회로 최신 값이
- *   반영되는지"를 블랙박스로 관찰한다) — 나간 방이 목록에서 사라지는 것으로 확인한다.
- */
-
 function createWrapper() {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },

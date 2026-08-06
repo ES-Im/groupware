@@ -8,19 +8,6 @@ import { server } from '@/test/mocks/server'
 import type { MailBox, MessagesResponse } from '../model/messageTypes'
 import { MessageBoxTable } from './MessageBoxTable'
 
-/**
- * MessageBoxTable(ROADMAP(MESSAGE) T2.2-b, F1501~F1504) 회귀 방지 테스트.
- *
- * 이 컴포넌트는 useMessagesQuery/각 mutation 훅을 직접 호출하는 self-contained 컴포넌트라(
- * DocumentBoxTable처럼 조회 훅을 prop으로 주입받지 않는다), LeaveDraftCreatePage.test.tsx의
- * 실제 훅 + MSW 패턴을 그대로 따른다. 검증 축:
- *   - 박스별 컬럼 분기(받은함 읽음 컬럼·상대방 표기·drafts sentAt 대시)와 액션 버튼 구성.
- *   - 액션(휴지통 이동/복구/완전삭제/발송/삭제)이 올바른 엔드포인트를 호출한다.
- *   - 액션 버튼 Enter 키가 행 활성화(onOpenDetail/onOpenCompose)로 이중 발화하지 않는다
- *     (stopPropagation 회귀, 이번 세션에서 실제로 잡은 버그).
- *   - isPlaceholderData(박스 전환 중 이전 데이터 유지) 동안 dimming 처리(aria-busy).
- */
-
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))
@@ -89,7 +76,6 @@ describe('MessageBoxTable (F1501) - 받은함 컬럼 렌더', () => {
     expect(await screen.findByText('점심 회의 안내')).toBeInTheDocument()
     expect(screen.getByText('개발팀 김철수')).toBeInTheDocument()
     expect(screen.getByText('2026-07-10 09:00')).toBeInTheDocument()
-    // 텍스트 배지 대신 시각 강조(좌측 바+굵게+점)로 표현한다 — 점에는 접근성 라벨을 둔다.
     expect(screen.getByLabelText('읽지 않음')).toBeInTheDocument()
   })
 
@@ -227,7 +213,6 @@ describe('MessageBoxTable (F1503) - 임시보관함', () => {
     await user.click(await screen.findByRole('button', { name: '발송' }))
 
     await waitFor(() => expect(sendCalled).toBe(true))
-    // 발송 버튼 클릭이 행 활성화로 이중 발화하지 않는다(stopPropagation).
     expect(onOpenCompose).not.toHaveBeenCalled()
   })
 
@@ -337,7 +322,6 @@ describe('MessageBoxTable (F1512) - 받은함/보낸함 휴지통 이동 액션'
     await waitFor(() =>
       expect(toast.success).toHaveBeenCalledWith('쪽지를 휴지통으로 이동했습니다'),
     )
-    // 버튼 클릭이 행 활성화(상세 열람)로 이중 발화하지 않는다.
     expect(onOpenDetail).not.toHaveBeenCalled()
   })
 
@@ -395,7 +379,6 @@ describe('MessageBoxTable - isPlaceholderData dimming(박스 전환)', () => {
       </QueryClientProvider>,
     )
 
-    // keepPreviousData: 새 응답(딜레이 50ms) 도착 전까지 이전 박스 데이터가 dimming된 채 남는다.
     expect(container.querySelector('[aria-busy="true"]')).toBeInTheDocument()
     expect(screen.getByText('받은 쪽지 A')).toBeInTheDocument()
 

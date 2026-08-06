@@ -7,12 +7,6 @@ import { BASE_URL } from '@/shared/api/client'
 import { server } from '@/test/mocks/server'
 import { EmpManagementSection } from './EmpManagementSection'
 
-/**
- * EmpManagementSection(사원 상세 관리 섹션, adapt-ui 신규) 검증.
- * useEmpForManagementQuery 로딩/빈 상태 분기와, canManageAsHr 우선순위에 따라
- * HrManagedInfoDialog/DeptManagedInfoDialog 중 어느 쪽 폼이 열리는지를 확인한다.
- */
-
 function makeRecord() {
   return {
     empId: 7,

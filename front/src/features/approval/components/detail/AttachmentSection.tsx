@@ -14,17 +14,10 @@ import { isDraftImageExtension } from '../../lib/isDraftImageExtension'
 import type { DraftFile } from '../../model/draftDetail'
 import type { DraftDetailSectionProps } from './types'
 
-/** 바이트 크기를 MB 단위 문자열로 변환(소수 1자리). BoardEditPage·EmployeeInfoView의 동일 이름
- * 헬퍼와 표기 방식을 통일한다(M2 code-reviewer minor 지적 반영 — 공유 유틸 승격은 이번 태스크 범위 밖). */
 function formatFileSizeMb(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
-/**
- * 이미지 첨부 인라인 미리보기(F718 DRAFT_FILE_PREVIEW). objectURL 생명주기는 useDraftFilePreviewUrl
- * (T6.2)에 전부 위임하고, 이 컴포넌트는 로딩/실패/성공 3분기 렌더만 담당한다(board BoardImagePreview
- * 복제). 훅은 조건부 호출이 불가하므로 이미지 첨부마다 이 서브컴포넌트로 분리해 호출한다.
- */
 function DraftImagePreview({ draftId, file }: { draftId: number; file: DraftFile }) {
   const { objectUrl, isLoading, isError } = useDraftFilePreviewUrl(draftId, file.fileId)
 
@@ -53,46 +46,21 @@ function DraftImagePreview({ draftId, file }: { draftId: number; file: DraftFile
   )
 }
 
-/**
- * 첨부 영역(ROADMAP(DRAFT) T2.3 read-only 목록 → M6 T6.1~T6.3 확장).
- *
- * 노출 판정(PRD §접근 권한 — 프론트는 노출만, 최종은 서버):
- * - **조회 가능자 전원**: 미리보기(F718, 이미지=인라인)/다운로드(F719, 비이미지=버튼). 상세
- *   (DRAFT_DETAIL)를 열람하고 있다는 것 자체가 서버가 조회 가능자(기안자·결재자·공람 대상자)로
- *   판정했음을 의미하므로 별도 클라이언트 게이팅을 두지 않는다(board 첨부 UX 복제).
- * - **기안자 본인**: 업로드(F716)/삭제(F717). `me.empBasicInfo.empId === draft.drafter.empId`로
- *   판정한다(numeric empId는 me 응답 empBasicInfo에 보강된 사원 PK — model/me.ts). me 미로딩 등으로
- *   empId가 미확정(undefined)이면 업로드/삭제를 노출하지 않는다(방어적 미노출). 최종 권한은 서버가
- *   판정하므로 이 게이팅은 UX 힌트이며, 서버 위반은 apiError 토스트로 처리한다.
- *
- * props는 `{ draft }` 고정 계약을 유지한다(types.ts DraftDetailSectionProps).
- */
 export function AttachmentSection({ draft }: DraftDetailSectionProps) {
   const { draftId, files } = draft
 
   const meQuery = useMeQuery()
   const myEmpId = meQuery.data?.empBasicInfo.empId
-  // 기안자 본인 판정: numeric empId 매칭. empId 미확정 시 업로드/삭제 미노출(undefined 방어).
   const isDrafter = myEmpId != null && myEmpId === draft.drafter.empId
-  // 첨부 변경(추가·삭제)은 **상신 전(UNSUBMITTED)** 에만 허용한다(사용자 요청 2026-07-14 — 상신
-  // 이후에는 첨부를 붙일 수 없으므로 버튼 자체를 숨긴다). 작성 화면은 파일을 업로드하지 않고
-  // 미리보기 목록만 보관하므로(DraftCreateFrame), 실제 업로드는 여전히 이 화면의 임시저장(미상신)
-  // 상태에서 이뤄진다 — 그 흐름은 유지하고 상신된 문서에서만 변경 UI를 닫는다. 조회/다운로드/이미지
-  // 미리보기는 상태와 무관하게 조회 가능자 전원에게 그대로 노출한다. 최종 판정은 서버가 한다.
   const isUnsubmitted = resolveApprovalStatus(draft.approvalStatus) === 'UNSUBMITTED'
   const canModifyFiles = isDrafter && isUnsubmitted
 
   const uploadMutation = useDraftFileUploadMutation()
   const deleteMutation = useDraftFileDeleteMutation()
   const fileInputRef = useRef<HTMLInputElement>(null)
-  // 삭제 진행 중인 fileId 집합(board 첨부 섹션 복제). 단일 deleteMutation 인스턴스의 variables/isPending은
-  // "마지막 mutate 호출" 값만 반영해, A 삭제 중 B를 누르면 A행 disabled가 풀려 중복 DELETE가 나갈 수
-  // 있으므로 fileId별로 로컬 state에서 개별 추적한다.
   const [deletingFileIds, setDeletingFileIds] = useState<Set<number>>(new Set())
 
   function reportUploadError(error: unknown) {
-    // 사전검증(DraftFileValidationError)은 axios 에러가 아니라 normalizeApiError가 "알 수 없는 오류"로
-    // 뭉개므로, 그 한국어 메시지를 그대로 노출하도록 instanceof로 먼저 분기한다.
     if (error instanceof DraftFileValidationError) {
       toast.error(error.message)
       return
@@ -102,7 +70,6 @@ export function AttachmentSection({ draft }: DraftDetailSectionProps) {
 
   function handleFileInputChange(event: ChangeEvent<HTMLInputElement>) {
     const selected = Array.from(event.target.files ?? [])
-    // 같은 파일을 재선택해도 change 이벤트가 다시 발화하도록 즉시 비운다(검증 실패 후 재시도 대비).
     event.target.value = ''
     if (selected.length === 0) {
       return
@@ -124,7 +91,6 @@ export function AttachmentSection({ draft }: DraftDetailSectionProps) {
         onSuccess: () => toast.success('첨부파일을 삭제했습니다'),
         onError: (error) => toast.error(normalizeApiError(error).message),
         onSettled: () => {
-          // 성공/실패 어느 쪽이든 해당 fileId의 진행 상태를 해제한다.
           setDeletingFileIds((prev) => {
             const next = new Set(prev)
             next.delete(fileId)
@@ -142,15 +108,12 @@ export function AttachmentSection({ draft }: DraftDetailSectionProps) {
   }
 
   return (
-    // 독립 카드(CardContent) 안에서 렌더되므로 자체 상단 구분선은 두지 않는다(레퍼런스 사이드 카드).
     <section className="space-y-3">
       <div className="flex items-center justify-between gap-3">
         <h3 className="flex items-center gap-1.5 text-base font-bold text-foreground">
           <Paperclip className="size-4 text-muted-foreground" />
           첨부파일{files.length > 0 ? ` ${files.length}개` : ''}
         </h3>
-        {/* (기안자 본인 + 미상신) 첨부 업로드(F716). 상신 이후에는 숨긴다. 다중 선택은 mutation이
-            파일별 순차 PATCH로 처리한다. */}
         {canModifyFiles && (
           <>
             <input
@@ -196,7 +159,6 @@ export function AttachmentSection({ draft }: DraftDetailSectionProps) {
                   <span className="ml-auto shrink-0 text-xs text-muted-foreground tabular-nums">
                     {formatFileSizeMb(file.fileSize)}
                   </span>
-                  {/* 비이미지 첨부는 다운로드 버튼(F719). 이미지 첨부는 아래 인라인 미리보기(F718). */}
                   {!isImage && (
                     <Button
                       type="button"
@@ -210,8 +172,6 @@ export function AttachmentSection({ draft }: DraftDetailSectionProps) {
                       다운로드
                     </Button>
                   )}
-                  {/* (기안자 본인 + 미상신) 첨부 삭제(F717). 상신 이후에는 숨긴다(첨부 확정). 파일별
-                      삭제 진행 상태를 개별 스피너로 표시한다. */}
                   {canModifyFiles && (
                     <Button
                       type="button"

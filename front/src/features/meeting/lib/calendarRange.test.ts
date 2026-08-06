@@ -1,13 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { buildCalendarRangeParams } from './calendarRange'
 
-/**
- * buildCalendarRangeParams(ROADMAP T1.1) 단위 테스트.
- *
- * FullCalendar의 view.activeStart/activeEnd(Date)를 서버 쿼리 파라미터 포맷
- * (yyyy-MM-dd'T'HH:mm:ss)으로 변환한다. 인자 미전달 시 undefined를 반환해 서버가
- * 당월 기본값을 적용하도록 위임한다.
- */
 describe('buildCalendarRangeParams', () => {
   it('activeStart/activeEnd를 YYYY-MM-DDTHH:mm:ss 포맷 문자열로 변환한다', () => {
     const activeStart = new Date(2026, 5, 1, 0, 0, 0)

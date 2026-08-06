@@ -2,12 +2,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { apiClient } from '@/shared/api/client'
 import { activateCategory, deactivateCategory } from './toggleCategoryVisibility'
 
-/**
- * activateCategory/deactivateCategory(CATEGORY_ACTIVATE/CATEGORY_DEACTIVATE, ADMIN 전용) 단위 테스트.
- * toggleFranchiseEducationActive.test.ts와 동일 패턴이지만, 이 두 엔드포인트는 PATCH다
- * (franchise 교육 토글의 POST와 다름 — http-request.adoc 실측, 임의 통일 금지).
- */
-
 vi.mock('@/shared/api/client', () => ({
   apiClient: { patch: vi.fn() },
 }))

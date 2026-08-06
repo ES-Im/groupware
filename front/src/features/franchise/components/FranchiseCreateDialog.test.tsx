@@ -7,27 +7,10 @@ import { BASE_URL } from '@/shared/api/client'
 import { server } from '@/test/mocks/server'
 import { FranchiseCreateDialog } from './FranchiseCreateDialog'
 
-/**
- * FranchiseCreateDialog(F1603, ROADMAP(FRANCHISE) T2.2) 검증.
- * MeetingRoomCreateDialog.test.tsx와 동형 패턴. 담당자 선택은 FranchiseManagerPicker(FRANCHISE
- * 권한 사원 평면 목록, FRANCHISE_ASSIGNABLE_MANAGERS)로 이뤄지므로 해당 엔드포인트를 목킹한다.
- *
- * - zod 클라 사전검증(필수 6필드) 실패 시 role=alert 인라인 에러 + 요청 미발생.
- * - 담당자 미선택 제출 시 POST body에서 managerEmpId 키 생략, 선택 시 selected[0].empId 합성.
- * - 성공(201) 시 성공 토스트 + onOpenChange(false) — 내비게이션 없음(라우터 비의존).
- * - 제출 중 Esc로 닫을 수 없는 가드.
- * - 서버 도메인 판정 실패(VALIDATION_ERROR) 시 root 에러 표시 + 닫히지 않음 + 입력 유지.
- * - 닫았다 다시 열면 폼 값·담당자 선택이 리셋된다(제어형 다이얼로그, 언마운트 안 됨).
- */
-
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))
 
-/**
- * FranchiseManagerPicker가 마운트 시 호출하는 배정 후보(FRANCHISE_ASSIGNABLE_MANAGERS) 목.
- * 담당자 선택 대상은 empId 101(김담당) 1명.
- */
 function mockAssignableManagers() {
   server.use(
     http.get(`${BASE_URL}/api/franchises/assignable-managers`, () =>
@@ -52,12 +35,10 @@ function renderDialog(open = true) {
   const view = render(dialogTree(open, onOpenChange, queryClient))
   return {
     onOpenChange,
-    /** 제어형 open 프롭만 갈아끼워 리렌더(닫기/재오픈 리셋 검증용). */
     setOpen: (next: boolean) => view.rerender(dialogTree(next, onOpenChange, queryClient)),
   }
 }
 
-/** 필수 6필드를 유효값으로 채운다(담당자 선택은 케이스별로 별도 수행). */
 async function fillRequiredFields(user: ReturnType<typeof userEvent.setup>) {
   await user.type(screen.getByLabelText(/사업자번호/), '123-45-67890')
   await user.type(screen.getByLabelText(/가맹점명/), 'HARUON 강남점')
@@ -174,7 +155,6 @@ describe('FranchiseCreateDialog - 제출 성공', () => {
     const user = userEvent.setup()
     const { onOpenChange } = renderDialog()
 
-    // FranchiseManagerPicker 후보 목록에서 바로 단일 선택(multiple=false).
     await user.click(await screen.findByRole('button', { name: /김담당/ }))
     expect(screen.getByRole('button', { name: '김담당 선택 해제' })).toBeInTheDocument()
 

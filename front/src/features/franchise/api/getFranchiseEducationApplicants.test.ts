@@ -2,11 +2,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { apiClient } from '@/shared/api/client'
 import { getFranchiseEducationApplicants } from './getFranchiseEducationApplicants'
 
-/**
- * getFranchiseEducationApplicants(FRANCHISE_EDUCATION_APPLICANTS, ROADMAP(FRANCHISE) T4.3) 단위 테스트.
- * getFranchises.test.ts와 동일 패턴 — page/size는 `!= null`일 때만(0 포함) params에 채워진다.
- */
-
 vi.mock('@/shared/api/client', () => ({
   apiClient: { get: vi.fn().mockResolvedValue({ data: undefined }) },
 }))

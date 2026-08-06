@@ -13,15 +13,12 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/shared/u
 import { Tabs, TabsList, TabsTrigger } from '@/shared/ui/tabs'
 
 const WIDGET_ITEM_LIMIT = 3
-// 상신함 응답에서 진행성 상태(WAITING/IN_PROGRESS/REJECTED)만 클라이언트 필터하므로, 필터 후에도
-// 상위 3건이 남을 확률을 높이기 위해 넉넉히 조회한다(계획 문서 §재사용 자원 맵).
 const SUBMITTED_FETCH_SIZE = 10
 
 type ApprovalTab = 'submitted' | 'pending'
 
 function EmptyState({ message }: { message: string }) {
   return (
-    // flex-1: 카드 고정 높이에서 내용이 없을 때 남는 공간을 채워 안내를 세로 중앙에 둔다.
     <div className="flex flex-1 flex-col items-center justify-center gap-2 py-10 text-center">
       <span className="grid size-10 place-items-center rounded-full bg-muted text-muted-foreground [&_svg]:size-5">
         <Inbox />
@@ -31,16 +28,6 @@ function EmptyState({ message }: { message: string }) {
   )
 }
 
-/**
- * 전자결재 현황 위젯(레퍼런스 dashboard-roles.html "전자결재 현황" 2분할 세그먼트 이식).
- * 기존 PendingApprovalWidget(결재 대기만 단일 표시)을 대체한다 — "내 상신 진행"·"내 결재 대기"
- * 두 탭으로 확장했다(계획 문서 §재사용 자원 맵).
- *
- * "내 상신 진행" 탭은 상신함(MY_SUBMITTED_DRAFTS) 응답에서 approvalStatus가 WAITING/IN_PROGRESS/
- * REJECTED인 것만 클라이언트 필터한다(APPROVED 제외 — 완료 건은 "진행"이 아니므로). 목록 응답에는
- * draftType이 없어(DocumentBoxRow 실측) 레퍼런스의 유형 뱃지(휴가/일반/출장/매출)·결재 진행
- * 단계(2/3 등)는 표시하지 않는다(계약에 없는 정보 발명 금지).
- */
 export function ApprovalStatusWidget() {
   const navigate = useNavigate()
   const [tab, setTab] = useState<ApprovalTab>('submitted')
@@ -60,10 +47,7 @@ export function ApprovalStatusWidget() {
   const moreLink = tab === 'submitted' ? '/approval/box/submitted' : '/approval/box/pending'
 
   return (
-    // 고정 높이(h-[420px]) + Card 기본 flex-col: header 고정 · content flex-1 스크롤 · footer 바닥 고정.
     <Card className="h-[420px]">
-      {/* 3등분 카드 폭(~1/3)에서는 아이콘+제목과 탭을 가로로 나란히 둘 공간이 없어 항상 세로로 쌓는다
-          (뷰포트 기준 sm:flex-row는 카드 폭과 무관해 제목이 줄바꿈되던 문제를 제거). */}
       <CardHeader className="flex shrink-0 flex-col items-start gap-3">
         <div className="flex items-start gap-3">
           <span className="grid size-9 shrink-0 place-items-center rounded-full bg-muted text-foreground [&_svg]:size-4">
@@ -98,8 +82,6 @@ export function ApprovalStatusWidget() {
           />
         ) : (
           <div className="w-full overflow-x-auto">
-            {/* 탭별로 열을 달리한다: 상신 탭은 기안자=본인이라 상태를, 결재대기 탭은 상태=항상 대기라
-                기안자를 두 번째 열에 둔다(레퍼런스 패널별 컬럼 구성 + 중복 정보 제거). */}
             <table className="w-full table-fixed border-collapse text-sm">
               <thead>
                 <tr className="border-b border-border">
@@ -148,7 +130,6 @@ export function ApprovalStatusWidget() {
           </div>
         )}
       </CardContent>
-      {/* "더 보기" 링크는 세 카드 공통으로 하단 footer에 고정한다(내용량과 무관하게 바닥 정렬). */}
       <CardFooter className="justify-end">
         <Link
           to={moreLink}

@@ -2,9 +2,6 @@ import { describe, expect, it, vi } from 'vitest'
 import { apiClient } from '@/shared/api/client'
 import { getMeetingRoomFiles } from './getMeetingRoomFiles'
 
-/**
- * getMeetingRoomFiles(F808, ROADMAP T2.2) 단위 테스트.
- */
 vi.mock('@/shared/api/client', () => ({
   apiClient: { get: vi.fn() },
 }))

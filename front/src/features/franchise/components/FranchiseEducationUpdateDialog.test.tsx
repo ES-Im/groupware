@@ -8,14 +8,6 @@ import { server } from '@/test/mocks/server'
 import type { FranchiseEducationDetail } from '../model/franchise'
 import { FranchiseEducationUpdateDialog } from './FranchiseEducationUpdateDialog'
 
-/**
- * FranchiseEducationUpdateDialog(F1613, ROADMAP(FRANCHISE) T4.4) 검증.
- * MeetingRoomUpdateDialog.test.tsx와 동형 패턴 — diff 기반 PATCH payload, setValueAs 계약,
- * zod 클라 사전검증, 서버 판정 실패/성공 분기를 다룬다.
- *
- * educationDate는 date/startAt을 합성해 프리필하고(toEducationDate), datetime-local이 초 없이
- * (`yyyy-MM-ddTHH:mm`) 값을 방출하는 경우 setValueAs가 `:00`을 보정한다(스키마 JSDoc 지침).
- */
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))
@@ -60,7 +52,6 @@ describe('FranchiseEducationUpdateDialog - 프리필', () => {
   it('열릴 때 date/startAt을 합성한 교육 일시와 나머지 상세값으로 입력을 채운다', () => {
     renderDialog()
 
-    // jsdom의 datetime-local 값 정규화 규칙상 초가 00이면 표시값에서 생략된다(HTML 표준 동작).
     expect(screen.getByLabelText('교육 일시')).toHaveValue('2026-05-01T10:00')
     expect(screen.getByLabelText('장소')).toHaveValue('본사 3층 강당')
     expect(screen.getByLabelText('제목')).toHaveValue('신규 가맹점 오리엔테이션')

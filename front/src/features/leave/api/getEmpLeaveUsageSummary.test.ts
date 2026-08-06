@@ -2,11 +2,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { apiClient } from '@/shared/api/client'
 import { getEmpLeaveUsageSummary } from './getEmpLeaveUsageSummary'
 
-/**
- * getEmpLeaveUsageSummary(F748, ROADMAP(LEAVE) M5 T5.1) 단위 테스트.
- * apiClient.get을 직접 모킹해 axios 호출 인자(URL, params)만 검증한다.
- */
-
 vi.mock('@/shared/api/client', () => ({
   apiClient: { get: vi.fn().mockResolvedValue({ data: undefined }) },
 }))

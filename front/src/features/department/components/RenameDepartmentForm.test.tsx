@@ -7,11 +7,6 @@ import { BASE_URL } from '@/shared/api/client'
 import { server } from '@/test/mocks/server'
 import { RenameDepartmentForm } from './RenameDepartmentForm'
 
-/**
- * RenameDepartmentForm(F206, T9.2) 검증.
- * 과거 모달(RenameDepartmentDialog)에서 인라인 폼으로 전환됨에 따라 open/onOpenChange 없이
- * 항상 렌더된다. 검증 의도(현재값 초기화·zod 검증·실패 비삼킴)는 그대로 유지한다.
- */
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))

@@ -5,14 +5,6 @@ import { BASE_URL } from '@/shared/api/client'
 import { server } from '@/test/mocks/server'
 import { useBoardFilePreviewUrl } from './useBoardFilePreviewUrl'
 
-/**
- * useBoardFilePreviewUrl(ROADMAP T11.2-b) 실동작 검증: BOARD_FILE_PREVIEW(GET
- * /api/boards/{boardId}/files/{fileId}/preview)를 blob으로 조회해 objectURL로 변환하고,
- * 언마운트/의존성 변경 시 revokeObjectURL을 호출하는지, boardId/fileId 미확정·조회 실패 시
- * 폴백 상태(objectUrl undefined)를 반환하는지 확인한다. shared/lib/useEmpFilePreview.test.tsx와
- * 동일한 시나리오 구성을 board 경로에 맞춰 복제했다.
- */
-
 const PREVIEW_URL = (boardId: number, fileId: number) =>
   `${BASE_URL}/api/boards/${boardId}/files/${fileId}/preview`
 
@@ -101,7 +93,6 @@ describe('useBoardFilePreviewUrl', () => {
         }),
       ),
       http.get(PREVIEW_URL(1, 20), async () => {
-        // 두 번째 요청 응답을 테스트가 제어하는 시점까지 지연시켜, 그 사이의 objectUrl 상태를 관찰한다.
         await secondResponseGate
         return HttpResponse.arrayBuffer(new TextEncoder().encode('second').buffer, {
           headers: { 'Content-Type': 'image/png' },
@@ -120,8 +111,6 @@ describe('useBoardFilePreviewUrl', () => {
 
     rerender({ boardId: 1, fileId: 20 })
 
-    // 새 blob이 아직 도착하지 않은 구간: 리셋 전 'blob:first'(이미 revoke된 URL)가 아니라
-    // 즉시 undefined여야 한다 — 그래야 소비처가 깨진 이미지 대신 폴백을 보여준다.
     await waitFor(() => expect(result.current.objectUrl).toBeUndefined())
     expect(result.current.isLoading).toBe(true)
 

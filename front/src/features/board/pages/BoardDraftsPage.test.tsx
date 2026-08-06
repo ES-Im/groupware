@@ -9,30 +9,6 @@ import { clearAccessToken, setAccessToken } from '@/shared/api/tokenStore'
 import { server } from '@/test/mocks/server'
 import { BoardDraftsPage } from './BoardDraftsPage'
 
-/**
- * BoardDraftsPage(F308/F306, ROADMAP T15.1) 회귀 방지 테스트.
- *
- * 방금 발견된 회귀 위험 지점(스타일링 리팩터 직후):
- * - 임시저장 목록 조회 실패가 "임시저장한 글이 없습니다."(빈 목록)와 구분되는 전용 문구로
- *   표시되는지(BoardDraftsPage.tsx L88-94 주석의 "빈 배열 폴백으로 실패가 숨겨지지 않아야
- *   한다" 계약).
- * - 발행 버튼이 401(ROLE_002, PermissionDeniedException — 소유권 위반)을 받았을 때
- *   handleApiError의 토큰무효 분기(로그인 리다이렉트)를 타지 않고, `normalizeApiError` +
- *   `toast.error`로 직접 에러 메시지만 노출하는지(BoardDraftsPage.tsx L64-69 주석 참조).
- *
- * 참고(회귀 시나리오 위치 정정): 과제 설명은 이 401(ROLE_002) 우회 처리를 "BoardCreatePage의
- * 발행 액션"으로 서술하지만, 실제 소스상 이 특수 처리는 BoardCreatePage.submit()(registerBoard,
- * publishedAt 포함 등록)이 아니라 여기 BoardDraftsPage.handlePublish()(publishBoard,
- * PATCH /publishment)에 구현되어 있다 — BoardCreatePage.test.tsx 상단 주석에도 동일하게 정정해
- * 두었다. 아래 테스트가 실제 구현 위치를 검증한다.
- *
- * 추가로 axios 인터셉터(client.ts, T0.1)는 응답 코드가 ROLE_002이면 "요청이 어느 화면에서
- * 왔는지"와 무관하게 항상 재발급(POST /api/auth/reissue)을 먼저 시도한다(전송 계층 정책이라
- * 페이지 코드가 이를 끌 방법은 없다) — 이 테스트가 검증하는 "우회"는 그 재발급이 실패/소진된
- * 뒤 최종적으로 전파된 에러를 페이지가 로그인 리다이렉트 없이 토스트로만 보여주는지에 대한
- * 것이다.
- */
-
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))
@@ -119,8 +95,6 @@ describe('BoardDraftsPage (F306) - 발행 버튼 401(ROLE_002) 소유권 위반 
     let publishCallCount = 0
     let reissueCallCount = 0
     server.use(
-      // 소유권 위반은 403이 아니라 401(ROLE_002)로 온다(publishBoard.ts 주석 참조) — 재시도해도
-      // 여전히 같은 소유권 문제이므로 재발급 후 재시도한 요청도 동일하게 401 ROLE_002를 반환한다.
       http.patch(`${BASE_URL}/api/boards/1/publishment`, () => {
         publishCallCount += 1
         return HttpResponse.json(
@@ -144,13 +118,9 @@ describe('BoardDraftsPage (F306) - 발행 버튼 401(ROLE_002) 소유권 위반 
       expect(toast.error).toHaveBeenCalledWith('본인이 작성한 게시글만 발행할 수 있습니다'),
     )
 
-    // client.ts(T0.1) 응답 인터셉터는 401 && ROLE_002를 만나면 항상 재발급을 먼저 시도한다
-    // (재시도 1회 → 여전히 401이므로 config._retried 가드로 더 이상 재시도하지 않고 최종 reject).
     expect(reissueCallCount).toBe(1)
     expect(publishCallCount).toBe(2)
 
-    // 로그인 화면으로 튕기지 않고 여전히 임시저장함에 머물러야 한다(handleApiError의
-    // isTokenInvalid 분기를 타지 않는다는 증거).
     expect(screen.queryByText('로그인 화면')).not.toBeInTheDocument()
     expect(screen.getByText('내 임시저장 글')).toBeInTheDocument()
   })

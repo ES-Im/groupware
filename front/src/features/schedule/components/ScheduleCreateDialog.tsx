@@ -24,30 +24,11 @@ import {
 import { scheduleKeys } from '../model/scheduleKeys'
 
 interface ScheduleCreateDialogProps {
-  /** 다이얼로그 열림 상태(제어형, 오픈 트리거는 T3.4가 소유). */
   open: boolean
   onOpenChange: (open: boolean) => void
-  /**
-   * 캘린더 날짜 클릭으로 열 때 시작 일시 프리필 기본값(datetime-local 포맷 'YYYY-MM-DDTHH:mm').
-   * 지정 시 종료 일시는 +1시간으로 채운다. 미지정([새 일정 등록] 버튼)이면 빈 값으로 연다.
-   */
   defaultStartAt?: string
 }
 
-/**
- * 수기 일정 등록 다이얼로그(F003 `MANUAL_SCHEDULE_CREATE`, ROADMAP(SCHEDULE) T3.3).
- *
- * MeetingRoomCreateDialog와 동형인 useZodForm/submitWithErrorMapping 표준 폼 패턴이다.
- * startAt/endAt은 `type="datetime-local"` 입력(분 단위, 초 없음)을 그대로 등록하고, 제출 시에만
- * API 계약(full datetime `yyyy-MM-dd'T'HH:mm:ss`)에 맞춰 초(`:00`)를 보정한다 — 초 보정을
- * 소비처가 수행한다는 manualScheduleCreateSchema.ts의 책임 분담 주석 그대로다.
- *
- * 성공(201 {sourceKey}) 시 scheduleKeys.calendar()를 invalidate해 캘린더가 새 일정을 반영하게
- * 하고, 성공 토스트 + 다이얼로그 닫기까지 담당한다. 폼 리셋은 별도 호출 없이 open 전이 useEffect가
- * 담당한다(닫힘 시 reset() → 다음 오픈 시 빈 값으로 다시 채움, MeetingRoomCreateDialog와 동일
- * 이유 — 제어형 다이얼로그는 언마운트되지 않는다). 종료<시작 등 서버 도메인 위반은
- * submitWithErrorMapping → handleApiError가 자연히 처리한다(별도 분기 없음).
- */
 export function ScheduleCreateDialog({ open, onOpenChange, defaultStartAt }: ScheduleCreateDialogProps) {
   const queryClient = useQueryClient()
   const mutation = useCreateManualScheduleMutation()
@@ -81,8 +62,6 @@ export function ScheduleCreateDialog({ open, onOpenChange, defaultStartAt }: Sch
     onOpenChange(false)
   }
 
-  // 제출 중(mutation in-flight)에는 Esc·오버레이 클릭·닫기 버튼 전부 무시한다
-  // (MeetingReservationUpdateDialog와 동일 이유 — 뒤늦게 도착하는 서버 위반 실패가 삼켜지지 않도록).
   function handleOpenChange(nextOpen: boolean) {
     if (!nextOpen && isSubmitting) {
       return

@@ -25,33 +25,10 @@ import {
 } from '../model/draftPreview'
 import { generalDraftSchema, type GeneralDraftFormValues } from '../model/generalDraftSchema'
 
-/**
- * 일반 기안 작성 페이지(F720 `GENERAL_DRAFT_CREATE(_SUBMISSION)`, ROADMAP(DRAFT-COMMON) T1.3,
- * docs/prd/8.general-draft-prd.md §일반 기안 작성 페이지).
- *
- * 취소기안 작성 폼과 동일 계열의 폼 로직(제목·본문 RHF+zod + 결재선/공람 EmployeeSelectField +
- * 2버튼 + approverSelection→ApproverParam[] 매핑 + 성공 후 상세 이동)을 공유한다.
- * 레이아웃은 공통 `DraftCreateFrame`(좌측 종류 선택 카드 + 우측 폼 카드)을 따른다. 첨부 UI는
- * 없다(Minor m3 — 첨부는 생성 후 상세 AttachmentSection에서 관리).
- *
- * 결재선은 EmployeePicker 로컬 선택 상태(zod 스키마 밖)라 선택 순서를 order(1-base)로 매핑하고,
- * role은 행별 select(결재/협조 — approverRoles state)로 지정한다(기본 APPROVER). 두 버튼:
- *   - [임시저장으로 생성](type=button): 결재선 없이 허용(GENERAL_DRAFT_CREATE, UNSUBMITTED).
- *   - [생성 후 상신](type=submit): 결재선 최소 1명 + APPROVER 역할 최소 1명 클라 사전검증(Open
- *     Q#1, 도메인모델 "결재자 최소 1명 이상 등록") 후 GENERAL_DRAFT_CREATE_SUBMISSION.
- * 두 진입 모두 동일 zod 사전검증(submitWithErrorMapping)을 거치며, 상신은 그 위에 결재선 가드를
- * 더한다(최종 판정은 서버). 생성 성공(201 {draftId}) 시 approvalKeys.all invalidate(mutation) 후
- * 토스트를 띄우고 새 기안 상세로 이동한다(Open Q#2).
- *
- * 공람(선택): 생성 요청 body에는 공람 필드가 없으므로(request-fields 실측) 화면에서 지정한
- * 공람자는 생성 성공 후 `addCirculation`(F707) 후속 호출로 등록한다. 이 호출이 실패해도 기안은
- * 이미 생성됐으므로 이동을 막지 않고 상세 화면에서의 재시도를 토스트로 안내한다.
- */
 export function GeneralDraftCreatePage() {
   const navigate = useNavigate()
   const mutation = useGeneralDraftCreateMutation()
   const [approverSelection, setApproverSelection] = useState<EmployeePickerEmployee[]>([])
-  // 결재선 행별 역할(empId → 결재/협조). 미지정 empId는 기본 APPROVER로 매핑한다.
   const [approverRoles, setApproverRoles] = useState<Record<number, ApprovalRole>>({})
   const [circulationSelection, setCirculationSelection] = useState<EmployeePickerEmployee[]>([])
   const [attachments, setAttachments] = useState<File[]>([])
@@ -67,8 +44,6 @@ export function GeneralDraftCreatePage() {
     formState: { errors, isSubmitting },
   } = form
 
-  // 결재선 선택 변경: 해제된 사원의 역할 항목을 함께 정리하고(재추가 시 기본 결재로 시작),
-  // 선택이 생기면 결재선 미지정 root 에러를 즉시 해제해 상신 재시도를 막지 않는다.
   function handleApproverSelectionChange(next: EmployeePickerEmployee[]) {
     setApproverSelection(next)
     setApproverRoles((prev) => {
@@ -86,16 +61,12 @@ export function GeneralDraftCreatePage() {
     }
   }
 
-  // 역할 변경(결재↔협조)도 상신 가드(APPROVER 최소 1명)의 재평가 대상이라 root 에러를 해제한다.
   function handleApproverRoleChange(empId: number, role: string) {
     setApproverRoles((prev) => ({ ...prev, [empId]: toApprovalRole(role) }))
     clearErrors('root')
   }
 
   async function onValid(values: GeneralDraftFormValues, submit: boolean) {
-    // [생성 후 상신]만 결재선을 클라 사전검증한다(Open Q#1): 최소 1명 + 결재(APPROVER) 역할 최소
-    // 1명(도메인모델 "결재자 최소 1명 이상 등록" — 전원 협조로는 결재 진행 불가). 결재선은
-    // EmployeePicker 로컬 상태라 zod 밖에서 검사하며, 위반 시 root 에러로 안내하고 요청을 보내지 않는다.
     if (submit && approverSelection.length === 0) {
       setError('root', { message: '상신하려면 결재선에 최소 1명을 지정해주세요' })
       return
@@ -118,8 +89,6 @@ export function GeneralDraftCreatePage() {
         : undefined
 
     const result = await mutation.mutateAsync({ payload: { ...values, approvers }, submit })
-    // 생성 요청 body에는 공람 필드가 없어(request-fields 실측) 공람자는 생성 성공 후 F707 후속
-    // 호출로 등록한다. 기안은 이미 생성됐으므로 실패해도 이동을 막지 않고 재추가를 안내한다.
     if (circulationSelection.length > 0) {
       try {
         await addCirculation(
@@ -134,14 +103,9 @@ export function GeneralDraftCreatePage() {
     navigate(`/approval/drafts/${result.draftId}`)
   }
 
-  // [임시저장으로 생성]·[생성 후 상신] 두 진입 모두 동일 zod 사전검증을 거치도록 각각을
-  // submitWithErrorMapping으로 감싼다(제출 실패는 handleApiError가 root 에러/토스트로 위임).
   const handleCreate = submitWithErrorMapping(form, (values) => onValid(values, false))
   const handleCreateAndSubmit = submitWithErrorMapping(form, (values) => onValid(values, true))
 
-  // 미리보기 새 창(DRAFT_PRINT_PREVIEW_STORAGE_KEY 핸드오프, model/draftPreview.ts)에 넘길 폼
-  // 스냅샷: 클릭 시점의 getValues()를 그대로 담는다. 제목·내용은 기안문 표 전용 필드로 분리하고
-  // 일반기안서는 유형별 부가 fields가 없다(빈 배열).
   function handlePreview() {
     const values = getValues()
     const previewFields: DraftPreviewField[] = []
@@ -168,11 +132,7 @@ export function GeneralDraftCreatePage() {
       attachments={attachments}
       onAttachmentsChange={setAttachments}
     >
-      {/* form onSubmit은 기본 액션([생성 후 상신])으로 둔다. [임시저장]은 type=button으로 분리. */}
       <form noValidate onSubmit={handleCreateAndSubmit} className="flex flex-1 flex-col gap-6">
-        {/* 폼 본문을 세로 80%/20%로 분할한다(사용자 요청 2026-07-14): 위쪽 입력 필드 / 아래쪽
-            결재선·공람 카드. fr 그리드라 남는 세로 공간을 정확히 4:1로 나누고, 각 행은
-            min-h-0으로 트랙 밖으로 내용이 넘치는 대신 안쪽에서 줄어들 수 있게 한다. */}
         <div className="grid min-h-0 flex-1 grid-rows-[4fr_1fr] gap-6">
           <div className="flex min-h-0 flex-col gap-6">
             <div className="flex flex-col gap-2">
@@ -193,7 +153,6 @@ export function GeneralDraftCreatePage() {
               )}
             </div>
 
-            {/* 남는 높이는 기안 내용 Textarea가 흡수한다(flex-1 min-h-0 — min-h-48은 바닥값으로 유지). */}
             <div className="flex min-h-0 flex-1 flex-col gap-2">
               <Label htmlFor="general-draft-content" className="text-sm font-semibold">
                 기안 내용 <span className="text-destructive">*</span>
@@ -213,8 +172,6 @@ export function GeneralDraftCreatePage() {
             </div>
           </div>
 
-          {/* 결재선(좌) / 공람(우) 각각 별도 카드로 감싼다. 카드 내부는 min-h-0 +
-              overflow-y-auto로 행이 많아져도 카드가 20% 트랙 밖으로 깨지지 않는다. */}
           <div className="grid min-h-0 grid-cols-1 gap-4 border-t pt-6 md:grid-cols-2">
             <Card className="flex h-full min-h-0 flex-col rounded-xl">
               <CardContent className="flex min-h-0 flex-1 flex-col overflow-y-auto">
@@ -231,7 +188,6 @@ export function GeneralDraftCreatePage() {
                 />
               </CardContent>
             </Card>
-            {/* 공람자는 생성 요청에 실을 수 없어(계약) 생성 성공 후 addCirculation으로 등록한다. */}
             <Card className="flex h-full min-h-0 flex-col rounded-xl">
               <CardContent className="flex min-h-0 flex-1 flex-col overflow-y-auto">
                 <EmployeeSelectField

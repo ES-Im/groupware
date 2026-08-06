@@ -2,16 +2,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { apiClient } from '@/shared/api/client'
 import { getMessages } from './getMessages'
 
-/**
- * getMessages(F1501~F1504, ROADMAP(MESSAGE) T2.1) 단위 테스트.
- *
- * apiClient.get을 직접 모킹해 호출 인자(URL, 쿼리 파라미터)만 검증한다(approval
- * createLeaveDraft.test.ts와 동일 패턴). 핵심 검증 축:
- *   - box가 그대로 경로 세그먼트로 쓰인다.
- *   - keyword/page/size는 값이 있을 때만 쿼리에 포함된다(조건부 조립).
- *   - isRead는 box==='received'일 때만 전송한다(백엔드가 받은함에서만 지원).
- */
-
 vi.mock('@/shared/api/client', () => ({
   apiClient: { get: vi.fn() },
 }))

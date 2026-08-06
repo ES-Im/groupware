@@ -6,24 +6,12 @@ import { cn } from '@/shared/lib/utils'
 import { useFranchiseAssignableManagersQuery } from '../api/useFranchiseAssignableManagersQuery'
 
 interface FranchiseManagerPickerProps {
-  /** 현재 선택된 사원 목록(제어형 — 소유·유지는 소비처). EmployeePicker와 동일 계약. */
   selected: EmployeePickerEmployee[]
   onChange: (next: EmployeePickerEmployee[]) => void
-  /** 다중 선택 여부(기본 true). false면 새 선택이 기존 선택을 대체하는 단일 선택 모드. */
   multiple?: boolean
-  /** 선택 불가로 표시할 empId 집합(예: 현재 담당자). */
   disabledEmpIds?: number[]
 }
 
-/**
- * 가맹점 담당자/답변 담당 배정 전용 사원 선택기.
- *
- * shared EmployeePicker(부서→부서원 드릴다운, 결재 공람/결재선 공용)와 **동일한 제어형 인터페이스**
- * (selected/onChange/multiple/disabledEmpIds)를 유지하되, 데이터원을 FRANCHISE 권한 사원 목록
- * (FRANCHISE_ASSIGNABLE_MANAGERS)으로 바꾼 **검색 가능한 평면 리스트**다. 이로써 가맹점 배정 UI에서는
- * FRANCHISE 권한 사원만 후보로 노출된다(서버도 배정 시 동일 규약을 재검증하므로, 이 picker는 UX
- * 사전 필터 역할). EmployeePicker는 미변경 — 타 도메인(결재) 사용처는 그대로 부서 드릴다운을 쓴다.
- */
 export function FranchiseManagerPicker({
   selected,
   onChange,
@@ -36,7 +24,6 @@ export function FranchiseManagerPicker({
   const managers = data ?? []
   const disabledSet = new Set(disabledEmpIds ?? [])
 
-  // 후보 수가 많지 않아(권한 보유 사원) 클라이언트 이름 필터로 충분하다.
   const filtered = useMemo(() => {
     const trimmed = keyword.trim().toLowerCase()
     if (!trimmed) {
@@ -66,7 +53,6 @@ export function FranchiseManagerPicker({
 
   return (
     <div className="space-y-3">
-      {/* 선택된 사원 칩(EmployeePicker와 동일한 시각·상호작용). */}
       {selected.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
           {selected.map((emp) => (

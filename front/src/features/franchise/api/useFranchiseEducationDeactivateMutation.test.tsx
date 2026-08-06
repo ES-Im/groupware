@@ -8,15 +8,6 @@ import { server } from '@/test/mocks/server'
 import { franchiseKeys } from '../model/queryKeys'
 import { useFranchiseEducationDeactivateMutation } from './useFranchiseEducationDeactivateMutation'
 
-/**
- * useFranchiseEducationDeactivateMutation(FRANCHISE_EDUCATION_DEACTIVATE, ROADMAP(FRANCHISE) T4.4,
- * F1614) 성공 후 invalidate 검증. useFranchiseEducationActivateMutation.test.tsx와 동일 관행.
- *
- * ⚠️ 비활성화도 POST /api/franchise-educations/{educationId}/deactivation.
- * 성공(204) 시 franchiseKeys.education.detail(educationId)와 [...all, 'education', 'calendar']
- * 접두사가 함께 invalidate된다.
- */
-
 function createWrapper() {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },

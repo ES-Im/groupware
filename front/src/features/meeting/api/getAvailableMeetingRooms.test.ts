@@ -2,10 +2,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { apiClient } from '@/shared/api/client'
 import { getAvailableMeetingRooms } from './getAvailableMeetingRooms'
 
-/**
- * getAvailableMeetingRooms(F802, ROADMAP T3.1) 단위 테스트.
- * date/startAt/endAt/capacity 4개는 계약상 전부 필수, page/size는 값이 있을 때만 쿼리스트링에 채운다.
- */
 vi.mock('@/shared/api/client', () => ({
   apiClient: { get: vi.fn().mockResolvedValue({ data: {} }) },
 }))

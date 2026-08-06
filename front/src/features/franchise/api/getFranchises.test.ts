@@ -2,17 +2,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { apiClient } from '@/shared/api/client'
 import { getFranchises } from './getFranchises'
 
-/**
- * getFranchises(FRANCHISE_LIST, ROADMAP(SALES) T1.1) 단위 테스트.
- *
- * apiClient.get을 직접 모킹해 axios 호출 인자(URL, params)만 검증한다
- * (getDeptAttendancePending.test.ts / getMyLeaveHistory.test.ts와 동일 패턴).
- *
- * keyword/status/managerId/page/size는 모두 선택값이며, keyword/status는 truthy일 때만,
- * managerId/page/size는 `!= null`일 때만(0도 포함) params에 채워져야 한다
- * (query-parameters.adoc 실측, getDepartments와 동형 조건부 채움).
- */
-
 vi.mock('@/shared/api/client', () => ({
   apiClient: { get: vi.fn().mockResolvedValue({ data: undefined }) },
 }))

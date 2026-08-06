@@ -8,18 +8,6 @@ import { server } from '@/test/mocks/server'
 import { franchiseKeys } from '../model/queryKeys'
 import { useFranchiseInquiryAnswerSendMutation } from './useFranchiseInquiryAnswerSendMutation'
 
-/**
- * useFranchiseInquiryAnswerSendMutation(FRANCHISE_INQUIRY_ANSWER_SEND, ROADMAP(FRANCHISE) T5.4,
- * F1623) 성공 후 invalidate 검증. useFranchiseInquiryAnswerCreateMutation.test.tsx와 동형 구조이되,
- * mutate 변수가 객체가 아닌 inquiryId(number) 단일값이다(구현 시그니처 그대로).
- *
- * 핵심 계약:
- * - 성공(204) 시 franchiseKeys.inquiry.answer(inquiryId)·detail(inquiryId)·
- *   [...all,'inquiry','list'] 접두사가 함께 invalidate된다(isSubmitted 전환이 목록의 isAnswered
- *   표시에도 영향을 준다).
- * - 다른 문의(id가 다른 detail)는 재조회되지 않는다.
- */
-
 function createWrapper() {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
@@ -135,7 +123,6 @@ describe('useFranchiseInquiryAnswerSendMutation', () => {
     await waitFor(() => expect(result.current.answer.data?.isSubmitted).toBe(true))
     await waitFor(() => expect(detailCalls).toBe(2))
     await waitFor(() => expect(listCalls).toBe(2))
-    // detail(2)는 invalidate 대상이 아니므로 재조회되지 않는다.
     expect(detail2Calls).toBe(1)
   })
 

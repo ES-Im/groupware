@@ -10,16 +10,6 @@ import type { ChatRoomListItem } from '../model/chatRoom'
 import { useChatOverlayStore } from '../lib/chatOverlayStore'
 import { ChatRoomListPanel } from './ChatRoomListPanel'
 
-/**
- * ChatRoomListPanel(구 ChatRoomListPage) 라우팅 관련 부분 회귀 검증(팝업 창 → 인앱 오버레이
- * 전환). 조회/필터/즐겨찾기 렌더 로직 자체는 기존과 동일해 재검증하지 않고, 방 클릭 시
- * `useNavigate` 대신 `chatOverlayStore.selectRoom`이 호출되는지만 확인한다.
- *
- * ChatRoomListPanel은 CreateChatRoomDialog(닫힌 상태라도 useMeQuery를 항상 호출)를 자식으로 항상
- * 마운트하므로, GET /api/employees/me도 함께 흘려보낸다(닫힌 Dialog는 Radix가 content를
- * 언마운트해 EmployeePicker의 DEPTS/DEPT_MEMBERS 조회까지는 발생하지 않는다).
- */
-
 function chatRoom(
   chatRoomId: number,
   roomName: string | null,
@@ -80,7 +70,6 @@ describe('ChatRoomListPanel', () => {
     await user.click(roomButton)
 
     expect(useChatOverlayStore.getState().selectedRoomId).toBe(7)
-    // selectRoom은 오버레이가 닫혀 있었다면 함께 연다(chatOverlayStore 계약).
     expect(useChatOverlayStore.getState().isOpen).toBe(true)
   })
 
@@ -135,7 +124,6 @@ describe('ChatRoomListPanel', () => {
       .map((el) => el.getAttribute('aria-label'))
       .filter((label): label is string => label != null && label.includes('메시지'))
 
-    // 즐겨찾기(2, 4)가 비즐겨찾기(1, 3)보다 먼저, 각 그룹 안에서는 lastMessagedAt 최신순이다.
     expect(order).toEqual([
       '최신메시지-즐겨찾기',
       '오래된메시지-즐겨찾기',
@@ -206,7 +194,6 @@ describe('ChatRoomListPanel', () => {
     await user.click(await screen.findByRole('menuitem', { name: '채팅방 이름변경' }))
     expect(await screen.findByText('표시명 수정')).toBeInTheDocument()
 
-    // roomId=2로 확정된 useChatRoomDetailQuery(roomId) 조회 결과로 입력값이 프리필된다.
     await waitFor(() =>
       expect(screen.getByLabelText('표시명 *')).toHaveValue('두번째방-상세표시명'),
     )

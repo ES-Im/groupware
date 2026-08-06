@@ -8,11 +8,6 @@ import { server } from '@/test/mocks/server'
 import type { EmployeePickerEmployee } from '@/shared/components/EmployeePicker'
 import { FranchiseManagerPicker } from './FranchiseManagerPicker'
 
-/**
- * FranchiseManagerPicker 회귀 방지 테스트.
- * FRANCHISE_ASSIGNABLE_MANAGERS 응답(서버가 FRANCHISE 권한 사원만 반환)을 그대로 후보로 노출하는지,
- * 단일 선택·비활성(현재 담당자)·이름 검색이 EmployeePicker 계약대로 동작하는지 검증한다.
- */
 const MANAGERS = [
   { empId: 1, empName: '김프랜차이즈' },
   { empId: 2, empName: '이프랜차이즈' },

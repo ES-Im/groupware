@@ -20,12 +20,6 @@ interface FranchiseEducationActiveToggleButtonProps {
   isActive: boolean
 }
 
-/**
- * 교육 상세의 활성/비활성 토글 확인 버튼(`FRANCHISE_EDUCATION_ACTIVATE`/`_DEACTIVATE`, F1614,
- * ROADMAP(FRANCHISE) T4.4). MeetingRoomActiveToggleButton과 동형 AlertDialog 확인 패턴이되,
- * 표 행이 아닌 상세 페이지 버튼이라 stopPropagation 래퍼는 두지 않는다(행 내비게이션 없음).
- * 등록자 본인 판정은 서버 403 전담(Open Q#6) — 위반 시 handleApiError 토스트로만 처리한다.
- */
 export function FranchiseEducationActiveToggleButton({
   educationId,
   isActive,

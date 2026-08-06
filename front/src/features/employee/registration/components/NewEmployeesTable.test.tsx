@@ -4,10 +4,6 @@ import { describe, expect, it, vi } from 'vitest'
 import type { NewEmpRecord } from '../model/newEmployee'
 import { NewEmployeesTable } from './NewEmployeesTable'
 
-/**
- * NewEmployeesTable(T1.5, F001) 검증.
- * 네트워크 없는 순수 렌더 컴포넌트라 QueryClientProvider/MSW 없이 data prop만으로 검증한다.
- */
 const records: NewEmpRecord[] = [
   { empId: 1, empNo: 'E100', name: '홍길동', loginId: 'hong123', email: 'hong@haruon.com', extensionNo: '1234' },
   { empId: 2, empNo: 'E101', name: '김철수', loginId: 'kim456', email: 'kim@haruon.com', extensionNo: '5678' },

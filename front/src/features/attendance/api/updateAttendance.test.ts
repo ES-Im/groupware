@@ -2,16 +2,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { apiClient } from '@/shared/api/client'
 import { updateAttendance } from './updateAttendance'
 
-/**
- * updateAttendance(F307·DEPT_ATTENDANCE_UPDATE, ROADMAP T4.2) 단위 테스트.
- *
- * apiClient.patch를 직접 모킹해 axios 호출 인자(URL에 attendanceId path param 포함, 바디)만
- * 검증한다(getDeptAttendanceMonthly.test.ts와 동일한 조건부 필드 생략 검증 패턴).
- *
- * startAt/endAt은 falsy(빈 문자열 ''/undefined)면 body에서 생략되어야 한다 — 빈 문자열을
- * 그대로 서버에 보내면 안 된다는 것이 이번 태스크의 핵심 요구사항.
- */
-
 vi.mock('@/shared/api/client', () => ({
   apiClient: { patch: vi.fn().mockResolvedValue({ data: undefined }) },
 }))

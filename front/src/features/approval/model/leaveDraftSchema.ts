@@ -1,13 +1,5 @@
 import { z } from 'zod'
 
-/**
- * 휴가 유형 enum 6종(F740 `LEAVE_DRAFT_CREATE` request-fields.adoc 실측: "예: ANNUAL, HOURLY, SICK,
- * OFFICIAL, COMPENSATORY, SPECIAL"). 표시 라벨은 백엔드 `LeaveType.java`의 `@Getter description`
- * 값을 그대로 소스 대조로 확정한다(추측 아님) — 작성 요청 body·`DRAFT_DETAIL`의 `leave.leaveType`
- * (①) 둘 다 이 enum 코드로 내려오므로 라벨 매핑을 작성 Select와 상세 본문(`LeaveDraftBody`, M2)이
- * 공용한다. `HOURLY`의 "공휴일" 라벨은 도메인모델의 "연가는 1시간 단위로 사용" 규칙과 겹쳐 보여
- * PRD Open Q#3로 남아 있으나, 백엔드가 직접 선언한 값이라 임시 라벨이 아닌 실측값으로 채택한다.
- */
 const LEAVE_TYPES = ['ANNUAL', 'HOURLY', 'SICK', 'OFFICIAL', 'COMPENSATORY', 'SPECIAL'] as const
 
 export type LeaveType = (typeof LEAVE_TYPES)[number]
@@ -21,42 +13,11 @@ export const leaveTypeLabels: Record<LeaveType, string> = {
   SPECIAL: '특별휴가',
 }
 
-/**
- * 작성 폼 Select 옵션 목록(enum 선언 순서 유지). HOURLY는 백엔드
- * `LeaveDraftService.REQUESTABLE_LEAVE_TYPES` 실측상 신청 불가(선택 시 항상 DRAFT_007
- * "신청할 수 없는 휴가 타입입니다")라 옵션에서 제외한다 — `leaveTypeLabels`에는 남겨
- * 상세 표시(LeaveDraftBody)의 기존 데이터 라벨링은 유지한다.
- */
 export const leaveTypeOptions = LEAVE_TYPES.filter((value) => value !== 'HOURLY').map((value) => ({
   value,
   label: leaveTypeLabels[value],
 }))
 
-/**
- * 휴가 기안 작성 폼 클라이언트 사전검증 스키마(F740 `LEAVE_DRAFT_CREATE(_SUBMISSION)`,
- * ROADMAP(LEAVE) T1.1).
- *
- * 필드 근거: back/build/generated-snippets/LEAVE_DRAFT_CREATE/request-fields.adoc(실측):
- *   - param.title / param.content: 필수(String)
- *   - startAt / endAt: 필수(String, `yyyy-MM-dd'T'HH:mm:ss`) — 폼 입력은 `datetime-local`(분 단위)이라
- *     이 스키마는 분 단위 문자열을 그대로 다루고, 초 보정은 제출 핸들러(페이지)가 dayjs로 수행한다.
- *   - leaveType: 필수(String enum 6종)
- *
- * `businessTripDraftSchema`(③)를 동형 확장한다 — title/content 검증은 그대로 이어받고, 휴가 전용
- * 필드(leaveType/startAt/endAt)를 추가한 뒤 object-level refine으로 `endAt >= startAt`(출장의
- * 엄격한 `<`와 달리 시작·종료가 같은 시각도 허용 — 로드맵 §Done 조건 "endAt≥startAt refine")을
- * 검증한다. 결재선(`param.approvers`)은 이 스키마가 아니라 EmployeePicker(①) 로컬 선택 상태로
- * 관리한다(②③와 동일한 경계).
- *
- * 서버 판정(VALIDATION_ERROR 등)은 submitWithErrorMapping이 handleApiError로 위임하므로 여기서는
- * 클라 사전검증 수준(공백 불가·유형 택1·기간 순서)만 다룬다.
- */
-/**
- * 연가 1시간 단위 규칙(도메인모델 "연가는 1시간 단위로 사용"): 값이 정시(:00)인지 검사한다.
- * 폼은 날짜+시 분리 입력(LeaveDateHourField)이라 분 선택 UI 자체가 없지만, 값 경로가 늘어나도
- * 깨지지 않도록 스키마가 최종 보루로 남는다. 시작·종료가 모두 정시면 사용 시간도 자연히
- * 1시간 단위가 되므로 기간 차이를 별도로 검사하지 않는다.
- */
 const isOnTheHour = (value: string) => /T\d{2}:00(:00)?$/.test(value)
 const HOUR_UNIT_MESSAGE = '연가는 1시간 단위로만 사용할 수 있습니다(분 단위 선택 불가)'
 

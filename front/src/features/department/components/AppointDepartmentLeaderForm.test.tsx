@@ -8,11 +8,6 @@ import { server } from '@/test/mocks/server'
 import type { DeptMemberResponse } from '../model/deptMember'
 import { AppointDepartmentLeaderForm } from './AppointDepartmentLeaderForm'
 
-/**
- * AppointDepartmentLeaderForm(F208, T9.2) 검증.
- * 멤버 선택이 네이티브 select에서 전용 다이얼로그(검색 + 행 선택)로 전환됨. 후보 노출·선택·날짜 입력의
- * zod 검증·실패 비삼킴 의도를 그대로 유지한다.
- */
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))
@@ -33,10 +28,8 @@ function renderForm() {
   )
 }
 
-/** 트리거 버튼은 `<Label htmlFor>`와 연결돼 접근성 이름이 필드 라벨("부서장으로 지정할 사원")이 된다. */
 const TRIGGER_NAME = /부서장으로 지정할 사원/
 
-/** 다이얼로그를 열어 이름으로 후보를 고르는 헬퍼. */
 async function pickLeader(user: ReturnType<typeof userEvent.setup>, empName: string | RegExp) {
   await user.click(screen.getByRole('button', { name: TRIGGER_NAME }))
   const dialog = await screen.findByRole('dialog')

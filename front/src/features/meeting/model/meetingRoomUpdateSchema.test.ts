@@ -1,13 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { meetingRoomUpdateSchema } from './meetingRoomUpdateSchema'
 
-/**
- * meetingRoomUpdateSchema(MEETING_ROOM_UPDATE, ROADMAP(MEETING-ROOMS) T7.1) 단위 테스트.
- *
- * 전 필드 optional 계약과, capacity는 `setValueAs`로 빈 문자열→undefined 변환을 전제한다는
- * 계약(valueAsNumber:true 아님)을 확인한다 — 빈 값 제출(undefined)은 검증을 통과해야 하고,
- * 잘못된 값(0 이하·비양수·NaN)은 에러여야 한다.
- */
 describe('meetingRoomUpdateSchema', () => {
   it('빈 객체({})는 전 필드가 optional이라 성공한다', () => {
     const result = meetingRoomUpdateSchema.safeParse({})

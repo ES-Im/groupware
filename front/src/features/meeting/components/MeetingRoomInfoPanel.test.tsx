@@ -6,10 +6,6 @@ import { BASE_URL } from '@/shared/api/client'
 import { server } from '@/test/mocks/server'
 import { MeetingRoomInfoPanel } from './MeetingRoomInfoPanel'
 
-/**
- * MeetingRoomInfoPanel(F807, ROADMAP T2.4-a) 회귀 방지 테스트.
- * meetingRoomId props만으로 독립 렌더 가능한 공유 컴포넌트 — 로딩/정상/404/그 외 에러 4분기.
- */
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))

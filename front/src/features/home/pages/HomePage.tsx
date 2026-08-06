@@ -14,24 +14,6 @@ import { RoleBandHeader } from '../components/RoleBandHeader'
 import { UnreadMessagesWidget } from '../components/UnreadMessagesWidget'
 import { WelcomeAttendanceCard } from '../components/WelcomeAttendanceCard'
 
-/**
- * 홈 대시보드(사이드바 "홈" 항목, minRole EMPLOYEE의 실제 진입점).
- *
- * 사용자가 첨부한 레퍼런스(dashboard-roles.html, "A안 · 권한별 대시보드")를 승인된 계획
- * (mighty-frolicking-squirrel)에 따라 이식했다 — 전 직원 공통 섹션(환영+출퇴근 · KPI 4종 ·
- * 전자결재 현황 · 안읽은 쪽지함 · 오늘 일정 3카드)에 로그인 사용자의 업무 권한(Layer 2:
- * HR/FACILITY/FRANCHISE)에 따라 노출되는 3개 역할 밴드를 이어 붙인다. roles는 authStore
- * (WelcomeAttendanceCard와 동일 소스)에서, 게이팅은 라우트 가드와 동일한
- * hasRequiredRole(roles, minRole)로 판정한다(신규 유틸 없음, ADMIN은 계층상 전 역할 자동 포함).
- *
- * RoleBandHeader는 밴드마다 이 페이지가 한 번씩 직접 렌더한다 — FRANCHISE 밴드는 위젯이 4개라
- * 헤더를 개별 위젯 내부에 두면 grid 컬럼 폭에 갇혀 레퍼런스처럼 전체 너비를 차지하지 못하기
- * 때문이다(밴드 헤더 1개당 위젯 1~4개인 HR/FACILITY/FRANCHISE 전부 이 방식으로 통일).
- *
- * 기존 4개 위젯 중 MyScheduleWidget(월 캘린더+상세 카드)·UnreadMessagesWidget은 2026-07-12
- * 사용자 확정 그대로 재배치했다(로직 변경 없음). PendingApprovalWidget은 ApprovalStatusWidget
- * (상신 진행·결재 대기 2탭)으로 대체되어 삭제했다.
- */
 export function HomePage() {
   const roles = useAuthStore((state) => state.roles)
   const isHr = hasRequiredRole(roles, 'HR')
@@ -44,10 +26,6 @@ export function HomePage() {
 
       <DashboardKpiRow />
 
-      {/* 전자결재 현황(A)·안읽은 쪽지함(B)·오늘 일정(C)을 동일 너비 3등분 한 줄로 배치한다
-          (2026-07-14 확정) — 기본 1열(모바일 세로 스택) → xl에서 3열. 세 카드는 각자 동일한
-          고정 높이(h-[420px])를 가져 내용량과 무관하게 높이가 일치한다. 이전의 A+C·B+휴가요약
-          2줄 구성과 MyLeaveSummaryWidget(내 휴가 요약)은 사용자 확정으로 제거했다. */}
       <div className="grid gap-4 xl:grid-cols-3">
         <ApprovalStatusWidget />
         <UnreadMessagesWidget />

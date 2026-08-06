@@ -7,16 +7,6 @@ import { BASE_URL } from '@/shared/api/client'
 import { server } from '@/test/mocks/server'
 import { MeetingRoomActiveToggleButton } from './MeetingRoomActiveToggleButton'
 
-/**
- * MeetingRoomActiveToggleButton(F814, ROADMAP(MEETING-ROOMS) T6.3-b) 검증.
- *
- * - isAvailable=true면 "비활성화" 트리거 버튼, false면 "활성화" 트리거 버튼이 노출된다.
- * - AlertDialog 확인 없이는 mutate가 발생하지 않는다(트리거 클릭만으로는 요청 없음).
- * - 확인(AlertDialogAction) 클릭 시 활성화/비활성화 mutation이 각각 호출되고 성공 토스트가 뜬다.
- * - 바깥 wrapper의 stopPropagation으로 클릭 이벤트가 부모(행)까지 버블링되지 않는다
- *   (MeetingRoomManagementPage의 행 내비게이션과 중복 트리거 방지 규약).
- * - 실패 시 handleApiError로 에러 토스트가 노출된다.
- */
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))
@@ -31,7 +21,6 @@ function renderButton(
   })
   return render(
     <QueryClientProvider client={queryClient}>
-      {/* onClick으로 감싸 부모(행) 클릭 핸들러 역할을 흉내낸다(stopPropagation 검증용). */}
       <div onClick={onParentClick}>
         <MeetingRoomActiveToggleButton meetingRoomId={1} isAvailable={isAvailable} variant={variant} />
       </div>

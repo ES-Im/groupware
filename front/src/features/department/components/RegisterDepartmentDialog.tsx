@@ -20,24 +20,10 @@ import {
 } from '../model/registerDepartmentSchema'
 
 interface RegisterDepartmentDialogProps {
-  /** 다이얼로그 열림 상태(제어형, DepartmentsPage가 소유). */
   open: boolean
   onOpenChange: (open: boolean) => void
 }
 
-/**
- * 부서 등록 다이얼로그(`DEPT_REGISTER`, ROADMAP T8.1, ADMIN 전용).
- *
- * T1.1의 useZodForm/submitWithErrorMapping 표준 폼 패턴(UpdateMeForm/LoginForm과 동형 구조)을
- * 이 저장소 최초의 shadcn Dialog 컨텍스트에 이식한다. 클라 사전검증(registerDepartmentSchema)을
- * 통과한 값만 useRegisterDepartmentMutation으로 전송하고, 서버가 던진 에러(VALIDATION_ERROR/
- * COMMON_00x 등)는 submitWithErrorMapping → handleApiError(T0.2c)가 폼 루트(root) 에러 또는
- * 토스트로 매핑한다(계약상 message는 필드 하나만 알려주므로 필드별 다중 매핑은 하지 않는다).
- *
- * 성공(204) 시: mutation의 onSuccess가 departmentKeys.all을 invalidate(목록 재조회)한 뒤,
- * 이 컴포넌트가 성공 토스트를 띄우고 다이얼로그를 닫는다. 닫힐 때마다 폼을 리셋해 다음에 열 때
- * 이전 입력값/에러가 남지 않도록 한다(제어형 다이얼로그라 언마운트되지 않으므로 명시적 리셋 필요).
- */
 export function RegisterDepartmentDialog({ open, onOpenChange }: RegisterDepartmentDialogProps) {
   const mutation = useRegisterDepartmentMutation()
   const form = useZodForm(registerDepartmentSchema, {
@@ -62,8 +48,6 @@ export function RegisterDepartmentDialog({ open, onOpenChange }: RegisterDepartm
     onOpenChange(false)
   }
 
-  // 제출 중(mutation in-flight)에는 Esc·오버레이 클릭·닫기 버튼 전부를 무시한다 — 그 사이에 다이얼로그가
-  // 닫히면 폼이 reset()되어, 뒤늦게 도착하는 등록 실패가 사용자에게 표시되지 않고 그대로 삼켜지기 때문이다.
   function handleOpenChange(nextOpen: boolean) {
     if (!nextOpen && isSubmitting) {
       return
@@ -124,8 +108,6 @@ export function RegisterDepartmentDialog({ open, onOpenChange }: RegisterDepartm
           )}
 
           <DialogFooter>
-            {/* 취소: DialogClose가 onOpenChange(false)를 호출하므로 상위 handleOpenChange의
-                in-flight 닫힘 가드를 그대로 탄다. 제출 중에는 명시적으로 비활성화한다. */}
             <DialogClose asChild>
               <Button type="button" variant="outline" disabled={isSubmitting}>
                 취소

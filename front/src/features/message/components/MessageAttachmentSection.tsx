@@ -8,30 +8,14 @@ import { isMessageImageExtension } from '../lib/messageImageExtension'
 import type { FileListInfo } from '../model/messageTypes'
 import { MessageFilePreviewDialog } from './MessageFilePreviewDialog'
 
-/** 바이트 크기를 MB 단위 문자열로 변환(소수 1자리). approval AttachmentSection의 동일 이름
- * 헬퍼와 표기 방식을 통일한다(공유 유틸 승격은 이번 태스크 범위 밖 — approval 선례와 동일 판단). */
 function formatFileSizeMb(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
 interface MessageAttachmentSectionProps {
-  /** 첨부 목록·미리보기·다운로드의 조회 대상 쪽지 id — T3.3-a가 확정한 단일 prop 계약. */
   messageId: number
 }
 
-/**
- * 쪽지 첨부 섹션(ROADMAP(MESSAGE) T3.3-b, F1519·F1522).
- *
- * approval AttachmentSection의 read-only 축소 이식: useMessageFilesQuery(T3.2)로 첨부 목록을
- * 조회해 파일명+용량을 렌더하고, 이미지 확장자는 모달 미리보기(MessageFilePreviewDialog), 전체
- * 파일은 다운로드 버튼(downloadMessageFile)을 노출한다. 상세(MESSAGE_DETAIL)를 열람하고 있다는
- * 것 자체가 서버가 조회 가능자로 판정했음을 의미하므로 별도 클라이언트 게이팅을 두지 않는다
- * (approval 동일).
- *
- * 업로드(F1520)·삭제(F1521) UI는 편집 모드 전용(T5.4 몫)이라 완전히 read-only로 유지한다.
- * 첨부 목록 조회 실패는 상세 본문과 독립된 부가 정보 실패라 목록 복귀 UX 없이 섹션 내 인라인
- * 폴백으로만 알린다(apiError 매핑 소비).
- */
 export function MessageAttachmentSection({ messageId }: MessageAttachmentSectionProps) {
   const filesQuery = useMessageFilesQuery(messageId)
   const files = filesQuery.data ?? []
@@ -71,9 +55,7 @@ export function MessageAttachmentSection({ messageId }: MessageAttachmentSection
                 <span className="shrink-0 text-xs text-muted-foreground tabular-nums">
                   {formatFileSizeMb(file.fileSize)}
                 </span>
-                {/* 이미지 첨부만 미리보기 모달을 연다(비이미지는 다운로드만). */}
                 {isImage && <MessageFilePreviewDialog messageId={messageId} file={file} />}
-                {/* 다운로드는 이미지/비이미지 모두 노출한다(F1522). */}
                 <Button
                   type="button"
                   variant="outline"

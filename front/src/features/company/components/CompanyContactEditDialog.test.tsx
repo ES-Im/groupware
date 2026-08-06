@@ -7,15 +7,6 @@ import { BASE_URL } from '@/shared/api/client'
 import { server } from '@/test/mocks/server'
 import { CompanyContactEditDialog } from './CompanyContactEditDialog'
 
-/**
- * CompanyContactEditDialog(COMPANY_UPDATE_CONTACT, ROADMAP-COMPANY T3.2-b, F1404) 검증.
- *
- * - open 시 현재 조회값으로 프리필된다.
- * - 무변경 제출 클라 차단.
- * - presentedEmail 형식 검증 실패 경로 + presentedExternalNo 공백-only 거부(PRD §6번 포인트).
- * - 성공(204) 시 토스트 + onOpenChange(false).
- * - 서버 에러는 삼켜지지 않고 root 에러로 표시된다.
- */
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))

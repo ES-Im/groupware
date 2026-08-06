@@ -4,12 +4,6 @@ import { BASE_URL } from '@/shared/api/client'
 import { server } from '@/test/mocks/server'
 import { getNewEmployees } from './getNewEmployees'
 
-/**
- * getNewEmployees(NEW_EMP_LIST, GET /api/employees/new) 단위 테스트.
- * keyword/page/size는 query-parameters.adoc 실측대로 전부 선택값이라, 값이 없는 파라미터는
- * 쿼리스트링 자체에서 생략되는지 + 값이 있으면 그대로 실리는지를 검증한다(getEmpsForManagement와 동일 패턴).
- */
-
 function emptyPage() {
   return {
     content: [],

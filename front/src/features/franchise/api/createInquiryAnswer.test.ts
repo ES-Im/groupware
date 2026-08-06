@@ -2,16 +2,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { apiClient } from '@/shared/api/client'
 import { createInquiryAnswer } from './createInquiryAnswer'
 
-/**
- * createInquiryAnswer(FRANCHISE_INQUIRY_ANSWER_CREATE, ROADMAP(FRANCHISE) T5.4, F1621) 단위 테스트.
- * createFranchise.test.ts와 동일 패턴 — apiClient.post 직접 모킹으로 요청 URL/바디를 검증한다.
- *
- * 핵심 계약:
- * - POST /api/franchise-inquiries/{inquiryId}/answers
- * - body는 {answer} 단일 필드(조회 응답의 content와 필드명이 다름 — 계약 그대로, 임의 통일 금지).
- * - 성공 시 201(반환값 없음).
- */
-
 vi.mock('@/shared/api/client', () => ({
   apiClient: { post: vi.fn() },
 }))

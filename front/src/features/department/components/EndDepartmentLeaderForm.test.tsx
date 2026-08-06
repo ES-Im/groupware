@@ -7,10 +7,6 @@ import { BASE_URL } from '@/shared/api/client'
 import { server } from '@/test/mocks/server'
 import { EndDepartmentLeaderForm } from './EndDepartmentLeaderForm'
 
-/**
- * EndDepartmentLeaderForm(F209, T9.3) 검증.
- * 과거 모달에서 인라인 폼으로 전환됨. 검증 의도(현재 부서장 안내·zod 검증·실패 비삼킴)는 유지한다.
- */
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))

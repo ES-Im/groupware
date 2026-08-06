@@ -11,14 +11,6 @@ import { useMeetingRoomFileDeleteMutation } from './useMeetingRoomFileDeleteMuta
 import { useMeetingRoomFilesQuery } from './useMeetingRoomFilesQuery'
 import { useMeetingRoomFileUploadMutation } from './useMeetingRoomFileUploadMutation'
 
-/**
- * useMeetingRoomFileUploadMutation/useMeetingRoomFileDeleteMutation(F815/F816,
- * ROADMAP(MEETING-ROOMS) T7.1) 성공 후 invalidate 검증 + 업로드 사전검증 차단 경로.
- *
- * PATCH 핸들러는 boardFileMutations.invalidate.test.tsx와 동일 이유로 request.formData()를
- * 호출하지 않고 응답(204)과 재조회 결과만 관찰한다(MSW+jsdom FormData/File 상호운용 한계 우회).
- */
-
 function createWrapper() {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },

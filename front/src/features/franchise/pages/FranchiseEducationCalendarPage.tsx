@@ -15,17 +15,10 @@ import { FranchisePageHeader } from '../components/FranchisePageHeader'
 import { FranchiseStatusPill } from '../components/FranchiseStatusPill'
 import type { FranchiseEducationCalendarItem } from '../model/franchise'
 
-/** 상태 필터 값. 'all'은 전체(파생 상태와 무관). */
 type EducationStatusFilter = 'all' | '접수중' | '정원 마감' | '비활성' | '종료'
 
-/** 파생 상태 pill 변형. FranchiseStatusPill 변형만 사용(코드 발명 없음). */
 type PillVariant = 'default' | 'secondary' | 'outline' | 'destructive'
 
-/**
- * 교육 목록 항목의 파생 상태. 교육 목록(FRANCHISE_EDUCATION_CALENDAR)은 유형·신청/정원 필드가 없어
- * (계약 실측), 보유 필드(isActive/isFull/date)만으로 상태를 도출한다: 비활성 → 종료(과거) → 정원
- * 마감 → 접수중 우선순위. 하드코딩 없이 데이터에서 파생한다.
- */
 function deriveEducationStatus(item: FranchiseEducationCalendarItem): {
   label: EducationStatusFilter
   variant: PillVariant
@@ -44,29 +37,14 @@ function deriveEducationStatus(item: FranchiseEducationCalendarItem): {
 
 const STATUS_OPTIONS: EducationStatusFilter[] = ['접수중', '정원 마감', '비활성', '종료']
 
-/**
- * P4 가맹점 교육 관리 페이지(F1609, ROADMAP(FRANCHISE) T4.1).
- * /franchise-educations 라우트에 마운트된다(export명은 라우터/테스트 참조 유지를 위해 종전대로 두되,
- * UI 개편(2026-07-13, 목업 기준)으로 FullCalendar를 걷어내고 **교육 목록 테이블**로 재구성했다).
- *
- * 교육 목록 데이터원은 여전히 범위 기반 교육 캘린더 조회(FRANCHISE_EDUCATION_CALENDAR — 페이지네이션
- * 목록 엔드포인트가 없다)다. 월 선택(기본 당월)으로 조회 범위를 바꾸고, 상태·검색은 배열에 대한
- * 클라이언트 필터로 처리한다(서버 필터 파라미터 부재). 상태 컬럼은 보유 필드에서 파생하며, 목업의
- * 유형·신청/정원 컬럼은 계약에 데이터가 없어 제거했다(정책 A). 행 클릭 → P5 상세, `[교육 등록]` →
- * 등록 모달(FranchiseEducationCreateDialog) — 사용자 요청으로 전용 페이지(/franchise-educations/new)
- * 대신 모달로 띄운다. 모달은 "등록 시 비활성 상태로 생성됨"을 안내하고, 등록 성공 시 상세로 이동한다.
- */
 export function FranchiseEducationCalendarPage() {
   const navigate = useNavigate()
 
   const [month, setMonth] = useState(() => dayjs().format('YYYY-MM'))
   const [statusFilter, setStatusFilter] = useState<EducationStatusFilter>('all')
   const [keyword, setKeyword] = useState('')
-  // 교육 등록 모달 열림 상태. [교육 등록] 버튼으로 열고, 등록 성공/취소 시 닫는다.
   const [createOpen, setCreateOpen] = useState(false)
 
-  // 월 선택으로 캘린더 조회 범위를 만든다(start 포함·end 미포함, yyyy-MM-dd'T'HH:mm:ss). 월 입력이
-  // 비면 범위를 생략해 서버 당월 기본값에 위임한다.
   const hasMonth = /^\d{4}-\d{2}$/.test(month)
   const start = hasMonth ? `${month}-01T00:00:00` : undefined
   const end = hasMonth
@@ -84,7 +62,6 @@ export function FranchiseEducationCalendarPage() {
 
   const items = data ?? []
 
-  // 클라이언트 필터: 상태(파생) + 검색(교육명 contains).
   const filtered = useMemo(() => {
     const trimmed = keyword.trim().toLowerCase()
     return items.filter((item) => {
@@ -110,8 +87,6 @@ export function FranchiseEducationCalendarPage() {
         </Button>
       </FranchisePageHeader>
 
-      {/* 교육 등록 모달: 등록 성공 시 모달을 닫고 생성된 교육 상세로 이동한다(mutation이 캘린더
-          캐시를 invalidate하므로 목록도 갱신된다). */}
       <FranchiseEducationCreateDialog
         open={createOpen}
         onOpenChange={setCreateOpen}
@@ -136,7 +111,6 @@ export function FranchiseEducationCalendarPage() {
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* 필터 툴바: 월 선택 + 상태 + 검색. */}
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
             <div>
               <label htmlFor="franchise-education-month" className="sr-only">

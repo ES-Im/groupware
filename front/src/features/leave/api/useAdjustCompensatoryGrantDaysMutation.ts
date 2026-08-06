@@ -9,10 +9,6 @@ interface AdjustCompensatoryGrantDaysVariables {
   plusMinusDays: number
 }
 
-/**
- * 포상 휴가 부여일수 조정 mutation 훅(`EMP_LEAVE_ADJUST_COMPENSATORY_GRANT_DAYS`, ROADMAP(LEAVE)
- * M5 T5.2, F750). useAdjustSpecialGrantDaysMutation과 동형 — invalidate 범위·에러 처리 동일.
- */
 export function useAdjustCompensatoryGrantDaysMutation() {
   const queryClient = useQueryClient()
 

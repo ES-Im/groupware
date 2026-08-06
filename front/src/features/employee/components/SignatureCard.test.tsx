@@ -5,11 +5,6 @@ import { useEmpFilePreviewUrl } from '@/shared/lib/useEmpFilePreview'
 import { SignatureCard } from './SignatureCard'
 import type { ActiveFile } from '../model/me'
 
-/**
- * SignatureCard(MyInfoPage 전용, adapt-ui 리디자인) 검증.
- * useEmpFilePreviewUrl(EMP_FILE_PREVIEW blob 조회, useEmpFilePreview.test.tsx에서 이미 실동작
- * 검증됨)은 목킹해 SignatureCard 자체의 분기(빈 상태/미리보기)만 격리 검증한다.
- */
 vi.mock('@/shared/lib/useEmpFilePreview', () => ({
   useEmpFilePreviewUrl: vi.fn(),
 }))

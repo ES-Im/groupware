@@ -3,11 +3,6 @@ import { describe, expect, it } from 'vitest'
 import type { ChatMessage, ChatMessagesPage } from '../model/chatMessage'
 import { removeChatMessage } from './removeChatMessage'
 
-/**
- * removeChatMessage(ROADMAP(CHAT) T2.4) 검증 — upsertChatMessage.test.ts와 동일한 fixture
- * 컨벤션을 따른다.
- */
-
 function message(overrides: Partial<ChatMessage> = {}): ChatMessage {
   return {
     id: -1,
@@ -52,7 +47,6 @@ describe('removeChatMessage', () => {
 
     const result = removeChatMessage(data, 'target-2')
 
-    // 대상이 없던 최초 페이지는 참조까지 그대로 유지된다(불필요한 리렌더 방지).
     expect(result?.pages[0]).toBe(data.pages[0])
     expect(result?.pages[1]?.messages).toEqual([])
   })

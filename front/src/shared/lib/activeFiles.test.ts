@@ -2,11 +2,6 @@ import { describe, expect, it } from 'vitest'
 import type { ActiveFile } from '@/features/employee/model/me'
 import { getActiveProfilePicture, getActiveSignature } from './activeFiles'
 
-/**
- * getActiveProfilePicture(ROADMAP T5.1) 순수 함수 검증.
- * activeFiles 중 type==='PROFILE_PICTURE' && isActive===true인 항목만 선택하는지,
- * 미지 type 값이 섞여도 크래시 없이 안전하게 걸러지는지 확인한다.
- */
 function makeFile(overrides: Partial<ActiveFile>): ActiveFile {
   return {
     file: { fileId: 1, originalName: 'a.png', extension: 'png', fileSize: 100 },
@@ -48,7 +43,6 @@ describe('getActiveProfilePicture', () => {
   })
 })
 
-/** getActiveSignature: getActiveProfilePicture와 동형 로직, type만 SIGNATURE로 대상 전환. */
 describe('getActiveSignature', () => {
   it('활성 SIGNATURE의 fileId를 반환한다', () => {
     const files = [

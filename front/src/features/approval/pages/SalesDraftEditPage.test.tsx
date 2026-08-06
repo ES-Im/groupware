@@ -9,24 +9,6 @@ import { server } from '@/test/mocks/server'
 import type { DraftDetailResponse } from '../model/draftDetail'
 import { SalesDraftEditPage } from './SalesDraftEditPage'
 
-/**
- * SalesDraftEditPage(F761 `SALES_DRAFT_UPDATE`, ROADMAP(SALES) T3.4) 진입 가드·프리필·저장 흐름
- * 회귀 방지 테스트. BusinessTripDraftEditPage 컨벤션(LeaveDraftCreatePage.test.tsx의 MSW server.use
- * 목·render 유틸)을 그대로 복제한다.
- *
- * 검증 축(SalesDraftEditPage.tsx 주석):
- *   - 매출 기안이 아니면(sales==null) 수정 불가 안내.
- *   - 기안자 본인이 아니거나 UNSUBMITTED가 아니면 권한 부족 안내(resolveDrafterActions.canEdit).
- *   - 정상 진입 시 title/content/franchiseId(FranchisePicker 선택칩)/reportMonth/salesAmount 프리필.
- *   - 저장 성공(204) 시 상세 페이지로 navigate + 성공 토스트.
- *   - 기존 결재선 role(협조 포함)은 저장 요청에 그대로 보존된다(이 화면엔 역할 변경 UI가 없음).
- *
- * meQuery(useMeQuery)는 가드 판정 전에 항상 호출되므로 모든 케이스에서 GET /api/employees/me 목이
- * 필요하다(onUnhandledRequest:'error'). 정상 진입 케이스는 SalesDraftEditForm이 마운트되며
- * EmployeePicker(GET /api/departments)·FranchisePicker(GET /api/franchises)도 함께 마운트되므로
- * 두 엔드포인트도 목이 필요하다.
- */
-
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))
@@ -87,7 +69,6 @@ function draftDetail(overrides: Partial<DraftDetailResponse> = {}): DraftDetailR
   }
 }
 
-/** GET /api/employees/me·GET /api/departments·GET /api/franchises 공통 목(폼 마운트 전제). */
 function mockFormDependencies(meEmpId: number) {
   server.use(
     http.get(`${BASE_URL}/api/employees/me`, () => HttpResponse.json(meFixture(meEmpId))),
@@ -157,7 +138,6 @@ describe('SalesDraftEditPage - 권한 부족(기안자 아님/UNSUBMITTED 아님
 
   it('기안자 본인이 아니면 권한 부족 안내를 보여준다', async () => {
     server.use(http.get(`${BASE_URL}/api/drafts/1`, () => HttpResponse.json(draftDetail())))
-    // drafter.empId=10인데 로그인 사용자는 empId=99.
     mockFormDependencies(99)
 
     renderPage()

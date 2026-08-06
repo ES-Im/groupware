@@ -26,13 +26,6 @@ interface EmpStatusActionButtonsProps {
   status: EmpStatus
 }
 
-/**
- * 사원 근무상태 전환 액션 3종(활성화/정직/퇴직, HR/ADMIN 전용, `HR_ACTIVATE_EMP`/`HR_SUSPEND_EMP`/
- * `HR_RESIGN_EMP`). 현재 status와 동일한 목표로의 전환 버튼은 비활성화한다(EmpManagementSheet 지시).
- * 활성화·정직은 FranchiseEducationActiveToggleButton과 동형의 즉시 확인형 AlertDialog이고, 퇴직만
- * 퇴직일 입력이 필요해 AlertDialogContent 안에 date input을 추가로 둔다. 목록/상세 캐시 무효화는
- * 각 mutation이 이미 담당하므로(useActivateEmpMutation 등 JSDoc 참고) 이 컴포넌트는 토스트만 책임진다.
- */
 export function EmpStatusActionButtons({ empId, status }: EmpStatusActionButtonsProps) {
   const activateMutation = useActivateEmpMutation()
   const suspendMutation = useSuspendEmpMutation()

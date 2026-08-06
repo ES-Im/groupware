@@ -7,11 +7,6 @@ import { BASE_URL } from '@/shared/api/client'
 import { server } from '@/test/mocks/server'
 import { MeetingRoomDetailPage } from './MeetingRoomDetailPage'
 
-/**
- * MeetingRoomDetailPage(F807+F808+F809, ROADMAP T2.4-b, P4) 회귀 방지 테스트.
- * 각 블록(MeetingRoomInfoPanel/MeetingRoomImageGallery/MeetingRoomReservationCalendarBlock)이
- * 개별 테스트에서 이미 검증되었으므로, 여기서는 조립 컨테이너 책임(라우트 파라미터 가드)만 확인한다.
- */
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))
@@ -52,7 +47,6 @@ describe('MeetingRoomDetailPage - 라우트 파라미터 가드', () => {
     renderDetail('-1')
 
     expect(screen.getByText('회의실을 찾을 수 없습니다.')).toBeInTheDocument()
-    // 조회 자체가 시도되지 않아야 하므로, 목이 없어도(=onUnhandledRequest 트리거 없이) 통과해야 한다.
   })
 
   it('meetingRoomId가 0이면 유효하지 않은 것으로 처리해 not-found를 렌더한다', () => {

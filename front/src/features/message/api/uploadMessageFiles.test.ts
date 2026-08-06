@@ -2,15 +2,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { apiClient } from '@/shared/api/client'
 import { uploadMessageFiles } from './uploadMessageFiles'
 
-/**
- * uploadMessageFiles(F1520, ROADMAP(MESSAGE) T4.3-a) 단위 테스트.
- *
- * approval uploadDraftFile 선례와 동일하게 다중 첨부를 파일별 순차 PATCH로 처리한다(다중 part
- * 일괄 전송 미지원). 핵심 검증 축:
- *   - 파일 개수만큼 PATCH를 순차 호출하고, 매 요청의 FormData가 'file' 단수 필드로 그 파일만 담는다.
- *   - 중간에 하나가 실패하면 그 시점에서 중단하고 에러를 그대로 던진다(이후 파일은 요청되지 않음).
- */
-
 vi.mock('@/shared/api/client', () => ({
   apiClient: { patch: vi.fn() },
 }))
@@ -53,14 +44,13 @@ describe('uploadMessageFiles', () => {
 
   it('중간 파일 업로드가 실패하면 그 시점에서 중단하고 이후 파일은 요청하지 않는다', async () => {
     vi.mocked(apiClient.patch)
-      .mockResolvedValueOnce({ data: undefined }) // a.pdf 성공
-      .mockRejectedValueOnce(new Error('network error')) // b.pdf 실패
+      .mockResolvedValueOnce({ data: undefined })
+      .mockRejectedValueOnce(new Error('network error'))
 
     await expect(
       uploadMessageFiles(10, [makeFile('a.pdf'), makeFile('b.pdf'), makeFile('c.pdf')]),
     ).rejects.toThrow('network error')
 
-    // a.pdf(성공) + b.pdf(실패) = 2회만 호출되고, c.pdf는 시도되지 않는다.
     expect(apiClient.patch).toHaveBeenCalledTimes(2)
   })
 })

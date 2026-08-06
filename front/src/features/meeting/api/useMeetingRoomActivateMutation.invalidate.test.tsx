@@ -10,16 +10,6 @@ import { useMeetingRoomManagementListQuery } from './useMeetingRoomManagementLis
 import { useMeetingRoomActivateMutation } from './useMeetingRoomActivateMutation'
 import { useMeetingRoomDeactivateMutation } from './useMeetingRoomDeactivateMutation'
 
-/**
- * useMeetingRoomActivateMutation/useMeetingRoomDeactivateMutation(F814, ROADMAP(MEETING-ROOMS)
- * T6.2) 성공 후 invalidate 검증.
- *
- * 오케스트레이터가 M7(상세 화면 재사용)을 위해 직접 명시한 규약: onSuccess에서
- * roomManagement(목록)와 roomDetail(상세) **둘 다** invalidate해야 한다. 목록만 갱신되고
- * 상세의 활성 상태가 stale해지는 회귀를 막기 위한 테스트다(boardFileMutations.invalidate.test.tsx와
- * 동일하게 mock을 가로채지 않고 재조회 결과를 블랙박스로 확인).
- */
-
 function createWrapper() {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },

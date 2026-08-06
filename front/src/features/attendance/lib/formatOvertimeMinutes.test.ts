@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { formatOvertimeMinutes } from './formatOvertimeMinutes'
 
-
 describe('formatOvertimeMinutes', () => {
   it('0분이면 "0분"을 반환한다', () => {
     expect(formatOvertimeMinutes(0)).toBe('0분')
@@ -36,8 +35,6 @@ describe('formatOvertimeMinutes', () => {
   })
 
   it('1500분(24시간 초과, 25시간 0분)이면 dur.asHours()로 총 시간을 정확히 반환해 "25시간 0분"이 된다', () => {
-    // dur.hours()를 썼다면 24시간마다 day 단위로 롤오버되어 "1시간 0분"이 되어버리는
-    // 회귀를 잡기 위한 경계 케이스.
     expect(formatOvertimeMinutes(1500)).toBe('25시간 0분')
   })
 })

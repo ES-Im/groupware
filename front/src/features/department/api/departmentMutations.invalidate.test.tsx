@@ -13,14 +13,6 @@ import { useEndDepartmentLeaderMutation } from './useEndDepartmentLeaderMutation
 import { useUpdateDepartmentNameMutation } from './useUpdateDepartmentNameMutation'
 import { useUpdateDepartmentParentMutation } from './useUpdateDepartmentParentMutation'
 
-/**
- * 부서 관리 mutation 훅 6종(F205~F209, ROADMAP T9.1-a/T9.1-b)의 성공(204) 후 invalidate 동작 검증.
- *
- * 실제 invalidateQueries 호출 여부를 mock으로 가로채지 않고, "prefetch된 detail 쿼리가 mutation
- * 성공 후 실제로 재조회되어 최신 값을 반영하는지"를 관찰 가능한 동작으로 확인한다(react-query의
- * invalidate 계약을 블랙박스로 검증).
- */
-
 function createWrapper() {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
@@ -259,9 +251,6 @@ describe('부서 관리 mutation 성공 시 invalidate (F205~F209)', () => {
     result.current.mutation.mutate({ deptId: 1, endAt: '2026-07-07' })
 
     await waitFor(() => expect(result.current.mutation.isSuccess).toBe(true))
-    // 종료 후 재조회 응답은 all-null wire → normalizeDeptLeader가 null로 정규화하는 지점은
-    // getDepartmentInfo(useDepartmentInfoQuery)의 책임이라 이 테스트는 raw fetch로 재조회
-    // 여부만(empId 필드 갱신) 확인한다.
     await waitFor(() => expect(result.current.detail.data?.deptLeader.empId).toBeNull())
   })
 })

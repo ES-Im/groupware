@@ -8,16 +8,6 @@ import { server } from '@/test/mocks/server'
 import { franchiseKeys } from '../model/queryKeys'
 import { useFranchiseEducationApplicantsQuery } from './useFranchiseEducationApplicantsQuery'
 
-/**
- * useFranchiseEducationApplicantsQuery(FRANCHISE_EDUCATION_APPLICANTS, ROADMAP(FRANCHISE) T4.3) 검증.
- * useFranchisesQuery.test.tsx와 동일 관행.
- *
- * - educationId가 undefined면 enabled:false로 요청이 발생하지 않는다(상세 404 시 신청자 요청
- *   중복 실패 방지 가드).
- * - franchiseKeys.education.applicants(educationId, params)로 캐시된다.
- * - params(page) 변경 시 keepPreviousData로 이전 목록을 유지해 isLoading이 다시 true가 되지 않는다.
- */
-
 function applicant(id: number, name: string) {
   return {
     applicationId: id,

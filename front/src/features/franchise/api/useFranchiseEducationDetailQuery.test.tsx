@@ -9,15 +9,6 @@ import { server } from '@/test/mocks/server'
 import { franchiseKeys } from '../model/queryKeys'
 import { useFranchiseEducationDetailQuery } from './useFranchiseEducationDetailQuery'
 
-/**
- * useFranchiseEducationDetailQuery(FRANCHISE_EDUCATION_DETAIL, ROADMAP(FRANCHISE) T4.3) 검증.
- * useFranchisesQuery.test.tsx와 동일 관행.
- *
- * - educationId가 undefined면 enabled:false로 요청 자체가 발생하지 않는다.
- * - franchiseKeys.education.detail(educationId)로 캐시된다.
- * - 404 응답이 그대로 throw되어 isNotFound로 판정 가능하다.
- */
-
 function detail(overrides: Partial<Record<string, unknown>> = {}) {
   return {
     id: 1,

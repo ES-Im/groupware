@@ -9,17 +9,6 @@ import { BASE_URL } from '@/shared/api/client'
 import { server } from '@/test/mocks/server'
 import { PersonalRecordsWidget } from './PersonalRecordsWidget'
 
-/**
- * PersonalRecordsWidget(MyInfoPage 전용, adapt-ui 리디자인 3차 — Magic Patterns 목업 카드3
- * "근태/휴가·출장" 2탭 이식) 검증.
- *
- * 기존 3구역 세로 스택(근태/연차/출장 동시 노출) 구조를 탭 2개(근태 / 휴가·출장)로 재구성했다.
- * "자세히 보기"류 버튼은 여전히 Dialog 오버레이를 열어 전용 페이지(MyAttendancePage/MyLeavePage/
- * MyBusinessTripHistoryPage)를 그대로 마운트한다(2026-07-13 확정된 오버레이 방침 유지) — 오버레이
- * 안의 페이지가 추가로 호출하는 쿼리도 위젯 자체가 쓰는 5개 엔드포인트와 동일하므로 별도 목이 필요
- * 없다.
- */
-
 const ATTENDANCE_MONTHLY_URL = `${BASE_URL}/api/employees/attendances/me/monthly`
 const ATTENDANCE_SUMMARY_URL = `${BASE_URL}/api/employees/attendances/me/monthly/summary`
 const LEAVE_HISTORY_URL = `${BASE_URL}/api/leaves/employees/me/request-history`
@@ -106,16 +95,13 @@ describe('PersonalRecordsWidget - 근태 탭(기본 탭)', () => {
     expect(await screen.findByText('12건')).toBeInTheDocument()
     expect(screen.getByText('5건')).toBeInTheDocument()
     expect(screen.getByText('10건')).toBeInTheDocument()
-    // 지각·결근은 서버 요약이 아니라 당월 목록에서 LATE_EARLY+ABSENT 건수로 파생한다(1+1=2건).
     await waitFor(() => expect(screen.getByText('지각 · 결근').nextElementSibling).toHaveTextContent('2건'))
 
-    // 미니 캘린더: 요일 헤더 7개 + 결근으로 표시한 5일 타일이 렌더된다.
     expect(screen.getByText('일')).toBeInTheDocument()
     expect(screen.getByText('결근')).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: '자세히 보기 →' }))
 
-    // 오버레이 안에 MyAttendancePage가 그대로 마운트되어 출근/퇴근 버튼이 나타난다.
     expect(await screen.findByRole('button', { name: '출근' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '퇴근' })).toBeInTheDocument()
   })
@@ -143,14 +129,12 @@ describe('PersonalRecordsWidget - 휴가·출장 탭', () => {
 
     await user.click(screen.getByRole('tab', { name: '휴가 · 출장' }))
 
-    // 잔여 = 부여 - 사용: 연차 12/15, 특별 2/2, 포상 0/1.
     await waitFor(() => expect(screen.getByText('12 / 15')).toBeInTheDocument())
     expect(screen.getByText('2 / 2')).toBeInTheDocument()
     expect(screen.getByText('0 / 1')).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: '자세히 →' }))
 
-    // 오버레이 안에 MyLeavePage가 그대로 마운트되어 전용 "휴가 신청" 버튼이 나타난다.
     expect(await screen.findByRole('button', { name: '휴가 신청' })).toBeInTheDocument()
   })
 
@@ -174,7 +158,6 @@ describe('PersonalRecordsWidget - 휴가·출장 탭', () => {
     await user.click(screen.getByRole('tab', { name: '휴가 · 출장' }))
 
     const items = await screen.findAllByRole('listitem')
-    // startAt 내림차순: 출장(07-10)이 연차(07-01)보다 먼저 나온다.
     expect(items[0]).toHaveTextContent('부산')
     expect(items[0]).toHaveTextContent('반려')
     expect(items[1]).toHaveTextContent('연차')
@@ -182,7 +165,6 @@ describe('PersonalRecordsWidget - 휴가·출장 탭', () => {
 
     await user.click(screen.getByRole('button', { name: '출장 이력 →' }))
 
-    // 오버레이 안에 MyBusinessTripHistoryPage가 그대로 마운트되어 목적지 데이터가 나타난다.
     expect(await screen.findAllByText('부산')).not.toHaveLength(0)
   })
 
@@ -223,11 +205,6 @@ describe('PersonalRecordsWidget - 월 변경', () => {
     const nextYearMonth = dayjs(currentYearMonth).add(1, 'month').format('YYYY-MM')
     await waitFor(() => expect(requestedYearMonths).toContain(nextYearMonth))
 
-    // jsdom의 input[type=month]는 실제 브라우저처럼 세그먼트 단위로 키 입력을 누적하지 않아
-    // user.clear()+user.type()으로 문자 하나씩 타이핑하면 중간에 잠깐 ''가 되어(clear 직후)
-    // 이후 타이핑이 씹히는 결과가 나올 수 있다(handleYearMonthChange가 ''를 무시하는 가드와 충돌).
-    // 실제 사용자가 네이티브 month 피커로 "2026-05"를 한 번에 확정하는 것과 동등하게
-    // fireEvent.change로 최종 값만 한 번에 반영한다.
     const monthInput = container.querySelector('input[type="month"]') as HTMLInputElement
     fireEvent.change(monthInput, { target: { value: '2026-05' } })
     await waitFor(() => expect(requestedYearMonths).toContain('2026-05'))
@@ -251,7 +228,6 @@ describe('PersonalRecordsWidget - 월 변경', () => {
     const monthInput = container.querySelector('input[type="month"]') as HTMLInputElement
     fireEvent.change(monthInput, { target: { value: '' } })
 
-    // yearMonth=''로 재조회가 나가지 않고(가드가 무시), 직전 유효 값이 그대로 유지된다.
     await waitFor(() => expect(monthInput.value).toBe(currentYearMonth))
     expect(requestedYearMonths).not.toContain('')
   })

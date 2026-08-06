@@ -8,11 +8,6 @@ import { server } from '@/test/mocks/server'
 import type { CategoryItem } from '../model/category'
 import { CategoryManagementDialog } from './CategoryManagementDialog'
 
-/**
- * CategoryManagementDialog(+CategoryManagementPanel/Row, ADMIN 전용) 검증.
- * FranchiseEducationCreateDialog.test.tsx 관행을 따른다 — zod 사전검증·성공 시 요청 바디·
- * 토스트, 그리고 이 도메인 고유 관심사(목록 렌더·이름수정 인라인 전환·노출/숨김 토글)를 더한다.
- */
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))
@@ -97,9 +92,6 @@ describe('CategoryManagementDialog', () => {
     renderDialog()
     await screen.findByText('조회 조건에 해당하는 카테고리가 없습니다.')
 
-    // Input maxLength=30이 실제 타이핑을 30자로 막으므로, HTML 제약을 우회하는 fireEvent.change로
-    // .value를 직접 31자로 세팅해 zod max(30) 검증 자체가 이 경계를 잡아내는지 확인한다
-    // (CommentForm.test.tsx 301자 경계 테스트와 동일한 이유).
     fireEvent.change(screen.getByPlaceholderText('새 카테고리명'), {
       target: { value: '가'.repeat(31) },
     })

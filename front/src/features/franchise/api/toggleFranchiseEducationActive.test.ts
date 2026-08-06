@@ -2,14 +2,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { apiClient } from '@/shared/api/client'
 import { activateFranchiseEducation, deactivateFranchiseEducation } from './toggleFranchiseEducationActive'
 
-/**
- * activateFranchiseEducation/deactivateFranchiseEducation(FRANCHISE_EDUCATION_ACTIVATE/_DEACTIVATE,
- * ROADMAP(FRANCHISE) T4.4, F1614) 단위 테스트.
- *
- * ⚠️ 핵심 계약: 회의실 토글 선례(PATCH)와 달리 이 두 엔드포인트는 **POST**다
- * (스니펫 실측 — apiClient.post 호출 검증이 이 테스트의 핵심).
- */
-
 vi.mock('@/shared/api/client', () => ({
   apiClient: { post: vi.fn() },
 }))

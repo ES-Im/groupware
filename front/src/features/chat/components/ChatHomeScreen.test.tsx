@@ -9,16 +9,6 @@ import { server } from '@/test/mocks/server'
 import { useChatOverlayStore } from '../lib/chatOverlayStore'
 import { ChatHomeScreen } from './ChatHomeScreen'
 
-/**
- * ChatHomeScreen(홈 화면: 프로필 + 사원목록/채팅창목록 탭) 검증.
- *
- * - 프로필 영역이 useMeQuery 데이터(이름·대표 소속·직위)로 렌더된다.
- * - 탭 클릭 시 chatOverlayStore.setActiveTab이 호출되어 activeTab이 바뀐다(Tabs value가
- *   스토어 소유이므로 실제 탭 전환은 스토어 상태 변화로 검증한다).
- * - 활성 탭에 따라 ChatEmployeeListPanel/ChatRoomListPanel 중 하나만 마운트된다(Radix Tabs
- *   기본 동작 — forceMount 미사용).
- */
-
 function meFixture() {
   return {
     empBasicInfo: {
@@ -88,7 +78,6 @@ describe('ChatHomeScreen', () => {
     server.use(
       http.get(`${BASE_URL}/api/employees/me`, () => HttpResponse.json(meFixture())),
       http.get(`${BASE_URL}/api/chat/rooms`, () => HttpResponse.json([])),
-      // 통합 검색창 마운트 시 본인 주 소속 부서(개발팀=10) 멤버를 기본 조회한다.
       http.get(`${BASE_URL}/api/departments/10/members`, () =>
         HttpResponse.json({
           content: [],

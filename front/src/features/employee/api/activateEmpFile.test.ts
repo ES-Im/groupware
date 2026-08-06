@@ -2,12 +2,6 @@ import { describe, expect, it, vi } from 'vitest'
 import { apiClient } from '@/shared/api/client'
 import { activateEmpFile } from './activateEmpFile'
 
-/**
- * activateEmpFile(ACTIVATE_ME_FILE) 단위 테스트.
- * 요청 본문이 JSON이 아니라 application/x-www-form-urlencoded(isForActivate)임을 검증한다
- * (http-request.adoc 실측).
- */
-
 vi.mock('@/shared/api/client', () => ({
   apiClient: { patch: vi.fn().mockResolvedValue({ data: undefined }) },
 }))

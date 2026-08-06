@@ -7,29 +7,10 @@ import { BASE_URL } from '@/shared/api/client'
 import { server } from '@/test/mocks/server'
 import { FranchiseInquiryManagerAssignDialog } from './FranchiseInquiryManagerAssignDialog'
 
-/**
- * FranchiseInquiryManagerAssignDialog(F1620, `FRANCHISE_INQUIRY_ASSIGN_ANSWER`,
- * ROADMAP(FRANCHISE) T5.3) 회귀 방지 테스트.
- * 사원 선택은 FranchiseManagerPicker(FRANCHISE 권한 사원 평면 목록, FRANCHISE_ASSIGNABLE_MANAGERS)로
- * 이뤄진다 — 부서→부서원 드릴다운이 아니라 후보 목록에서 바로 이름을 고른다.
- *
- * 검증 대상:
- * - 미선택 상태에서는 [배정] 버튼이 비활성이다.
- * - 현재 담당자(currentManagerEmpId)는 후보 목록에서 선택 불가(disabled)로 표시된다.
- * - 사원 1명 선택 후 [배정] 클릭 시 PATCH .../assign-answer?assignedEmpId={value}로 호출되고
- *   성공 토스트 + onOpenChange(false).
- * - 서버 판정 실패(도메인 위반) 시 handleApiError 토스트만 뜨고 onOpenChange(false)는 호출되지 않는다.
- * - 배정 요청 중에는 Esc로 닫을 수 없고, 응답 도착 후에 닫힌다.
- */
-
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))
 
-/**
- * FranchiseManagerPicker가 마운트 시 호출하는 배정 후보(FRANCHISE_ASSIGNABLE_MANAGERS) 목.
- * empId 7(현재 담당자, disabledEmpIds로 비활성 확인용)과 empId 101(선택 대상) 2명.
- */
 function mockAssignableManagers() {
   server.use(
     http.get(`${BASE_URL}/api/franchises/assignable-managers`, () =>

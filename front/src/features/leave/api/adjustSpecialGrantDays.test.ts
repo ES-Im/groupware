@@ -2,12 +2,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { apiClient } from '@/shared/api/client'
 import { adjustSpecialGrantDays } from './adjustSpecialGrantDays'
 
-/**
- * adjustSpecialGrantDays(F749, ROADMAP(LEAVE) M5 T5.2) 단위 테스트.
- * apiClient.patch를 직접 모킹해 axios 호출 인자(URL에 empId path param 포함, 본문 없음,
- * query에 plusMinusDays)만 검증한다(attendance approveAttendance.test.ts와 동일한 스타일).
- */
-
 vi.mock('@/shared/api/client', () => ({
   apiClient: { patch: vi.fn().mockResolvedValue({ data: undefined }) },
 }))

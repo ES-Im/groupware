@@ -8,14 +8,6 @@ import { server } from '@/test/mocks/server'
 import { attendanceKeys } from '../model/queryKeys'
 import { useMyAttendanceMonthlySummaryQuery } from './useMyAttendanceMonthlySummaryQuery'
 
-/**
- * useMyAttendanceMonthlySummaryQuery(F304, ROADMAP T1.4) 실동작 검증.
- *
- * - attendanceKeys.mySummary(yearMonth)로 캐시되는지(QueryClient.getQueryData로 확인).
- * - 응답이 단일 객체 그대로 노출되는지(배열 아님).
- * - yearMonth 지정/미지정 두 케이스 모두 정상 조회되는지.
- */
-
 function createWrapper() {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return {

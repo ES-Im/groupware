@@ -7,12 +7,6 @@ import { BASE_URL } from '@/shared/api/client'
 import { server } from '@/test/mocks/server'
 import { useEmpForManagementQuery } from './useEmpForManagementQuery'
 
-/**
- * useEmpForManagementQuery(EmpManagementSection이 소비하는 단건 조회 훅) 검증.
- * EMPS_FOR_MANAGEMENT는 목록 엔드포인트뿐이라, deptId로 필터링한 목록을 size=100으로 받아
- * select로 empId가 일치하는 레코드 하나만 골라내는 동작 + enabled 게이팅을 확인한다.
- */
-
 function makeRecord(empId: number) {
   return {
     empId,

@@ -33,52 +33,15 @@ import {
 } from '../model/draftPreview'
 import { salesDraftSchema, type SalesDraftFormValues } from '../model/salesDraftSchema'
 
-/** 매출액 표시(자동 입력·미리보기 공용): 유한 숫자만 `1,234원`으로, 그 외(NaN 등)는 빈 문자열. */
 function formatSalesAmount(value: number): string {
   return Number.isFinite(value) ? `${value.toLocaleString('ko-KR')}원` : ''
 }
 
-/**
- * 매출 기안 작성 페이지(F760 `SALES_DRAFT_CREATE(_SUBMISSION)`, ROADMAP(SALES) T2.3,
- * docs/prd/12.sales-draft-prd.md §매출 기안 작성 페이지).
- *
- * ③`BusinessTripDraftCreatePage`(F730)의 폼 로직(제목·본문 RHF+zod + EmployeePicker 결재선 +
- * 2버튼 + approverSelection→ApproverParam[] 매핑 + 성공 후 상세 이동)을 동형 복제하되, 출장 전용
- * 필드(기간·목적지·목적·참여자)를 매출 필드(FranchisePicker→franchiseId·매출 보고월 month input·
- * 매출액)로 치환한다. 레이아웃은 공통 `DraftCreateFrame`을 따른다. 첨부는 화면 보관·미리보기
- * 표시까지만(실제 업로드는 생성 후 상세 — ②③④선례, DraftCreateFrame 첨부 카드 주석 참조).
- *
- * 레퍼런스 이식 규칙 2가지(원본 apps/draft/create):
- *   - [매출액 불러오기]: 가맹점·보고월이 정해지면 `FRANCHISE_SALES_MONTHLY`
- *     (`GET /api/franchises/{franchiseId}/sales/months/{yyyy-MM}`)로 월 매출을 조회해 응답의
- *     totalSalesAmount를 매출액 필드에 주입한다(원본은 하드코딩 — 여기서는 실 API 연동).
- *     1회성 폼 주입이라 훅 대신 queryClient.fetchQuery로 호출한다(같은 달 재클릭은 캐시 히트).
- *   - 기안 내용 자동 입력: 사용자가 본문을 직접 수정하기 전까지 매출 필드 값으로 본문을 자동
- *     구성한다(본문 입력 시 자동 갱신 중단).
- *
- * franchiseId는 FranchisePicker(제어형, 네이티브 입력이 아님)의 선택 결과를 로컬 state로 들고
- * 있다가 `setValue`로 zod 필드에 동기화한다(reportMonth/salesAmount는 네이티브 input이라 register로
- * 직결). 결재선은 ②③④와 동일하게 EmployeePicker 로컬 선택 상태(zod 스키마 밖)이며, role은
- * 행별 select(결재/협조 — approverRoles state, 기본 APPROVER)로 지정한다.
- *
- * 두 버튼:
- *   - [임시저장으로 생성](type=button): 결재선 없이 허용(SALES_DRAFT_CREATE, UNSUBMITTED).
- *   - [생성 후 상신](type=submit): 결재선 최소 1명 + APPROVER 역할 최소 1명 클라 사전검증(Open
- *     Q#1, 도메인모델 "결재자 최소 1명 이상 등록") 후 SALES_DRAFT_CREATE_SUBMISSION.
- * 두 진입 모두 동일 zod 사전검증(submitWithErrorMapping)을 거치며, 상신은 그 위에 결재선 가드를
- * 더한다(최종 판정은 서버). 생성 성공(201 {draftId}) 시 approvalKeys.all invalidate(mutation)
- * 후 토스트를 띄우고 새 기안 상세로 이동한다.
- *
- * 공람(선택): 생성 요청 body에는 공람 필드가 없으므로(request-fields 실측) 화면에서 지정한
- * 공람자는 생성 성공 후 `addCirculation`(F707) 후속 호출로 등록한다. 실패해도 기안은 이미
- * 생성됐으므로 이동을 막지 않고 상세 화면에서의 재추가를 토스트로 안내한다.
- */
 export function SalesDraftCreatePage() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const mutation = useSalesDraftCreateMutation()
   const [approverSelection, setApproverSelection] = useState<EmployeePickerEmployee[]>([])
-  // 결재선 행별 역할(empId → 결재/협조). 미지정 empId는 기본 APPROVER로 매핑한다.
   const [approverRoles, setApproverRoles] = useState<Record<number, ApprovalRole>>({})
   const [circulationSelection, setCirculationSelection] = useState<EmployeePickerEmployee[]>([])
   const [franchiseSelection, setFranchiseSelection] = useState<FranchisePickerSelection | null>(
@@ -109,8 +72,6 @@ export function SalesDraftCreatePage() {
     setValue('franchiseId', next?.id ?? 0, { shouldValidate: true })
   }
 
-  // 기안 내용 자동 입력(레퍼런스 이식): 본문을 직접 수정하기 전까지 매출 필드 값으로 본문을
-  // 구성한다. 생성 문자열이 현재 값과 같으면 setValue를 건너뛰어 불필요한 갱신 루프를 막는다.
   useEffect(() => {
     if (isContentManuallyEdited) {
       return
@@ -133,11 +94,6 @@ export function SalesDraftCreatePage() {
     setValue,
   ])
 
-  /**
-   * [매출액 불러오기](FRANCHISE_SALES_MONTHLY): 가맹점·보고월 선행 조건을 안내 토스트로 가드한 뒤
-   * 월 매출을 조회해 totalSalesAmount를 매출액 필드에 주입한다. 서버 에러(권한/미존재 등)는
-   * handleApiError 표준 정책(토스트)으로 위임한다.
-   */
   async function handleLoadSalesAmount() {
     const franchiseId = getValues('franchiseId')
     const reportMonth = getValues('reportMonth')
@@ -156,8 +112,6 @@ export function SalesDraftCreatePage() {
         queryKey: franchiseKeys.monthlySales(franchiseId, reportMonth),
         queryFn: () => getFranchiseMonthlySales(franchiseId, reportMonth),
       })
-      // 매출 없음은 204 빈 바디 → axios data가 빈 문자열(FranchiseSalesPage T3.1 실측과 동일).
-      // 이때 필드 접근이 전부 undefined가 되므로 주입 없이 안내하고 끝낸다.
       if (!sales || typeof sales === 'string') {
         toast.error(`${reportMonth}에는 매출 데이터가 없습니다`)
         return
@@ -171,8 +125,6 @@ export function SalesDraftCreatePage() {
     }
   }
 
-  // 결재선 선택 변경: 해제된 사원의 역할 항목을 함께 정리하고(재추가 시 기본 결재로 시작),
-  // 선택이 생기면 결재선 미지정 root 에러를 즉시 해제해 상신 재시도를 막지 않는다.
   function handleApproverSelectionChange(next: EmployeePickerEmployee[]) {
     setApproverSelection(next)
     setApproverRoles((prev) => {
@@ -190,16 +142,12 @@ export function SalesDraftCreatePage() {
     }
   }
 
-  // 역할 변경(결재↔협조)도 상신 가드(APPROVER 최소 1명)의 재평가 대상이라 root 에러를 해제한다.
   function handleApproverRoleChange(empId: number, role: string) {
     setApproverRoles((prev) => ({ ...prev, [empId]: toApprovalRole(role) }))
     clearErrors('root')
   }
 
   async function onValid(values: SalesDraftFormValues, submit: boolean) {
-    // [생성 후 상신]만 결재선을 클라 사전검증한다(Open Q#1): 최소 1명 + 결재(APPROVER) 역할 최소
-    // 1명(도메인모델 "결재자 최소 1명 이상 등록" — 전원 협조로는 결재 진행 불가). 결재선은
-    // EmployeePicker 로컬 상태라 zod 밖에서 검사하며, 위반 시 root 에러로 안내하고 요청을 보내지 않는다.
     if (submit && approverSelection.length === 0) {
       setError('root', { message: '상신하려면 결재선에 최소 1명을 지정해주세요' })
       return
@@ -229,8 +177,6 @@ export function SalesDraftCreatePage() {
     }
 
     const result = await mutation.mutateAsync({ payload, submit })
-    // 생성 요청 body에는 공람 필드가 없어(request-fields 실측) 공람자는 생성 성공 후 F707 후속
-    // 호출로 등록한다. 기안은 이미 생성됐으므로 실패해도 이동을 막지 않고 재추가를 안내한다.
     if (circulationSelection.length > 0) {
       try {
         await addCirculation(
@@ -245,14 +191,9 @@ export function SalesDraftCreatePage() {
     navigate(`/approval/drafts/${result.draftId}`)
   }
 
-  // [임시저장으로 생성]·[생성 후 상신] 두 진입 모두 동일 zod 사전검증을 거치도록 각각을
-  // submitWithErrorMapping으로 감싼다(제출 실패는 handleApiError가 root 에러/토스트로 위임).
   const handleCreate = submitWithErrorMapping(form, (values) => onValid(values, false))
   const handleCreateAndSubmit = submitWithErrorMapping(form, (values) => onValid(values, true))
 
-  // 미리보기 새 창(DRAFT_PRINT_PREVIEW_STORAGE_KEY 핸드오프, model/draftPreview.ts)에 넘길 폼
-  // 스냅샷: 클릭 시점의 getValues()를 그대로 담는다. 제목·내용은 기안문 표 전용 필드로 분리하고
-  // fields에는 유형별 부가 정보만 싣는다(undefined 가능 지점은 ''로 강제 — JSON 직렬화 계약).
   function handlePreview() {
     const values = getValues()
     const previewFields: DraftPreviewField[] = [
@@ -283,11 +224,7 @@ export function SalesDraftCreatePage() {
       attachments={attachments}
       onAttachmentsChange={setAttachments}
     >
-      {/* form onSubmit은 기본 액션([생성 후 상신])으로 둔다. [임시저장]은 type=button으로 분리. */}
       <form noValidate onSubmit={handleCreateAndSubmit} className="flex flex-1 flex-col gap-4">
-        {/* 폼 본문을 세로 80%/20%로 분할한다(사용자 요청 2026-07-14): 위쪽 입력 필드 / 아래쪽
-            결재선·공람 카드. fr 그리드라 남는 세로 공간을 정확히 4:1로 나누고, 각 행은
-            min-h-0으로 트랙 밖으로 내용이 넘치는 대신 안쪽에서 줄어들 수 있게 한다. */}
         <div className="grid min-h-0 flex-1 grid-rows-[4fr_1fr] gap-4">
           <div className="flex min-h-0 flex-col gap-4">
             <div className="flex flex-col gap-1.5">
@@ -307,7 +244,6 @@ export function SalesDraftCreatePage() {
               )}
             </div>
 
-            {/* 유형 필드를 본문보다 앞에 둔다(레퍼런스 필드 순서: 제목 → 유형 필드 → 기안 내용). */}
             <div className="flex flex-col gap-1.5">
               <Label>
                 대상 가맹점 <span className="text-destructive">*</span>
@@ -343,7 +279,6 @@ export function SalesDraftCreatePage() {
                   <Label htmlFor="sales-draft-sales-amount">
                     매출액(원) <span className="text-destructive">*</span>
                   </Label>
-                  {/* 레퍼런스의 라벨 우측 [매출액 불러오기] 링크 버튼 이식(여기서는 실 API 연동). */}
                   <Button
                     type="button"
                     variant="ghost"
@@ -373,7 +308,6 @@ export function SalesDraftCreatePage() {
               </div>
             </div>
 
-            {/* 남는 높이는 기안 내용 Textarea가 흡수한다(flex-1 min-h-0 — min-h-48은 바닥값으로 유지). */}
             <div className="flex min-h-0 flex-1 flex-col gap-1.5">
               <Label htmlFor="sales-draft-content">
                 기안 내용 <span className="text-destructive">*</span>
@@ -384,7 +318,6 @@ export function SalesDraftCreatePage() {
                 className="min-h-48 flex-1"
                 aria-invalid={!!errors.content}
                 {...register('content', {
-                  // 직접 수정이 시작되면 자동 입력을 중단한다(setValue는 이 onChange를 타지 않는다).
                   onChange: () => setIsContentManuallyEdited(true),
                 })}
               />
@@ -396,8 +329,6 @@ export function SalesDraftCreatePage() {
             </div>
           </div>
 
-          {/* 결재선(좌) / 공람(우) 각각 별도 카드로 감싼다. 카드 내부는 min-h-0 +
-              overflow-y-auto로 행이 많아져도 카드가 20% 트랙 밖으로 깨지지 않는다. */}
           <div className="grid min-h-0 grid-cols-1 gap-4 border-t pt-4 md:grid-cols-2">
             <Card className="flex h-full min-h-0 flex-col rounded-xl">
               <CardContent className="flex min-h-0 flex-1 flex-col overflow-y-auto">
@@ -414,7 +345,6 @@ export function SalesDraftCreatePage() {
                 />
               </CardContent>
             </Card>
-            {/* 공람자는 생성 요청에 실을 수 없어(계약) 생성 성공 후 addCirculation으로 등록한다. */}
             <Card className="flex h-full min-h-0 flex-col rounded-xl">
               <CardContent className="flex min-h-0 flex-1 flex-col overflow-y-auto">
                 <EmployeeSelectField

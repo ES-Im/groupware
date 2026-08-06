@@ -8,14 +8,6 @@ import { server } from '@/test/mocks/server'
 import type { AttendanceEditTarget } from '../model/deptAttendance'
 import { UpdateAttendanceDialog } from './UpdateAttendanceDialog'
 
-/**
- * UpdateAttendanceDialog(F307, ROADMAP2 T4.3) 검증.
- *
- * RegisterDepartmentDialog.test.tsx/RenameDepartmentDialog.test.tsx의 표준 패턴(MSW 핸들러 재사용,
- * sonner mock, 닫힘 가드/실패 비삼킴)을 그대로 복제한다. 이 다이얼로그는 mutation(useUpdateAttendanceMutation)의
- * onSuccess가 이미 성공 토스트를 처리하므로, 컴포넌트 자체는 toast.success를 호출하지 않는다
- * (RegisterDepartmentDialog와의 차이 — 여기서는 toast.success 호출 여부를 단언하지 않는다).
- */
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))
@@ -40,7 +32,6 @@ function renderDialog(target: AttendanceEditTarget | null = DEFAULT_TARGET, open
   return { onOpenChange }
 }
 
-/** input[type=time]은 userEvent.type이 아니라 fireEvent.change로 값을 직접 설정한다(jsdom 표준 패턴). */
 function setTimeValue(input: HTMLElement, value: string) {
   fireEvent.change(input, { target: { value } })
 }
@@ -84,7 +75,6 @@ describe('UpdateAttendanceDialog', () => {
     renderDialog()
 
     const reasonField = screen.getByLabelText(/수정 사유/)
-    // Textarea의 native maxLength=100 제약을 우회해(직접 DOM value 대입) zod .max(100) 분기 자체를 검증한다.
     fireEvent.change(reasonField, { target: { value: 'a'.repeat(101) } })
     fireEvent.click(screen.getByRole('button', { name: '수정' }))
 
@@ -161,7 +151,6 @@ describe('UpdateAttendanceDialog', () => {
 
     expect(await screen.findByText('이미 승인된 근태는 수정할 수 없습니다')).toBeInTheDocument()
     expect(onOpenChange).not.toHaveBeenCalledWith(false)
-    // 폼이 열린 채 입력값이 유지된다.
     expect(screen.getByLabelText(/수정 사유/)).toHaveValue('오전 반차 정정')
   })
 })

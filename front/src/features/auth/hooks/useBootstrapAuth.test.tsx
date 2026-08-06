@@ -6,11 +6,6 @@ import { server } from '@/test/mocks/server'
 import { useAuthStore } from '../store/authStore'
 import { useBootstrapAuth } from './useBootstrapAuth'
 
-/**
- * T1.4 세션 복원(authStore.bootstrap + useBootstrapAuth)의 실제 동작을 검증한다.
- * REISSUE_TOKEN·RETRIEVE_ME_INFO 호출을 MSW로 목킹해 성공/실패 경로를 각각 확인한다.
- */
-
 const REISSUE_URL = `${BASE_URL}/api/auth/reissue`
 const ME_URL = `${BASE_URL}/api/employees/me`
 
@@ -36,7 +31,6 @@ const meFixture = {
   ],
 }
 
-/** {alg,typ} 헤더 + payload만 갖춘 가짜 JWT(서명 검증 없이 payload만 디코드하므로 서명은 더미). */
 function makeFakeAccessToken(roles: string[]): string {
   const toBase64Url = (obj: unknown) =>
     btoa(JSON.stringify(obj))
@@ -71,7 +65,6 @@ function Harness() {
 
 describe('useBootstrapAuth (T1.4 세션 복원)', () => {
   afterEach(() => {
-    // 스토어는 모듈 싱글턴이므로 테스트 간 상태가 새지 않도록 초기화한다.
     useAuthStore.setState({ accessToken: null, user: null, roles: [], status: 'idle' })
   })
 
@@ -88,7 +81,6 @@ describe('useBootstrapAuth (T1.4 세션 복원)', () => {
       expect(screen.getByTestId('status')).toHaveTextContent('authenticated'),
     )
     expect(screen.getByTestId('userName')).toHaveTextContent('홍길동')
-    // ROLE_ 접두어가 제거되어 정규화됐는지 확인.
     expect(screen.getByTestId('roles')).toHaveTextContent('EMPLOYEE,HR')
     expect(useAuthStore.getState().accessToken).toBe(fakeToken)
   })
@@ -97,7 +89,6 @@ describe('useBootstrapAuth (T1.4 세션 복원)', () => {
     const fakeToken = makeFakeAccessToken(['ROLE_EMPLOYEE'])
     server.use(
       http.post(REISSUE_URL, () => HttpResponse.json({ accessToken: fakeToken })),
-      // 404는 queryClient의 재시도 대상이 아니므로(shared/api/queryClient.ts) waitFor가 빠르게 확정된다.
       http.get(ME_URL, () => HttpResponse.json({ code: 'RESOURCE_001' }, { status: 404 })),
     )
 

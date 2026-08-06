@@ -9,18 +9,6 @@ import { useAuthStore } from '@/features/auth/store/authStore'
 import { server } from '@/test/mocks/server'
 import { EmployeeDetailPage } from './EmployeeDetailPage'
 
-/**
- * EmployeeDetailPage(타 사원 상세, F002) 관리 섹션 역할별 렌더 회귀 테스트(adapt-ui 신규 → 2차 수정).
- * EmpManagementSection은 canManage(=canManageAsHr || canManageAsDeptManager)일 때만 렌더되고,
- * canManageAsHr가 canManageAsDeptManager보다 우선해 어느 다이얼로그 폼이 열리는지를 결정한다.
- *
- * 2차 수정: 우측 컬럼에 EmpRecordsWidget(근태·휴가·출장 조회)이 추가되어
- * canViewRecordsBoard(=hasRequiredRole(roles,'DEPT_MANAGER'), canManage와는 별도 값 — HR 단독은
- * false)로 게이팅된다. 렌더되면 부서 단위 3개 엔드포인트(DEPT_ATTENDANCE_MONTHLY/
- * DEPT_LEAVE_REQUEST_HISTORY/DEPT_BUSINESS_TRIP_REQUEST_HISTORY)를 size=100으로 호출하므로,
- * canViewRecordsBoard가 true인 테스트는 목이 있어야 onUnhandledRequest:'error'에 걸리지 않는다.
- */
-
 const empDetailFixture = {
   empBasicInfo: {
     empId: 7,
@@ -86,7 +74,6 @@ function emptyPage() {
   }
 }
 
-/** EmpRecordsWidget이 조회하는 부서 단위 3개 엔드포인트(deptId=1) 목. 빈 목록이면 충분하다. */
 function mockRecordsWidgetDefaults() {
   server.use(
     http.get(`${BASE_URL}/api/employees/attendances/1/monthly`, () => HttpResponse.json(emptyPage())),

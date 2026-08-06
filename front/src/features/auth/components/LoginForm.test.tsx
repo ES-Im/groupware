@@ -3,16 +3,10 @@ import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import { LoginForm } from './LoginForm'
 
-/**
- * LoginForm은 T1.1 표준 폼 패턴(useZodForm + submitWithErrorMapping)의 최초 소비처다.
- * 여기서는 그 표준 패턴이 실제로 동작하는지(클라 사전검증 → 서버 에러 매핑)를 검증한다.
- * sonner는 실제 Toaster 렌더 없이도 toast.error 호출 여부만 확인하면 되므로 모킹한다.
- */
 vi.mock('sonner', () => ({
   toast: { error: vi.fn() },
 }))
 
-/** axios.isAxiosError가 인식하는 최소 형태(isAxiosError 플래그 + response)만 흉내낸 가짜 에러. */
 function fakeAxiosError(status: number, code: string, message: string) {
   return Object.assign(new Error(message), {
     isAxiosError: true,

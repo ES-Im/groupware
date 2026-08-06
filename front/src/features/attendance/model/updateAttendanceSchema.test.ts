@@ -1,12 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { updateAttendanceSchema } from './updateAttendanceSchema'
 
-/**
- * updateAttendanceSchema(DEPT_ATTENDANCE_UPDATE, ROADMAP T4.1, F307) 단위 테스트.
- * startAt/endAt 둘 다 비어있으면 refine 에러(path: ['startAt'])가 발생하는 경계와,
- * editReason 100자 경계·targetEmpId 타입 검증을 확인한다.
- */
-
 const validBase = {
   targetEmpId: 1,
   editReason: '지각 사유 정정',

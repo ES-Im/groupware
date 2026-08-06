@@ -2,9 +2,6 @@ import { describe, expect, it, vi } from 'vitest'
 import { apiClient } from '@/shared/api/client'
 import { updateMeetingReservationInfo } from './updateMeetingReservationInfo'
 
-/**
- * updateMeetingReservationInfo(F804, ROADMAP T4.2) 단위 테스트.
- */
 vi.mock('@/shared/api/client', () => ({
   apiClient: { patch: vi.fn().mockResolvedValue({ data: undefined }) },
 }))

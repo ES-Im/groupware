@@ -2,12 +2,6 @@ import { describe, expect, it, vi } from 'vitest'
 import { apiClient } from '@/shared/api/client'
 import { uploadMeetingRoomFile } from './uploadMeetingRoomFile'
 
-/**
- * uploadMeetingRoomFile(F815, ROADMAP(MEETING-ROOMS) T7.1) 단위 테스트.
- * apiClient.patch 직접 모킹으로 URL/FormData part명만 검증한다(board uploadBoardFile.test.ts와
- * 동일 이유 — MSW+jsdom File 상호운용 한계 우회).
- */
-
 vi.mock('@/shared/api/client', () => ({
   apiClient: { patch: vi.fn().mockResolvedValue({ data: undefined }) },
 }))

@@ -2,17 +2,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { apiClient } from '@/shared/api/client'
 import { sendInquiryAnswer } from './sendInquiryAnswer'
 
-/**
- * sendInquiryAnswer(FRANCHISE_INQUIRY_ANSWER_SEND, ROADMAP(FRANCHISE) T5.4, F1623) 단위 테스트.
- * assignInquiryAnswerManager.test.ts와 동형 구조(Path only, 본문 없음) — apiClient.patch
- * 직접 모킹으로 요청 URL과 본문 미포함을 검증한다.
- *
- * 핵심 계약:
- * - PATCH /api/franchise-inquiries/{inquiryId}/answers/send
- * - Path only(쿼리 파라미터·본문 없음). 성공 시 204(반환값 없음).
- * - 발송 후 수정 불가 판정은 서버가 최종 담당한다(사전 필터링 발명 금지).
- */
-
 vi.mock('@/shared/api/client', () => ({
   apiClient: { patch: vi.fn() },
 }))

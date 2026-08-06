@@ -32,14 +32,6 @@ interface DeptManagedInfoDialogProps {
   record: EmpManagementRecord
 }
 
-/**
- * DEPT_MANAGER 전용 사원 정보 수정 다이얼로그(`DEPT_MANAGER_UPDATE_EMP_INFO`, adapt-ui 신규).
- *
- * 권한 후보는 EMPLOYEE/DEPT_MANAGER + "뷰어(부서매니저) 본인이 가진 Layer-2 권한"만 허용한다
- * (request-fields.adoc: "부서매니저 상위 권한 부여 불가", [FRANCHISE,IT,HR,FACILITY 중 부서
- * 매니저가 가진 권한]) — authStore의 원본 roles에서 LAYER2_ROLE_CODES와 교집합을 구해 후보에 더한다.
- * HrManagedInfoDialog와 달리 이름/비밀번호/입사일자는 다루지 않는다(계약 범위 밖).
- */
 export function DeptManagedInfoDialog({
   open,
   onOpenChange,
@@ -50,15 +42,6 @@ export function DeptManagedInfoDialog({
   const viewerLayer2Roles = LAYER2_ROLE_CODES.filter((code) => rawRoles.includes(code))
   const roleCandidates = [...BASE_DEPT_MANAGER_ROLE_CANDIDATES, ...viewerLayer2Roles]
 
-  /**
-   * 대상 사원이 이 부서매니저의 후보 목록 밖 권한(예: ADMIN, 본인이 갖지 않은 Layer-2 권한)을
-   * 이미 보유한 경우, 서버(`EmpCommandService.validateAssignableRolesByDeptManager` +
-   * `EmpUpdateRequestByDeptManager`의 compact constructor)는 그 권한이 배열에 "존재하기만 해도"
-   * (새로 부여하려는 게 아니라 그대로 재전송/보존하려는 시도여도) 거부한다 — 실측 확인(체크 안 된
-   * 후보만 보내면 조용히 제거되고, 보존하려 배열에 포함해 보내면 하드 거부됨, 둘 다 재현). 이
-   * 부서매니저가 애초에 다룰 수 없는 권한이 껴 있으면 권한 편집 자체를 막고(체크박스 disabled)
-   * systemRoleCode를 아예 생략해 기존 권한을 그대로 둔다 — 내선번호만 수정 가능하다.
-   */
   const outOfScopeRoles = record.systemRoleCodeName.filter((code) => !roleCandidates.includes(code))
   const canEditRoles = outOfScopeRoles.length === 0
 
@@ -90,12 +73,7 @@ export function DeptManagedInfoDialog({
       empId,
       values: {
         ...values,
-        // 빈 문자열은 "변경 안 함"을 뜻하므로 undefined로 바꿔 요청 바디에서 제외한다
-        // (JSON.stringify가 undefined 키를 생략 — 서버가 null로 인식해 미변경 처리한다).
         extensionNo: values.extensionNo === '' ? undefined : values.extensionNo,
-        // canEditRoles가 false면(후보 밖 권한 보유) systemRoleCode를 아예 생략해 기존 권한을
-        // 그대로 둔다 — 위 canEditRoles 주석 참고(체크된 후보만 보내면 조용히 제거, 후보 밖 권한을
-        // 보존하려 배열에 포함해 보내면 서버가 하드 거부, 둘 다 실측 확인).
         systemRoleCode: canEditRoles ? values.systemRoleCode : undefined,
       },
     })
@@ -143,9 +121,6 @@ export function DeptManagedInfoDialog({
                   key={code}
                   className="group inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-sm text-muted-foreground transition-colors has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-50 has-[:not(:disabled)]:cursor-pointer has-[:not(:disabled)]:hover:border-foreground/30 has-[:checked]:border-primary has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring/50"
                 >
-                  {/* 네이티브 체크박스는 sr-only로 숨겨 시각은 pill 토글로 대체하되, 포커스·키보드
-                      토글 접근성은 유지한다. 선택 상태는 배경색과 Check 아이콘으로 이중 표기한다.
-                      canEditRoles가 false면 disabled로 잠가 체크 상태(현재 권한)만 보여준다. */}
                   <input
                     type="checkbox"
                     value={code}

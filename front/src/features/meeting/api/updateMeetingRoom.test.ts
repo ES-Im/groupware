@@ -2,11 +2,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { apiClient } from '@/shared/api/client'
 import { updateMeetingRoom } from './updateMeetingRoom'
 
-/**
- * updateMeetingRoom(F813, ROADMAP(MEETING-ROOMS) T7.1) 단위 테스트.
- * apiClient.patch 직접 모킹으로 요청 URL/바디(부분수정 payload 그대로 전달)를 검증한다.
- */
-
 vi.mock('@/shared/api/client', () => ({
   apiClient: { patch: vi.fn().mockResolvedValue({ data: undefined }) },
 }))

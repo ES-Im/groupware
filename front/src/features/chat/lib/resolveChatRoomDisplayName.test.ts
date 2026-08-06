@@ -1,10 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { resolveChatRoomDisplayName } from './resolveChatRoomDisplayName'
 
-/**
- * resolveChatRoomDisplayName 검증 — 채팅방 표시명 폴백 규칙.
- * roomName이 있으면 그대로, 없으면 참여자 이름으로 'N명 외 M명' 축약, 이름조차 없으면 최종 폴백.
- */
 describe('resolveChatRoomDisplayName', () => {
   it('roomName이 있으면 그대로 반환한다(참여자 이름 무시)', () => {
     expect(resolveChatRoomDisplayName('업무방', ['김영희', '김철수'])).toBe('업무방')
@@ -37,7 +33,6 @@ describe('resolveChatRoomDisplayName', () => {
   it('participantNames가 undefined/null이어도(서버 미반영 등) 안전하게 최종 폴백한다', () => {
     expect(resolveChatRoomDisplayName(null, undefined)).toBe('이름 없는 채팅방')
     expect(resolveChatRoomDisplayName(null, null)).toBe('이름 없는 채팅방')
-    // roomName이 있으면 participantNames 상태와 무관하게 그대로 반환한다.
     expect(resolveChatRoomDisplayName('업무방', undefined)).toBe('업무방')
   })
 })

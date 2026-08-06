@@ -3,13 +3,6 @@ import { describe, expect, it } from 'vitest'
 import type { ChatMessage, ChatMessagesPage } from '../model/chatMessage'
 import { upsertChatMessage } from './upsertChatMessage'
 
-/**
- * upsertChatMessage(ROADMAP(CHAT) T2.3-b) 검증.
- *
- * F904(실시간 수신 append)와 향후 T2.4(낙관 발신 dedup)가 공유할 순수 병합 함수라, react-query나
- * STOMP 없이 InfiniteData 구조만으로 append/dedup 동작을 검증한다.
- */
-
 function message(overrides: Partial<ChatMessage> = {}): ChatMessage {
   return {
     id: 1,
@@ -48,9 +41,7 @@ describe('upsertChatMessage', () => {
     const result = upsertChatMessage(data, incoming)
 
     expect(result?.pages[0]?.messages).toEqual([existing, incoming])
-    // 다른 페이지는 건드리지 않는다.
     expect(result?.pages[1]).toBe(data.pages[1])
-    // pageParams는 페이지 구조를 바꾸지 않았으므로 그대로 유지된다.
     expect(result?.pageParams).toEqual([undefined, 5])
   })
 
@@ -87,7 +78,6 @@ describe('upsertChatMessage', () => {
     const first = message({ id: 10, clientMessageId: 'first' })
     const data: InfiniteData<ChatMessagesPage> = { pages: [page([first])], pageParams: [undefined] }
 
-    // 다음 메시지(id 11)가 그다음 메시지(id 12)보다 늦게 도착한 상황을 흉내낸다.
     const laterButArrivedSecond = message({ id: 12, clientMessageId: 'later' })
     const step1 = upsertChatMessage(data, laterButArrivedSecond)
     const earlierButArrivedFirst = message({ id: 11, clientMessageId: 'earlier' })

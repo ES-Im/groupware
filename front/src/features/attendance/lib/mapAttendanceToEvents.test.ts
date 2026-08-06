@@ -2,14 +2,6 @@ import { describe, expect, it } from 'vitest'
 import type { AttendanceItem } from '../model/attendance'
 import { mapAttendanceToEvents } from './mapAttendanceToEvents'
 
-/**
- * mapAttendanceToEvents(AttendanceItem[] → FullCalendar EventInput[]) 단위 테스트.
- *
- * 우측 AttendanceCalendar(F305 상세)의 이벤트 클릭이 근태 수정 다이얼로그(F307) 진입점이므로,
- * extendedProps 페이로드(targetEmpId/attendanceId/startAt/endAt/isApproved)의 정확성이 핵심이다
- * (DeptAttendancePage.handleCalendarEventClick이 이 값을 그대로 복원해 사용한다).
- */
-
 function makeItem(overrides: Partial<AttendanceItem> = {}): AttendanceItem {
   return {
     attendanceId: 1,

@@ -1,16 +1,5 @@
 import { z } from 'zod'
 
-/**
- * 내 정보 수정 폼 클라이언트 사전검증 스키마(ROADMAP T3.1).
- *
- * 필드 근거: back/build/generated-snippets/UPDATE_SELF_INFO/request-fields.adoc(실측, 추측 금지).
- * - extensionNo: "3자리 숫자 - 4자리 숫자 형식" → NNN-NNNN
- * - newRawPassword: "8자이상, 영문+숫자+특수문자 조합" → registerSchema.password와 동일 규칙
- *   (도메인모델.md §Emp 규칙1과도 일치: "영문+숫자+특수문자 포함 8자 이상")
- *
- * 서버 판정(VALIDATION_ERROR/COMMON_00x 등)은 submitWithErrorMapping이 handleApiError로 위임해
- * 폼 루트 에러/토스트로 처리하므로 여기서는 클라 사전검증 수준만 다룬다.
- */
 export const updateMeSchema = z.object({
   extensionNo: z
     .string()

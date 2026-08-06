@@ -2,14 +2,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { apiClient } from '@/shared/api/client'
 import { getDeptAttendancePending } from './getDeptAttendancePending'
 
-/**
- * getDeptAttendancePending(F306, ROADMAP T3.3) 단위 테스트.
- *
- * apiClient.get을 직접 모킹해 axios 호출 인자(URL에 deptId path param 포함, params)만
- * 검증한다(getDeptAttendanceMonthly.test.ts와 동일 패턴). page/size만 존재한다
- * (query-parameters.adoc 실측, keyword/status 없음).
- */
-
 vi.mock('@/shared/api/client', () => ({
   apiClient: { get: vi.fn().mockResolvedValue({ data: undefined }) },
 }))

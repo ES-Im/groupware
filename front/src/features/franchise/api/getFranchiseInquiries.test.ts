@@ -2,14 +2,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { apiClient } from '@/shared/api/client'
 import { getFranchiseInquiries } from './getFranchiseInquiries'
 
-/**
- * getFranchiseInquiries(FRANCHISE_INQUIRY_LIST, ROADMAP(FRANCHISE) T5.1) 단위 테스트.
- *
- * apiClient.get을 직접 모킹해 axios 호출 인자(URL, params)만 검증한다(getFranchises.test.ts와
- * 동일 패턴). isAnswered/assignedManagerId/page/size는 `!= null`일 때만(0·false도 포함),
- * keyword/from/to는 truthy일 때만 params에 채워져야 한다(query-parameters.adoc 실측).
- */
-
 vi.mock('@/shared/api/client', () => ({
   apiClient: { get: vi.fn().mockResolvedValue({ data: undefined }) },
 }))

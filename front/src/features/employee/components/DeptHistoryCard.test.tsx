@@ -3,11 +3,6 @@ import { describe, expect, it } from 'vitest'
 import { DeptHistoryCard } from './DeptHistoryCard'
 import type { CurrentDept } from '../model/me'
 
-/**
- * DeptHistoryCard("소속·발령" 카드, adapt-ui 리디자인 3차 — EmployeeProfileTabs의 "부서이력"
- * 탭에서 분리된 신규 컴포넌트) 검증.
- */
-
 function makeDept(overrides: Partial<CurrentDept> = {}): CurrentDept {
   return {
     deptId: 1,
@@ -33,7 +28,6 @@ describe('DeptHistoryCard - 정렬/배지', () => {
     )
 
     const items = screen.getAllByRole('listitem')
-    // 2025-03-02(채용TF)가 2023-01-14(인사팀)보다 먼저 나온다(최신순).
     expect(items[0]).toHaveTextContent('채용TF')
     expect(items[0]).toHaveTextContent('겸직')
     expect(items[1]).toHaveTextContent('인사팀')

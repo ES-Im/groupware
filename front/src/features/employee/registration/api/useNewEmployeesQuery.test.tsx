@@ -8,13 +8,6 @@ import { server } from '@/test/mocks/server'
 import { employeeKeys } from '../../model/queryKeys'
 import { useNewEmployeesQuery } from './useNewEmployeesQuery'
 
-/**
- * useNewEmployeesQuery(NEW_EMP_LIST) 실동작 검증.
- *
- * - employeeKeys.newEmployees(params)로 캐시되는지(useDepartmentsQuery.test.tsx와 동일 패턴).
- * - keyword 변경 시 keepPreviousData로 이전 목록을 유지해 isLoading이 다시 true가 되지 않는지.
- */
-
 function makePage(items: unknown[]) {
   return {
     content: items,

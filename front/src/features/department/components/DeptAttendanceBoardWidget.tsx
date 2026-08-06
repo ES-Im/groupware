@@ -11,14 +11,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/sha
 import { Input } from '@/shared/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/tabs'
 
-/** 위젯 미리보기에 표시할 최대 건수(요약 카드 성격이라 전체 목록은 전용 페이지로 유도). */
 const RECENT_ITEMS_LIMIT = 5
 
-/**
- * 부서 전원의 월별 요약(summary)을 정확히 합산하기 위한 조회 size. `DEPT_ATTENDANCE_MONTHLY`는
- * 요약 전용 엔드포인트가 없어(useEmpForManagementQuery와 동일 이유) 넉넉한 size로 한 페이지에
- * 부서 전원을 담아 그 content를 합산하는 방식으로 통계를 파생한다.
- */
 const STATS_PAGE_SIZE = 100
 
 interface RecordStat {
@@ -147,22 +141,9 @@ function PendingTabContent({ deptId }: { deptId: number }) {
 }
 
 interface DeptAttendanceBoardWidgetProps {
-  /** 위젯이 조회할 부서. 상위(DepartmentMembersPage)가 이미 도출한 deptId를 그대로 주입받는다 —
-   * attendance 도메인의 usePrimaryDeptId(엄격 판정)와 department 도메인의 getPrimaryDeptId(폴백 허용)가
-   * 서로 다른 정책을 쓰므로, 이 위젯은 어느 쪽도 재도출하지 않고 상위가 이미 확정한 값만 신뢰한다. */
   deptId: number
 }
 
-/**
- * "부서 근태 보드" 위젯(DepartmentDetailView 전용, adapt-ui 신규).
- *
- * `/me`의 PersonalRecordsWidget과 동형 구조: 월 선택(prev/next+input) + 탭(월별 근태/승인 대기,
- * DeptAttendancePage와 동일 2탭 구성) + 요약 통계 + 최근 목록. 별도 부서 근태 요약 API가 없어
- * (계약에 DEPT_ATTENDANCE_MONTHLY_SUMMARY 같은 엔드포인트 없음) 이미 존재하는 목록 조회 훅
- * (useDeptAttendanceMonthlyQuery/useDeptAttendancePendingQuery, DeptAttendancePage가 이미 소비 중)의
- * content를 그대로 재사용해 통계를 파생한다. 신규 CRUD/필터 UI는 만들지 않고, 상세 조회는
- * 전용 페이지(`/attendance/dept`)로 유도한다.
- */
 export function DeptAttendanceBoardWidget({ deptId }: DeptAttendanceBoardWidgetProps) {
   const [yearMonth, setYearMonth] = useState(() => dayjs().format('YYYY-MM'))
 
@@ -170,8 +151,6 @@ export function DeptAttendanceBoardWidget({ deptId }: DeptAttendanceBoardWidgetP
     setYearMonth((prev) => dayjs(prev).add(delta, 'month').format('YYYY-MM'))
   }
 
-  // 네이티브 month 입력의 클리어로 값이 ''가 되는 경우를 무시한다(PersonalRecordsWidget과 동일한
-  // 이유 — dayjs('')가 Invalid Date를 만들어 위젯이 자가복구 불가 상태로 빠지는 것을 방지).
   function handleYearMonthChange(value: string) {
     if (value === '') {
       return

@@ -7,15 +7,6 @@ import { BASE_URL } from '@/shared/api/client'
 import { server } from '@/test/mocks/server'
 import { CompanyHomePageEditDialog } from './CompanyHomePageEditDialog'
 
-/**
- * CompanyHomePageEditDialog(COMPANY_UPDATE_HOME_PAGE_URL, ROADMAP-COMPANY T3.2-c, F1405) 검증.
- *
- * - open 시 현재 조회값으로 프리필된다.
- * - 무변경 제출(프리필값 그대로) 클라 차단.
- * - required 필드라 zod가 빈 값/http(s):// 미시작을 거부한다.
- * - 성공(204) 시 토스트 + onOpenChange(false).
- * - 서버 에러는 삼켜지지 않고 root 에러로 표시된다.
- */
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))

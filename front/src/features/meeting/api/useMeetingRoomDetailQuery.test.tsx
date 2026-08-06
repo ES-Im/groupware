@@ -8,11 +8,6 @@ import { server } from '@/test/mocks/server'
 import { meetingKeys } from '../model/meetingKeys'
 import { useMeetingRoomDetailQuery } from './useMeetingRoomDetailQuery'
 
-/**
- * useMeetingRoomDetailQuery(F807, ROADMAP T2.1) 실동작 검증.
- * - meetingRoomId 미확정 시 enabled:false로 조회를 지연하는지.
- * - 확정 시 meetingKeys.roomDetail(meetingRoomId)로 캐시되는지.
- */
 function createWrapper() {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return {

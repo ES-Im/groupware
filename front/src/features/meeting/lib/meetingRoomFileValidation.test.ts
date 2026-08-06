@@ -5,12 +5,6 @@ import {
   validateMeetingRoomFileUpload,
 } from './meetingRoomFileValidation'
 
-/**
- * validateMeetingRoomFileUpload(F815, ROADMAP(MEETING-ROOMS) T7.1) 단위 테스트.
- * 확장자(jpg/jpeg/png만 허용) → 용량(10MB) 순 검증, 위반 시 첫 번째 사유만 던지는지 확인한다
- * (board fileValidation.test.ts와 동일 패턴).
- */
-
 function makeFile(name: string, size: number): File {
   return new File([new Uint8Array(size)], name)
 }

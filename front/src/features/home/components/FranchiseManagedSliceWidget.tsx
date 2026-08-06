@@ -26,26 +26,10 @@ function KvTile({ label, value }: { label: string; value: string }) {
   )
 }
 
-/**
- * 담당 가맹점 슬라이스 위젯(FRANCHISE, 레퍼런스 "담당 가맹점" 캐러셀 이식).
- *
- * FranchiseSalesComparisonWidget과 동일한 목록 쿼리(managerId=본인 empId)를 재사용한다 —
- * react-query가 동일 queryKey로 캐시를 공유하므로 두 위젯이 각자 훅을 호출해도 네트워크 요청은
- * 한 번만 발생한다(계획 문서 §재사용 자원 맵 "위 목록 재사용"). shadcn Carousel 프리미티브가
- * 프로젝트에 설치돼 있지 않아(새 라이브러리 도입 금지 원칙) 이전/다음 버튼 + 인덱스 state로 직접
- * 구현한다.
- *
- * 현재 선택된 가맹점만 상세(FRANCHISE_DETAIL)·월매출을 on-demand 조회한다. FranchiseDetail에는
- * 오픈일 필드가 없고, 미답변 문의 수는 franchiseId 역조회 API 자체가 없어(도메인 실측 기록) 둘 다
- * 표시하지 않는다(계약에 없는 정보 발명 금지) — 대신 계약에 있는 대표자·메모를 보여준다.
- */
 export function FranchiseManagedSliceWidget() {
   const { data: me } = useMeQuery()
   const managerId = me?.empBasicInfo.empId
 
-  // managerId 미확정(me 로딩 중) 상태에서는 enabled로 쿼리 자체를 막는다 — 표시 단만 가드하면
-  // keepPreviousData 특성상 필터 없는 전체 목록이 placeholder로 잠깐 노출될 수 있다(useFranchisesQuery
-  // JSDoc 참고).
   const franchisesQuery = useFranchisesQuery(
     { managerId, page: 0, size: 50 },
     { enabled: managerId != null },

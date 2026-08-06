@@ -8,15 +8,6 @@ import { server } from '@/test/mocks/server'
 import { attendanceKeys } from '../model/queryKeys'
 import { useMyAttendanceMonthlyQuery } from './useMyAttendanceMonthlyQuery'
 
-/**
- * useMyAttendanceMonthlyQuery(F303, ROADMAP T1.4) 실동작 검증.
- *
- * - attendanceKeys.myMonthly(params)로 캐시되는지(QueryClient.getQueryData로 확인).
- * - Spring Page 메타(number 0-based 등)가 변환 없이 그대로 노출되는지.
- * - status/page 변경 시 keepPreviousData로 이전 목록을 유지해 isLoading이 다시
- *   true가 되지 않는지(department useDepartmentsQuery.test.tsx와 동일 패턴).
- */
-
 function makeItem(attendanceId: number, status: string) {
   return {
     attendanceId,
@@ -69,7 +60,6 @@ describe('useMyAttendanceMonthlyQuery', () => {
 
     await waitFor(() => expect(result.current.data).toBeDefined())
 
-    // Page 메타는 파싱 단계에서 변환하지 않고 그대로 노출되어야 한다(0-based number 등).
     expect(result.current.data?.number).toBe(0)
     expect(result.current.data?.size).toBe(10)
     expect(result.current.data?.totalElements).toBe(1)

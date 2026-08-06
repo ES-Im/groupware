@@ -2,12 +2,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { apiClient } from '@/shared/api/client'
 import { getMyMeetingReservationsCalendar } from './getMyMeetingReservationsCalendar'
 
-/**
- * getMyMeetingReservationsCalendar(F800, ROADMAP(MEETING-ROOMS) T1.3) 단위 테스트.
- *
- * apiClient.get을 직접 모킹해 axios 호출 인자(URL, params)와 응답 그대로 반환 여부만
- * 검증한다(leave getMyLeaveHistory.test.ts와 동일 패턴).
- */
 vi.mock('@/shared/api/client', () => ({
   apiClient: { get: vi.fn().mockResolvedValue({ data: [] }) },
 }))

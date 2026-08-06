@@ -6,21 +6,10 @@ import { EmpFileUploadButton } from './EmpFileUploadButton'
 import type { ActiveFile } from '../model/me'
 
 interface SignatureCardProps {
-  /** 사원 식별 번호. 미확정이면 업로드 버튼이 비활성화된다(EmpFileUploadButton 참고). */
   empId: number | undefined
   activeFiles: ActiveFile[]
 }
 
-/**
- * "내 전자서명" 카드(MyInfoPage 전용, adapt-ui 리디자인 신규).
- *
- * 활성 SIGNATURE 파일을 EMP_FILE_PREVIEW(useEmpFilePreviewUrl)로 미리보기하고, 업로드 버튼
- * (EmpFileUploadButton, fileType=SIGNATURE)으로 새 서명 이미지를 첨부한다. 도메인 규칙(같은
- * 타입은 하나만 활성화 가능, 새 파일 등록 시 기존 파일 자동 비활성화)에 따라 업로드하면 즉시
- * 이 미리보기가 새 서명으로 갱신된다(useEmpFileUploadMutation이 employeeKeys.me() invalidate).
- *
- * 활성 서명이 없으면 레퍼런스와 동일하게 빈 상태([이미지가 없습니다])를 보여준다.
- */
 export function SignatureCard({ empId, activeFiles }: SignatureCardProps) {
   const signatureFileId = getActiveSignature(activeFiles)
   const { objectUrl, isError } = useEmpFilePreviewUrl(empId, signatureFileId)

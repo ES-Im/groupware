@@ -9,18 +9,6 @@ import { server } from '@/test/mocks/server'
 import { franchiseKeys } from '../model/queryKeys'
 import { useFranchisesQuery } from './useFranchisesQuery'
 
-/**
- * useFranchisesQuery(FRANCHISE_LIST, ROADMAP(SALES) T1.1) 실동작 검증.
- *
- * - franchiseKeys.list(params)로 캐시되는지(QueryClient.getQueryData) — FranchisePicker(T1.2)의
- *   담당 기본뷰(managerId)↔전체 검색(keyword) 모드 전환이 이 축으로 캐시되는 전제를 확인한다.
- * - Page<Franchise> 응답이 그대로 노출되는지(BusinessStatus 필드 포함).
- * - params(managerId→keyword) 변경 시 keepPreviousData로 이전 목록을 유지해 isLoading이
- *   다시 true가 되지 않는지(useDepartmentsQuery.test.tsx와 동일 패턴).
- * - 403(ROLE_003) 응답이 그대로 throw되어 normalizeApiError로 isForbidden 판정되는지
- *   (useDeptAttendancePendingQuery.test.tsx와 동일 패턴).
- */
-
 function franchise(id: number, name: string, managerEmpId: number) {
   return {
     id,

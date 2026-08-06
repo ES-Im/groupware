@@ -9,21 +9,6 @@ import { server } from '@/test/mocks/server'
 import type { FileListInfo, MessageDetailResponse } from '../model/messageTypes'
 import { MessageComposeView, type MessageComposeInitialValues } from './MessageComposeView'
 
-/**
- * MessageComposeView(ROADMAP(MESSAGE) T4.1·T4.3-b·T4.4·T5.1·T5.2·T5.3-b·T5.4) 회귀 방지 테스트.
- *
- * LeaveDraftCreatePage.test.tsx의 실제 훅 + MSW 패턴을 따른다. EmployeePicker가 마운트 즉시
- * GET /api/departments를 조회하므로 모든 케이스에서 목이 필요하다(onUnhandledRequest:'error').
- * 검증 축:
- *   - zod 사전검증(빈 값 제출, 제목 51자) — API 미호출.
- *   - 받는 사람 0명 클라 가드([전송]에서만) — API 미호출.
- *   - 첨부 스테이징(신규작성): 유효 파일 추가/제거, 사전검증 위반 시 토스트+미추가.
- *   - 신규작성 해피패스: 첨부 없는 [전송](sendMessage 단건), [임시저장](createDraft 단건).
- *   - 첨부 있는 [전송]의 draft-first 오케스트레이션 순서(createDraft→upload→sendDraft).
- *   - 편집모드(messageId) 프리필과 [저장](dirtyFields만 갱신)·[발송]·[삭제] 버튼 배선.
- *   - 답장모드(initialValues) 프리필.
- */
-
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))
@@ -55,7 +40,6 @@ function pageOf<T>(items: T[]) {
   }
 }
 
-/** EmployeePicker가 항상 마운트 즉시 조회하는 부서 목록 + 부서 선택 후 조회하는 부서원 목록 목. */
 function mockEmployeePicker() {
   server.use(
     http.get(`${BASE_URL}/api/departments`, () => HttpResponse.json(pageOf([deptSummary(1, '개발팀')]))),
@@ -69,10 +53,6 @@ function mockEmployeePicker() {
   )
 }
 
-/**
- * 수신자 선택: [수신자 선택]으로 모달을 열고 부서 → 부서원 순서로 클릭한 뒤 [완료]로 닫는다.
- * (EmployeePicker의 부서/검색 브라우징이 인라인에서 모달 안으로 이동함.)
- */
 async function selectReceiver(user: ReturnType<typeof userEvent.setup>) {
   await user.click(screen.getByRole('button', { name: '수신자 선택' }))
   await user.click(await screen.findByRole('button', { name: '개발팀' }))
@@ -371,7 +351,6 @@ describe('MessageComposeView (T5.1) - 편집모드 프리필', () => {
     expect(screen.getByRole('button', { name: '저장' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '발송' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '삭제' })).toBeInTheDocument()
-    // 편집모드는 신규작성 전용 [임시저장]/[전송] 버튼을 렌더하지 않는다.
     expect(screen.queryByRole('button', { name: '임시저장' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: '전송' })).not.toBeInTheDocument()
   })
@@ -478,14 +457,9 @@ describe('MessageComposeView (T5.4) - 편집모드 첨부: 여러 파일 동시 
     await screen.findByText('느린파일.pdf')
     await screen.findByText('빠른파일.pdf')
 
-    // 느린 파일(1) 삭제를 먼저 트리거하고, 완료를 기다리지 않은 채 빠른 파일(2) 삭제도 트리거한다.
     await user.click(screen.getByRole('button', { name: '느린파일.pdf 삭제' }))
     await user.click(screen.getByRole('button', { name: '빠른파일.pdf 삭제' }))
 
-    // 실제 완료 순서는 MSW 요청 스케줄링에 따라 달라질 수 있어(느린 쪽 인위적 지연이 있어도
-    // 항상 나중에 끝난다는 보장은 없음) 순서는 검증 대상이 아니다 — 각자 독립된 mutation이라
-    // 둘 다 누락 없이 완료되고, 서로의 onSuccess/onError 콜백을 덮어쓰지 않는지(DeletableFileItem
-    // 인스턴스 분리 회귀)만 확인한다.
     await waitFor(() => expect(deleted).toContain(2))
     await waitFor(() => expect(deleted).toContain(1))
     expect(deleted).toHaveLength(2)

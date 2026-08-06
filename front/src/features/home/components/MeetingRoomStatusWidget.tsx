@@ -8,16 +8,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
 const TODAY = dayjs().format('YYYY-MM-DD')
 const CURRENT_YEAR_MONTH = dayjs().format('YYYY-MM')
 
-/**
- * 회의실 운영 밴드 위젯(FACILITY, 레퍼런스 "회의실 예약 현황" 섹션 이식).
- * 밴드 타이틀(RoleBandHeader)은 HomePage가 렌더한다 — 이 컴포넌트는 카드 자체만 담당한다.
- *
- * KPI(DashboardKpiRow의 FacilityMeetingKpiCard)와 동일 소스(MEETING_RESERVATION_MANAGEMENT
- * 현재월 목록)를 재사용해 오늘 예약분만 클라이언트 필터한다. MeetingManagementItem에는 회의실
- * 정원 필드가 없어(계약 실측) 레퍼런스의 "10인" 같은 정원 표기는 만들지 않는다(발명 금지).
- * 상태 뱃지는 isCanceled 여부만으로 판정한다(진행중/예정 같은 시간 기반 세분화는 계약 밖 파생값이라
- * 과설계로 보고 제외).
- */
 export function MeetingRoomStatusWidget() {
   const { data } = useManagementReservationsQuery({
     yearMonth: CURRENT_YEAR_MONTH,

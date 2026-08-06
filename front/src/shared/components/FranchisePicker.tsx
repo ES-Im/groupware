@@ -5,50 +5,24 @@ import { useMeQuery } from '@/features/employee/api/useMeQuery'
 import { Input } from '@/shared/ui/input'
 import { cn } from '@/shared/lib/utils'
 
-/** 가맹점 검색 디바운스 지연(ms). EmployeePicker(department 도메인)와 동일 값. */
 const SEARCH_DEBOUNCE_MS = 300
 
-/** 넉넉한 단일 페이지 크기(§FranchisePicker 설계, EmployeePicker memberPageSize 동형). */
 const PAGE_SIZE = 50
 
-/** FranchisePicker의 선택 단위. 소비처(작성/수정 폼)가 franchiseId/franchiseName으로 매핑한다. */
 export interface FranchisePickerSelection {
   id: number
   name: string
 }
 
 interface FranchisePickerProps {
-  /** 현재 선택된 가맹점(제어형 — 소유·유지는 소비처). 미선택은 null. */
   selected: FranchisePickerSelection | null
-  /** 선택 변경 콜백. 이미 선택된 행을 다시 누르면 null로 해제된다. */
   onChange: (next: FranchisePickerSelection | null) => void
 }
 
-/**
- * 매출 기안 작성/수정 폼의 대상 가맹점 선택 위젯(F762, ROADMAP(SALES) T1.2, PRD §FranchisePicker 설계).
- *
- * `EmployeePicker`(부서→부서원 2단 탐색·다중 선택)를 **단일 목록·단일 선택**으로 치환 복제한다.
- * 가맹점은 부서처럼 상위 탐색 축이 없고 `FRANCHISE_LIST`가 이미 담당자 필터(`managerId`)를
- * 지원하므로, "담당 가맹점 기본뷰 ↔ keyword 전체 검색" 두 모드를 단일 목록 하나로 전환한다
- * (2단 탐색 UI 불필요).
- *
- * 기본 뷰: 마운트 시 `managerId`=본인 empId(`useMeQuery`)로 담당 가맹점을 우선 노출한다.
- * 서버가 담당 여부를 강제하지 않으므로(§권한 분기점) 이는 UX 편의일 뿐이다. 본인 empId가
- * 아직 없으면(로딩 중/조회 실패) `managerId`를 보내지 않아(getFranchises 조건부 채움) 자동으로
- * 검색 모드와 동일하게 fail-closed 동작한다(담당 필터 미적용).
- *
- * 검색 모드: `keyword` 입력(디바운스 300ms) 시 `managerId`를 제거하고 전체 가맹점에서 검색한다.
- * 담당 외 가맹점도 선택 허용(서버는 임의 franchiseId를 허용, findById로 존재만 검증).
- *
- * 제어형(controlled): 선택 상태(`selected`)의 소유·유지는 소비처가 하고, 이 컴포넌트는 탐색
- * UI·토글만 담당한다(EmployeePicker와 동일 계약).
- */
 export function FranchisePicker({ selected, onChange }: FranchisePickerProps) {
   const [searchInput, setSearchInput] = useState('')
   const [keyword, setKeyword] = useState('')
 
-  // 검색 입력 디바운스(EmployeePicker와 동일 패턴): 300ms 유예 후에만 확정된 keyword를 쿼리에
-  // 반영해 키 입력마다 FRANCHISE_LIST 요청이 발생하는 것을 막는다.
   useEffect(() => {
     const trimmed = searchInput.trim()
     if (trimmed === keyword) {
@@ -67,7 +41,6 @@ export function FranchisePicker({ selected, onChange }: FranchisePickerProps) {
   )
 
   const franchises = franchisesQuery.data?.content ?? []
-  // 담당 가맹점 기본뷰가 빈 결과일 때만 안내한다(검색 모드에서 결과가 없는 것과는 다른 메시지).
   const showManagedEmptyState =
     !isSearching && meEmpId != null && !franchisesQuery.isLoading && franchises.length === 0
 
@@ -152,7 +125,6 @@ export function FranchisePicker({ selected, onChange }: FranchisePickerProps) {
           </ul>
         )}
       </div>
-      {/* 검색으로 좁히도록 유도: 결과가 한 페이지를 넘으면 안내(페이지네이션은 MVP 범위 밖). */}
       {franchisesQuery.data && !franchisesQuery.data.last && (
         <p className="text-xs text-muted-foreground">결과가 많습니다. 검색해 좁혀주세요.</p>
       )}

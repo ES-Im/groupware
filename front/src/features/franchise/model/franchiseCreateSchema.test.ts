@@ -1,18 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { franchiseCreateSchema } from './franchiseCreateSchema'
 
-/**
- * franchiseCreateSchema(FRANCHISE_CREATE, ROADMAP(FRANCHISE) T2.2, F1603) 단위 테스트.
- * meetingRoomCreateSchema.test.ts와 동일 패턴(safeParse + issues[0].message 단언).
- *
- * - businessNumber: 필수 + `000-00-00000`(하이픈 포함 12자) regex.
- * - franchiseName/address/ownerName: 필수 + 최대 길이(50/200/50) + 공백만 입력 거부(refine).
- * - contactNumber: 필수 + `010-000(0)-0000` 휴대폰 형식 regex(백엔드 런타임 실측 — 스키마 주석 참고).
- * - contactEmail: z.email 형식 검증.
- * - managerEmpId: optional number(폼 밖 EmployeePicker 합성 필드).
- */
-
-/** 전 필드 유효한 기준값. 각 케이스는 여기서 하나만 덮어써 실패 원인을 격리한다. */
 function validValues(overrides?: Record<string, unknown>) {
   return {
     businessNumber: '123-45-67890',

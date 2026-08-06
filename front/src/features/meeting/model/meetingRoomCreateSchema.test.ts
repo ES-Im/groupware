@@ -1,11 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { meetingRoomCreateSchema } from './meetingRoomCreateSchema'
 
-/**
- * meetingRoomCreateSchema(MEETING_ROOM_CREATE, ROADMAP(MEETING-ROOMS) T6.2) 단위 테스트.
- * name/description 공백 거부·50자 제한, capacity 양수 검증 및 미입력(NaN)/숫자아님 메시지 분기를
- * 확인한다(leave adjustGrantDaysSchema.test.ts와 동일 패턴).
- */
 describe('meetingRoomCreateSchema', () => {
   it('유효한 값이면 성공한다', () => {
     const result = meetingRoomCreateSchema.safeParse({

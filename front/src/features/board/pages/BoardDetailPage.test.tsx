@@ -9,15 +9,6 @@ import { useAuthStore } from '@/features/auth/store/authStore'
 import { server } from '@/test/mocks/server'
 import { BoardDetailPage } from './BoardDetailPage'
 
-/**
- * BoardDetailPage(F303/F304/F310/F311/F306, ROADMAP T11.3/T11.4) 회귀 방지 테스트.
- *
- * 방금 발견된 회귀 위험 지점(스타일링 리팩터 직후):
- * - useBoardDetailQuery의 refetchOnWindowFocus:false 오버라이드가 유지되어, 창 포커스 복귀만으로
- *   viewCount 중복 증가(=BOARD_DETAIL 재조회)가 발생하지 않는지.
- * - not-found/유효하지 않은 boardId 분기, ADMIN 게이팅("수정" 버튼)이 유지되는지.
- */
-
 function detailFixture(overrides: Record<string, unknown> = {}) {
   return {
     boardId: 1,
@@ -98,8 +89,6 @@ describe('BoardDetailPage (F303) - 렌더/게이팅', () => {
   })
 
   it('유효하지 않은 boardId(숫자 아님)면 API 호출 없이 "게시글을 찾을 수 없습니다."를 즉시 렌더한다', async () => {
-    // 이 케이스는 boardId가 undefined로 확정되어 모든 조회 훅이 enabled:false로 대기하므로
-    // 어떤 MSW 핸들러도 등록하지 않는다(onUnhandledRequest:'error'가 실수로 호출됐다면 잡아준다).
     renderDetail('not-a-number')
 
     expect(await screen.findByText('게시글을 찾을 수 없습니다.')).toBeInTheDocument()
@@ -113,7 +102,6 @@ describe('BoardDetailPage (F303) - 렌더/게이팅', () => {
           { status: 404 },
         ),
       ),
-      // filesQuery는 boardId 파싱과 무관하게 항상 활성화되므로(상세 에러 분기와 독립적) 함께 목을 건다.
       http.get(`${BASE_URL}/api/boards/999/files`, () => HttpResponse.json([])),
     )
 
@@ -144,12 +132,8 @@ describe('BoardDetailPage (F303) - refetchOnWindowFocus:false 회귀 방지', ()
     expect(await screen.findByText('게시글 제목')).toBeInTheDocument()
     expect(callCount).toBe(1)
 
-    // TanStack Query의 focusManager는 window의 visibilitychange 이벤트로 재포커스를 감지한다
-    // (@tanstack/query-core focusManager.ts). refetchOnWindowFocus:false가 없다면 staleTime
-    // 기본값(0)과 맞물려 이 이벤트만으로 BOARD_DETAIL이 재조회되어 콜 카운트가 2로 늘어난다.
     window.dispatchEvent(new Event('visibilitychange'))
 
-    // 재조회가 "일어나지 않는다"는 부정 단언이므로, 충분한 유예 뒤에도 콜 카운트가 그대로인지 확인한다.
     await new Promise((resolve) => setTimeout(resolve, 100))
     expect(callCount).toBe(1)
   })
@@ -178,8 +162,6 @@ describe('BoardDetailPage (F303) - 좋아요 토글', () => {
 
     await user.click(likeButton)
 
-    // 성공 시 상세를 refetch하지 않고 캐시(likeCount/isLiked)만 낙관적으로 갱신한다
-    // (BOARD_DETAIL 재조회 시 viewCount가 오르는 부작용 회피 — useBoardLikeMutation 주석).
     const likedButton = await screen.findByRole('button', { name: /좋아요 4개/ })
     expect(likedButton).toHaveAttribute('aria-pressed', 'true')
   })

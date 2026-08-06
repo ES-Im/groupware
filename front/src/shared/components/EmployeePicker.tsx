@@ -5,51 +5,21 @@ import { useDepartmentsQuery } from '@/features/department/api/useDepartmentsQue
 import { Input } from '@/shared/ui/input'
 import { cn } from '@/shared/lib/utils'
 
-/** 부서원 검색 디바운스 지연(ms). department 도메인(DepartmentsPage·DepartmentDetailView)과 동일 값. */
 const SEARCH_DEBOUNCE_MS = 300
 
-/**
- * EmployeePicker가 다루는 사원 선택 단위(empId + 표시용 empName).
- * 소비처는 이 배열로 각자 필요한 payload를 만든다:
- *   - 취소기안 결재선(T4.5): `selected.map((e,i)=>({approverId:e.empId, role:'APPROVER', order:i+1}))`
- *   - 공람 대상(M5 F707): `selected.map(e=>e.empId)` (empIds[])
- */
 export interface EmployeePickerEmployee {
   empId: number
   empName: string
 }
 
 interface EmployeePickerProps {
-  /** 현재 선택된 사원 목록(제어형 — 소유·유지는 소비처). */
   selected: EmployeePickerEmployee[]
-  /** 선택 변경 콜백. */
   onChange: (next: EmployeePickerEmployee[]) => void
-  /** 다중 선택 여부(기본 true). false면 새 선택이 기존 선택을 대체하는 단일 선택 모드. */
   multiple?: boolean
-  /**
-   * 선택 불가로 표시할 empId 집합(비활성 렌더). 예: M5 공람 추가 시 이미 공람 지정된 사원,
-   * 결재선/공람에서 제외할 본인 등. 소비처가 도메인 규칙에 맞게 채운다.
-   */
   disabledEmpIds?: number[]
-  /** 부서원 목록 페이지 크기(기본 50). 키워드 검색으로 좁히는 것을 전제로 한 넉넉한 단일 페이지. */
   memberPageSize?: number
 }
 
-/**
- * 사원 검색/선택 공용 컴포넌트(ROADMAP(DRAFT) T4.4 — M4 취소기안 결재선·M5 공람 대상 공용).
- *
- * 일반 사원(EMPLOYEE)이 쓸 수 있는 표준 후보 조회 경로가 **부서 선택(DEPTS) → 부서원 목록
- * (DEPT_MEMBERS, EMPLOYEE 게이트·부서제약 없음)**뿐이라(PRD Open Q#1, team-lead 확정), 그
- * 흐름을 그대로 구현한다. department 도메인의 기존 조회 훅(useDepartmentsQuery·
- * useDepartmentMembersQuery)을 **그대로 재사용**한다(신규 사원 검색 API 발명 금지).
- *
- * 제어형(controlled): 선택 상태(`selected`)의 소유·유지는 소비처가 하고, 이 컴포넌트는 부서/부서원
- * 탐색 UI와 토글만 담당한다. 이렇게 두면 취소기안(결재선=role/order 부가)과 공람(empIds only)이
- * 같은 선택 결과 배열을 서로 다른 payload로 매핑해 재사용할 수 있다.
- *
- * 조회 라이프사이클: 이 컴포넌트가 마운트된 동안에만 부서/부서원 쿼리가 활성이다(부모 다이얼로그가
- * 닫히면 Radix가 content를 언마운트 → 쿼리 정지). 부서원 쿼리는 부서 선택 전 enabled:false로 대기.
- */
 export function EmployeePicker({
   selected,
   onChange,
@@ -61,8 +31,6 @@ export function EmployeePicker({
   const [searchInput, setSearchInput] = useState('')
   const [keyword, setKeyword] = useState('')
 
-  // 검색 입력 디바운스(DepartmentsPage와 동일 패턴): 300ms 유예 후에만 확정된 keyword를 쿼리에
-  // 반영해 키 입력마다 DEPT_MEMBERS 요청이 발생하는 것을 막는다.
   useEffect(() => {
     const trimmed = searchInput.trim()
     if (trimmed === keyword) {
@@ -72,7 +40,6 @@ export function EmployeePicker({
     return () => clearTimeout(timer)
   }, [searchInput, keyword])
 
-  // 활성 부서만 후보로 노출한다. 부서 수는 많지 않아 넉넉한 단일 페이지로 조회한다(page 미노출).
   const deptsQuery = useDepartmentsQuery({ isActive: true, size: 100 })
   const membersQuery = useDepartmentMembersQuery(selectedDeptId, {
     keyword: keyword || undefined,
@@ -104,7 +71,6 @@ export function EmployeePicker({
 
   return (
     <div className="space-y-3">
-      {/* 선택된 사원 칩(선택 순서 유지 — 결재선 order 매핑의 기준). */}
       {selected.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
           {selected.map((emp) => (
@@ -127,7 +93,6 @@ export function EmployeePicker({
       )}
 
       <div className="grid gap-3 sm:grid-cols-2">
-        {/* 부서 목록 */}
         <div className="space-y-1.5">
           <p className="text-xs font-medium text-muted-foreground">부서</p>
           <div className="h-48 overflow-y-auto rounded-lg border p-1">
@@ -160,7 +125,6 @@ export function EmployeePicker({
           </div>
         </div>
 
-        {/* 부서원 목록 */}
         <div className="space-y-1.5">
           <p className="text-xs font-medium text-muted-foreground">부서원</p>
           <Input
@@ -213,7 +177,6 @@ export function EmployeePicker({
               </ul>
             )}
           </div>
-          {/* 검색으로 좁히도록 유도: 결과가 한 페이지를 넘으면 안내(페이지네이션은 MVP 범위 밖). */}
           {membersQuery.data && !membersQuery.data.last && (
             <p className="text-xs text-muted-foreground">
               결과가 많습니다. 이름으로 검색해 좁혀주세요.

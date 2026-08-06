@@ -2,13 +2,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { apiClient } from '@/shared/api/client'
 import { getMyLeaveSummary } from './getMyLeaveSummary'
 
-/**
- * getMyLeaveSummary(F743, ROADMAP(LEAVE) M3 T3.1) 단위 테스트.
- *
- * apiClient.get을 직접 모킹해 axios 호출 인자(URL, params)만 검증한다(getMyLeaveHistory.test.ts와
- * 동일 패턴). year는 선택값이므로 미지정 시 params 객체에서 생략되어야 한다.
- */
-
 vi.mock('@/shared/api/client', () => ({
   apiClient: {
     get: vi.fn().mockResolvedValue({

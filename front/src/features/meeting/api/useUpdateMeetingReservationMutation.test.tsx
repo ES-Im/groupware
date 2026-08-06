@@ -8,9 +8,6 @@ import { server } from '@/test/mocks/server'
 import { meetingKeys } from '../model/meetingKeys'
 import { useUpdateMeetingReservationMutation } from './useUpdateMeetingReservationMutation'
 
-/**
- * useUpdateMeetingReservationMutation(F804, ROADMAP T4.2) 실동작 검증.
- */
 function createWrapper() {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')

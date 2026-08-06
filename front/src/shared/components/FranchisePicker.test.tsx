@@ -9,21 +9,6 @@ import { BASE_URL } from '@/shared/api/client'
 import { server } from '@/test/mocks/server'
 import { FranchisePicker, type FranchisePickerSelection } from './FranchisePicker'
 
-/**
- * FranchisePicker(F762, ROADMAP(SALES) T1.2) 실동작 검증.
- *
- * EmployeePicker(department 도메인 2단 탐색)를 단일 목록·단일 선택으로 치환 복제한 위젯이므로,
- * 검증 축도 EmployeePicker/DepartmentsPage의 기존 컨벤션(디바운스 검색, MSW server.use 목,
- * 실타이머 waitFor)을 그대로 따른다.
- *
- * - 마운트 시 useMeQuery의 empBasicInfo.empId를 managerId로 담당 가맹점 우선 조회.
- * - 검색어 입력(디바운스 300ms) 시 managerId 제거하고 keyword 전체 검색으로 전환.
- * - 행 클릭 단일 선택 / 재클릭 선택 해제(onChange(null)).
- * - 담당 가맹점 0건(검색어 없음) 빈 상태 안내.
- * - !last(다음 페이지 더 있음) 안내 문구.
- * - useMeQuery 로딩 중/empId 미확보 시 managerId 생략 fail-closed(전체 목록 노출).
- */
-
 function franchise(id: number, name: string, managerEmpId: number) {
   return {
     id,
@@ -87,7 +72,6 @@ function renderPicker(
   )
 }
 
-/** 제어형 계약(controlled) 그대로 소비하는 최소 하네스: 실제 선택→해제 왕복 동작을 검증한다. */
 function ControlledHarness() {
   const [selected, setSelected] = useState<FranchisePickerSelection | null>(null)
   return <FranchisePicker selected={selected} onChange={setSelected} />
@@ -148,7 +132,6 @@ describe('FranchisePicker - 검색 모드 전환', () => {
 
     await user.type(screen.getByLabelText('가맹점 검색'), '역삼')
 
-    // 디바운스 유예 시간 전에는 아직 keyword='역삼' 파라미터가 반영된 요청이 없어야 한다.
     expect(requestedParams.every((p) => p.get('keyword') !== '역삼')).toBe(true)
 
     await screen.findByText('역삼점')
@@ -178,12 +161,10 @@ describe('FranchisePicker - 단일 선택/해제', () => {
 
     await user.click(row)
 
-    // 선택되면 상단에 선택 칩(선택 해제 버튼)이 나타난다.
     expect(await screen.findByRole('button', { name: '테스트강남점 선택 해제' })).toBeInTheDocument()
 
     await user.click(row)
 
-    // 같은 행을 다시 누르면 해제되어 선택 칩이 사라진다.
     await waitFor(() =>
       expect(screen.queryByRole('button', { name: '테스트강남점 선택 해제' })).not.toBeInTheDocument(),
     )
@@ -223,7 +204,6 @@ describe('FranchisePicker - 결과 과다 안내', () => {
 
 describe('FranchisePicker - useMeQuery 미확보 시 fail-closed', () => {
   it('useMeQuery가 아직 로딩 중이면 managerId 없이 조회되어 전체 목록이 노출된다', async () => {
-    // 응답을 영원히 지연시켜 "아직 로딩 중"인 상태를 고정한다(usePrimaryDeptId.test.tsx와 동일 기법).
     server.use(http.get(`${BASE_URL}/api/employees/me`, () => new Promise(() => {})))
     const requestedParams: URLSearchParams[] = []
     server.use(

@@ -8,23 +8,6 @@ import { server } from '@/test/mocks/server'
 import { FranchiseInquiryAnswerForm } from './FranchiseInquiryAnswerForm'
 import type { FranchiseInquiryAnswer } from '../model/franchise'
 
-/**
- * FranchiseInquiryAnswerForm(F1621·F1622·F1623, ROADMAP(FRANCHISE) T5.4) 회귀 방지 테스트.
- * FranchiseMemoActions(useZodForm+submitWithErrorMapping 폼)·FranchiseEducationActiveToggleButton
- * (AlertDialog 확인 패턴)·FranchiseCreateDialog(zod 검증/서버 에러 검증 관행)를 그대로 복제한다.
- *
- * 검증 대상:
- * - answer 없음(신규): 빈 textarea + "초안 저장" 버튼, 발송 버튼 없음.
- * - zod 클라 사전검증: 빈 값/공백만 제출 시 role=alert 인라인 에러 + POST 미발생.
- * - 신규 제출 성공(201) 시 POST body {answer} + 성공 토스트.
- * - answer 있음(미제출 초안, 수정 모드): textarea가 answer.content로 프리필 + "수정 저장" +
- *   "발송" 버튼 노출.
- * - 수정 제출 성공(204) 시 PATCH body {answer} + 성공 토스트.
- * - 서버 판정 실패(VALIDATION_ERROR)는 root 에러로 표시된다(FranchiseCreateDialog와 동일 관행).
- * - 발송: 트리거 클릭만으로는 요청 미발생(확인 다이얼로그 필요), 확인 클릭 시 PATCH
- *   .../answers/send 호출 + 성공(204) → 성공 토스트. 실패 시 handleApiError 토스트만.
- */
-
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))

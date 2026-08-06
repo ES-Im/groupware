@@ -1,15 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { salesDraftSchema } from './salesDraftSchema'
 
-/**
- * salesDraftSchema(F760 `SALES_DRAFT_CREATE(_SUBMISSION)`, ROADMAP(SALES) T2.1) 클라 사전검증
- * 단위 테스트. leaveDraftSchema/businessTripDraftSchema와 동형 축(title/content trim min(1))에
- * 더해 매출 전용 필드(franchiseId/reportMonth/salesAmount)의 경계값을 검증한다:
- *   - franchiseId: `.int().positive()` — 0/음수/미선택(0) 거부.
- *   - reportMonth: `yyyy-MM` 정규식 — 월 두 자리 초과(13)·한 자리(2026-4) 거부.
- *   - salesAmount: `.int().positive()` — 0/음수/소수 거부, NaN(빈 값)과 숫자아님을 구분한 에러 메시지.
- */
-
 function validPayload(overrides: Partial<Record<string, unknown>> = {}) {
   return {
     title: '7월 매출 보고',

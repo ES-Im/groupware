@@ -9,11 +9,6 @@ import { Label } from '@/shared/ui/label'
 import { Separator } from '@/shared/ui/separator'
 import { SCHEDULE_TYPES, type ScheduleCalendarItem, type ScheduleType } from '../model/schedule'
 
-/**
- * 일정 유형 표시 메타(라벨·인디케이터 색).
- * 인디케이터 색은 시맨틱 토큰으로 표현할 수 없는 범주형 색이라 vivid -500 톤을 인라인으로 쓴다 —
- * 라이트/다크 카드 배경 모두에서 대비가 확보되는 값으로 고른다(캘린더 이벤트 색과 결을 맞춘 계열).
- */
 const TYPE_META: Record<ScheduleType, { label: string; color: string }> = {
   MANUAL: { label: '개인 일정', color: '#6366f1' },
   MEETING: { label: '회의', color: '#0ea5e9' },
@@ -22,31 +17,19 @@ const TYPE_META: Record<ScheduleType, { label: string; color: string }> = {
 }
 
 interface ScheduleSidebarProps {
-  /** 현재 로드된 range 데이터 기준 유형별 개수. */
   counts: Record<ScheduleType, number>
-  /** 캘린더에 표시 중인 유형 집합(체크된 것만 노출). */
   visibleTypes: Set<ScheduleType>
   onToggleType: (type: ScheduleType) => void
-  /** 취소된 일정도 캘린더에 표시할지(해제하면 숨김, 유형 필터와 별개 축). */
   showCanceled: boolean
   onToggleShowCanceled: () => void
-  /** 오늘 날짜에 해당하는 일정(현재 range 데이터에서 필터링된 결과, showCanceled 반영됨). */
   todayItems: ScheduleCalendarItem[]
-  /** "새 일정 등록" 클릭 콜백. 다이얼로그 open 로직은 페이지 소유(여기선 자리에 연결만). */
   onCreateClick: () => void
 }
 
-/** 'HH:mm:ss' → 'HH:mm'(초 절삭). 종일 일정은 상위에서 '종일'로 대체 표기한다. */
 function toHourMinute(time: string) {
   return time.slice(0, 5)
 }
 
-/**
- * 캘린더 좌측 보조 패널(레퍼런스 "A안 톤" 좌측 rail 이식).
- * 하나의 큰 카드 대신 [일정 유형 필터 + 취소 토글] 카드 · [오늘 일정] 카드 · 안내 callout(카드 아님)로
- * 분리해 세로로 쌓는다. 데이터/상태는 전부 props 주입(순수 뷰) — 필터 토글·개수 집계·오늘 필터링은
- * 페이지가 계산해 내려준다.
- */
 export function ScheduleSidebar({
   counts,
   visibleTypes,
@@ -58,7 +41,6 @@ export function ScheduleSidebar({
 }: ScheduleSidebarProps) {
   return (
     <aside className="flex flex-col gap-3.5 lg:w-[300px] lg:shrink-0 lg:self-start">
-      {/* 일정 유형 필터: 각 유형 독립 토글(다중선택). 개수는 현재 로드된 range 기준. */}
       <Card>
         <CardContent className="flex flex-col gap-1">
           <h3 className="px-1 pb-1 text-xs font-semibold tracking-wide text-muted-foreground">
@@ -72,7 +54,6 @@ export function ScheduleSidebar({
                 key={type}
                 className="flex items-center gap-2.5 rounded-md px-1.5 py-1.5 hover:bg-muted/60"
               >
-                {/* 체크 시 유형색으로 채워지도록 shadcn 기본 primary 채움을 유형색으로 오버라이드. */}
                 <Checkbox
                   id={inputId}
                   checked={visibleTypes.has(type)}
@@ -100,8 +81,6 @@ export function ScheduleSidebar({
 
           <Separator className="my-1" />
 
-          {/* 취소 여부 필터: 유형 필터와 별개 축. 취소된 더미/실 일정이 많을 때 캘린더가 어수선해지는
-              것을 막기 위한 표시 옵션이라 유형 체크박스와 달리 개수 배지 없이 단일 토글로 둔다. */}
           <div className="flex items-center gap-2.5 rounded-md px-1.5 py-1.5 hover:bg-muted/60">
             <Checkbox
               id="schedule-show-canceled"
@@ -119,7 +98,6 @@ export function ScheduleSidebar({
         </CardContent>
       </Card>
 
-      {/* 오늘 일정 요약: 현재 range가 오늘을 포함할 때만 항목이 있고, 아니면 빈 상태 문구. */}
       <Card>
         <CardContent className="flex flex-col gap-2">
           <div className="flex items-center justify-between px-1">
@@ -135,8 +113,6 @@ export function ScheduleSidebar({
               {todayItems.map((item) => {
                 const meta = TYPE_META[item.scheduleType]
                 return (
-                  // 취소 일정은 캘린더 이벤트(mapScheduleToEvents의 [취소] 접두사 + opacity)와 결을
-                  // 맞춰 흐림 처리 + 취소선을 준다 — 그러지 않으면 정상 일정과 구분이 안 된다.
                   <li
                     key={item.scheduleId}
                     className={cn(
@@ -170,13 +146,11 @@ export function ScheduleSidebar({
         </CardContent>
       </Card>
 
-      {/* 새 일정 등록: "오늘 일정" 카드 하단에 배치(페이지 헤더에서 이동). 클릭 로직은 페이지 소유. */}
       <Button type="button" onClick={onCreateClick} className="w-full">
         <CalendarPlus />
         새 일정 등록
       </Button>
 
-      {/* 안내 callout: 카드가 아닌 옅은 강조색 배너. 회의·휴가·출장은 타 업무에서 자동 반영됨을 안내. */}
       <p className="flex items-start gap-2 rounded-xl bg-primary/10 p-3 text-xs leading-relaxed text-muted-foreground">
         <Info className="mt-0.5 size-4 shrink-0 text-primary" />
         <span>회의 · 휴가 · 출장 일정은 관련 업무(전자결재·회의 예약)에서 자동으로 반영됩니다.</span>

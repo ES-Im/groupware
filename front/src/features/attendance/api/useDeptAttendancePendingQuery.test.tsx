@@ -9,14 +9,6 @@ import { server } from '@/test/mocks/server'
 import { attendanceKeys } from '../model/queryKeys'
 import { useDeptAttendancePendingQuery } from './useDeptAttendancePendingQuery'
 
-/**
- * useDeptAttendancePendingQuery(F306, ROADMAP T3.3) 실동작 검증.
- *
- * useDeptAttendanceMonthlyQuery.test.tsx와 동일한 3가지 케이스(undefined 게이팅/정상 조회+캐시/
- * 403 매핑)를 DEPT_ATTENDANCE_PENDING 기준으로 작성한다. attendanceInfo가 단건 객체인 점이
- * DeptAttendanceRow와의 핵심 차이(front/src/features/attendance/model/deptAttendance.ts 참조).
- */
-
 function makeRow(empId: number, empName: string) {
   return {
     empInfo: {

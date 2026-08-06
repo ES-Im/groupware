@@ -7,16 +7,6 @@ import { BASE_URL } from '@/shared/api/client'
 import { server } from '@/test/mocks/server'
 import { ScheduleCreateDialog } from './ScheduleCreateDialog'
 
-/**
- * ScheduleCreateDialog(F003 `MANUAL_SCHEDULE_CREATE`, ROADMAP(SCHEDULE) T3.3) 회귀 방지 테스트.
- * MeetingRoomCreateDialog.test.tsx와 동형 패턴.
- *
- * - zod 클라 사전검증(제목/내용/시작 일시/종료 일시 필수) 실패 경로.
- * - endAt < startAt 객체 레벨 refine 실패 경로.
- * - 정상 제출 시 datetime-local(초 없음) 값에 ":00"이 보정되어 POST body로 전송됨.
- * - 제출 중 Esc/취소로 닫을 수 없는 가드.
- * - 서버 검증 실패 시 다이얼로그가 닫히지 않고 에러가 표시된다.
- */
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))

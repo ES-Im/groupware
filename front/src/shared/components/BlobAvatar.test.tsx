@@ -5,11 +5,6 @@ import { BASE_URL } from '@/shared/api/client'
 import { server } from '@/test/mocks/server'
 import { BlobAvatar } from './BlobAvatar'
 
-/**
- * BlobAvatar(ROADMAP T5.1) 렌더 검증: blob 조회 성공 시 <img>, empId/fileId 미확정 또는
- * 조회 실패 시 이니셜 폴백을 렌더하는지 확인한다.
- */
-
 afterEach(() => {
   vi.restoreAllMocks()
 })

@@ -11,17 +11,10 @@ import { EducationFileValidationError } from '../lib/educationFileValidation'
 import { isEducationImageExtension } from '../lib/isEducationImageExtension'
 import type { FranchiseEducationFileInfo } from '../model/franchise'
 
-/** 바이트 크기를 MB 단위 문자열로 변환(소수 1자리). approval AttachmentSection과 표기 방식 통일. */
 function formatFileSizeMb(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
-/**
- * 이미지 첨부 인라인 미리보기(EDUCATION_FILE_PREVIEW). objectURL 생명주기는
- * useEducationFilePreviewUrl에 전부 위임하고, 이 컴포넌트는 로딩/실패/성공 3분기 렌더만
- * 담당한다(approval DraftImagePreview 복제). 훅은 조건부 호출이 불가하므로 이미지 첨부마다
- * 이 서브컴포넌트로 분리해 호출한다.
- */
 function EducationImagePreview({
   educationId,
   file,
@@ -56,15 +49,6 @@ function EducationImagePreview({
   )
 }
 
-/**
- * 교육 첨부 영역(ROADMAP(FRANCHISE) T4.5, approval AttachmentSection.tsx 단일 컴포넌트 패턴
- * 복제). `FranchiseEducationDetailPage`에서 사용한다.
- *
- * 노출 판정(PRD §계약 실측 메모): 상세 응답에 교육 등록자 식별자가 없어(Open Q#6) 프론트에서
- * "등록자 본인" 여부를 판정할 수 없다 — 업로드/삭제 버튼도 조회 가능자 전원(이 페이지에 도달한
- * 인증 사용자)에게 노출하고, 실제 등록자·FRANCHISE/ADMIN 권한 판정은 서버 403이 전담한다
- * (approval처럼 클라이언트 게이팅을 두지 않는다 — 서버 위반은 일반 에러 토스트로 처리).
- */
 export function FranchiseEducationAttachmentSection({
   educationId,
   files,
@@ -77,14 +61,9 @@ export function FranchiseEducationAttachmentSection({
   const uploadMutation = useEducationFileUploadMutation()
   const deleteMutation = useEducationFileDeleteMutation()
   const fileInputRef = useRef<HTMLInputElement>(null)
-  // 삭제 진행 중인 fileId 집합(approval AttachmentSection 복제). 단일 deleteMutation 인스턴스의
-  // variables/isPending은 "마지막 mutate 호출" 값만 반영해, A 삭제 중 B를 누르면 A행 disabled가
-  // 풀려 중복 DELETE가 나갈 수 있으므로 fileId별로 로컬 state에서 개별 추적한다.
   const [deletingFileIds, setDeletingFileIds] = useState<Set<number>>(new Set())
 
   function reportUploadError(error: unknown) {
-    // 사전검증(EducationFileValidationError)은 axios 에러가 아니라 normalizeApiError가 "알 수 없는
-    // 오류"로 뭉개므로, 그 한국어 메시지를 그대로 노출하도록 instanceof로 먼저 분기한다.
     if (error instanceof EducationFileValidationError) {
       toast.error(error.message)
       return
@@ -94,7 +73,6 @@ export function FranchiseEducationAttachmentSection({
 
   function handleFileInputChange(event: ChangeEvent<HTMLInputElement>) {
     const selected = Array.from(event.target.files ?? [])
-    // 같은 파일을 재선택해도 change 이벤트가 다시 발화하도록 즉시 비운다(검증 실패 후 재시도 대비).
     event.target.value = ''
     if (selected.length === 0) {
       return

@@ -8,11 +8,6 @@ import { server } from '@/test/mocks/server'
 import { meetingKeys } from '../model/meetingKeys'
 import { useCreateMeetingReservationMutation } from './useCreateMeetingReservationMutation'
 
-/**
- * useCreateMeetingReservationMutation(F803, ROADMAP T3.2) 실동작 검증.
- * 성공 시 meetingKeys.all(전체)을 invalidate하는지 확인한다 — 생성된 예약이 내 예약 캘린더/
- * 회의실 예약 캘린더/예약 관리 목록 중 어디에 반영될지 개별적으로 알 수 없기 때문이다.
- */
 function createWrapper() {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')

@@ -10,12 +10,6 @@ import { useMeetingRoomFilesQuery } from './useMeetingRoomFilesQuery'
 import { useMeetingRoomManagementListQuery } from './useMeetingRoomManagementListQuery'
 import { useMeetingRoomUpdateMutation } from './useMeetingRoomUpdateMutation'
 
-/**
- * useMeetingRoomUpdateMutation(F813, ROADMAP(MEETING-ROOMS) T7.1) 성공 후 invalidate 검증.
- * 성공(204) 시 roomDetail·roomFiles·roomManagement(목록) 3개 쿼리 모두 invalidate되는지
- * 블랙박스로 확인한다(boardFileMutations.invalidate.test.tsx와 동일 관행).
- */
-
 function createWrapper() {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },

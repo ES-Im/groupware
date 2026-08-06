@@ -35,30 +35,16 @@ import { Label } from '@/shared/ui/label'
 import { EmployeePicker, type EmployeePickerEmployee } from '@/shared/components/EmployeePicker'
 
 interface EmployeeSelectFieldProps {
-  /** 섹션 라벨(예: 결재선, 참여자). */
   label: string
-  /** 라벨 아래 한 줄 설명(예: 결재 순서대로 처리됩니다.). */
   description?: string
-  /** 현재 선택된 사원 목록(제어형 — 소유·유지는 페이지). EmployeePicker와 동일 계약을 그대로 전달. */
   selected: EmployeePickerEmployee[]
-  /** 선택 변경 콜백(페이지가 root 에러 해제 등 부가 처리를 감쌀 수 있음). */
   onChange: (next: EmployeePickerEmployee[]) => void
-  /** 선택 순서를 순번 배지로 표시할지(결재선=true, 참여자=false). true면 드래그 재정렬도 켠다. */
   ordered?: boolean
-  /** 각 행 우측 역할 배지 텍스트(결재선="결재"). 없으면 배지 미표시. */
   roleBadge?: string
-  /**
-   * 행별 역할 select 옵션(예: APPROVAL_ROLE_OPTIONS). onRoleChange와 함께 제공하면 정적
-   * roleBadge 대신 행마다 역할 select를 렌더한다(결재선 결재/협조 지정). 첫 옵션이 기본값.
-   */
   roleOptions?: { value: string; label: string }[]
-  /** empId → 현재 역할 값(roleOptions와 함께 사용). 미지정 empId는 첫 옵션으로 폴백. */
   rolesByEmpId?: Record<number, string>
-  /** 행 역할 변경 콜백(roleOptions와 함께 사용 — 값 정규화는 페이지 책임). */
   onRoleChange?: (empId: number, role: string) => void
-  /** 선택이 비었을 때 안내 문구. */
   emptyText?: string
-  /** 다이얼로그 제목(기본은 `${label} 선택`). */
   dialogTitle?: string
 }
 
@@ -73,12 +59,6 @@ interface SortableEmployeeRowProps {
   onRemove: (empId: number) => void
 }
 
-/**
- * 선택 결과 한 행. ordered(결재선)일 때는 dnd-kit sortable 행이 되어 드래그 핸들(GripVertical)로
- * 순서를 바꿀 수 있다 — 행 전체가 아닌 핸들에만 리스너를 달아 역할 select·제거 버튼과의 포인터
- * 충돌을 피하고, 핸들은 버튼이라 키보드(스페이스+방향키, KeyboardSensor)로도 재정렬된다.
- * ordered가 아니면 useSortable을 disabled로 두어 일반 행으로 렌더된다(참여자·공람).
- */
 function SortableEmployeeRow({
   emp,
   index,
@@ -126,8 +106,6 @@ function SortableEmployeeRow({
       </Avatar>
       <span className="min-w-0 flex-1 truncate text-sm font-medium">{emp.empName}</span>
       {roleOptions && onRoleChange ? (
-        // 역할 select(결재/협조): 네이티브 select 컨벤션(연가 유형 select 톤)을 행 크기에
-        // 맞춰 h-8·text-xs로 소형화한다. 미지정 empId는 첫 옵션(기본 역할)으로 표시.
         <select
           aria-label={`${emp.empName} 역할 선택`}
           value={rolesByEmpId?.[emp.empId] ?? roleOptions[0]?.value ?? ''}
@@ -161,19 +139,6 @@ function SortableEmployeeRow({
   )
 }
 
-/**
- * 사원 다중 선택 필드(레퍼런스 결재선 UI 이식 — "+ 추가" 트리거 + 선택 결과 행 리스트).
- *
- * 선택 UI는 다이얼로그 안에 기존 `EmployeePicker`를 그대로 넣어 재사용한다(EmployeePicker는 부모
- * 다이얼로그가 닫히면 쿼리가 정지되도록 이미 설계됨). 다이얼로그 밖에서는 선택 결과만 레퍼런스
- * 스타일 행 리스트(순번 + 이름 + 역할 배지 + 제거 버튼)로 렌더한다. 순서는 배열 인덱스를 그대로
- * 따르며(결재선 order 매핑 기준), EmployeePicker의 selected/onChange 계약은 변경하지 않는다.
- *
- * ordered(결재선)일 때는 dnd-kit(2026-07-11 사용자 승인 도입)로 행을 드래그해 순서를 바꿀 수
- * 있다. 재정렬 결과는 onChange로 새 배열을 올려보내 페이지의 order(index+1) 매핑에 그대로
- * 반영된다. PointerSensor는 터치를 포함하며(핸들에 touch-none), distance 제약으로 클릭과
- * 드래그를 구분한다.
- */
 export function EmployeeSelectField({
   label,
   description,
@@ -220,8 +185,6 @@ export function EmployeeSelectField({
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            {/* 한 화면에 이 필드가 여러 개(결재선·공람·참여자)라 접근 이름으로 어느 목록의
-                추가인지 구분한다(시각 라벨은 "추가" 유지). */}
             <Button
               type="button"
               variant="ghost"

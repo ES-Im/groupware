@@ -8,14 +8,6 @@ import { server } from '@/test/mocks/server'
 import type { ChatRoomDetail } from '../model/chatRoomDetail'
 import { useChatRoomDetailQuery } from './useChatRoomDetailQuery'
 
-/**
- * useChatRoomDetailQuery(ROADMAP(CHAT) T2.1) 실동작 검증.
- *
- * - roomId로 상세(방/멤버)를 조회해 그대로 반환해야 한다(response-fields 실측: members[] 포함).
- * - roomId가 undefined(라우트 파라미터 파싱 전/유효성 실패)면 enabled:false로 요청 자체가
- *   나가지 않아야 한다(approval useDraftDetailQuery 동형 가드).
- */
-
 function chatRoomDetail(): ChatRoomDetail {
   return {
     roomId: 3,

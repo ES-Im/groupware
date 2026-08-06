@@ -7,14 +7,6 @@ import { BASE_URL } from '@/shared/api/client'
 import { server } from '@/test/mocks/server'
 import { MeetingRoomImageUploadButton } from './MeetingRoomImageUploadButton'
 
-/**
- * MeetingRoomImageUploadButton(F815, ROADMAP(MEETING-ROOMS) T7.2-c) 검증.
- * board BoardEditPage.test.tsx의 첨부파일 사전검증 패턴을 재사용한다.
- *
- * 성공 경로 PATCH 핸들러는 boardFileMutations.invalidate.test.tsx와 동일 이유로
- * `request.formData()`를 호출하지 않고 응답(204)만 반환한다(MSW+jsdom FormData/File
- * 상호운용 한계 우회).
- */
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))
@@ -45,9 +37,6 @@ describe('MeetingRoomImageUploadButton - 사전검증', () => {
     )
     const { container } = renderButton()
     const fileInput = container.querySelector('input[type="file"]') as HTMLInputElement
-    // input의 accept="image/jpeg,image/png" 때문에 userEvent.upload는 file.type을 브라우저처럼
-    // 필터링한다(다른 MIME이면 change 자체가 발화하지 않음) — 확장자 기반 검증을 타게 하려면
-    // MIME은 이미지로 맞추고 파일명 확장자만 비허용으로 어긋나게 만든다.
     const badFile = new File(['x'], 'virus.exe', { type: 'image/png' })
 
     await userEvent.upload(fileInput, badFile)

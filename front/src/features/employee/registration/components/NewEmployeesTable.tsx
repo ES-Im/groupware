@@ -15,10 +15,6 @@ interface NewEmployeesTableProps {
   onApprove: (empId: number, name: string, loginId: string) => void
 }
 
-/**
- * 가입 대기(PENDING) 신규 사원 1페이지(content)만 렌더하는 표(목표 디자인 이식).
- * 행별 [승인] 클릭은 상위(T1.6)로 위임한다. EmpManagementTable과 동일한 표 스타일 언어를 쓴다.
- */
 export function NewEmployeesTable({ data, onApprove }: NewEmployeesTableProps) {
   const columns = useMemo(
     () => [
@@ -60,8 +56,6 @@ export function NewEmployeesTable({ data, onApprove }: NewEmployeesTableProps) {
     getCoreRowModel: getCoreRowModel(),
   })
 
-  // 빈 상태 안내는 이 컴포넌트가 아니라 상위 페이지(NewEmployeeApprovalListPage, T1.6)가 전담한다
-  // (참고 패턴 원본 DepartmentMembersTable과 달리 이 표는 data.length===0 가드를 두지 않는다).
   return (
     <div className="w-full overflow-x-auto">
       <table className="w-full border-collapse text-sm">

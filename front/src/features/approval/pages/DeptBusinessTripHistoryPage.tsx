@@ -16,30 +16,10 @@ import { useDeptBusinessTripHistoryQuery } from '../api/useDeptBusinessTripHisto
 import { approvalStatusBadgeMap, getApprovalStatusBadge } from '../lib/approvalStatusBadge'
 import type { ApprovalStatus } from '../model/approval'
 
-/** 검색 디바운스 지연(ms). DeptAttendancePage와 동일 값을 재사용한다. */
 const SEARCH_DEBOUNCE_MS = 300
 
-/** 결재 상태 필터 셀렉트 옵션(approvalStatusBadgeMap 키 그대로 파생 — 별도 배열 중복 선언 금지). */
 const STATUS_OPTIONS = Object.keys(approvalStatusBadgeMap) as ApprovalStatus[]
 
-/**
- * 부서 출장 이력 페이지(ROADMAP(DRAFT-BUSINESSTRIP) M5 T5.2, F734).
- *
- * deptId는 `usePrimaryDeptId()`(strict, 폴백 없음)로 도출한다. useMeQuery가 아직 로딩 중이거나
- * primary 소속이 없으면 deptId가 undefined인데, 이때 `useDeptBusinessTripHistoryQuery`는
- * `enabled:false`로 대기만 할 뿐이라 이 페이지는 `deptId === undefined`를 별도로 감지해
- * 필터/표 대신 "부서 정보를 확인하는 중" 안내만 렌더하는 게이팅 분기를 둔다(DeptAttendancePage 동형).
- *
- * keyword는 로컬 입력값(searchInput)을 300ms 디바운스한 뒤에만 확정 keyword로 반영한다
- * (DeptAttendancePage와 동일 패턴). yearMonth(기본=현재월)·approvalStatus·keyword 중 하나라도
- * 바뀌면 resetPage()로 페이지를 0으로 되돌려 존재하지 않는 페이지를 조회하는 사고를 막는다.
- *
- * yearMonth 미입력 시 서버가 현재 월로 응답하므로(§계약 실측 메모) 월 선택기 기본값을 당월로
- * 맞추고 "이번 달 이력만 표시됩니다" 안내를 둔다(근태 MY_ATTENDANCE_MONTHLY 관례 동형).
- *
- * 조회 실패(타 부서 접근 403 ROLE_003 포함)는 handleApiError 단일 진입점으로 토스트만 남긴다.
- * 행 클릭 → 기안서 상세 페이지(①공통, /approval/drafts/{draftId})로 이동한다.
- */
 export function DeptBusinessTripHistoryPage() {
   const navigate = useNavigate()
   const deptId = usePrimaryDeptId()
@@ -50,7 +30,6 @@ export function DeptBusinessTripHistoryPage() {
   const [yearMonth, setYearMonth] = useState(() => dayjs().format('YYYY-MM'))
   const { page, size, onPageChange, resetPage } = usePageState()
 
-  // 검색 입력 디바운스(DeptAttendancePage와 동일 패턴): 300ms 유예 후에만 확정 keyword로 반영 + page 리셋.
   useEffect(() => {
     const trimmed = searchInput.trim()
     if (trimmed === keyword) {
@@ -123,7 +102,6 @@ export function DeptBusinessTripHistoryPage() {
             <CardDescription>부서원의 출장 신청 이력과 결재 상태를 확인합니다.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* 필터 툴바: 사원 이름 검색 + 조회 월(yyyy-MM) + 결재 상태 필터 */}
             <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
               <div className="relative w-full sm:max-w-xs">
                 <Search className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />

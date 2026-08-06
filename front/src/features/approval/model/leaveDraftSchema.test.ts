@@ -1,14 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { leaveDraftSchema, leaveTypeLabels, leaveTypeOptions } from './leaveDraftSchema'
 
-/**
- * leaveDraftSchema(F740 `LEAVE_DRAFT_CREATE(_SUBMISSION)`, ROADMAP(LEAVE) T1.1) 클라 사전검증
- * 단위 테스트. businessTripDraftSchema를 동형 확장한 스키마이므로 검증 축도 동형이다:
- *   - title/content: trim 후 공백만 있으면 실패(min 1).
- *   - leaveType: enum 6종 밖의 값/미선택은 실패.
- *   - endAt >= startAt refine — 출장의 엄격한 `<`와 달리 같은 시각(경계값)도 허용해야 한다.
- */
-
 function validPayload(overrides: Partial<Record<string, unknown>> = {}) {
   return {
     title: '연차 신청',

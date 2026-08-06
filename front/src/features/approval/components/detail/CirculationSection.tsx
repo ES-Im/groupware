@@ -10,31 +10,17 @@ import { formatDraftDateTime } from '../../lib/approvalStatusBadge'
 import { CirculationAddDialog } from './CirculationAddDialog'
 import type { DraftDetailSectionProps } from './types'
 
-/**
- * 공람 영역(ROADMAP(DRAFT) T2.3 read-only 목록 → M5 T5.1~T5.2 확장).
- *
- * 노출 판정(PRD §접근 권한 — 프론트는 노출만, 최종은 서버):
- * - **기안자 본인**(`me.empBasicInfo.empId === draft.drafter.empId`): 공람 추가(F707)/제거(F708).
- * - **공람 대상자 본인**(`circulations`에 본인이 있고 `readAt == null`): 읽음 처리(F709).
- * empId는 me 응답 empBasicInfo에 보강된 사원 PK(model/me.ts)다. me 미로딩 등으로 empId가
- * 미확정(undefined)이면 기안자/공람대상 판정이 모두 false가 되어 액션을 노출하지 않는다(방어적 미노출).
- * props는 `{ draft }` 고정 계약을 유지한다(types.ts DraftDetailSectionProps).
- */
 export function CirculationSection({ draft }: DraftDetailSectionProps) {
   const { draftId, circulations } = draft
 
   const myEmpId = useMeQuery().data?.empBasicInfo.empId
   const isDrafter = myEmpId != null && myEmpId === draft.drafter.empId
-  // 본인 공람 항목(공람 대상자 여부·읽음 처리 노출 판정). empId 미확정 시 undefined → 미노출.
   const myCirculation = myEmpId != null ? circulations.find((c) => c.empId === myEmpId) : undefined
   const canMarkRead = myCirculation != null && myCirculation.readAt == null
 
   const [addOpen, setAddOpen] = useState(false)
   const readMutation = useCirculationReadMutation()
   const removeMutation = useCirculationRemoveMutation()
-  // 제거 진행 중인 empId 집합(AttachmentSection 삭제 패턴 복제). 단일 mutation 인스턴스의
-  // variables/isPending은 "마지막 mutate 호출"만 반영해, A 제거 중 B를 누르면 A행 disabled가 풀려
-  // 중복 DELETE가 나갈 수 있으므로 empId별로 로컬 state에서 개별 추적한다.
   const [removingEmpIds, setRemovingEmpIds] = useState<Set<number>>(new Set())
 
   function handleRemove(empId: number) {
@@ -54,12 +40,10 @@ export function CirculationSection({ draft }: DraftDetailSectionProps) {
   }
 
   return (
-    // 독립 카드(CardContent) 안에서 렌더되므로 자체 상단 구분선은 두지 않는다(레퍼런스 사이드 카드).
     <section className="space-y-3">
       <div className="flex items-center justify-between gap-3">
         <h3 className="text-base font-bold text-foreground">공람</h3>
         <div className="flex items-center gap-2">
-          {/* (공람 대상자 본인·미열람) 읽음 처리(F709). */}
           {canMarkRead && (
             <Button
               type="button"
@@ -73,7 +57,6 @@ export function CirculationSection({ draft }: DraftDetailSectionProps) {
               읽음 처리
             </Button>
           )}
-          {/* (기안자 본인) 공람 추가(F707). */}
           {isDrafter && (
             <Button
               type="button"
@@ -117,7 +100,6 @@ export function CirculationSection({ draft }: DraftDetailSectionProps) {
                     미열람
                   </Badge>
                 )}
-                {/* (기안자 본인) 공람 제거(F708). 공람자별 진행 상태를 개별 추적한다. */}
                 {isDrafter && (
                   <button
                     type="button"
@@ -135,7 +117,6 @@ export function CirculationSection({ draft }: DraftDetailSectionProps) {
         </ul>
       )}
 
-      {/* 기안자 본인일 때만 추가 다이얼로그를 마운트(empId 확정 시). 본인·기존 공람자는 선택 비활성. */}
       {isDrafter && myEmpId != null && (
         <CirculationAddDialog
           draftId={draftId}

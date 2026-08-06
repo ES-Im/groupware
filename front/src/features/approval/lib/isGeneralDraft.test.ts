@@ -2,16 +2,6 @@ import { describe, expect, it } from 'vitest'
 import type { DraftDetailResponse } from '../model/draftDetail'
 import { isGeneralDraft } from './isGeneralDraft'
 
-/**
- * isGeneralDraft(ROADMAP(DRAFT-COMMON) T2.1, Major M1) 슬롯-null 판별 술어 단위 테스트.
- *
- * 판별 규칙(isGeneralDraft.ts 주석 · DraftTypeBody 동형):
- *   - leave/businessTrip/sales 전부 null + sourceDraftId null → 순수 일반 기안(true).
- *   - 유형 슬롯 중 하나라도 non-null(휴가/출장/매출) → false.
- *   - sourceDraftId non-null(취소기안) → false.
- * draftType 문자열은 판별에 쓰지 않는다(실측 "GeneralDraft"·스니펫 outdated).
- */
-
 function draft(overrides: Partial<DraftDetailResponse> = {}): DraftDetailResponse {
   return {
     draftId: 1,

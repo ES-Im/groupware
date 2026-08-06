@@ -8,14 +8,6 @@ import { server } from '@/test/mocks/server'
 import { companyKeys } from '../model/companyKeys'
 import { useCompanyInfoQuery } from './useCompanyInfoQuery'
 
-/**
- * useCompanyInfoQuery(COMPANY_INFO, ROADMAP-COMPANY T1.1) 실동작 검증.
- *
- * getCompanyInfo가 404를 null로 정규화하므로, 이 훅은 "isLoading/query.error(진짜 실패)/
- * data===null(미등록)/data(등록됨)" 4가지로 분기 가능해야 한다. 컴포넌트(CompanyInfoPage)가
- * 이 분기를 실제로 사용하므로, 훅 레벨에서 queryKey와 각 상태를 격리해 확인한다.
- */
-
 function createWrapper() {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return function Wrapper({ children }: { children: ReactNode }) {

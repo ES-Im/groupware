@@ -8,14 +8,6 @@ import { server } from '@/test/mocks/server'
 import { EmployeeProfileTabs } from './EmployeeProfileTabs'
 import type { EmployeeInfoResponse } from '../model/me'
 
-/**
- * EmployeeProfileTabs(EmployeeInfoView 우측 탭 카드, adapt-ui 리디자인) 검증.
- * - "직위"는 대표부서(isPrimary) positionName에서 파생한다(신규 필드 아님).
- * - viewerIsSelf=false면 아이디 필드뿐 아니라 "파일관리" 탭 자체가 없어 EmpFileManagementPanel이
- *   마운트되지 않는다(불필요한 RETRIEVE_FILES_INFOS 조회 방지).
- * - "상태 메모"는 RETRIEVE_ME_INFO/RETRIEVE_EMP_INFO 응답에 없는 필드라 어디에도 렌더되지 않는다.
- */
-
 function makeData(): EmployeeInfoResponse {
   return {
     empBasicInfo: {
@@ -50,7 +42,6 @@ describe('EmployeeProfileTabs - 직위 파생', () => {
     const label = screen.getByText('직위')
     const value = label.closest('div')?.querySelector('dd')
     expect(value).toHaveTextContent('팀장')
-    // 겸직 부서(기획팀)의 부서이력 탭은 기본 탭(기본정보)이 아니라 마운트되지 않으므로 '사원'이 노출되지 않는다.
     expect(screen.queryByText('사원')).not.toBeInTheDocument()
   })
 })
@@ -61,7 +52,6 @@ describe('EmployeeProfileTabs - viewerIsSelf=false', () => {
 
     expect(screen.queryByText('아이디')).not.toBeInTheDocument()
     expect(screen.queryByRole('tab', { name: '파일관리' })).not.toBeInTheDocument()
-    // 파일관리 탭 자체가 없으므로 EmpFileManagementPanel도 마운트되지 않는다(불필요한 조회 없음, onUnhandledRequest:'error'로도 방증).
     expect(screen.queryByText('전자서명 첨부')).not.toBeInTheDocument()
   })
 })

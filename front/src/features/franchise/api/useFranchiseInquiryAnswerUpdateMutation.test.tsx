@@ -8,16 +8,6 @@ import { server } from '@/test/mocks/server'
 import { franchiseKeys } from '../model/queryKeys'
 import { useFranchiseInquiryAnswerUpdateMutation } from './useFranchiseInquiryAnswerUpdateMutation'
 
-/**
- * useFranchiseInquiryAnswerUpdateMutation(FRANCHISE_INQUIRY_ANSWER_UPDATE, ROADMAP(FRANCHISE) T5.4,
- * F1622) 성공 후 invalidate 검증. useFranchiseInquiryAnswerCreateMutation.test.tsx와 동형 구조.
- *
- * 핵심 계약:
- * - 성공(204) 시 franchiseKeys.inquiry.answer(inquiryId)·detail(inquiryId)·
- *   [...all,'inquiry','list'] 접두사가 함께 invalidate된다.
- * - 다른 문의(id가 다른 detail)는 재조회되지 않는다.
- */
-
 function createWrapper() {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
@@ -133,7 +123,6 @@ describe('useFranchiseInquiryAnswerUpdateMutation', () => {
     await waitFor(() => expect(result.current.answer.data?.content).toBe('수정된 초안'))
     await waitFor(() => expect(detailCalls).toBe(2))
     await waitFor(() => expect(listCalls).toBe(2))
-    // detail(2)는 invalidate 대상이 아니므로 재조회되지 않는다.
     expect(detail2Calls).toBe(1)
   })
 

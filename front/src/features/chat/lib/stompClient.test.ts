@@ -4,15 +4,6 @@ import { clearAccessToken, setAccessToken } from '@/shared/api/tokenStore'
 import { useChatStompStatus } from './chatConnectionStatus'
 import { connectChatStomp, disconnectChatStomp, getChatStompClient } from './stompClient'
 
-/**
- * T0.4-a(채팅 STOMP CONNECT 인프라) + T0.4-b(연결 상태 노출/종료 정리) 검증.
- *
- * 실제 백엔드(ws://localhost:8080/ws-chat) 없이도 "CONNECT 성공(브로커 CONNECTED 프레임
- * 수신)"을 로컬에서 확인하기 위해, @stomp/stompjs가 내부적으로 `new WebSocket(brokerURL, ...)`로
- * 생성하는 브라우저 WebSocket을 흉내내는 최소 가짜 소켓으로 STOMP 텍스트 프로토콜의
- * CONNECT→CONNECTED 왕복만 시뮬레이션한다(Playwright 미사용, chat-stomp.md §연결·인증 근거).
- */
-
 interface FakeCloseEvent {
   code: number
   reason: string
@@ -22,7 +13,7 @@ interface FakeCloseEvent {
 class FakeStompSocket {
   url: string
   protocols?: string | string[]
-  readyState = 0 // CONNECTING
+  readyState = 0
   binaryType = ''
   onopen: (() => void) | null = null
   onmessage: ((ev: { data: string }) => void) | null = null
@@ -33,9 +24,8 @@ class FakeStompSocket {
   constructor(url: string, protocols?: string | string[]) {
     this.url = url
     this.protocols = protocols
-    // 실제 WebSocket처럼 open은 다음 틱에 비동기로 발생시킨다.
     setTimeout(() => {
-      this.readyState = 1 // OPEN
+      this.readyState = 1
       this.onopen?.()
     }, 0)
   }
@@ -43,7 +33,6 @@ class FakeStompSocket {
   send(data: string): void {
     this.sentFrames.push(data)
     if (data.startsWith('CONNECT\n')) {
-      // 브로커가 CONNECTED 프레임으로 응답하는 상황을 흉내낸다(STOMP 1.2, NUL 종단).
       setTimeout(() => {
         this.onmessage?.({ data: 'CONNECTED\nversion:1.2\n\n\0' })
       }, 0)
@@ -51,12 +40,11 @@ class FakeStompSocket {
   }
 
   close(): void {
-    this.readyState = 3 // CLOSED
+    this.readyState = 3
   }
 }
 
 afterEach(async () => {
-  // 싱글턴 클라이언트가 활성 상태로 남지 않도록 정리한다(다음 테스트로 상태가 새지 않게).
   const client = getChatStompClient()
   if (client.active) {
     await client.deactivate({ force: true })
@@ -74,7 +62,6 @@ describe('chatStompClient (T0.4-a STOMP CONNECT 인프라)', () => {
     const client = getChatStompClient()
 
     expect(client.brokerURL).toBe('ws://localhost:8080/ws-chat')
-    // activate() 직후 클라이언트는 동기적으로 ACTIVE 상태가 된다.
     expect(client.active).toBe(true)
 
     await vi.waitFor(() => {
@@ -103,7 +90,6 @@ describe('chatStompClient 연결 상태 노출/종료 정리 (T0.4-b)', () => {
     act(() => {
       connectChatStomp()
     })
-    // activate() 직후 실제 WebSocket open은 아직 비동기(다음 틱)이므로 이 시점엔 connecting.
     expect(result.current).toBe('connecting')
 
     await vi.waitFor(() => {
@@ -121,8 +107,6 @@ describe('chatStompClient 연결 상태 노출/종료 정리 (T0.4-b)', () => {
       expect(result.current).toBe('connected')
     })
 
-    // activate()는 이미 ACTIVE인 클라이언트에는 no-op이라 onConnect가 다시 불리지 않으므로,
-    // 여기서 상태가 connecting으로 되돌아가면 영영 connecting에 머무는 회귀 버그가 된다.
     act(() => {
       connectChatStomp()
     })
@@ -154,16 +138,6 @@ describe('chatStompClient 연결 상태 노출/종료 정리 (T0.4-b)', () => {
     expect(() => freshStompClientModule.disconnectChatStomp()).not.toThrow()
   })
 
-  /**
-   * 채팅 오버레이(팝업 → 인앱 오버레이 전환) 열기/닫기/재열기는 이제 React 마운트/언마운트로
-   * connectChatStomp/disconnectChatStomp를 그대로 호출한다(ChatOverlayPanel 참조) — 이 시나리오를
-   * 재현해 force disconnect 직후 재연결이 다시 정상적으로 CONNECTED 상태에 도달하는지 검증한다.
-   * (playwright 수동 검증 중 재오픈 시 콘솔에 "WebSocket is already in CLOSING or CLOSED state"
-   * 로그가 1회 관찰됐으나, 이는 jsdom에 없는 실제 브라우저 네이티브 WebSocket 구현이 force close
-   * 경합 상황에서 찍는 방어적 로그로 보이며 — FakeStompSocket은 그 네이티브 로그를 재현하지
-   * 않으므로 이 테스트에서 직접 검증할 수는 없다 — 기능적으로는 이 테스트가 보여주듯 재연결이
-   * 정상 완료된다.)
-   */
   it('force disconnect 직후 재연결해도 새 연결이 정상적으로 CONNECTED 상태에 도달한다(오버레이 재오픈 시나리오)', async () => {
     setAccessToken('test-access-token')
     vi.stubGlobal('WebSocket', FakeStompSocket)
@@ -186,11 +160,6 @@ describe('chatStompClient 연결 상태 노출/종료 정리 (T0.4-b)', () => {
     expect(getChatStompClient().active).toBe(true)
   })
 
-  /**
-   * 실사용 중 발견된 회귀: 모듈 스코프 싱글턴(chatStompClient)의 connectHeaders가 최초 생성
-   * 시점 토큰으로 고정돼, 같은 브라우저 탭에서 로그아웃 후 다른 사용자로 재로그인해도 그
-   * 이전 사용자의 토큰으로 재연결되던 문제(beforeConnect 도입으로 수정, stompClient.ts 참조).
-   */
   it('연결 종료 후 accessToken이 바뀐 상태로 재연결하면 새 토큰으로 CONNECT한다(계정 전환 시나리오)', async () => {
     setAccessToken('user-a-token')
     vi.stubGlobal('WebSocket', FakeStompSocket)
@@ -209,7 +178,6 @@ describe('chatStompClient 연결 상태 노출/종료 정리 (T0.4-b)', () => {
     })
     expect(result.current).toBe('disconnected')
 
-    // 로그아웃 → 다른 사용자로 재로그인 시나리오: 같은 탭에서 accessToken만 교체된다.
     setAccessToken('user-b-token')
 
     connectChatStomp()

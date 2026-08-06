@@ -23,28 +23,16 @@ import {
 } from '../model/franchiseEducationUpdateSchema'
 
 interface FranchiseEducationUpdateDialogProps {
-  /** 다이얼로그 열림 상태(제어형, FranchiseEducationDetailPage가 소유). */
   open: boolean
   onOpenChange: (open: boolean) => void
   educationId: number
-  /** 프리필 기준값(현재 교육 상세, T4.3 useFranchiseEducationDetailQuery 재사용). */
   detail: FranchiseEducationDetail
 }
 
-/**
- * 조회 응답은 일시를 date(`yyyy-MM-dd`)/startAt(`HH:mm:ss`) 둘로 쪼개 내려주지만 수정 요청은
- * educationDate(`yyyy-MM-dd'T'HH:mm:ss`) 하나로 받는다 — 프리필·diff 비교 양쪽에서 동일하게
- * 합성해 기준을 맞춘다.
- */
 function toEducationDate(detail: FranchiseEducationDetail): string {
   return `${detail.date}T${detail.startAt}`
 }
 
-/**
- * 변경된 필드만 담아 PATCH 페이로드를 구성한다(FranchiseUpdateDialog의 buildUpdatePayload와
- * 동일 패턴). 아무 필드도 바뀌지 않으면 빈 payload가 되고, 그대로 제출되어 서버의
- * "변경값 없음" 거부가 submitWithErrorMapping을 통해 노출된다.
- */
 function buildUpdatePayload(
   values: FranchiseEducationUpdateFormValues,
   detail: FranchiseEducationDetail,
@@ -68,18 +56,6 @@ function buildUpdatePayload(
   return payload
 }
 
-/**
- * 교육 수정 다이얼로그(F1613, `FRANCHISE_EDUCATION_UPDATE`, ROADMAP(FRANCHISE) T4.4).
- *
- * 전 필드 부분 수정(optional) — 열릴 때 현재 상세값으로 프리필하고, 제출 시 변경된 필드만
- * 골라 보낸다(FranchiseUpdateDialog·MeetingRoomUpdateDialog 동형). 등록자 본인/비활성/신청자
- * 0명 판정은 서버 403·도메인 에러 전담(Open Q#6)이라 여기서는 검증하지 않는다.
- *
- * educationDate는 `<input type="datetime-local" step={1}>`을 쓰되, 브라우저가 초 없이
- * `yyyy-MM-ddTHH:mm`을 방출하는 경우를 setValueAs에서 `:00` 보정한다(스키마 JSDoc 지침).
- * capacity는 valueAsNumber 대신 setValueAs로 빈 문자열을 undefined로 변환한다
- * (meetingRoomUpdateSchema JSDoc 함정 — 빈 입력이 NaN으로 검증 실패하는 것을 막는다).
- */
 export function FranchiseEducationUpdateDialog({
   open,
   onOpenChange,
@@ -95,8 +71,6 @@ export function FranchiseEducationUpdateDialog({
     formState: { errors, isSubmitting },
   } = form
 
-  // 열릴 때마다 현재 상세값으로 프리필하고, 닫힐 때는 다음 오픈에 이전 입력값/에러가 남지 않도록
-  // 리셋한다(FranchiseUpdateDialog와 동일 이유 — 제어형 다이얼로그는 언마운트되지 않는다).
   useEffect(() => {
     if (open) {
       reset({
@@ -119,8 +93,6 @@ export function FranchiseEducationUpdateDialog({
     onOpenChange(false)
   }
 
-  // 제출 중(mutation in-flight)에는 Esc·오버레이 클릭·닫기 버튼 전부를 무시한다
-  // (FranchiseUpdateDialog와 동일 이유).
   function handleOpenChange(nextOpen: boolean) {
     if (!nextOpen && isSubmitting) {
       return

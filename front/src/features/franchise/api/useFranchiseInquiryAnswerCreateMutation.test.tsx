@@ -8,17 +8,6 @@ import { server } from '@/test/mocks/server'
 import { franchiseKeys } from '../model/queryKeys'
 import { useFranchiseInquiryAnswerCreateMutation } from './useFranchiseInquiryAnswerCreateMutation'
 
-/**
- * useFranchiseInquiryAnswerCreateMutation(FRANCHISE_INQUIRY_ANSWER_CREATE, ROADMAP(FRANCHISE) T5.4,
- * F1621) 성공 후 invalidate 검증. useFranchiseInquiryAssignAnswerMutation.test.tsx와 동일 관행 —
- * invalidateQueries를 mock으로 가로채지 않고 실제 재조회 여부를 블랙박스로 확인한다.
- *
- * 핵심 계약:
- * - 성공(201) 시 franchiseKeys.inquiry.answer(inquiryId)·detail(inquiryId)·
- *   [...all,'inquiry','list'] 접두사가 함께 invalidate된다(isAnswered가 목록 필터/표시 축이기도 함).
- * - 다른 문의(id가 다른 detail)는 재조회되지 않는다.
- */
-
 function createWrapper() {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
@@ -134,7 +123,6 @@ describe('useFranchiseInquiryAnswerCreateMutation', () => {
     await waitFor(() => expect(result.current.answer.data?.content).toBe('초안을 저장했습니다'))
     await waitFor(() => expect(detailCalls).toBe(2))
     await waitFor(() => expect(listCalls).toBe(2))
-    // detail(2)는 invalidate 대상이 아니므로 재조회되지 않는다.
     expect(detail2Calls).toBe(1)
   })
 

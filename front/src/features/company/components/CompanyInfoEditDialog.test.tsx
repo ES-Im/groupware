@@ -7,16 +7,6 @@ import { BASE_URL } from '@/shared/api/client'
 import { server } from '@/test/mocks/server'
 import { CompanyInfoEditDialog } from './CompanyInfoEditDialog'
 
-/**
- * CompanyInfoEditDialog(COMPANY_UPDATE_INFO, ROADMAP-COMPANY T3.2-a, F1403) 검증.
- *
- * - open 시 현재 조회값으로 프리필된다.
- * - 무변경 제출(프리필값 그대로) 클라 차단: 서버 요청이 나가지 않아야 한다(회귀 가치 높음,
- *   PRD §5번 포인트).
- * - companyName/location/ownerName 공백-only 입력 거부(회귀 가치 높음, PRD §6번 포인트).
- * - 성공(204) 시 토스트 + onOpenChange(false).
- * - 서버 에러는 삼켜지지 않고 root 에러로 표시된다(닫히지 않음).
- */
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))
@@ -113,7 +103,6 @@ describe('CompanyInfoEditDialog', () => {
     const { toast } = await import('sonner')
     expect(toast.success).toHaveBeenCalledWith('회사 기본정보를 수정했습니다')
     expect(capturedBody).toMatchObject({ companyName: '하루온 주식회사' })
-    // editedAt은 자동 주입되지만 사용자 입력 필드는 아니다 — 서버 바디엔 존재해야 한다.
     expect(capturedBody).toHaveProperty('editedAt')
   })
 

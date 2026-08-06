@@ -1,12 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { meetingKeys } from './meetingKeys'
 
-/**
- * meetingKeys(ROADMAP(MEETING-ROOMS) T1.1) 팩토리 단위 테스트.
- *
- * - all이 배열 리터럴로 고정되어 invalidateQueries(meetingKeys.all)로 하위 전체를 묶을 수 있는지.
- * - 각 하위 키가 all을 prefix로 갖고, 파라미터를 그대로 반영하는지.
- */
 describe('meetingKeys', () => {
   it('all은 [\'meeting\']로 고정된다', () => {
     expect(meetingKeys.all).toEqual(['meeting'])

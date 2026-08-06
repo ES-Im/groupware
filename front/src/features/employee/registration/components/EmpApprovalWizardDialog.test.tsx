@@ -7,19 +7,10 @@ import { BASE_URL } from '@/shared/api/client'
 import { server } from '@/test/mocks/server'
 import { EmpApprovalWizardDialog } from './EmpApprovalWizardDialog'
 
-/**
- * EmpApprovalWizardDialog(T3.7) 검증.
- * 1단계(가입 승인)→2단계(EmpBelongingsAssignmentForm, T3.6) 전이와 닫기 가드(PRD Open Q#2)를 다룬다.
- * EmpBelongingsAssignmentForm 자체의 필드 검증/조립 로직은 EmpBelongingsAssignmentForm.test.tsx(T3.6)가
- * 이미 커버하므로 여기서는 재검증하지 않는다.
- */
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn(), warning: vi.fn() },
 }))
 
-// radix-ui Checkbox(react-use-size)가 크기 관측에 ResizeObserver를 쓰는데 jsdom에는 구현이 없다.
-// no-op 스텁으로 충분하다(전역 setup 수정 금지 제약에 따라 테스트 파일 로컬로만 주입,
-// EmpBelongingsAssignmentForm.test.tsx 선례와 동일 패턴 — 2단계에서 이 컴포넌트를 그대로 렌더하므로 필요).
 if (typeof globalThis.ResizeObserver === 'undefined') {
   class ResizeObserverStub {
     observe() {}
@@ -73,7 +64,6 @@ function renderDialog() {
   return { onOpenChange, onApproveSuccess, onApproveError }
 }
 
-/** 1단계에서 입사일자를 입력하고 승인을 제출하는 헬퍼. */
 async function submitStep1(user: ReturnType<typeof userEvent.setup>, hiredAt = '2024-03-05') {
   await user.type(screen.getByLabelText('입사일자'), hiredAt)
   await user.click(screen.getByRole('button', { name: '승인' }))

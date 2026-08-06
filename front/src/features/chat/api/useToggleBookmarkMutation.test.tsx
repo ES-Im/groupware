@@ -8,16 +8,6 @@ import { server } from '@/test/mocks/server'
 import { chatKeys } from '../model/queryKeys'
 import { useToggleBookmarkMutation } from './useToggleBookmarkMutation'
 
-/**
- * useToggleBookmarkMutation(F910, ROADMAP(CHAT) T1.3) 실동작 검증.
- *
- * - isBookmarked:false(현재 미등록) → bookmark 엔드포인트(`PATCH .../bookmark`) 호출.
- * - isBookmarked:true(현재 등록됨) → unbookmark 엔드포인트(`PATCH .../unbookmark`) 호출.
- * - 성공(204) 후 chatKeys.all이 invalidate되어 목록 쿼리가 재조회된다(department 도메인
- *   departmentMutations.invalidate.test.tsx와 동일하게, invalidateQueries를 mock으로 가로채지
- *   않고 "재조회로 최신 값이 반영되는지"를 블랙박스로 관찰한다).
- */
-
 function createWrapper() {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },

@@ -8,16 +8,6 @@ import { server } from '@/test/mocks/server'
 import { attendanceKeys } from '../model/queryKeys'
 import { useCheckInMutation } from './useCheckInMutation'
 
-/**
- * useCheckInMutation(F301·MY_ATTENDANCE_CHECK_IN, ROADMAP T2.2) 동작 검증.
- *
- * - 성공(204) 시 attendanceKeys.all이 invalidate되어 하위 쿼리(myMonthly)가 재조회되는지
- *   (departmentMutations.invalidate.test.tsx와 동일하게 실제 refetch를 관찰해 블랙박스 검증).
- * - 성공 시 toast.success('출근이 기록되었습니다')가 호출되는지.
- * - 실패 시 toast.success는 호출되지 않고, handleApiError 경로를 통해 toast.error가 호출되는지
- *   (LoginForm.test.tsx의 sonner 모킹 패턴).
- */
-
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))

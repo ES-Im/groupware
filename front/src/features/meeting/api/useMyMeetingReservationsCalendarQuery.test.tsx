@@ -8,12 +8,6 @@ import { server } from '@/test/mocks/server'
 import { meetingKeys } from '../model/meetingKeys'
 import { useMyMeetingReservationsCalendarQuery } from './useMyMeetingReservationsCalendarQuery'
 
-/**
- * useMyMeetingReservationsCalendarQuery(F800, ROADMAP T1.3) 실동작 검증.
- *
- * - meetingKeys.myReservationsCalendar(range)로 캐시되는지.
- * - range가 바뀌면 queryKey가 달라져 자동 재조회되는지(새 파라미터가 실제로 전송되는지).
- */
 function makeItem(meetingId: number, title: string) {
   return {
     meetingId,

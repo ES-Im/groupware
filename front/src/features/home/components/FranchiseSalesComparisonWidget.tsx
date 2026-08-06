@@ -14,21 +14,10 @@ function formatCurrency(value: number) {
   return `${value.toLocaleString('ko-KR')}원`
 }
 
-/**
- * 가맹점 매출 비교 위젯(FRANCHISE, 레퍼런스 "가맹점 월별 매출 현황" 이식).
- * 밴드 타이틀(RoleBandHeader)은 HomePage가 렌더한다 — 이 컴포넌트는 카드 자체만 담당한다.
- *
- * 담당 가맹점 수만큼 월매출(FRANCHISE_SALES_MONTHLY)을 병렬 조회한다(계획 문서 확정 설계 결정
- * — "가맹점 매출 비교 막대차트 포함"). 담당 목록은 FRANCHISE_LIST의 managerId=본인 empId 필터로
- * 얻는다. 이번 달 고정 조회이며(레퍼런스의 "지난 달/연간" 세그먼트는 계획 범위 밖 — 과설계 방지).
- */
 export function FranchiseSalesComparisonWidget() {
   const { data: me } = useMeQuery()
   const managerId = me?.empBasicInfo.empId
 
-  // managerId 미확정(me 로딩 중) 상태에서는 enabled로 쿼리 자체를 막는다 — 표시 단만 가드하면
-  // keepPreviousData 특성상 필터 없는 전체 목록이 placeholder로 잠깐 노출될 수 있다(useFranchisesQuery
-  // JSDoc 참고).
   const franchisesQuery = useFranchisesQuery(
     { managerId, page: 0, size: 50 },
     { enabled: managerId != null },

@@ -1,11 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { meetingReservationUpdateSchema } from './meetingReservationUpdateSchema'
 
-/**
- * meetingReservationUpdateSchema(F804, ROADMAP T4.3-b) 단위 테스트.
- * 전 필드 optional(변경 필드만 전송)이지만, optional 내부에도 형식 검증(min(1) 등)이
- * 남아있어 "값을 지워 빈 문자열로 만드는" 경우까지 막는다.
- */
 describe('meetingReservationUpdateSchema', () => {
   it('빈 객체(아무 필드도 변경하지 않음)는 통과한다', () => {
     expect(meetingReservationUpdateSchema.safeParse({}).success).toBe(true)

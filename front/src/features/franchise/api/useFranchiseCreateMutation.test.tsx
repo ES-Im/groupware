@@ -8,17 +8,6 @@ import { server } from '@/test/mocks/server'
 import { franchiseKeys } from '../model/queryKeys'
 import { useFranchiseCreateMutation } from './useFranchiseCreateMutation'
 
-/**
- * useFranchiseCreateMutation(FRANCHISE_CREATE, ROADMAP(FRANCHISE) T2.2) 성공 후 invalidate 검증.
- * useMeetingRoomCreateMutation.test.tsx와 동일 관행 — invalidateQueries를 mock으로 가로채지 않고
- * "성공 후 목록 쿼리가 실제로 재조회되어 최신 값을 반영하는지"를 블랙박스로 확인한다.
- *
- * 핵심 계약:
- * - invalidate 접두사는 `[...franchiseKeys.all, 'list']` 2단계 — params가 채워진
- *   franchiseKeys.list({...}) 캐시 키와 partial match되어야 한다.
- * - 목록만 갱신 대상이므로 detail 등 다른 franchise 쿼리는 재조회되지 않아야 한다.
- */
-
 function createWrapper() {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
@@ -95,8 +84,6 @@ describe('useFranchiseCreateMutation', () => {
 
     const { result } = renderHook(
       () => ({
-        // 실제 화면과 동일하게 keyword/page 등 params가 채워진 list 키로 캐시를 만든다 —
-        // franchiseKeys.list() 3단계 키로 invalidate하면 partial match에 실패하는 회귀를 잡는다.
         list: useQuery({
           queryKey: franchiseKeys.list({ page: 0, size: 10 }),
           queryFn: async () => (await fetch(`${BASE_URL}/api/franchises?page=0&size=10`)).json(),
@@ -118,7 +105,6 @@ describe('useFranchiseCreateMutation', () => {
 
     await waitFor(() => expect(result.current.mutation.isSuccess).toBe(true))
     await waitFor(() => expect(result.current.list.data?.content).toHaveLength(2))
-    // list 접두사 invalidate이므로 detail은 재조회되지 않는다(franchiseKeys.all 전체 invalidate 회귀 방지).
     expect(detailCalls).toBe(1)
   })
 

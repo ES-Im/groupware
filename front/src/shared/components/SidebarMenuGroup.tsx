@@ -6,20 +6,11 @@ import type { SidebarMenuItem } from '@/shared/components/sidebarMenuItems'
 import { hasRequiredRole } from '@/shared/lib/hasRequiredRole'
 import { cn } from '@/shared/lib/utils'
 
-/**
- * 하위 항목을 가진 그룹 노드(순수 시각 요소). 자체는 라우팅하지 않고 펼침/접힘 아코디언만 수행한다.
- * children을 각자의 minRole로 2차 필터하며, 보이는 children이 0개면 그룹 자체를 렌더하지 않는다.
- * open 상태는 비영속 로컬 상태다(영속 대상은 사이드바 collapsed뿐).
- *
- * collapsed(아이콘 전용) 상태에서 그룹 아이콘을 클릭하면 상위에 사이드바 펼침(onExpandSidebar)을
- * 요청하고 동시에 이 그룹을 열어(setOpen(true)) 하위 항목이 바로 보이게 한다.
- */
 interface SidebarMenuGroupProps {
   item: SidebarMenuItem
   roles: string[]
   collapsed: boolean
   onExpandSidebar: () => void
-  /** 메뉴 뱃지 count 맵(badgeKey → count, T7.3). 그대로 자식 SidebarMenuLink로 내려보낸다. */
   badgeCounts?: Record<string, number | undefined>
 }
 
@@ -32,7 +23,6 @@ export function SidebarMenuGroup({
 }: SidebarMenuGroupProps) {
   const [open, setOpen] = useState(false)
 
-  // 그룹 내부 children 2차 필터: 각 항목의 minRole로 게이팅한다.
   const visibleChildren = (item.children ?? []).filter((child) =>
     hasRequiredRole(roles, child.minRole),
   )
@@ -40,7 +30,6 @@ export function SidebarMenuGroup({
 
   const Icon = item.icon
 
-  // collapsed: 그룹은 아이콘 전용 버튼만 노출. 클릭 시 사이드바를 펼치고 이 그룹을 연다.
   if (collapsed) {
     return (
       <button
@@ -59,7 +48,6 @@ export function SidebarMenuGroup({
 
   return (
     <div className="flex flex-col">
-      {/* 그룹 헤더 버튼: 아이콘 + 라벨 + 회전하는 화살표. 클릭 시 아코디언 토글. */}
       <button
         type="button"
         onClick={() => setOpen((prev) => !prev)}

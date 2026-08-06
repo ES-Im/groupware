@@ -8,30 +8,10 @@ import { BASE_URL } from '@/shared/api/client'
 import { server } from '@/test/mocks/server'
 import { FranchiseInquiryDetailPage } from './FranchiseInquiryDetailPage'
 
-/**
- * FranchiseInquiryDetailPage(F1618·F1619, ROADMAP(FRANCHISE) T5.2) 회귀 방지 테스트.
- * FranchiseDetailPage와 동일 패턴(route param 가드·not-found/기타 에러 분기·useEffect 1회성
- * 토스트)을 문의 상세(FRANCHISE_INQUIRY_DETAIL) + 답변(FRANCHISE_INQUIRY_ANSWER_DETAIL) 2개
- * 쿼리로 확장한 페이지다. FranchiseInquiryListPage.test.tsx의 MSW server.use + QueryClient
- * 래퍼 + MemoryRouter 패턴을 그대로 따른다.
- *
- * 검증 대상:
- * - route param 가드: 순수 10진 양의 정수가 아니면 "잘못된 문의 식별자입니다." + 쿼리 미호출.
- * - 로딩 중 "불러오는 중..." 표시.
- * - 상세 200 → Card 타이틀(제목) + 부제(가맹점명·문의일시) + isDeleted 배지 + dl(문의자연락처·담당자·문의내용).
- * - 답변 200(작성됨) → 내용·제출여부·제출일시·답변담당자 렌더.
- * - 답변 미작성(404 또는 200+빈 문자열) → "아직 작성된 답변이 없습니다." + 토스트 없음(정상 흐름).
- * - 상세 404 → "문의를 찾을 수 없습니다." + 토스트 없음.
- * - 상세 500 등 기타 에러 → useEffect 1회성 토스트 + "문의 정보를 불러오지 못했습니다."
- * - 답변이 404가 아닌 에러(500)면 별도 useEffect가 토스트를 띄운다(상세와 독립적인 useEffect).
- */
-
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))
 
-// toast mock은 파일 전역에서 공유되므로, 테스트 간 호출 카운트가 누적되지 않도록 매 테스트 후 초기화한다
-// (FranchiseSalesPage.test.tsx와 동일 컨벤션).
 afterEach(() => {
   vi.clearAllMocks()
 })
@@ -95,7 +75,6 @@ function mockAnswerError(inquiryId: number, status: number, body: unknown) {
   )
 }
 
-/** useMeQuery(GET /api/employees/me) 목. FranchiseSalesPage.test.tsx의 meFixture 패턴과 동형. */
 function mockMe(empId: number) {
   server.use(
     http.get(`${BASE_URL}/api/employees/me`, () =>
@@ -115,7 +94,6 @@ function mockMe(empId: number) {
   )
 }
 
-/** 응답이 도착한 카드(CardTitle 텍스트 기준)의 dt/dd 스코프를 좁혀 동일 라벨("내용" 등) 충돌을 피한다. */
 function getCardByHeading(headingText: string) {
   const heading = screen.getByText(headingText)
   const card = heading.closest('[data-slot="card"]')
@@ -162,7 +140,6 @@ describe('FranchiseInquiryDetailPage (F1618·F1619) - route param 가드', () =>
 
       expect(screen.getByText('잘못된 문의 식별자입니다.')).toBeInTheDocument()
 
-      // enabled:false 가드라 네트워크 호출 자체가 없어야 한다 — 한 틱 대기 후에도 카운트가 0인지 확인.
       await new Promise((resolve) => setTimeout(resolve, 0))
       expect(detailCallCount).toBe(0)
       expect(answerCallCount).toBe(0)
@@ -180,32 +157,25 @@ describe('FranchiseInquiryDetailPage (F1618·F1619) - 상세·답변 성공', ()
 
     renderPage('1')
 
-    // 응답 도착 전에는 로딩 문구가 보인다.
     expect(screen.getByText('불러오는 중...')).toBeInTheDocument()
 
     await screen.findByText('환불 문의')
 
     const detailCard = getCardByHeading('환불 문의')
-    // 제목(CardTitle)은 이제 inquiryTitle이며, 가맹점명·문의일시는 라벨 없이 부제 span으로 노출된다.
     expect(detailCard.getByText('환불 문의')).toBeInTheDocument()
     expect(detailCard.getByText('테스트강남점')).toBeInTheDocument()
     expect(detailCard.getByText('2026-07-01T10:30:00')).toBeInTheDocument()
-    // isDeleted가 false이면 "삭제 요청" 배지 자체가 렌더되지 않는다.
     expect(detailCard.queryByText('삭제 요청')).not.toBeInTheDocument()
-    // 본문(inquiryContent)은 라벨 없는 <p>로 노출된다("문의 내용" dt 라벨은 제거됨).
     expect(detailCard.getByText('환불 요청드립니다.')).toBeInTheDocument()
 
-    // 문의자 연락처·코드는 우측 "가맹점 정보" 요약 카드(infolist)에 있다(담당자는 답변 카드 헤더로 이동).
     const summaryCard = getCardByHeading('가맹점 정보')
     expect(summaryCard.getByText('문의자 연락처')).toBeInTheDocument()
     expect(summaryCard.getByText('010-1234-5678')).toBeInTheDocument()
     expect(summaryCard.getByText('코드')).toBeInTheDocument()
     expect(summaryCard.getByText('EXT-1')).toBeInTheDocument()
-    // 담당자는 더 이상 요약 카드에 없다(답변 카드 헤더의 "답변 담당"으로 이동).
     expect(summaryCard.queryByText('담당자')).not.toBeInTheDocument()
 
     const answerCard = getCardByHeading('답변')
-    // 답변 카드 헤더의 "답변 담당"에 배정 담당자(김담당)와 배정 버튼이 있다.
     expect(answerCard.getByText('답변 담당')).toBeInTheDocument()
     expect(answerCard.getByRole('button', { name: '담당자 배정' })).toBeInTheDocument()
     expect(answerCard.getByText('내용')).toBeInTheDocument()
@@ -215,7 +185,6 @@ describe('FranchiseInquiryDetailPage (F1618·F1619) - 상세·답변 성공', ()
     expect(answerCard.getByText('제출 일시')).toBeInTheDocument()
     expect(answerCard.getByText('2026-07-02T09:00:00')).toBeInTheDocument()
     expect(answerCard.getByText('답변 담당자')).toBeInTheDocument()
-    // 김담당은 답변 카드 헤더(답변 담당)와 읽기전용 dl(답변 담당자) 두 곳에 등장한다.
     expect(answerCard.getAllByText('김담당').length).toBeGreaterThan(0)
 
     const { toast } = await import('sonner')
@@ -332,7 +301,6 @@ describe('FranchiseInquiryDetailPage (F1618·F1619) - 답변 조회 실패(404 �
 
     renderPage('1')
 
-    // 상세는 정상 렌더된다(에러 경로 아님).
     await screen.findByText('환불 문의')
 
     const { toast } = await import('sonner')
@@ -347,9 +315,6 @@ describe('FranchiseInquiryDetailPage (F1618·F1619) - 담당자 배정(F1620, T5
   it('"담당자 배정" 버튼 클릭 시 FranchiseInquiryManagerAssignDialog가 열린다', async () => {
     mockDetail(1)
     mockAnswer(1)
-    // FranchiseInquiryManagerAssignDialog가 마운트하는 EmployeePicker가 부서 목록(DEPT_LIST)을
-    // 추가 호출한다 — 빈 페이지로 응답만 보장(FranchiseListPage.test.tsx의 담당자 필터 다이얼로그
-    // 테스트와 동일 패턴, 오픈 확인까지만 검증).
     server.use(
       http.get(`${BASE_URL}/api/departments`, () =>
         HttpResponse.json({
@@ -430,7 +395,6 @@ describe('FranchiseInquiryDetailPage (F1618·F1619) - 답변 작성/수정/발�
     const { toast } = await import('sonner')
     await waitFor(() => expect(toast.success).toHaveBeenCalledWith('답변 초안을 저장했습니다'))
 
-    // 생성 mutation의 invalidate로 답변이 재조회되어 프리필된 수정 모드로 전환된다.
     await waitFor(() =>
       expect(screen.getByRole('button', { name: '수정 저장' })).toBeInTheDocument(),
     )

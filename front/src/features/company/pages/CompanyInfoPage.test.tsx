@@ -8,16 +8,6 @@ import { useAuthStore } from '@/features/auth/store/authStore'
 import { server } from '@/test/mocks/server'
 import { CompanyInfoPage } from './CompanyInfoPage'
 
-/**
- * CompanyInfoPage(F1401~F1405, ROADMAP-COMPANY T1.2/T2.2/T3.2-a/T3.2-b/T3.2-c) 검증.
- *
- * - 조회 4-way 분기: 로딩/에러/미등록(404→null)/등록됨.
- * - 미등록 상태의 ADMIN/비-ADMIN 분기(등록 CTA vs 안내 문구).
- * - 등록됨 상태의 ADMIN/비-ADMIN 편집 버튼 노출 비대칭.
- * - 최초 등록(CompanyRegisterCard, F1402): COMPANY_002(이미 등록됨, 400)만 전용 안내로 가로채고
- *   재조회하는 분기, 그 외 서버 에러는 submitWithErrorMapping 기본 경로(root 에러)로 위임.
- * - editedAt은 폼에 노출되는 사용자 입력 필드가 아니다(자동 주입).
- */
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))
@@ -126,7 +116,6 @@ describe('CompanyInfoPage - 조회 분기', () => {
 
     await waitFor(() => expect(screen.getAllByText('HARUON').length).toBeGreaterThan(0))
     expect(screen.getAllByRole('button', { name: '편집' })).toHaveLength(3)
-    // location은 회사 헤더 요약과 기본정보 섹션 양쪽에 노출되므로 getAllByText로 존재만 확인한다.
     expect(screen.getAllByText('서울특별시 강남구').length).toBeGreaterThan(0)
     expect(screen.getByText('contact@haruon.com')).toBeInTheDocument()
     expect(screen.getByText('https://haruon.com')).toBeInTheDocument()
@@ -257,7 +246,6 @@ describe('CompanyInfoPage - 최초 등록 폼(CompanyRegisterCard, F1402)', () =
         ),
       ),
     )
-    // 폼 진입을 위해 처음엔 미등록 상태로 시작한다.
     alreadyRegistered = false
     const user = userEvent.setup()
 
@@ -270,7 +258,6 @@ describe('CompanyInfoPage - 최초 등록 폼(CompanyRegisterCard, F1402)', () =
     await user.type(screen.getByLabelText(/대표자명/), '김대표')
     await user.type(screen.getByLabelText(/홈페이지 URL/), 'https://haruon.com')
 
-    // 제출 직전 서버 상태를 "이미 등록됨"으로 바꿔 COMPANY_002 경쟁 상황을 재현한다.
     alreadyRegistered = true
     await user.click(screen.getByRole('button', { name: '회사 정보 등록' }))
 
@@ -278,9 +265,7 @@ describe('CompanyInfoPage - 최초 등록 폼(CompanyRegisterCard, F1402)', () =
     await waitFor(() =>
       expect(toast.error).toHaveBeenCalledWith('이미 등록된 회사 정보가 있습니다'),
     )
-    // COMPANY_002는 root 폼 에러로 표시되지 않는다(전용 토스트로만 처리).
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
-    // 재조회로 상태가 동기화되어 카드 뷰(등록됨)로 전환된다(location은 헤더·기본정보 양쪽에 노출).
     await screen.findAllByText('서울특별시 강남구')
   })
 
@@ -308,7 +293,6 @@ describe('CompanyInfoPage - 최초 등록 폼(CompanyRegisterCard, F1402)', () =
     await user.click(screen.getByRole('button', { name: '회사 정보 등록' }))
 
     expect(await screen.findByText('입력값을 다시 확인해주세요')).toBeInTheDocument()
-    // 폼이 닫히지 않고(카드 유지) 실패가 삼켜지지 않는다.
     expect(screen.getByLabelText(/회사명/)).toHaveValue('HARUON')
   })
 })

@@ -1,10 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { mapMeetingRoomReservationsToEvents } from './mapMeetingRoomReservationsToEvents'
 
-/**
- * mapMeetingRoomReservationsToEvents(F809, ROADMAP T2.4-b) 단위 테스트.
- * 응답에 meetingId가 없어 이벤트에 id를 부여하지 않는다(상세로 링크할 식별자가 없다는 설계 의도).
- */
 describe('mapMeetingRoomReservationsToEvents', () => {
   it('title/start/end와 함께 원본 항목을 extendedProps로 실어 클릭 시 예약 요약에 쓰게 한다', () => {
     const items = [

@@ -5,12 +5,6 @@ import {
   isFourHourUnitLeaveType,
 } from './leaveHours'
 
-/**
- * lib/leaveHours.ts — 백엔드 `LeaveDraftService.calculateUsedHours` 순방향 미러 검증.
- * 기대값은 백엔드 규칙(근무 09~18시, 하루 8시간, 4시간 초과 구간 휴게 1시간 차감, 멀티데이 =
- * 시작일(시작~18) + 중간일×8 + 종료일(09~종료))을 수기로 계산해 대조한 값이다. 폼의 시각
- * 옵션은 반차 경계(시작 09/13, 종료 13/18)라 결과는 항상 0.5일 배수다.
- */
 describe('calculateUsedLeaveDays', () => {
   it('같은 날 09~13(오전 반차)은 0.5일이다', () => {
     expect(calculateUsedLeaveDays('2026-07-13', '09', '2026-07-13', '13')).toBe(0.5)

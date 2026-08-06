@@ -7,11 +7,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
 
 const WIDGET_ITEM_LIMIT = 4
 
-/**
- * 가맹점 문의 미리보기 위젯(FRANCHISE, 레퍼런스 "가맹점 문의 내역" 이식).
- * 미답변(isAnswered=false) 상위 N건만 보여준다(계획 문서 §재사용 자원 맵). 담당자가 없는
- * 가맹점에서 생성된 문의는 담당자 없이 조회될 수 있어(도메인모델 실측) "미배정"으로 대체 표기한다.
- */
 export function FranchiseInquiryPreviewWidget() {
   const { data } = useFranchiseInquiriesQuery({ isAnswered: false, page: 0, size: WIDGET_ITEM_LIMIT })
   const items = data?.content ?? []

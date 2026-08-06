@@ -3,11 +3,6 @@ import { apiClient } from '@/shared/api/client'
 import type { EmpBelongingsCreatePayload } from '../model/empBelongingsCreatePayload'
 import { updateEmpBelongings } from './updateEmpBelongings'
 
-/**
- * updateEmpBelongings(HR_UPDATE_EMP_BELONGINGS) 단위 테스트.
- * apiClient.patch 직접 모킹으로 URL/바디를 검증한다(updateHrManagedInfo.test.ts와 동일 패턴).
- */
-
 vi.mock('@/shared/api/client', () => ({
   apiClient: { patch: vi.fn().mockResolvedValue({ data: undefined }) },
 }))

@@ -7,17 +7,10 @@ import { BASE_URL } from '@/shared/api/client'
 import { server } from '@/test/mocks/server'
 import { EmpBelongingsAssignmentForm } from './EmpBelongingsAssignmentForm'
 
-/**
- * EmpBelongingsAssignmentForm(T3.6, `HR_UPDATE_EMP_BELONGINGS` 2단계 폼) 검증.
- * mutation을 직접 호출하지 않는 자체완결형 폼이라 onSubmit prop 스파이로 조립된 값만 확인한다.
- */
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))
 
-// radix-ui Checkbox(react-use-size)가 크기 관측에 ResizeObserver를 쓰는데 jsdom에는 구현이 없다.
-// no-op 스텁으로 충분하다(전역 setup 수정 금지 제약에 따라 테스트 파일 로컬로만 주입,
-// ScheduleDetailDialog.test.tsx 선례와 동일 패턴).
 if (typeof globalThis.ResizeObserver === 'undefined') {
   class ResizeObserverStub {
     observe() {}

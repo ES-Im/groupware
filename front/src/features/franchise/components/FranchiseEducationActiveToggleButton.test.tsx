@@ -7,14 +7,6 @@ import { BASE_URL } from '@/shared/api/client'
 import { server } from '@/test/mocks/server'
 import { FranchiseEducationActiveToggleButton } from './FranchiseEducationActiveToggleButton'
 
-/**
- * FranchiseEducationActiveToggleButton(F1614, ROADMAP(FRANCHISE) T4.4) 검증.
- * MeetingRoomActiveToggleButton.test.tsx와 동형 AlertDialog 확인 패턴이되, 상세 페이지 버튼이라
- * stopPropagation 래퍼 검증은 없다(구현 JSDoc: 행 내비게이션 없음).
- *
- * ⚠️ 활성화/비활성화 둘 다 POST(회의실 선례의 PATCH와 다름) — mock 엔드포인트가 POST인지가
- * 핵심 회귀 방지 포인트다.
- */
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))

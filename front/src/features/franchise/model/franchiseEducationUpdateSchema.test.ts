@@ -1,15 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { franchiseEducationUpdateSchema } from './franchiseEducationUpdateSchema'
 
-/**
- * franchiseEducationUpdateSchema(FRANCHISE_EDUCATION_UPDATE, ROADMAP(FRANCHISE) T4.4, F1613) 단위 테스트.
- * meetingRoomUpdateSchema.test.ts와 동일 패턴(safeParse + issues[0].message 단언).
- *
- * 전 필드 optional(부분수정) — 빈 객체도 성공해야 한다. 계약에 문서화된 제약만 검증한다:
- * educationDate(yyyy-MM-dd'T'HH:mm:ss regex)·place/title(50자 이하)·content(공백만 거부)·
- * capacity(양수).
- */
-
 describe('franchiseEducationUpdateSchema', () => {
   it('빈 객체({})는 성공한다(전 필드 optional, PATCH 부분수정)', () => {
     const result = franchiseEducationUpdateSchema.safeParse({})

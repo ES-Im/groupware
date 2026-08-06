@@ -12,25 +12,10 @@ import type { CategoryNameFormValues } from '../model/categorySchema'
 import { CategoryManagementRow } from './CategoryManagementRow'
 import { CategoryNameForm } from './CategoryNameForm'
 
-/** 노출여부 필터 값. 'all'은 isVisible 쿼리 파라미터 생략(전체)을 의미한다
- * (FranchiseInquiryListPage의 AnsweredFilter 동형). */
 type VisibilityFilter = 'all' | 'true' | 'false'
 
-/** 검색 디바운스 지연(ms). 다른 목록 페이지와 동일 값(BoardListPage SEARCH_DEBOUNCE_MS). */
 const SEARCH_DEBOUNCE_MS = 300
 
-/**
- * 카테고리 관리 모달 본문(`CATEGORY_MANAGEMENT`, ADMIN 전용).
- *
- * CategoryManagementDialog가 Dialog chrome(제목/설명)만 소유하고, 검색·필터·페이징·등록 상태는
- * 전부 이 컴포넌트가 소유한다 — Radix Dialog는 닫히면 DialogContent의 children을 언마운트하므로
- * (FranchiseEducationCreateDialog 주석 참조), 이 컴포넌트를 별도 자식으로 분리해두면 모달을 다시
- * 열 때마다 검색어/필터/페이지가 항상 초기 상태로 새로 마운트된다(별도 reset 로직 불필요).
- *
- * 등록/이름변경은 공용 CategoryNameForm을 재사용하고, 행별 이름변경·노출토글은
- * CategoryManagementRow가 캡슐화한다. 페이징은 신규 UI 없이 공유 표준(usePageState +
- * PaginationControls)을 그대로 소비한다(BoardListPage/FranchiseInquiryListPage 동형).
- */
 export function CategoryManagementPanel() {
   const [searchInput, setSearchInput] = useState('')
   const [keyword, setKeyword] = useState('')
@@ -39,8 +24,6 @@ export function CategoryManagementPanel() {
 
   const registerMutation = useCategoryRegisterMutation()
 
-  // 검색 입력 디바운스: 300ms 유예 후에만 확정된 keyword로 반영하고 페이지를 0으로 리셋한다
-  // (BoardListPage/FranchiseInquiryListPage 동일 컨벤션).
   useEffect(() => {
     const trimmed = searchInput.trim()
     if (trimmed === keyword) {
@@ -90,11 +73,8 @@ export function CategoryManagementPanel() {
 
   return (
     <div className="flex flex-col gap-4">
-      {/* 등록: 인라인 입력 + 등록 버튼(공용 CategoryNameForm 재사용, 취소 버튼 없음). */}
       <CategoryNameForm submitLabel="추가" placeholder="새 카테고리명" onSubmit={handleRegister} />
 
-      {/* 검색 + 노출여부 필터. select는 이 저장소에 shadcn Select가 없어 FranchiseInquiryListPage와
-          동일하게 네이티브 select를 그대로 스타일링해 재사용한다. */}
       <div className="flex flex-wrap items-center gap-2 border-t pt-4">
         <div className="relative flex-1">
           <Search className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -125,7 +105,6 @@ export function CategoryManagementPanel() {
         </select>
       </div>
 
-      {/* 목록: 최대 높이를 두고 내부 스크롤(모달 자체 스크롤과 이중 스크롤을 피하기 위해 적당히 제한). */}
       <ul className="flex max-h-80 flex-col gap-2 overflow-y-auto">
         {managementQuery.isLoading ? (
           <p className="py-6 text-center text-sm text-muted-foreground">불러오는 중...</p>

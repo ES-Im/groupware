@@ -8,20 +8,6 @@ import { server } from '@/test/mocks/server'
 import { chatKeys } from '../model/queryKeys'
 import { useUpdateReadPositionMutation } from './useUpdateReadPositionMutation'
 
-/**
- * useUpdateReadPositionMutation(F911, ROADMAP(CHAT) T2.5) 실동작 검증.
- *
- * - `PATCH /api/chat/rooms/{roomId}/read-position`에 `{ lastReadMessageId }` body로 요청한다
- *   (request-fields.adoc 실측 필드명 그대로).
- * - 성공(204) 후 채팅방 목록(rooms) 쿼리가 재조회된다. useToggleBookmarkMutation.test.tsx와
- *   동일하게 invalidateQueries를 mock으로 가로채지 않고 "재조회로 최신 값이 반영되는지"를
- *   블랙박스로 관찰한다.
- * - keyword/isBookmark 필터가 걸린 목록 쿼리(캐시 키의 params가 undefined가 아닌 경우)도
- *   함께 무효화되는지 확인한다 — chatKeys.rooms()처럼 params 자리에 undefined를 그대로 채워
- *   넘기면 TanStack Query의 부분 매칭이 다른 params 조합과 매칭되지 않는 함정이 있어(길이만큼만
- *   비교), 이 훅이 그 함정을 피해 'rooms' 세그먼트까지만 넘기는지 회귀 검증한다.
- */
-
 function createWrapper() {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
@@ -83,7 +69,6 @@ describe('useUpdateReadPositionMutation', () => {
 
     const { result } = renderHook(
       () => ({
-        // params가 undefined가 아닌 필터 조합(isBookmark:true) 캐시 항목.
         filteredRooms: useQuery({
           queryKey: chatKeys.rooms({ isBookmark: true }),
           queryFn: async () => (await fetch(`${BASE_URL}/api/chat/rooms`)).json(),

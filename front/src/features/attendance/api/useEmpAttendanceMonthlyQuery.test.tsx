@@ -7,12 +7,6 @@ import { BASE_URL } from '@/shared/api/client'
 import { server } from '@/test/mocks/server'
 import { useEmpAttendanceMonthlyQuery } from './useEmpAttendanceMonthlyQuery'
 
-/**
- * useEmpAttendanceMonthlyQuery(EmpRecordsWidget이 소비하는 단건 조회 훅) 검증.
- * DEPT_ATTENDANCE_MONTHLY는 부서 목록 엔드포인트뿐이라, size=100으로 통째로 받아
- * select로 empInfo.empId가 일치하는 행 하나만 골라내는 동작 + enabled 게이팅을 확인한다.
- */
-
 function makeRow(empId: number, total: number) {
   return {
     empInfo: { empId, empNo: `20260700${empId}`, empName: `사원${empId}`, deptName: '본사', positionName: '사원' },

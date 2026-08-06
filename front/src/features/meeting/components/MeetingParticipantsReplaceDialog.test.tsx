@@ -7,13 +7,6 @@ import { BASE_URL } from '@/shared/api/client'
 import { server } from '@/test/mocks/server'
 import { MeetingParticipantsReplaceDialog } from './MeetingParticipantsReplaceDialog'
 
-/**
- * MeetingParticipantsReplaceDialog(F805, ROADMAP T4.3-c) 회귀 방지 테스트.
- * - 열릴 때 기존 참여자를 EmployeePicker 선택으로 선반영(전량 교체 전제).
- * - 선택 0명이면 저장 버튼 비활성(계약상 빈 배열 불가).
- * - 저장 성공 시 PATCH participantIds로 호출 + 성공 토스트 + onOpenChange(false).
- * - 실패 시 handleApiError 토스트만 뜨고 onOpenChange는 호출되지 않는다.
- */
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))

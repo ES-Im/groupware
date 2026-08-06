@@ -2,19 +2,9 @@ import dayjs from 'dayjs'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { meetingReservationCreateSchema } from './meetingReservationCreateSchema'
 
-/**
- * meetingReservationCreateSchema(F803, ROADMAP T3.2) 단위 테스트.
- * 필드 근거: MEETING_RESERVATION_CREATE/request-fields.adoc(추측 금지).
- *
- * 핵심 경계 케이스: 백엔드 MeetingReserveRequest는 LocalDateTime.of(meetingDate, startAt).isBefore(now)로
- * 판정한다 — meetingDate 단독(day 단위)이 아니라 meetingDate+startAt 조합을 now와 비교해야 한다.
- * "now" 기준값을 고정하기 위해 vi.setSystemTime을 사용한다.
- */
 function validValues(overrides: Partial<Record<string, unknown>> = {}) {
   return {
     title: '주간 회의',
-    // "현재 이후" refine을 항상 통과하도록 하드코딩 대신 미래(내일) 날짜를 쓴다. meetingDate+startAt
-    // 조합 경계를 검증하는 아래 describe는 vi.setSystemTime + 명시적 meetingDate override로 별도 고정한다.
     meetingDate: dayjs().add(1, 'day').format('YYYY-MM-DD'),
     startAt: '10:00',
     endAt: '11:00',
@@ -102,9 +92,6 @@ describe('meetingReservationCreateSchema - meetingDate+startAt 조합 vs now 경
   })
 
   it('내일 예약이면 startAt 시각 자체(00:00)가 현재 시각보다 이르더라도 통과한다(day+time 조합 비교)', () => {
-    // meetingDate가 미래이면 startAt의 시분(00:00)만 떼어 "현재 시각(12:00)보다 이르다"고
-    // 잘못 판정하면 안 된다 — 조합된 LocalDateTime(2026-07-11T00:00) 자체는 now(2026-07-10T12:00)
-    // 이후이므로 통과해야 한다.
     const result = meetingReservationCreateSchema.safeParse(
       validValues({ meetingDate: '2026-07-11', startAt: '00:00', endAt: '01:00' }),
     )

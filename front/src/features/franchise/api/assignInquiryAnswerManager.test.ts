@@ -2,18 +2,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { apiClient } from '@/shared/api/client'
 import { assignInquiryAnswerManager } from './assignInquiryAnswerManager'
 
-/**
- * assignInquiryAnswerManager(FRANCHISE_INQUIRY_ASSIGN_ANSWER, ROADMAP(FRANCHISE) T5.3, F1620)
- * 단위 테스트. updateFranchiseManager와 동형 구조(PATCH + 쿼리 파라미터 필수 + 본문 없음)라
- * apiClient.patch 직접 모킹으로 요청 URL/쿼리 파라미터/본문을 검증한다(createFranchise.test.ts·
- * toggleFranchiseEducationActive.test.ts와 동일 관행).
- *
- * 핵심 계약:
- * - PATCH /api/franchise-inquiries/{inquiryId}/assign-answer?assignedEmpId={value}
- * - assignedEmpId는 필수 쿼리 파라미터(null 배정 불가) — 본문은 null.
- * - 성공 시 204(반환값 없음).
- */
-
 vi.mock('@/shared/api/client', () => ({
   apiClient: { patch: vi.fn() },
 }))

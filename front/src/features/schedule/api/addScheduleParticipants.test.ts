@@ -2,9 +2,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { apiClient } from '@/shared/api/client'
 import { addScheduleParticipants } from './addScheduleParticipants'
 
-/**
- * addScheduleParticipants(F005, ROADMAP(SCHEDULE) T5.1) 단위 테스트.
- */
 vi.mock('@/shared/api/client', () => ({
   apiClient: { post: vi.fn().mockResolvedValue({ data: undefined }) },
 }))

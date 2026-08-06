@@ -3,16 +3,6 @@ import { describe, expect, it } from 'vitest'
 import type { DraftDetailResponse } from '../../model/draftDetail'
 import { SalesDraftBody } from './SalesDraftBody'
 
-/**
- * SalesDraftBody(F761, ROADMAP(SALES) T3.2) 컴포넌트 렌더 테스트.
- *
- * 검증 축(SalesDraftBody.tsx 주석 · LeaveDraftBody 동형):
- *   - sales 슬롯(franchiseName·reportMonth·salesAmount) + 공통 content를 렌더.
- *   - 매출액은 천 단위 구분 표기("1,000,000원").
- *   - 보고월은 dayjs 포맷("2026년 7월").
- *   - sales가 null이면(호출부 계약 위반 방어) 아무것도 렌더하지 않는다.
- */
-
 function draft(overrides: Partial<DraftDetailResponse> = {}): DraftDetailResponse {
   return {
     draftId: 1,

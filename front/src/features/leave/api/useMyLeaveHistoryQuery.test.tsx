@@ -8,16 +8,6 @@ import { server } from '@/test/mocks/server'
 import { leaveKeys } from '../model/leaveKeys'
 import { useMyLeaveHistoryQuery } from './useMyLeaveHistoryQuery'
 
-/**
- * useMyLeaveHistoryQuery(F742, ROADMAP(LEAVE) M3 T3.1) 실동작 검증.
- *
- * - leaveKeys.myHistory(params)로 캐시되는지(QueryClient.getQueryData로 확인) — 신설된
- *   leaveKeys 팩토리가 실제로 소비되는지 검증하는 목적을 겸한다.
- * - 배열 응답이 Page 래핑 없이 그대로 노출되는지.
- * - approvalStatus 변경 시 keepPreviousData로 이전 목록을 유지해 isLoading이 다시 true가
- *   되지 않는지(attendance useMyAttendanceMonthlyQuery.test.tsx와 동일 패턴).
- */
-
 function makeEntry(draftId: number, leaveType: string) {
   return {
     draftId,

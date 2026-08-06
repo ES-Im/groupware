@@ -9,12 +9,6 @@ import { BASE_URL } from '@/shared/api/client'
 import { server } from '@/test/mocks/server'
 import { MyMeetingCalendarPage } from './MyMeetingCalendarPage'
 
-/**
- * MyMeetingCalendarPage(F800, ROADMAP T1.4, P1) 회귀 방지 테스트.
- *
- * getMyMeetingReservationsCalendar.test.ts/useMyMeetingReservationsCalendarQuery.test.tsx가
- * 이미 확립한 MSW 엔드포인트(GET /api/meetings/my/reservations/calendar)를 그대로 재사용한다.
- */
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))
@@ -34,9 +28,6 @@ function makeItem(meetingId: number, title: string, isCanceled = false) {
     reserverDeptName: '개발팀',
     reserverEmpName: '홍길동',
     title,
-    // FullCalendar 초기 뷰(dayGridMonth)가 현재월(테스트 실행 시점 실제 시스템 날짜)을 보여주므로,
-    // 이벤트가 초기 뷰에 실제로 렌더되도록 오늘 날짜로 고정한다(다른 달로 고정하면 초기 뷰에
-    // 렌더되지 않아 findByText가 타임아웃난다).
     meetingDate: dayjs().format('YYYY-MM-DD'),
     startAt: '10:00:00',
     endAt: '11:00:00',
@@ -167,7 +158,6 @@ describe('MyMeetingCalendarPage - 라우팅', () => {
     const eventEl = await screen.findByText(/주간 회의/)
     eventEl.click()
 
-    // 상세 "페이지"로의 navigate는 발생하지 않고, 캘린더 아래 인라인 패널에 상세(예약자)가 표시된다.
     expect(await screen.findByText('개발팀 · 홍길동')).toBeInTheDocument()
     expect(mockNavigate).not.toHaveBeenCalledWith('/meetings/10')
   })

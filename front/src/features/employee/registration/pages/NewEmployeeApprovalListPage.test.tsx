@@ -7,21 +7,10 @@ import { BASE_URL } from '@/shared/api/client'
 import { server } from '@/test/mocks/server'
 import { NewEmployeeApprovalListPage } from './NewEmployeeApprovalListPage'
 
-/**
- * NewEmployeeApprovalListPage(ROADMAP T4.1-c) 페이지 단위 통합 플로우 테스트.
- *
- * 개별 훅/컴포넌트 로직(useNewEmployeesQuery, EmpApprovalWizardDialog, EmpBelongingsAssignmentForm 등)은
- * 각자의 단위 테스트(T4.1-a/b)가 이미 커버하므로, 이 파일은 "페이지가 조립됐을 때"의 흐름만 다룬다:
- * 검색/페이지네이션 재조회, 마법사 1→2단계 전이(성공/실패), 두 mutation의 무효화가 목록에 반영되는지,
- * 승인 후 2단계 이탈 경고.
- */
-
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn(), warning: vi.fn() },
 }))
 
-// radix-ui Checkbox(react-use-size)가 크기 관측에 ResizeObserver를 쓰는데 jsdom에는 구현이 없다.
-// EmpApprovalWizardDialog.test.tsx 선례와 동일 패턴(2단계 EmpBelongingsAssignmentForm이 렌더될 때 필요).
 if (typeof globalThis.ResizeObserver === 'undefined') {
   class ResizeObserverStub {
     observe() {}
@@ -89,7 +78,6 @@ function renderPage() {
   )
 }
 
-/** 1단계에서 입사일자를 입력하고 승인을 제출하는 헬퍼(다이얼로그 스코프 내에서 동작). */
 async function submitStep1(user: ReturnType<typeof userEvent.setup>, hiredAt = '2024-03-05') {
   const dialog = screen.getByRole('dialog')
   await user.type(within(dialog).getByLabelText('입사일자'), hiredAt)
@@ -120,12 +108,10 @@ describe('NewEmployeeApprovalListPage - 검색/페이지네이션', () => {
     expect(requests[0].keyword).toBeNull()
     expect(requests[0].page).toBe('0')
 
-    // 페이지 이동 시 재조회 + 빈 목록 안내.
     await user.click(screen.getByRole('button', { name: '다음 페이지' }))
     await screen.findByText('가입 대기 중인 사원이 없습니다.')
     expect(requests.some((r) => r.page === '1')).toBe(true)
 
-    // 검색어 입력(디바운스 300ms) — 유예 전에는 반영되지 않는다.
     await user.type(screen.getByLabelText('이름 검색'), '김철수')
     expect(requests.every((r) => r.keyword !== '김철수')).toBe(true)
 
@@ -175,7 +161,6 @@ describe('NewEmployeeApprovalListPage - 마법사 1→2단계 전이', () => {
     await waitFor(() => expect(toast.error).toHaveBeenCalledWith('이미 승인된 사원입니다'))
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
 
-    // 승인만으로는 목록에서 사라지지 않으므로(재조회해도 동일 응답), 대상이 그대로 표에 남아있다.
     expect(approvalCallCount).toBe(1)
     expect(await screen.findByText('홍길동')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '승인' })).toBeInTheDocument()

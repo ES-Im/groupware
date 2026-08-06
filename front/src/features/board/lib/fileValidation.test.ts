@@ -2,12 +2,6 @@ import { describe, expect, it } from 'vitest'
 import type { BoardFileInfo } from '../model/board'
 import { BoardFileValidationError, validateBoardFileUpload } from './fileValidation'
 
-/**
- * validateBoardFileUpload(ROADMAP T13.2) 단위 테스트.
- * 도메인모델.md 기준(게시글당 최대 10개·총 10MB·허용확장자 화이트리스트)의 세 위반 유형을
- * 각각 확인하고, 통과 케이스도 함께 검증한다.
- */
-
 function makeFile(name: string, size: number): File {
   return new File([new Uint8Array(size)], name)
 }

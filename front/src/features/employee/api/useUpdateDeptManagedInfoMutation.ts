@@ -3,10 +3,6 @@ import { employeeKeys } from '../model/queryKeys'
 import type { UpdateDeptManagedInfoRequest } from './updateDeptManagedInfo'
 import { updateDeptManagedInfo } from './updateDeptManagedInfo'
 
-/**
- * DEPT_MANAGER/ADMIN의 특정 사원 정보 수정 mutation 훅.
- * invalidate 범위는 useUpdateHrManagedInfoMutation과 동일(detail + empsForManagement 전체).
- */
 export function useUpdateDeptManagedInfoMutation() {
   const queryClient = useQueryClient()
 

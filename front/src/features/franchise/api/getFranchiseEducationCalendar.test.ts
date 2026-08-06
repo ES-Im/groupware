@@ -2,15 +2,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { apiClient } from '@/shared/api/client'
 import { getFranchiseEducationCalendar } from './getFranchiseEducationCalendar'
 
-/**
- * getFranchiseEducationCalendar(FRANCHISE_EDUCATION_CALENDAR, ROADMAP(FRANCHISE) T4.1) 단위 테스트.
- *
- * apiClient.get을 직접 모킹해 axios 호출 인자(URL, params)와 응답 그대로 반환 여부만 검증한다
- * (getFranchises.test.ts / getMyMeetingReservationsCalendar.test.ts와 동일 패턴).
- *
- * start/end는 둘 다 선택 쿼리 — 값이 있을 때만 params에 조건부로 채워 쿼리스트링 자체를
- * 생략한다(query-parameters.adoc 실측: 미입력 시 서버가 당월 범위 기본 적용).
- */
 vi.mock('@/shared/api/client', () => ({
   apiClient: { get: vi.fn().mockResolvedValue({ data: [] }) },
 }))

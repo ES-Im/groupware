@@ -8,15 +8,6 @@ import { useAuthStore } from '@/features/auth/store/authStore'
 import { server } from '@/test/mocks/server'
 import { DepartmentMembersPage } from './DepartmentMembersPage'
 
-/**
- * DepartmentMembersPage(F104, 본인 소속 바로가기) 회귀 방지 테스트.
- *
- * T9.2에서 이 페이지는 DepartmentDetailView에 canManageDept를 의도적으로 전달하지 않는다
- * (기본값 false) — ADMIN 계정이라도 이 조회 전용 화면에서는 "부서 관리" 섹션(활성화 토글·
- * 부서명 변경·상위부서 변경·부서장 지정/종료)이 노출되면 안 된다. 관리는 오직
- * DepartmentDetailPage(/departments/:deptId, T7.1)에서만 수행한다.
- */
-
 const meFixture = {
   empBasicInfo: {
     empNo: '000000001',
@@ -111,14 +102,9 @@ describe('DepartmentMembersPage (F104) - 관리 섹션 회귀 방지', () => {
 
     renderPage()
 
-    // 이 페이지는 useMeQuery → (deptId 확정 후) useDepartmentInfoQuery/useDepartmentMembersQuery로
-    // 이어지는 2단 워터폴 조회 구조라, 전체 스위트를 병렬 실행할 때(다수 jsdom 환경 동시 구동으로
-    // 자원 경합이 커짐) 기본 findBy 타임아웃(1000ms)을 넘기는 경우가 실측 확인됐다(로직 결함이
-    // 아니라 단순 타이밍 여유 부족 — 플레이키 안정화 차원에서 타임아웃만 넉넉히 늘린다).
     expect(
       await screen.findByRole('heading', { name: '본사', level: 2 }, { timeout: 5000 }),
     ).toBeInTheDocument()
-    // 관리 섹션 헤딩·액션 버튼 모두 부재해야 한다.
     expect(screen.queryByText('부서 관리')).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: '부서명 변경' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: '활성화 전환' })).not.toBeInTheDocument()
@@ -126,12 +112,7 @@ describe('DepartmentMembersPage (F104) - 관리 섹션 회귀 방지', () => {
   })
 
   it('순수 HR 역할(DEPT_MANAGER 미보유)도 canManageMembers가 true가 되어 "정보 수정" 버튼이 보인다', async () => {
-    // 확장(canManageMembers = canManageAsHr || canManageAsDeptManager = HR || DEPT_MANAGER) 회귀
-    // 방지: 순수 HR은 RoleHierarchy상 DEPT_MANAGER를 포함하지 않으므로, OR 분기가 없으면 "관리"
-    // 액션 컬럼(정보 수정 버튼) 자체가 렌더되지 않는다.
     useAuthStore.setState({ roles: ['HR'] })
-    // 정보 수정 모달용 관리 레코드 전량 조회(useDeptEmpManagementListQuery, GET /api/employees).
-    // 대상 사원(empId 5)이 포함돼야 [정보 수정] 버튼이 활성화된다(룩업 맵 hit).
     const managementPage = {
       content: [
         {

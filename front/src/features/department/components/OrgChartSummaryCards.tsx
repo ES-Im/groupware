@@ -7,11 +7,6 @@ interface OrgChartSummaryCardsProps {
   totalMemberCount: number
 }
 
-/**
- * 조직도 상단 요약 통계 카드 4개(전체 부서/활성 부서/부서장 지정 완료/조회 인원).
- * 계산은 상위 컨테이너(DepartmentsExplorerLayout)가 전담하고, 이 컴포넌트는 값만 받아 그린다.
- * 각 카드는 label + 큰 숫자 + 보조 hint 한 줄로 구성한다.
- */
 export function OrgChartSummaryCards({
   totalDeptCount,
   activeDeptCount,

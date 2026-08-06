@@ -29,10 +29,8 @@ import { useMessageTrashMutation } from '../api/useMessageTrashMutation'
 import { useSendDraftMutation } from '../api/useSendDraftMutation'
 import type { MailBox, MessagesResponse } from '../model/messageTypes'
 
-/** 검색 디바운스 지연(ms). DocumentBoxTable·BoardListPage와 동일한 값을 재사용한다. */
 const SEARCH_DEBOUNCE_MS = 300
 
-/** 받은함 전용 읽음 필터 상태. 'all'은 isRead 파라미터 자체를 전송하지 않는 것을 뜻한다. */
 type ReadFilter = 'all' | 'read' | 'unread'
 
 const READ_FILTERS: { value: ReadFilter; label: string }[] = [
@@ -41,7 +39,6 @@ const READ_FILTERS: { value: ReadFilter; label: string }[] = [
   { value: 'unread', label: '안읽음' },
 ]
 
-/** 박스별 빈 목록 안내 문구(F1501~F1504). */
 const EMPTY_MESSAGES: Record<MailBox, string> = {
   received: '받은 쪽지가 없습니다.',
   sent: '보낸 쪽지가 없습니다.',
@@ -49,19 +46,10 @@ const EMPTY_MESSAGES: Record<MailBox, string> = {
   trash: '휴지통이 비어 있습니다.',
 }
 
-/**
- * 쪽지 일시(`yyyy-MM-dd'T'HH:mm:ss`) 표시 포맷. sentAt은 미발송(임시보관)에서 null → 대시 표기.
- * approval formatDraftDateTime과 동일 포맷이지만 cross-domain import 금지 원칙에 따라 로컬 정의한다.
- */
 function formatMessageDateTime(value: string | null): string {
   return value ? dayjs(value).format('YYYY-MM-DD HH:mm') : '-'
 }
 
-/**
- * 상대방 표기(F1502): 보낸함은 대표 수신자 + "외 N명"(receiverCount는 대표를 포함한 전체
- * 수신자 수이므로 N = receiverCount - 1), 그 외 박스는 발신자(부서명 + 이름)를 표기한다
- * (휴지통의 내 발신 쪽지도 스펙대로 발신자 열을 유지한다 — isSentByMe 분기는 상세 뷰 몫).
- */
 function formatCounterpart(box: MailBox, row: MessagesResponse): string {
   if (box === 'sent') {
     if (!row.representativeReceiverName) {
@@ -74,7 +62,6 @@ function formatCounterpart(box: MailBox, row: MessagesResponse): string {
   return row.senderDeptName ? `${row.senderDeptName} ${row.senderName}` : row.senderName
 }
 
-/** 아바타 이니셜에 쓰는 짧은 이름(접미사 없음). sent는 대표 수신자, 그 외는 발신자. */
 function counterpartAvatarName(box: MailBox, row: MessagesResponse): string {
   if (box === 'sent') {
     return row.representativeReceiverName ?? '쪽'
@@ -82,9 +69,6 @@ function counterpartAvatarName(box: MailBox, row: MessagesResponse): string {
   return row.senderName
 }
 
-/** 액션 컬럼(휴지통이동/복구/완전삭제 T3.4-b, 임시보관 발송/삭제 퀵액션 T5.3-b)이 소비하는
- * mutate 트리거. draft 삭제(onDeleteDraft)는 완전삭제(onDelete, isSentByMe 필요)와 다른
- * API(deleteDraft)·다른 시그니처(작성자 본인 단건)라 별도 필드로 둔다(이름 재사용 안 함). */
 interface MessageRowActions {
   onTrash: (params: { messageId: number; isSentByMe: boolean }) => void
   onRestore: (params: { messageId: number; isSentByMe: boolean }) => void
@@ -93,10 +77,6 @@ interface MessageRowActions {
   onDeleteDraft: (messageId: number) => void
 }
 
-/**
- * box별 행 액션 버튼(받은/보낸함=휴지통이동 1버튼, 휴지통=복구+완전삭제, 임시보관함=발송+삭제).
- * 행 자체 클릭(상세/편집 진입)과 별개인 명시적 버튼이라 stopPropagation으로 중복 트리거를 막는다.
- */
 function MessageRowActionButtons({
   box,
   row,
@@ -210,10 +190,6 @@ function MessageRowActionButtons({
   )
 }
 
-/**
- * 목록 행 1건(레퍼런스 메일함 톤: 아바타 + 이름/부서 + 제목 + 시간/첨부/액션).
- * 받은함 미읽음 쪽지는 좌측 primary 강조선 + 옅은 배경 + 굵은 텍스트 + 우측 점으로 강조한다.
- */
 function MessageRow({
   box,
   row,
@@ -297,49 +273,24 @@ function MessageRow({
   )
 }
 
-/**
- * T2.2-a(MessageBoxPage)가 고정한 슬롯 계약 그대로의 props. 행 클릭 분기는 이 테이블 책임:
- * received/sent/trash 행 → onOpenDetail, drafts 행 → onOpenCompose(messageId, true)(편집 모드).
- */
 interface MessageBoxTableProps {
   box: MailBox
   onOpenDetail: (messageId: number) => void
   onOpenCompose: (messageId?: number, isEdit?: boolean) => void
 }
 
-/**
- * 쪽지함 4박스 공용 목록(ROADMAP(MESSAGE) T2.2-b, F1501~F1504) — 레퍼런스 메일함 톤의
- * row-list로 렌더한다(표 마크업 대신 아바타+이름/부서+제목+시간/첨부/액션을 한 행에 배치).
- *
- * DocumentBoxTable(approval)의 목록 패턴 — 검색 300ms 디바운스, usePageState + PaginationControls
- * (페이징 number+1), 조회 실패 handleApiError 토스트 — 을 복제하되, 문서함과 달리 검색창을 이
- * 컴포넌트가 자체 소유한다(받은함 전용 isRead 필터가 box 조건부라 검색+필터를 함께 소유하는 편이
- * 응집도가 높음 — 태스크 계획 결정).
- *
- * box 전환 시 이 컴포넌트는 리마운트되지 않고 box prop만 바뀐다(MessageBoxPage가 단일
- * TabsContent로 인스턴스를 유지) — useMessagesQuery의 keepPreviousData가 이전 박스 목록을
- * placeholder로 잠깐 유지하므로, isPlaceholderData 동안 목록을 dimming(투명도 감소 +
- * pointer-events 차단) 처리한다(2026-07-10 사용자 확정, useMessagesQuery.ts 주석 참고).
- */
 export function MessageBoxTable({ box, onOpenDetail, onOpenCompose }: MessageBoxTableProps) {
   const searchInputId = useId()
   const [searchValue, setSearchValue] = useState('')
   const [keyword, setKeyword] = useState('')
   const [readFilter, setReadFilter] = useState<ReadFilter>('all')
   const { page, size, onPageChange, resetPage } = usePageState()
-  // 행 액션(T3.4-b 휴지통 생명주기, T5.3-b 임시보관 발송/삭제)이 self-contained로 소비하는
-  // mutation. 상위(MessageBoxPage)로 콜백을 bubbling하지 않는다 — 상세 뷰(MessageDetailView)나
-  // 편집 뷰(MessageComposeView)와 달리 페이지 이동이 필요 없다(목록에 머문 채 invalidate로 갱신).
   const trashMutation = useMessageTrashMutation()
   const restoreMutation = useMessageRestoreMutation()
   const deleteMutation = useMessageDeleteMutation()
   const sendDraftMutation = useSendDraftMutation()
   const deleteDraftMutation = useDeleteDraftMutation()
 
-  // box가 바뀌면(탭 전환) 검색어·읽음필터·페이지를 초기화한다(다른 박스의 검색 결과가 남으면 혼란 —
-  // DocumentBoxHomePage가 탭 전환 시 searchValue를 비우는 것과 동일 이유). key 리마운트 대신
-  // 렌더 중 상태 조정(React 공식 "props 변경 시 상태 초기화" 패턴)을 쓴다: 인스턴스를 유지해야
-  // keepPreviousData의 이전 박스 placeholder가 살아 dimming 처리가 동작하기 때문이다.
   const [prevBox, setPrevBox] = useState(box)
   if (prevBox !== box) {
     setPrevBox(box)
@@ -349,8 +300,6 @@ export function MessageBoxTable({ box, onOpenDetail, onOpenCompose }: MessageBox
     resetPage()
   }
 
-  // 검색어 디바운스: 입력값을 300ms 유예 후 확정 keyword로 반영하고 페이지를 0으로 리셋한다
-  // (DocumentBoxTable 디바운스 effect 복제 — resetPage는 useCallback으로 안정화돼 있다).
   useEffect(() => {
     const trimmed = searchValue.trim()
     if (trimmed === keyword) {
@@ -363,8 +312,6 @@ export function MessageBoxTable({ box, onOpenDetail, onOpenCompose }: MessageBox
     return () => clearTimeout(timer)
   }, [searchValue, keyword, resetPage])
 
-  // 받은함 외 박스에서는 isRead 키 자체를 params에 만들지 않는다 — queryKey에 무의미한 필드가
-  // 섞여 동일 조회가 중복 캐시되는 것을 막는다(T2.1 리뷰 기록). '전체'도 파라미터 미전송이다.
   const isReadParam =
     box === 'received' && readFilter !== 'all' ? readFilter === 'read' : undefined
   const listQuery = useMessagesQuery(box, {
@@ -374,7 +321,6 @@ export function MessageBoxTable({ box, onOpenDetail, onOpenCompose }: MessageBox
     ...(isReadParam != null ? { isRead: isReadParam } : {}),
   })
 
-  // 조회 실패는 PRD 지시대로 토스트로 알린다(handleApiError 단일 진입점 — DocumentBoxTable 컨벤션).
   useEffect(() => {
     if (!listQuery.error) {
       return
@@ -382,10 +328,6 @@ export function MessageBoxTable({ box, onOpenDetail, onOpenCompose }: MessageBox
     handleApiError(listQuery.error, { toast })
   }, [listQuery.error])
 
-  // 행 액션(T3.4-b 휴지통 생명주기, T5.3-b 임시보관 발송/삭제)이 소비하는 mutate 트리거 묶음.
-  // onSendDraft·onDeleteDraft는 sendDraft(T4.3-a)·deleteDraft(T5.3-a) 훅이 onError 없이 전파하는
-  // 컨벤션이라(다른 소비처가 submitWithErrorMapping으로 위임받는 구조), mutate 호출 시 handleApiError를
-  // 옵션으로 직접 연결한다(신규 에러분기 발명 아님, 표준 진입점 재사용 — MessageBoxPage 동일 판단).
   const rowActions: MessageRowActions = {
     onTrash: trashMutation.mutate,
     onRestore: restoreMutation.mutate,
@@ -420,13 +362,10 @@ export function MessageBoxTable({ box, onOpenDetail, onOpenCompose }: MessageBox
       return
     }
     setReadFilter(next)
-    // 필터가 바뀌면 결과 집합이 달라지므로 페이지를 처음으로 되돌린다(검색어 확정 시와 동일 규칙).
     resetPage()
   }
 
-  // 행 활성화(클릭/Enter) 분기: 임시보관함은 편집 모드 작성 뷰, 그 외 박스는 상세 뷰로 연다.
   function handleRowActivate(row: MessagesResponse) {
-    // placeholder(이전 박스/페이지 데이터) 표시 중에는 잘못된 대상으로 이동하지 않도록 무시한다.
     if (isPlaceholder) {
       return
     }
@@ -439,8 +378,6 @@ export function MessageBoxTable({ box, onOpenDetail, onOpenCompose }: MessageBox
 
   return (
     <div className="flex flex-1 flex-col gap-4">
-      {/* 도구줄: 검색 입력(좌) + 받은함 전용 읽음 필터(우, 세그먼트 톤). 검색 라벨의 "제목/내용/발신자"는
-          안내용이고 서버는 단일 keyword로 위임한다(PRD F1501). */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative w-full sm:max-w-xs">
           <Search className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -482,9 +419,6 @@ export function MessageBoxTable({ box, onOpenDetail, onOpenCompose }: MessageBox
         )}
       </div>
 
-      {/* 목록 영역: flex-1로 남는 높이를 채워 페이지네이션을 카드 하단에 고정한다.
-          isPlaceholderData(박스 전환·검색·페이지 변경 중 이전 데이터 유지) 동안에는
-          목록을 흐리게 하고 클릭을 차단해 "이전 데이터"임을 드러낸다. */}
       <div
         aria-busy={isPlaceholder || undefined}
         className={cn(
@@ -495,7 +429,6 @@ export function MessageBoxTable({ box, onOpenDetail, onOpenCompose }: MessageBox
         {listQuery.isLoading ? (
           <p className="py-8 text-center text-sm text-muted-foreground">불러오는 중...</p>
         ) : listQuery.error ? (
-          // 실패는 위 useEffect가 토스트로 알렸으므로 화면은 빈 상태 문구만 표시한다.
           <p className="py-8 text-center text-sm text-muted-foreground">
             목록을 불러오지 못했습니다.
           </p>
@@ -516,7 +449,6 @@ export function MessageBoxTable({ box, onOpenDetail, onOpenCompose }: MessageBox
         )}
       </div>
 
-      {/* 하단 페이지네이션(공유 표준 컴포넌트 재사용, 페이징 number+1) */}
       <PaginationControls
         className="border-t pt-4"
         pageInfo={pageInfo}

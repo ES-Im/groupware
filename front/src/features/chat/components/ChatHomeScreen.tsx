@@ -6,12 +6,6 @@ import { useChatOverlayStore } from '../lib/chatOverlayStore'
 import { ChatEmployeeListPanel } from './ChatEmployeeListPanel'
 import { ChatRoomListPanel } from './ChatRoomListPanel'
 
-/**
- * 채팅 오버레이 홈 화면(screen==='home'). 상단 프로필 + 사원목록/채팅창목록 탭으로 구성된다.
- * 탭 선택 상태는 chatOverlayStore가 소유한다 — 방 상세에서 '멤버 초대'로 진입할 때
- * (startInviteFlow) 이 화면의 사원목록 탭이 초대 모드로 강제 전환되어야 하므로 로컬 상태로 두지
- * 않는다. presence(온라인 상태 배지·상태 메시지)는 이 프로젝트에 없는 기능이라 발명하지 않는다.
- */
 export function ChatHomeScreen() {
   const activeTab = useChatOverlayStore((state) => state.activeTab)
   const setActiveTab = useChatOverlayStore((state) => state.setActiveTab)
@@ -44,7 +38,6 @@ export function ChatHomeScreen() {
         onValueChange={(value) => setActiveTab(value as 'employees' | 'rooms')}
         className="min-h-0 flex-1"
       >
-        {/* 두 탭이 패널 폭을 꽉 채우도록 block-level flex(w-auto)로 확장해 활성 탭 구분을 뚜렷하게 한다. */}
         <TabsList className="mx-4 mt-3 flex w-auto">
           <TabsTrigger value="employees">사원목록</TabsTrigger>
           <TabsTrigger value="rooms">채팅창목록</TabsTrigger>

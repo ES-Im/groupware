@@ -8,17 +8,6 @@ import { server } from '@/test/mocks/server'
 import type { ChatMessagesPage } from '../model/chatMessage'
 import { useChatMessagesQuery } from './useChatMessagesQuery'
 
-/**
- * useChatMessagesQuery(ROADMAP(CHAT) T2.2) 실동작 검증.
- *
- * - cursor 없이 최초 페이지를 조회해 messages/nextCursor/hasNext를 그대로 반환해야 한다
- *   (chatMessagesResponseFields 실측).
- * - hasNext:true일 때 fetchNextPage가 이전 응답의 nextCursor를 cursor 쿼리 파라미터로 실어
- *   요청해야 한다(getNextPageParam).
- * - hasNext:false면 hasNextPage가 false여야 한다(다음 페이지 없음).
- * - roomId가 undefined면 enabled:false로 요청 자체가 나가지 않아야 한다.
- */
-
 function messagesPage(hasNext: boolean, nextCursor: number | null, ids: number[]): ChatMessagesPage {
   return {
     messages: ids.map((id) => ({

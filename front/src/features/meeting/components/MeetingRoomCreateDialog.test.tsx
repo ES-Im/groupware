@@ -8,15 +8,6 @@ import { BASE_URL } from '@/shared/api/client'
 import { server } from '@/test/mocks/server'
 import { MeetingRoomCreateDialog } from './MeetingRoomCreateDialog'
 
-/**
- * MeetingRoomCreateDialog(F812, ROADMAP(MEETING-ROOMS) T6.3-b) 검증.
- * RegisterDepartmentDialog.test.tsx와 동형 패턴.
- *
- * - zod 클라 사전검증(이름/설명 필수, 수용인원 미입력) 실패 경로.
- * - 제출 중 Esc/취소로 닫을 수 없는 가드.
- * - 제출 성공 시 성공 토스트 + 다이얼로그 닫힘 + 생성된 회의실의 P7(관리 상세)로 navigate.
- * - 서버 검증 실패 시 다이얼로그가 닫히지 않고 root 에러가 표시된다.
- */
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))

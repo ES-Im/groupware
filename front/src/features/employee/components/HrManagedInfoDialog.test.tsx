@@ -9,12 +9,6 @@ import { server } from '@/test/mocks/server'
 import type { EmpManagementRecord } from '../model/empManagement'
 import { HrManagedInfoDialog } from './HrManagedInfoDialog'
 
-/**
- * HrManagedInfoDialog(`HR_UPDATE_EMP_INFO`, HR/ADMIN 전용) 검증.
- * request-fields.adoc: "HR은 ADMIN 부여 불가, ADMIN은 전체 부여 가능" — 이 컴포넌트가
- * authStore 원본 roles에서 'ADMIN' 포함 여부로 후보 목록 자체를 제한하는지 확인한다.
- */
-
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))
@@ -113,8 +107,6 @@ describe('HrManagedInfoDialog - 제출', () => {
     const user = userEvent.setup()
     renderDialog()
 
-    // 빈 문자열은 "변경 안 함"이라 통과해야 하므로(파트셜 업데이트 계약), 형식 자체가 잘못된
-    // 비밀번호(8자 미만)를 입력해 실제 포맷 검증 실패 경로를 확인한다.
     await user.type(screen.getByLabelText('새 비밀번호'), 'ab1!')
     await user.click(screen.getByRole('button', { name: '저장' }))
 
@@ -122,8 +114,6 @@ describe('HrManagedInfoDialog - 제출', () => {
     expect(patchSpy).not.toHaveBeenCalled()
   })
 
-  // EmpUpdateRequestByHR.java 실측: partial-update 계약이라 비밀번호를 비워두면 요청 바디에서
-  // 아예 제외돼야 한다(실사용 검증 중 발견한 UX 결함 수정 — 이전에는 매번 새 비밀번호를 강제했다).
   it('비밀번호를 비워두면 검증을 통과하고 password 필드 없이 전송된다', async () => {
     useAuthStore.setState({ roles: ['HR'] })
     let capturedBody: unknown
@@ -147,8 +137,6 @@ describe('HrManagedInfoDialog - 제출', () => {
     })
   })
 
-  // 기존 내선번호가 비어있는 사원(예: extensionNo=null)의 권한만 바꾸려 할 때도 내선번호 재입력을
-  // 강제하지 않는다 — 빈 문자열이면 password와 동일하게 요청 바디에서 제외된다.
   it('내선번호를 비워두면 검증을 통과하고 extensionNo 필드 없이 전송된다', async () => {
     useAuthStore.setState({ roles: ['HR'] })
     let capturedBody: unknown
@@ -172,10 +160,6 @@ describe('HrManagedInfoDialog - 제출', () => {
     })
   })
 
-  // 서버(EmpCommandService.validateAssignableRolesByHR)는 순수 HR이 ADMIN을 배열에 "포함해
-  // 재전송"하는 것도 하드 거부한다(새로 부여하려는 시도가 아니어도) — 체크박스로 제거된 걸로
-  // 보내면 조용히 제거되고, 보존하려 포함하면 거부되므로 이 다이얼로그는 후보 밖 권한이 있으면
-  // 권한 편집 자체를 잠그고 systemRoleCode를 아예 생략한다.
   it('대상 사원이 후보 밖 권한(ADMIN)을 이미 보유하면 권한 체크박스가 잠기고 제출 시 systemRoleCode가 생략된다', async () => {
     useAuthStore.setState({ roles: ['HR'] })
     const recordWithAdmin: EmpManagementRecord = { ...record, systemRoleCodeName: ['EMPLOYEE', 'ADMIN'] }

@@ -8,15 +8,6 @@ import { server } from '@/test/mocks/server'
 import { franchiseKeys } from '../model/queryKeys'
 import { useFranchiseEducationActivateMutation } from './useFranchiseEducationActivateMutation'
 
-/**
- * useFranchiseEducationActivateMutation(FRANCHISE_EDUCATION_ACTIVATE, ROADMAP(FRANCHISE) T4.4, F1614)
- * 성공 후 invalidate 검증. useFranchiseEducationUpdateMutation.test.tsx와 동일 관행.
- *
- * ⚠️ 활성화는 POST /api/franchise-educations/{educationId}/activation(회의실 선례의 PATCH와 다름).
- * 성공(204) 시 franchiseKeys.education.detail(educationId)와 [...all, 'education', 'calendar']
- * 접두사가 함께 invalidate된다.
- */
-
 function createWrapper() {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },

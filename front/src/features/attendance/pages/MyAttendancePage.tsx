@@ -18,7 +18,6 @@ import type { AttendanceStatus } from '../model/attendance'
 import { AttendanceSummaryCard } from '../components/AttendanceSummaryCard'
 import { AttendanceTable } from '../components/AttendanceTable'
 
-/** 근태 상태 필터 셀렉트 옵션 순서(도메인모델 실측 6개, attendanceStatusBadgeMap과 동일 리터럴 순서). */
 const STATUS_OPTIONS: AttendanceStatus[] = [
   'NORMAL',
   'LATE_EARLY',
@@ -122,8 +121,6 @@ export function MyAttendancePage() {
 
       <Card className="h-fit">
         <CardContent className="space-y-4">
-          {/* 필터 툴바: 조회 월(yyyy-MM) + 근태 상태 필터. 검색창이 없는 2개 필터라 양끝 배치 대신
-              좌측 필터 클러스터로 묶는다(BoardListPage 툴바 톤 유지, 모바일은 세로 스택). */}
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
             <div className="flex items-center gap-2">
               <label htmlFor="attendance-month" className="sr-only">
@@ -157,7 +154,6 @@ export function MyAttendancePage() {
             </div>
           </div>
 
-          {/* 표 영역: 로딩/에러/빈 상태는 AttendanceTable이 빈 배열로 자체 처리, 로딩/에러만 여기서 분기 */}
           {listQuery.isLoading ? (
             <p className="py-8 text-center text-sm text-muted-foreground">불러오는 중...</p>
           ) : listQuery.error ? (

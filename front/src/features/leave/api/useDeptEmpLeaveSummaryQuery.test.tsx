@@ -8,14 +8,6 @@ import { server } from '@/test/mocks/server'
 import { leaveKeys } from '../model/leaveKeys'
 import { useDeptEmpLeaveSummaryQuery } from './useDeptEmpLeaveSummaryQuery'
 
-/**
- * useDeptEmpLeaveSummaryQuery(F745, ROADMAP(LEAVE) M4 T4.2) 실동작 검증.
- *
- * - deptId===undefined면 enabled:false로 대기해 요청 자체가 나가지 않는다.
- * - deptId가 확정된 number일 때 leaveKeys.deptSummary(deptId, params)로 캐시되고, empId를 포함한
- *   응답이 그대로 노출된다.
- */
-
 function makeRow(empId: number, empName: string) {
   return {
     empId,

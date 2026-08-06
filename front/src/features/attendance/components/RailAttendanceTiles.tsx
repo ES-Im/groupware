@@ -2,10 +2,6 @@ import { LogIn, LogOut } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
 import { useAttendanceQuickState } from '../lib/useAttendanceQuickState'
 
-/**
- * 좌측 고정 패널의 출퇴근 버튼(요청: "출 퇴근 버튼"). HeaderAttendanceQuickPanel과 같은
- * useAttendanceQuickState를 공유해 상태·mutation을 중복 구현하지 않는다.
- */
 export function RailAttendanceTiles() {
   const {
     canCheckIn,

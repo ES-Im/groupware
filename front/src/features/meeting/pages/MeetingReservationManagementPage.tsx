@@ -15,34 +15,10 @@ import { MeetingReservationDetailPanel } from '../components/MeetingReservationD
 import { CapacityLabel, CountPill, InitialAvatar, StatusPill } from '../components/meetingUiKit'
 import type { MeetingManagementItem } from '../model/meeting'
 
-/** 검색/회의실ID 입력 디바운스 지연(ms). BoardListPage/DeptLeavePage와 동일 값을 재사용한다. */
 const SEARCH_DEBOUNCE_MS = 300
 
 const columnHelper = createColumnHelper<MeetingManagementItem>()
 
-/**
- * P5 회의 예약 관리 페이지(F810, ROADMAP(MEETING-ROOMS) T5.2).
- *
- * T5.1(useManagementReservationsQuery)로 전사 회의 예약 목록을 조회한다. FACILITY 이상 권한
- * 전용 화면이지만, 별도 role 분기 없이 M4에서 이미 구현된 게이팅(canManageReservation이
- * reserverId 불일치 시 액션 영역을 자연히 숨김)에 기대어 P3 상세로는 조회 전용으로만 진입한다.
- *
- * 필터 3종:
- * - yearMonth: `type="month"` 네이티브 입력이라 키 입력 단위로 값이 바뀌지 않으므로(선택 즉시
- *   확정) 디바운스 없이 바로 반영한다(DeptLeavePage 동일 패턴). 기본값은 당월.
- * - keyword: 로컬 입력값을 300ms 디바운스한 뒤에만 확정 반영한다(BoardListPage/DeptLeavePage 동일).
- * - meetingRoomId: 예약 가능 회의실 검색(getAvailableMeetingRooms)은 date/startAt/endAt/capacity가
- *   전부 필수라 이 화면의 "회의실 선택 필터" 옵션 소스로 재사용할 수 없고, 회의실 관리 목록
- *   (T6.1)은 아직 이 태스크 시점에 존재하지 않는다 — 태스크 가이드가 명시한 폴백대로 단순
- *   숫자 입력으로 최소 구현한다. `type="number"` 역시 키 입력마다 값이 바뀌므로 keyword와
- *   동일하게 300ms 디바운스한다(DeptLeavePage의 year 필터 디바운스와 동일 이유).
- *
- * 세 필터 모두 변경 시 resetPage()로 페이지를 0으로 되돌린다. 행 클릭 시 P3 상세
- * (`/meetings/:meetingId`, T4.3-c)로 라우트 문자열 내비게이션만 수행한다(코드 결합 없음,
- * M3 T3.3-a·M2 T2.4-b와 동형).
- *
- * 라우팅은 아직 미배선(M8)이므로 직접 URL(`/meetings/management`)로만 검증한다.
- */
 export function MeetingReservationManagementPage() {
   const [yearMonth, setYearMonth] = useState(() => dayjs().format('YYYY-MM'))
 
@@ -52,12 +28,10 @@ export function MeetingReservationManagementPage() {
   const [meetingRoomIdInput, setMeetingRoomIdInput] = useState('')
   const [meetingRoomId, setMeetingRoomId] = useState<number | undefined>(undefined)
 
-  // 행 선택 시 상세 "페이지"로 이동하지 않고, 표 아래 인라인 상세 패널로 표시한다(P3 페이지 대체).
   const [selectedMeetingId, setSelectedMeetingId] = useState<number | undefined>(undefined)
 
   const { page, size, onPageChange, resetPage } = usePageState()
 
-  // 검색어 디바운스: 300ms 유예 후에만 확정 keyword로 반영 + page 리셋.
   useEffect(() => {
     const trimmed = searchInput.trim()
     if (trimmed === keyword) {
@@ -71,7 +45,6 @@ export function MeetingReservationManagementPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchInput, keyword])
 
-  // 회의실 ID 입력 디바운스: 숫자 입력도 keyword와 동일하게 키 입력마다 재요청되는 것을 막는다.
   useEffect(() => {
     const trimmed = meetingRoomIdInput.trim()
     const parsed = trimmed === '' ? undefined : Number(trimmed)
@@ -205,7 +178,6 @@ export function MeetingReservationManagementPage() {
               {pageInfo.totalElements}건
             </CountPill>
           </div>
-          {/* 필터 툴바: 조회 월 + 제목/예약자 검색 + 회의실 ID */}
           <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
             <label htmlFor="meeting-management-month" className="sr-only">
               조회 월
@@ -246,10 +218,6 @@ export function MeetingReservationManagementPage() {
           </div>
         </CardHeader>
         <CardContent>
-          {/* 목록 영역을 usePageState 기본 size(10)행 기준 높이로 고정한다(헤더 행 약 2.25rem +
-           * 본문 행 약 3rem×10 ≈ 32.25rem, 여유를 더해 34rem). 조회 결과가 10건 미만이어도 카드
-           * 높이가 줄지 않아 하단 페이지네이션·상세 패널 위치가 페이지마다 들쭉날쭉해지지 않는다
-           * (스크롤이 아닌 순수 높이 고정 — 남는 공간은 빈 여백으로 유지된다). */}
           <div className="flex min-h-[34rem] flex-col">
             {managementQuery.isLoading ? (
               <div className="flex flex-1 items-center justify-center">

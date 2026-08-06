@@ -16,49 +16,17 @@ import { InitialsAvatar } from './InitialsAvatar'
 
 interface CommentSectionProps {
   boardId: number
-  /**
-   * 렌더 방식. `standalone`(기본)은 자체 `<Card>`로 감싸 상위 요소와 여백을 두고 분리한다(전용
-   * 상세 페이지 BoardDetailPage). `embedded`는 바깥 Card 없이 헤더/본문만 렌더해, 상위(BoardDetailView
-   * 인라인 전환)의 같은 Card 안에 이어 붙일 수 있게 한다 — 사용자 요청("게시글 목록 카드 안에
-   * 상세+댓글이 한 뭉텅이로 보여야 한다")에 따라 카드 경계가 아닌 구분선(border-t)만으로 나뉜다.
-   * Card/CardHeader/CardContent가 공유하는 `--card-spacing` CSS 변수는 상위 Card가 이미 정의해
-   * 상속되므로, 바깥 Card를 생략해도 내부 여백은 동일하게 유지된다.
-   */
   variant?: 'standalone' | 'embedded'
 }
 
-/**
- * 게시글 상세 댓글 영역(ROADMAP T14.2, F313~F317, docs/prd/4.board-slice-prd.md §게시글 상세
- * 페이지). BoardDetailPage.tsx 하단에 마운트한다.
- *
- * 댓글 목록(F313)은 `parentCommentId` 유무로만 1-depth 스타일(들여쓰기·답글 버튼 노출 여부)을
- * 결정하고, 페이지에 도착한 댓글 배열은 서버가 내려준 순서 그대로 전부 렌더링한다 —
- * "부모를 찾아 그 아래에 묶는" 그룹핑은 하지 않는다. 백엔드(`BoardQueryRepositoryAdapter`)는
- * 순수 `createdAt asc` 정렬만 하고 부모-자식을 같은 페이지로 묶어주지 않으므로, 부모가 이전
- * 페이지로 밀려난 대댓글이 있을 수 있다 — 그런 대댓글도 "부모를 못 찾았다"는 이유로 누락하지
- * 않고 시간순 위치 그대로 독립적으로 표시한다(데이터 유실 방지 우선, 부모 바로 아래에 시각적으로
- * 붙지 않을 수 있는 것은 이 페이지네이션 구조상 감내하는 트레이드오프). 대댓글(`parentCommentId`
- * 존재)에는 `allowReply=false`로 답글 버튼을 숨겨 재대댓글을 막는다(F315, 1-depth 제한).
- *
- * 페이징은 신규 UI를 만들지 않고 T10.1 표준(`usePageState`+`PaginationControls`, BoardListPage와
- * 동일 소비 패턴)을 그대로 재사용한다.
- *
- * 등록/대댓글/수정/삭제 4종 mutation은 성공 시 `onCommentMutationSuccess`(T14.1)가 이미
- * `boardKeys.comments(...)`를 invalidate하고 `boardKeys.detail(boardId)`의 `commentCount`를
- * 로컬 델타로 갱신하므로, 이 컴포넌트는 별도로 commentCount를 계산/갱신하지 않는다.
- */
 export function CommentSection({ boardId, variant = 'standalone' }: CommentSectionProps) {
   const { page, size, onPageChange } = usePageState()
   const commentsQuery = useBoardCommentsQuery(boardId, { page, size })
   const registerMutation = useCommentRegisterMutation()
-  // 등록 폼 아바타 프리픽스(목표 디자인 board-page.html의 댓글 작성 박스)용 현재 사용자 이름.
-  // 아직 me 정보가 없으면(부팅 직후 등) '나'로 폴백한다 — 순수 표시용이라 로직에 영향 없음.
   const myName = useAuthStore((state) => state.user?.empBasicInfo.name) ?? '나'
 
   const comments = commentsQuery.data?.content ?? []
 
-  // 403(권한 위반)은 아래에서 전용 문구로 렌더하므로 토스트에서는 제외한다(BoardDetailPage와
-  // 동일 컨벤션). 활성 사원이 아닌 경우 등 그 외 실패는 토스트로만 알린다.
   useEffect(() => {
     if (!commentsQuery.error) {
       return
@@ -86,8 +54,6 @@ export function CommentSection({ boardId, variant = 'standalone' }: CommentSecti
 
   const body = (
     <>
-      {/* embedded일 때는 카드 경계 대신 구분선(border-t)만으로 상세 본문과 나눈다(사용자 요청:
-          "한 뭉텅이"처럼 보이되 hr 같은 선으로만 구별). standalone은 기존 border-b 헤더 그대로. */}
       <CardHeader className={variant === 'embedded' ? 'border-t pt-(--card-spacing)' : 'border-b'}>
         <CardTitle className="flex items-center gap-1.5 text-base">
           <MessageCircle className="size-4" />
@@ -95,8 +61,6 @@ export function CommentSection({ boardId, variant = 'standalone' }: CommentSecti
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* 댓글 작성 박스: 좌측 작성자 아바타 + 우측 입력 폼(목표 디자인). CommentForm은 등록/
-            대댓글/수정 공용이라 아바타는 여기 최상위 등록 폼에만 붙인다. */}
         <div className="flex items-start gap-3">
           <InitialsAvatar name={myName} />
           <div className="min-w-0 flex-1">
@@ -104,9 +68,6 @@ export function CommentSection({ boardId, variant = 'standalone' }: CommentSecti
           </div>
         </div>
 
-        {/* 로딩 → 조회 실패(403 전용 문구, 그 외 실패는 "불러오지 못했습니다." 전용 문구 —
-            BoardListPage.tsx의 not-found 외 실패 분기 관행과 동일) → 빈 목록 → 목록 순서대로 분기.
-            실패를 빈 목록으로 오표시하지 않도록 error 분기를 length===0 분기보다 먼저 둔다. */}
         {commentsQuery.isLoading ? (
           <p className="py-4 text-center text-sm text-muted-foreground">불러오는 중...</p>
         ) : commentsQuery.error ? (

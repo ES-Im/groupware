@@ -10,19 +10,6 @@ import { useChatOverlayStore } from '../lib/chatOverlayStore'
 import { chatKeys } from '../model/queryKeys'
 import { ChatRoomDetailPanel } from './ChatRoomDetailPanel'
 
-/**
- * ChatRoomDetailPanel(구 ChatRoomDetailPage) 라우팅 관련 부분 회귀 검증(팝업 창 → 인앱 오버레이
- * 전환). 이제 roomId는 useParams가 아니라 오버레이 스토어(selectedRoomId)에서 나온 값을 그대로
- * prop으로 받는다 — 조회/메시지·읽음 위치 동기화 로직은 기존과 동일해 재검증하지 않고,
- * "목록으로" 뒤로가기 클릭 시 `useNavigate` 대신 `chatOverlayStore.backToList`가 호출되는지만
- * 확인한다.
- *
- * 렌더 경로에서 함께 마운트되는 ChatRoomSettingsMenu(무필터 CHAT_ROOM_LIST 재조회)·
- * ChatMessageInput(useMeQuery)까지 실제로 훅이 실행되므로, 그 하위 조회도 최소 목으로 흘려보낸다.
- * STOMP 연결 상태는 기본값 idle이라 useChatRoomSubscription은 구독을 시도하지 않는다(연결
- * 상태 검증은 stompClient.test.ts/useChatRoomSubscription.test.tsx가 이미 커버).
- */
-
 function meFixture() {
   return {
     empBasicInfo: {
@@ -60,9 +47,7 @@ function mockDetailEndpoints(
     http.get(`${BASE_URL}/api/chat/rooms/${roomId}/messages`, () =>
       HttpResponse.json({ messages: options?.messages ?? [], nextCursor: null, hasNext: false }),
     ),
-    // ChatRoomSettingsMenu가 무필터로 재조회하는 목록(현재 방의 isBookmarked를 찾기 위함).
     http.get(`${BASE_URL}/api/chat/rooms`, () => HttpResponse.json([])),
-    // ChatMessageInput → useSendChatMessage가 항상 호출하는 useMeQuery.
     http.get(`${BASE_URL}/api/employees/me`, () => HttpResponse.json(meFixture())),
   )
 }
@@ -84,8 +69,6 @@ describe('ChatRoomDetailPanel', () => {
     const user = userEvent.setup()
     await user.click(screen.getByRole('button', { name: '목록으로' }))
 
-    // backToList는 screen만 'home'으로 되돌리고 selectedRoomId·isOpen은 건드리지 않는다
-    // (chatOverlayStore 계약 — 오버레이를 닫았다 다시 열면 마지막 보던 방으로 복귀해야 한다).
     expect(useChatOverlayStore.getState().screen).toBe('home')
     expect(useChatOverlayStore.getState().selectedRoomId).toBe(5)
     expect(useChatOverlayStore.getState().isOpen).toBe(true)
@@ -100,7 +83,6 @@ describe('ChatRoomDetailPanel', () => {
     const user = userEvent.setup()
     await user.click(screen.getByRole('button', { name: '멤버 초대' }))
 
-    // startInviteFlow는 홈 화면 사원목록 탭을 초대 모드로 연다(chatOverlayStore 계약).
     expect(useChatOverlayStore.getState().screen).toBe('home')
     expect(useChatOverlayStore.getState().activeTab).toBe('employees')
     expect(useChatOverlayStore.getState().inviteTargetRoomId).toBe(5)
@@ -215,8 +197,6 @@ describe('ChatRoomDetailPanel', () => {
     await screen.findByText('읽은 메시지')
     expect(screen.getByText('안 읽은 메시지 1개')).toBeInTheDocument()
 
-    // 실시간 수신을 흉내내 캐시에 새 메시지를 직접 추가한다(useChatRoomSubscription이 수신 시
-    // upsertChatMessage로 하는 것과 동일한 setQueryData 패턴).
     act(() => {
       queryClient.setQueryData(
         chatKeys.messages(5),
@@ -245,7 +225,6 @@ describe('ChatRoomDetailPanel', () => {
     })
 
     await screen.findByText('실시간새메시지')
-    // 구분선은 여전히 방 입장 시점 값(1개)이어야 하며, 방문 중 도착한 메시지는 반영하지 않는다.
     expect(screen.getByText('안 읽은 메시지 1개')).toBeInTheDocument()
   })
 

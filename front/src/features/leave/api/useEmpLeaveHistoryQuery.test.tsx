@@ -7,12 +7,6 @@ import { BASE_URL } from '@/shared/api/client'
 import { server } from '@/test/mocks/server'
 import { useEmpLeaveHistoryQuery } from './useEmpLeaveHistoryQuery'
 
-/**
- * useEmpLeaveHistoryQuery(EmpRecordsWidget이 소비하는 필터 조회 훅) 검증.
- * DEPT_LEAVE_REQUEST_HISTORY는 부서 목록 엔드포인트뿐이라, size=100으로 통째로 받아
- * select로 empId가 일치하는 행들만 골라내는 동작(단건이 아닌 filter) + enabled 게이팅을 확인한다.
- */
-
 function makeRow(empId: number, draftId: number) {
   return {
     empId,

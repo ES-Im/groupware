@@ -10,19 +10,6 @@ import { server } from '@/test/mocks/server'
 import type { FranchiseEducationCalendarItem } from '../model/franchise'
 import { FranchiseEducationCalendarPage } from './FranchiseEducationCalendarPage'
 
-/**
- * FranchiseEducationCalendarPage(F1609, ROADMAP(FRANCHISE) T4.1, P4) 회귀 방지 테스트.
- * UI 개편(2026-07-13, 목업 기준)으로 FullCalendar → **교육 목록 테이블**로 재구성됐다. 데이터원은
- * 여전히 범위 기반 교육 캘린더 조회(FRANCHISE_EDUCATION_CALENDAR)이며, 상태 컬럼은 보유 필드
- * (isActive/isFull/date)에서 파생한다(유형·신청/정원 컬럼은 계약에 데이터가 없어 제거 — 정책 A).
- *
- * 검증 대상:
- * - 조회 데이터가 테이블 행(교육명·교육일·장소·상태 pill)으로 렌더된다.
- * - 파생 상태: 활성+여석 → 접수중, 비활성 → 비활성, 정원 마감 → 정원 마감.
- * - 행 클릭 시 /franchise-educations/:educationId, [교육 등록] → 등록 모달 열림(사용자 요청으로
- *   전용 페이지 이동 대신 모달로 전환, 비활성 안내 포함).
- * - 조회 실패 시 handleApiError 토스트.
- */
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))
@@ -40,8 +27,6 @@ function makeItem(
 ): FranchiseEducationCalendarItem {
   return {
     id,
-    // 기본 조회 월(당월) 범위에 들어오도록 오늘 날짜로 고정한다. (상태 파생상 과거일이면 "종료"가
-    // 되므로 오늘로 두어 활성/마감/비활성 파생을 그대로 검증한다.)
     date: dayjs().format('YYYY-MM-DD'),
     place: '본사 교육장',
     title,
@@ -68,7 +53,6 @@ function renderPage() {
   )
 }
 
-/** 교육명 셀이 든 <tr> 스코프를 좁힌다. */
 function rowByTitle(title: string) {
   const row = screen.getByText(title).closest('tr')
   if (!row) {
@@ -136,18 +120,13 @@ describe('FranchiseEducationCalendarPage - 라우팅', () => {
     const user = userEvent.setup()
 
     renderPage()
-    // mockNavigate는 모듈 레벨 공유라 앞선 테스트 호출이 누적된다 — 모달 오픈이 이동을 일으키지
-    // 않음을 정확히 검증하기 위해 클릭 직전에 초기화한다.
     mockNavigate.mockClear()
 
     await user.click(screen.getByRole('button', { name: '교육 등록' }))
 
-    // 전용 페이지로 이동하지 않고 모달을 띄운다(사용자 요청).
     const dialog = await screen.findByRole('dialog')
     expect(within(dialog).getByRole('heading', { name: '교육 등록' })).toBeInTheDocument()
-    // 등록 시 비활성 상태로 생성됨을 안내한다(도메인 규칙: 교육은 생성 시 비활성 상태로 생성된다).
     expect(within(dialog).getByText('비활성 상태')).toBeInTheDocument()
-    // 등록 폼 필드가 함께 렌더된다.
     expect(within(dialog).getByLabelText(/교육 제목/)).toBeInTheDocument()
     expect(mockNavigate).not.toHaveBeenCalled()
   })

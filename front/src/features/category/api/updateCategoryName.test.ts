@@ -2,11 +2,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { apiClient } from '@/shared/api/client'
 import { updateCategoryName } from './updateCategoryName'
 
-/**
- * updateCategoryName(CATEGORY_UPDATE_NAME, ADMIN 전용) 단위 테스트.
- * apiClient.patch 직접 모킹으로 요청 URL/바디를 검증한다.
- */
-
 vi.mock('@/shared/api/client', () => ({
   apiClient: { patch: vi.fn() },
 }))

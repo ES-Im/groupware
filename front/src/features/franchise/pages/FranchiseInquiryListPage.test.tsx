@@ -8,21 +8,6 @@ import { BASE_URL } from '@/shared/api/client'
 import { server } from '@/test/mocks/server'
 import { FranchiseInquiryListPage } from './FranchiseInquiryListPage'
 
-/**
- * FranchiseInquiryListPage(F1617, ROADMAP(FRANCHISE) T5.1) 회귀 방지 테스트.
- * FranchiseListPage.test.tsx의 헬퍼 패턴(MSW server.use + QueryClient 래퍼 + MemoryRouter
- * 상세 플레이스홀더)을 복제한다.
- *
- * 검증 대상:
- * - 로딩/빈 목록/에러 상태 렌더 + 목록 6컬럼(가맹점명·문의제목·문의일시·답변여부·담당자명·삭제요청) 표시.
- * - 검색어는 300ms 디바운스 후에만 keyword 쿼리 파라미터로 반영 + page 0 리셋.
- * - 답변여부 select 변경 시 isAnswered=true/false 쿼리 파라미터 + page 0 리셋.
- * - 기간(from/to) date input 변경 시 각각 쿼리 파라미터 반영 + page 0 리셋.
- * - 행 클릭 시 `/franchise-inquiries/:inquiryId`로 navigate.
- * - 담당자 필터 버튼 클릭 시 EmployeePicker 다이얼로그가 열린다(선택/적용은 department 도메인
- *   테스트 영역이므로 오픈까지만 검증 — FranchiseListPage.test.tsx와 동일 범위).
- */
-
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))
@@ -302,7 +287,6 @@ describe('FranchiseInquiryListPage (F1617) - 행 클릭 내비게이션', () => 
 describe('FranchiseInquiryListPage (F1617) - 담당자 필터', () => {
   it('담당자 버튼 클릭 시 EmployeePicker 다이얼로그가 열린다', async () => {
     mockInquiriesDefault()
-    // EmployeePicker가 마운트되며 부서 목록(DEPT_LIST)을 추가 호출한다 — 빈 페이지로 응답만 보장.
     server.use(
       http.get(`${BASE_URL}/api/departments`, () => HttpResponse.json(makePage([]))),
     )

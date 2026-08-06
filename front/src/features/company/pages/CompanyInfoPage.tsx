@@ -17,23 +17,6 @@ import { CompanyHomePageEditDialog } from '../components/CompanyHomePageEditDial
 import { CompanyInfoEditDialog } from '../components/CompanyInfoEditDialog'
 import { companyRegisterSchema, type CompanyRegisterFormValues } from '../model/companyRegisterSchema'
 
-/**
- * 회사 관리 페이지(F1401, ROADMAP-COMPANY.md T1.2/T2.2/T3.2-a/T3.2-b/T3.2-c).
- *
- * 목표 디자인(admin-page_1.html · A안 톤)에 맞춰 회사 헤더(로고 이니셜 + 회사명 + 위치·대표자 메타 +
- * 최근 수정)와 기본정보/대표 연락처/홈페이지 3개 섹션 카드(아이콘 헤더 + 섹션별 편집 버튼)로 재구성했다.
- * 변경 이력 타임라인은 조회 API(백엔드)가 없어 제외했고(팀 결정: 실데이터만 재구성), 사업자등록번호·
- * 설립일 등 실제 응답에 없는 필드도 넣지 않는다 — COMPANY_INFO 응답 필드(회사명/위치/대표자명/
- * 대표 이메일/대표 연락처/홈페이지 URL/최종 수정일시)만 노출한다.
- *
- * useCompanyInfoQuery는 404를 "미등록" 상태(data===null)로 정규화하므로, 여기서는
- * isLoading/query.error(진짜 조회 실패)/data===null(미등록)/data(등록됨) 4가지로만 분기한다.
- * 미등록+ADMIN이면 CompanyRegisterCard(등록 폼)를 렌더한다 — 등록 성공 시 mutation 훅이 이미
- * companyKeys.all을 invalidate하므로 이 쿼리가 자동 재조회되어 카드 뷰로 자연 전환된다.
- *
- * 등록됨 뷰는 기본정보/연락처/홈페이지 3개 섹션으로 나뉜다(T3.2-a/b/c가 각 섹션에 편집 다이얼로그를
- * 배선). 편집 다이얼로그(모달)는 이번 재디자인 범위 밖이라 기존 컴포넌트를 그대로 재사용한다.
- */
 export function CompanyInfoPage() {
   const roles = useAuthStore((state) => state.roles)
   const isAdmin = hasRequiredRole(roles, 'ADMIN')
@@ -82,7 +65,6 @@ export function CompanyInfoPage() {
 
   return (
     <PageShell>
-      {/* 회사 헤더: 로고 이니셜 + 회사명 + 위치·대표자 메타 + 최근 수정 */}
       <Card>
         <CardContent className="flex flex-wrap items-center gap-4">
           <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-primary text-lg font-bold text-primary-foreground">
@@ -161,7 +143,6 @@ export function CompanyInfoPage() {
   )
 }
 
-/** 페이지 공통 셸(헤더 + 본문). 로딩/에러/미등록/등록됨 4개 분기가 동일한 헤더를 공유한다. */
 function PageShell({ children }: { children: ReactNode }) {
   return (
     <div className="w-full space-y-6 p-4 sm:p-6 lg:p-8">
@@ -176,7 +157,6 @@ function PageShell({ children }: { children: ReactNode }) {
   )
 }
 
-/** 정보 섹션 카드(아이콘 칩 헤더 + 우측 수정 버튼 + 라벨/값 행 목록). onEdit이 없으면 수정 버튼을 숨긴다(비ADMIN). */
 function CompanySection({
   icon: Icon,
   title,
@@ -211,7 +191,6 @@ function CompanySection({
   )
 }
 
-/** 라벨/값 한 행. divide-y로 상단 구분선이 자동으로 그어진다(첫 행 제외). */
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="grid grid-cols-[7rem_1fr] items-center gap-3 py-3 text-sm sm:grid-cols-[9rem_1fr]">
@@ -222,20 +201,9 @@ function InfoRow({ label, value }: { label: string; value: string }) {
 }
 
 interface CompanyRegisterCardProps {
-  /** 등록 성공 시(mutation 훅이 이미 invalidate 처리) 및 COMPANY_002(이미 등록됨) 실패 시 상태
-   * 동기화를 위해 호출하는 재조회 함수. CompanyInfoPage의 useCompanyInfoQuery().refetch를 그대로 받는다. */
   onRegistered: () => Promise<unknown>
 }
 
-/**
- * 회사 정보 최초 등록 폼 카드(`COMPANY_REGISTER`, ROADMAP-COMPANY.md T2.2, F1402).
- *
- * RegisterDepartmentDialog와 동일한 useZodForm+submitWithErrorMapping 표준 폼 패턴을 그대로
- * 이식한다(Dialog 대신 Card 안에 인라인으로 배치). COMPANY_002(이미 등록된 회사 정보 존재, 400 —
- * ROADMAP §3 확정대로 409가 아니다)만 handleApiError 위임 전에 가로채 전용 안내 토스트를 띄우고
- * 재조회한다(동시 등록으로 데이터가 이미 채워졌다면 상위 쿼리가 갱신되어 카드 뷰로 자연 전환된다).
- * 그 외 에러(VALIDATION_ERROR 등)는 submitWithErrorMapping의 기본 handleApiError 경로로 위임한다.
- */
 function CompanyRegisterCard({ onRegistered }: CompanyRegisterCardProps) {
   const mutation = useCompanyRegisterMutation()
   const form = useZodForm(companyRegisterSchema, {

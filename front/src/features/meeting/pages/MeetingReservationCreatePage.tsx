@@ -22,24 +22,6 @@ import {
   type MeetingReservationCreateFormValues,
 } from '../model/meetingReservationCreateSchema'
 
-/**
- * P2 회의 예약 생성 페이지(F802+F803, ROADMAP(MEETING-ROOMS) T3.3-b).
- *
- * T3.3-a(`MeetingRoomSearchAndSelect`)가 검색·카드선택을 자체 관리하고, 카드 선택 시 회의실 +
- * 확정 검색조건(date/startAt/endAt)을 이 페이지로 넘긴다. 회의실을 선택하면 하단이 좌/우 2카드로
- * 나뉜다 — 좌측은 선택 회의실 정보(`MeetingRoomInfoPanel`)와 첨부 이미지 미리보기
- * (`MeetingRoomImageGallery`, 조회 전용), 우측은 예약 정보 폼(제목·신청 일시·참여자)이다.
- *
- * 신청 일시(meetingDate/startAt/endAt)는 검색 조건으로 프리필하되 **편집 가능한 폼 입력**이다 —
- * 날짜·시간 없이(회의실만 둘러보기) 검색해도 여기서 직접 채워 예약할 수 있다. 값 검증
- * ("현재 이후"·"종료>시작")은 meetingReservationCreateSchema가 그대로 담당한다.
- *
- * meetingRoomId·reserverId는 스키마 밖의 값이다(T3.2 설계 경계) — meetingRoomId는 선택된 회의실
- * 카드에서, reserverId는 useMeQuery empId에서 각각 얻어 제출 시점에 payload로 합류시킨다.
- * reserverId가 로딩 전/부재(undefined)면 PRD·ROADMAP 확정대로 fail-closed 처리해 제출 버튼을
- * 비활성화한다. 참여자 수가 선택 회의실 capacity를 넘는 경우는 서버가 강제하지 않으므로(Open Q#6)
- * 인라인 경고만 표시하고 제출을 막지 않는다.
- */
 export function MeetingReservationCreatePage() {
   const navigate = useNavigate()
   const meQuery = useMeQuery()
@@ -47,8 +29,6 @@ export function MeetingReservationCreatePage() {
 
   const [selectedRoom, setSelectedRoom] = useState<MeetingRoomSummary | undefined>(undefined)
   const [participantSelection, setParticipantSelection] = useState<EmployeePickerEmployee[]>([])
-  // 참여자 필드를 한 번도 건드리지 않은 상태(마운트 시 빈 배열)에서는 동기화 effect가 검증까지
-  // 트리거하지 않게 한다 — 그렇지 않으면 사용자가 손대기도 전에 "참여자 필수" 에러가 노출된다.
   const [participantsTouched, setParticipantsTouched] = useState(false)
 
   const form = useZodForm(meetingReservationCreateSchema, {
@@ -64,7 +44,6 @@ export function MeetingReservationCreatePage() {
 
   function handleRoomSelected(room: MeetingRoomSummary | undefined, confirmed?: ConfirmedMeetingSearchParams) {
     setSelectedRoom(room)
-    // 검색 조건을 신청 일시로 프리필한다(편집 가능). 검색에 없던 값은 빈 값으로 두고 사용자가 채운다.
     setValue('meetingDate', confirmed?.date ?? '')
     setValue('startAt', confirmed?.startAt ?? '')
     setValue('endAt', confirmed?.endAt ?? '')
@@ -73,9 +52,6 @@ export function MeetingReservationCreatePage() {
     }
   }
 
-  // 참여자 선택(EmployeePicker 로컬 상태, 결재선/공람과 동일 경계)을 zod participantIds 필드에
-  // 동기화한다 — "빈 배열 불가" 검증을 스키마가 그대로 담당하게 하기 위함이다. 아직 한 번도
-  // 상호작용하지 않은 초기 빈 배열 동기화는 검증을 트리거하지 않는다(participantsTouched 가드).
   useEffect(() => {
     setValue(
       'participantIds',
@@ -91,8 +67,6 @@ export function MeetingReservationCreatePage() {
 
   const reserverId = meQuery.data?.empBasicInfo.empId
   const isOverCapacity = selectedRoom !== undefined && participantSelection.length > selectedRoom.capacity
-  // 신청 일시는 편집 가능한 폼 입력이므로 별도 slot 게이트 없이 스키마 검증에 맡긴다(빈 값/과거/역전은
-  // 제출 시 인라인 에러로 안내). 제출 가능 조건은 회의실 선택 + 본인 정보 확정(fail-closed)뿐이다.
   const canSubmit = selectedRoom !== undefined && reserverId !== undefined
 
   async function onValid(values: MeetingReservationCreateFormValues) {
@@ -140,13 +114,11 @@ export function MeetingReservationCreatePage() {
 
       {selectedRoom ? (
         <div className="grid gap-6 lg:grid-cols-2">
-          {/* 좌: 선택 회의실 정보 + 첨부 이미지 미리보기(조회 전용) */}
           <div className="space-y-6">
             <MeetingRoomInfoPanel meetingRoomId={selectedRoom.meetingRoomId} />
             <MeetingRoomImageGallery meetingRoomId={selectedRoom.meetingRoomId} />
           </div>
 
-          {/* 우: 예약 정보 폼 */}
           <Card className="h-fit">
             <CardHeader className="border-b">
               <CardTitle>예약 정보</CardTitle>

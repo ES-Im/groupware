@@ -6,18 +6,6 @@ import { describe, expect, it } from 'vitest'
 import type { BoardComment } from '../model/board'
 import { CommentItem } from './CommentItem'
 
-/**
- * CommentItem(ROADMAP T14.2, F313~F317) 회귀 방지 테스트.
- *
- * 방금 발견된 회귀 위험 지점(스타일링 리팩터 직후):
- * - isOwner가 numeric empId 미보유(§리스크7 동형 공백, //todo)로 인해 항상 false로 고정된 현재
- *   의도된 동작 — "수정"/"삭제" 버튼이 어떤 경우에도 노출되지 않아야 한다.
- * - allowReply/indented 조합에 따른 "답글" 버튼 노출·삭제된 댓글 전용 렌더링이 유지되는지.
- *
- * 이 컴포넌트는 useCommentReplyMutation/useCommentUpdateMutation/useCommentDeleteMutation을
- * 내부에서 사용하므로(제출 전에는 네트워크 요청이 없다) QueryClientProvider만 감싸면 된다.
- */
-
 function comment(overrides: Partial<BoardComment> = {}): BoardComment {
   return {
     parentCommentId: null,

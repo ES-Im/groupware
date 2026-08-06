@@ -2,16 +2,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { apiClient } from '@/shared/api/client'
 import { getMeetingRoomManagementList } from './getMeetingRoomManagementList'
 
-/**
- * getMeetingRoomManagementList(F811, ROADMAP(MEETING-ROOMS) T6.1) 단위 테스트.
- *
- * apiClient.get을 직접 모킹해 axios 호출 인자(URL, params)만 검증한다
- * (meeting getManagementReservations.test.ts와 동일 패턴).
- *
- * available/bookedInFuture는 false도 유효한 값이므로 `!= null`로 판별한다 — false를 넘겨도
- * 생략되지 않아야 한다(department getDepartments의 isActive와 동일 계약).
- */
-
 vi.mock('@/shared/api/client', () => ({
   apiClient: { get: vi.fn().mockResolvedValue({ data: undefined }) },
 }))

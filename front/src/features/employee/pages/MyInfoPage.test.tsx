@@ -8,23 +8,6 @@ import { BASE_URL } from '@/shared/api/client'
 import { server } from '@/test/mocks/server'
 import { MyInfoPage } from './MyInfoPage'
 
-/**
- * MyInfoPage(F003 RETRIEVE_ME_INFO, adapt-ui 리디자인 3차 — Magic Patterns 목업 이식) 조합
- * 스모크 테스트.
- *
- * 하위 컴포넌트(EmployeeSummaryCard/SignatureCard/EmployeeProfileTabs/DeptHistoryCard/
- * PersonalRecordsWidget/UpdateMeDialog)의 세부 분기는 각자의 .test.tsx가 이미 담당하므로, 이
- * 페이지는 로딩/에러/성공 렌더와 페이지 레벨 조합("정보/비밀번호 수정" 버튼 → UpdateMeDialog
- * 오픈, "현재 활성 파일" 카드 제거)만 검증한다. "수정" 버튼은 3차 수정으로 좌측 요약 카드의
- * "정보/비밀번호 수정" 버튼 1개로 옮겨졌다(애초 "정보 수정"/"비밀번호" 2버튼안은 같은 다이얼로그를
- * 여는 중복 진입점이라 사용자 요청으로 통합했다). "현재 활성 파일" 카드는 2차 수정으로 완전히
- * 제거됐다(파일관리 탭에서 이미 확인 가능).
- *
- * activeFiles에 PROFILE_PICTURE/SIGNATURE를 모두 활성으로 두면 EmployeeSummaryCard의
- * BlobAvatar·SignatureCard가 각각 EMP_FILE_PREVIEW(GET /api/employees/{empId}/files/{fileId}/preview)를
- * 실제로 호출하므로(react-query가 아닌 useEffect 기반 훅), 두 fileId 모두 목을 등록해야
- * onUnhandledRequest:'error'에 걸리지 않는다.
- */
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))
@@ -142,8 +125,6 @@ describe('MyInfoPage - 성공 렌더', () => {
     renderPage()
 
     expect(await screen.findAllByText('홍길동')).not.toHaveLength(0)
-    // 3차 수정(Magic Patterns 목업 이식): "수정" 버튼은 좌측 요약 카드의 "정보/비밀번호 수정"
-    // 버튼 1개로 옮겨졌다(같은 UpdateMeDialog를 연다).
     expect(screen.queryByRole('link', { name: '정보/비밀번호 수정' })).not.toBeInTheDocument()
     const editButton = screen.getByRole('button', { name: '정보/비밀번호 수정' })
 

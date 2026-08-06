@@ -9,15 +9,6 @@ import { server } from '@/test/mocks/server'
 import { meetingKeys } from '../model/meetingKeys'
 import { useMeetingRoomManagementListQuery } from './useMeetingRoomManagementListQuery'
 
-/**
- * useMeetingRoomManagementListQuery(F811, ROADMAP(MEETING-ROOMS) T6.1) 실동작 검증.
- *
- * - 파라미터 전부 선택값이라 항상 활성 상태로 조회되는지.
- * - meetingKeys.roomManagement(params)로 캐시되는지.
- * - 403(ROLE_003) 응답이 그대로 throw되어 error에 반영되고 normalizeApiError로 정규화 시
- *   isForbidden===true가 되는지.
- */
-
 function makeItem(meetingRoomId: number, name: string) {
   return { meetingRoomId, name, capacity: 8, isAvailable: true }
 }

@@ -4,11 +4,6 @@ import { describe, expect, it, vi } from 'vitest'
 import type { BoardSummary } from '../model/board'
 import { BoardListTable } from './BoardListTable'
 
-/**
- * BoardListTable(F301, ROADMAP T10.3) 순수 렌더/상호작용 검증.
- * 데이터 레이어(useBoardListQuery 등)에 의존하지 않는 props 기반 컴포넌트라 MSW 없이 검증한다.
- */
-
 function boardFixture(overrides: Partial<BoardSummary> = {}): BoardSummary {
   return {
     boardId: 1,
@@ -42,7 +37,6 @@ describe('BoardListTable (F301)', () => {
     expect(screen.getAllByText('3')).toHaveLength(2)
     expect(screen.getAllByText('5')).toHaveLength(2)
 
-    // 첨부 아이콘은 isFileAttached=true인 행에만 렌더된다.
     expect(screen.getByLabelText('첨부파일 있음')).toBeInTheDocument()
   })
 

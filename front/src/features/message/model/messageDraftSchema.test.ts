@@ -1,13 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { messageDraftSchema } from './messageDraftSchema'
 
-/**
- * messageDraftSchema(ROADMAP(MESSAGE) T4.1, F1506·F1507) 클라 사전검증 단위 테스트.
- * approval leaveDraftSchema의 title/content trim 검증 패턴을 그대로 복제한 스키마라 검증 축도
- * 동형이다: title은 trim 후 공백만 있으면 실패(min 1)·50자 초과 실패, content는 trim 후
- * 공백만 있으면 실패(min 1, 상한 없음).
- */
-
 function validPayload(overrides: Partial<Record<string, unknown>> = {}) {
   return {
     title: '점심 회의 안내',

@@ -2,11 +2,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { apiClient } from '@/shared/api/client'
 import { createMeetingRoom } from './createMeetingRoom'
 
-/**
- * createMeetingRoom(F812, ROADMAP(MEETING-ROOMS) T6.2) 단위 테스트.
- * apiClient.post 직접 모킹으로 요청 URL/바디, 응답 파싱을 검증한다.
- */
-
 vi.mock('@/shared/api/client', () => ({
   apiClient: { post: vi.fn() },
 }))

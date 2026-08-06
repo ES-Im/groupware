@@ -7,11 +7,6 @@ import { BASE_URL } from '@/shared/api/client'
 import { server } from '@/test/mocks/server'
 import { EmpFileManagementPanel } from './EmpFileManagementPanel'
 
-/**
- * EmpFileManagementPanel(EmployeeProfileTabs "파일관리" 탭, adapt-ui 리디자인) 검증.
- * MeetingRoomImageGallery(AlertDialog 삭제 확인)·MeetingRoomActiveToggleButton(활성화 토글)
- * 패턴을 사원 파일 도메인에 맞춰 복제한다.
- */
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))
@@ -24,7 +19,6 @@ function makeFileInfo(fileId: number, type: 'PROFILE_PICTURE' | 'SIGNATURE', isA
   }
 }
 
-/** resolve를 밖으로 노출해 언제든 응답을 확정지을 수 있는 지연 프라미스 헬퍼(MyAttendancePage.test.tsx 패턴). */
 function deferred<T>() {
   let resolve!: (value: T) => void
   const promise = new Promise<T>((r) => {
@@ -85,7 +79,6 @@ describe('EmpFileManagementPanel - 목록 렌더', () => {
     expect(screen.getByText('활성')).toBeInTheDocument()
     expect(screen.getByText('비활성')).toBeInTheDocument()
 
-    // 비활성 파일(inactive-pic.png)에만 "활성화" 버튼이 노출된다(활성 파일에는 없음).
     expect(screen.getAllByRole('button', { name: '활성화' })).toHaveLength(1)
   })
 })

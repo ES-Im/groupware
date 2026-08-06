@@ -2,15 +2,6 @@ import { describe, expect, it } from 'vitest'
 import type { DraftDetailResponse } from '../model/draftDetail'
 import { isBusinessTripDraft } from './isBusinessTripDraft'
 
-/**
- * isBusinessTripDraft(ROADMAP(DRAFT-BUSINESSTRIP) T2.1) 슬롯-null 판별 술어 단위 테스트.
- *
- * 판별 규칙(isBusinessTripDraft.ts 주석 · DraftTypeBody 동형):
- *   - businessTrip 슬롯 non-null → 출장 기안(true).
- *   - businessTrip 슬롯 null → false(일반/휴가/매출 등).
- * draftType 문자열은 판별에 쓰지 않는다(실측 "GeneralDraft"·스니펫 outdated).
- */
-
 function draft(overrides: Partial<DraftDetailResponse> = {}): DraftDetailResponse {
   return {
     draftId: 1,

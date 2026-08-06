@@ -9,16 +9,6 @@ import { server } from '@/test/mocks/server'
 import { useNewEmployeesQuery } from './useNewEmployeesQuery'
 import { useUpdateEmpBelongingsMutation } from './useUpdateEmpBelongingsMutation'
 
-/**
- * useUpdateEmpBelongingsMutation(HR_UPDATE_EMP_BELONGINGS) 실동작 검증.
- *
- * - 성공(204) 시 employeeKeys.newEmployees() 접두 무효화(exact:false)로, keyword가 서로 다른
- *   newEmployees 캐시 엔트리 두 개가 동시에 재조회되는지 확인한다
- *   (empManagementMutations.invalidate.test.tsx의 exact:false 검증과 동일 패턴).
- * - 실패(ROLE_001, 404 — 소속 배정 대상이 ACTIVE가 아님) 시 isError로 반영되고, invalidate가
- *   일어나지 않아 목록 재조회 카운트가 늘지 않는지 확인한다.
- */
-
 function makePage(items: unknown[]) {
   return {
     content: items,

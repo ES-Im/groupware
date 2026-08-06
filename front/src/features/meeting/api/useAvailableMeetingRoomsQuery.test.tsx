@@ -7,13 +7,6 @@ import { BASE_URL } from '@/shared/api/client'
 import { server } from '@/test/mocks/server'
 import { useAvailableMeetingRoomsQuery } from './useAvailableMeetingRoomsQuery'
 
-/**
- * useAvailableMeetingRoomsQuery(F802, ROADMAP T3.1) 실동작 검증.
- *
- * date/startAt/endAt/capacity는 모두 선택값이라(입력한 조건만 필터로 적용) 검색 실행 여부는
- * options.enabled로 외부에서 주입한다. enabled:false(기본)면 조회하지 않고, enabled:true면
- * 값이 있는 파라미터만 쿼리스트링에 담아 조회한다.
- */
 function createWrapper() {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return {
@@ -62,7 +55,6 @@ describe('useAvailableMeetingRoomsQuery', () => {
     )
 
     const { Wrapper } = createWrapper()
-    // 최소 수용 인원만 입력한 검색 — date/startAt/endAt은 쿼리스트링에서 빠져야 한다.
     renderHook(() => useAvailableMeetingRoomsQuery({ capacity: 6 }, { enabled: true }), {
       wrapper: Wrapper,
     })

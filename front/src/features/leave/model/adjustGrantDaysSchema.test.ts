@@ -1,11 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { adjustGrantDaysSchema } from './adjustGrantDaysSchema'
 
-/**
- * adjustGrantDaysSchema(EMP_LEAVE_ADJUST_{SPECIAL,COMPENSATORY}_GRANT_DAYS, ROADMAP(LEAVE) M5
- * T5.3, F749·F750) 단위 테스트. 0.5일 단위 소수 허용(정수 강제 금지)·0 거부·음수(차감) 허용·
- * 미입력(NaN) 시 커스텀 한국어 메시지 노출을 확인한다.
- */
 describe('adjustGrantDaysSchema', () => {
   it('양의 정수는 성공한다', () => {
     const result = adjustGrantDaysSchema.safeParse({ plusMinusDays: 2 })

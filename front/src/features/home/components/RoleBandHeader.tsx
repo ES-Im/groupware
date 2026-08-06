@@ -6,10 +6,6 @@ interface RoleBandHeaderProps {
   roleChip: string
 }
 
-/**
- * 역할 밴드(HR/FACILITY/FRANCHISE) 공용 헤더(레퍼런스 dashboard-roles.html `.band` 섹션 이식).
- * 아이콘 + 타이틀 + 역할칩 + 구분선으로 구성해 공통 위젯 영역과 역할별 영역을 시각적으로 분리한다.
- */
 export function RoleBandHeader({ icon, title, roleChip }: RoleBandHeaderProps) {
   return (
     <div className="mt-2 mb-1 flex items-center gap-2.5">

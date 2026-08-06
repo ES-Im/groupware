@@ -3,9 +3,6 @@ import { describe, expect, it, vi } from 'vitest'
 import { apiClient } from '@/shared/api/client'
 import { createMeetingReservation, formatMeetingTimeOfDay } from './createMeetingReservation'
 
-/**
- * createMeetingReservation/formatMeetingTimeOfDay(F803, ROADMAP T3.2) 단위 테스트.
- */
 vi.mock('@/shared/api/client', () => ({
   apiClient: { post: vi.fn().mockResolvedValue({ data: undefined }) },
 }))

@@ -30,7 +30,6 @@ function StatGrid({ stats }: { stats: RecordStat[] }) {
   )
 }
 
-/** approvalStatus(표시명 문자열) 배열에서 건수/대기/완료를 파생한다(leave·trip 구역 공용, PersonalRecordsWidget과 동일). */
 function deriveApprovalStats(rows: { approvalStatus: string }[]) {
   const total = rows.length
   const pending = rows.filter((row) => {
@@ -40,11 +39,6 @@ function deriveApprovalStats(rows: { approvalStatus: string }[]) {
   return { total, pending, completed: total - pending }
 }
 
-/**
- * 구역명 + 우측 "자세히 보기" 링크. PersonalRecordsWidget.SectionHeader와 시각적으로 동일하되,
- * 여기서는 Dialog가 아니라 부서 단위 관리 페이지로의 실제 네비게이션(Link)이라 Button asChild로
- * 감싸 스타일만 공유한다(사용자 확정, 2026-07-13 — 부서 전체를 보여주는 무거운 화면이라 모달 미사용).
- */
 function SectionHeader({ title, to }: { title: string; to: string }) {
   return (
     <div className="flex items-center justify-between gap-3">
@@ -127,28 +121,10 @@ function BusinessTripSection({ deptId, empId, yearMonth }: { deptId: number; emp
 }
 
 interface EmpRecordsWidgetProps {
-  /** 조회 대상 사원. */
   empId: number
-  /** 조회 대상 사원의 소속 부서(부서 단위 API의 path param + "같은 부서" 서버 판정용). */
   deptId: number
 }
 
-/**
- * 사원 상세(EmployeeDetailPage) 관리용 화면의 "근태·휴가·출장 조회" 위젯(adapt-ui 신규).
- *
- * PersonalRecordsWidget(`/me`)과 동형 구조(월 선택 + 근태/연차/출장 3구역 세로 나열 + 요약 통계)이지만,
- * 데이터 소스가 "내 이력" 대신 부서 단위 목록 API(DEPT_ATTENDANCE_MONTHLY/DEPT_LEAVE_REQUEST_HISTORY/
- * DEPT_BUSINESS_TRIP_REQUEST_HISTORY)다 — 사원 단건 이력 조회 엔드포인트가 계약에 없어 부서 목록을
- * size=100으로 가져와 대상 empId 행만 select로 골라내는 방식이다(useEmp*Query 3종 참고).
- *
- * PersonalRecordsWidget과 달리 "자세히 보기"는 Dialog 오버레이가 아니라 부서 단위 관리 페이지로의
- * 실제 네비게이션(Link)이다(사용자 확정, 2026-07-13 — 부서 전체를 보여주는 무거운 화면이라 모달에
- * 담지 않는다). 목적지: `/attendance/dept`, `/leaves/dept`, `/approval/business-trips/dept/history`.
- *
- * 이 3개 API는 전부 "DEPT_MANAGER(같은 부서) 또는 ADMIN" 권한만 허용해(HR 불가), 이 위젯을 렌더할지
- * 여부(canViewRecordsBoard)는 EmployeeDetailPage(react-router-developer 담당)가 hasRequiredRole
- * (roles,'DEPT_MANAGER')로 계산해 게이팅한다 — 이 컴포넌트 자체는 방어적 권한 분기를 하지 않는다.
- */
 export function EmpRecordsWidget({ empId, deptId }: EmpRecordsWidgetProps) {
   const [yearMonth, setYearMonth] = useState(() => dayjs().format('YYYY-MM'))
 
@@ -156,8 +132,6 @@ export function EmpRecordsWidget({ empId, deptId }: EmpRecordsWidgetProps) {
     setYearMonth((prev) => dayjs(prev).add(delta, 'month').format('YYYY-MM'))
   }
 
-  // 네이티브 month 입력의 클리어로 값이 ''가 되는 경우를 무시한다(PersonalRecordsWidget과 동일한
-  // 이유 — dayjs('')가 Invalid Date를 만들어 위젯이 자가복구 불가 상태로 빠지는 것을 방지).
   function handleYearMonthChange(value: string) {
     if (value === '') {
       return

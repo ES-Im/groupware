@@ -8,17 +8,6 @@ import { server } from '@/test/mocks/server'
 import { franchiseKeys } from '../model/queryKeys'
 import { useFranchiseEducationUpdateMutation } from './useFranchiseEducationUpdateMutation'
 
-/**
- * useFranchiseEducationUpdateMutation(FRANCHISE_EDUCATION_UPDATE, ROADMAP(FRANCHISE) T4.4, F1613)
- * 성공 후 invalidate 검증. useFranchiseCreateMutation.test.tsx와 동일 관행 — invalidateQueries를
- * mock으로 가로채지 않고 실제 재조회 여부를 블랙박스로 확인한다.
- *
- * 핵심 계약:
- * - 성공(204) 시 franchiseKeys.education.detail(educationId)와 [...all, 'education', 'calendar']
- *   접두사가 함께 invalidate된다.
- * - 다른 교육(id가 다른 detail)은 재조회되지 않는다.
- */
-
 function createWrapper() {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
@@ -97,7 +86,6 @@ describe('useFranchiseEducationUpdateMutation', () => {
     await waitFor(() => expect(result.current.mutation.isSuccess).toBe(true))
     await waitFor(() => expect(result.current.detail1.data?.title).toBe('수정된 제목'))
     await waitFor(() => expect(calendarCalls).toBe(2))
-    // detail(1)과 calendar 접두사만 invalidate 대상이므로 detail(2)는 재조회되지 않는다.
     expect(detail2Calls).toBe(1)
   })
 

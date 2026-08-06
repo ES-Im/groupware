@@ -12,15 +12,6 @@ import { useEmpFileUploadMutation } from './useEmpFileUploadMutation'
 import { useFilesInfosQuery } from './useFilesInfosQuery'
 import { useMeQuery } from './useMeQuery'
 
-/**
- * useEmpFileUploadMutation/useEmpFileActivateMutation/useEmpFileDeleteMutation 성공 후
- * employeeKeys.me()·filesInfos() invalidate 검증 + 업로드 사전검증 차단 경로
- * (useMeetingRoomFileUploadMutation.invalidate.test.tsx와 동일 패턴).
- *
- * PATCH(업로드) 핸들러는 request.formData()를 호출하지 않고 응답(204)과 재조회 결과만
- * 관찰한다(MSW+jsdom FormData/File 상호운용 한계 우회, meeting 테스트와 동일 이유).
- */
-
 const ME_RESPONSE = {
   empBasicInfo: { empId: 1, empNo: '202607001', name: '홍길동', loginId: 'test1234', email: 'a@a.com', extensionNo: '000-0000' },
   activeFiles: [] as unknown[],

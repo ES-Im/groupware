@@ -7,14 +7,6 @@ import {
   validateDraftFileUpload,
 } from './draftFileValidation'
 
-/**
- * validateDraftFileUpload(ROADMAP(DRAFT) T6.1) 첨부 사전검증 단위 테스트.
- *
- * 기준(도메인모델 _Draft_file_ 실측): 기안서당 최대 10개·총량 10MB. 확장자는 board 허용목록과 동일.
- * 검증 순서(개수 → 총량 → 확장자)와 기존 파일 합산·경계값(정확히 한계=허용, 한계+1=차단)을 확인한다.
- * 확장자 위반만 서버 대응 코드(FILE_003)를 갖는다.
- */
-
 function makeFile(name: string, size: number): File {
   return new File([new Uint8Array(size)], name)
 }

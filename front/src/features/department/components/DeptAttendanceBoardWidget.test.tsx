@@ -9,12 +9,6 @@ import { BASE_URL } from '@/shared/api/client'
 import { server } from '@/test/mocks/server'
 import { DeptAttendanceBoardWidget } from './DeptAttendanceBoardWidget'
 
-/**
- * DeptAttendanceBoardWidget(DepartmentDetailView 전용, adapt-ui 신규) 검증.
- * `/me`의 PersonalRecordsWidget과 동형 구조라 PersonalRecordsWidget.test.tsx의 탭 전환·월 변경
- * 케이스를 그대로 복제한다. 대상 엔드포인트는 DEPT_ATTENDANCE_MONTHLY/DEPT_ATTENDANCE_PENDING.
- */
-
 const MONTHLY_URL = `${BASE_URL}/api/employees/attendances/1/monthly`
 const PENDING_URL = `${BASE_URL}/api/employees/attendances/1/monthly/pending`
 

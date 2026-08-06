@@ -7,13 +7,6 @@ import { BASE_URL } from '@/shared/api/client'
 import { server } from '@/test/mocks/server'
 import { EmpFileUploadButton } from './EmpFileUploadButton'
 
-/**
- * EmpFileUploadButton(MyInfoPage 전용, SignatureCard/EmpFileManagementPanel 공유) 검증.
- * MeetingRoomImageUploadButton.test.tsx의 사전검증/업로드 성공 패턴을 그대로 복제한다.
- *
- * 성공 경로 PATCH 핸들러는 empFileMutations.invalidate.test.tsx와 동일 이유로
- * request.formData()를 호출하지 않고 응답(204)만 반환한다(MSW+jsdom FormData/File 상호운용 한계 우회).
- */
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))

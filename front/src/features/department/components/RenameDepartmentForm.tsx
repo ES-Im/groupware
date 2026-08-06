@@ -12,20 +12,9 @@ import {
 
 interface RenameDepartmentFormProps {
   deptId: number
-  /** 입력값 초기값으로 채울 현재 부서명. */
   currentName: string
 }
 
-/**
- * 부서명 변경 인라인 폼(F206, `DEPT_UPDATE_NAME`, ADMIN 전용).
- *
- * 과거 모달(RenameDepartmentDialog)에서 Dialog 껍데기만 벗겨내 관리 패널 탭 콘텐츠로 인라인화했다.
- * zod 스키마(updateDepartmentNameSchema)·mutation·submitWithErrorMapping 검증/에러 매핑은 그대로다.
- * 모달이 아니라 항상 렌더되므로, 선택 부서가 바뀔 때(deptId/currentName 변경)마다 현재값으로 reset한다.
- *
- * 성공(204) 시: mutation의 onSuccess가 departmentKeys.detail(deptId)를 invalidate(상세 재조회)하고,
- * 이 폼은 성공 토스트를 띄운 뒤 방금 제출한 값으로 reset해 dirty 상태를 정리한다.
- */
 export function RenameDepartmentForm({ deptId, currentName }: RenameDepartmentFormProps) {
   const mutation = useUpdateDepartmentNameMutation()
   const form = useZodForm(updateDepartmentNameSchema, {
@@ -38,8 +27,6 @@ export function RenameDepartmentForm({ deptId, currentName }: RenameDepartmentFo
     formState: { errors, isSubmitting, isDirty },
   } = form
 
-  // 선택 부서가 바뀔 때마다 현재 부서명으로 초기화한다 — 트리에서 다른 부서를 고르면
-  // 폼도 새 부서의 현재값으로 리셋돼야 한다(모달 시절 open 트랜지션 reset을 대체).
   useEffect(() => {
     reset({ newName: currentName })
   }, [deptId, currentName, reset])

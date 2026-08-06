@@ -8,15 +8,6 @@ import { server } from '@/test/mocks/server'
 import { approvalKeys } from '../model/queryKeys'
 import { useSalesDraftUpdateMutation } from './useSalesDraftUpdateMutation'
 
-/**
- * useSalesDraftUpdateMutation(F761 `SALES_DRAFT_UPDATE`, ROADMAP(SALES) T3.3) 동작 검증.
- *
- * useCirculationReadMutation.invalidate.test.tsx 관행을 복제: mock을 가로채지 않고 "성공(204) 후
- * approvalKeys.draftDetail(draftId)·approvalKeys.all에 걸린 쿼리가 실제로 재조회되어 최신 값을
- * 반영하는지"를 블랙박스로 확인한다. 이 훅 자체는 toast를 호출하지 않는다(토스트는 소비 페이지,
- * SalesDraftEditPage가 mutateAsync 성공 후 직접 호출) — 그래서 이 테스트는 toast를 검증하지 않는다.
- */
-
 function createWrapper() {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
@@ -27,7 +18,6 @@ function createWrapper() {
   return { Wrapper }
 }
 
-/** approvalKeys.draftDetail(draftId) 축 프로브 — 특정 기안 상세 재조회 관측용. */
 function useDetailProbe(draftId: number) {
   return useQuery({
     queryKey: approvalKeys.draftDetail(draftId),
@@ -36,7 +26,6 @@ function useDetailProbe(draftId: number) {
   })
 }
 
-/** approvalKeys.all 접두 축 프로브(문서함 목록 대용) — 상세와 무관한 all 하위 쿼리도 함께 갱신되는지 관측용. */
 function useListProbe() {
   return useQuery({
     queryKey: approvalKeys.submitted(),

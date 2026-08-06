@@ -2,20 +2,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { apiClient } from '@/shared/api/client'
 import { updateSalesDraft, type SalesDraftUpdatePayload } from './updateSalesDraft'
 
-/**
- * updateSalesDraft(F761 `SALES_DRAFT_UPDATE`, ROADMAP(SALES) T3.3) 단위 테스트.
- *
- * apiClient.patch를 직접 모킹해 axios 호출 인자(URL, 바디)만 검증한다
- * (updateAttendance.test.ts/createLeaveDraft.test.ts와 동일 패턴).
- *
- * 핵심 검증 축:
- *   - PATCH /api/drafts/sales/{draftId}로 draftId path param을 그대로 사용.
- *   - body는 혼합 구조(title/content/approvers는 param 중첩, franchiseId/reportMonth/salesAmount는
- *     최상위 형제) — 평탄화되지 않고 그대로 전달되는지.
- *   - 전부 optional이라 부분 payload도 그대로(가공 없이) 전달되는지.
- *   - 204 Empty 응답이므로 반환값이 없다(void).
- */
-
 vi.mock('@/shared/api/client', () => ({
   apiClient: { patch: vi.fn() },
 }))
@@ -66,7 +52,6 @@ describe('updateSalesDraft', () => {
       reportMonth: '2026-07',
       salesAmount: 1200000,
     })
-    // 평탄화되어 title/content가 최상위로 올라와 있지 않은지 명시적으로 확인.
     expect(sentBody).not.toHaveProperty('title')
     expect(sentBody).not.toHaveProperty('content')
   })

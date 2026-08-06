@@ -26,16 +26,6 @@ interface CategoryManagementRowProps {
   category: CategoryItem
 }
 
-/**
- * 카테고리 관리 목록 한 행(`CATEGORY_UPDATE_NAME`/`CATEGORY_ACTIVATE`/`CATEGORY_DEACTIVATE`,
- * ADMIN 전용). CommentItem(board 도메인)의 isEditing 토글 패턴을 그대로 복제한다 — 평상시에는
- * 이름+노출배지+액션 버튼을, "이름수정" 클릭 시 같은 자리를 공용 CategoryNameForm으로 교체한다.
- *
- * 하드 삭제 엔드포인트는 계약에 없다(toggleCategoryVisibility.ts 주석 참조) — "삭제"는 숨김
- * (비활성화)으로 매핑한다. 숨김은 되돌릴 수 있는 동작이라 되돌리기(노출)는 확인 없이 즉시
- * 실행하고, 숨기기만 AlertDialog로 한 번 더 확인한다(CommentItem 삭제 확인 선례와 동일 컴포넌트
- * 재사용 — 다만 완전 삭제로 오인하지 않도록 "언제든 다시 노출할 수 있다"를 설명에 명시한다).
- */
 export function CategoryManagementRow({ category }: CategoryManagementRowProps) {
   const [isEditing, setIsEditing] = useState(false)
 

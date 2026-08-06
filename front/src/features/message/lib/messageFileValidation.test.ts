@@ -6,15 +6,6 @@ import {
   validateMessageFileUpload,
 } from './messageFileValidation'
 
-/**
- * validateMessageFileUpload(ROADMAP(MESSAGE) T4.1) 첨부 사전검증 단위 테스트.
- *
- * 기준(도메인모델 _Message_file_ 실측): 쪽지당 최대 10개·총량 10MB. 확장자는 board/기안서
- * 허용목록과 동일. approval draftFileValidation.test.ts와 동일 축을 검증하되, 이 함수는 기존
- * 첨부 File[] 대신 existingTotalSize/existingCount(숫자)를 인자로 받는다는 시그니처 차이를
- * 반영한다.
- */
-
 function makeFile(name: string, size: number): File {
   return new File([new Uint8Array(size)], name)
 }

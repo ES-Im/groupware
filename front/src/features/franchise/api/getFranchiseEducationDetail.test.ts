@@ -2,12 +2,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { apiClient } from '@/shared/api/client'
 import { getFranchiseEducationDetail } from './getFranchiseEducationDetail'
 
-/**
- * getFranchiseEducationDetail(FRANCHISE_EDUCATION_DETAIL, ROADMAP(FRANCHISE) T4.3) 단위 테스트.
- * getFranchises.test.ts와 동일 패턴 — apiClient.get을 직접 모킹해 요청 URL과 응답 그대로 반환
- * 여부(fileListInfoList가 null인 케이스 포함)만 검증한다.
- */
-
 vi.mock('@/shared/api/client', () => ({
   apiClient: { get: vi.fn() },
 }))

@@ -1,11 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { EMP_FILE_MAX_SIZE_BYTES, EmpFileValidationError, validateEmpFileUpload } from './empFileValidation'
 
-/**
- * validateEmpFileUpload 단위 테스트(meetingRoomFileValidation.test.ts와 동일 패턴).
- * 확장자(jpg/jpeg/png만 허용) → 용량(5MB) 순 검증, 위반 시 첫 번째 사유만 던지는지 확인한다.
- */
-
 function makeFile(name: string, size: number): File {
   return new File([new Uint8Array(size)], name)
 }

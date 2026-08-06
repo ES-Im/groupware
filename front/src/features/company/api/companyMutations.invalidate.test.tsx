@@ -11,14 +11,6 @@ import { useUpdateCompanyContactMutation } from './useUpdateCompanyContactMutati
 import { useUpdateCompanyHomePageURLMutation } from './useUpdateCompanyHomePageURLMutation'
 import { useUpdateCompanyInfoMutation } from './useUpdateCompanyInfoMutation'
 
-/**
- * company 등록/수정 mutation 훅 4종(F1402~F1405)의 성공(204) 후 invalidate 동작 검증.
- *
- * 실제 invalidateQueries 호출을 mock으로 가로채지 않고, "useCompanyInfoQuery가 mutation 성공
- * 후 실제로 재조회되어 최신 값을 반영하는지"를 관찰 가능한 동작으로 확인한다
- * (departmentMutations.invalidate.test.tsx와 동일 패턴).
- */
-
 function createWrapper() {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },

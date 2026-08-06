@@ -2,9 +2,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { apiClient } from '@/shared/api/client'
 import { getMeetingRoomReservationsCalendar } from './getMeetingRoomReservationsCalendar'
 
-/**
- * getMeetingRoomReservationsCalendar(F809, ROADMAP T2.3) 단위 테스트.
- */
 vi.mock('@/shared/api/client', () => ({
   apiClient: { get: vi.fn().mockResolvedValue({ data: [] }) },
 }))

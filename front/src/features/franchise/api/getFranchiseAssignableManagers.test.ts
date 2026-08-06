@@ -2,10 +2,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { apiClient } from '@/shared/api/client'
 import { getFranchiseAssignableManagers } from './getFranchiseAssignableManagers'
 
-/**
- * getFranchiseAssignableManagers(FRANCHISE_ASSIGNABLE_MANAGERS) 단위 테스트.
- * apiClient.get을 직접 모킹해 호출 URL과 반환값(응답 배열 무가공 반환)을 검증한다(getFranchises.test 동형).
- */
 vi.mock('@/shared/api/client', () => ({
   apiClient: { get: vi.fn().mockResolvedValue({ data: [] }) },
 }))

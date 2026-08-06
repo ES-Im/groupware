@@ -10,12 +10,6 @@ import {
   resolveApprovalStatus,
 } from './approvalStatusBadge'
 
-/**
- * approvalStatusBadge(ROADMAP(DRAFT) T1.3) 표시 유틸 단위 테스트.
- * ①상태 배지(표시명↔코드) ②role 라벨 ③일시 포맷 ④첨부 아이콘 4가지 규칙을 각각 검증한다.
- * label은 백엔드 enum description과 정확히 일치해야 역매핑(resolveApprovalStatus)이 성립한다.
- */
-
 describe('approvalStatusBadgeMap / getApprovalStatusBadge', () => {
   it.each([
     ['UNSUBMITTED', '미상신', 'outline'],

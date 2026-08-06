@@ -3,20 +3,10 @@ import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import { CommentForm } from './CommentForm'
 
-/**
- * CommentForm(ROADMAP T14.2, F314/F315/F316) 회귀 방지 테스트.
- *
- * 등록/대댓글/수정 세 용도를 하나의 컴포넌트가 props(onSubmit/onCancel/initialContent/
- * submitLabel)로만 구분한다(CommentForm.tsx 상단 주석 참조) — API 호출은 이 컴포넌트 밖
- * (onSubmit 콜백)에서 일어나므로 여기서는 MSW 없이 콜백 스텁으로 RHF+zod(commentSchema) 경계와
- * 등록/취소 두 모드의 렌더/이벤트만 검증한다.
- */
-
 vi.mock('sonner', () => ({
   toast: { error: vi.fn() },
 }))
 
-/** axios.isAxiosError가 인식하는 최소 형태(isAxiosError 플래그 + response)만 흉내낸 가짜 에러(LoginForm.test.tsx와 동일 패턴). */
 function fakeAxiosError(status: number, code: string, message: string) {
   return Object.assign(new Error(message), {
     isAxiosError: true,
@@ -55,8 +45,6 @@ describe('CommentForm (F314) - 등록 모드(초기값 없음, 취소 버튼 없
     render(<CommentForm onSubmit={onSubmit} submitLabel="등록" />)
 
     const textarea = screen.getByLabelText('댓글 내용')
-    // maxLength=300은 실제 타이핑에만 적용되고 프로그램적 value 대입(fireEvent)에는 적용되지
-    // 않으므로, 301자를 그대로 넣어 zod max(300) 검증 자체가 이 경계를 잡아내는지 확인한다.
     const overLong = 'a'.repeat(301)
     const { fireEvent } = await import('@testing-library/react')
     fireEvent.change(textarea, { target: { value: overLong } })
@@ -149,8 +137,6 @@ describe('CommentForm (F316) - 수정 모드(initialContent 초기값)', () => {
     await user.click(screen.getByRole('button', { name: '저장' }))
 
     await waitFor(() => expect(onSubmit).toHaveBeenCalledWith({ content: '수정된 댓글 내용' }))
-    // reset({ content: initialContent ?? '' })이므로 편집 중 값이 아니라 원래 initialContent로
-    // 되돌아간다(수정 모드는 호출부가 initialContent 자체를 갱신해 재마운트하는 것을 전제).
     await waitFor(() => expect(screen.getByLabelText('댓글 내용')).toHaveValue('기존 댓글 내용'))
   })
 

@@ -1,18 +1,5 @@
 import { z } from 'zod'
 
-/**
- * 회사 정보 최초 등록 폼 클라이언트 사전검증 스키마(`COMPANY_REGISTER`, ROADMAP-COMPANY T2.1, F1402).
- *
- * 필드 근거: back/build/generated-snippets/COMPANY_REGISTER/request-fields.adoc(실측, 추측 금지) —
- * companyName(필수, 50자 이하)·location(필수, 200자 이하)·presentedEmail(필수, 이메일 형식, 150자
- * 이하)·presentedExternalNo(필수, 20자 이하)·ownerName(필수, 20자 이하)·homePageURL(필수,
- * http:// 또는 https://로 시작, 200자 이하). `editedAt`은 이 스키마에 포함하지 않는다(제출
- * 시각에 결정되는 값이라 폼 입력 필드가 아니다 — registerCompany가 호출 시점에 자동 주입한다).
- *
- * companyName/location/presentedExternalNo/ownerName/homePageURL의 "공백 불가"는 boardCreateSchema와
- * 동일하게 공백만으로 채운 값을 막는 제약이다(값 자체를 trim하지 않는다). presentedEmail은
- * z.email() 형식 검증 자체가 공백만으로 구성된 값을 이미 거부하므로 별도 trim refine을 두지 않는다.
- */
 export const companyRegisterSchema = z.object({
   companyName: z
     .string()

@@ -2,21 +2,6 @@ import { describe, expect, it } from 'vitest'
 import type { DraftDetailResponse } from '../model/draftDetail'
 import { resolveDrafterActions } from './resolveDrafterActions'
 
-/**
- * resolveDrafterActions(ROADMAP(DRAFT) T4.1) 순수 파생 로직 단위 테스트.
- *
- * 판정 규칙(resolveDrafterActions.ts 주석 · PRD §기안자 액션):
- *  - 기안자 본인(drafter.empId === myEmpId) 아니면 전부 false.
- *  - myEmpId undefined → isDrafter=false(fail-closed).
- *  - UNSUBMITTED("미상신")       → canSubmit + canEdit.
- *  - WAITING("결재대기")·IN_PROGRESS("결재진행중") → canWithdraw.
- *  - APPROVED("결재완료") + cancellationDraftId null    → canCancel=true.
- *  - APPROVED("결재완료") + cancellationDraftId non-null → canCancel=false(취소기안 이미 존재).
- *  - REJECTED("반려") 및 계약 밖 표시명 → 기안자 액션 없음(플래그 전부 false).
- *
- * approvalStatus는 표시명 문자열로 내려오므로 resolveApprovalStatus로 코드 변환해 분기한다.
- */
-
 function draft(overrides: Partial<DraftDetailResponse> = {}): DraftDetailResponse {
   return {
     draftId: 1,

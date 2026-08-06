@@ -2,10 +2,6 @@ import { describe, expect, it, vi } from 'vitest'
 import { apiClient } from '@/shared/api/client'
 import { downloadMeetingRoomFile } from './downloadMeetingRoomFile'
 
-/**
- * downloadMeetingRoomFile(F812, ROADMAP T2.4-a) 단위 테스트.
- * board downloadBoardFile과 동형 — blob 조회 후 임시 <a>로 저장을 트리거하고 objectURL을 즉시 revoke한다.
- */
 vi.mock('@/shared/api/client', () => ({
   apiClient: { get: vi.fn() },
 }))

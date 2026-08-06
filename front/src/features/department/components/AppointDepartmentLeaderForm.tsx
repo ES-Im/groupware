@@ -23,16 +23,9 @@ import type { DeptMemberResponse } from '../model/deptMember'
 
 interface AppointDepartmentLeaderFormProps {
   deptId: number
-  /** 부서장 후보 목록. 현재 페이지에 로드된 부서 멤버(DEPT_MEMBERS 응답)를 그대로 사용한다. */
   members: DeptMemberResponse[]
 }
 
-/**
- * 부서장 지정 사원 선택 다이얼로그. 후보(members)는 이미 해당 부서 소속으로만 좁혀져 있으므로
- * 별도 쿼리 없이 prop 그대로를 클라이언트 사이드로 검색·필터링해 1명만 고른다(백엔드
- * `Dept.appointLeader()`가 "부서장은 해당 부서의 현재 소속 사원이어야 합니다"를 강제하므로
- * 타 부서 사원은 애초에 노출하지 않는다). 행 클릭 시 선택하고 다이얼로그를 닫는다.
- */
 function LeaderMemberPickerDialog({
   members,
   selectedEmpId,
@@ -41,7 +34,6 @@ function LeaderMemberPickerDialog({
   invalid,
 }: {
   members: DeptMemberResponse[]
-  /** RHF에 저장된 현재 선택값(문자열 empId). 미선택이면 빈 문자열. */
   selectedEmpId: string
   onSelect: (member: DeptMemberResponse) => void
   disabled: boolean
@@ -64,7 +56,6 @@ function LeaderMemberPickerDialog({
 
   function handleOpenChange(nextOpen: boolean) {
     setOpen(nextOpen)
-    // 닫힐 때 검색어를 비워 다음에 열 때 이전 검색이 남지 않게 한다.
     if (!nextOpen) {
       setQuery('')
     }
@@ -151,17 +142,6 @@ function LeaderMemberPickerDialog({
   )
 }
 
-/**
- * 부서장 지정 인라인 폼(F208, `DEPT_APPOINT_LEADER`, ADMIN 전용).
- *
- * "부서장으로 지정할 사원" 입력은 네이티브 `<select>` 대신 전용 다이얼로그(LeaderMemberPickerDialog)로
- * 고른다. 후보는 현재 부서 멤버(members prop)로만 좁혀져 있어(백엔드가 타 부서 사원 지정을 거부) 별도
- * 쿼리 없이 클라이언트 사이드 검색만 얹는다. 선택값은 RHF의 setValue로 leaderEmpId에 프로그래밍적으로
- * 세팅하고, zod/mutation/에러 매핑은 그대로 유지한다.
- *
- * 성공(204) 시: mutation의 onSuccess가 departmentKeys.detail(deptId)를 invalidate(상세 재조회)하고,
- * 이 폼은 성공 토스트를 띄운 뒤 입력값을 비운다.
- */
 export function AppointDepartmentLeaderForm({ deptId, members }: AppointDepartmentLeaderFormProps) {
   const mutation = useAppointDepartmentLeaderMutation()
   const form = useZodForm(appointDepartmentLeaderSchema, {
@@ -177,7 +157,6 @@ export function AppointDepartmentLeaderForm({ deptId, members }: AppointDepartme
     formState: { errors, isSubmitting },
   } = form
 
-  // 선택 부서가 바뀌면 이전 부서에서 고르던 사원/지정일·에러를 비운다.
   useEffect(() => {
     reset({ leaderEmpId: '', appointedAt: '' })
   }, [deptId, reset])
@@ -206,7 +185,6 @@ export function AppointDepartmentLeaderForm({ deptId, members }: AppointDepartme
       onSubmit={submitWithErrorMapping(form, handleSubmit)}
       className="flex flex-col gap-4"
     >
-      {/* 섹션 타이틀 줄: 좌측 헤딩 + 우측 제출 버튼. 버튼이 폼의 isSubmitting에 접근해야 하므로 헤딩을 폼이 소유한다. */}
       <div className="flex items-center justify-between gap-3">
         <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
           <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
@@ -223,7 +201,6 @@ export function AppointDepartmentLeaderForm({ deptId, members }: AppointDepartme
         <Label htmlFor="leader-emp-id">
           부서장으로 지정할 사원 <span className="text-destructive">*</span>
         </Label>
-        {/* RHF가 leaderEmpId를 추적하도록 hidden input으로 등록하고, 값은 다이얼로그 선택으로 setValue한다. */}
         <input type="hidden" {...register('leaderEmpId')} />
         <LeaderMemberPickerDialog
           members={members}

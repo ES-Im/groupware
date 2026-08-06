@@ -5,10 +5,6 @@ import { BASE_URL } from '@/shared/api/client'
 import { server } from '@/test/mocks/server'
 import { useMeetingRoomFilePreviewUrl } from './useMeetingRoomFilePreviewUrl'
 
-/**
- * useMeetingRoomFilePreviewUrl(ROADMAP T2.2) 실동작 검증.
- * board useBoardFilePreviewUrl.test.tsx와 동일한 시나리오 구성을 회의실 경로에 맞춰 복제했다.
- */
 const PREVIEW_URL = (meetingRoomId: number, fileId: number) =>
   `${BASE_URL}/api/meeting-rooms/${meetingRoomId}/files/${fileId}/preview`
 

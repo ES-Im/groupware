@@ -2,12 +2,6 @@ import { describe, expect, it, vi } from 'vitest'
 import { apiClient } from '@/shared/api/client'
 import { uploadEmpFile } from './uploadEmpFile'
 
-/**
- * uploadEmpFile(EMP_FILE_UPLOAD) 단위 테스트.
- * apiClient.patch 직접 모킹으로 URL/쿼리(fileType)/FormData part명만 검증한다
- * (uploadMeetingRoomFile.test.ts와 동일 이유 — MSW+jsdom File 상호운용 한계 우회).
- */
-
 vi.mock('@/shared/api/client', () => ({
   apiClient: { patch: vi.fn().mockResolvedValue({ data: undefined }) },
 }))

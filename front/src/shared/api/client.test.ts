@@ -4,12 +4,6 @@ import { server } from '@/test/mocks/server'
 import { apiClient, BASE_URL } from './client'
 import { clearAccessToken, setAccessToken } from './tokenStore'
 
-/**
- * client.ts 응답 인터셉터(T0.1) 재발급 경로 검증 — 특히 ROADMAP T5.1 리뷰에서 지적된
- * "responseType:'blob' 요청이 401 ROLE_002를 만나도 재발급을 타지 못하는" 문제의 보완분.
- * blob 에러 바디도 code를 정상 추출해 기존 재발급→원요청 재시도 경로를 그대로 태우는지 확인한다.
- */
-
 const PREVIEW_URL = `${BASE_URL}/api/employees/1/files/10/preview`
 const REISSUE_URL = `${BASE_URL}/api/auth/reissue`
 
@@ -26,14 +20,12 @@ describe('apiClient 응답 인터셉터 — blob 요청의 ROLE_002 재발급', 
       http.get(PREVIEW_URL, ({ request }) => {
         previewCallCount += 1
         if (previewCallCount === 1) {
-          // 실제 EMP_FILE_PREVIEW처럼 responseType:'blob' 요청이라도 에러 바디는 JSON 계약 그대로 온다.
           expect(request.headers.get('authorization')).toBe('Bearer expired-token')
           return HttpResponse.json(
             { code: 'ROLE_002', name: 'PERMISSION_DENIED_EXCEPTION', httpStatus: 401, message: '토큰이 유효하지 않습니다' },
             { status: 401 },
           )
         }
-        // 재시도 요청은 갱신된 토큰을 실어야 한다.
         expect(request.headers.get('authorization')).toBe('Bearer new-access-token')
         return HttpResponse.arrayBuffer(new TextEncoder().encode('image-bytes').buffer, {
           headers: { 'Content-Type': 'image/png' },
@@ -47,7 +39,6 @@ describe('apiClient 응답 인터셉터 — blob 요청의 ROLE_002 재발급', 
     expect(previewCallCount).toBe(2)
     expect(res.status).toBe(200)
     expect(res.data).toBeInstanceOf(Blob)
-    // 재시도 요청도 responseType:'blob'이 그대로 유지된 원요청 config로 나갔음을 데이터 형태로 확인.
     expect((res.data as Blob).size).toBeGreaterThan(0)
   })
 

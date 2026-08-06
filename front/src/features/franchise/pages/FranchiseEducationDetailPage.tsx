@@ -27,33 +27,10 @@ import type { FranchiseEducationApplicant } from '../model/franchise'
 
 const columnHelper = createColumnHelper<FranchiseEducationApplicant>()
 
-/**
- * P5 가맹점 교육 상세 페이지(F1610 FRANCHISE_EDUCATION_DETAIL + F1611
- * FRANCHISE_EDUCATION_APPLICANTS, ROADMAP(FRANCHISE) T4.3).
- * /franchise-educations/:educationId 라우트에 마운트된다(T1.2 배선 완료).
- *
- * 조회 실패 분기는 FranchiseDetailPage(T2.3)와 동일 패턴: 무효 param → 안내, not-found(404) →
- * 전용 문구, 그 외 → useEffect 1회성 토스트 + 실패 문구. 신청자 표는
- * MeetingRoomManagementPage의 react-table+usePageState+PaginationControls 배선을 동형
- * 복제한다(필터 UI 없음). 신청자 쿼리는 상세 조회 성공 후에만 educationId를 넘겨(enabled 가드)
- * 상세 404 시 신청자 요청이 중복 실패하지 않게 한다.
- *
- * fileListInfoList shape는 T1.1-b **가정** 타입(Open Q#3 미해소 — 첨부 있는 교육 더미데이터로
- * 런타임 확인 필요)이며 null(첨부 없음)을 방어한다. 첨부 업로드/삭제/미리보기/다운로드는
- * T4.5 FranchiseEducationAttachmentSection이 담당한다.
- *
- * mutation 배선(T4.4): 수정(F1613 — FranchiseEducationUpdateDialog)은 isActive===false &&
- * appliedCount===0일 때만 트리거 버튼을 노출한다 — 상세 응답에 등록자 식별자가 없어(Open Q#6)
- * 이 조건은 노출 힌트일 뿐이고, 등록자 본인 여부를 포함한 최종 판정은 서버 403·도메인 에러가
- * 전담한다(handleApiError 토스트). 활성/비활성 토글(F1614 —
- * FranchiseEducationActiveToggleButton)은 항상 노출한다.
- */
 export function FranchiseEducationDetailPage() {
   const { educationId: educationIdParam } = useParams<{ educationId: string }>()
   const [updateOpen, setUpdateOpen] = useState(false)
 
-  // route param은 신뢰 불가 입력이다(FranchiseDetailPage와 동일 가드): 순수 10진 양의 정수
-  // 형식만 허용해 지수/16진수/음수 표기가 다른 교육으로 오매핑되는 것을 막는다.
   const isDecimalPositiveInteger =
     educationIdParam !== undefined && /^[1-9][0-9]*$/.test(educationIdParam)
   const educationId = isDecimalPositiveInteger ? Number(educationIdParam) : undefined
@@ -61,13 +38,11 @@ export function FranchiseEducationDetailPage() {
   const detailQuery = useFranchiseEducationDetailQuery(educationId)
 
   const { page, size, onPageChange } = usePageState()
-  // 상세 조회 성공 전에는 undefined를 넘겨 신청자 조회를 지연한다(중복 404 방지).
   const applicantsQuery = useFranchiseEducationApplicantsQuery(
     detailQuery.data ? educationId : undefined,
     { page, size },
   )
 
-  // 상세 not-found는 아래에서 전용 UX로 렌더하므로, 그 외 실패만 토스트로 알린다.
   useEffect(() => {
     if (!detailQuery.error) {
       return
@@ -78,7 +53,6 @@ export function FranchiseEducationDetailPage() {
     }
   }, [detailQuery.error])
 
-  // 신청자 목록 실패는 표 영역 안내 문구 + 토스트로 처리한다(MeetingRoomManagementPage 동형).
   useEffect(() => {
     if (!applicantsQuery.error) {
       return
@@ -160,7 +134,6 @@ export function FranchiseEducationDetailPage() {
         </div>
       )
     }
-    // not-found가 아닌 실패는 위 useEffect가 토스트로 알렸으므로 화면은 안내 문구만 표시한다.
     return (
       <div className="w-full p-4 sm:p-6 lg:p-8">
         <h1 className="mb-2 text-xl font-semibold tracking-tight">가맹점 교육 상세</h1>
@@ -176,14 +149,12 @@ export function FranchiseEducationDetailPage() {
   const education = detailQuery.data
   const files = education.fileListInfoList
 
-  // 상세 응답의 잔여정원으로 정원 마감 여부를 파생한다(상세 응답에는 isFull 필드가 없다).
   const isFull = education.remainingCapacity <= 0
 
   return (
     <div className="flex w-full flex-col gap-6 p-4 sm:p-6 lg:p-8 lg:min-h-full">
       <FranchiseBackLink to="/franchise-educations">가맹점 교육</FranchiseBackLink>
 
-      {/* 헤더 hero: book 아이콘 타일 + 제목 + 활성/정원 pill + meta + 우측 액션(수정 조건부·활성토글). */}
       <Card>
         <CardContent>
           <FranchiseDetailHero
@@ -241,8 +212,6 @@ export function FranchiseEducationDetailPage() {
         </CardContent>
       </Card>
 
-      {/* 본문 grid-cd: 좌 넓게 신청자 표, 우 좁게 교육 개요 + 첨부. 풀스크린에서 이 영역이 남는 세로
-          공간을 채우도록 grid를 flex-1로 늘리고(auto-rows-fr) 신청자 카드를 stretch시킨다. */}
       <div className="grid gap-4 lg:min-h-0 lg:flex-1 lg:auto-rows-fr lg:grid-cols-[1fr_360px]">
         <Card>
           <CardHeader className="border-b">
@@ -306,7 +275,6 @@ export function FranchiseEducationDetailPage() {
         </Card>
 
         <div className="space-y-4">
-          {/* 교육 개요(내용). */}
           <Card>
             <CardHeader className="border-b">
               <CardTitle className="flex items-center gap-2">
@@ -319,7 +287,6 @@ export function FranchiseEducationDetailPage() {
             </CardContent>
           </Card>
 
-          {/* 첨부파일 다운로드/업로드. */}
           <Card>
             <CardContent>
               <FranchiseEducationAttachmentSection educationId={education.id} files={files} />

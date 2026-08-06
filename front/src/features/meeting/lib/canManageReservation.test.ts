@@ -3,10 +3,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { MeetingReservationDetail } from '../model/meeting'
 import { canManageReservation } from './canManageReservation'
 
-/**
- * canManageReservation(ROADMAP(MEETING-ROOMS) T4.3-a) 단위 테스트.
- * fail-closed 원칙: myEmpId 미확정(undefined)이거나 세 조건 중 하나라도 미충족이면 false다.
- */
 function makeDetail(overrides: Partial<MeetingReservationDetail> = {}): MeetingReservationDetail {
   return {
     meetingId: 10,

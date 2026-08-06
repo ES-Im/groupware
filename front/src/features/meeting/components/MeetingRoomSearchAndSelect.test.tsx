@@ -8,15 +8,6 @@ import { BASE_URL } from '@/shared/api/client'
 import { server } from '@/test/mocks/server'
 import { MeetingRoomSearchAndSelect } from './MeetingRoomSearchAndSelect'
 
-/**
- * MeetingRoomSearchAndSelect(F802, ROADMAP T3.3-a) 회귀 방지 테스트.
- * 검증 대상:
- * - 검색 전 안내 문구, 검색 제출 시 확정 파라미터로 조회.
- * - 카드 선택 시 onRoomSelected(room, confirmedParams) 호출.
- * - 재검색(재제출) 시 이전 선택 해제 신호(onRoomSelected(undefined)) 전달 — stale 회의실 제출 방지.
- * - endAt <= startAt 클라 가드(토스트, API 미호출).
- * - showRoomDetailLink=false면 "상세 보기" 버튼이 렌더되지 않는다.
- */
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))
@@ -50,9 +41,6 @@ async function search(
   user: ReturnType<typeof userEvent.setup>,
   { date = '2026-07-10', startAt = '10:00', endAt = '11:00', capacity = '4' } = {},
 ) {
-  // 네이티브 date/time input은 userEvent.type의 세그먼트 입력과 궁합이 좋지 않아, 이 저장소의
-  // 다른 테스트(attendance UpdateAttendanceDialog.test.tsx setTimeValue)와 동일하게
-  // fireEvent.change로 값을 직접 채운다.
   fireEvent.change(screen.getByLabelText('날짜'), { target: { value: date } })
   fireEvent.change(screen.getByLabelText('시작 시각'), { target: { value: startAt } })
   fireEvent.change(screen.getByLabelText('종료 시각'), { target: { value: endAt } })

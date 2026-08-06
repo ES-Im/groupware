@@ -6,17 +6,6 @@ interface DeptHistoryCardProps {
   currentDepts: CurrentDept[]
 }
 
-/**
- * "소속 · 발령" 카드(MyInfoPage 전용, adapt-ui 리디자인 신규).
- *
- * 기존 EmployeeProfileTabs의 "부서이력" 탭 내용을 분리해 좌측 세로 타임라인으로 보여준다
- * (EmployeeProfileTabs는 showDeptTab=false로 이 탭을 숨긴다 — EmployeeDetailPage는 그대로 유지).
- *
- * RETRIEVE_ME_INFO.currentDepts는 "현재 소속만" 내려주고 endAt은 항상 null이다(response-fields.adoc
- * 실측: "종료일, 현재 소속만 출력"). 과거에 종료된 발령 이력을 조회하는 계약이 없으므로, 레퍼런스
- * 목업의 "신규 입사" 같은 과거 이력 항목은 지어내지 않고 현재 겸직/주소속만 startAt 내림차순으로
- * 나열한다.
- */
 export function DeptHistoryCard({ currentDepts }: DeptHistoryCardProps) {
   const sorted = [...currentDepts].sort((a, b) => (a.startAt < b.startAt ? 1 : -1))
 

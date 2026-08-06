@@ -13,16 +13,6 @@ import type { ChatMessage, ChatMessagesPage } from '../model/chatMessage'
 import { chatKeys } from '../model/queryKeys'
 import { CHAT_MESSAGE_MAX_LENGTH, useSendChatMessage } from './useSendChatMessage'
 
-/**
- * useSendChatMessage(ROADMAP(CHAT) T2.4, F905) 검증.
- *
- * stompClient.test.ts/useChatRoomSubscription.test.tsx와 동일하게 @stomp/stompjs가 내부적으로
- * 생성하는 브라우저 WebSocket을 흉내내는 최소 가짜 소켓으로 CONNECT→CONNECTED 왕복을
- * 시뮬레이션한 뒤, 실제로 오가는 SEND 프레임을 확인해 발신을 검증한다. 낙관 렌더는
- * upsertChatMessage(T2.3-b, 별도 유닛테스트 보유)를 그대로 재사용하므로 여기서는 "그 함수가
- * 호출되는 경로"까지만 통합적으로 확인하고 upsert 세부 동작 자체는 재검증하지 않는다.
- */
-
 vi.mock('sonner', () => ({
   toast: { error: vi.fn() },
 }))
@@ -66,7 +56,6 @@ class FakeStompSocket {
     this.readyState = 3
   }
 
-  /** 브로커가 구독 중인 destination으로 MESSAGE 프레임을 push하는 상황을 흉내낸다(echo 시뮬레이션). */
   emitMessage(subscriptionId: string, destination: string, body: string): void {
     this.onmessage?.({
       data: `MESSAGE\nsubscription:${subscriptionId}\ndestination:${destination}\ncontent-type:application/json\n\n${body}\0`,
@@ -172,7 +161,6 @@ describe('useSendChatMessage 낙관 렌더 + SEND', () => {
 
     const { result } = renderHook(() => useSendChatMessage(1), { wrapper: Wrapper })
     await waitFor(() => {
-      // useMeQuery가 로드될 때까지 대기(로드 전에는 fail-closed로 전송이 차단된다).
       expect(queryClient.getQueryData(employeeKeys.me())).toBeDefined()
     })
 
@@ -181,11 +169,9 @@ describe('useSendChatMessage 낙관 렌더 + SEND', () => {
     expect(sent).toBe(true)
     const cache = queryClient.getQueryData<InfiniteData<ChatMessagesPage>>(chatKeys.messages(1))
     const optimistic = cache?.pages[0]?.messages[0]
-    // content는 trim되어 저장된다.
     expect(optimistic?.content).toBe('안녕하세요')
     expect(optimistic?.senderId).toBe(42)
     expect(optimistic?.senderName).toBe('나')
-    // 서버 확정 전 임시 id는 항상 음수다(useSendChatMessage.ts 주석 참조).
     expect(optimistic?.id).toBeLessThan(0)
     expect(optimistic?.clientMessageId).toBeTruthy()
 
@@ -200,9 +186,6 @@ describe('useSendChatMessage 낙관 렌더 + SEND', () => {
     await connectFakeClient()
     const { Wrapper, queryClient } = createWrapper()
     queryClient.setQueryData(chatKeys.messages(1), emptyMessagesCache())
-    // T2.3-b 수신 처리는 이 훅의 범위가 아니므로, 여기서는 SUBSCRIBE 없이 echo 프레임을 직접
-    // 캐시 upsert 경로로 흉내내는 대신, 실제 소비 경로(useChatRoomSubscription)와 동일하게
-    // parseChatBroadcastMessage+upsertChatMessage를 그대로 사용해 통합 확인한다.
     const { parseChatBroadcastMessage } = await import('../lib/parseChatBroadcastMessage')
     const { upsertChatMessage } = await import('../lib/upsertChatMessage')
 
@@ -218,8 +201,6 @@ describe('useSendChatMessage 낙관 렌더 + SEND', () => {
     const clientMessageId = beforeEcho?.pages[0]?.messages[0]?.clientMessageId
     expect(clientMessageId).toBeTruthy()
 
-    // 실측 브로드캐스트 프레임은 평면 ChatMessage가 아니라 이벤트 봉투다(parseChatBroadcastMessage.ts
-    // 주석 참조) — 메시지 식별자는 id가 아니라 data.chatId로 온다.
     const confirmedEventBody = JSON.stringify({
       eventId: '827a1d50-210c-47b4-8f5c-f2e7de9bd830',
       eventType: 'MESSAGE_CREATED',
@@ -242,7 +223,6 @@ describe('useSendChatMessage 낙관 렌더 + SEND', () => {
     )
 
     const afterEcho = queryClient.getQueryData<InfiniteData<ChatMessagesPage>>(chatKeys.messages(1))
-    // append가 아니라 교체이므로 여전히 메시지는 1건이고, id가 서버 확정 양수값으로 바뀐다.
     expect(afterEcho?.pages[0]?.messages).toHaveLength(1)
     expect(afterEcho?.pages[0]?.messages[0]?.id).toBe(999)
     expect(afterEcho?.pages[0]?.messages[0]?.clientMessageId).toBe(clientMessageId)
@@ -251,7 +231,6 @@ describe('useSendChatMessage 낙관 렌더 + SEND', () => {
 
 describe('useSendChatMessage me 미로딩 fail-closed', () => {
   it('me 조회가 아직 로딩 중이면(캐시 미도착) 전송을 차단하고 안내 토스트를 띄운다', async () => {
-    // 응답을 영원히 지연시켜 "아직 로딩 중"인 상태를 고정한다(usePrimaryDeptId.test.tsx와 동일 기법).
     server.use(http.get(`${BASE_URL}/api/employees/me`, () => new Promise(() => {})))
     const client = await connectFakeClient()
     const socket = client.webSocket as unknown as FakeStompSocket
@@ -266,7 +245,6 @@ describe('useSendChatMessage me 미로딩 fail-closed', () => {
     expect(toast.error).toHaveBeenCalledWith(
       '사용자 정보를 불러오는 중입니다. 잠시 후 다시 시도해주세요.',
     )
-    // 발신자 정보 없이는 낙관 메시지를 구성할 수 없으므로 SEND 자체를 시도하지 않는다.
     expect(socket.sentFrames.some((frame) => frame.startsWith('SEND\n'))).toBe(false)
   })
 })
@@ -275,8 +253,6 @@ describe('useSendChatMessage publish() 동기 예외 롤백', () => {
   it('publish()가 동기 예외를 던지면 방금 넣은 낙관 메시지를 캐시에서 롤백하고 false를 반환한다', async () => {
     mockMeEndpoint()
     const client = await connectFakeClient()
-    // SEND 자체가 브로커에 전달되지 못하는 상황(예: stompStatus 미러와 client.connected가 어긋나는
-    // 좁은 레이스)을 흉내낸다 — getChatStompClient()는 싱글턴이라 이 스파이가 훅 내부 호출에도 적용된다.
     const publishSpy = vi.spyOn(client, 'publish').mockImplementation(() => {
       throw new Error('일시적 전송 실패')
     })
@@ -290,15 +266,12 @@ describe('useSendChatMessage publish() 동기 예외 롤백', () => {
 
     const sent = result.current.sendMessage('안녕하세요')
 
-    // 다른 실패 경로(2000자 초과·연결 끊김 등)와 동일하게 false를 반환해 입력값을 유지시켜야 한다.
     expect(sent).toBe(false)
     const cache = queryClient.getQueryData<InfiniteData<ChatMessagesPage>>(chatKeys.messages(1))
-    // 낙관 메시지가 서버 echo 없이 영구 잔류하지 않도록 롤백되어야 한다.
     expect(cache?.pages[0]?.messages).toHaveLength(0)
     const { toast } = await import('sonner')
     expect(toast.error).toHaveBeenCalledWith('메시지 전송에 실패했습니다. 다시 시도해주세요.')
 
-    // 다음 테스트로 mocked throw가 새지 않도록 원래 구현으로 되돌린다(싱글턴 클라이언트 공유 주의).
     publishSpy.mockRestore()
   })
 })

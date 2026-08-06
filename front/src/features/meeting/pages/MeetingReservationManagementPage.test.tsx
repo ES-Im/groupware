@@ -9,17 +9,6 @@ import { BASE_URL } from '@/shared/api/client'
 import { server } from '@/test/mocks/server'
 import { MeetingReservationManagementPage } from './MeetingReservationManagementPage'
 
-/**
- * MeetingReservationManagementPage(F810, ROADMAP(MEETING-ROOMS) T5.2) 회귀 방지 테스트.
- *
- * DeptLeavePage.test.tsx/BoardListPage.test.tsx의 헬퍼 패턴을 그대로 복제한다(신규 목 레이어
- * 구축 금지). 검증 대상:
- * - 로딩/에러/빈 상태 렌더.
- * - yearMonth(즉시 반영)/keyword(300ms 디바운스)/meetingRoomId(300ms 디바운스) 필터 변경 시
- *   새 쿼리 파라미터로 재조회되고 page가 0으로 리셋된다.
- * - 행 클릭 시 P3 상세(`/meetings/:meetingId`)로 navigate한다.
- */
-
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))
@@ -149,7 +138,6 @@ describe('MeetingReservationManagementPage (F810) - 행 클릭 → 인라인 상
     const row = await screen.findByRole('button', { name: /김철수/ })
     await user.click(row)
 
-    // 하단 인라인 패널에 상세(예약자)가 표시되고, 남의 예약이라 관리 액션은 노출되지 않는다.
     expect(await screen.findByText('기획팀 · 김철수')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: '회의 정보 수정' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: '참가자 교체' })).not.toBeInTheDocument()
@@ -193,7 +181,6 @@ describe('MeetingReservationManagementPage (F810) - 필터 3종', () => {
     expect(requests[0].yearMonth).toBe(currentYearMonth)
     expect(requests[0].page).toBe('0')
 
-    // 페이지를 1로 이동한 뒤 yearMonth를 바꾸면 즉시 반영 + page 0 리셋.
     await user.click(screen.getByRole('button', { name: '다음 페이지' }))
     await waitFor(() => expect(requests.some((r) => r.page === '1')).toBe(true))
 
@@ -206,7 +193,6 @@ describe('MeetingReservationManagementPage (F810) - 필터 3종', () => {
       ).toBe(true),
     )
 
-    // keyword는 300ms 디바운스 후에만 반영 + page 0 리셋.
     await user.click(screen.getByRole('button', { name: '다음 페이지' }))
     await waitFor(() =>
       expect(requests.some((r) => r.yearMonth === '2026-05' && r.page === '1')).toBe(true),
@@ -222,7 +208,6 @@ describe('MeetingReservationManagementPage (F810) - 필터 3종', () => {
       { timeout: 2000 },
     )
 
-    // meetingRoomId는 keyword와 동일하게 300ms 디바운스 후에만 반영 + page 0 리셋.
     await user.click(screen.getByRole('button', { name: '다음 페이지' }))
     await waitFor(() =>
       expect(requests.some((r) => r.keyword === '전략' && r.page === '1')).toBe(true),

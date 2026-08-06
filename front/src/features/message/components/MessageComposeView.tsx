@@ -59,7 +59,6 @@ import { messageDraftSchema } from '../model/messageDraftSchema'
 import type { FileListInfo } from '../model/messageTypes'
 import { MessageFilePreviewDialog } from './MessageFilePreviewDialog'
 
-/** 첨부파일 크기 표기(approval DraftAttachmentsCard formatFileSize 이식 — B/KB/MB 3단). */
 function formatFileSize(size: number): string {
   if (size < 1024) {
     return `${size} B`
@@ -70,8 +69,6 @@ function formatFileSize(size: number): string {
   return `${(size / 1024 / 1024).toFixed(1)} MB`
 }
 
-/** 답장 진입 시 프리필 값(ROADMAP(MESSAGE) T4.4). MessageBoxPage가 받은쪽지 상세의 발신자·제목·
- * 본문에서 구성해 넘긴다 — messageId(편집 모드)와는 상호 배타적(호출부 책임, 여기서 방어 안 함). */
 export interface MessageComposeInitialValues {
   receiverId: number
   receiverName: string
@@ -79,19 +76,10 @@ export interface MessageComposeInitialValues {
   quotedContent?: string
 }
 
-/** 답장 본문 인용 포맷("(필요 시 본문 인용)", PRD §지원 UI 답장). quotedContent 없으면 빈 문자열. */
 function buildQuotedContent(quoted?: string): string {
   return quoted ? `\n\n----- 원본 메시지 -----\n${quoted}` : ''
 }
 
-/**
- * 첨부 1건의 삭제 버튼을 소유하는 하위 컴포넌트 — 파일마다 독립된 useDeleteMessageFileMutation
- * 인스턴스(=독립된 MutationObserver)를 갖는다. TanStack Query v5는 단일 mutation 인스턴스에
- * 동시 mutate() 호출이 겹치면 나중 호출이 앞선 호출의 per-call 콜백(onSuccess/onError/onSettled)
- * 을 덮어쓰는 함정이 있어(A 삭제 진행 중 B를 누르면 A의 콜백이 유실), 파일별로 컴포넌트를 쪼개
- * 인스턴스를 분리하는 것이 표준 해법이다. 이 컴포넌트 자신의 deleteMutation.isPending이 곧
- * "이 파일 삭제 중" 상태이므로, 상위가 Set으로 수동 추적할 필요가 없다(과잉 상태 관리 제거).
- */
 function DeletableFileItem({ messageId, file }: { messageId: number; file: FileListInfo }) {
   const deleteMutation = useDeleteMessageFileMutation()
   const isImage = isMessageImageExtension(file.extension)
@@ -106,7 +94,6 @@ function DeletableFileItem({ messageId, file }: { messageId: number; file: FileL
     )
   }
 
-  // 이미 서버에 올라간 첨부(fileId 보유)만 다운로드 대상 — 편집 모드 기존 첨부는 전부 해당한다.
   function handleDownload() {
     downloadMessageFile(messageId, file.fileId, file.originalName).catch((error: unknown) => {
       toast.error(normalizeApiError(error).message)
@@ -126,7 +113,6 @@ function DeletableFileItem({ messageId, file }: { messageId: number; file: FileL
           {file.extension.toUpperCase()} · {formatFileSize(file.fileSize)}
         </span>
       </span>
-      {/* 이미지 첨부만 미리보기 모달(비이미지는 다운로드만). 버튼이 여러 개라 아이콘 전용(compact). */}
       {isImage && <MessageFilePreviewDialog messageId={messageId} file={file} compact />}
       <Button
         type="button"
@@ -153,16 +139,6 @@ function DeletableFileItem({ messageId, file }: { messageId: number; file: FileL
   )
 }
 
-/**
- * 편집모드(T5.4) 첨부 업로드/삭제 섹션 — T5.1의 read-only ExistingAttachmentList를 대체한다.
- * approval AttachmentSection.tsx 패턴 이식(hidden input+ref 트리거, 파일별 삭제는
- * DeletableFileItem에 위임). 미리보기/다운로드(F1522)는 M4 완료정의에 없어 범위 밖이다 —
- * 파일명·확장자·용량 표시+업로드+삭제만 다룬다.
- *
- * 업로드는 messageId 선존이 전제라 로컬 스테이징 없이 선택 즉시 사전검증→업로드한다(§🧩 "편집
- * 모드는 즉시 호출"). 삭제는 완전삭제(AlertDialog 필수)와 성격이 다른 개별 파일 삭제라
- * approval 선례처럼 확인 없이 즉시 실행한다.
- */
 function EditableAttachmentSection({
   messageId,
   files,
@@ -174,8 +150,6 @@ function EditableAttachmentSection({
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   function reportUploadError(error: unknown) {
-    // 사전검증(MessageFileValidationError)은 axios 에러가 아니라 normalizeApiError가 "알 수 없는
-    // 오류"로 뭉개므로, 그 한국어 메시지를 그대로 노출하도록 instanceof로 먼저 분기한다.
     if (error instanceof MessageFileValidationError) {
       toast.error(error.message)
       return
@@ -185,7 +159,6 @@ function EditableAttachmentSection({
 
   function handleFileInputChange(event: ChangeEvent<HTMLInputElement>) {
     const selected = Array.from(event.target.files ?? [])
-    // 같은 파일을 재선택해도 change가 다시 발화하도록 즉시 비운다(검증 실패 후 재시도 대비).
     event.target.value = ''
     if (selected.length === 0) {
       return
@@ -245,52 +218,13 @@ function EditableAttachmentSection({
 }
 
 interface MessageComposeViewProps {
-  /** 대상 쪽지 id(임시보관 편집 진입). 존재 여부로만 모드를 파생한다 — 실제 프리필은 T5.1 범위. */
   messageId?: number
   onBack: () => void
-  /** 답장 진입 시 발신자·제목·본문 프리필(T4.4). messageId와 동시 전달되지 않는다(호출부 보장). */
   initialValues?: MessageComposeInitialValues
-  /** 편집모드(T5.3-b) [발송] — MessageBoxPage가 sendDraft mutate+navigate까지 소유한다. */
   onSend?: () => void
-  /** 편집모드(T5.3-b) [삭제] — AlertDialog 확인 후에만 호출된다. */
   onDelete?: () => void
 }
 
-/**
- * 쪽지 작성 뷰(ROADMAP(MESSAGE) T4.1·T4.3-b·T4.4·T5.4, F1506·F1507·F1519·F1520·F1521, PRD
- * §페이지별 상세 쪽지 작성 뷰, §🧩 첨부 2단계 흐름, §지원 UI 답장).
- *
- * initialValues(T4.4, 답장 진입)가 있으면 마운트 시 수신자·제목·본문을 프리필한다 — 이후 사용자
- * 입력을 덮어쓰지 않도록 useState 초기값/useZodForm defaultValues로만 시드하고 별도 useEffect
- * 동기화는 두지 않는다(컴포넌트가 매 답장마다 새로 마운트되므로 초기값 시딩으로 충분).
- *
- * MessageBoxPage(T2.2-a)가 activeView==='compose'일 때 카드 내 뷰 전환으로 마운트하는 새 작성/편집
- * 공용 컨테이너다. 수신자는 shared EmployeePicker(다중 selected/onChange)를 로컬 state로 그대로
- * 소비해 receiverIds를 파생하고, 제목/본문은 messageDraftSchema(zod)로 RHF 검증한다(useZodForm +
- * submitWithErrorMapping, approval 표준 폼 패턴 재사용). 첨부는 로컬 File[] 스테이징 UI(approval
- * DraftAttachmentsCard 이식)로, 추가 시점에 messageFileValidation으로 사전검증해 위반 시
- * toast.error로 알린다.
- *
- * [전송]/[임시저장]은 첨부 유무로 분기하는 draft-first 오케스트레이션을 직접 소비한다(T4.3-b):
- * 첨부 없는 발송=sendMessage 단건, 첨부 있는 발송=createDraft→uploadMessageFiles→sendDraft(첨부
- * 전 전달 방지를 위해 반드시 이 순서), 임시저장=createDraft(+첨부 시 uploadMessageFiles만). 화면
- * 카피는 "전송"/"임시저장" 단일 유지(draft-first 여부는 PRD Open Q#6 확정대로 비노출).
- *
- * 편집모드(T5.1, messageId!=null — 임시보관 행 클릭 진입)에서는 useMessageDetailQuery·
- * useMessageFilesQuery(T3.1·T3.2)로 원본 title/content/receivers·첨부 목록을 조회해, 데이터
- * 도착 시 1회성 useRef 가드(MessageDetailView 자동읽음 패턴 동형)로 form.reset+selectedEmployees
- * 를 프리필한다. 첨부는 업로드/삭제 인터랙션 섹션(EditableAttachmentSection, T5.4 — uploadMessageFiles
- * 는 T4.3-a 재사용, 삭제는 신규 deleteMessageFile)을 보여주고, 신규작성 전용 로컬 File[] 스테이징
- * UI는 편집모드에서 렌더하지 않는다. initialValues(T4.4, 답장)와는 shape·출처가 달라 재사용하지
- * 않는다 — messageId·initialValues 동시 전달은 호출부(MessageBoxPage)가 상호 배타로 보장하므로
- * 여기서 별도 방어 로직을 두지 않는다.
- *
- * 편집모드의 [저장](T5.2)은 updateDraft(제목/본문, dirtyFields일 때만)·updateDraftReceivers
- * (수신자, 항상)를 Promise.allSettled로 병렬 호출한다 — [전송]/[임시저장](신규작성 전용)과
- * 달리 페이지 이동 없이 편집을 계속할 수 있어야 한다. [발송](T5.3-b)은 onSend를 즉시 호출하고
- * (sendDraft mutate+navigate는 MessageBoxPage 소유), [삭제](T5.3-b)는 AlertDialog 확인 후에만
- * onDelete를 호출한다(완전삭제와 달리 하드삭제·휴지통 미경유임을 다이얼로그 문구에 명시).
- */
 export function MessageComposeView({
   messageId,
   onBack,
@@ -319,12 +253,7 @@ export function MessageComposeView({
       : [],
   )
   const [attachments, setAttachments] = useState<File[]>([])
-  // 수신자 선택 모달 열림 상태: 부서/검색 브라우징(EmployeePicker)은 모달 안에 두고, 폼에는
-  // 선택된 수신자 칩만 표기한다. 모달 안 EmployeePicker는 selectedEmployees에 직접 바인딩해
-  // 선택이 즉시 폼 칩에 반영된다(별도 staging 없음 — 답장/편집 프리필 초기값도 그대로 노출).
   const [receiverDialogOpen, setReceiverDialogOpen] = useState(false)
-  // draft-first 오케스트레이션 중 createDraft가 발급한 messageId. 중간 단계(업로드/발송) 실패 후
-  // 재시도 시 이 값이 남아 있으면 createDraft를 재호출하지 않고 실패 지점부터 재개한다.
   const [resumeMessageId, setResumeMessageId] = useState<number | undefined>(undefined)
 
   const sendMessageMutation = useSendMessageMutation()
@@ -334,12 +263,8 @@ export function MessageComposeView({
   const updateDraftMutation = useMessageDraftUpdateMutation()
   const updateReceiversMutation = useMessageDraftReceiversUpdateMutation()
 
-  // 편집모드(T5.1) 원본 프리필 데이터. 신규작성/답장(messageId==null)에서는 둘 다 enabled:false로
-  // 대기해 추가 요청이 나가지 않는다.
   const detailQuery = useMessageDetailQuery(isEditMode ? messageId : undefined)
   const filesQuery = useMessageFilesQuery(isEditMode ? messageId : undefined)
-  // 데이터가 도착한 시점에 딱 1회만 form.reset+selectedEmployees를 채운다(MessageDetailView
-  // 자동읽음 1회 가드와 동형) — 이후 사용자가 입력 중인 값을 재조회·리렌더로 덮어쓰지 않는다.
   const prefilledRef = useRef(false)
 
   useEffect(() => {
@@ -384,17 +309,8 @@ export function MessageComposeView({
     setAttachments((prev) => prev.filter((item) => item !== file))
   }
 
-  /**
-   * 임시 쪽지(draft) messageId 확보. 이전 시도에서 이미 createDraft가 성공했다면(resumeMessageId
-   * 보존) 재호출하지 않고 그 값을 그대로 재사용한다 — 실패 지점부터 재개(중복 draft 생성 방지).
-   */
   async function ensureDraftMessageId(payload: MessageCreateRequest): Promise<number> {
     if (resumeMessageId != null) {
-      // 재개 경로는 createDraft를 건너뛰고 이미 발급된 id를 그대로 재사용한다 — 재시도 사이에
-      // title/content/receiverIds를 고쳐도 서버 draft는 최초 제출값 그대로다(구 값으로 전송/
-      // 저장됨). 재개 시점에 서버 draft를 최신 폼값으로 동기화하려면 updateDraft가 필요한데
-      // 이는 T5.2 산출물이라 아직 없다 — 지금 임시방편을 만들면 T5.2와 중복/충돌할 위험이 커
-      // T5.2 완료 전까지는 이 제약을 그대로 둔다(team-lead 확인, 2026-07-10).
       return resumeMessageId
     }
     const { messageId: created } = await createDraftMutation.mutateAsync(payload)
@@ -410,8 +326,6 @@ export function MessageComposeView({
     }
 
     if (attachments.length === 0) {
-      // 첨부 없는 발송: MESSAGE_SEND 단건. createDraft를 거치지 않아 실패해도 아무것도 남지
-      // 않으므로, 이 에러는 그대로 던져 submitWithErrorMapping의 기본 서버 에러 매핑에 맡긴다.
       await sendMessageMutation.mutateAsync({ ...values, receiverIds })
       toast.success('쪽지를 전송했습니다')
       onBack()
@@ -419,17 +333,8 @@ export function MessageComposeView({
       return
     }
 
-    // 첨부 있는 발송: createDraft(messageId 확보)→uploadMessageFiles→sendDraft 순서를 반드시
-    // 지킨다(첨부 전 발송 방지). createDraft 자체가 실패하면(아직 아무것도 저장 안 됨) 그대로
-    // 전파하고, createDraft 이후(id 확보 후) 단계가 실패하면 이미 임시보관함에 저장돼 있다는
-    // 사실을 알리는 전용 토스트를 띄운 뒤 재던져 폼 에러도 함께 노출한다.
     const id = await ensureDraftMessageId({ ...values, receiverIds })
     try {
-      // 재개 단위가 draft(messageId) 뿐이라, upload 성공 후 sendDraft만 실패해 재시도하면 이미
-      // 성공한 파일도 다시 전송될 수 있다(서버에 dedup·idempotency 키 없음, 순차 append). 이는
-      // T4.3-b가 새로 만든 문제가 아니라 board→approval→message가 공유하는 기존 순차-업로드
-      // -부분실패-비복구 설계의 연장(approval useDraftFileUploadMutation.ts 동일 한계 문서화
-      // 선례)이라 이 태스크에서 별도로 막지 않는다(team-lead 확인, 2026-07-10).
       await uploadFilesMutation.mutateAsync({ messageId: id, files: attachments })
       await sendDraftMutation.mutateAsync(id)
     } catch (error) {
@@ -460,14 +365,6 @@ export function MessageComposeView({
     navigate('/messages/drafts')
   })
 
-  /**
-   * 편집모드(T5.2) 저장 — 발송/삭제(T5.3)와 달리 페이지 이동 없이 편집을 계속할 수 있어야 한다.
-   * 제목/본문은 dirtyFields일 때만 updateDraft를 호출하고(변경 없으면 불필요한 요청 생략),
-   * 수신자는 selectedEmployees 기준 항상 updateDraftReceivers를 호출한다(두 리소스가 서로
-   * 독립적이라 값 비교로 스킵하지 않음 — team-lead 확정 설계). 두 mutation은 상호 의존이 없어
-   * Promise.allSettled로 병렬 실행하고, 실패는 그대로 던져 submitWithErrorMapping의 표준
-   * handleApiError 위임에 맡긴다(신규 에러분기 없음).
-   */
   const handleSave = submitWithErrorMapping(form, async (values) => {
     if (messageId == null) {
       return
@@ -496,8 +393,6 @@ export function MessageComposeView({
 
   return (
     <div className="flex flex-1 flex-col gap-4">
-      {/* 목록 복귀: xl 이상에서는 좌측 박스 네비 하단의 "목록으로" 버튼이 담당하므로 숨긴다
-          (쪽지 상세 뷰와 동일 패턴). xl 미만(박스 네비 미노출)에서만 노출한다. */}
       <div className="xl:hidden">
         <Button type="button" variant="outline" size="sm" onClick={onBack}>
           <ArrowLeft />
@@ -505,8 +400,6 @@ export function MessageComposeView({
         </Button>
       </div>
 
-      {/* 작성 카드: 쪽지 상세 뷰와 톤을 통일한다 — 제목/부제를 카드 헤더에 두어 카드가 좌측 네비와
-          같은 높이에서 시작하고, 메인 영역을 flex-1로 꽉 채운다(내용 입력이 남는 높이를 흡수). */}
       <Card className="flex min-h-0 min-w-0 flex-1 flex-col">
         <CardHeader className="border-b">
           <CardTitle className="text-xl font-bold tracking-tight text-foreground">
@@ -521,9 +414,6 @@ export function MessageComposeView({
         <CardContent className="flex min-h-0 flex-1 flex-col">
           <form
             noValidate
-            // 편집모드는 [저장] 버튼이 type=button으로 handleSave를 직접 트리거한다(발송 전용
-            // handleSend가 Enter 키 등으로 실수 제출되지 않도록 폼 자체 submit은 no-op으로 둔다
-            // — approval GeneralDraftEditForm과 동일 패턴).
             onSubmit={isEditMode ? (event) => event.preventDefault() : handleSend}
             className="flex flex-1 flex-col gap-4"
           >
@@ -541,8 +431,6 @@ export function MessageComposeView({
                 </Button>
               </div>
 
-              {/* 선택된 수신자 칩(EmployeePicker 내부 칩과 동일 톤). 개별 X로 제거한다 —
-                  모달이 닫혀 EmployeePicker가 언마운트돼도 폼에서 선택을 확인/해제할 수 있다. */}
               {selectedEmployees.length > 0 ? (
                 <div className="flex flex-wrap gap-1.5">
                   {selectedEmployees.map((emp) => (
@@ -572,8 +460,6 @@ export function MessageComposeView({
                 </p>
               )}
 
-              {/* 수신자 브라우징 모달: 부서/검색 UI(EmployeePicker)를 모달 안으로 옮겨 폼 세로 공간을
-                  절약한다(CirculationAddDialog 패턴). 선택은 selectedEmployees에 즉시 반영된다. */}
               <Dialog open={receiverDialogOpen} onOpenChange={setReceiverDialogOpen}>
                 <DialogContent className="sm:max-w-lg">
                   <DialogHeader>
@@ -614,7 +500,6 @@ export function MessageComposeView({
               <Label htmlFor="message-compose-content">
                 내용 <span className="text-destructive">*</span>
               </Label>
-              {/* 받는 사람 필드가 모달로 빠져 절약된 세로 공간을 내용 입력이 flex-1로 흡수한다. */}
               <Textarea
                 id="message-compose-content"
                 placeholder="내용을 입력해주세요"
@@ -645,8 +530,6 @@ export function MessageComposeView({
                 )}
               </div>
               {isEditMode && messageId != null ? (
-                // 편집모드(T5.4): 업로드/삭제 인터랙션 섹션. 신규작성 전용 로컬 File[] 스테이징
-                // UI는 렌더하지 않는다.
                 <EditableAttachmentSection messageId={messageId} files={filesQuery.data ?? []} />
               ) : (
                 <>
@@ -658,7 +541,6 @@ export function MessageComposeView({
                     aria-label="쪽지 첨부파일"
                     onChange={(event) => {
                       addFiles(event.target.files)
-                      // 같은 파일을 다시 골라도 change가 발생하도록 입력값을 비운다(approval 동형).
                       event.target.value = ''
                     }}
                   />
@@ -713,7 +595,6 @@ export function MessageComposeView({
 
             <div className="-mx-4 -mb-4 mt-auto flex flex-col-reverse gap-2 rounded-b-xl border-t bg-muted/50 px-4 py-3 sm:flex-row sm:items-center sm:justify-end">
               {isEditMode ? (
-                // 편집모드: [삭제](T5.3-b, AlertDialog 확인)·[저장](T5.2)·[발송](T5.3-b, 즉시).
                 <>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>

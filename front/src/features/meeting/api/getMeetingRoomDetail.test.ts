@@ -2,10 +2,6 @@ import { describe, expect, it, vi } from 'vitest'
 import { apiClient } from '@/shared/api/client'
 import { getMeetingRoomDetail } from './getMeetingRoomDetail'
 
-/**
- * getMeetingRoomDetail(F807, ROADMAP T2.1) 단위 테스트.
- * apiClient.get 직접 모킹으로 URL/응답 그대로 반환 여부만 검증한다.
- */
 vi.mock('@/shared/api/client', () => ({
   apiClient: { get: vi.fn() },
 }))
