@@ -206,3 +206,11 @@
 .schedule-calendar .fc-event.fc-event-draggable {
   cursor: grab;
 }
+
+.schedule-calendar .fc-daygrid-event {
+  white-space: normal;
+}
+.schedule-calendar .fc-daygrid-event .fc-event-title {
+  overflow: hidden;
+  white-space: normal;
+}

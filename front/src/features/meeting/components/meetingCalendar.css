@@ -34,3 +34,11 @@
   aspect-ratio: 1 / 1;
   min-height: 0;
 }
+
+.meeting-calendar .fc-daygrid-event {
+  white-space: normal;
+}
+.meeting-calendar .fc-daygrid-event .fc-event-title {
+  overflow: hidden;
+  white-space: normal;
+}
