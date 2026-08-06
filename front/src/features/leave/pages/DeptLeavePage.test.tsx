@@ -9,20 +9,6 @@ import { BASE_URL } from '@/shared/api/client'
 import { server } from '@/test/mocks/server'
 import { DeptLeavePage } from './DeptLeavePage'
 
-/**
- * DeptLeavePage(F744·F745·F746, ROADMAP(LEAVE) M4 T4.3) 회귀 방지 테스트.
- *
- * 검증 대상:
- * - deptId 미확정(primary 소속 없음) 시 대기 안내만 렌더하고 어떤 요청도 발생하지 않는다.
- * - 탭①(신청 이력) 로딩/에러/빈 상태, 검색어(디바운스)/월/상태 필터 변경 시 page가 0으로 리셋.
- * - 탭① 이력 행 클릭 → 기안서 상세 페이지로 navigate.
- * - 탭②(부서 요약) 사용률 카드 + 부서원 요약표(잔여=부여-사용 프론트 계산) 렌더, year 변경 시
- *   사용률·요약 두 쿼리 모두 재조회되고 요약표 page가 0으로 리셋.
- *
- * DeptAttendancePage.test.tsx/LeaveDraftCreatePage.test.tsx의 헬퍼 패턴을 그대로 복제한다
- * (신규 목 레이어 구축 금지).
- */
-
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))
@@ -311,9 +297,8 @@ describe('DeptLeavePage (F745/F746) - 탭② 부서 요약', () => {
     await screen.findByText('조회 조건에 해당하는 휴가 신청 이력이 없습니다.')
     await user.click(screen.getByRole('tab', { name: '부서 요약' }))
 
-    expect(await screen.findByText('35.5%')).toBeInTheDocument()
+    expect(await screen.findByText('35.50%')).toBeInTheDocument()
     expect(await screen.findByText(/김요약/)).toBeInTheDocument()
-    // annualBaseGrantDays(15) - annualUsedDays(5) = 잔여 10
     expect(screen.getByText('잔여 10')).toBeInTheDocument()
   })
 
@@ -386,9 +371,6 @@ describe('DeptLeavePage (F745/F746) - 탭② 부서 요약', () => {
     await user.click(screen.getByRole('button', { name: '다음 페이지' }))
     await waitFor(() => expect(summaryRequests.some((r) => r.page === '1')).toBe(true))
 
-    // year는 keyword와 동일하게 300ms 디바운스된 뒤에만 확정 반영된다(handleYearChange 제거 후
-    // yearInput 로컬 상태 + useEffect 디바운스로 통일). clear+type으로 실제 타이핑을 재현해도
-    // 중간값(intermediate) 요청은 디바운스가 흡수하고 마지막 값만 반영되는지 확인한다.
     const yearInput = screen.getByLabelText('조회 연도')
     await user.clear(yearInput)
     await user.type(yearInput, '2025')

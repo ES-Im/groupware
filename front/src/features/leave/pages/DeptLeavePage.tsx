@@ -18,42 +18,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/tabs'
 import { useDeptEmpLeaveSummaryQuery } from '../api/useDeptEmpLeaveSummaryQuery'
 import { useDeptLeaveHistoryQuery } from '../api/useDeptLeaveHistoryQuery'
 import { useDeptLeaveUsageSummaryQuery } from '../api/useDeptLeaveUsageSummaryQuery'
+import { formatUsagePercent } from '../lib/formatUsagePercent'
 
-/** 검색 디바운스 지연(ms). DeptAttendancePage/DeptBusinessTripHistoryPage와 동일 값을 재사용한다. */
 const SEARCH_DEBOUNCE_MS = 300
 
-/** 결재 상태 필터 셀렉트 옵션(approvalStatusBadgeMap 키 그대로 파생 — MyLeavePage 동형, 별도 배열 중복 선언 금지). */
 const STATUS_OPTIONS = Object.keys(approvalStatusBadgeMap) as ApprovalStatus[]
 
-/**
- * 부서 휴가 관리 페이지(F744·F745·F746, ROADMAP(LEAVE) M4 T4.3, PRD §페이지별 상세(부서 휴가 관리 페이지)).
- *
- * deptId는 `usePrimaryDeptId()`(strict, 폴백 없음)로 도출한다. useMeQuery가 아직 로딩 중이거나
- * primary 소속이 없으면 deptId가 undefined인데, 이때 두 조회 훅 모두 `enabled:false`로 대기만 할
- * 뿐이라 이 페이지는 `deptId === undefined`를 별도로 감지해 필터/탭 대신 "부서 정보를 확인하는 중"
- * 안내만 렌더하는 게이팅 분기를 둔다(DeptAttendancePage/DeptBusinessTripHistoryPage 동형).
- *
- * 탭①(신청 이력, F744)과 탭②(사용률+부서원 요약, F745·F746)는 각자 독립된 필터/페이지 상태를
- * 가진다(usePageState 별도 인스턴스 — DeptAttendancePage의 탭①/탭② 분리 패턴 동형). 탭 전환으로
- * 비활성 탭의 DOM이 언마운트되어도 이 컴포넌트 최상단 state는 유지되므로 필터·페이지가 보존된다.
- *
- * 탭①의 keyword는 로컬 입력값(historySearchInput)을 300ms 디바운스한 뒤에만 확정 keyword로
- * 반영한다. yearMonth(기본=당월)·approvalStatus·keyword 중 하나라도 바뀌면 resetPage()로 페이지를
- * 0으로 되돌린다. 탭②는 keyword(별도 디바운스)와 year(기본=올해, 마찬가지로 300ms 디바운스) 필터를
- * 공유하며, year는 사용률 카드(F746)와 부서원 요약표(F745) 양쪽 쿼리에 동일하게 반영된다(PRD
- * §페이지별 상세 — 두 조회가 같은 year 축을 공유). year를 keyword와 동일하게 디바운스하는 이유는
- * `type=number` 입력이 확정 없이 즉시 반영되면 키 입력마다(예: "2"→"20"→"202") 두 쿼리가 매번
- * 재요청되고 summaryQuery(keepPreviousData)에 중간값 캐시 키까지 쌓이기 때문이다(code-reviewer 지적,
- * MyLeavePage/AdminLeavePage도 동일하게 통일).
- *
- * 조회 실패(타 부서 접근 403 ROLE_003 포함)는 handleApiError 단일 진입점으로 토스트만 남긴다.
- * 탭① 이력 행 클릭 → 기안서 상세 페이지(①공통, /approval/drafts/{draftId})로 이동한다.
- */
 export function DeptLeavePage() {
   const navigate = useNavigate()
   const deptId = usePrimaryDeptId()
 
-  // 탭① 신청 이력 필터/페이지 상태.
   const [historySearchInput, setHistorySearchInput] = useState('')
   const [historyKeyword, setHistoryKeyword] = useState('')
   const [approvalStatus, setApprovalStatus] = useState<ApprovalStatus | undefined>(undefined)
@@ -61,7 +35,6 @@ export function DeptLeavePage() {
   const { page: historyPage, size: historySize, onPageChange: onHistoryPageChange, resetPage: resetHistoryPage } =
     usePageState()
 
-  // 탭② 부서 사용률 + 부서원 요약 필터/페이지 상태(서로 다른 usePageState 인스턴스 — 탭①과 완전히 독립).
   const [summarySearchInput, setSummarySearchInput] = useState('')
   const [summaryKeyword, setSummaryKeyword] = useState('')
   const [yearInput, setYearInput] = useState(() => String(dayjs().year()))
@@ -69,7 +42,6 @@ export function DeptLeavePage() {
   const { page: summaryPage, size: summarySize, onPageChange: onSummaryPageChange, resetPage: resetSummaryPage } =
     usePageState()
 
-  // 탭① 검색 입력 디바운스: 300ms 유예 후에만 확정 keyword로 반영 + page 리셋.
   useEffect(() => {
     const trimmed = historySearchInput.trim()
     if (trimmed === historyKeyword) {
@@ -83,7 +55,6 @@ export function DeptLeavePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [historySearchInput, historyKeyword])
 
-  // 탭② 검색 입력 디바운스: 탭①과 완전히 독립된 별도 상태.
   useEffect(() => {
     const trimmed = summarySearchInput.trim()
     if (trimmed === summaryKeyword) {
@@ -97,9 +68,6 @@ export function DeptLeavePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [summarySearchInput, summaryKeyword])
 
-  // 탭② 연도 입력 디바운스: keyword와 동일 패턴(300ms 유예 후에만 확정 year로 반영 + page 리셋).
-  // 키 입력마다 즉시 반영하면 usageQuery·summaryQuery가 매 keystroke마다 재요청되고 중간값("2",
-  // "20" 등)까지 캐시되는 문제가 있어(code-reviewer 지적), keyword 디바운스와 동형으로 통일한다.
   useEffect(() => {
     const trimmed = yearInput.trim()
     const parsed = Number(trimmed)
@@ -215,7 +183,6 @@ export function DeptLeavePage() {
                 <CardDescription>부서원의 휴가 신청 이력과 결재 상태를 확인합니다.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {/* 필터 툴바: 부서원 이름 검색 + 조회 월(yyyy-MM) + 결재 상태 필터 */}
                 <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
                   <div className="relative w-full sm:max-w-xs">
                     <Search className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -401,7 +368,6 @@ export function DeptLeavePage() {
                   </p>
                 ) : (
                   <div className="flex items-center gap-5">
-                    {/* 연차 사용률 도넛: conic-gradient로 primary(사용)·muted(잔여) 비율을 그린다. */}
                     <div
                       className="grid size-24 shrink-0 place-items-center rounded-full"
                       style={{
@@ -410,7 +376,7 @@ export function DeptLeavePage() {
                     >
                       <div className="grid size-[68px] place-items-center rounded-full bg-card">
                         <span className="text-xl font-bold tabular-nums text-foreground">
-                          {usageQuery.data.annualLeaveUsagePercent}%
+                          {formatUsagePercent(usageQuery.data.annualLeaveUsagePercent)}%
                         </span>
                       </div>
                     </div>

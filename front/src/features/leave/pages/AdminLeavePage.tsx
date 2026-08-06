@@ -14,33 +14,11 @@ import { useEmpLeaveSummaryQuery } from '../api/useEmpLeaveSummaryQuery'
 import { useEmpLeaveUsageSummaryQuery } from '../api/useEmpLeaveUsageSummaryQuery'
 import { AdjustGrantDaysDialog } from '../components/AdjustGrantDaysDialog'
 import { EmpLeaveSummaryTable } from '../components/EmpLeaveSummaryTable'
+import { formatUsagePercent } from '../lib/formatUsagePercent'
 import type { AdjustGrantDaysTarget } from '../model/leave'
 
-/** 검색 디바운스 지연(ms). EmployeePicker/DeptAttendancePage와 동일 값. */
 const SEARCH_DEBOUNCE_MS = 300
 
-/**
- * 관리자 휴가 관리 페이지(F747·F748·F749·F750, ROADMAP(LEAVE) M5 T5.3, ADMIN 전용).
- *
- * 목표 디자인(admin-page_1.html · A안 톤)에 맞춰 전사(또는 선택 부서) 연차 사용률 도넛(Recharts)과
- * 대상 사원 수 지표, 사원 휴가 요약 표로 재구성했다. 본부별 사용률 막대·연차 부여/사용 합계 KPI·
- * 특별/포상 전사 집계는 백엔드 집계 API가 없어 제외했다(팀 결정: 실데이터만 재구성).
- *
- * 연차 사용률 카드(useEmpLeaveUsageSummaryQuery, T5.1)는 deptId 미지정 시 회사 전체, 지정 시
- * 해당 부서 기준으로 단일 값(annualLeaveUsagePercent)을 보여준다. deptId 후보 목록은 신규 조회를
- * 만들지 않고 기존 `useDepartmentsQuery`(department 도메인, EmployeePicker가 이미 쓰는 DEPTS
- * 조회)를 그대로 재사용한다(ROADMAP §신규 확인 "관리자 부서 필터 목록 출처").
- *
- * 전사 사원 휴가 요약 표(useEmpLeaveSummaryQuery, T5.1, Page<T> 표준 페이징)는 keyword·year(둘 다
- * 300ms 디바운스)·deptId 필터와 PaginationControls/usePageState로 연동한다(DeptAttendancePage와
- * 동일 톤). year도 keyword와 동일하게 디바운스하는 이유: type=number 자유 입력이라 즉시 확정하면
- * 중간 입력값("2026"→"202")마다 쿼리가 재요청되기 때문(code-reviewer 지적). 필터가 하나라도
- * 확정 반영되면 resetPage()로 페이지를 0으로 되돌린다.
- *
- * 부여일수 조정(AdjustGrantDaysDialog, T5.2 mutation 소비)은 요약 표 행의 [조정] 버튼이
- * `adjustTarget`(단일 상태)을 채우면 열린다 — 다이얼로그 인스턴스는 이 페이지 최하단에 하나만
- * 마운트한다(UpdateAttendanceDialog와 동일 패턴).
- */
 export function AdminLeavePage() {
   const [searchInput, setSearchInput] = useState('')
   const [keyword, setKeyword] = useState('')
@@ -51,7 +29,6 @@ export function AdminLeavePage() {
 
   const [adjustTarget, setAdjustTarget] = useState<AdjustGrantDaysTarget | null>(null)
 
-  // 검색 입력 디바운스(DeptAttendancePage와 동일 패턴): 300ms 유예 후에만 확정 keyword로 반영 + page 리셋.
   useEffect(() => {
     const trimmed = searchInput.trim()
     if (trimmed === keyword) {
@@ -65,10 +42,6 @@ export function AdminLeavePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchInput, keyword])
 
-  // 연도 입력 디바운스(code-reviewer 지적, keyword와 동일 패턴 재사용): type=number 자유 입력은
-  // 키 입력마다("2026"→"202" 같은 중간값 포함) 즉시 확정하면 usage/summary 두 쿼리가 매번
-  // 재요청되어 스퍼리어스 에러 토스트가 뜰 수 있다. 300ms 유예 후 유효한 숫자일 때만 확정
-  // year로 반영 + page 리셋한다. 빈 문자열/숫자가 아닌 값은 커밋하지 않고 다음 유효 입력을 기다린다.
   useEffect(() => {
     const trimmed = yearInput.trim()
     if (trimmed === '' || trimmed === String(year)) {
@@ -151,7 +124,6 @@ export function AdminLeavePage() {
         </div>
       </header>
 
-      {/* 연차 사용률 개요: 도넛 + 사용률·대상 사원 지표 */}
       <Card>
         <CardHeader className="border-b">
           <CardTitle>연차 사용률</CardTitle>
@@ -188,7 +160,7 @@ export function AdminLeavePage() {
               <div className="space-y-3">
                 <div className="flex items-baseline gap-2">
                   <span className="text-3xl font-bold tabular-nums text-primary">
-                    {usageQuery.data.annualLeaveUsagePercent}%
+                    {formatUsagePercent(usageQuery.data.annualLeaveUsagePercent)}%
                   </span>
                   <span className="text-sm text-muted-foreground">연차 사용률</span>
                 </div>
@@ -203,7 +175,6 @@ export function AdminLeavePage() {
         </CardContent>
       </Card>
 
-      {/* 사원 휴가 요약: 검색 + 표 + 페이지네이션 */}
       <Card>
         <CardHeader className="border-b">
           <CardTitle>사원 휴가 요약</CardTitle>
@@ -262,11 +233,6 @@ export function AdminLeavePage() {
   )
 }
 
-/**
- * 연차 사용률 도넛(Recharts PieChart). 사용분(primary)/잔여(muted) 2조각 링에 중앙 정수 %를 겹쳐
- * 표시한다. 색은 FranchiseSalesOverview와 동일하게 테마 적응형 CSS 변수(var(--primary)/var(--muted))만
- * 쓴다. 값은 0~100으로 클램프해 음수/초과 입력에도 링이 깨지지 않게 한다.
- */
 function UsageDonut({ percent }: { percent: number }) {
   const clamped = Math.max(0, Math.min(100, percent))
   const data = [
@@ -293,7 +259,7 @@ function UsageDonut({ percent }: { percent: number }) {
         </PieChart>
       </ResponsiveContainer>
       <div className="absolute inset-0 flex items-center justify-center">
-        <span className="text-2xl font-bold tabular-nums">{Math.round(clamped)}%</span>
+        <span className="text-2xl font-bold tabular-nums">{formatUsagePercent(clamped)}%</span>
       </div>
     </div>
   )
