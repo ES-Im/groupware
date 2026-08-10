@@ -88,11 +88,11 @@ public class FranchiseApiTest extends IntegrationTestSupport {
         )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.franchiseId").isNumber())
+                .andExpect(jsonPath("$.id").isNumber())
                 .andReturn();
 
         long franchiseId = objectMapper.readTree(result.getResponse().getContentAsString())
-                .get("franchiseId")
+                .get("id")
                 .asLong();
 
         Franchise franchise = franchiseRepository.findById(franchiseId).orElseThrow();

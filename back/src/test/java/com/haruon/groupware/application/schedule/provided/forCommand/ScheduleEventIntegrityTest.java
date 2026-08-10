@@ -2,11 +2,7 @@ package com.haruon.groupware.application.schedule.provided.forCommand;
 
 import com.haruon.groupware.application.TestIntegrationConfig;
 import com.haruon.groupware.application.dept.required.DeptRepository;
-import com.haruon.groupware.application.draft.provided.forCommand.BusinessTripDraftManagement;
-import com.haruon.groupware.application.draft.provided.forCommand.DraftManagementResolver;
-import com.haruon.groupware.application.draft.provided.forCommand.GeneralDraftManagement;
-import com.haruon.groupware.application.draft.provided.forCommand.LeaveCancelDraftManagement;
-import com.haruon.groupware.application.draft.provided.forCommand.LeaveDraftManagement;
+import com.haruon.groupware.application.draft.provided.forCommand.*;
 import com.haruon.groupware.application.draft.required.DraftRepository;
 import com.haruon.groupware.application.draft.service.command.dto.ApproversRequest;
 import com.haruon.groupware.application.draft.service.command.dto.createDraft.BusinessTripDraftCreateRequest;

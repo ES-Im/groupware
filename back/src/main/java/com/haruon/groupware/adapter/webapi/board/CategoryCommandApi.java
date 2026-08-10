@@ -17,7 +17,7 @@ public class CategoryCommandApi {
     private final CategoryManagement categoryManagement;
 
     @PostMapping
-    public ResponseEntity<Void> registerCategories(
+    public ResponseEntity<Void> categories(
             @AuthenticationPrincipal EmpDetails details,
             @RequestBody @Valid CommandCategoryNameRequest request
     ) {

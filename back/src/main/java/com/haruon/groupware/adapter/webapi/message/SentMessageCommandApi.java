@@ -21,7 +21,6 @@ public class SentMessageCommandApi {
 
     private final SentMessageManagement sentMessageManagement;
 
-    // PATCH /api/messages/sent/{messageId}/trash
     @PatchMapping("/{messageId}/trash")
     public ResponseEntity<Void> moveMessageToTrash(
             @AuthenticationPrincipal EmpDetails details,
@@ -36,7 +35,6 @@ public class SentMessageCommandApi {
         return ResponseEntity.status(204).build();
     }
 
-    // PATCH /api/messages/sent/{messageId}/trash/restoration
     @PatchMapping("/{messageId}/trash/restoration")
     public ResponseEntity<Void> restoreMessageFromTrash(
             @AuthenticationPrincipal EmpDetails details,
@@ -48,7 +46,6 @@ public class SentMessageCommandApi {
 
         return ResponseEntity.status(204).build();
     }
-    // PATCH /api/messages/sent/{messageId}/deletion
     @PatchMapping("/{messageId}/deletion")
     public ResponseEntity<Void> deleteMessage(
             @AuthenticationPrincipal EmpDetails details,

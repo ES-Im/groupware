@@ -1,6 +1,7 @@
 package com.haruon.groupware.adapter.webapi.franchise;
 
 import com.haruon.groupware.adapter.security.empDtails.EmpDetails;
+import com.haruon.groupware.adapter.webapi.RegisterDomainIdResponse;
 import com.haruon.groupware.application.franchise.provided.forCommand.FranchiseManagement;
 import com.haruon.groupware.application.franchise.provided.forRetriever.FranchiseRetriever;
 import com.haruon.groupware.application.franchise.service.command.dto.FranchiseCreateRequest;
@@ -65,13 +66,13 @@ public class FranchiseApi {
     }
 
     @PostMapping
-    public ResponseEntity<FranchiseIdResponse> registerFranchises(
+    public ResponseEntity<RegisterDomainIdResponse> registerFranchises(
             @AuthenticationPrincipal EmpDetails details,
             @RequestBody @Valid FranchiseCreateRequest request
     ) {
         long franchiseId = franchiseManagement.createFranchise(details.getEmpId(), request);
 
-        return ResponseEntity.status(201).body(new FranchiseIdResponse(franchiseId));
+        return ResponseEntity.status(201).body(new RegisterDomainIdResponse(franchiseId));
     }
 
     @PatchMapping("/{franchiseId}")
@@ -130,10 +131,6 @@ public class FranchiseApi {
 
     public record MemoRequest(
             @NotBlank String memo
-    ) {}
-
-    public record FranchiseIdResponse(
-            Long franchiseId
     ) {}
 
 }

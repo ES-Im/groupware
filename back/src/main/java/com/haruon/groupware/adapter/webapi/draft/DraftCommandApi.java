@@ -1,6 +1,7 @@
 package com.haruon.groupware.adapter.webapi.draft;
 
 import com.haruon.groupware.adapter.security.empDtails.EmpDetails;
+import com.haruon.groupware.adapter.webapi.RegisterDomainIdResponse;
 import com.haruon.groupware.application.draft.provided.forCommand.*;
 import com.haruon.groupware.application.draft.service.command.dto.ApproversRequest;
 import com.haruon.groupware.application.draft.service.command.dto.createDraft.BusinessTripDraftCreateRequest;
@@ -35,57 +36,57 @@ public class DraftCommandApi {
     private final DraftManagementResolver draftManagementResolver;
 
     @PostMapping("/generals")
-    public ResponseEntity<DraftIdResponse> createGeneralDraft(
+    public ResponseEntity<RegisterDomainIdResponse> createGeneralDraft(
             @AuthenticationPrincipal EmpDetails details,
             @RequestBody @Valid CommonDraftCreateRequest request
     ) {
         Long draftId = generalDraftManagement.createDraft(details.getEmpId(), request);
 
-        return ResponseEntity.status(201).body(new DraftIdResponse(draftId));
+        return ResponseEntity.status(201).body(new RegisterDomainIdResponse(draftId));
     }
 
     @PostMapping("/leaves")
-    public ResponseEntity<DraftIdResponse> createLeaveDraft(
+    public ResponseEntity<RegisterDomainIdResponse> createLeaveDraft(
             @AuthenticationPrincipal EmpDetails details,
             @RequestBody @Valid LeaveDraftCreateRequest request
     ) {
         Long draftId = leaveDraftManagement.createDraft(details.getEmpId(), request);
 
-        return ResponseEntity.status(201).body(new DraftIdResponse(draftId));
+        return ResponseEntity.status(201).body(new RegisterDomainIdResponse(draftId));
     }
 
     @PostMapping("/business-trips")
-    public ResponseEntity<DraftIdResponse> createBusinessTripDraft(
+    public ResponseEntity<RegisterDomainIdResponse> createBusinessTripDraft(
             @AuthenticationPrincipal EmpDetails details,
             @RequestBody @Valid BusinessTripDraftCreateRequest request
     ) {
         Long draftId = businessTripDraftManagement.createDraft(details.getEmpId(), request);
 
-        return ResponseEntity.status(201).body(new DraftIdResponse(draftId));
+        return ResponseEntity.status(201).body(new RegisterDomainIdResponse(draftId));
     }
 
     @PostMapping("/sales")
-    public ResponseEntity<DraftIdResponse> createSalesDraft(
+    public ResponseEntity<RegisterDomainIdResponse> createSalesDraft(
             @AuthenticationPrincipal EmpDetails details,
             @RequestBody @Valid SalesDraftCreateRequest request
     ) {
         Long draftId = salesDraftManagement.createDraft(details.getEmpId(), request);
 
-        return ResponseEntity.status(201).body(new DraftIdResponse(draftId));
+        return ResponseEntity.status(201).body(new RegisterDomainIdResponse(draftId));
     }
 
     @PostMapping("/generals/submission")
-    public ResponseEntity<DraftIdResponse> createSubmittedGeneralDraft(
+    public ResponseEntity<RegisterDomainIdResponse> createSubmittedGeneralDraft(
             @AuthenticationPrincipal EmpDetails details,
             @RequestBody @Valid CommonDraftCreateRequest request
     ) {
         Long draftId = generalDraftManagement.createSubmitted(details.getEmpId(), withSubmittedAt(request));
 
-        return ResponseEntity.status(201).body(new DraftIdResponse(draftId));
+        return ResponseEntity.status(201).body(new RegisterDomainIdResponse(draftId));
     }
 
     @PostMapping("/leaves/submission")
-    public ResponseEntity<DraftIdResponse> createSubmittedLeaveDraft(
+    public ResponseEntity<RegisterDomainIdResponse> createSubmittedLeaveDraft(
             @AuthenticationPrincipal EmpDetails details,
             @RequestBody @Valid LeaveDraftCreateRequest request
     ) {
@@ -94,11 +95,11 @@ public class DraftCommandApi {
                 new LeaveDraftCreateRequest(withSubmittedAt(request.param()), request.startAt(), request.endAt(), request.leaveType())
         );
 
-        return ResponseEntity.status(201).body(new DraftIdResponse(draftId));
+        return ResponseEntity.status(201).body(new RegisterDomainIdResponse(draftId));
     }
 
     @PostMapping("/business-trips/submission")
-    public ResponseEntity<DraftIdResponse> createSubmittedBusinessTripDraft(
+    public ResponseEntity<RegisterDomainIdResponse> createSubmittedBusinessTripDraft(
             @AuthenticationPrincipal EmpDetails details,
             @RequestBody @Valid BusinessTripDraftCreateRequest request
     ) {
@@ -114,11 +115,11 @@ public class DraftCommandApi {
                 )
         );
 
-        return ResponseEntity.status(201).body(new DraftIdResponse(draftId));
+        return ResponseEntity.status(201).body(new RegisterDomainIdResponse(draftId));
     }
 
     @PostMapping("/sales/submission")
-    public ResponseEntity<DraftIdResponse> createSubmittedSalesDraft(
+    public ResponseEntity<RegisterDomainIdResponse> createSubmittedSalesDraft(
             @AuthenticationPrincipal EmpDetails details,
             @RequestBody @Valid SalesDraftCreateRequest request
     ) {
@@ -132,7 +133,7 @@ public class DraftCommandApi {
                 )
         );
 
-        return ResponseEntity.status(201).body(new DraftIdResponse(draftId));
+        return ResponseEntity.status(201).body(new RegisterDomainIdResponse(draftId));
     }
 
     @PatchMapping("/generals/{draftId}")
@@ -207,18 +208,18 @@ public class DraftCommandApi {
     }
 
     @PostMapping("/{sourceDraftId}/cancellation-drafts")
-    public ResponseEntity<DraftIdResponse> createCancellationDraft(
+    public ResponseEntity<RegisterDomainIdResponse> createCancellationDraft(
             @AuthenticationPrincipal EmpDetails details,
             @PathVariable Long sourceDraftId,
             @RequestBody @Valid CommonDraftCreateRequest request
     ) {
         Long draftId = draftManagementResolver.createCancelDraft(details.getEmpId(), sourceDraftId, request);
 
-        return ResponseEntity.status(201).body(new DraftIdResponse(draftId));
+        return ResponseEntity.status(201).body(new RegisterDomainIdResponse(draftId));
     }
 
     @PostMapping("/{sourceDraftId}/cancellation-drafts/submission")
-    public ResponseEntity<DraftIdResponse> createSubmittedCancellationDraft(
+    public ResponseEntity<RegisterDomainIdResponse> createSubmittedCancellationDraft(
             @AuthenticationPrincipal EmpDetails details,
             @PathVariable Long sourceDraftId,
             @RequestBody @Valid CommonDraftCreateRequest request
@@ -229,7 +230,7 @@ public class DraftCommandApi {
                 withSubmittedAt(request)
         );
 
-        return ResponseEntity.status(201).body(new DraftIdResponse(draftId));
+        return ResponseEntity.status(201).body(new RegisterDomainIdResponse(draftId));
     }
 
     @PatchMapping("/business-trips/{draftId}/participants")
@@ -261,10 +262,6 @@ public class DraftCommandApi {
                 LocalDateTime.now(SEOUL_ZONE)
         );
     }
-
-    public record DraftIdResponse(
-            Long draftId
-    ) {}
 
 
 }

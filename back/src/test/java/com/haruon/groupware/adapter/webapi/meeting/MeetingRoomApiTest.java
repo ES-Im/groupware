@@ -140,7 +140,7 @@ class MeetingRoomApiTest extends IntegrationTestSupport {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(createRequest)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.meetingRoomId").isNumber());
+                .andExpect(jsonPath("$.id").isNumber());
 
         MeetingRoomUpdateRequest updateRequest = MeetingRoomUpdateRequest.builder()
                 .name("수정 회의실")

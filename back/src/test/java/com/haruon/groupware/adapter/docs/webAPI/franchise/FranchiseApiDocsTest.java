@@ -187,7 +187,7 @@ public class FranchiseApiDocsTest extends RestDocsSupport {
                         preprocessRequest(prettyPrint()),
                         requestHeaders(headerWithName("Authorization").description("Bearer Access Token")),
                         requestFields(franchiseCreateRequestFields()),
-                        responseFields(fieldWithPath("franchiseId").type(JsonFieldType.NUMBER).description("생성된 가맹점 식별 번호"))
+                        responseFields(fieldWithPath("id").type(JsonFieldType.NUMBER).description("생성된 가맹점 식별 번호"))
                 ));
     }
 
@@ -423,7 +423,7 @@ public class FranchiseApiDocsTest extends RestDocsSupport {
                         preprocessRequest(prettyPrint()),
                         requestHeaders(headerWithName("Authorization").description("Bearer Access Token")),
                         requestFields(educationCreateRequestFields()),
-                        responseFields(fieldWithPath("educationId").type(JsonFieldType.NUMBER).description("생성된 교육 식별 번호"))
+                        responseFields(fieldWithPath("id").type(JsonFieldType.NUMBER).description("생성된 교육 식별 번호"))
                 ));
     }
 

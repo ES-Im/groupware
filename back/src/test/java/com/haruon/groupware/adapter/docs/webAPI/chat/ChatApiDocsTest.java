@@ -152,13 +152,13 @@ class ChatApiDocsTest extends RestDocsSupport {
                         .header("Authorization", "Bearer accessToken")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(request)))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andDo(document("CHAT_ROOM_CREATE",
                         preprocessRequest(prettyPrint()), preprocessResponse(prettyPrint()),
                         requestHeaders(headerWithName("Authorization").description("Bearer Access Token")),
                         requestFields(roomMemberIdsRequestFields()),
-                        responseFields(fieldWithPath("roomId").type(JsonFieldType.NUMBER)
+                        responseFields(fieldWithPath("id").type(JsonFieldType.NUMBER)
                                 .attributes(destinationType("Number"))
                                 .description("생성된 채팅방 식별 번호"))
                 ));

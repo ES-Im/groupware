@@ -65,7 +65,7 @@ class MessageCommandApiDocsTest extends RestDocsSupport {
                                         .attributes(key("constraints").value("선택"))
                                         .description("수신자 식별 번호 목록")
                         ),
-                        responseFields(fieldWithPath("messageId").type(JsonFieldType.NUMBER)
+                        responseFields(fieldWithPath("id").type(JsonFieldType.NUMBER)
                                 .description("쪽지 식별 번호"))
                 ));
     }
@@ -98,7 +98,7 @@ class MessageCommandApiDocsTest extends RestDocsSupport {
                                         .attributes(key("constraints").value("필수, 빈 배열 불가"))
                                         .description("수신자 식별 번호 목록")
                         ),
-                        responseFields(fieldWithPath("messageId").type(JsonFieldType.NUMBER)
+                        responseFields(fieldWithPath("id").type(JsonFieldType.NUMBER)
                                 .description("쪽지 식별 번호"))
                 ));
     }

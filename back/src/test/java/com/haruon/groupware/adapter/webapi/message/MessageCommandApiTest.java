@@ -55,11 +55,11 @@ class MessageCommandApiTest extends IntegrationTestSupport {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(createRequest)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.messageId").isNumber())
+                .andExpect(jsonPath("$.id").isNumber())
                 .andReturn();
 
         long messageId = objectMapper.readTree(result.getResponse().getContentAsString())
-                .get("messageId")
+                .get("id")
                 .asLong();
 
         MessageUpdateRequest updateRequest = new MessageUpdateRequest("수정된 내용", "수정된 제목");
@@ -114,11 +114,11 @@ class MessageCommandApiTest extends IntegrationTestSupport {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(request)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.messageId").isNumber())
+                .andExpect(jsonPath("$.id").isNumber())
                 .andReturn();
 
         long messageId = objectMapper.readTree(result.getResponse().getContentAsString())
-                .get("messageId")
+                .get("id")
                 .asLong();
 
         new TransactionTemplate(transactionManager).executeWithoutResult(status -> {
@@ -150,7 +150,7 @@ class MessageCommandApiTest extends IntegrationTestSupport {
                 .andReturn();
 
         long messageId = objectMapper.readTree(result.getResponse().getContentAsString())
-                .get("messageId")
+                .get("id")
                 .asLong();
 
         mockMvc.perform(delete("/api/messages/drafts/{messageId}", messageId)

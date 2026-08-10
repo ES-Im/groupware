@@ -2,6 +2,7 @@ package com.haruon.groupware.adapter.webapi.meeting;
 
 import com.haruon.groupware.adapter.security.empDtails.EmpDetails;
 import com.haruon.groupware.adapter.webapi.DateSupport;
+import com.haruon.groupware.adapter.webapi.RegisterDomainIdResponse;
 import com.haruon.groupware.application.exception.common.EndTimeBeforeStartTimeException;
 import com.haruon.groupware.application.exception.common.PositiveValueRequiredException;
 import com.haruon.groupware.application.file.service.query.dto.FileListInfo;
@@ -104,13 +105,13 @@ public class MeetingRoomApi {
     }
 
     @PostMapping
-    public ResponseEntity<MeetingRoomIdResponse> createRoom(
+    public ResponseEntity<RegisterDomainIdResponse> createRoom(
             @AuthenticationPrincipal EmpDetails details,
             @RequestBody @Valid MeetingRoomCreateRequest request
     ) {
         long meetingRoomId = meetingRoomManagement.createMeetingRoom(details.getEmpId(), request);
 
-        return ResponseEntity.status(201).body(new MeetingRoomIdResponse(meetingRoomId));
+        return ResponseEntity.status(201).body(new RegisterDomainIdResponse(meetingRoomId));
     }
 
     @PatchMapping("/{meetingRoomId}")
@@ -144,8 +145,5 @@ public class MeetingRoomApi {
         return ResponseEntity.status(204).build();
     }
 
-    public record MeetingRoomIdResponse(
-            Long meetingRoomId
-    ) {}
 
 }

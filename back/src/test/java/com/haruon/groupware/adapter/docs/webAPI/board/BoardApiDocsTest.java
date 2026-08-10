@@ -241,6 +241,7 @@ class BoardApiDocsTest extends RestDocsSupport {
                 .andExpect(status().isCreated())
                 .andDo(document("BOARD_REGISTER",
                         preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
                         authorizationHeader(),
                         requestFields(
                                 fieldWithPath("categoryId").type(JsonFieldType.NUMBER)
@@ -255,6 +256,9 @@ class BoardApiDocsTest extends RestDocsSupport {
                                 fieldWithPath("publishedAt").optional().type(JsonFieldType.STRING)
                                         .attributes(key("constraints").value("선택"))
                                         .description("발행 시각. 미입력 시 임시저장")
+                        ),
+                        responseFields(
+                                fieldWithPath("id").type(JsonFieldType.NUMBER).description("생성된 게시글 식별 번호")
                         )
                 ));
     }

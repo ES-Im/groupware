@@ -72,12 +72,12 @@ class ChatApiTest extends IntegrationTestSupport {
                         .content(objectMapper.writeValueAsBytes(
                                 new ChatCommandApi.RoomMemberIdsRequest(Set.of(member.getId()))
                         )))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.roomId").isNumber())
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").isNumber())
                 .andReturn();
 
         long roomId = objectMapper.readTree(createResult.getResponse().getContentAsString())
-                .get("roomId")
+                .get("id")
                 .asLong();
 
         mockMvc.perform(get("/api/chat/rooms")

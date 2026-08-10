@@ -1,6 +1,7 @@
 package com.haruon.groupware.adapter.webapi.chat;
 
 import com.haruon.groupware.adapter.security.empDtails.EmpDetails;
+import com.haruon.groupware.adapter.webapi.RegisterDomainIdResponse;
 import com.haruon.groupware.application.chat.provided.forCommand.ChatRoomManagement;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -25,14 +26,14 @@ public class ChatCommandApi {
     private final ChatRoomManagement chatRoomManagement;
 
     @PostMapping
-    public ResponseEntity<ChatRoomIdResponse> createChatRoom(
+    public ResponseEntity<RegisterDomainIdResponse> createChatRoom(
             @AuthenticationPrincipal EmpDetails details,
             @RequestBody @Valid RoomMemberIdsRequest request
     ) {
         long roomId = chatRoomManagement
                 .makeRoom(details.getEmpId(), request.memberIds, LocalDateTime.now(SEOUL_ZONE));
 
-        return ResponseEntity.ok().body(new ChatRoomIdResponse(roomId));
+        return ResponseEntity.status(201).body(new RegisterDomainIdResponse(roomId));
     }
 
     @PatchMapping("/{roomId}/invite")
@@ -113,10 +114,6 @@ public class ChatCommandApi {
 
     public record RoomMemberIdsRequest(
             @NotEmpty Set<Long> memberIds
-    ) {}
-
-    public record ChatRoomIdResponse(
-            Long roomId
     ) {}
 
 }

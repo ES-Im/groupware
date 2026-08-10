@@ -51,7 +51,7 @@ public class DraftSecurityIntegrationTest extends IntegrationTestSupport {
                 ).andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isCreated())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.draftId").isNumber());
+                .andExpect(jsonPath("$.id").isNumber());
     }
 
     @Test

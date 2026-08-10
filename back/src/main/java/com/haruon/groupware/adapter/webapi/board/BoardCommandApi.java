@@ -1,6 +1,7 @@
 package com.haruon.groupware.adapter.webapi.board;
 
 import com.haruon.groupware.adapter.security.empDtails.EmpDetails;
+import com.haruon.groupware.adapter.webapi.RegisterDomainIdResponse;
 import com.haruon.groupware.application.board.provided.forCommand.BoardManagement;
 import com.haruon.groupware.application.board.service.command.dto.BoardCreateRequest;
 import com.haruon.groupware.application.board.service.command.dto.BoardUpdateRequest;
@@ -22,13 +23,15 @@ public class BoardCommandApi {
     private final BoardManagement boardManagement;
 
     @PostMapping
-    public ResponseEntity<Void> registerBoards (
+    public ResponseEntity<RegisterDomainIdResponse> boards (
             @AuthenticationPrincipal EmpDetails details,
             @RequestBody @Valid BoardCreateRequest request
     ) {
-        boardManagement.registerBoard(details.getEmpId(), request);
+        long boardId = boardManagement.registerBoard(details.getEmpId(), request);
 
-        return ResponseEntity.status(201).build();
+        return ResponseEntity
+                .status(201)
+                .body(new RegisterDomainIdResponse(boardId));
     }
 
     @PatchMapping("/{boardId}/publishment")
@@ -63,7 +66,5 @@ public class BoardCommandApi {
 
         return ResponseEntity.noContent().build();
     }
-
-
 
 }

@@ -21,7 +21,6 @@ public class ReceivedMessageCommandApi {
 
     private final ReceivedMessageManagement receivedMessageManagement;
 
-    // PATCH /api/messages/received/{messageId}/read
     @PatchMapping("/{messageId}/read")
     public ResponseEntity<Void> markMessageAsRead(
             @AuthenticationPrincipal EmpDetails details,
@@ -34,7 +33,6 @@ public class ReceivedMessageCommandApi {
         return ResponseEntity.status(204).build();
     }
 
-    // PATCH /api/messages/received/{messageId}/trash
     @PatchMapping("/{messageId}/trash")
     public ResponseEntity<Void> moveMessageToTrash(
             @AuthenticationPrincipal EmpDetails details,
@@ -47,7 +45,6 @@ public class ReceivedMessageCommandApi {
         return ResponseEntity.status(204).build();
     }
 
-    // PATCH /api/messages/received/{messageId}/trash/restoration
     @PatchMapping("/{messageId}/trash/restoration")
     public ResponseEntity<Void> restoreMessageFromTrash(
             @AuthenticationPrincipal EmpDetails details,
@@ -58,7 +55,6 @@ public class ReceivedMessageCommandApi {
         return ResponseEntity.status(204).build();
     }
 
-    // PATCH /api/messages/received/{messageId}/deletion
     @PatchMapping("/{messageId}/deletion")
     public ResponseEntity<Void> deleteMessage(
             @AuthenticationPrincipal EmpDetails details,

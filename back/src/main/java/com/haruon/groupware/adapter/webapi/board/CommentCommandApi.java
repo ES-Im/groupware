@@ -21,7 +21,7 @@ public class CommentCommandApi {
     private final CommentManagement commentManagement;
 
     @PostMapping("/{boardId}/comments")
-    public ResponseEntity<Void> createComment(
+    public ResponseEntity<Void> comments(
             @AuthenticationPrincipal EmpDetails details,
             @PathVariable Long boardId,
             @RequestBody @Valid CommandCommentRequest request

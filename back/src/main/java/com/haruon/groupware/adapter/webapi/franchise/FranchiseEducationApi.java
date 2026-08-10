@@ -2,6 +2,7 @@ package com.haruon.groupware.adapter.webapi.franchise;
 
 import com.haruon.groupware.adapter.security.empDtails.EmpDetails;
 import com.haruon.groupware.adapter.webapi.DateSupport;
+import com.haruon.groupware.adapter.webapi.RegisterDomainIdResponse;
 import com.haruon.groupware.application.franchise.provided.forCommand.EducationManagement;
 import com.haruon.groupware.application.franchise.provided.forRetriever.FranchiseEducationRetriever;
 import com.haruon.groupware.application.franchise.service.command.dto.EducationCreateRequest;
@@ -88,13 +89,13 @@ public class FranchiseEducationApi {
     }
 
     @PostMapping
-    public ResponseEntity<EducationIdResponse> registerEducations(
+    public ResponseEntity<RegisterDomainIdResponse> registerEducations(
             @AuthenticationPrincipal EmpDetails details,
             @RequestBody @Valid EducationCreateRequest request
     ) {
         long educationId = educationManagement.createEducation(details.getEmpId(), request);
 
-        return ResponseEntity.status(201).body(new EducationIdResponse(educationId));
+        return ResponseEntity.status(201).body(new RegisterDomainIdResponse(educationId));
     }
 
     @PatchMapping("/{educationId}")
@@ -127,9 +128,5 @@ public class FranchiseEducationApi {
 
         return ResponseEntity.status(204).build();
     }
-
-    public record EducationIdResponse(
-            Long educationId
-    ) {}
 
 }

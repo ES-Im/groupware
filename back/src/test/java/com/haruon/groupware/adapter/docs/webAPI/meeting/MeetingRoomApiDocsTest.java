@@ -225,7 +225,7 @@ class MeetingRoomApiDocsTest extends RestDocsSupport {
                                 fieldWithPath("description").type(JsonFieldType.STRING).attributes(key("constraints").value("필수, 공백 불가")).description("회의실 설명"),
                                 fieldWithPath("capacity").type(JsonFieldType.NUMBER).attributes(key("constraints").value("필수, 양수")).description("수용 인원")
                         ),
-                        responseFields(fieldWithPath("meetingRoomId").type(JsonFieldType.NUMBER).description("생성된 회의실 식별 번호"))
+                        responseFields(fieldWithPath("id").type(JsonFieldType.NUMBER).description("생성된 회의실 식별 번호"))
                 ));
     }
 

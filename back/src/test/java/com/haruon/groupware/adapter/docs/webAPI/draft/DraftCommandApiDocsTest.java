@@ -608,7 +608,7 @@ public class DraftCommandApiDocsTest extends RestDocsSupport {
 
     private FieldDescriptor[] draftIdResponseFields() {
         return new FieldDescriptor[] {
-                fieldWithPath("draftId").type(JsonFieldType.NUMBER).description("생성된 기안서 식별 번호")
+                fieldWithPath("id").type(JsonFieldType.NUMBER).description("생성된 기안서 식별 번호")
         };
     }
 
