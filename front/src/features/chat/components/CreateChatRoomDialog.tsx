@@ -44,7 +44,7 @@ export function CreateChatRoomDialog({ open, onOpenChange }: CreateChatRoomDialo
       {
         onSuccess: (result) => {
           onOpenChange(false)
-          selectRoom(result.roomId)
+          selectRoom(result.id)
         },
         onError: (error) => handleApiError(error, { toast }),
       },

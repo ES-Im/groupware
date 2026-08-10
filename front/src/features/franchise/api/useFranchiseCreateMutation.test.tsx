@@ -77,7 +77,7 @@ describe('useFranchiseCreateMutation', () => {
       }),
       http.post(`${BASE_URL}/api/franchises`, () => {
         franchises = [...franchises, makeFranchise(2, '신규점')]
-        return HttpResponse.json({ franchiseId: 2 }, { status: 201 })
+        return HttpResponse.json({ id: 2 }, { status: 201 })
       }),
     )
     const { Wrapper } = createWrapper()

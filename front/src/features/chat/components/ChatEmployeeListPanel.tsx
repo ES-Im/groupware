@@ -83,7 +83,7 @@ export function ChatEmployeeListPanel() {
     createMutation.mutate(
       { memberIds: [empId] },
       {
-        onSuccess: (result) => selectRoom(result.roomId),
+        onSuccess: (result) => selectRoom(result.id),
         onError: (error) => handleApiError(error, { toast }),
       },
     )

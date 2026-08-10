@@ -165,7 +165,7 @@ describe('ChatEmployeeListPanel', () => {
     server.use(
       http.post(`${BASE_URL}/api/chat/rooms`, async ({ request }) => {
         createBody = await request.json()
-        return HttpResponse.json({ roomId: 99 })
+        return HttpResponse.json({ id: 99 }, { status: 201 })
       }),
     )
     useChatOverlayStore.setState({ inviteTargetRoomId: null })

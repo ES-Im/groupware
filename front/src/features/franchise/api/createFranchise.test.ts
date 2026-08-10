@@ -18,16 +18,16 @@ const basePayload = {
 describe('createFranchise', () => {
   beforeEach(() => {
     vi.mocked(apiClient.post).mockReset()
-    vi.mocked(apiClient.post).mockResolvedValue({ data: { franchiseId: 55 } })
+    vi.mocked(apiClient.post).mockResolvedValue({ data: { id: 55 } })
   })
 
-  it('/api/franchises로 POST하고 응답의 franchiseId를 반환한다', async () => {
+  it('/api/franchises로 POST하고 응답의 id를 반환한다', async () => {
     const result = await createFranchise({ ...basePayload, managerEmpId: 7 })
 
     expect(apiClient.post).toHaveBeenCalledTimes(1)
     const [url] = vi.mocked(apiClient.post).mock.calls[0]
     expect(url).toBe('/api/franchises')
-    expect(result).toEqual({ franchiseId: 55 })
+    expect(result).toEqual({ id: 55 })
   })
 
   it('managerEmpId를 지정하면 body에 그대로 포함된다', async () => {
