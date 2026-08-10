@@ -7,6 +7,8 @@ import interactionPlugin from '@fullcalendar/interaction'
 import koLocale from '@fullcalendar/core/locales/ko'
 import type { DatesSetArg, EventClickArg, EventDropArg, EventInput } from '@fullcalendar/core'
 import type { DateClickArg } from '@fullcalendar/interaction'
+import { useIsMobile } from '@/shared/lib/useIsMobile'
+import { cn } from '@/shared/lib/utils'
 import './scheduleCalendar.css'
 
 interface ScheduleCalendarProps {
@@ -26,16 +28,18 @@ export function ScheduleCalendar({
   onEventClick,
   onEventDrop,
 }: ScheduleCalendarProps) {
+  const isMobile = useIsMobile()
+
   return (
-    <div className="schedule-calendar h-full">
+    <div className={cn('schedule-calendar', !isMobile && 'h-full')}>
       <FullCalendar
         ref={calendarRef}
         plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
         initialView="dayGridMonth"
         locale={koLocale}
         headerToolbar={false}
-        height="100%"
-        dayMaxEvents
+        height={isMobile ? 'auto' : '100%'}
+        dayMaxEvents={!isMobile}
         events={events}
         eventDisplay="block"
         nowIndicator
