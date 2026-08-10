@@ -1,5 +1,6 @@
 package com.haruon.groupware.application.board.required;
 
+import com.haruon.groupware.domain.board.Board;
 import com.haruon.groupware.domain.board.BoardLike;
 import org.springframework.data.repository.Repository;
 
@@ -14,4 +15,6 @@ public interface BoardLikeRepository extends Repository<BoardLike, Long> {
     boolean existsByBoardIdAndEmpId(Long boardId, Long empId);
 
     Optional<BoardLike> findByBoardIdAndEmpId(Long boardId, Long empId);
+
+    void deleteAllByBoard(Board board);
 }

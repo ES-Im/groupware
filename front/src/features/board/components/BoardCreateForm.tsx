@@ -1,25 +1,28 @@
-import { useEffect, useRef, useState } from 'react'
-import { FileClock, FileText, Paperclip, Plus, Save, Send, X } from 'lucide-react'
+import {useEffect, useRef, useState} from 'react'
+import {useQueryClient} from '@tanstack/react-query'
+import {FileClock, FileText, Paperclip, Plus, Save, Send, X} from 'lucide-react'
 import dayjs from 'dayjs'
-import { toast } from 'sonner'
-import { isForbidden, isNotFound, normalizeApiError } from '@/shared/lib/apiError'
-import { submitWithErrorMapping, useZodForm } from '@/shared/lib/form'
-import { Button } from '@/shared/ui/button'
-import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/shared/ui/hover-card'
-import { Input } from '@/shared/ui/input'
-import { Label } from '@/shared/ui/label'
-import { Textarea } from '@/shared/ui/textarea'
-import { useCategoriesQuery } from '@/features/category/api/useCategoriesQuery'
-import { useBoardDetailQuery } from '../api/useBoardDetailQuery'
-import { useBoardDraftsQuery } from '../api/useBoardDraftsQuery'
-import { useBoardEditModeQuery } from '../api/useBoardEditModeQuery'
-import { useBoardRegisterMutation } from '../api/useBoardRegisterMutation'
-import { useBoardUpdateMutation } from '../api/useBoardUpdateMutation'
-import { BoardFileValidationError, validateBoardFileUpload } from '../lib/fileValidation'
-import { boardCreateSchema, type BoardCreateFormValues } from '../model/boardCreateSchema'
-import type { BoardUpdateRequest } from '../model/board'
-import { BoardEditAttachments } from './BoardEditAttachments'
-import { BoardEditForm } from './BoardEditForm'
+import {toast} from 'sonner'
+import {isForbidden, isNotFound, normalizeApiError} from '@/shared/lib/apiError'
+import {submitWithErrorMapping, useZodForm} from '@/shared/lib/form'
+import {Button} from '@/shared/ui/button'
+import {HoverCard, HoverCardContent, HoverCardTrigger} from '@/shared/ui/hover-card'
+import {Input} from '@/shared/ui/input'
+import {Label} from '@/shared/ui/label'
+import {Textarea} from '@/shared/ui/textarea'
+import {useCategoriesQuery} from '@/features/category/api/useCategoriesQuery'
+import {useBoardDetailQuery} from '../api/useBoardDetailQuery'
+import {useBoardDraftsQuery} from '../api/useBoardDraftsQuery'
+import {useBoardEditModeQuery} from '../api/useBoardEditModeQuery'
+import {useBoardPublishMutation} from '../api/useBoardPublishMutation'
+import {useBoardRegisterMutation} from '../api/useBoardRegisterMutation'
+import {useBoardUpdateMutation} from '../api/useBoardUpdateMutation'
+import {BoardFileValidationError, validateBoardFileUpload} from '../lib/fileValidation'
+import {type BoardCreateFormValues, boardCreateSchema} from '../model/boardCreateSchema'
+import {boardKeys} from '../model/queryKeys'
+import type {BoardUpdateRequest} from '../model/board'
+import {BoardEditAttachments} from './BoardEditAttachments'
+import {BoardEditForm} from './BoardEditForm'
 
 function formatFileSizeMb(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
@@ -36,6 +39,7 @@ interface BoardCreateFormProps {
 }
 
 export function BoardCreateForm({ onSuccess, defaultCategoryId }: BoardCreateFormProps) {
+  const queryClient = useQueryClient()
   const categoriesQuery = useCategoriesQuery()
   const categories = categoriesQuery.data ?? []
 
@@ -53,6 +57,7 @@ export function BoardCreateForm({ onSuccess, defaultCategoryId }: BoardCreateFor
   const editModeQuery = useBoardEditModeQuery(editingBoardId)
   const detailQuery = useBoardDetailQuery(editModeQuery.isSuccess ? editingBoardId : undefined)
   const updateMutation = useBoardUpdateMutation()
+  const publishMutation = useBoardPublishMutation()
 
   const form = useZodForm(boardCreateSchema, {
     defaultValues: { categoryId: '', title: '', content: '' },
@@ -110,13 +115,10 @@ export function BoardCreateForm({ onSuccess, defaultCategoryId }: BoardCreateFor
   }, [detailQuery.error])
 
   function getModifiedAt(): string | undefined {
-    if (detailQuery.data) {
-      return detailQuery.data.modifiedAt
+    if (!detailQuery.data) {
+      return undefined
     }
-    if (detailQuery.error && isNotFound(normalizeApiError(detailQuery.error))) {
-      return dayjs().format('YYYY-MM-DDTHH:mm:ss')
-    }
-    return undefined
+    return detailQuery.data.modifiedAt ?? dayjs().format('YYYY-MM-DDTHH:mm:ss')
   }
 
   async function submit(values: BoardCreateFormValues, options: { publish: boolean }) {
@@ -171,6 +173,23 @@ export function BoardCreateForm({ onSuccess, defaultCategoryId }: BoardCreateFor
     onSuccess()
   }
 
+  function handlePublish() {
+    if (editingBoardId === undefined) {
+      return
+    }
+    publishMutation.mutate(editingBoardId, {
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({ queryKey: boardKeys.all })
+        toast.success('게시글을 발행했습니다')
+        setEditingBoardId(undefined)
+        onSuccess()
+      },
+      onError: (error) => {
+        toast.error(normalizeApiError(error).message)
+      },
+    })
+  }
+
   if (editingBoardId !== undefined) {
     if (editModeQuery.isLoading || categoriesQuery.isLoading) {
       return <p className="py-8 text-center text-sm text-muted-foreground">불러오는 중...</p>
@@ -201,6 +220,11 @@ export function BoardCreateForm({ onSuccess, defaultCategoryId }: BoardCreateFor
         getModifiedAt={getModifiedAt}
         isModifiedAtReady={getModifiedAt() !== undefined}
         onSubmitPayload={handleEditSubmit}
+        publish={
+          detailQuery.data?.isDraft
+            ? { onClick: handlePublish, isPending: publishMutation.isPending }
+            : undefined
+        }
       />
     )
   }

@@ -1,12 +1,12 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { render, screen, waitFor } from '@testing-library/react'
+import {QueryClient, QueryClientProvider} from '@tanstack/react-query'
+import {render, screen, waitFor} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { http, HttpResponse } from 'msw'
-import { MemoryRouter, Route, Routes } from 'react-router'
-import { afterEach, describe, expect, it, vi } from 'vitest'
-import { BASE_URL } from '@/shared/api/client'
-import { server } from '@/test/mocks/server'
-import { BoardCreatePage } from './BoardCreatePage'
+import {http, HttpResponse} from 'msw'
+import {MemoryRouter, Route, Routes} from 'react-router'
+import {afterEach, describe, expect, it, vi} from 'vitest'
+import {BASE_URL} from '@/shared/api/client'
+import {server} from '@/test/mocks/server'
+import {BoardCreatePage} from './BoardCreatePage'
 
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
@@ -170,10 +170,21 @@ describe('BoardCreatePage (F308) - 임시저장글 인라인 편집', () => {
         HttpResponse.json({ boardId: 42, categoryId: 1, title: '이어쓰던 초안', content: '이어쓰던 본문' }),
       ),
       http.get(`${BASE_URL}/api/boards/42`, () =>
-        HttpResponse.json(
-          { code: 'RESOURCE_001', name: 'NOT_FOUND', httpStatus: 404, message: '게시글을 찾을 수 없습니다' },
-          { status: 404 },
-        ),
+        HttpResponse.json({
+          boardId: 42,
+          categoryId: 1,
+          empId: 100,
+          authorName: '홍길동',
+          title: '이어쓰던 초안',
+          content: '이어쓰던 본문',
+          publishedAt: null,
+          modifiedAt: null,
+          likeCount: 0,
+          viewCount: 0,
+          commentCount: 0,
+          isDraft: true,
+          isLiked: false,
+        }),
       ),
       http.get(`${BASE_URL}/api/boards/42/files`, () => HttpResponse.json([])),
     )
@@ -188,9 +199,57 @@ describe('BoardCreatePage (F308) - 임시저장글 인라인 편집', () => {
     await user.click(screen.getByText('이어쓰던 초안'))
 
     expect(await screen.findByRole('button', { name: '저장' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '발행' })).toBeInTheDocument()
     expect(await screen.findByText('첨부파일이 없습니다.')).toBeInTheDocument()
     expect(screen.getByLabelText(/제목/)).toHaveValue('이어쓰던 초안')
     expect(screen.queryByText('게시글 수정 화면')).not.toBeInTheDocument()
+  })
+
+  it('임시저장글 인라인 편집에서 "발행"을 클릭하면 발행 후 목록으로 돌아간다', async () => {
+    mockCategoriesAndDrafts([
+      { boardId: 42, title: '이어쓰던 초안', updatedAt: '2026-07-01T09:00:00' },
+    ])
+    let publishCalled = false
+    server.use(
+      http.get(`${BASE_URL}/api/boards/42/edit-mode`, () =>
+        HttpResponse.json({ boardId: 42, categoryId: 1, title: '이어쓰던 초안', content: '이어쓰던 본문' }),
+      ),
+      http.get(`${BASE_URL}/api/boards/42`, () =>
+        HttpResponse.json({
+          boardId: 42,
+          categoryId: 1,
+          empId: 100,
+          authorName: '홍길동',
+          title: '이어쓰던 초안',
+          content: '이어쓰던 본문',
+          publishedAt: null,
+          modifiedAt: null,
+          likeCount: 0,
+          viewCount: 0,
+          commentCount: 0,
+          isDraft: true,
+          isLiked: false,
+        }),
+      ),
+      http.get(`${BASE_URL}/api/boards/42/files`, () => HttpResponse.json([])),
+      http.patch(`${BASE_URL}/api/boards/42/publishment`, () => {
+        publishCalled = true
+        return new HttpResponse(null, { status: 204 })
+      }),
+    )
+    const user = userEvent.setup()
+    renderPage()
+
+    await screen.findByRole('option', { name: '공지' })
+    await user.hover(screen.getByRole('button', { name: /임시저장글/ }))
+    await user.click(await screen.findByText('이어쓰던 초안'))
+
+    await user.click(await screen.findByRole('button', { name: '발행' }))
+
+    expect(await screen.findByText('게시판 목록 화면')).toBeInTheDocument()
+    expect(publishCalled).toBe(true)
+    const { toast } = await import('sonner')
+    expect(toast.success).toHaveBeenCalledWith('게시글을 발행했습니다')
   })
 
   it('임시저장 목록이 비어 있으면 "임시저장한 글이 없습니다."를 보여준다', async () => {

@@ -1,6 +1,8 @@
 package com.haruon.groupware.application.board.service.command;
 
 import com.haruon.groupware.application.board.provided.forCommand.BoardManagement;
+import com.haruon.groupware.application.board.required.BoardCommentRepository;
+import com.haruon.groupware.application.board.required.BoardLikeRepository;
 import com.haruon.groupware.application.board.required.BoardRepository;
 import com.haruon.groupware.application.board.required.CategoryRepository;
 import com.haruon.groupware.application.board.service.command.dto.BoardCreateRequest;
@@ -33,6 +35,8 @@ public class BoardCommandService implements BoardManagement {
     private final EmpRepository empRepository;
     private final CategoryRepository categoryRepository;
     private final FileStorage fileStorage;
+    private final BoardLikeRepository boardLikeRepository;
+    private final BoardCommentRepository boardCommentRepository;
 
     @Override
     public long registerBoard(Long authorId, BoardCreateRequest request) {
@@ -81,6 +85,11 @@ public class BoardCommandService implements BoardManagement {
         List<FilePathInfo> files = board.getBoardFiles().stream()
                 .map(file -> new FilePathInfo(file.getStoredPath(), file.getStoredName()))
                 .toList();
+
+        boardLikeRepository.deleteAllByBoard(board);
+
+        boardCommentRepository.deleteRepliesByBoardId(boardId);
+        boardCommentRepository.deleteRootCommentsByBoardId(boardId);
 
         boardRepository.delete(board);
 

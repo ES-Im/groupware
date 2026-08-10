@@ -1,26 +1,39 @@
-import { useEffect } from 'react'
-import { Link } from 'react-router'
-import { Download, Eye, Heart, MessageCircle, Paperclip, Pencil, Send } from 'lucide-react'
+import {useEffect} from 'react'
+import {Link, useNavigate} from 'react-router'
+import {Download, Eye, Heart, MessageCircle, Paperclip, Pencil, Send, Trash2} from 'lucide-react'
 import dayjs from 'dayjs'
-import { toast } from 'sonner'
-import { useAuthStore } from '@/features/auth/store/authStore'
-import { isForbidden, isNotFound, normalizeApiError } from '@/shared/lib/apiError'
-import { hasRequiredRole } from '@/shared/lib/hasRequiredRole'
-import { cn } from '@/shared/lib/utils'
-import { Button } from '@/shared/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
-import { Separator } from '@/shared/ui/separator'
-import { useCategoriesQuery } from '@/features/category/api/useCategoriesQuery'
-import { downloadBoardFile } from '../api/downloadBoardFile'
-import { useBoardDetailQuery } from '../api/useBoardDetailQuery'
-import { useBoardFilePreviewUrl } from '../api/useBoardFilePreviewUrl'
-import { useBoardFilesQuery } from '../api/useBoardFilesQuery'
-import { useBoardLikeMutation } from '../api/useBoardLikeMutation'
-import { useBoardPublishMutation } from '../api/useBoardPublishMutation'
-import { isImageExtension } from '../lib/isImageExtension'
-import type { BoardFileInfo } from '../model/board'
-import { CategoryBadge } from './CategoryBadge'
-import { CommentSection } from './CommentSection'
+import {toast} from 'sonner'
+import {useAuthStore} from '@/features/auth/store/authStore'
+import {isForbidden, isNotFound, normalizeApiError} from '@/shared/lib/apiError'
+import {hasRequiredRole} from '@/shared/lib/hasRequiredRole'
+import {cn} from '@/shared/lib/utils'
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/shared/ui/alert-dialog'
+import {Button} from '@/shared/ui/button'
+import {Card, CardContent, CardHeader, CardTitle} from '@/shared/ui/card'
+import {Separator} from '@/shared/ui/separator'
+import {useCategoriesQuery} from '@/features/category/api/useCategoriesQuery'
+import {useMeQuery} from '@/features/employee/api/useMeQuery'
+import {downloadBoardFile} from '../api/downloadBoardFile'
+import {useBoardDeleteMutation} from '../api/useBoardDeleteMutation'
+import {useBoardDetailQuery} from '../api/useBoardDetailQuery'
+import {useBoardFilePreviewUrl} from '../api/useBoardFilePreviewUrl'
+import {useBoardFilesQuery} from '../api/useBoardFilesQuery'
+import {useBoardLikeMutation} from '../api/useBoardLikeMutation'
+import {useBoardPublishMutation} from '../api/useBoardPublishMutation'
+import {isImageExtension} from '../lib/isImageExtension'
+import type {BoardFileInfo} from '../model/board'
+import {CategoryBadge} from './CategoryBadge'
+import {CommentSection} from './CommentSection'
 
 function formatFileSize(bytes: number): string {
   if (bytes >= 1024 * 1024) {
@@ -135,15 +148,19 @@ function BoardImagePreview({
 interface BoardDetailViewProps {
   boardId: number
   inline?: boolean
+  onDeleted?: () => void
 }
 
-export function BoardDetailView({ boardId, inline }: BoardDetailViewProps) {
+export function BoardDetailView({ boardId, inline, onDeleted }: BoardDetailViewProps) {
+  const navigate = useNavigate()
   const roles = useAuthStore((state) => state.roles)
-  const canEdit = hasRequiredRole(roles, 'ADMIN')
+  const isAdmin = hasRequiredRole(roles, 'ADMIN')
+  const myEmpId = useMeQuery().data?.empBasicInfo.empId
 
   const detailQuery = useBoardDetailQuery(boardId)
   const filesQuery = useBoardFilesQuery(boardId)
   const publishMutation = useBoardPublishMutation()
+  const deleteMutation = useBoardDeleteMutation()
   const likeMutation = useBoardLikeMutation(boardId)
 
   const categoriesQuery = useCategoriesQuery()
@@ -175,6 +192,22 @@ export function BoardDetailView({ boardId, inline }: BoardDetailViewProps) {
     publishMutation.mutate(boardId, {
       onSuccess: () => {
         toast.success('게시글을 발행했습니다')
+      },
+      onError: (error) => {
+        toast.error(normalizeApiError(error).message)
+      },
+    })
+  }
+
+  function handleDelete() {
+    deleteMutation.mutate(boardId, {
+      onSuccess: () => {
+        toast.success('게시글을 삭제했습니다')
+        if (onDeleted) {
+          onDeleted()
+        } else {
+          navigate('/boards')
+        }
       },
       onError: (error) => {
         toast.error(normalizeApiError(error).message)
@@ -217,6 +250,7 @@ export function BoardDetailView({ boardId, inline }: BoardDetailViewProps) {
   }
 
   const board = detailQuery.data
+  const canEdit = isAdmin || (myEmpId != null && myEmpId === board.empId)
   const files = filesQuery.data ?? []
   const showModifiedAt = board.modifiedAt && board.modifiedAt !== board.publishedAt
   const categoryName = categoriesQuery.data?.find(
@@ -247,6 +281,28 @@ export function BoardDetailView({ boardId, inline }: BoardDetailViewProps) {
               <Send />
               발행
             </Button>
+          )}
+          {canEdit && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <Trash2 />
+                  삭제
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>게시글을 삭제하시겠습니까?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    삭제한 게시글은 되돌릴 수 없습니다.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>취소</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleDelete}>삭제</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           )}
         </div>
       </div>
@@ -337,10 +393,10 @@ export function BoardDetailView({ boardId, inline }: BoardDetailViewProps) {
   if (inline) {
     return (
       <div className="flex flex-col">
-        <Card className="flex flex-col lg:flex-1 lg:overflow-visible">
+        <Card className="flex flex-col">
           {cardHeader}
-          <div className="flex flex-col lg:flex-[7]">{cardBody}</div>
-          <div className="flex flex-col lg:min-h-0 lg:flex-[3] lg:overflow-y-auto">
+          <div className="flex flex-col">{cardBody}</div>
+          <div className="flex flex-col lg:min-h-72">
             <CommentSection boardId={boardId} variant="embedded" />
           </div>
         </Card>

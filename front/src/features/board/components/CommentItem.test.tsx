@@ -1,10 +1,11 @@
-import type { ComponentProps } from 'react'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { render, screen } from '@testing-library/react'
+import type {ComponentProps} from 'react'
+import {QueryClient, QueryClientProvider} from '@tanstack/react-query'
+import {render, screen} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, expect, it } from 'vitest'
-import type { BoardComment } from '../model/board'
-import { CommentItem } from './CommentItem'
+import {describe, expect, it} from 'vitest'
+import {employeeKeys} from '@/features/employee/model/queryKeys'
+import type {BoardComment} from '../model/board'
+import {CommentItem} from './CommentItem'
 
 function comment(overrides: Partial<BoardComment> = {}): BoardComment {
   return {
@@ -20,8 +21,29 @@ function comment(overrides: Partial<BoardComment> = {}): BoardComment {
   }
 }
 
-function renderItem(props: Partial<ComponentProps<typeof CommentItem>> = {}) {
+function meFixture(empId: number) {
+  return {
+    empBasicInfo: {
+      empId,
+      empNo: '000000001',
+      name: '나',
+      loginId: 'test1234',
+      email: 'test1234@haruon.com',
+      extensionNo: null,
+    },
+    activeFiles: [],
+    currentDepts: [],
+  }
+}
+
+function renderItem(
+  props: Partial<ComponentProps<typeof CommentItem>> = {},
+  meEmpId?: number,
+) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+  if (meEmpId !== undefined) {
+    queryClient.setQueryData(employeeKeys.me(), meFixture(meEmpId))
+  }
   return render(
     <QueryClientProvider client={queryClient}>
       <CommentItem boardId={1} comment={comment()} allowReply={true} {...props} />
@@ -29,9 +51,9 @@ function renderItem(props: Partial<ComponentProps<typeof CommentItem>> = {}) {
   )
 }
 
-describe('CommentItem (F313~F317) - isOwner 항상 false(현재 의도된 동작)', () => {
+describe('CommentItem (F313~F317) - 다른 사원의 댓글', () => {
   it('최상위 댓글(allowReply=true)에서 "답글" 버튼은 보이지만 "수정"/"삭제" 버튼은 보이지 않는다', () => {
-    renderItem({ allowReply: true, indented: false })
+    renderItem({ allowReply: true, indented: false }, 999)
 
     expect(screen.getByText('댓글 내용입니다')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '답글' })).toBeInTheDocument()
@@ -40,11 +62,29 @@ describe('CommentItem (F313~F317) - isOwner 항상 false(현재 의도된 동작
   })
 
   it('대댓글(allowReply=false, indented=true)에서는 "답글"/"수정"/"삭제" 버튼이 모두 보이지 않는다', () => {
-    renderItem({ allowReply: false, indented: true })
+    renderItem({ allowReply: false, indented: true }, 999)
 
     expect(screen.queryByRole('button', { name: '답글' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: '수정' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: '삭제' })).not.toBeInTheDocument()
+  })
+})
+
+describe('CommentItem (F313~F317) - 내 댓글(isOwner=true)', () => {
+  it('내가 작성한 댓글이면 "수정"/"삭제" 버튼이 보인다', () => {
+    renderItem({ allowReply: true, indented: false }, 10)
+
+    expect(screen.getByRole('button', { name: '수정' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '삭제' })).toBeInTheDocument()
+  })
+
+  it('"수정" 버튼을 누르면 내용 수정 폼이 열린다', async () => {
+    const user = userEvent.setup()
+    renderItem({ allowReply: true, indented: false }, 10)
+
+    await user.click(screen.getByRole('button', { name: '수정' }))
+
+    expect(screen.getByDisplayValue('댓글 내용입니다')).toBeInTheDocument()
   })
 })
 

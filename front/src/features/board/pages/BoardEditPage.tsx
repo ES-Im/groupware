@@ -1,21 +1,25 @@
-import { useEffect } from 'react'
-import { useNavigate, useParams } from 'react-router'
-import { SquarePen } from 'lucide-react'
+import {useEffect} from 'react'
+import {useNavigate, useParams} from 'react-router'
+import {useQueryClient} from '@tanstack/react-query'
+import {SquarePen} from 'lucide-react'
 import dayjs from 'dayjs'
-import { toast } from 'sonner'
-import { isForbidden, isNotFound, normalizeApiError } from '@/shared/lib/apiError'
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
-import { useCategoriesQuery } from '@/features/category/api/useCategoriesQuery'
-import { useBoardDetailQuery } from '../api/useBoardDetailQuery'
-import { useBoardEditModeQuery } from '../api/useBoardEditModeQuery'
-import { useBoardUpdateMutation } from '../api/useBoardUpdateMutation'
-import { BoardEditAttachments } from '../components/BoardEditAttachments'
-import { BoardEditForm } from '../components/BoardEditForm'
-import type { BoardUpdateRequest } from '../model/board'
+import {toast} from 'sonner'
+import {isForbidden, isNotFound, normalizeApiError} from '@/shared/lib/apiError'
+import {Card, CardContent, CardHeader, CardTitle} from '@/shared/ui/card'
+import {useCategoriesQuery} from '@/features/category/api/useCategoriesQuery'
+import {useBoardDetailQuery} from '../api/useBoardDetailQuery'
+import {useBoardEditModeQuery} from '../api/useBoardEditModeQuery'
+import {useBoardPublishMutation} from '../api/useBoardPublishMutation'
+import {useBoardUpdateMutation} from '../api/useBoardUpdateMutation'
+import {boardKeys} from '../model/queryKeys'
+import {BoardEditAttachments} from '../components/BoardEditAttachments'
+import {BoardEditForm} from '../components/BoardEditForm'
+import type {BoardUpdateRequest} from '../model/board'
 
 export function BoardEditPage() {
   const { boardId: boardIdParam } = useParams()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
 
   const isDecimalPositiveInteger = boardIdParam !== undefined && /^[1-9][0-9]*$/.test(boardIdParam)
   const boardId = isDecimalPositiveInteger ? Number(boardIdParam) : undefined
@@ -29,6 +33,7 @@ export function BoardEditPage() {
     isInvalidBoardId || !editModeQuery.isSuccess ? undefined : boardId,
   )
   const updateMutation = useBoardUpdateMutation()
+  const publishMutation = useBoardPublishMutation()
 
   useEffect(() => {
     if (!categoriesQuery.error) {
@@ -58,16 +63,16 @@ export function BoardEditPage() {
   }, [detailQuery.error])
 
   function getModifiedAt(): string | undefined {
-    if (detailQuery.data) {
-      return detailQuery.data.modifiedAt
+    if (!detailQuery.data) {
+      return undefined
     }
-    if (detailQuery.error && isNotFound(normalizeApiError(detailQuery.error))) {
-      return dayjs().format('YYYY-MM-DDTHH:mm:ss')
-    }
-    return undefined
+    return detailQuery.data.modifiedAt ?? dayjs().format('YYYY-MM-DDTHH:mm:ss')
   }
 
   function resolveEditTargetPath(): string {
+    if (detailQuery.data?.isDraft) {
+      return '/boards'
+    }
     if (detailQuery.error && isNotFound(normalizeApiError(detailQuery.error))) {
       return '/boards'
     }
@@ -81,6 +86,22 @@ export function BoardEditPage() {
     await updateMutation.mutateAsync({ boardId, payload })
     toast.success('게시글을 수정했습니다')
     navigate(resolveEditTargetPath())
+  }
+
+  function handlePublish() {
+    if (boardId === undefined) {
+      return
+    }
+    publishMutation.mutate(boardId, {
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({ queryKey: boardKeys.all })
+        toast.success('게시글을 발행했습니다')
+        navigate('/boards')
+      },
+      onError: (error) => {
+        toast.error(normalizeApiError(error).message)
+      },
+    })
   }
 
   if (isInvalidBoardId) {
@@ -167,6 +188,11 @@ export function BoardEditPage() {
             getModifiedAt={getModifiedAt}
             isModifiedAtReady={getModifiedAt() !== undefined}
             onSubmitPayload={handleSubmitPayload}
+            publish={
+              detailQuery.data?.isDraft
+                ? { onClick: handlePublish, isPending: publishMutation.isPending }
+                : undefined
+            }
           />
         </CardContent>
       </Card>

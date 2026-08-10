@@ -1,13 +1,13 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { render, screen } from '@testing-library/react'
+import {QueryClient, QueryClientProvider} from '@tanstack/react-query'
+import {render, screen, waitFor, within} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { http, HttpResponse } from 'msw'
-import { MemoryRouter, Route, Routes } from 'react-router'
-import { afterEach, describe, expect, it } from 'vitest'
-import { BASE_URL } from '@/shared/api/client'
-import { useAuthStore } from '@/features/auth/store/authStore'
-import { server } from '@/test/mocks/server'
-import { BoardDetailPage } from './BoardDetailPage'
+import {http, HttpResponse} from 'msw'
+import {MemoryRouter, Route, Routes} from 'react-router'
+import {afterEach, describe, expect, it} from 'vitest'
+import {BASE_URL} from '@/shared/api/client'
+import {useAuthStore} from '@/features/auth/store/authStore'
+import {server} from '@/test/mocks/server'
+import {BoardDetailPage} from './BoardDetailPage'
 
 function detailFixture(overrides: Record<string, unknown> = {}) {
   return {
@@ -86,6 +86,73 @@ describe('BoardDetailPage (F303) - 렌더/게이팅', () => {
 
     expect(await screen.findByText('게시글 제목')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /수정/ })).toBeInTheDocument()
+  })
+
+  it('작성자 본인(EMPLOYEE)이면 "수정"/"삭제" 버튼이 보인다', async () => {
+    useAuthStore.setState({ roles: ['EMPLOYEE'] })
+    server.use(
+      http.get(`${BASE_URL}/api/boards/1`, () => HttpResponse.json(detailFixture({ empId: 100 }))),
+      http.get(`${BASE_URL}/api/boards/1/files`, () => HttpResponse.json([])),
+      http.get(`${BASE_URL}/api/boards/1/comments`, () => HttpResponse.json(emptyCommentsPage)),
+      http.get(`${BASE_URL}/api/employees/me`, () =>
+        HttpResponse.json({
+          empBasicInfo: {
+            empId: 100,
+            empNo: '000000100',
+            name: '홍길동',
+            loginId: 'staff0100',
+            email: 'staff0100@haruon.com',
+            extensionNo: null,
+          },
+          activeFiles: [],
+          currentDepts: [],
+        }),
+      ),
+    )
+
+    renderDetail(1)
+
+    expect(await screen.findByText('게시글 제목')).toBeInTheDocument()
+    expect(await screen.findByRole('link', { name: /수정/ })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /삭제/ })).toBeInTheDocument()
+  })
+
+  it('작성자 본인이 삭제를 확인하면 DELETE 요청 후 목록(/boards)으로 이동한다', async () => {
+    useAuthStore.setState({ roles: ['EMPLOYEE'] })
+    let deleteCalled = false
+    server.use(
+      http.get(`${BASE_URL}/api/boards/1`, () => HttpResponse.json(detailFixture({ empId: 100 }))),
+      http.get(`${BASE_URL}/api/boards/1/files`, () => HttpResponse.json([])),
+      http.get(`${BASE_URL}/api/boards/1/comments`, () => HttpResponse.json(emptyCommentsPage)),
+      http.get(`${BASE_URL}/api/employees/me`, () =>
+        HttpResponse.json({
+          empBasicInfo: {
+            empId: 100,
+            empNo: '000000100',
+            name: '홍길동',
+            loginId: 'staff0100',
+            email: 'staff0100@haruon.com',
+            extensionNo: null,
+          },
+          activeFiles: [],
+          currentDepts: [],
+        }),
+      ),
+      http.delete(`${BASE_URL}/api/boards/1`, () => {
+        deleteCalled = true
+        return new HttpResponse(null, { status: 204 })
+      }),
+    )
+    const user = userEvent.setup()
+    renderDetail(1)
+
+    const deleteButton = await screen.findByRole('button', { name: /삭제/ })
+    await user.click(deleteButton)
+
+    const dialog = await screen.findByRole('alertdialog')
+    await user.click(within(dialog).getByRole('button', { name: '삭제' }))
+
+    await waitFor(() => expect(deleteCalled).toBe(true))
   })
 
   it('유효하지 않은 boardId(숫자 아님)면 API 호출 없이 "게시글을 찾을 수 없습니다."를 즉시 렌더한다', async () => {

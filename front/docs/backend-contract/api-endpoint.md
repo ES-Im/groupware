@@ -157,6 +157,7 @@
 | 게시글 등록 | `BOARD_REGISTER` | `POST` | `/api/boards` | JSON Body | `201` Empty | 예 | EMPLOYEE(활성 사원) |
 | 임시저장 게시글 발행 | `BOARD_PUBLISH` | `PATCH` | `/api/boards/{boardId}/publishment` | Path | `204` Empty | 예 | 게시글 작성자 또는 ADMIN |
 | 게시글 수정 | `BOARD_UPDATE` | `PATCH` | `/api/boards/{boardId}` | Path + JSON Body | `204` Empty | 예 | 게시글 작성자 또는 ADMIN |
+| 게시글 삭제 | `BOARD_DELETE` | `DELETE` | `/api/boards/{boardId}` | Path | `204` Empty | 예 | 게시글 작성자 또는 ADMIN |
 | 카테고리별 게시글 목록 | `BOARD_LIST` | `GET` | `/api/categories/{categoryId}/boards?keyword={value}&page={value}&size={value}` | Path + Query | `200` JSON Body | 예 | EMPLOYEE |
 | 카테고리별 최신 게시글 | `BOARD_LATEST` | `GET` | `/api/categories/{categoryId}/boards/latest?limit={value}` | Path + Query | `200` JSON Body | 예 | EMPLOYEE |
 | 게시글 상세 조회 | `BOARD_DETAIL` | `GET` | `/api/boards/{boardId}` | Path | `200` JSON Body | 예 | EMPLOYEE |

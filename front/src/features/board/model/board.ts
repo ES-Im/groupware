@@ -31,7 +31,7 @@ export interface BoardDetailResponse {
   title: string
   content: string
   publishedAt: string
-  modifiedAt: string
+  modifiedAt: string | null
   likeCount: number
   viewCount: number
   commentCount: number

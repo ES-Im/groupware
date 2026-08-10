@@ -1,27 +1,22 @@
-import { useEffect, useState } from 'react'
-import { ChevronLeft, FilePlus, Search, Tags } from 'lucide-react'
-import { toast } from 'sonner'
-import { isNotFound, normalizeApiError } from '@/shared/lib/apiError'
-import { usePageState } from '@/shared/lib/usePageState'
-import type { PageMeta } from '@/shared/components/PaginationControls'
-import { PaginationControls } from '@/shared/components/PaginationControls'
-import { Badge } from '@/shared/ui/badge'
-import { Button } from '@/shared/ui/button'
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/shared/ui/card'
-import { Input } from '@/shared/ui/input'
-import { useCategoriesQuery } from '@/features/category/api/useCategoriesQuery'
-import { CategoryManagementTrigger } from '@/features/category/components/CategoryManagementTrigger'
-import { useBoardListQuery } from '../api/useBoardListQuery'
-import { BoardCategoryFilter } from '../components/BoardCategoryFilter'
-import { BoardCreateForm } from '../components/BoardCreateForm'
-import { BoardDetailView } from '../components/BoardDetailView'
-import { BoardListTable } from '../components/BoardListTable'
+import {useEffect, useState} from 'react'
+import {ChevronLeft, FilePlus, Search, Tags} from 'lucide-react'
+import {toast} from 'sonner'
+import {isNotFound, normalizeApiError} from '@/shared/lib/apiError'
+import {cn} from '@/shared/lib/utils'
+import {usePageState} from '@/shared/lib/usePageState'
+import type {PageMeta} from '@/shared/components/PaginationControls'
+import {PaginationControls} from '@/shared/components/PaginationControls'
+import {Badge} from '@/shared/ui/badge'
+import {Button} from '@/shared/ui/button'
+import {Card, CardAction, CardContent, CardHeader, CardTitle,} from '@/shared/ui/card'
+import {Input} from '@/shared/ui/input'
+import {useCategoriesQuery} from '@/features/category/api/useCategoriesQuery'
+import {CategoryManagementTrigger} from '@/features/category/components/CategoryManagementTrigger'
+import {useBoardListQuery} from '../api/useBoardListQuery'
+import {BoardCategoryFilter} from '../components/BoardCategoryFilter'
+import {BoardCreateForm} from '../components/BoardCreateForm'
+import {BoardDetailView} from '../components/BoardDetailView'
+import {BoardListTable} from '../components/BoardListTable'
 
 const SEARCH_DEBOUNCE_MS = 300
 
@@ -98,8 +93,15 @@ export function BoardListPage() {
     last: true,
   }
 
+  const isDetailOpen = !isComposing && selectedBoardId !== undefined
+
   return (
-    <div className="flex w-full flex-col p-4 sm:p-6 lg:h-full lg:p-8">
+    <div
+      className={cn(
+        'flex w-full flex-col p-4 sm:p-6 lg:p-8',
+        !isDetailOpen && 'lg:h-full',
+      )}
+    >
       <div className="mb-6">
         <h1 className="text-xl font-semibold tracking-tight">게시판</h1>
         <p className="mt-1 text-sm text-muted-foreground">
@@ -107,7 +109,12 @@ export function BoardListPage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:min-h-0 lg:flex-1 lg:grid-cols-[320px_1fr]">
+      <div
+        className={cn(
+          'grid grid-cols-1 gap-6 lg:grid-cols-[320px_1fr]',
+          !isDetailOpen && 'lg:min-h-0 lg:flex-1',
+        )}
+      >
         <div className="flex h-fit flex-col gap-4">
           <Card className="h-fit">
             <CardHeader className="border-b">
@@ -163,7 +170,11 @@ export function BoardListPage() {
             </CardContent>
           </Card>
         ) : selectedBoardId !== undefined ? (
-          <BoardDetailView boardId={selectedBoardId} inline />
+          <BoardDetailView
+            boardId={selectedBoardId}
+            inline
+            onDeleted={() => setSelectedBoardId(undefined)}
+          />
         ) : (
           <Card className="lg:min-h-[22rem] lg:flex-1">
             <CardHeader className="border-b">

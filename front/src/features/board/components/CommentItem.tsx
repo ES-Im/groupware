@@ -1,28 +1,29 @@
-import { useState } from 'react'
-import { CornerDownRight, Pencil, Reply as ReplyIcon, Trash2 } from 'lucide-react'
+import {useState} from 'react'
+import {CornerDownRight, Pencil, Reply as ReplyIcon, Trash2} from 'lucide-react'
 import dayjs from 'dayjs'
-import { toast } from 'sonner'
-import { BlobAvatar } from '@/shared/components/BlobAvatar'
-import { handleApiError } from '@/shared/lib/apiError'
-import { cn } from '@/shared/lib/utils'
+import {toast} from 'sonner'
+import {BlobAvatar} from '@/shared/components/BlobAvatar'
+import {handleApiError} from '@/shared/lib/apiError'
+import {cn} from '@/shared/lib/utils'
+import {useMeQuery} from '@/features/employee/api/useMeQuery'
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
 } from '@/shared/ui/alert-dialog'
-import { Button } from '@/shared/ui/button'
-import { useCommentDeleteMutation } from '../api/useCommentDeleteMutation'
-import { useCommentReplyMutation } from '../api/useCommentReplyMutation'
-import { useCommentUpdateMutation } from '../api/useCommentUpdateMutation'
-import type { BoardComment } from '../model/board'
-import type { CommentFormValues } from '../model/commentSchema'
-import { CommentForm } from './CommentForm'
+import {Button} from '@/shared/ui/button'
+import {useCommentDeleteMutation} from '../api/useCommentDeleteMutation'
+import {useCommentReplyMutation} from '../api/useCommentReplyMutation'
+import {useCommentUpdateMutation} from '../api/useCommentUpdateMutation'
+import type {BoardComment} from '../model/board'
+import type {CommentFormValues} from '../model/commentSchema'
+import {CommentForm} from './CommentForm'
 
 interface CommentItemProps {
   boardId: number
@@ -39,7 +40,7 @@ export function CommentItem({ boardId, comment, allowReply, indented }: CommentI
   const updateMutation = useCommentUpdateMutation()
   const deleteMutation = useCommentDeleteMutation()
 
-  const myEmpId: number | undefined = undefined
+  const myEmpId = useMeQuery().data?.empBasicInfo.empId
   const isOwner = myEmpId !== undefined && comment.writerEmpId === myEmpId
 
   async function handleReplySubmit(values: CommentFormValues) {

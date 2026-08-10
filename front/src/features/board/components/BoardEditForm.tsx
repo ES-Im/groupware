@@ -1,15 +1,15 @@
-import type { ReactNode } from 'react'
-import { Link } from 'react-router'
-import { Save } from 'lucide-react'
-import { toast } from 'sonner'
-import { submitWithErrorMapping, useZodForm } from '@/shared/lib/form'
-import { Button } from '@/shared/ui/button'
-import { Input } from '@/shared/ui/input'
-import { Label } from '@/shared/ui/label'
-import { Textarea } from '@/shared/ui/textarea'
-import type { CategoryItem } from '@/features/category/model/category'
-import { boardEditSchema, type BoardEditFormValues } from '../model/boardEditSchema'
-import type { BoardUpdateRequest } from '../model/board'
+import type {ReactNode} from 'react'
+import {Link} from 'react-router'
+import {Save, Send} from 'lucide-react'
+import {toast} from 'sonner'
+import {submitWithErrorMapping, useZodForm} from '@/shared/lib/form'
+import {Button} from '@/shared/ui/button'
+import {Input} from '@/shared/ui/input'
+import {Label} from '@/shared/ui/label'
+import {Textarea} from '@/shared/ui/textarea'
+import type {CategoryItem} from '@/features/category/model/category'
+import {type BoardEditFormValues, boardEditSchema} from '../model/boardEditSchema'
+import type {BoardUpdateRequest} from '../model/board'
 
 type BoardEditCancel =
   | { type: 'link'; path: string }
@@ -23,6 +23,7 @@ export function BoardEditForm({
   getModifiedAt,
   isModifiedAtReady,
   onSubmitPayload,
+  publish,
 }: {
   cancel: BoardEditCancel
   categories: CategoryItem[]
@@ -31,6 +32,7 @@ export function BoardEditForm({
   getModifiedAt: () => string | undefined
   isModifiedAtReady: boolean
   onSubmitPayload: (payload: BoardUpdateRequest) => Promise<void>
+  publish?: { onClick: () => void; isPending: boolean }
 }) {
   const form = useZodForm(boardEditSchema, { defaultValues })
   const {
@@ -149,6 +151,17 @@ export function BoardEditForm({
         ) : (
           <Button type="button" variant="outline" onClick={cancel.onClick}>
             취소
+          </Button>
+        )}
+        {publish && (
+          <Button
+            type="button"
+            variant="secondary"
+            disabled={publish.isPending}
+            onClick={publish.onClick}
+          >
+            <Send />
+            발행
           </Button>
         )}
         <Button

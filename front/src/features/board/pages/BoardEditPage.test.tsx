@@ -1,12 +1,12 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { render, screen, waitFor } from '@testing-library/react'
+import {QueryClient, QueryClientProvider} from '@tanstack/react-query'
+import {render, screen, waitFor} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { http, HttpResponse } from 'msw'
-import { MemoryRouter, Route, Routes } from 'react-router'
-import { afterEach, describe, expect, it, vi } from 'vitest'
-import { BASE_URL } from '@/shared/api/client'
-import { server } from '@/test/mocks/server'
-import { BoardEditPage } from './BoardEditPage'
+import {http, HttpResponse} from 'msw'
+import {MemoryRouter, Route, Routes} from 'react-router'
+import {afterEach, describe, expect, it, vi} from 'vitest'
+import {BASE_URL} from '@/shared/api/client'
+import {server} from '@/test/mocks/server'
+import {BoardEditPage} from './BoardEditPage'
 
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
@@ -41,10 +41,6 @@ function detailFixture(overrides: Record<string, unknown> = {}) {
     isLiked: false,
     ...overrides,
   }
-}
-
-function notFoundBody() {
-  return { code: 'RESOURCE_001', name: 'NOT_FOUND', httpStatus: 404, message: '게시글을 찾을 수 없습니다' }
 }
 
 function renderEdit(boardId: number | string = 1) {
@@ -100,13 +96,15 @@ describe('BoardEditPage (T13.3-a) - 저장/취소 네비게이션 분기', () =>
     vi.clearAllMocks()
   })
 
-  it('초안(detail 404)을 저장하면 게시판 목록(/boards)으로 이동하고, "취소"도 동일 경로를 가리킨다', async () => {
+  it('초안(detail의 isDraft=true)을 저장하면 게시판 목록(/boards)으로 이동하고, "취소"도 동일 경로를 가리킨다', async () => {
     server.use(
       http.get(`${BASE_URL}/api/categories`, () =>
         HttpResponse.json([{ categoryId: 1, categoryName: '공지', isVisible: true }]),
       ),
       http.get(`${BASE_URL}/api/boards/1/edit-mode`, () => HttpResponse.json(editModeFixture({ categoryId: 1 }))),
-      http.get(`${BASE_URL}/api/boards/1`, () => HttpResponse.json(notFoundBody(), { status: 404 })),
+      http.get(`${BASE_URL}/api/boards/1`, () =>
+        HttpResponse.json(detailFixture({ categoryId: 1, isDraft: true, modifiedAt: null })),
+      ),
       http.get(`${BASE_URL}/api/boards/1/files`, () => HttpResponse.json([])),
       http.patch(`${BASE_URL}/api/boards/1`, () => new HttpResponse(null, { status: 204 })),
     )
@@ -147,6 +145,53 @@ describe('BoardEditPage (T13.3-a) - 저장/취소 네비게이션 분기', () =>
     await user.click(screen.getByRole('button', { name: '저장' }))
 
     expect(await screen.findByText('게시글 상세 화면')).toBeInTheDocument()
+  })
+})
+
+describe('BoardEditPage - 임시저장 발행 버튼', () => {
+  afterEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('초안(isDraft=true)이면 "발행" 버튼이 보이고, 클릭하면 발행 후 게시판 목록(/boards)으로 이동한다', async () => {
+    let publishCalled = false
+    server.use(
+      http.get(`${BASE_URL}/api/categories`, () =>
+        HttpResponse.json([{ categoryId: 1, categoryName: '공지', isVisible: true }]),
+      ),
+      http.get(`${BASE_URL}/api/boards/1/edit-mode`, () => HttpResponse.json(editModeFixture({ categoryId: 1 }))),
+      http.get(`${BASE_URL}/api/boards/1`, () =>
+        HttpResponse.json(detailFixture({ categoryId: 1, isDraft: true, modifiedAt: null })),
+      ),
+      http.get(`${BASE_URL}/api/boards/1/files`, () => HttpResponse.json([])),
+      http.patch(`${BASE_URL}/api/boards/1/publishment`, () => {
+        publishCalled = true
+        return new HttpResponse(null, { status: 204 })
+      }),
+    )
+    const user = userEvent.setup()
+    renderEdit(1)
+
+    const publishButton = await screen.findByRole('button', { name: '발행' })
+    await user.click(publishButton)
+
+    expect(await screen.findByText('게시판 목록 화면')).toBeInTheDocument()
+    expect(publishCalled).toBe(true)
+  })
+
+  it('발행 글(isDraft=false)이면 "발행" 버튼이 보이지 않는다', async () => {
+    server.use(
+      http.get(`${BASE_URL}/api/categories`, () =>
+        HttpResponse.json([{ categoryId: 1, categoryName: '공지', isVisible: true }]),
+      ),
+      http.get(`${BASE_URL}/api/boards/1/edit-mode`, () => HttpResponse.json(editModeFixture({ categoryId: 1 }))),
+      http.get(`${BASE_URL}/api/boards/1`, () => HttpResponse.json(detailFixture({ categoryId: 1 }))),
+      http.get(`${BASE_URL}/api/boards/1/files`, () => HttpResponse.json([])),
+    )
+    renderEdit(1)
+
+    await screen.findByRole('button', { name: '저장' })
+    expect(screen.queryByRole('button', { name: '발행' })).not.toBeInTheDocument()
   })
 })
 
