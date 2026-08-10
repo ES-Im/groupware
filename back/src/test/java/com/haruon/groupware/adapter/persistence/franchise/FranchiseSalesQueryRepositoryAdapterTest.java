@@ -154,7 +154,7 @@ record FranchiseSalesQueryRepositoryAdapterTest(
     private Franchise saveFranchise() {
         String token = UUID.randomUUID().toString().substring(0, 8);
         return franchiseRepository.save(Franchise.create(
-                "000-00-00000",
+                "0000000000",
                 "Sales Query " + token,
                 "Seoul " + token,
                 "Owner " + token,

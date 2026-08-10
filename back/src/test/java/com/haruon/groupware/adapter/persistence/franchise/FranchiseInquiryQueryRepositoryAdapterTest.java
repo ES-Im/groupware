@@ -159,7 +159,7 @@ record FranchiseInquiryQueryRepositoryAdapterTest(
 
     private Franchise saveFranchise(Emp manager, String token) {
         return franchiseRepository.save(Franchise.create(
-                "000-00-" + token.substring(0, 5),
+                "00000" + token.substring(0, 5),
                 "Inquiry Query " + token,
                 "Seoul " + token,
                 "Owner " + token,

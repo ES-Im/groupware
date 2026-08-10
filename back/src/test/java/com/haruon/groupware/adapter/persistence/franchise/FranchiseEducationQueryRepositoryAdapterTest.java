@@ -179,7 +179,7 @@ record FranchiseEducationQueryRepositoryAdapterTest(
     private Franchise saveFranchise() {
         String token = token();
         return franchiseRepository.save(Franchise.create(
-                "000-00-00000",
+                "0000000000",
                 "Query Franchise " + token,
                 "Seoul " + token,
                 "Owner " + token,
