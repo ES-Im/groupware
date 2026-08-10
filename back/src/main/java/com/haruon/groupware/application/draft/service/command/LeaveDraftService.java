@@ -13,6 +13,7 @@ import com.haruon.groupware.application.exception.common.PositiveValueRequiredEx
 import com.haruon.groupware.application.exception.draft.*;
 import com.haruon.groupware.application.exception.employee.leave.EmpAnnualLeaveNotFoundException;
 import com.haruon.groupware.application.exception.employee.leave.UnsupportedLeaveTypeException;
+import com.haruon.groupware.application.file.required.FileStorage;
 import com.haruon.groupware.application.utils.required.CompanyPolicyPort;
 import com.haruon.groupware.domain.draft.Draft;
 import com.haruon.groupware.domain.draft.LeaveDraft;
@@ -54,9 +55,10 @@ public class LeaveDraftService extends CommonDraftService implements LeaveDraftM
             EmpRepository empRepository,
             LeaveDraftRepository leaveDraftRepository,
             CompanyPolicyPort policyPort,
-            EmpLeaveRepository empLeaveRepository
+            EmpLeaveRepository empLeaveRepository,
+            FileStorage fileStorage
     ) {
-        super(empRepository, leaveDraftRepository);
+        super(empRepository, leaveDraftRepository, fileStorage);
         this.leaveDraftRepository = leaveDraftRepository;
         this.policyPort = policyPort;
         this.empLeaveRepository = empLeaveRepository;

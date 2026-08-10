@@ -9,6 +9,7 @@ import com.haruon.groupware.application.exception.common.RequiredValueMissingExc
 import com.haruon.groupware.application.exception.draft.DraftNotApprovedException;
 import com.haruon.groupware.application.exception.draft.DraftNotFoundException;
 import com.haruon.groupware.application.exception.draft.DraftTypeMismatchException;
+import com.haruon.groupware.application.file.required.FileStorage;
 import com.haruon.groupware.domain.draft.BusinessTripCancelDraft;
 import com.haruon.groupware.domain.draft.BusinessTripDraft;
 import com.haruon.groupware.domain.draft.Draft;
@@ -29,9 +30,10 @@ public class BusinessTripCancelDraftService extends CommonDraftService implement
 
     public BusinessTripCancelDraftService(
             EmpRepository empRepository,
-            DraftRepository draftRepository
+            DraftRepository draftRepository,
+            FileStorage fileStorage
     ) {
-        super(empRepository, draftRepository);
+        super(empRepository, draftRepository, fileStorage);
         this.draftRepository = draftRepository;
     }
 

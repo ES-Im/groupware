@@ -7,6 +7,8 @@ import com.haruon.groupware.application.exception.common.RequiredValueMissingExc
 import com.haruon.groupware.application.exception.draft.ApprovalLineRequiredException;
 import com.haruon.groupware.application.exception.draft.DraftNonDeletableStateException;
 import com.haruon.groupware.application.exception.draft.DraftNotFoundException;
+import com.haruon.groupware.application.file.required.FileStorage;
+import com.haruon.groupware.application.file.service.command.dto.FilePathInfo;
 import com.haruon.groupware.application.utils.AuthValidator;
 import com.haruon.groupware.application.utils.Utils;
 import com.haruon.groupware.domain.draft.Draft;
@@ -28,10 +30,12 @@ abstract class CommonDraftService {
 
     private final EmpRepository empRepository;
     private final DraftRepository draftRepository;
+    private final FileStorage fileStorage;
 
-    public CommonDraftService(EmpRepository empRepository, DraftRepository draftRepository) {
+    public CommonDraftService(EmpRepository empRepository, DraftRepository draftRepository, FileStorage fileStorage) {
         this.empRepository = empRepository;
         this.draftRepository = draftRepository;
+        this.fileStorage = fileStorage;
     }
 
     public void revertToDraft(long draftId, long drafterId) {
@@ -66,7 +70,13 @@ abstract class CommonDraftService {
         Draft foundDraft = findDraftByDraftIdAndEmpId(draftId, empId);
         if(!foundDraft.isDeletableDraft()) throw new DraftNonDeletableStateException();
 
+        List<FilePathInfo> files = foundDraft.getDraftFiles().stream()
+                .map(file -> new FilePathInfo(file.getStoredPath(), file.getStoredName()))
+                .toList();
+
         draftRepository.delete(foundDraft);
+
+        files.forEach(file -> fileStorage.delete(file.storedPath(), file.storedName()));
     }
 
     public void addCirculatedEmp(long draftId, long drafterId, long circulatedEmpId) {

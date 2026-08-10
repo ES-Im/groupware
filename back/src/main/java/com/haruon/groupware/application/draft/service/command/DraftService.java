@@ -7,6 +7,7 @@ import com.haruon.groupware.application.draft.service.command.dto.updateDraft.Co
 import com.haruon.groupware.application.employee.account.required.EmpRepository;
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import com.haruon.groupware.application.exception.draft.DraftTypeMismatchException;
+import com.haruon.groupware.application.file.required.FileStorage;
 import com.haruon.groupware.domain.draft.Draft;
 import com.haruon.groupware.domain.draft.GeneralDraft;
 import com.haruon.groupware.domain.draft.sub.ApproversParam;
@@ -25,9 +26,10 @@ public class DraftService extends CommonDraftService implements GeneralDraftMana
 
     public DraftService(
             EmpRepository empRepository,
-            GeneralDraftRepository generalDraftRepository
+            GeneralDraftRepository generalDraftRepository,
+            FileStorage fileStorage
     ) {
-        super(empRepository, generalDraftRepository);
+        super(empRepository, generalDraftRepository, fileStorage);
         this.generalDraftRepository = generalDraftRepository;
     }
 
