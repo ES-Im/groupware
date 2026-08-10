@@ -5,16 +5,20 @@ import { uploadMeetingRoomFile } from './uploadMeetingRoomFile'
 
 interface MeetingRoomFileUploadVariables {
   meetingRoomId: number
-  file: File
+  files: File[]
 }
 
 export function useMeetingRoomFileUploadMutation() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async ({ meetingRoomId, file }: MeetingRoomFileUploadVariables) => {
-      validateMeetingRoomFileUpload(file)
-      await uploadMeetingRoomFile(meetingRoomId, file)
+    mutationFn: async ({ meetingRoomId, files }: MeetingRoomFileUploadVariables) => {
+      for (const file of files) {
+        validateMeetingRoomFileUpload(file)
+      }
+      for (const file of files) {
+        await uploadMeetingRoomFile(meetingRoomId, file)
+      }
     },
     onSuccess: async (_data, { meetingRoomId }) => {
       await Promise.all([

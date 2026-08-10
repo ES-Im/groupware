@@ -14,6 +14,7 @@ import {useCategoriesQuery} from '@/features/category/api/useCategoriesQuery'
 import {useBoardDetailQuery} from '../api/useBoardDetailQuery'
 import {useBoardDraftsQuery} from '../api/useBoardDraftsQuery'
 import {useBoardEditModeQuery} from '../api/useBoardEditModeQuery'
+import {useBoardFileUploadMutation} from '../api/useBoardFileUploadMutation'
 import {useBoardPublishMutation} from '../api/useBoardPublishMutation'
 import {useBoardRegisterMutation} from '../api/useBoardRegisterMutation'
 import {useBoardUpdateMutation} from '../api/useBoardUpdateMutation'
@@ -53,6 +54,7 @@ export function BoardCreateForm({ onSuccess, defaultCategoryId }: BoardCreateFor
   const drafts = draftsQuery.data ?? []
 
   const registerMutation = useBoardRegisterMutation()
+  const fileUploadMutation = useBoardFileUploadMutation()
 
   const editModeQuery = useBoardEditModeQuery(editingBoardId)
   const detailQuery = useBoardDetailQuery(editModeQuery.isSuccess ? editingBoardId : undefined)
@@ -122,12 +124,38 @@ export function BoardCreateForm({ onSuccess, defaultCategoryId }: BoardCreateFor
   }
 
   async function submit(values: BoardCreateFormValues, options: { publish: boolean }) {
-    await registerMutation.mutateAsync({
+    const hasAttachments = stagedFiles.length > 0
+
+    const { id } = await registerMutation.mutateAsync({
       categoryId: Number(values.categoryId),
       title: values.title,
       content: values.content,
-      publishedAt: options.publish ? dayjs().format('YYYY-MM-DDTHH:mm:ss') : undefined,
+      publishedAt:
+        options.publish && !hasAttachments ? dayjs().format('YYYY-MM-DDTHH:mm:ss') : undefined,
     })
+
+    if (hasAttachments) {
+      try {
+        await fileUploadMutation.mutateAsync({ boardId: id, files: stagedFiles })
+      } catch {
+        toast.error('게시글이 임시저장되었습니다. 첨부파일을 다시 시도해주세요')
+        setStagedFiles([])
+        setEditingBoardId(id)
+        return
+      }
+
+      if (options.publish) {
+        try {
+          await publishMutation.mutateAsync(id)
+        } catch {
+          toast.error('게시글이 임시저장되었습니다. 발행을 다시 시도해주세요')
+          setStagedFiles([])
+          setEditingBoardId(id)
+          return
+        }
+      }
+    }
+
     toast.success(options.publish ? '게시글을 발행했습니다' : '게시글을 임시저장했습니다')
     setStagedFiles([])
     onSuccess()
@@ -350,9 +378,6 @@ export function BoardCreateForm({ onSuccess, defaultCategoryId }: BoardCreateFor
         ) : (
           <p className="text-sm text-muted-foreground">선택된 첨부파일이 없습니다.</p>
         )}
-        <p className="text-xs text-muted-foreground">
-          선택한 파일은 게시글을 저장한 뒤 "임시저장글" 목록에서 열어 첨부할 수 있습니다.
-        </p>
       </div>
 
       <div className="mt-2 flex flex-col-reverse gap-3 rounded-xl border bg-muted/50 p-3 sm:flex-row sm:items-center sm:justify-between">

@@ -62,7 +62,7 @@ describe('MeetingRoomCreateDialog', () => {
     server.use(
       http.post(`${BASE_URL}/api/meeting-rooms`, async () => {
         await gate
-        return HttpResponse.json({ meetingRoomId: 42 }, { status: 201 })
+        return HttpResponse.json({ id: 42 }, { status: 201 })
       }),
     )
     const user = userEvent.setup()

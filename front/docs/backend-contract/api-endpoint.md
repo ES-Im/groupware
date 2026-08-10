@@ -1,3 +1,5 @@
+> ⚠️ 도메인 "등록"(생성) API는 대부분 공용 응답 DTO `RegisterDomainIdResponse { id: Long }`를 반환한다(`201` + `{"id": N}`). 프론트 타입은 `src/shared/api/registerDomainIdResponse.ts`. 예외: `CATEGORY_REGISTER`는 `201 Empty`.
+
 ### AUTH API
 | 기능 | ID | Method | Endpoint | Request | Response | 권한필요여부 | 필요한 권한 |
 |---|---|---|---|---|---|---|---|
@@ -154,7 +156,7 @@
 | 카테고리명 변경 | `CATEGORY_UPDATE_NAME` | `PATCH` | `/api/categories/{categoryId}/name` | Path + JSON Body | `204` Empty | 예 | ADMIN |
 | 카테고리 노출 | `CATEGORY_ACTIVATE` | `PATCH` | `/api/categories/{categoryId}/visibility/activation` | Path | `204` Empty | 예 | ADMIN |
 | 카테고리 숨김 | `CATEGORY_DEACTIVATE` | `PATCH` | `/api/categories/{categoryId}/visibility/deactivation` | Path | `204` Empty | 예 | ADMIN |
-| 게시글 등록 | `BOARD_REGISTER` | `POST` | `/api/boards` | JSON Body | `201` Empty | 예 | EMPLOYEE(활성 사원) |
+| 게시글 등록 | `BOARD_REGISTER` | `POST` | `/api/boards` | JSON Body | `201` JSON Body | 예 | EMPLOYEE(활성 사원) |
 | 임시저장 게시글 발행 | `BOARD_PUBLISH` | `PATCH` | `/api/boards/{boardId}/publishment` | Path | `204` Empty | 예 | 게시글 작성자 또는 ADMIN |
 | 게시글 수정 | `BOARD_UPDATE` | `PATCH` | `/api/boards/{boardId}` | Path + JSON Body | `204` Empty | 예 | 게시글 작성자 또는 ADMIN |
 | 게시글 삭제 | `BOARD_DELETE` | `DELETE` | `/api/boards/{boardId}` | Path | `204` Empty | 예 | 게시글 작성자 또는 ADMIN |
@@ -185,7 +187,7 @@
 | 내 채팅방 목록 조회 | `CHAT_ROOM_LIST` | `GET` | `/api/chat/rooms?keyword={value}&isBookmark={value}` | Query | `200` JSON Body | 예 | EMPLOYEE(본인) |
 | 채팅방 상세 조회 | `CHAT_ROOM_DETAIL` | `GET` | `/api/chat/rooms/{roomId}` | Path | `200` JSON Body | 예 | 채팅방 멤버 |
 | 채팅 메시지 목록 조회 | `CHAT_MESSAGES` | `GET` | `/api/chat/rooms/{roomId}/messages?cursor={value}&size={value}` | Path + Query | `200` JSON Body | 예 | 채팅방 멤버 |
-| 채팅방 생성 | `CHAT_ROOM_CREATE` | `POST` | `/api/chat/rooms` | JSON Body | `200` JSON Body | 예 | EMPLOYEE(활성 사원) |
+| 채팅방 생성 | `CHAT_ROOM_CREATE` | `POST` | `/api/chat/rooms` | JSON Body | `201` JSON Body | 예 | EMPLOYEE(활성 사원) |
 | 채팅방 멤버 초대 | `CHAT_ROOM_INVITE` | `PATCH` | `/api/chat/rooms/{roomId}/invite` | Path + JSON Body | `204` Empty | 예 | 채팅방 멤버 |
 | 채팅방 표시명 수정 | `CHAT_ROOM_NAME_UPDATE` | `PATCH` | `/api/chat/rooms/{roomId}/name` | Path + JSON Body | `204` Empty | 예 | 채팅방 멤버 |
 | 채팅방 나가기 | `CHAT_ROOM_LEAVE` | `PATCH` | `/api/chat/rooms/{roomId}/leave` | Path | `204` Empty | 예 | 채팅방 멤버 |

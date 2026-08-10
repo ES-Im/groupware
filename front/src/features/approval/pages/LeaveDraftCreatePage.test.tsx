@@ -150,11 +150,11 @@ describe('LeaveDraftCreatePage (F740) - zod 사전검증(빈 값)', () => {
     server.use(
       http.post(`${BASE_URL}/api/drafts/leaves`, () => {
         leaveCalled = true
-        return HttpResponse.json({ draftId: 1 }, { status: 201 })
+        return HttpResponse.json({ id: 1 }, { status: 201 })
       }),
       http.post(`${BASE_URL}/api/drafts/leaves/submission`, () => {
         submissionCalled = true
-        return HttpResponse.json({ draftId: 1 }, { status: 201 })
+        return HttpResponse.json({ id: 1 }, { status: 201 })
       }),
     )
     const user = userEvent.setup()
@@ -179,7 +179,7 @@ describe('LeaveDraftCreatePage (F740) - zod 사전검증(빈 값)', () => {
     server.use(
       http.post(`${BASE_URL}/api/drafts/leaves`, () => {
         leaveCalled = true
-        return HttpResponse.json({ draftId: 1 }, { status: 201 })
+        return HttpResponse.json({ id: 1 }, { status: 201 })
       }),
     )
     const user = userEvent.setup()
@@ -205,11 +205,11 @@ describe('LeaveDraftCreatePage (F740) - [생성 후 상신] 결재선 0명 클�
     server.use(
       http.post(`${BASE_URL}/api/drafts/leaves`, () => {
         leaveCalled = true
-        return HttpResponse.json({ draftId: 1 }, { status: 201 })
+        return HttpResponse.json({ id: 1 }, { status: 201 })
       }),
       http.post(`${BASE_URL}/api/drafts/leaves/submission`, () => {
         submissionCalled = true
-        return HttpResponse.json({ draftId: 1 }, { status: 201 })
+        return HttpResponse.json({ id: 1 }, { status: 201 })
       }),
     )
     const user = userEvent.setup()
@@ -279,7 +279,7 @@ describe('LeaveDraftCreatePage (F740) - 정상 입력 + 결재선 1명 + [임시
     server.use(
       http.post(`${BASE_URL}/api/drafts/leaves`, async ({ request }) => {
         registeredBody = (await request.json()) as Record<string, unknown>
-        return HttpResponse.json({ draftId: 55 }, { status: 201 })
+        return HttpResponse.json({ id: 55 }, { status: 201 })
       }),
     )
     const user = userEvent.setup()
@@ -319,7 +319,7 @@ describe('LeaveDraftCreatePage (F740) - 결재선 행 역할 select(결재/협�
     server.use(
       http.post(`${BASE_URL}/api/drafts/leaves`, async ({ request }) => {
         registeredBody = (await request.json()) as Record<string, unknown>
-        return HttpResponse.json({ draftId: 60 }, { status: 201 })
+        return HttpResponse.json({ id: 60 }, { status: 201 })
       }),
     )
     const user = userEvent.setup()
@@ -344,11 +344,11 @@ describe('LeaveDraftCreatePage (F740) - 결재선 행 역할 select(결재/협�
     server.use(
       http.post(`${BASE_URL}/api/drafts/leaves`, () => {
         leaveCalled = true
-        return HttpResponse.json({ draftId: 1 }, { status: 201 })
+        return HttpResponse.json({ id: 1 }, { status: 201 })
       }),
       http.post(`${BASE_URL}/api/drafts/leaves/submission`, () => {
         submissionCalled = true
-        return HttpResponse.json({ draftId: 1 }, { status: 201 })
+        return HttpResponse.json({ id: 1 }, { status: 201 })
       }),
     )
     const user = userEvent.setup()

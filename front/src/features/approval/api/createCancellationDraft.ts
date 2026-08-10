@@ -1,4 +1,5 @@
 import { apiClient } from '@/shared/api/client'
+import type { RegisterDomainIdResponse } from '@/shared/api/registerDomainIdResponse'
 import type { ApproverParam } from '../model/approverParam'
 
 export interface CancellationDraftPayload {
@@ -7,18 +8,14 @@ export interface CancellationDraftPayload {
   approvers?: ApproverParam[]
 }
 
-export interface CancellationDraftResult {
-  draftId: number
-}
-
 export async function createCancellationDraft(
   sourceDraftId: number,
   payload: CancellationDraftPayload,
   submit: boolean,
-): Promise<CancellationDraftResult> {
+): Promise<RegisterDomainIdResponse> {
   const url = submit
     ? `/api/drafts/${sourceDraftId}/cancellation-drafts/submission`
     : `/api/drafts/${sourceDraftId}/cancellation-drafts`
-  const { data } = await apiClient.post<CancellationDraftResult>(url, payload)
+  const { data } = await apiClient.post<RegisterDomainIdResponse>(url, payload)
   return data
 }

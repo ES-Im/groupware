@@ -1,10 +1,14 @@
+import { useRef, useState } from 'react'
+import { Plus, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { submitWithErrorMapping, useZodForm } from '@/shared/lib/form'
 import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
 import { Label } from '@/shared/ui/label'
 import { Textarea } from '@/shared/ui/textarea'
+import { useEducationFileUploadMutation } from '../api/useEducationFileUploadMutation'
 import { useFranchiseEducationCreateMutation } from '../api/useFranchiseEducationCreateMutation'
+import { EducationFileValidationError, validateEducationFileUpload } from '../lib/educationFileValidation'
 import {
   franchiseEducationCreateSchema,
   type FranchiseEducationCreateFormValues,
@@ -15,11 +19,16 @@ interface FranchiseEducationCreateFormProps {
   onSuccess: (educationId: number) => void
 }
 
+function formatFileSizeMb(bytes: number): string {
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
+
 export function FranchiseEducationCreateForm({
   onCancel,
   onSuccess,
 }: FranchiseEducationCreateFormProps) {
   const mutation = useFranchiseEducationCreateMutation()
+  const uploadMutation = useEducationFileUploadMutation()
   const form = useZodForm(franchiseEducationCreateSchema, {
     defaultValues: {
       educationDate: '',
@@ -31,10 +40,36 @@ export function FranchiseEducationCreateForm({
     },
   })
 
+  const [stagedFiles, setStagedFiles] = useState<File[]>([])
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
   const {
     register,
     formState: { errors, isSubmitting },
   } = form
+
+  function handleStagedFileInputChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const selected = Array.from(event.target.files ?? [])
+    event.target.value = ''
+    if (selected.length === 0) {
+      return
+    }
+    const combined = [...stagedFiles, ...selected]
+    try {
+      validateEducationFileUpload(combined, [])
+    } catch (error) {
+      if (error instanceof EducationFileValidationError) {
+        toast.error(error.message)
+        return
+      }
+      throw error
+    }
+    setStagedFiles(combined)
+  }
+
+  function handleRemoveStagedFile(index: number) {
+    setStagedFiles((prev) => prev.filter((_, i) => i !== index))
+  }
 
   async function handleSubmit(values: FranchiseEducationCreateFormValues) {
     const educationDate = `${values.educationDate}T${values.educationTime}:00`
@@ -45,8 +80,19 @@ export function FranchiseEducationCreateForm({
       content: values.content,
       capacity: values.capacity,
     })
+
+    if (stagedFiles.length > 0) {
+      try {
+        await uploadMutation.mutateAsync({ educationId: result.id, files: stagedFiles })
+      } catch {
+        toast.error('교육은 등록되었습니다. 첨부파일은 교육 상세 화면에서 다시 업로드해주세요')
+        onSuccess(result.id)
+        return
+      }
+    }
+
     toast.success('교육을 등록했습니다')
-    onSuccess(result.educationId)
+    onSuccess(result.id)
   }
 
   return (
@@ -160,6 +206,55 @@ export function FranchiseEducationCreateForm({
           <p role="alert" className="text-sm text-destructive">
             {errors.content.message}
           </p>
+        )}
+      </div>
+
+      <div className="flex flex-col gap-1.5 sm:col-span-2">
+        <Label>첨부파일</Label>
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple
+          className="hidden"
+          onChange={handleStagedFileInputChange}
+        />
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="w-fit"
+          onClick={() => fileInputRef.current?.click()}
+        >
+          <Plus />
+          파일 추가
+        </Button>
+        {stagedFiles.length > 0 ? (
+          <ul className="flex flex-col gap-2">
+            {stagedFiles.map((file, index) => (
+              <li
+                key={`${file.name}-${index}`}
+                className="flex items-center justify-between gap-3 rounded-lg border px-3 py-2"
+              >
+                <span className="min-w-0 flex-1 truncate text-sm text-foreground">
+                  {file.name}
+                </span>
+                <div className="flex shrink-0 items-center gap-3">
+                  <span className="text-xs text-muted-foreground">{formatFileSizeMb(file.size)}</span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    onClick={() => handleRemoveStagedFile(index)}
+                    aria-label={`${file.name} 제거`}
+                  >
+                    <X />
+                  </Button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-sm text-muted-foreground">선택된 첨부파일이 없습니다.</p>
         )}
       </div>
 

@@ -79,7 +79,7 @@ describe('FranchiseEducationCreateDialog', () => {
     server.use(
       http.post(`${BASE_URL}/api/franchise-educations`, async ({ request }) => {
         requestBody = await request.json()
-        return HttpResponse.json({ educationId: 7 }, { status: 201 })
+        return HttpResponse.json({ id: 7 }, { status: 201 })
       }),
     )
     const user = userEvent.setup()
@@ -108,7 +108,7 @@ describe('FranchiseEducationCreateDialog', () => {
     server.use(
       http.post(`${BASE_URL}/api/franchise-educations`, async () => {
         await gate
-        return HttpResponse.json({ educationId: 7 }, { status: 201 })
+        return HttpResponse.json({ id: 7 }, { status: 201 })
       }),
     )
     const user = userEvent.setup()

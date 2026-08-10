@@ -7,6 +7,8 @@ import { Input } from '@/shared/ui/input'
 import { Label } from '@/shared/ui/label'
 import { Textarea } from '@/shared/ui/textarea'
 import { addCirculation } from '../api/addCirculation'
+import { useDraftFileUploadMutation } from '../api/useDraftFileUploadMutation'
+import { useDraftSubmitMutation } from '../api/useDraftSubmitMutation'
 import { useGeneralDraftCreateMutation } from '../api/useGeneralDraftCreateMutation'
 import { DraftCreateFrame } from '../components/DraftCreateFrame'
 import { DraftFormActions } from '../components/DraftFormActions'
@@ -28,6 +30,8 @@ import { generalDraftSchema, type GeneralDraftFormValues } from '../model/genera
 export function GeneralDraftCreatePage() {
   const navigate = useNavigate()
   const mutation = useGeneralDraftCreateMutation()
+  const uploadFilesMutation = useDraftFileUploadMutation()
+  const submitMutation = useDraftSubmitMutation()
   const [approverSelection, setApproverSelection] = useState<EmployeePickerEmployee[]>([])
   const [approverRoles, setApproverRoles] = useState<Record<number, ApprovalRole>>({})
   const [circulationSelection, setCirculationSelection] = useState<EmployeePickerEmployee[]>([])
@@ -88,19 +92,41 @@ export function GeneralDraftCreatePage() {
           }))
         : undefined
 
-    const result = await mutation.mutateAsync({ payload: { ...values, approvers }, submit })
+    const hasAttachments = attachments.length > 0
+    const result = await mutation.mutateAsync({
+      payload: { ...values, approvers },
+      submit: submit && !hasAttachments,
+    })
     if (circulationSelection.length > 0) {
       try {
         await addCirculation(
-          result.draftId,
+          result.id,
           circulationSelection.map((emp) => emp.empId),
         )
       } catch {
         toast.error('공람자 지정에 실패했습니다. 상세 화면에서 다시 추가해주세요')
       }
     }
+
+    if (hasAttachments) {
+      try {
+        await uploadFilesMutation.mutateAsync({ draftId: result.id, files: attachments })
+        if (submit) {
+          await submitMutation.mutateAsync({ draftId: result.id })
+        }
+      } catch {
+        toast.error(
+          submit
+            ? '기안서가 임시저장되었습니다. 상세 화면에서 첨부와 상신을 이어서 진행해주세요'
+            : '기안서는 임시저장되었으나 첨부파일 업로드에 실패했습니다. 상세 화면에서 다시 첨부해주세요',
+        )
+        navigate(`/approval/drafts/${result.id}`)
+        return
+      }
+    }
+
     toast.success(submit ? '기안서를 상신했습니다' : '기안서를 임시저장했습니다')
-    navigate(`/approval/drafts/${result.draftId}`)
+    navigate(`/approval/drafts/${result.id}`)
   }
 
   const handleCreate = submitWithErrorMapping(form, (values) => onValid(values, false))

@@ -103,7 +103,7 @@ describe('MessageComposeView (F1506·F1507) - zod 사전검증', () => {
     server.use(
       http.post(`${BASE_URL}/api/messages`, () => {
         sendCalled = true
-        return HttpResponse.json({ messageId: 1 }, { status: 201 })
+        return HttpResponse.json({ id: 1 }, { status: 201 })
       }),
     )
     const user = userEvent.setup()
@@ -124,7 +124,7 @@ describe('MessageComposeView (F1506·F1507) - zod 사전검증', () => {
     server.use(
       http.post(`${BASE_URL}/api/messages`, () => {
         sendCalled = true
-        return HttpResponse.json({ messageId: 1 }, { status: 201 })
+        return HttpResponse.json({ id: 1 }, { status: 201 })
       }),
     )
     const user = userEvent.setup()
@@ -150,7 +150,7 @@ describe('MessageComposeView (F1506) - 받는 사람 0명 클라 가드([전송]
     server.use(
       http.post(`${BASE_URL}/api/messages`, () => {
         sendCalled = true
-        return HttpResponse.json({ messageId: 1 }, { status: 201 })
+        return HttpResponse.json({ id: 1 }, { status: 201 })
       }),
     )
     const user = userEvent.setup()
@@ -214,7 +214,7 @@ describe('MessageComposeView (F1506) - 신규작성 해피패스: 첨부 없는 
     server.use(
       http.post(`${BASE_URL}/api/messages`, async ({ request }) => {
         registeredBody = (await request.json()) as Record<string, unknown>
-        return HttpResponse.json({ messageId: 100 }, { status: 201 })
+        return HttpResponse.json({ id: 100 }, { status: 201 })
       }),
     )
     const user = userEvent.setup()
@@ -250,7 +250,7 @@ describe('MessageComposeView (F1507) - 신규작성 해피패스: [임시저장]
     server.use(
       http.post(`${BASE_URL}/api/messages/drafts`, async ({ request }) => {
         registeredBody = (await request.json()) as Record<string, unknown>
-        return HttpResponse.json({ messageId: 200 }, { status: 201 })
+        return HttpResponse.json({ id: 200 }, { status: 201 })
       }),
     )
     const user = userEvent.setup()
@@ -280,7 +280,7 @@ describe('MessageComposeView (T4.3-b) - 첨부 있는 [전송] draft-first 오�
     server.use(
       http.post(`${BASE_URL}/api/messages/drafts`, () => {
         callOrder.push('createDraft')
-        return HttpResponse.json({ messageId: 300 }, { status: 201 })
+        return HttpResponse.json({ id: 300 }, { status: 201 })
       }),
       http.patch(`${BASE_URL}/api/messages/300/files`, () => {
         callOrder.push('uploadFiles')

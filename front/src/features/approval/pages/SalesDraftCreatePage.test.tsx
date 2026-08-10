@@ -158,11 +158,11 @@ describe('SalesDraftCreatePage (F760) - zod 사전검증(빈 값)', () => {
     server.use(
       http.post(`${BASE_URL}/api/drafts/sales`, () => {
         salesCalled = true
-        return HttpResponse.json({ draftId: 1 }, { status: 201 })
+        return HttpResponse.json({ id: 1 }, { status: 201 })
       }),
       http.post(`${BASE_URL}/api/drafts/sales/submission`, () => {
         submissionCalled = true
-        return HttpResponse.json({ draftId: 1 }, { status: 201 })
+        return HttpResponse.json({ id: 1 }, { status: 201 })
       }),
     )
     const user = userEvent.setup()
@@ -187,7 +187,7 @@ describe('SalesDraftCreatePage (F760) - zod 사전검증(빈 값)', () => {
     server.use(
       http.post(`${BASE_URL}/api/drafts/sales`, () => {
         salesCalled = true
-        return HttpResponse.json({ draftId: 1 }, { status: 201 })
+        return HttpResponse.json({ id: 1 }, { status: 201 })
       }),
     )
     const user = userEvent.setup()
@@ -213,11 +213,11 @@ describe('SalesDraftCreatePage (F760) - FranchisePicker 선택 시 franchiseId �
     server.use(
       http.post(`${BASE_URL}/api/drafts/sales`, () => {
         salesCalled = true
-        return HttpResponse.json({ draftId: 1 }, { status: 201 })
+        return HttpResponse.json({ id: 1 }, { status: 201 })
       }),
       http.post(`${BASE_URL}/api/drafts/sales/submission`, () => {
         submissionCalled = true
-        return HttpResponse.json({ draftId: 1 }, { status: 201 })
+        return HttpResponse.json({ id: 1 }, { status: 201 })
       }),
     )
     const user = userEvent.setup()
@@ -250,11 +250,11 @@ describe('SalesDraftCreatePage (F760) - [생성 후 상신] 결재선 0명 클�
     server.use(
       http.post(`${BASE_URL}/api/drafts/sales`, () => {
         salesCalled = true
-        return HttpResponse.json({ draftId: 1 }, { status: 201 })
+        return HttpResponse.json({ id: 1 }, { status: 201 })
       }),
       http.post(`${BASE_URL}/api/drafts/sales/submission`, () => {
         submissionCalled = true
-        return HttpResponse.json({ draftId: 1 }, { status: 201 })
+        return HttpResponse.json({ id: 1 }, { status: 201 })
       }),
     )
     const user = userEvent.setup()
@@ -277,7 +277,7 @@ describe('SalesDraftCreatePage (F760) - [생성 후 상신] 결재선 0명 클�
     server.use(
       http.post(`${BASE_URL}/api/drafts/sales`, async ({ request }) => {
         registeredBody = (await request.json()) as Record<string, unknown>
-        return HttpResponse.json({ draftId: 42 }, { status: 201 })
+        return HttpResponse.json({ id: 42 }, { status: 201 })
       }),
     )
     const user = userEvent.setup()
@@ -380,7 +380,7 @@ describe('SalesDraftCreatePage (F760) - 정상 입력 + 결재선 1명 + [임시
     server.use(
       http.post(`${BASE_URL}/api/drafts/sales`, async ({ request }) => {
         registeredBody = (await request.json()) as Record<string, unknown>
-        return HttpResponse.json({ draftId: 55 }, { status: 201 })
+        return HttpResponse.json({ id: 55 }, { status: 201 })
       }),
     )
     const user = userEvent.setup()
@@ -421,7 +421,7 @@ describe('SalesDraftCreatePage (F760) - 공람 지정(생성 성공 후 F707 후
     let circulationBody: Record<string, unknown> | undefined
     server.use(
       http.post(`${BASE_URL}/api/drafts/sales`, () =>
-        HttpResponse.json({ draftId: 77 }, { status: 201 }),
+        HttpResponse.json({ id: 77 }, { status: 201 }),
       ),
       http.post(`${BASE_URL}/api/drafts/:draftId/circulations`, async ({ request, params }) => {
         circulationDraftId = params.draftId
@@ -449,7 +449,7 @@ describe('SalesDraftCreatePage (F760) - 공람 지정(생성 성공 후 F707 후
     mockPickers()
     server.use(
       http.post(`${BASE_URL}/api/drafts/sales`, () =>
-        HttpResponse.json({ draftId: 88 }, { status: 201 }),
+        HttpResponse.json({ id: 88 }, { status: 201 }),
       ),
       http.post(`${BASE_URL}/api/drafts/:draftId/circulations`, () =>
         HttpResponse.json(

@@ -1,4 +1,5 @@
 import { apiClient } from '@/shared/api/client'
+import type { RegisterDomainIdResponse } from '@/shared/api/registerDomainIdResponse'
 import type { ApproverParam } from '../model/approverParam'
 
 export interface LeaveDraftPayload {
@@ -12,15 +13,11 @@ export interface LeaveDraftPayload {
   leaveType: string
 }
 
-export interface LeaveDraftResult {
-  draftId: number
-}
-
 export async function createLeaveDraft(
   payload: LeaveDraftPayload,
   submit: boolean,
-): Promise<LeaveDraftResult> {
+): Promise<RegisterDomainIdResponse> {
   const url = submit ? '/api/drafts/leaves/submission' : '/api/drafts/leaves'
-  const { data } = await apiClient.post<LeaveDraftResult>(url, payload)
+  const { data } = await apiClient.post<RegisterDomainIdResponse>(url, payload)
   return data
 }

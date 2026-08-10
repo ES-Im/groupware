@@ -11,6 +11,8 @@ import { Textarea } from '@/shared/ui/textarea'
 import { addCirculation } from '../api/addCirculation'
 import type { BusinessTripDraftPayload } from '../api/createBusinessTripDraft'
 import { useBusinessTripDraftCreateMutation } from '../api/useBusinessTripDraftCreateMutation'
+import { useDraftFileUploadMutation } from '../api/useDraftFileUploadMutation'
+import { useDraftSubmitMutation } from '../api/useDraftSubmitMutation'
 import { composeDateTime, DateTimeField } from '../components/DateTimeField'
 import { DraftCreateFrame } from '../components/DraftCreateFrame'
 import { DraftFormActions } from '../components/DraftFormActions'
@@ -43,6 +45,8 @@ function toDisplayDateTime(value: string): string {
 export function BusinessTripDraftCreatePage() {
   const navigate = useNavigate()
   const mutation = useBusinessTripDraftCreateMutation()
+  const uploadFilesMutation = useDraftFileUploadMutation()
+  const submitMutation = useDraftSubmitMutation()
   const meQuery = useMeQuery()
   const [approverSelection, setApproverSelection] = useState<EmployeePickerEmployee[]>([])
   const [approverRoles, setApproverRoles] = useState<Record<number, ApprovalRole>>({})
@@ -191,19 +195,38 @@ export function BusinessTripDraftCreatePage() {
       participantIds,
     }
 
-    const result = await mutation.mutateAsync({ payload, submit })
+    const hasAttachments = attachments.length > 0
+    const result = await mutation.mutateAsync({ payload, submit: submit && !hasAttachments })
     if (circulationSelection.length > 0) {
       try {
         await addCirculation(
-          result.draftId,
+          result.id,
           circulationSelection.map((emp) => emp.empId),
         )
       } catch {
         toast.error('공람자 지정에 실패했습니다. 상세 화면에서 다시 추가해주세요')
       }
     }
+
+    if (hasAttachments) {
+      try {
+        await uploadFilesMutation.mutateAsync({ draftId: result.id, files: attachments })
+        if (submit) {
+          await submitMutation.mutateAsync({ draftId: result.id })
+        }
+      } catch {
+        toast.error(
+          submit
+            ? '출장 기안서가 임시저장되었습니다. 상세 화면에서 첨부와 상신을 이어서 진행해주세요'
+            : '출장 기안서는 임시저장되었으나 첨부파일 업로드에 실패했습니다. 상세 화면에서 다시 첨부해주세요',
+        )
+        navigate(`/approval/drafts/${result.id}`)
+        return
+      }
+    }
+
     toast.success(submit ? '출장 기안서를 상신했습니다' : '출장 기안서를 임시저장했습니다')
-    navigate(`/approval/drafts/${result.draftId}`)
+    navigate(`/approval/drafts/${result.id}`)
   }
 
   const handleCreate = submitWithErrorMapping(form, (values) => onValid(values, false))

@@ -1,4 +1,5 @@
 import { apiClient } from '@/shared/api/client'
+import type { RegisterDomainIdResponse } from '@/shared/api/registerDomainIdResponse'
 
 export interface RegisterBoardPayload {
   categoryId: number
@@ -7,6 +8,7 @@ export interface RegisterBoardPayload {
   publishedAt?: string
 }
 
-export async function registerBoard(payload: RegisterBoardPayload): Promise<void> {
-  await apiClient.post('/api/boards', payload)
+export async function registerBoard(payload: RegisterBoardPayload): Promise<RegisterDomainIdResponse> {
+  const { data } = await apiClient.post<RegisterDomainIdResponse>('/api/boards', payload)
+  return data
 }

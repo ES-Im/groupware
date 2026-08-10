@@ -44,7 +44,7 @@ describe('useSalesDraftCreateMutation (SALES_DRAFT_CREATE, F760)', () => {
       http.get(`${BASE_URL}/api/drafts/55`, () => HttpResponse.json({ version })),
       http.post(`${BASE_URL}/api/drafts/sales`, () => {
         version = 2
-        return HttpResponse.json({ draftId: 55 }, { status: 201 })
+        return HttpResponse.json({ id: 55 }, { status: 201 })
       }),
     )
     const { Wrapper } = createWrapper()
@@ -59,7 +59,7 @@ describe('useSalesDraftCreateMutation (SALES_DRAFT_CREATE, F760)', () => {
     result.current.mutation.mutate({ payload: payload(), submit: false })
 
     await waitFor(() => expect(result.current.mutation.isSuccess).toBe(true))
-    expect(result.current.mutation.data).toEqual({ draftId: 55 })
+    expect(result.current.mutation.data).toEqual({ id: 55 })
     await waitFor(() => expect(result.current.probe.data).toEqual({ version: 2 }))
   })
 
@@ -71,7 +71,7 @@ describe('useSalesDraftCreateMutation (SALES_DRAFT_CREATE, F760)', () => {
       http.post(`${BASE_URL}/api/drafts/sales/submission`, () => {
         submissionCalled = true
         version = 2
-        return HttpResponse.json({ draftId: 55 }, { status: 201 })
+        return HttpResponse.json({ id: 55 }, { status: 201 })
       }),
     )
     const { Wrapper } = createWrapper()

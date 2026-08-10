@@ -11,8 +11,8 @@ describe('createMeetingRoom', () => {
     vi.mocked(apiClient.post).mockClear()
   })
 
-  it('/api/meeting-rooms로 payload를 그대로 POST하고 응답의 meetingRoomId를 반환한다', async () => {
-    vi.mocked(apiClient.post).mockResolvedValueOnce({ data: { meetingRoomId: 10 } })
+  it('/api/meeting-rooms로 payload를 그대로 POST하고 응답의 id를 반환한다', async () => {
+    vi.mocked(apiClient.post).mockResolvedValueOnce({ data: { id: 10 } })
 
     const payload = { name: '대회의실', description: '층별 대형 회의실', capacity: 12 }
     const result = await createMeetingRoom(payload)
@@ -21,7 +21,7 @@ describe('createMeetingRoom', () => {
     const [url, body] = vi.mocked(apiClient.post).mock.calls[0]
     expect(url).toBe('/api/meeting-rooms')
     expect(body).toEqual(payload)
-    expect(result).toEqual({ meetingRoomId: 10 })
+    expect(result).toEqual({ id: 10 })
   })
 
   it('서버 판정 실패는 삼켜지지 않고 그대로 throw된다', async () => {

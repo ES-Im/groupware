@@ -1,9 +1,9 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import type { RegisterDomainIdResponse } from '@/shared/api/registerDomainIdResponse'
 import { approvalKeys } from '../model/queryKeys'
 import {
   createCancellationDraft,
   type CancellationDraftPayload,
-  type CancellationDraftResult,
 } from './createCancellationDraft'
 
 interface CancellationDraftVariables {
@@ -15,7 +15,7 @@ interface CancellationDraftVariables {
 export function useCancellationDraftMutation() {
   const queryClient = useQueryClient()
 
-  return useMutation<CancellationDraftResult, unknown, CancellationDraftVariables>({
+  return useMutation<RegisterDomainIdResponse, unknown, CancellationDraftVariables>({
     mutationFn: ({ sourceDraftId, payload, submit }) =>
       createCancellationDraft(sourceDraftId, payload, submit),
     onSuccess: async () => {

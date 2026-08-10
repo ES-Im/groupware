@@ -1,4 +1,5 @@
 import { apiClient } from '@/shared/api/client'
+import type { RegisterDomainIdResponse } from '@/shared/api/registerDomainIdResponse'
 import type { ApproverParam } from '../model/approverParam'
 
 export interface SalesDraftPayload {
@@ -12,15 +13,11 @@ export interface SalesDraftPayload {
   salesAmount: number
 }
 
-export interface SalesDraftResult {
-  draftId: number
-}
-
 export async function createSalesDraft(
   payload: SalesDraftPayload,
   submit: boolean,
-): Promise<SalesDraftResult> {
+): Promise<RegisterDomainIdResponse> {
   const url = submit ? '/api/drafts/sales/submission' : '/api/drafts/sales'
-  const { data } = await apiClient.post<SalesDraftResult>(url, payload)
+  const { data } = await apiClient.post<RegisterDomainIdResponse>(url, payload)
   return data
 }

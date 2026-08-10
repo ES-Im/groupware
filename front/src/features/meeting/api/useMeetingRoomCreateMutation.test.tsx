@@ -45,7 +45,7 @@ describe('useMeetingRoomCreateMutation', () => {
       ),
       http.post(`${BASE_URL}/api/meeting-rooms`, async () => {
         rooms = [...rooms, { meetingRoomId: 2, name: '신규회의실', capacity: 6, isAvailable: true }]
-        return HttpResponse.json({ meetingRoomId: 2 }, { status: 201 })
+        return HttpResponse.json({ id: 2 }, { status: 201 })
       }),
     )
     const { Wrapper } = createWrapper()

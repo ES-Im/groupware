@@ -52,7 +52,7 @@ describe('useMeetingRoomFileUploadMutation', () => {
 
     await waitFor(() => expect(result.current.files.data).toEqual([]))
 
-    result.current.mutation.mutate({ meetingRoomId: 1, file: makeFile('room.jpg') })
+    result.current.mutation.mutate({ meetingRoomId: 1, files: [makeFile('room.jpg')] })
 
     await waitFor(() => expect(result.current.mutation.isSuccess).toBe(true))
     await waitFor(() => expect(result.current.files.data).toHaveLength(1))
@@ -71,7 +71,7 @@ describe('useMeetingRoomFileUploadMutation', () => {
 
     const { result } = renderHook(() => useMeetingRoomFileUploadMutation(), { wrapper: Wrapper })
 
-    result.current.mutate({ meetingRoomId: 1, file: makeFile('virus.exe') })
+    result.current.mutate({ meetingRoomId: 1, files: [makeFile('virus.exe')] })
 
     await waitFor(() => expect(result.current.isError).toBe(true))
     const error = result.current.error as MeetingRoomFileValidationError
@@ -92,7 +92,7 @@ describe('useMeetingRoomFileUploadMutation', () => {
 
     const { result } = renderHook(() => useMeetingRoomFileUploadMutation(), { wrapper: Wrapper })
 
-    result.current.mutate({ meetingRoomId: 1, file: makeFile('room.png', 11 * 1024 * 1024) })
+    result.current.mutate({ meetingRoomId: 1, files: [makeFile('room.png', 11 * 1024 * 1024)] })
 
     await waitFor(() => expect(result.current.isError).toBe(true))
     expect((result.current.error as MeetingRoomFileValidationError).reason).toBe('SIZE_EXCEEDED')

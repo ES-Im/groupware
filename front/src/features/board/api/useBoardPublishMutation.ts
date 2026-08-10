@@ -8,7 +8,11 @@ export function useBoardPublishMutation() {
   return useMutation({
     mutationFn: (boardId: number) => publishBoard(boardId),
     onSuccess: async (_data, boardId) => {
-      await queryClient.invalidateQueries({ queryKey: boardKeys.detail(boardId) })
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: boardKeys.detail(boardId) }),
+        queryClient.invalidateQueries({ queryKey: [...boardKeys.all, 'list'] }),
+        queryClient.invalidateQueries({ queryKey: boardKeys.drafts() }),
+      ])
     },
   })
 }

@@ -1,4 +1,5 @@
 import { apiClient } from '@/shared/api/client'
+import type { RegisterDomainIdResponse } from '@/shared/api/registerDomainIdResponse'
 
 export interface CreateMeetingRoomPayload {
   name: string
@@ -6,11 +7,9 @@ export interface CreateMeetingRoomPayload {
   capacity: number
 }
 
-export interface CreateMeetingRoomResult {
-  meetingRoomId: number
-}
-
-export async function createMeetingRoom(payload: CreateMeetingRoomPayload): Promise<CreateMeetingRoomResult> {
-  const { data } = await apiClient.post<CreateMeetingRoomResult>('/api/meeting-rooms', payload)
+export async function createMeetingRoom(
+  payload: CreateMeetingRoomPayload,
+): Promise<RegisterDomainIdResponse> {
+  const { data } = await apiClient.post<RegisterDomainIdResponse>('/api/meeting-rooms', payload)
   return data
 }

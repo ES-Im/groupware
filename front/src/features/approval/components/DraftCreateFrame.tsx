@@ -1,6 +1,7 @@
 import { useId, type ReactNode } from 'react'
 import { Link } from 'react-router'
 import { Check, FileText, FileUp, Inbox, Paperclip, Plus, X, type LucideIcon } from 'lucide-react'
+import { toast } from 'sonner'
 import { useAuthStore } from '@/features/auth/store/authStore'
 import { Badge } from '@/shared/ui/badge'
 import { Button } from '@/shared/ui/button'
@@ -14,6 +15,7 @@ import {
 import { hasRequiredRole } from '@/shared/lib/hasRequiredRole'
 import { cn } from '@/shared/lib/utils'
 import { DRAFT_TYPES, getDraftTypeMeta, type DraftTypeKey } from '../lib/draftTypes'
+import { DraftFileValidationError, validateDraftFileUpload } from '../lib/draftFileValidation'
 
 interface DraftCreateFrameProps {
   currentType: DraftTypeKey
@@ -186,9 +188,19 @@ export function DraftAttachmentsCard({
     const added = Array.from(files).filter(
       (file) => !attachments.some((item) => item.name === file.name && item.size === file.size),
     )
-    if (added.length > 0) {
-      onChange([...attachments, ...added])
+    if (added.length === 0) {
+      return
     }
+    try {
+      validateDraftFileUpload([...attachments, ...added])
+    } catch (error) {
+      if (error instanceof DraftFileValidationError) {
+        toast.error(error.message)
+        return
+      }
+      throw error
+    }
+    onChange([...attachments, ...added])
   }
 
   return (
@@ -264,9 +276,6 @@ export function DraftAttachmentsCard({
             })}
           </ul>
         )}
-        <p className="mt-2 text-xs text-muted-foreground">
-          목록은 미리보기 문서에 표시되며, 실제 업로드는 기안 생성 후 상세 화면에서 진행합니다.
-        </p>
       </CardContent>
     </Card>
   )

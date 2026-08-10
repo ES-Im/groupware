@@ -19,7 +19,7 @@ function payload(overrides: Partial<LeaveDraftPayload> = {}): LeaveDraftPayload 
 describe('createLeaveDraft', () => {
   beforeEach(() => {
     vi.mocked(apiClient.post).mockReset()
-    vi.mocked(apiClient.post).mockResolvedValue({ data: { draftId: 123 } })
+    vi.mocked(apiClient.post).mockResolvedValue({ data: { id: 123 } })
   })
 
   it('submit=false면 POST /api/drafts/leaves를 호출한다', async () => {
@@ -71,11 +71,11 @@ describe('createLeaveDraft', () => {
     expect(sentBody.param.approvers).toBeUndefined()
   })
 
-  it('응답 {draftId}를 그대로 반환한다', async () => {
-    vi.mocked(apiClient.post).mockResolvedValue({ data: { draftId: 999 } })
+  it('응답 {id}를 그대로 반환한다', async () => {
+    vi.mocked(apiClient.post).mockResolvedValue({ data: { id: 999 } })
 
     const result = await createLeaveDraft(payload(), true)
 
-    expect(result).toEqual({ draftId: 999 })
+    expect(result).toEqual({ id: 999 })
   })
 })

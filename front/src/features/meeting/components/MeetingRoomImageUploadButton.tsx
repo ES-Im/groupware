@@ -29,7 +29,7 @@ export function MeetingRoomImageUploadButton({ meetingRoomId }: MeetingRoomImage
       return
     }
     uploadMutation.mutate(
-      { meetingRoomId, file },
+      { meetingRoomId, files: [file] },
       {
         onSuccess: () => toast.success('안내 이미지를 업로드했습니다'),
         onError: reportUploadError,

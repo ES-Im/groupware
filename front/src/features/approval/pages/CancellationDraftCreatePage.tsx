@@ -15,6 +15,8 @@ import { type EmployeePickerEmployee } from '@/shared/components/EmployeePicker'
 import { addCirculation } from '../api/addCirculation'
 import { useDraftDetailQuery } from '../api/useDraftDetailQuery'
 import { useCancellationDraftMutation } from '../api/useCancellationDraftMutation'
+import { useDraftFileUploadMutation } from '../api/useDraftFileUploadMutation'
+import { useDraftSubmitMutation } from '../api/useDraftSubmitMutation'
 import { DraftAttachmentsCard, DraftCreateFrame } from '../components/DraftCreateFrame'
 import { DraftFormActions } from '../components/DraftFormActions'
 import { EmployeeSelectField } from '../components/EmployeeSelectField'
@@ -51,6 +53,8 @@ function CancellationDraftForm({
 }) {
   const navigate = useNavigate()
   const mutation = useCancellationDraftMutation()
+  const uploadFilesMutation = useDraftFileUploadMutation()
+  const submitMutation = useDraftSubmitMutation()
   const [approverSelection, setApproverSelection] = useState<EmployeePickerEmployee[]>([])
   const [approverRoles, setApproverRoles] = useState<Record<number, ApprovalRole>>({})
   const [circulationSelection, setCirculationSelection] = useState<EmployeePickerEmployee[]>([])
@@ -116,23 +120,42 @@ function CancellationDraftForm({
           }))
         : undefined
 
+    const hasAttachments = attachments.length > 0
     const result = await mutation.mutateAsync({
       sourceDraftId,
       payload: { ...values, approvers },
-      submit,
+      submit: submit && !hasAttachments,
     })
     if (circulationSelection.length > 0) {
       try {
         await addCirculation(
-          result.draftId,
+          result.id,
           circulationSelection.map((emp) => emp.empId),
         )
       } catch {
         toast.error('공람자 지정에 실패했습니다. 상세 화면에서 다시 추가해주세요')
       }
     }
+
+    if (hasAttachments) {
+      try {
+        await uploadFilesMutation.mutateAsync({ draftId: result.id, files: attachments })
+        if (submit) {
+          await submitMutation.mutateAsync({ draftId: result.id })
+        }
+      } catch {
+        toast.error(
+          submit
+            ? '취소 기안이 임시저장되었습니다. 상세 화면에서 첨부와 상신을 이어서 진행해주세요'
+            : '취소 기안은 임시저장되었으나 첨부파일 업로드에 실패했습니다. 상세 화면에서 다시 첨부해주세요',
+        )
+        navigate(`/approval/drafts/${result.id}`)
+        return
+      }
+    }
+
     toast.success(submit ? '취소 기안을 상신했습니다' : '취소 기안을 임시저장했습니다')
-    navigate(`/approval/drafts/${result.draftId}`)
+    navigate(`/approval/drafts/${result.id}`)
   }
 
   const handleCreate = submitWithErrorMapping(form, (values) => onValid(values, false))

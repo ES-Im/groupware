@@ -1,3 +1,5 @@
+import type { RegisterDomainIdResponse } from '@/shared/api/registerDomainIdResponse'
+
 export interface Franchise {
   id: number
   name: string
@@ -77,9 +79,7 @@ export interface FranchiseCreateRequest {
   managerEmpId?: number
 }
 
-export interface FranchiseCreateResponse {
-  franchiseId: number
-}
+export type FranchiseCreateResponse = RegisterDomainIdResponse
 
 export interface FranchiseEducationCalendarItem {
   id: number
@@ -132,9 +132,7 @@ export interface FranchiseEducationCreateRequest {
   capacity: number
 }
 
-export interface FranchiseEducationCreateResponse {
-  educationId: number
-}
+export type FranchiseEducationCreateResponse = RegisterDomainIdResponse
 
 export interface FranchiseInquiry {
   inquiryId: number

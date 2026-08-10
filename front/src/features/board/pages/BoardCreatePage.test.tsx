@@ -55,7 +55,7 @@ describe('BoardCreatePage (F305) - zod 사전검증', () => {
     server.use(
       http.post(`${BASE_URL}/api/boards`, () => {
         registerCalled = true
-        return new HttpResponse(null, { status: 201 })
+        return HttpResponse.json({ id: 1 }, { status: 201 })
       }),
     )
     const user = userEvent.setup()
@@ -77,7 +77,7 @@ describe('BoardCreatePage (F305) - zod 사전검증', () => {
     server.use(
       http.post(`${BASE_URL}/api/boards`, () => {
         registerCalled = true
-        return new HttpResponse(null, { status: 201 })
+        return HttpResponse.json({ id: 1 }, { status: 201 })
       }),
     )
     const user = userEvent.setup()
@@ -103,7 +103,7 @@ describe('BoardCreatePage (F305) - 임시저장/발행 제출 페이로드', () 
     server.use(
       http.post(`${BASE_URL}/api/boards`, async ({ request }) => {
         registeredBody = (await request.json()) as Record<string, unknown>
-        return new HttpResponse(null, { status: 201 })
+        return HttpResponse.json({ id: 1 }, { status: 201 })
       }),
     )
     const user = userEvent.setup()
@@ -132,7 +132,7 @@ describe('BoardCreatePage (F305) - 임시저장/발행 제출 페이로드', () 
     server.use(
       http.post(`${BASE_URL}/api/boards`, async ({ request }) => {
         registeredBody = (await request.json()) as Record<string, unknown>
-        return new HttpResponse(null, { status: 201 })
+        return HttpResponse.json({ id: 1 }, { status: 201 })
       }),
     )
     const user = userEvent.setup()

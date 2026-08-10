@@ -313,7 +313,7 @@ export function MessageComposeView({
     if (resumeMessageId != null) {
       return resumeMessageId
     }
-    const { messageId: created } = await createDraftMutation.mutateAsync(payload)
+    const { id: created } = await createDraftMutation.mutateAsync(payload)
     setResumeMessageId(created)
     return created
   }
