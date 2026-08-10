@@ -10,6 +10,7 @@ import { isGeneralDraft } from '../../lib/isGeneralDraft'
 import { isLeaveDraft } from '../../lib/isLeaveDraft'
 import { isSalesDraft } from '../../lib/isSalesDraft'
 import { resolveDrafterActions } from '../../lib/resolveDrafterActions'
+import { DeleteDraftAlertDialog } from '../DeleteDraftAlertDialog'
 import type { DraftDetailSectionProps } from './types'
 
 export function DrafterActions({ draft }: DraftDetailSectionProps) {
@@ -110,6 +111,18 @@ export function DrafterActions({ draft }: DraftDetailSectionProps) {
         >
           취소 기안 작성
         </Button>
+      )}
+      {availability.canDelete && (
+        <DeleteDraftAlertDialog>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            className="rounded-lg text-destructive hover:text-destructive"
+          >
+            삭제
+          </Button>
+        </DeleteDraftAlertDialog>
       )}
     </>
   )

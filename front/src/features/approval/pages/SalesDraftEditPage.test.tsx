@@ -177,7 +177,7 @@ describe('SalesDraftEditPage - 정상 진입 시 프리필', () => {
     renderPage()
 
     expect(await screen.findByLabelText(/^제목/)).toHaveValue('7월 매출 보고')
-    expect(screen.getByLabelText(/^본문/)).toHaveValue('7월 매출을 보고합니다.')
+    expect(screen.getByLabelText(/^기안 내용/)).toHaveValue('7월 매출을 보고합니다.')
     expect(screen.getByRole('button', { name: '강남점 선택 해제' })).toBeInTheDocument()
     expect(screen.getByLabelText(/매출 보고월/)).toHaveValue('2026-07')
     expect(screen.getByLabelText(/매출액/)).toHaveValue(1000000)

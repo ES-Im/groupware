@@ -1,11 +1,13 @@
-import { Eye, Save, Send } from 'lucide-react'
+import { Eye, Save, Send, Trash2 } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
+import { DeleteDraftAlertDialog } from './DeleteDraftAlertDialog'
 
 interface DraftFormActionsProps {
   isSubmitting: boolean
   onCancel: () => void
   onPreview: () => void
   onSaveDraft: () => void
+  onDelete?: () => void
   saveLabel?: string
   submitLabel?: string
 }
@@ -15,11 +17,25 @@ export function DraftFormActions({
   onCancel,
   onPreview,
   onSaveDraft,
+  onDelete,
   saveLabel = '임시저장',
   submitLabel = '상신',
 }: DraftFormActionsProps) {
   return (
     <div className="-mx-4 -mb-4 mt-auto flex flex-col-reverse gap-2 rounded-b-2xl border-t bg-muted/40 px-4 py-3 sm:flex-row sm:items-center sm:justify-end">
+      {onDelete && (
+        <DeleteDraftAlertDialog onConfirm={onDelete}>
+          <Button
+            type="button"
+            variant="ghost"
+            className="rounded-xl text-destructive hover:text-destructive sm:mr-auto"
+            disabled={isSubmitting}
+          >
+            <Trash2 />
+            삭제
+          </Button>
+        </DeleteDraftAlertDialog>
+      )}
       <Button
         type="button"
         variant="ghost"

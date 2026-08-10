@@ -30,6 +30,7 @@ const ALL_FALSE = {
   canEdit: false,
   canWithdraw: false,
   canCancel: false,
+  canDelete: false,
 }
 
 describe('resolveDrafterActions', () => {
@@ -43,7 +44,7 @@ describe('resolveDrafterActions', () => {
     )
   })
 
-  it('기안자 + UNSUBMITTED("미상신") → 상신·수정 노출, 철회·취소는 비노출', () => {
+  it('기안자 + UNSUBMITTED("미상신") → 상신·수정·삭제 노출, 철회·취소는 비노출', () => {
     const result = resolveDrafterActions(draft({ approvalStatus: '미상신' }), 10)
     expect(result).toEqual({
       isDrafter: true,
@@ -51,6 +52,7 @@ describe('resolveDrafterActions', () => {
       canEdit: true,
       canWithdraw: false,
       canCancel: false,
+      canDelete: true,
     })
   })
 
@@ -62,6 +64,7 @@ describe('resolveDrafterActions', () => {
       canEdit: false,
       canWithdraw: true,
       canCancel: false,
+      canDelete: false,
     })
   })
 
@@ -73,6 +76,7 @@ describe('resolveDrafterActions', () => {
       canEdit: false,
       canWithdraw: true,
       canCancel: false,
+      canDelete: false,
     })
   })
 
@@ -87,6 +91,7 @@ describe('resolveDrafterActions', () => {
       canEdit: false,
       canWithdraw: false,
       canCancel: true,
+      canDelete: false,
     })
   })
 
@@ -99,9 +104,9 @@ describe('resolveDrafterActions', () => {
     expect(result.isDrafter).toBe(true)
   })
 
-  it('기안자 + REJECTED("반려") → 기안자 액션 없음(isDrafter만 true)', () => {
+  it('기안자 + REJECTED("반려") → 삭제만 노출', () => {
     const result = resolveDrafterActions(draft({ approvalStatus: '반려' }), 10)
-    expect(result).toEqual({ ...ALL_FALSE, isDrafter: true })
+    expect(result).toEqual({ ...ALL_FALSE, isDrafter: true, canDelete: true })
   })
 
   it('기안자 + 계약 밖 표시명(알 수 없는 상태) → 기안자 액션 없음(default 분기, fail-safe)', () => {

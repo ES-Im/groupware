@@ -1,5 +1,4 @@
 import dayjs from 'dayjs'
-import { toast } from 'sonner'
 import { Button } from '@/shared/ui/button'
 import { cn } from '@/shared/lib/utils'
 import { ElectronicSignature } from './ElectronicSignature'
@@ -96,13 +95,6 @@ export function DraftPrintDocument({
         <div className="flex shrink-0 gap-2">
           <Button type="button" variant="ghost" onClick={() => window.close()}>
             닫기
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => toast.info('PDF 다운로드 기능은 준비 중입니다')}
-          >
-            PDF 다운로드
           </Button>
           <Button type="button" onClick={() => window.print()}>
             인쇄

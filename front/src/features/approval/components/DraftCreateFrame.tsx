@@ -76,7 +76,7 @@ export function DraftCreateFrame({
 
         <Card className="min-w-0 rounded-2xl">
           <CardHeader className="border-b bg-muted/30">
-            <CardTitle className="flex items-center gap-3">
+            <CardTitle className="flex min-w-0 items-center gap-3">
               <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                 <HeaderIcon className="size-5" />
               </span>

@@ -20,6 +20,7 @@ import { DraftFormActions } from '../components/DraftFormActions'
 import { EmployeeSelectField } from '../components/EmployeeSelectField'
 import { type EmployeePickerEmployee } from '@/shared/components/EmployeePicker'
 import { FranchisePicker, type FranchisePickerSelection } from '@/shared/components/FranchisePicker'
+import { formatSalesAmount } from '../lib/formatSalesAmount'
 import {
   APPROVAL_ROLE_OPTIONS,
   toApprovalRole,
@@ -32,10 +33,6 @@ import {
   type DraftPrintPreviewPayload,
 } from '../model/draftPreview'
 import { salesDraftSchema, type SalesDraftFormValues } from '../model/salesDraftSchema'
-
-function formatSalesAmount(value: number): string {
-  return Number.isFinite(value) ? `${value.toLocaleString('ko-KR')}원` : ''
-}
 
 export function SalesDraftCreatePage() {
   const navigate = useNavigate()

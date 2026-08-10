@@ -468,6 +468,7 @@ function LeaveDraftEditForm({
           onCancel={() => navigate(`/approval/drafts/${draftId}`)}
           onPreview={handlePreview}
           onSaveDraft={() => void handleSave()}
+          onDelete={() => {}}
           saveLabel="저장"
           submitLabel="상신"
         />

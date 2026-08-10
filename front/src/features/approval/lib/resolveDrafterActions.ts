@@ -7,6 +7,7 @@ export interface DrafterActionAvailability {
   canEdit: boolean
   canWithdraw: boolean
   canCancel: boolean
+  canDelete: boolean
 }
 
 const NONE: DrafterActionAvailability = {
@@ -15,6 +16,7 @@ const NONE: DrafterActionAvailability = {
   canEdit: false,
   canWithdraw: false,
   canCancel: false,
+  canDelete: false,
 }
 
 export function resolveDrafterActions(
@@ -29,12 +31,14 @@ export function resolveDrafterActions(
   const base = { ...NONE, isDrafter: true }
   switch (resolveApprovalStatus(draft.approvalStatus)) {
     case 'UNSUBMITTED':
-      return { ...base, canSubmit: true, canEdit: true }
+      return { ...base, canSubmit: true, canEdit: true, canDelete: true }
     case 'WAITING':
     case 'IN_PROGRESS':
       return { ...base, canWithdraw: true }
     case 'APPROVED':
       return { ...base, canCancel: draft.cancellationDraftId == null }
+    case 'REJECTED':
+      return { ...base, canDelete: true }
     default:
       return base
   }
