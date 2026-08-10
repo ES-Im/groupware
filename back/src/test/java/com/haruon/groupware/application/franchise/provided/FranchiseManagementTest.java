@@ -44,7 +44,7 @@ record FranchiseManagementTest(
     void create_franchise_by_emp_who_has_franchise_role_success() {
         Emp franchiseEmp = getSavedFranchiseEmp(deptRepository, empRepository,"202601001", "franchise1");
 
-        String businessNumber = "000-00-00000";
+        String businessNumber = "0000000000";
         String franchiseName = "테스트강남점";
         String address = "서울특별시 강남구 테스트";
         String ownerName = "홍길동";
@@ -90,7 +90,7 @@ record FranchiseManagementTest(
                 franchiseManagement.createFranchise(
                         franchiseEmp.getId(),
                         FranchiseCreateRequest.builder()
-                                .businessNumber("000-00-00000")
+                                .businessNumber("0000000000")
                                 .franchiseName("테스트강남점")
                                 .address("서울특별시 강남구 테스트")
                                 .ownerName("홍길동")
@@ -109,7 +109,7 @@ record FranchiseManagementTest(
         long franchiseId = franchiseManagement.createFranchise(
                 franchiseEmp.getId(),
                 FranchiseCreateRequest.builder()
-                        .businessNumber("000-00-00000")
+                        .businessNumber("0000000000")
                         .franchiseName("테스트강남점")
                         .address("서울특별시 강남구 테스트")
                         .ownerName("홍길동")
@@ -118,7 +118,7 @@ record FranchiseManagementTest(
                         .build()
         );
 
-        String newbusinessNumber = "100-00-00000";
+        String newbusinessNumber = "1000000000";
         String newfranchiseName = "new테스트강남점";
         String newaddress = "new서울특별시 강남구 테스트";
         String newownerName = "new홍길동";
@@ -161,7 +161,7 @@ record FranchiseManagementTest(
         long franchiseId = franchiseManagement.createFranchise(
                 franchiseEmp.getId(),
                 FranchiseCreateRequest.builder()
-                        .businessNumber("000-00-00000")
+                        .businessNumber("0000000000")
                         .franchiseName("테스트강남점")
                         .address("서울특별시 강남구 테스트")
                         .ownerName("홍길동")
@@ -185,7 +185,7 @@ record FranchiseManagementTest(
         long franchiseId = franchiseManagement.createFranchise(
                 register.getId(),
                 FranchiseCreateRequest.builder()
-                        .businessNumber("000-00-00000")
+                        .businessNumber("0000000000")
                         .franchiseName("테스트강남점")
                         .address("서울특별시 강남구 테스트")
                         .ownerName("홍길동")
@@ -209,7 +209,7 @@ record FranchiseManagementTest(
         long franchiseId = franchiseManagement.createFranchise(
                 register.getId(),
                 FranchiseCreateRequest.builder()
-                        .businessNumber("000-00-00000")
+                        .businessNumber("0000000000")
                         .franchiseName("테스트강남점")
                         .address("서울특별시 강남구 테스트")
                         .ownerName("홍길동")
@@ -234,7 +234,7 @@ record FranchiseManagementTest(
         long franchiseId = franchiseManagement.createFranchise(
                 register.getId(),
                 FranchiseCreateRequest.builder()
-                        .businessNumber("000-00-00000")
+                        .businessNumber("0000000000")
                         .franchiseName("테스트강남점")
                         .address("서울특별시 강남구 테스트")
                         .ownerName("홍길동")

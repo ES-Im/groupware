@@ -2,6 +2,7 @@ package com.haruon.groupware.application.draft.provided;
 
 import com.haruon.groupware.application.TestIntegrationConfig;
 import com.haruon.groupware.application.dept.required.DeptRepository;
+import com.haruon.groupware.application.draft.provided.forCommand.DraftManagementResolver;
 import com.haruon.groupware.application.draft.provided.forCommand.GeneralDraftManagement;
 import com.haruon.groupware.application.draft.required.DraftRepository;
 import com.haruon.groupware.application.draft.service.command.dto.ApproversRequest;
@@ -35,6 +36,7 @@ record CommonDraftTest(
         DraftRepository draftRepository,
         DeptRepository deptRepository,
         GeneralDraftManagement generalDraftManagement,
+        DraftManagementResolver draftManagementResolver,
         EmpRepository empRepository,
         EntityManager entityManager
 ) {
@@ -79,7 +81,7 @@ record CommonDraftTest(
         String content = "test";
 
         Draft draft = createDraft(drafter, title, content, List.of());
-        generalDraftManagement.submit(draft.getId(), drafter.getId(), LocalDateTime.of(2026, 1, 1, 0, 0, 0)
+        draftManagementResolver.submit(draft.getId(), drafter.getId(), LocalDateTime.of(2026, 1, 1, 0, 0, 0)
                 , List.of(new ApproversRequest(approverEmp1.getId(), ApprovalRole.APPROVER, 1)));
 
         assertThat(draft.getApproval().getStatus()).isEqualTo(WAITING);
@@ -96,7 +98,7 @@ record CommonDraftTest(
         Draft draft = createDraft(drafter, title, content, List.of());
 
         assertThatThrownBy(() ->
-                generalDraftManagement.submit(
+                draftManagementResolver.submit(
                         draft.getId(),
                         drafter.getId(),
                         LocalDateTime.of(2026, 1, 1, 0, 0, 0),
@@ -105,7 +107,7 @@ record CommonDraftTest(
         ).isInstanceOf(ApprovalLineRequiredException.class);
 
         assertThatThrownBy(() ->
-                generalDraftManagement.submit(
+                draftManagementResolver.submit(
                         draft.getId(),
                         drafter.getId(),
                         null,
@@ -202,7 +204,7 @@ record CommonDraftTest(
     void reverToDraft_when_approval_status_is_waiting() {
         Emp drafter = saveApprovedEmp(empRepository, "202601001", "drafter");
         Draft draft = getSubmitted(drafter);
-        generalDraftManagement.revertToDraft(draft.getId(), drafter.getId());
+        draftManagementResolver.revertToDraft(draft.getId(), drafter.getId());
 
         Draft foundDraft = draftRepository.findById(draft.getId()).orElseThrow();
 
@@ -216,7 +218,7 @@ record CommonDraftTest(
         Emp notDrafter = saveApprovedEmp(empRepository, "202601002", "notDrafter");
         Draft draft = getSubmitted(drafter);
         assertThatThrownBy(() ->
-                generalDraftManagement.revertToDraft(draft.getId(), notDrafter.getId())
+                draftManagementResolver.revertToDraft(draft.getId(), notDrafter.getId())
         ).isInstanceOf(DraftNotFoundException.class);
     }
 
@@ -229,10 +231,10 @@ record CommonDraftTest(
 
         Draft draft = createSubmitted(drafter, "test", "test", List.of(approverEmp1, approverEmp2), LocalDateTime.of(2026, 1, 1, 0, 0, 0));
 
-        generalDraftManagement.approve(draft.getId(), approverEmp1.getId(), LocalDateTime.of(2026, 1, 1, 0, 0, 5));
+        draftManagementResolver.approve(draft.getId(), approverEmp1.getId(), LocalDateTime.of(2026, 1, 1, 0, 0, 5));
 
         assertThatThrownBy(() ->
-                    generalDraftManagement.revertToDraft(draft.getId(), drafter.getId())
+                    draftManagementResolver.revertToDraft(draft.getId(), drafter.getId())
         ).isInstanceOf(IllegalStateException.class);
     }
 
@@ -250,7 +252,7 @@ record CommonDraftTest(
                 .filter(approver -> approver.getOrder() == 1)
                 .findFirst().orElseThrow();
 
-        generalDraftManagement.approve(
+        draftManagementResolver.approve(
                 draft.getId(), firstApprover.getApprover().getId(), LocalDateTime.of(2026, 1, 1, 0, 0, 5)
         );
 
@@ -278,7 +280,7 @@ record CommonDraftTest(
                 .findFirst().orElseThrow();
 
         assertThatThrownBy(() ->
-                generalDraftManagement.approve(
+                draftManagementResolver.approve(
                         draft.getId(), secondApprover.getApprover().getId(), LocalDateTime.of(2026, 1, 1, 0, 0, 5)
                 )
         ).isInstanceOf(IllegalStateException.class);
@@ -298,7 +300,7 @@ record CommonDraftTest(
                 .filter(approver -> approver.getOrder() == 1)
                 .findFirst().orElseThrow();
 
-        generalDraftManagement.reject(
+        draftManagementResolver.reject(
                 draft.getId(), firstApprover.getApprover().getId(), "test", LocalDateTime.of(2026, 1, 1, 0, 0, 5)
         );
 
@@ -322,7 +324,7 @@ record CommonDraftTest(
                 .findFirst().orElseThrow();
 
         assertThatThrownBy(() ->
-                generalDraftManagement.reject(
+                draftManagementResolver.reject(
                         draft.getId(), secondApprover.getApprover().getId(), "test", LocalDateTime.of(2026, 1, 1, 0, 0, 5)
                 )
         ).isInstanceOf(IllegalStateException.class);
@@ -343,7 +345,7 @@ record CommonDraftTest(
                 = saveApprovedEmp(empRepository, "202601004", "sharedEmp");
         return List.of(
                 DynamicTest.dynamicTest("미상신 상태에서 공람 지정", () -> {
-                    generalDraftManagement.addCirculatedEmp(draft.getId(), drafter.getId(), firstShareEmp.getId());
+                    draftManagementResolver.addCirculatedEmp(draft.getId(), drafter.getId(), firstShareEmp.getId());
 
                     assertThat(draft.getCirculations()).hasSize(1);
                 }), DynamicTest.dynamicTest("상신 후 결재 대기 상태에서 공람 지정", () -> {
@@ -351,25 +353,25 @@ record CommonDraftTest(
                     Emp sharedEmp = saveApprovedEmp(empRepository, "202601005", "sharedEmp2");
                     draft.submit(submittedAt, List.of());
 
-                    generalDraftManagement.addCirculatedEmp(draft.getId(), drafter.getId(), sharedEmp.getId());
+                    draftManagementResolver.addCirculatedEmp(draft.getId(), drafter.getId(), sharedEmp.getId());
 
                     assertThat(draft.getCirculations()).hasSize(2);
                 }), DynamicTest.dynamicTest("결재 진행 중에서 공람 지정", () -> {
                     draft.approve(approverEmp1, LocalDateTime.of(2026, 1, 2, 0, 0, 0));
 
                     Emp sharedEmp = saveApprovedEmp(empRepository, "202601006", "sharedEmp3");
-                    generalDraftManagement.addCirculatedEmp(draft.getId(), drafter.getId(), sharedEmp.getId());
+                    draftManagementResolver.addCirculatedEmp(draft.getId(), drafter.getId(), sharedEmp.getId());
 
                     assertThat(draft.getCirculations()).hasSize(3);
                 }), DynamicTest.dynamicTest("결재 완료 상태에서 공람 지정", () -> {
                     draft.approve(approverEmp2, LocalDateTime.of(2026,1,2,1,1,1));
 
                     Emp sharedEmp = saveApprovedEmp(empRepository, "202601007", "sharedEmp4");
-                    generalDraftManagement.addCirculatedEmp(draft.getId(), drafter.getId(), sharedEmp.getId());
+                    draftManagementResolver.addCirculatedEmp(draft.getId(), drafter.getId(), sharedEmp.getId());
 
                     assertThat(draft.getCirculations()).hasSize(4);
                 }), DynamicTest.dynamicTest("지정된 공람자를 삭제 할 수 있다.", () -> {
-                    generalDraftManagement.removeCirculatedEmp(draft.getId(), drafter.getId(), firstShareEmp.getId());
+                    draftManagementResolver.removeCirculatedEmp(draft.getId(), drafter.getId(), firstShareEmp.getId());
 
                     assertThat(draft.getCirculations()).hasSize(3);
                 })

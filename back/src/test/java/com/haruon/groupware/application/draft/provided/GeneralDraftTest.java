@@ -30,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @TestIntegrationConfig
-public record generalDraftTest(
+public record GeneralDraftTest(
         DraftRepository draftRepository,
         DeptRepository deptRepository,
         GeneralDraftManagement generalDraftManagement,

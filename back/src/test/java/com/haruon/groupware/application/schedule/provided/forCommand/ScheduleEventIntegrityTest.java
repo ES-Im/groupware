@@ -3,6 +3,7 @@ package com.haruon.groupware.application.schedule.provided.forCommand;
 import com.haruon.groupware.application.TestIntegrationConfig;
 import com.haruon.groupware.application.dept.required.DeptRepository;
 import com.haruon.groupware.application.draft.provided.forCommand.BusinessTripDraftManagement;
+import com.haruon.groupware.application.draft.provided.forCommand.DraftManagementResolver;
 import com.haruon.groupware.application.draft.provided.forCommand.GeneralDraftManagement;
 import com.haruon.groupware.application.draft.provided.forCommand.LeaveCancelDraftManagement;
 import com.haruon.groupware.application.draft.provided.forCommand.LeaveDraftManagement;
@@ -75,6 +76,7 @@ record ScheduleEventIntegrityTest(
         MeetingManagement meetingManagement,
         MeetingRoomManagement meetingRoomManagement,
         GeneralDraftManagement generalDraftManagement,
+        DraftManagementResolver draftManagementResolver,
         BusinessTripDraftManagement businessTripDraftManagement,
         LeaveDraftManagement leaveDraftManagement,
 
@@ -655,7 +657,7 @@ record ScheduleEventIntegrityTest(
         );
         Draft draft = draftRepository.findByEmp(drafter).stream().findFirst().orElseThrow();
 
-        generalDraftManagement.approve(
+        draftManagementResolver.approve(
                 draft.getId(), approverEmp1.getId(), LocalDateTime.of(year, 1, 1, 0, 0, 5)
         );
 

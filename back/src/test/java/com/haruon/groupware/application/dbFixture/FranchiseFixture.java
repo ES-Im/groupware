@@ -77,7 +77,7 @@ public class FranchiseFixture {
         long franchiseId = franchiseManagement.createFranchise(
                 franchiseEmp.getId(),
                 FranchiseCreateRequest.builder()
-                        .businessNumber("000-00-00000")
+                        .businessNumber("0000000000")
                         .franchiseName("테스트강남점")
                         .address("서울특별시 강남구 테스트")
                         .ownerName("홍길동")

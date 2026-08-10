@@ -118,7 +118,7 @@ public class FranchiseApiDocsTest extends RestDocsSupport {
         Mockito.when(franchiseRetriever.retrieveFranchise(eq(1L), eq(1L)))
                 .thenReturn(new FranchisesDetailResponse(
                         1L, "테스트강남점", "서울특별시 강남구", "홍길동",
-                        "000-00-00000", "010-1234-5678", "owner@example.com",
+                        "0000000000", "010-1234-5678", "owner@example.com",
                         BusinessStatus.OPEN, "메모", 1L, "김담당"
                 ));
 
@@ -785,7 +785,7 @@ public class FranchiseApiDocsTest extends RestDocsSupport {
     private FieldDescriptor[] franchiseUpdateRequestFields() {
         return new FieldDescriptor[]{
                 fieldWithPath("businessNumber").optional().type(JsonFieldType.STRING)
-                        .attributes(key("constraints").value("12자 사업자번호 형식"))
+                        .attributes(key("constraints").value("10자 사업자번호 형식"))
                         .description("변경할 사업자번호"),
                 fieldWithPath("franchiseName").optional().type(JsonFieldType.STRING)
                         .attributes(key("constraints").value("50자 이하"))
