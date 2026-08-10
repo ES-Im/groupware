@@ -428,7 +428,7 @@ function BusinessTripDraftEditForm({
           onCancel={() => navigate(`/approval/drafts/${draftId}`)}
           onPreview={handlePreview}
           onSaveDraft={() => void handleSave()}
-          onDelete={() => {}}
+          draftId={draftId}
           saveLabel="저장"
           submitLabel="상신"
         />

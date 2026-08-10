@@ -113,7 +113,7 @@ export function DrafterActions({ draft }: DraftDetailSectionProps) {
         </Button>
       )}
       {availability.canDelete && (
-        <DeleteDraftAlertDialog>
+        <DeleteDraftAlertDialog draftId={draft.draftId}>
           <Button
             type="button"
             size="sm"

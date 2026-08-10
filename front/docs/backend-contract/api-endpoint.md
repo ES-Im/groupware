@@ -78,6 +78,7 @@
 | 출장 참여자 수정 | `BUSINESS_TRIP_PARTICIPANTS_UPDATE` | `PATCH` | `/api/drafts/business-trips/{draftId}/participants` | Path + JSON Body | `204` Empty | 예 | 기안자(EMPLOYEE) |
 | 기안서 상신 | `DRAFT_SUBMIT` | `PATCH` | `/api/drafts/{draftId}/submission` | Path + JSON Body | `204` Empty | 예 | 기안자(EMPLOYEE) |
 | 기안서 상신 철회 | `DRAFT_SUBMISSION_WITHDRAWAL` | `PATCH` | `/api/drafts/{draftId}/submission-withdrawal` | Path | `204` Empty | 예 | 기안자(EMPLOYEE) |
+| 기안서 삭제 | `DRAFT_DELETE` | `DELETE` | `/api/drafts/{draftId}` | Path | `204` Empty | 예 | 기안자(EMPLOYEE) |
 | 취소 기안서 생성 | `DRAFT_CANCELLATION_CREATE` | `POST` | `/api/drafts/{sourceDraftId}/cancellation-drafts` | Path + JSON Body | `201` JSON Body | 예 | 기안자(EMPLOYEE) |
 | 취소 기안서 생성/상신 | `DRAFT_CANCELLATION_CREATE_SUBMISSION` | `POST` | `/api/drafts/{sourceDraftId}/cancellation-drafts/submission` | Path + JSON Body | `201` JSON Body | 예 | 기안자(EMPLOYEE) |
 | 기안서 승인 | `DRAFT_APPROVE` | `PATCH` | `/api/drafts/{draftId}/approval` | Path | `204` Empty | 예 | 결재선 결재자 |
