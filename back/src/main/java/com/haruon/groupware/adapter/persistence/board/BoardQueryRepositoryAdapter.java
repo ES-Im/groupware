@@ -117,7 +117,7 @@ public class BoardQueryRepositoryAdapter implements BoardQueryRepository {
                 .join(board.emp, emp)
                 .where(
                         board.id.eq(boardId),
-                        isPublished(true)
+                        isPublished(true).or(board.emp.id.eq(empId))
                 )
                 .fetchOne();
     }

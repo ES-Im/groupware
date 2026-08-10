@@ -7,6 +7,8 @@ import com.haruon.groupware.application.board.service.command.dto.BoardCreateReq
 import com.haruon.groupware.application.board.service.command.dto.BoardUpdateRequest;
 import com.haruon.groupware.application.employee.account.required.EmpRepository;
 import com.haruon.groupware.application.exception.common.role.PermissionDeniedException;
+import com.haruon.groupware.application.file.required.FileStorage;
+import com.haruon.groupware.application.file.service.command.dto.FilePathInfo;
 import com.haruon.groupware.domain.board.Board;
 import com.haruon.groupware.domain.board.Category;
 import com.haruon.groupware.domain.employee.Emp;
@@ -16,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static com.haruon.groupware.application.board.service.support.BoardUtils.findBoard;
 import static com.haruon.groupware.application.board.service.support.BoardUtils.findVisableCategory;
@@ -29,6 +32,7 @@ public class BoardCommandService implements BoardManagement {
     private final BoardRepository boardRepository;
     private final EmpRepository empRepository;
     private final CategoryRepository categoryRepository;
+    private final FileStorage fileStorage;
 
     @Override
     public long registerBoard(Long authorId, BoardCreateRequest request) {
@@ -66,6 +70,21 @@ public class BoardCommandService implements BoardManagement {
         board.changeBoard(
                 author, category, request.title(), request.content(), request.modifiedAt()
         );
+    }
+
+    @Override
+    public void deleteBoard(Long empId, Long boardId) {
+        Emp author = findActiveEmpById(empRepository, empId);
+        Board board = findBoard(boardRepository, boardId);
+        validateAuthor(author, board);
+
+        List<FilePathInfo> files = board.getBoardFiles().stream()
+                .map(file -> new FilePathInfo(file.getStoredPath(), file.getStoredName()))
+                .toList();
+
+        boardRepository.delete(board);
+
+        files.forEach(file -> fileStorage.delete(file.storedPath(), file.storedName()));
     }
 
     private void validateAuthor(Emp author, Board board) {

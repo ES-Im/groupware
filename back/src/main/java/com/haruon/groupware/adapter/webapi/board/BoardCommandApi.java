@@ -54,6 +54,16 @@ public class BoardCommandApi {
         return ResponseEntity.status(204).build();
     }
 
+    @DeleteMapping("/{boardId}")
+    public ResponseEntity<Void> deleteBoard(
+            @AuthenticationPrincipal EmpDetails details,
+            @PathVariable Long boardId
+    ) {
+        boardManagement.deleteBoard(details.getEmpId(), boardId);
+
+        return ResponseEntity.noContent().build();
+    }
+
 
 
 }

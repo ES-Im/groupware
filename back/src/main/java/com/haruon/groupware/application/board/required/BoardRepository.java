@@ -34,4 +34,6 @@ public interface BoardRepository extends Repository<Board, Long> {
             @Param("commentCount") Long commentCount,
             @Param("likeCount") Long likeCount
     );
+
+    void delete(Board board);
 }

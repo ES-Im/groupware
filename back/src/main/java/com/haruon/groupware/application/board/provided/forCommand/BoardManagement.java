@@ -12,4 +12,6 @@ public interface BoardManagement {
     void publishBoard(Long authorId, Long boardId, LocalDateTime publishedAt);
 
     void changeBoard(Long authorId, Long boardId, BoardUpdateRequest request);
+
+    void deleteBoard(Long empId, Long boardId);
 }
