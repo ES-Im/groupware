@@ -14,7 +14,7 @@ spring:
     import:
       - optional:env.yml
   profiles:
-    active: prod # dev / prod / test
+    active: dev # dev / prod / test
 
   servlet:
     multipart:

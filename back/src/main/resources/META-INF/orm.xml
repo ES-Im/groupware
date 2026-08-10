@@ -440,10 +440,11 @@
                     <cascade-all/>
                 </cascade>
             </one-to-many>
-            <one-to-one name="approval" mapped-by="draft" orphan-removal="true">
+            <one-to-one name="approval" orphan-removal="true">
                 <cascade>
                     <cascade-all/>
                 </cascade>
+                <join-column name="approval_id" nullable="false" unique="true"/>
             </one-to-one>
         </attributes>
     </entity>
@@ -553,9 +554,7 @@
                     <cascade-all/>
                 </cascade>
             </one-to-many>
-            <one-to-one name="draft" fetch="LAZY">
-                <join-column name="draft_id" nullable="false" unique="true"/>
-            </one-to-one>
+            <one-to-one name="draft" mapped-by="approval" fetch="LAZY"/>
         </attributes>
     </entity>
 

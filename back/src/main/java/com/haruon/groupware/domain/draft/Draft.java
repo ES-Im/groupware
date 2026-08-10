@@ -81,7 +81,7 @@ public abstract class Draft extends AbstractEventAggregateRoot {
         state(isDraft(), "미상신 문서만 결재선 수정가능");
         state(hasApproval(), "결재 정보가 없음");
 
-        this.approval.changeApprovers(params);
+        this.approval = Approval.createDraft(this, params);
     }
 
     protected static void validateDraftBase(String title, String content) {
