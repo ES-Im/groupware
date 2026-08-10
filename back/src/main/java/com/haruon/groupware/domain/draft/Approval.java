@@ -138,6 +138,10 @@ public class Approval extends AbstractEntity {
         return this.status == ApprovalStatus.UNSUBMITTED;
     }
 
+    boolean isDeletable() {
+        return this.status == ApprovalStatus.UNSUBMITTED || this.status == ApprovalStatus.REJECTED;
+    }
+
     private void addApprover(ApproversParam param) {
         state(param.order() > 0, "순서는 양수여야함");
         requireNonNull(param.role());

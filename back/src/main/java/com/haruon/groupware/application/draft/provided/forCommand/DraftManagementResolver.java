@@ -12,17 +12,19 @@ public interface DraftManagementResolver {
 
     Long createSubmittedCancelDraft(Long drafterId, Long sourceDraftId, CommonDraftCreateRequest request);
 
-    void submit(Long draftId, Long drafterId, LocalDateTime submittedAt, @Nullable List<ApproversRequest> approvers);
+    void submit(long draftId, long drafterId, LocalDateTime submittedAt, @Nullable List<ApproversRequest> approvers);
 
-    void revertToDraft(Long draftId, Long drafterId);
+    void revertToDraft(long draftId, long drafterId);
 
-    void approve(Long draftId, Long approverId, LocalDateTime approvedAt);
+    void approve(long draftId, long approverId, LocalDateTime approvedAt);
 
-    void reject(Long draftId, Long rejecterId, String reason, LocalDateTime rejectedAt);
+    void reject(long draftId, long rejecterId, String reason, LocalDateTime rejectedAt);
 
-    void addCirculatedEmp(Long draftId, Long drafterId, Long circulatedEmpId);
+    void deleteDraft(long draftId, long drafterId);
 
-    void removeCirculatedEmp(Long draftId, Long drafterId, Long circulatedEmpId);
+    void addCirculatedEmp(long draftId, long drafterId, long circulatedEmpId);
 
-    void markReadByCirculation(Long draftId, Long viewerId, LocalDateTime readAt);
+    void removeCirculatedEmp(long draftId, long drafterId, long circulatedEmpId);
+
+    void markReadByCirculation(long draftId, long viewerId, LocalDateTime readAt);
 }

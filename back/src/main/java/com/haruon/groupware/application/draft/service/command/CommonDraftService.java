@@ -5,6 +5,7 @@ import com.haruon.groupware.application.draft.service.command.dto.ApproversReque
 import com.haruon.groupware.application.employee.account.required.EmpRepository;
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import com.haruon.groupware.application.exception.draft.ApprovalLineRequiredException;
+import com.haruon.groupware.application.exception.draft.DraftNonDeletableStateException;
 import com.haruon.groupware.application.exception.draft.DraftNotFoundException;
 import com.haruon.groupware.application.utils.AuthValidator;
 import com.haruon.groupware.application.utils.Utils;
@@ -59,6 +60,13 @@ abstract class CommonDraftService {
         Emp rejector = findActiveEmpById(rejecterId);
 
         draft.reject(rejector, reason, rejectedAt);
+    }
+
+    public void deleteDraft(long draftId, long empId) {
+        Draft foundDraft = findDraftByDraftIdAndEmpId(draftId, empId);
+        if(!foundDraft.isDeletableDraft()) throw new DraftNonDeletableStateException();
+
+        draftRepository.delete(foundDraft);
     }
 
     public void addCirculatedEmp(long draftId, long drafterId, long circulatedEmpId) {

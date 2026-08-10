@@ -25,9 +25,10 @@ public class DraftServiceResolver implements DraftManagementResolver {
     private final LeaveCancelDraftManagement leaveCancelDraftManagement;
     private final BusinessTripCancelDraftManagement businessTripCancelDraftManagement;
 
+    private final DraftService draftService;
+    private final GeneralDraftManagement generalDraftManagement;
     private final LeaveDraftManagement leaveDraftManagement;
     private final BusinessTripDraftManagement businessTripDraftManagement;
-    private final GeneralDraftManagement generalDraftManagement;
     private final SalesDraftManagement salesDraftManagement;
 
     @Override
@@ -64,17 +65,17 @@ public class DraftServiceResolver implements DraftManagementResolver {
     }
 
     @Override
-    public void submit(Long draftId, Long drafterId, LocalDateTime submittedAt, @Nullable List<ApproversRequest> approvers) {
-        generalDraftManagement.submit(draftId, drafterId, submittedAt, approvers);
+    public void submit(long draftId, long drafterId, LocalDateTime submittedAt, @Nullable List<ApproversRequest> approvers) {
+        draftService.submit(draftId, drafterId, submittedAt, approvers);
     }
 
     @Override
-    public void revertToDraft(Long draftId, Long drafterId) {
-        generalDraftManagement.revertToDraft(draftId, drafterId);
+    public void revertToDraft(long draftId, long drafterId) {
+        draftService.revertToDraft(draftId, drafterId);
     }
 
     @Override
-    public void approve(Long draftId, Long approverId, LocalDateTime approvedAt) {
+    public void approve(long draftId, long approverId, LocalDateTime approvedAt) {
         Draft draft = getSourceDraft(draftId);
 
         switch(draft) {
@@ -90,23 +91,28 @@ public class DraftServiceResolver implements DraftManagementResolver {
     }
 
     @Override
-    public void reject(Long draftId, Long rejecterId, String reason, LocalDateTime rejectedAt) {
-        generalDraftManagement.reject(draftId, rejecterId, reason, rejectedAt);
+    public void reject(long draftId, long rejecterId, String reason, LocalDateTime rejectedAt) {
+        draftService.reject(draftId, rejecterId, reason, rejectedAt);
     }
 
     @Override
-    public void addCirculatedEmp(Long draftId, Long drafterId, Long circulatedEmpId) {
-        generalDraftManagement.addCirculatedEmp(draftId, drafterId, circulatedEmpId);
+    public void addCirculatedEmp(long draftId, long drafterId, long circulatedEmpId) {
+        draftService.addCirculatedEmp(draftId, drafterId, circulatedEmpId);
     }
 
     @Override
-    public void removeCirculatedEmp(Long draftId, Long drafterId, Long circulatedEmpId) {
-        generalDraftManagement.removeCirculatedEmp(draftId, drafterId, circulatedEmpId);
+    public void removeCirculatedEmp(long draftId, long drafterId, long circulatedEmpId) {
+        draftService.removeCirculatedEmp(draftId, drafterId, circulatedEmpId);
     }
 
     @Override
-    public void markReadByCirculation(Long draftId, Long viewerId, LocalDateTime readAt) {
-        generalDraftManagement.markReadByCirculation(draftId, viewerId, readAt);
+    public void markReadByCirculation(long draftId, long viewerId, LocalDateTime readAt) {
+        draftService.markReadByCirculation(draftId, viewerId, readAt);
+    }
+
+    @Override
+    public void deleteDraft(long draftId, long drafterId) {
+        draftService.deleteDraft(draftId, drafterId);
     }
 
     private Draft getSourceDraft(Long sourceDraftId) {

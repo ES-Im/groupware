@@ -53,6 +53,7 @@ public enum ApplicationErrorCode {
     UNREQUESTABLE_LEAVE_TYPE_EXCEPTION(HttpStatus.BAD_REQUEST, "DRAFT_007", "신청할 수 없는 휴가 타입입니다."),
     LEAVE_TIME_OUTSIDE_COMPANY_HOURS_EXCEPTION(HttpStatus.BAD_REQUEST, "DRAFT_008", "휴가 시간은 회사 근무시간 내에서만 신청할 수 있습니다."),
     DRAFT_NOT_APPROVED_EXCEPTION(HttpStatus.BAD_REQUEST, "DRAFT_009", "승인 완료된 기안서만 취소할 수 있습니다."),
+    DRAFT_NON_DELETABLE_STATE_EXCEPTION(HttpStatus.BAD_REQUEST, "DRAFT_010", "기안서는 반려, 결재대기, 미결재 상태에서만 삭제할 수 있습니다."),
 
     // franchise
     FRANCHISE_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND, "FRANCHISE_001", "해당 가맹점 정보를 찾을 수 없습니다"),

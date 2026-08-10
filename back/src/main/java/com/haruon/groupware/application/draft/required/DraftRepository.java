@@ -20,5 +20,7 @@ public interface DraftRepository extends Repository<Draft, Long> {
     void deleteAll();
 
     void save(Draft draft);
+
+    void delete(Draft draft);
 }
 

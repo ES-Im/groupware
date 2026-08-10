@@ -19,11 +19,11 @@ import java.util.List;
 
 @Service
 @Transactional
-public class GeneralDraftService extends CommonDraftService implements GeneralDraftManagement {
+public class DraftService extends CommonDraftService implements GeneralDraftManagement {
 
     private final GeneralDraftRepository generalDraftRepository;
 
-    public GeneralDraftService(
+    public DraftService(
             EmpRepository empRepository,
             GeneralDraftRepository generalDraftRepository
     ) {
@@ -73,7 +73,6 @@ public class GeneralDraftService extends CommonDraftService implements GeneralDr
             generalDraft.changeApprovalLine(toApproverParams(req.approvers()));
         }
     }
-
 
     private GeneralDraft getGeneralDraft(long draftId, long drafterId) {
         Draft draft = findDraftByDraftIdAndEmpId(draftId, drafterId);

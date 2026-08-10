@@ -240,6 +240,10 @@ public abstract class Draft extends AbstractEventAggregateRoot {
         this.draftFiles.remove(file);
     }
 
+    public boolean isDeletableDraft() {
+        return this.approval == null || this.approval.isDeletable();
+    }
+
     protected void validateBeforeSubmit(@Nullable List<ApproversParam> params) {}
 
     protected boolean isDraft() {

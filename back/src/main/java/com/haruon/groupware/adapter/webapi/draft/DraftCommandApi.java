@@ -243,6 +243,16 @@ public class DraftCommandApi {
         return ResponseEntity.noContent().build();
     }
 
+    @DeleteMapping("/{draftId}")
+    public ResponseEntity<Void> delete(
+            @AuthenticationPrincipal EmpDetails details,
+            @PathVariable Long draftId
+    ) {
+        draftManagementResolver.deleteDraft(draftId, details.getEmpId());
+
+        return ResponseEntity.noContent().build();
+    }
+
     private CommonDraftCreateRequest withSubmittedAt(CommonDraftCreateRequest request) {
         return new CommonDraftCreateRequest(
                 request.title(),
