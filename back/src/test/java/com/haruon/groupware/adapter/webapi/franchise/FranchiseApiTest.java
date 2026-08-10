@@ -72,7 +72,7 @@ public class FranchiseApiTest extends IntegrationTestSupport {
     void franchise_emp_can_create_franchise() throws Exception {
         String accessToken = franchiseAccessToken();
         FranchiseCreateRequest request = FranchiseCreateRequest.builder()
-                .businessNumber("000-00-00000")
+                .businessNumber("0000000000")
                 .franchiseName("테스트강남점")
                 .address("서울특별시 강남구 테스트")
                 .ownerName("홍길동")
