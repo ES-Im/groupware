@@ -93,7 +93,7 @@ export function FranchiseCreateDialog({ open, onOpenChange }: FranchiseCreateDia
             </Label>
             <Input
               id="franchise-create-business-number"
-              placeholder="예: 123-45-67890"
+              placeholder="예: 1234567890"
               aria-invalid={!!errors.businessNumber}
               {...register('businessNumber')}
             />

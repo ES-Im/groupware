@@ -52,7 +52,7 @@ function buildUpdatePayload(
 }
 
 const FIELDS: Array<{ name: keyof FranchiseUpdateFormValues; label: string; placeholder?: string }> = [
-  { name: 'businessNumber', label: '사업자번호', placeholder: '000-00-00000' },
+  { name: 'businessNumber', label: '사업자번호', placeholder: '1234567890' },
   { name: 'franchiseName', label: '가맹점명' },
   { name: 'address', label: '주소' },
   { name: 'ownerName', label: '대표자명' },

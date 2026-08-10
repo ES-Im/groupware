@@ -3,7 +3,7 @@ import { franchiseCreateSchema } from './franchiseCreateSchema'
 
 function validValues(overrides?: Record<string, unknown>) {
   return {
-    businessNumber: '123-45-67890',
+    businessNumber: '1234567890',
     franchiseName: 'HARUON 강남점',
     address: '서울특별시 강남구 테헤란로 1',
     ownerName: '홍길동',
@@ -38,26 +38,27 @@ describe('franchiseCreateSchema', () => {
       }
     })
 
-    it('하이픈 없는 10자리 숫자면 형식 메시지로 실패한다', () => {
-      const result = franchiseCreateSchema.safeParse(validValues({ businessNumber: '1234567890' }))
-      expect(result.success).toBe(false)
-      if (!result.success) {
-        expect(result.error.issues[0].message).toBe(
-          '사업자번호는 000-00-00000 형식(12자)으로 입력해주세요',
-        )
-      }
-    })
-
-    it('자릿수 배열이 다르면(3-3-5) 형식 메시지로 실패한다', () => {
+    it('하이픈이 포함되면 형식 메시지로 실패한다', () => {
       const result = franchiseCreateSchema.safeParse(
-        validValues({ businessNumber: '123-456-7890' }),
+        validValues({ businessNumber: '123-45-67890' }),
       )
       expect(result.success).toBe(false)
       if (!result.success) {
-        expect(result.error.issues[0].message).toBe(
-          '사업자번호는 000-00-00000 형식(12자)으로 입력해주세요',
-        )
+        expect(result.error.issues[0].message).toBe('사업자번호는 숫자 10자리로 입력해주세요')
       }
+    })
+
+    it('10자리가 아니면 형식 메시지로 실패한다', () => {
+      const result = franchiseCreateSchema.safeParse(validValues({ businessNumber: '123456789' }))
+      expect(result.success).toBe(false)
+      if (!result.success) {
+        expect(result.error.issues[0].message).toBe('사업자번호는 숫자 10자리로 입력해주세요')
+      }
+    })
+
+    it('숫자 10자리면 성공한다', () => {
+      const result = franchiseCreateSchema.safeParse(validValues({ businessNumber: '1234567890' }))
+      expect(result.success).toBe(true)
     })
   })
 

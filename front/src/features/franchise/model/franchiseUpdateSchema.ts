@@ -3,7 +3,7 @@ import { z } from 'zod'
 export const franchiseUpdateSchema = z.object({
   businessNumber: z
     .string()
-    .regex(/^\d{3}-\d{2}-\d{5}$/, '사업자번호는 000-00-00000 형식(12자)으로 입력해주세요')
+    .regex(/^\d{10}$/, '사업자번호는 숫자 10자리로 입력해주세요')
     .optional(),
   franchiseName: z
     .string()

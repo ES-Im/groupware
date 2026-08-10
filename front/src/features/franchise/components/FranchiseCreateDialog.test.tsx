@@ -40,7 +40,7 @@ function renderDialog(open = true) {
 }
 
 async function fillRequiredFields(user: ReturnType<typeof userEvent.setup>) {
-  await user.type(screen.getByLabelText(/사업자번호/), '123-45-67890')
+  await user.type(screen.getByLabelText(/사업자번호/), '1234567890')
   await user.type(screen.getByLabelText(/가맹점명/), 'HARUON 강남점')
   await user.type(screen.getByLabelText(/주소/), '서울특별시 강남구 테헤란로 1')
   await user.type(screen.getByLabelText(/대표자명/), '홍길동')
@@ -82,7 +82,7 @@ describe('FranchiseCreateDialog - 클라 사전검증', () => {
     expect(postCalls).toBe(0)
   })
 
-  it('사업자번호 형식(000-00-00000) 위반 시 형식 메시지가 노출되고 POST 요청이 발생하지 않는다', async () => {
+  it('사업자번호 형식(숫자 10자리) 위반 시 형식 메시지가 노출되고 POST 요청이 발생하지 않는다', async () => {
     mockAssignableManagers()
     let postCalls = 0
     server.use(
@@ -96,11 +96,11 @@ describe('FranchiseCreateDialog - 클라 사전검증', () => {
 
     await fillRequiredFields(user)
     await user.clear(screen.getByLabelText(/사업자번호/))
-    await user.type(screen.getByLabelText(/사업자번호/), '1234567890')
+    await user.type(screen.getByLabelText(/사업자번호/), '123-45-67890')
     await user.click(screen.getByRole('button', { name: '등록' }))
 
     expect(
-      await screen.findByText('사업자번호는 000-00-00000 형식(12자)으로 입력해주세요'),
+      await screen.findByText('사업자번호는 숫자 10자리로 입력해주세요'),
     ).toBeInTheDocument()
     expect(postCalls).toBe(0)
   })
@@ -128,7 +128,7 @@ describe('FranchiseCreateDialog - 제출 성공', () => {
 
     await waitFor(() =>
       expect(requestedBody).toEqual({
-        businessNumber: '123-45-67890',
+        businessNumber: '1234567890',
         franchiseName: 'HARUON 강남점',
         address: '서울특별시 강남구 테헤란로 1',
         ownerName: '홍길동',

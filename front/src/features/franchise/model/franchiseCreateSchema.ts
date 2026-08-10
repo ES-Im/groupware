@@ -4,7 +4,7 @@ export const franchiseCreateSchema = z.object({
   businessNumber: z
     .string()
     .min(1, '사업자번호를 입력해주세요')
-    .regex(/^\d{3}-\d{2}-\d{5}$/, '사업자번호는 000-00-00000 형식(12자)으로 입력해주세요'),
+    .regex(/^\d{10}$/, '사업자번호는 숫자 10자리로 입력해주세요'),
   franchiseName: z
     .string()
     .min(1, '가맹점명을 입력해주세요')
