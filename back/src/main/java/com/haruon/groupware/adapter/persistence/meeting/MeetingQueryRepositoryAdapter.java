@@ -61,8 +61,8 @@ public class MeetingQueryRepositoryAdapter implements MeetingQueryRepository {
                         JPAExpressions.selectOne()
                                 .from(participant)
                                 .where(
-                                        participant.meeting.eq(meeting),
-                                        participant.emp.id.eq(empId)
+                                        (participant.meeting.eq(meeting).and(participant.emp.id.eq(empId))
+                                        ).or(meeting.emp.id.eq(empId))
                                 )
                                 .exists(),
                         meeting.meetingDate.goe(startDate),
