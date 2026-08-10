@@ -40,6 +40,9 @@ public class QBusinessTripCancelDraft extends EntityPathBase<BusinessTripCancelD
     public final DateTimePath<java.time.Instant> createdAt;
 
     //inherited
+    public final BooleanPath deletableDraft;
+
+    //inherited
     public final BooleanPath draft;
 
     //inherited
@@ -86,6 +89,7 @@ public class QBusinessTripCancelDraft extends EntityPathBase<BusinessTripCancelD
         this.circulations = _super.circulations;
         this.content = _super.content;
         this.createdAt = _super.createdAt;
+        this.deletableDraft = _super.deletableDraft;
         this.draft = _super.draft;
         this.draftFiles = _super.draftFiles;
         this.emp = _super.emp;

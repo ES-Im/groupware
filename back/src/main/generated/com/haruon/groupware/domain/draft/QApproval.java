@@ -36,6 +36,8 @@ public class QApproval extends EntityPathBase<Approval> {
 
     public final QApprover currentPendingMember;
 
+    public final BooleanPath deletable = createBoolean("deletable");
+
     public final QDraft draft;
 
     //inherited

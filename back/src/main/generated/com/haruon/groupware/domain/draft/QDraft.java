@@ -36,6 +36,8 @@ public class QDraft extends EntityPathBase<Draft> {
     //inherited
     public final DateTimePath<java.time.Instant> createdAt = _super.createdAt;
 
+    public final BooleanPath deletableDraft = createBoolean("deletableDraft");
+
     public final BooleanPath draft = createBoolean("draft");
 
     public final ListPath<DraftFile, QDraftFile> draftFiles = this.<DraftFile, QDraftFile>createList("draftFiles", DraftFile.class, QDraftFile.class, PathInits.DIRECT2);

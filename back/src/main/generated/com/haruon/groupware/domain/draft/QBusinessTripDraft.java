@@ -39,6 +39,9 @@ public class QBusinessTripDraft extends EntityPathBase<BusinessTripDraft> {
     //inherited
     public final DateTimePath<java.time.Instant> createdAt;
 
+    //inherited
+    public final BooleanPath deletableDraft;
+
     public final StringPath destination = createString("destination");
 
     //inherited
@@ -96,6 +99,7 @@ public class QBusinessTripDraft extends EntityPathBase<BusinessTripDraft> {
         this.circulations = _super.circulations;
         this.content = _super.content;
         this.createdAt = _super.createdAt;
+        this.deletableDraft = _super.deletableDraft;
         this.draft = _super.draft;
         this.draftFiles = _super.draftFiles;
         this.emp = _super.emp;
