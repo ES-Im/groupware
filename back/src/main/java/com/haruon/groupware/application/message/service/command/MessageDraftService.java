@@ -3,6 +3,8 @@ package com.haruon.groupware.application.message.service.command;
 import com.haruon.groupware.application.employee.account.required.EmpRepository;
 import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
 import com.haruon.groupware.application.exception.message.MessageReceiverRequiredException;
+import com.haruon.groupware.application.file.required.FileStorage;
+import com.haruon.groupware.application.file.service.command.dto.FilePathInfo;
 import com.haruon.groupware.application.message.provided.forCommand.MessageDraftManagement;
 import com.haruon.groupware.application.message.required.MessageRepository;
 import com.haruon.groupware.application.message.service.command.dto.MessageCreateRequest;
@@ -30,6 +32,7 @@ public class MessageDraftService implements MessageDraftManagement {
 
     private final MessageRepository messageRepository;
     private final EmpRepository empRepository;
+    private final FileStorage fileStorage;
 
 
     @Override
@@ -68,10 +71,6 @@ public class MessageDraftService implements MessageDraftManagement {
         Emp sender = findActiveEmpById(empRepository, senderId);
         Message found = findMessage(messageRepository, messageDraftId);
 
-        // sendMessage()와 동일한 검증을 여기서도 선제 수행한다 — Message.sendMessage() 내부의
-        // validateHasReceiving()은 Assert.state()로 검증해 IllegalStateException을 던지고, 이는
-        // GlobalExceptionHandler에 ApplicationException으로 매핑되지 않아 500으로 노출된다.
-        // 기존 MessageReceiverRequiredException(400)을 재사용해 여기서 먼저 걸러낸다.
         if (found.getReceivings().isEmpty()) throw new MessageReceiverRequiredException();
 
         found.sendMessage(sender, sentAt);
@@ -86,7 +85,13 @@ public class MessageDraftService implements MessageDraftManagement {
 
         found.validateForDeleteDraft(writer);
 
+        List<FilePathInfo> files = found.getMessageFiles().stream()
+                .map(file -> new FilePathInfo(file.getStoredPath(), file.getStoredName()))
+                .toList();
+
         messageRepository.delete(found);
+
+        files.forEach(file -> fileStorage.delete(file.storedPath(), file.storedName()));
     }
 
     @Override
