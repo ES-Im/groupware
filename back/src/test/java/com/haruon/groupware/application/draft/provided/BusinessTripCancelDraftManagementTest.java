@@ -155,13 +155,14 @@ record BusinessTripCancelDraftManagementTest(
         Draft businessTrip = createAndApproveBTDraft(drafter, startAt, endAt, destination, purpose, participants);
 
         String sourceKey = businessTrip.getSourceKey();
-        businessTripCancelDraftManagement.createDraft(
+        businessTripCancelDraftManagement.createSubmitted(
                 drafter.getId(),
                 CancelDraftCreateRequest.builder()
                         .param(CommonDraftCreateRequest.builder()
                                 .title("cancelTitle")
                                 .content("cancelContent")
                                 .approvers(List.of(new ApproversRequest(approver.getId(), ApprovalRole.APPROVER, 1)))
+                                .submittedAt(LocalDateTime.of(2026,10,1,0,0,0))
                                 .build()
                         )
                         .sourceKey(sourceKey)

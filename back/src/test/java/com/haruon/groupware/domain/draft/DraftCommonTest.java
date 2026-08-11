@@ -327,7 +327,7 @@ class DraftCommonTest {
 
         assertThatThrownBy(() ->
                 submitted.approve(emp, LocalDateTime.of(2026, 5, 1, 0,0,0))
-        ).isInstanceOf(IllegalStateException.class).hasMessage("이미 완료된 결재건은 승인할 수 없음");
+        ).isInstanceOf(IllegalStateException.class).hasMessage("결재대기 또는 결재 진행중인 상태일때만 승인 가능");
     }
     @Test
     @DisplayName("결재 상태가 결재완료(approved)라면 reject는 실패한다.")
@@ -356,7 +356,7 @@ class DraftCommonTest {
 
         assertThatThrownBy(() ->
                 submitted.approve(emp, LocalDateTime.of(2026, 5, 1, 0,0,0))
-        ).isInstanceOf(IllegalStateException.class).hasMessage("반려된 결재건은 승인할 수 없음");
+        ).isInstanceOf(IllegalStateException.class).hasMessage("결재대기 또는 결재 진행중인 상태일때만 승인 가능");
     }
     @Test
     @DisplayName("결재 상태가 반려(reject)라면 reject는 실패한다.")
@@ -659,8 +659,7 @@ class DraftCommonTest {
     void removeFile_for_submitted_fail() {
         GeneralDraft submitted = getDraftWithApprovers();
         submitted.addFile("image/png", "originName", "storedName.png", "png", 1024L, "/test/storedName.png");
-        submitted.approve(submitted.getApproval().getApprovers().getFirst().getApprover(),
-                LocalDateTime.of(2026,5, 5,0,0,0));
+        submitted.submit(LocalDateTime.of(2026,5, 5,0,0,0), null);
 
         DraftFile first = submitted.getDraftFiles().getFirst();
         ReflectionTestUtils.setField(first, "id", 1L);

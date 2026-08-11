@@ -438,7 +438,7 @@ record ScheduleEventIntegrityTest(
         log.info("============ 취소 전, {}",schedules.toString());
 
         Emp approver = saveApprovedEmp(empRepository, "202601602", "approver999");
-        leaveCancelDraftManagement.createDraft(
+        leaveCancelDraftManagement.createSubmitted(
                 drafter.getId(),
                 CancelDraftCreateRequest.builder()
                         .param(CommonDraftCreateRequest.builder()
