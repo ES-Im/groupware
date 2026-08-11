@@ -4,7 +4,7 @@ import { getDepartmentMembers } from './getDepartmentMembers'
 
 export function useDepartmentMembersQuery(
   deptId: number | undefined,
-  params?: { keyword?: string; page?: number; size?: number },
+  params?: { keyword?: string; isEmpActive?: boolean; page?: number; size?: number },
 ) {
   return useQuery({
     queryKey: departmentKeys.members(deptId, params),

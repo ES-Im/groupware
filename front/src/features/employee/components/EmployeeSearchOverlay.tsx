@@ -95,6 +95,7 @@ function EmployeeSearchOverlayContent() {
   const deptInfoQuery = useDepartmentInfoQuery(selectedDeptId)
   const deptMembersQuery = useDepartmentMembersQuery(selectedDeptId, {
     keyword: '',
+    isEmpActive: true,
     page: 0,
     size: ALL_DEPT_MEMBERS_PAGE_SIZE,
   })

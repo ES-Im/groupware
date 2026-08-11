@@ -24,10 +24,15 @@ export function useEmployeeNameSearchQuery(keyword: string) {
       return {
         queryKey: departmentKeys.members(deptId, {
           keyword: trimmedKeyword,
+          isEmpActive: true,
           size: RESULT_SIZE_PER_DEPARTMENT,
         }),
         queryFn: () =>
-          getDepartmentMembers(deptId, { keyword: trimmedKeyword, size: RESULT_SIZE_PER_DEPARTMENT }),
+          getDepartmentMembers(deptId, {
+            keyword: trimmedKeyword,
+            isEmpActive: true,
+            size: RESULT_SIZE_PER_DEPARTMENT,
+          }),
         enabled,
       }
     }),

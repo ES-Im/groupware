@@ -59,7 +59,10 @@ export function ChatEmployeeListPanel() {
       : []
 
   const membersDeptId = drillDept ? drillDept.deptId : isSearching ? undefined : myPrimaryDeptId
-  const deptMembersQuery = useDepartmentMembersQuery(membersDeptId, { size: 50 })
+  const deptMembersQuery = useDepartmentMembersQuery(membersDeptId, {
+    isEmpActive: true,
+    size: 50,
+  })
 
   const searchQuery = useEmployeeNameSearchQuery(isSearching && !drillDept ? keyword : '')
 

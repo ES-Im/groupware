@@ -5,8 +5,8 @@ import { getDepartmentMembers } from './getDepartmentMembers'
 export function useDepartmentMemberCountsQuery(deptIds: number[]) {
   const results = useQueries({
     queries: deptIds.map((deptId) => ({
-      queryKey: departmentKeys.members(deptId, { size: 1 }),
-      queryFn: () => getDepartmentMembers(deptId, { size: 1 }),
+      queryKey: departmentKeys.members(deptId, { isEmpActive: true, size: 1 }),
+      queryFn: () => getDepartmentMembers(deptId, { isEmpActive: true, size: 1 }),
     })),
   })
 

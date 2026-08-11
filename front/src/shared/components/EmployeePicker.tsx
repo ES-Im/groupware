@@ -43,6 +43,7 @@ export function EmployeePicker({
   const deptsQuery = useDepartmentsQuery({ isActive: true, size: 100 })
   const membersQuery = useDepartmentMembersQuery(selectedDeptId, {
     keyword: keyword || undefined,
+    isEmpActive: true,
     size: memberPageSize,
   })
 

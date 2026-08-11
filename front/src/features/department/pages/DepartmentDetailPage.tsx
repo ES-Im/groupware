@@ -26,6 +26,7 @@ export function DepartmentDetailPage() {
 
   const deptInfoQuery = useDepartmentInfoQuery(isInvalidDeptId ? undefined : deptId)
   const membersQuery = useDepartmentMembersQuery(isInvalidDeptId ? undefined : deptId, {
+    isEmpActive: true,
     size: LEADER_CANDIDATE_PAGE_SIZE,
   })
 
