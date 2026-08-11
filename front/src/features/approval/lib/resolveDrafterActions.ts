@@ -38,7 +38,8 @@ export function resolveDrafterActions(
     case 'APPROVED':
       return { ...base, canCancel: draft.cancellationDraftId == null }
     case 'REJECTED':
-      return { ...base, canDelete: true }
+      // 반려 상태는 삭제 불가(백엔드 정책: 미상신 상태에서만 삭제 가능)
+      return base
     default:
       return base
   }

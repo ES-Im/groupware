@@ -104,9 +104,9 @@ describe('resolveDrafterActions', () => {
     expect(result.isDrafter).toBe(true)
   })
 
-  it('기안자 + REJECTED("반려") → 삭제만 노출', () => {
+  it('기안자 + REJECTED("반려") → 기안자 액션 없음(삭제 불가)', () => {
     const result = resolveDrafterActions(draft({ approvalStatus: '반려' }), 10)
-    expect(result).toEqual({ ...ALL_FALSE, isDrafter: true, canDelete: true })
+    expect(result).toEqual({ ...ALL_FALSE, isDrafter: true })
   })
 
   it('기안자 + 계약 밖 표시명(알 수 없는 상태) → 기안자 액션 없음(default 분기, fail-safe)', () => {
