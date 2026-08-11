@@ -11,6 +11,7 @@ import com.haruon.groupware.application.exception.common.RequiredValueMissingExc
 import com.haruon.groupware.application.exception.meeting.InactivatedMeetingRoomException;
 import com.haruon.groupware.application.exception.meeting.MeetingNotFoundException;
 import com.haruon.groupware.application.exception.meeting.MeetingParticipantRequiredException;
+import com.haruon.groupware.application.exception.meeting.ReservedMeetingExistException;
 import com.haruon.groupware.application.meeting.provided.forCommand.MeetingManagement;
 import com.haruon.groupware.application.meeting.provided.forCommand.MeetingRoomManagement;
 import com.haruon.groupware.application.meeting.required.MeetingRepository;
@@ -369,6 +370,38 @@ record MeetingManagementTest(
                                 .build()
                 )
         ).isInstanceOf(InactivatedMeetingRoomException.class);
+    }
+
+    @Transactional
+    @Test
+    @DisplayName("겹치는 회의가 있다면 회의 예약정보를 수정할 수 없다.")
+    void changeReservation_info_with_overlapping_time_fail() {
+        Emp emp = saveApprovedEmp(empRepository, "202601021", "approvedEmp21");
+        MeetingRoom room = meetingRoomRepository.findById(saveMeetingRoom()).orElseThrow();
+        long reservationId = getSavedTomorrowReservation(emp, room);
+
+        meetingManagement.reserve(
+                MeetingReserveRequest.builder()
+                        .meetingRoomId(room.getId())
+                        .reserverId(emp.getId())
+                        .title("otherMeeting")
+                        .meetingDate(LocalDate.now().plusDays(1))
+                        .startAt(LocalTime.of(12, 0))
+                        .endAt(LocalTime.of(13, 0))
+                        .participantIds(Set.of(emp.getId()))
+                        .build()
+        );
+
+        assertThatThrownBy(() ->
+                meetingManagement.changeReservationInfo(
+                        reservationId,
+                        emp.getId(),
+                        MeetingUpdateRequest.builder()
+                                .startAt(LocalTime.of(12, 30))
+                                .endAt(LocalTime.of(13, 30))
+                                .build()
+                )
+        ).isInstanceOf(ReservedMeetingExistException.class);
     }
 
     private long getSavedTomorrowReservation(Emp reserverEmp, MeetingRoom room) {

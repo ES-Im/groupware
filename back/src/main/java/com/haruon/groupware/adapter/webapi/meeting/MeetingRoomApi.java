@@ -5,6 +5,8 @@ import com.haruon.groupware.adapter.webapi.DateSupport;
 import com.haruon.groupware.adapter.webapi.RegisterDomainIdResponse;
 import com.haruon.groupware.application.exception.common.EndTimeBeforeStartTimeException;
 import com.haruon.groupware.application.exception.common.PositiveValueRequiredException;
+import com.haruon.groupware.application.exception.common.RequiredValueMissingException;
+import com.haruon.groupware.application.exception.meeting.DateValueRequiredException;
 import com.haruon.groupware.application.file.service.query.dto.FileListInfo;
 import com.haruon.groupware.application.meeting.provided.forCommand.MeetingRoomManagement;
 import com.haruon.groupware.application.meeting.provided.forRetriever.MeetingRoomRetriever;
@@ -46,6 +48,7 @@ public class MeetingRoomApi {
             @RequestParam(required = false) Integer capacity,
             @PageableDefault(size = 10, page = 0) Pageable pageable
     ) {
+        if((startAt != null || endAt != null) && date == null) throw new DateValueRequiredException();
         if(startAt != null && endAt != null && !endAt.isAfter(startAt)) throw new EndTimeBeforeStartTimeException();
         if(capacity != null && capacity <= 0) throw new PositiveValueRequiredException();
 

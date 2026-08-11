@@ -107,7 +107,7 @@ public class MeetingRoomQueryRepositoryAdapter implements MeetingRoomQueryReposi
     private BooleanExpression isNotReservedAt(
             @Nullable LocalDate date, @Nullable LocalTime startAt, @Nullable LocalTime endAt
     ) {
-        if(date == null || startAt == null || endAt == null) return null;
+        if(date == null && startAt == null && endAt == null) return null;
 
         return JPAExpressions
                 .selectOne()
