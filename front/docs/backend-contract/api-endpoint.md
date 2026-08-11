@@ -213,6 +213,7 @@
 | 교육 수정 | `FRANCHISE_EDUCATION_UPDATE` | `PATCH` | `/api/franchise-educations/{educationId}` | Path + JSON Body | `204` Empty | 예 | FRANCHISE 또는 ADMIN(교육 등록자) |
 | 교육 활성화 | `FRANCHISE_EDUCATION_ACTIVATE` | `POST` | `/api/franchise-educations/{educationId}/activation` | Path | `204` Empty | 예 | FRANCHISE 또는 ADMIN(교육 등록자) |
 | 교육 비활성화 | `FRANCHISE_EDUCATION_DEACTIVATE` | `POST` | `/api/franchise-educations/{educationId}/deactivation` | Path | `204` Empty | 예 | FRANCHISE 또는 ADMIN(교육 등록자) |
+| 교육 삭제 | `FRANCHISE_EDUCATION_DELETE` | `DELETE` | `/api/franchise-educations/{educationId}` | Path | `204` Empty | 예 | FRANCHISE 또는 ADMIN(교육 등록자) |
 | 문의 목록 조회 | `FRANCHISE_INQUIRY_LIST` | `GET` | `/api/franchise-inquiries?isAnswered={value}&assignedManagerId={value}&keyword={value}&from={value}&to={value}` | Query | `200` JSON Body | 예 | FRANCHISE 또는 ADMIN |
 | 문의 상세 조회 | `FRANCHISE_INQUIRY_DETAIL` | `GET` | `/api/franchise-inquiries/{inquiryId}` | Path | `200` JSON Body | 예 | FRANCHISE 또는 ADMIN |
 | 답변 조회 | `FRANCHISE_INQUIRY_ANSWER_DETAIL` | `GET` | `/api/franchise-inquiries/{inquiryId}/answer` | Path | `200` JSON Body | 예 | FRANCHISE 또는 ADMIN |
