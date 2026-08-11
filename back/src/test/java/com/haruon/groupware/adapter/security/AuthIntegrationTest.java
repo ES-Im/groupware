@@ -2,6 +2,7 @@ package com.haruon.groupware.adapter.security;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.haruon.groupware.adapter.IntegrationTestSupport;
+import com.haruon.groupware.adapter.exception.AdapterErrorCode;
 import com.haruon.groupware.adapter.exception.auth.InvalidLoginException;
 import com.haruon.groupware.adapter.webapi.auth.EmpLoginRequest;
 import com.haruon.groupware.application.exception.common.role.PermissionDeniedException;
@@ -68,6 +69,30 @@ public class AuthIntegrationTest extends IntegrationTestSupport {
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value(invalidLoginException.getErrorCode().getCode()))
                 .andExpect(jsonPath("$.message").value(invalidLoginException.getErrorCode().getMessage()))
+                .andExpect(cookie().doesNotExist("refreshToken"))
+                .andReturn();
+
+        assertThat(redisTemplate.opsForValue().get(REFRESH_TOKEN_KEY_PREFIX + loginId)).isNull();
+    }
+
+    @Test
+    @DisplayName("가입 승인 대기 사원 로그인 실패")
+    //todo
+    void login_fail_for_pending_emp() throws Exception {
+        String loginId = "pending12345";
+        String password = "!Q2w3e4r5t";
+        registerEmp(loginId, password);
+
+        EmpLoginRequest request = new EmpLoginRequest(loginId, password);
+
+        mockMvc.perform(
+                        post("/api/auth/login")
+                                .content(objectMapper.writeValueAsBytes(request))
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value(AdapterErrorCode.PENDING_APPROVAL_LOGIN_EXCEPTION.getCode()))
+                .andExpect(jsonPath("$.message").value(AdapterErrorCode.PENDING_APPROVAL_LOGIN_EXCEPTION.getMessage()))
                 .andExpect(cookie().doesNotExist("refreshToken"))
                 .andReturn();
 
