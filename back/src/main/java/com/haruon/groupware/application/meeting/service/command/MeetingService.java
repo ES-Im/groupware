@@ -3,7 +3,7 @@ package com.haruon.groupware.application.meeting.service.command;
 import com.haruon.groupware.application.employee.account.required.EmpRepository;
 import com.haruon.groupware.application.exception.meeting.MeetingNotFoundException;
 import com.haruon.groupware.application.exception.meeting.MeetingRoomNotFoundException;
-import com.haruon.groupware.application.exception.meeting.ReservedMeetingExistException;
+import com.haruon.groupware.application.exception.meeting.RoomAlreadyBookedException;
 import com.haruon.groupware.application.meeting.provided.forCommand.MeetingManagement;
 import com.haruon.groupware.application.meeting.required.MeetingRepository;
 import com.haruon.groupware.application.meeting.required.MeetingRoomRepository;
@@ -155,7 +155,7 @@ public class MeetingService implements MeetingManagement {
                 );
 
         if (hasOverlappingMeeting) {
-            throw new ReservedMeetingExistException();
+            throw new RoomAlreadyBookedException();
         }
     }
 
@@ -176,7 +176,7 @@ public class MeetingService implements MeetingManagement {
                 );
 
         if (hasOverlappingMeeting) {
-            throw new ReservedMeetingExistException();
+            throw new RoomAlreadyBookedException();
         }
     }
 
