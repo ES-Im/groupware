@@ -21,8 +21,13 @@ public class EmpDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(
             String loginId
     ) throws UsernameNotFoundException {
-        Emp emp = empRepository.findByLoginIdAndStatus(loginId, EmpStatus.ACTIVE)
+
+        Emp emp = empRepository.findByLoginId(loginId)
                 .orElseThrow(() -> new UsernameNotFoundException("Emp not found"));
+
+        if (emp.getStatus() != EmpStatus.ACTIVE && emp.getStatus() != EmpStatus.PENDING) {
+            throw new UsernameNotFoundException("Emp not found");
+        }
 
         return EmpDetails.from(emp);
     }

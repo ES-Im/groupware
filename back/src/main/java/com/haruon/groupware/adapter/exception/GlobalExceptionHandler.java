@@ -1,6 +1,7 @@
 package com.haruon.groupware.adapter.exception;
 
 import com.haruon.groupware.adapter.exception.auth.InvalidLoginException;
+import com.haruon.groupware.adapter.exception.auth.PendingApprovalLoginException;
 import com.haruon.groupware.application.exception.ApplicationException;
 import com.haruon.groupware.application.exception.file.FileSizeLimitExceededException;
 import jakarta.validation.ConstraintViolationException;
@@ -9,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.hibernate.query.sqm.UnknownPathException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -17,6 +19,7 @@ import org.springframework.web.multipart.MaxUploadSizeExceededException;
 @Slf4j
 @RestControllerAdvice
 @RequiredArgsConstructor
+@SuppressWarnings("StringConcatToTextBlock")
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(ApplicationException.class)
@@ -44,6 +47,20 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(400)
                 .body(ErrorResponse.from(e));
+    }
+
+    @ExceptionHandler(DisabledException.class)
+    public ResponseEntity<ErrorResponse> handleDisabled(DisabledException ex) {
+        PendingApprovalLoginException e = new PendingApprovalLoginException();
+
+        log.warn("[DisabledException] message={}, className={}",
+                ex.getMessage(),
+                ex.getClass().getSimpleName()
+        );
+
+        return ResponseEntity
+                .status(e.getErrorCode().getStatus())
+                .body(ErrorResponse.from(e.getErrorCode()));
     }
 
     @ExceptionHandler(BadCredentialsException.class)

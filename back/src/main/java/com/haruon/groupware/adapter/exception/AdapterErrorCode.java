@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 public enum AdapterErrorCode {
     // 인증
     INVALID_LOGIN_EXCEPTION(HttpStatus.UNAUTHORIZED, "AUTH_001", "아이디 또는 비밀번호가 올바르지 않습니다"),
+    PENDING_APPROVAL_LOGIN_EXCEPTION(HttpStatus.UNAUTHORIZED, "AUTH_002", "가입 승인 대기 중입니다. 관리자에게 가입 승인을 요청해 주세요."),
 
     // 파일
     FILE_CONVERT_FAILED_EXCEPTION(HttpStatus.BAD_REQUEST, "FILE_001", "파일 변환에 실패했습니다."),
