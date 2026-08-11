@@ -27,6 +27,7 @@ const DETAIL: FranchiseEducationDetail = {
   capacity: 20,
   remainingCapacity: 20,
   isActive: false,
+  registerId: 1,
   fileListInfoList: null,
 }
 

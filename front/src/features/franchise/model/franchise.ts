@@ -108,6 +108,7 @@ export interface FranchiseEducationDetail {
   capacity: number
   remainingCapacity: number
   isActive: boolean
+  registerId: number
   fileListInfoList: FranchiseEducationFileInfo[] | null
 }
 

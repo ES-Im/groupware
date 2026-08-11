@@ -18,11 +18,13 @@ import { useFranchiseEducationDeactivateMutation } from '../api/useFranchiseEduc
 interface FranchiseEducationActiveToggleButtonProps {
   educationId: number
   isActive: boolean
+  disabled?: boolean
 }
 
 export function FranchiseEducationActiveToggleButton({
   educationId,
   isActive,
+  disabled = false,
 }: FranchiseEducationActiveToggleButtonProps) {
   const activateMutation = useFranchiseEducationActivateMutation()
   const deactivateMutation = useFranchiseEducationDeactivateMutation()
@@ -42,7 +44,7 @@ export function FranchiseEducationActiveToggleButton({
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button type="button" variant="outline" size="sm">
+        <Button type="button" variant="outline" size="sm" disabled={disabled}>
           {isActive ? '비활성화' : '활성화'}
         </Button>
       </AlertDialogTrigger>

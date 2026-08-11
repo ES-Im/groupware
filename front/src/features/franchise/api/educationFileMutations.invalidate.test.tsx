@@ -31,6 +31,7 @@ function detail(fileListInfoList: FranchiseEducationFileInfo[] | null): Franchis
     capacity: 20,
     remainingCapacity: 20,
     isActive: true,
+    registerId: 1,
     fileListInfoList,
   }
 }

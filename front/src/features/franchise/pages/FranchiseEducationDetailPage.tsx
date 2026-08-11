@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useParams } from 'react-router'
+import { useNavigate, useParams } from 'react-router'
 import { toast } from 'sonner'
 import dayjs from 'dayjs'
 import {
@@ -8,14 +8,27 @@ import {
   getCoreRowModel,
   useReactTable,
 } from '@tanstack/react-table'
-import { Armchair, BookOpen, CalendarDays, MapPin, Store, Users } from 'lucide-react'
+import { Armchair, BookOpen, CalendarDays, MapPin, Store, Trash2, Users } from 'lucide-react'
+import { useMeQuery } from '@/features/employee/api/useMeQuery'
 import { handleApiError, isNotFound, normalizeApiError } from '@/shared/lib/apiError'
 import { usePageState } from '@/shared/lib/usePageState'
 import type { PageMeta } from '@/shared/components/PaginationControls'
 import { PaginationControls } from '@/shared/components/PaginationControls'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/shared/ui/alert-dialog'
 import { Button } from '@/shared/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
 import { useFranchiseEducationApplicantsQuery } from '../api/useFranchiseEducationApplicantsQuery'
+import { useFranchiseEducationDeleteMutation } from '../api/useFranchiseEducationDeleteMutation'
 import { useFranchiseEducationDetailQuery } from '../api/useFranchiseEducationDetailQuery'
 import { FranchiseBackLink } from '../components/FranchiseBackLink'
 import { FranchiseDetailHero, FranchiseHeroMetaItem } from '../components/FranchiseDetailHero'
@@ -28,6 +41,7 @@ import type { FranchiseEducationApplicant } from '../model/franchise'
 const columnHelper = createColumnHelper<FranchiseEducationApplicant>()
 
 export function FranchiseEducationDetailPage() {
+  const navigate = useNavigate()
   const { educationId: educationIdParam } = useParams<{ educationId: string }>()
   const [updateOpen, setUpdateOpen] = useState(false)
 
@@ -36,6 +50,9 @@ export function FranchiseEducationDetailPage() {
   const educationId = isDecimalPositiveInteger ? Number(educationIdParam) : undefined
 
   const detailQuery = useFranchiseEducationDetailQuery(educationId)
+  const meQuery = useMeQuery()
+  const myEmpId = meQuery.data?.empBasicInfo.empId
+  const deleteMutation = useFranchiseEducationDeleteMutation()
 
   const { page, size, onPageChange } = usePageState()
   const applicantsQuery = useFranchiseEducationApplicantsQuery(
@@ -150,6 +167,20 @@ export function FranchiseEducationDetailPage() {
   const files = education.fileListInfoList
 
   const isFull = education.remainingCapacity <= 0
+  const isOwner = myEmpId != null && myEmpId === education.registerId
+  const canModify = isOwner && !education.isActive && education.appliedCount === 0
+
+  function handleDelete() {
+    deleteMutation.mutate(education.id, {
+      onSuccess: () => {
+        toast.success('교육을 삭제했습니다')
+        navigate('/franchise-educations')
+      },
+      onError: (error) => {
+        handleApiError(error, { toast })
+      },
+    })
+  }
 
   return (
     <div className="flex w-full flex-col gap-6 p-4 sm:p-6 lg:p-8 lg:min-h-full">
@@ -192,19 +223,50 @@ export function FranchiseEducationDetailPage() {
             }
             actions={
               <>
-                {!education.isActive && education.appliedCount === 0 && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setUpdateOpen(true)}
-                  >
-                    수정
-                  </Button>
-                )}
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={!canModify}
+                  title={canModify ? undefined : '등록자 본인만, 비활성·신청인원 0명일 때만 수정할 수 있습니다'}
+                  onClick={() => setUpdateOpen(true)}
+                >
+                  수정
+                </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      disabled={!canModify}
+                      title={canModify ? undefined : '등록자 본인만, 비활성·신청인원 0명일 때만 삭제할 수 있습니다'}
+                    >
+                      <Trash2 />
+                      삭제
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>교육을 삭제하시겠습니까?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        삭제하면 신청 이력과 첨부파일이 함께 삭제되며 되돌릴 수 없습니다.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel disabled={deleteMutation.isPending}>
+                        돌아가기
+                      </AlertDialogCancel>
+                      <AlertDialogAction onClick={handleDelete} disabled={deleteMutation.isPending}>
+                        {deleteMutation.isPending ? '삭제 중...' : '삭제'}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
                 <FranchiseEducationActiveToggleButton
                   educationId={education.id}
                   isActive={education.isActive}
+                  disabled={!isOwner}
                 />
               </>
             }

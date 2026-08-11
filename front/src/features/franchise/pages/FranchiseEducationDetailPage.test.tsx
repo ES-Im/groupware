@@ -1,9 +1,9 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { http, HttpResponse } from 'msw'
 import { MemoryRouter, Route, Routes } from 'react-router'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { BASE_URL } from '@/shared/api/client'
 import { server } from '@/test/mocks/server'
 import { FranchiseEducationDetailPage } from './FranchiseEducationDetailPage'
@@ -14,6 +14,10 @@ vi.mock('sonner', () => ({
 
 afterEach(() => {
   vi.clearAllMocks()
+})
+
+beforeEach(() => {
+  mockMe(1)
 })
 
 function makeDetail(overrides: Partial<Record<string, unknown>> = {}) {
@@ -28,9 +32,29 @@ function makeDetail(overrides: Partial<Record<string, unknown>> = {}) {
     capacity: 20,
     remainingCapacity: 20,
     isActive: false,
+    registerId: 1,
     fileListInfoList: null,
     ...overrides,
   }
+}
+
+function mockMe(empId: number) {
+  server.use(
+    http.get(`${BASE_URL}/api/employees/me`, () =>
+      HttpResponse.json({
+        empBasicInfo: {
+          empId,
+          empNo: '000000001',
+          name: '홍길동',
+          loginId: 'test1234',
+          email: 'test1234@haruon.com',
+          extensionNo: null,
+        },
+        activeFiles: [],
+        currentDepts: [],
+      }),
+    ),
+  )
 }
 
 function makeApplicantsPage(items: unknown[]) {
@@ -72,6 +96,7 @@ function renderPage(educationIdParam: string) {
       <MemoryRouter initialEntries={[`/franchise-educations/${educationIdParam}`]}>
         <Routes>
           <Route path="/franchise-educations/:educationId" element={<FranchiseEducationDetailPage />} />
+          <Route path="/franchise-educations" element={<div>가맹점 교육 목록</div>} />
         </Routes>
       </MemoryRouter>
     </QueryClientProvider>,
@@ -172,40 +197,77 @@ describe('FranchiseEducationDetailPage - 정상 렌더', () => {
   })
 })
 
-describe('FranchiseEducationDetailPage - 수정 버튼 노출 조건', () => {
-  it('비활성 + 신청인원 0명이면 "수정" 버튼이 노출된다', async () => {
-    mockDetail(1, { isActive: false, appliedCount: 0 })
+describe('FranchiseEducationDetailPage - 수정/삭제 버튼 게이팅', () => {
+  it('등록자 본인 + 비활성 + 신청인원 0명이면 "수정"·"삭제" 버튼이 활성화된다', async () => {
+    mockDetail(1, { registerId: 1, isActive: false, appliedCount: 0 })
     mockApplicants(1)
 
     renderPage('1')
 
-    expect(await screen.findByRole('button', { name: '수정' })).toBeInTheDocument()
+    expect(await screen.findByRole('button', { name: '수정' })).not.toBeDisabled()
+    expect(screen.getByRole('button', { name: '삭제' })).not.toBeDisabled()
   })
 
-  it('활성 상태면 신청인원이 0명이어도 "수정" 버튼이 노출되지 않는다', async () => {
-    mockDetail(1, { isActive: true, appliedCount: 0 })
+  it('활성 상태면 등록자 본인이어도 "수정"·"삭제" 버튼이 비활성화된다', async () => {
+    mockDetail(1, { registerId: 1, isActive: true, appliedCount: 0 })
     mockApplicants(1)
 
     renderPage('1')
 
-    await screen.findByText('신규 가맹점 오리엔테이션')
-    expect(screen.queryByRole('button', { name: '수정' })).not.toBeInTheDocument()
+    expect(await screen.findByRole('button', { name: '수정' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: '삭제' })).toBeDisabled()
   })
 
-  it('신청인원이 1명 이상이면 비활성 상태여도 "수정" 버튼이 노출되지 않는다', async () => {
-    mockDetail(1, { isActive: false, appliedCount: 1 })
+  it('신청인원이 1명 이상이면 비활성 상태여도 "수정"·"삭제" 버튼이 비활성화된다', async () => {
+    mockDetail(1, { registerId: 1, isActive: false, appliedCount: 1 })
     mockApplicants(1)
 
     renderPage('1')
 
-    await screen.findByText('신규 가맹점 오리엔테이션')
-    expect(screen.queryByRole('button', { name: '수정' })).not.toBeInTheDocument()
+    expect(await screen.findByRole('button', { name: '수정' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: '삭제' })).toBeDisabled()
+  })
+
+  it('등록자 본인이 아니면 조건을 만족해도 "수정"·"삭제"·활성 토글 버튼이 비활성화된다', async () => {
+    mockDetail(1, { registerId: 1, isActive: false, appliedCount: 0 })
+    mockApplicants(1)
+    mockMe(99)
+
+    renderPage('1')
+
+    expect(await screen.findByRole('button', { name: '수정' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: '삭제' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: '활성화' })).toBeDisabled()
+  })
+
+  it('"삭제" 확인 시 DELETE 요청 후 성공 토스트와 함께 목록으로 이동한다', async () => {
+    mockDetail(1, { registerId: 1, isActive: false, appliedCount: 0 })
+    mockApplicants(1)
+    let deleteCalls = 0
+    server.use(
+      http.delete(`${BASE_URL}/api/franchise-educations/1`, () => {
+        deleteCalls += 1
+        return new HttpResponse(null, { status: 204 })
+      }),
+    )
+    const user = userEvent.setup()
+
+    renderPage('1')
+
+    await user.click(await screen.findByRole('button', { name: '삭제' }))
+    const dialog = await screen.findByRole('alertdialog')
+    await user.click(within(dialog).getByRole('button', { name: '삭제' }))
+
+    await waitFor(() => expect(deleteCalls).toBe(1))
+    const { toast } = await import('sonner')
+    await waitFor(() => expect(toast.success).toHaveBeenCalledWith('교육을 삭제했습니다'))
+    expect(await screen.findByText('가맹점 교육 목록')).toBeInTheDocument()
   })
 })
 
 describe('FranchiseEducationDetailPage - 활성 토글 버튼', () => {
   it('isActive=true면 "비활성화" 버튼, false면 "활성화" 버튼이 항상 노출된다', async () => {
-    mockDetail(1, { isActive: true })
+    mockDetail(1, { registerId: 1, isActive: true })
     mockApplicants(1)
 
     renderPage('1')
