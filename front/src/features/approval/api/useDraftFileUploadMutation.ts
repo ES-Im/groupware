@@ -21,8 +21,8 @@ export function useDraftFileUploadMutation() {
         await uploadDraftFile(draftId, file)
       }
     },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: approvalKeys.all })
+    onSuccess: async (_data, { draftId }) => {
+      await queryClient.invalidateQueries({ queryKey: approvalKeys.draftDetail(draftId) })
     },
   })
 }

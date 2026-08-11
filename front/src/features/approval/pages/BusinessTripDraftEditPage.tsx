@@ -19,6 +19,7 @@ import { useDraftDetailQuery } from '../api/useDraftDetailQuery'
 import { useDraftSubmitMutation } from '../api/useDraftSubmitMutation'
 import { composeDateTime, DateTimeField } from '../components/DateTimeField'
 import { DraftCreateFrame } from '../components/DraftCreateFrame'
+import { DraftEditAttachments } from '../components/DraftEditAttachments'
 import { DraftFormActions } from '../components/DraftFormActions'
 import { EmployeeSelectField } from '../components/EmployeeSelectField'
 import { getApprovalStatusBadge } from '../lib/approvalStatusBadge'
@@ -252,36 +253,32 @@ function BusinessTripDraftEditForm({
       formDescription="제목·내용·출장 정보·결재선을 수정합니다"
       headerBadge="임시저장 수정"
       sidebar={
-        <Card className="h-fit rounded-2xl">
-          <CardHeader className="border-b">
-            <CardTitle className="text-base font-bold">문서 정보</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <dl className="flex flex-col gap-3 text-sm">
-              <div className="flex flex-col gap-0.5">
-                <dt className="text-xs text-muted-foreground">문서번호</dt>
-                <dd className="font-semibold">HARUON-DRAFT-{draft.draftId}</dd>
-              </div>
-              <div className="flex flex-col gap-1">
-                <dt className="text-xs text-muted-foreground">상태</dt>
-                <dd>
-                  <Badge variant={statusBadge.variant}>{statusBadge.label}</Badge>
-                </dd>
-              </div>
-              <div className="flex flex-col gap-0.5">
-                <dt className="text-xs text-muted-foreground">첨부파일</dt>
-                <dd className="font-medium">{draft.files.length}개</dd>
-              </div>
-            </dl>
-            <p className="mt-4 text-xs text-muted-foreground">
-              첨부파일은 저장 후 상세 화면에서 관리합니다.
-            </p>
-            <p className="mt-2 text-xs text-muted-foreground">
-              참여자는 이 화면에서 수정할 수 없습니다. 기안서 상세 페이지의 참여자 수정에서
-              변경해주세요.
-            </p>
-          </CardContent>
-        </Card>
+        <>
+          <Card className="h-fit rounded-2xl">
+            <CardHeader className="border-b">
+              <CardTitle className="text-base font-bold">문서 정보</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <dl className="flex flex-col gap-3 text-sm">
+                <div className="flex flex-col gap-0.5">
+                  <dt className="text-xs text-muted-foreground">문서번호</dt>
+                  <dd className="font-semibold">HARUON-DRAFT-{draft.draftId}</dd>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <dt className="text-xs text-muted-foreground">상태</dt>
+                  <dd>
+                    <Badge variant={statusBadge.variant}>{statusBadge.label}</Badge>
+                  </dd>
+                </div>
+              </dl>
+              <p className="mt-4 text-xs text-muted-foreground">
+                참여자는 이 화면에서 수정할 수 없습니다. 기안서 상세 페이지의 참여자 수정에서
+                변경해주세요.
+              </p>
+            </CardContent>
+          </Card>
+          <DraftEditAttachments draftId={draftId} files={draft.files} />
+        </>
       }
     >
       <form noValidate onSubmit={handleSaveAndSubmit} className="flex flex-1 flex-col gap-6">

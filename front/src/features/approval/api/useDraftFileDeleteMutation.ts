@@ -12,8 +12,8 @@ export function useDraftFileDeleteMutation() {
 
   return useMutation({
     mutationFn: ({ draftId, fileId }: DraftFileDeleteVariables) => deleteDraftFile(draftId, fileId),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: approvalKeys.all })
+    onSuccess: async (_data, { draftId }) => {
+      await queryClient.invalidateQueries({ queryKey: approvalKeys.draftDetail(draftId) })
     },
   })
 }
