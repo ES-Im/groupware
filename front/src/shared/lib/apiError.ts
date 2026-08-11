@@ -57,6 +57,8 @@ export const isValidationError = (error: ApiError): boolean =>
 
 export const isAuthFailure = (error: ApiError): boolean => error.code === 'AUTH_001'
 
+export const isPendingApprovalLogin = (error: ApiError): boolean => error.code === 'AUTH_002'
+
 export const isTokenInvalid = (error: ApiError): boolean => error.code === 'ROLE_002'
 
 export const isForbidden = (error: ApiError): boolean => error.httpStatus === 403
@@ -82,7 +84,7 @@ export interface HandleApiErrorContext {
 export function handleApiError(error: unknown, ctx: HandleApiErrorContext = {}): ApiError {
   const apiError = normalizeApiError(error)
 
-  if (isValidationError(apiError) || isAuthFailure(apiError)) {
+  if (isValidationError(apiError) || isAuthFailure(apiError) || isPendingApprovalLogin(apiError)) {
     if (ctx.setError) {
       ctx.setError('root', { message: apiError.message })
     } else {

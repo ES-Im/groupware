@@ -47,6 +47,28 @@ describe('LoginForm (T1.1 표준 폼 패턴)', () => {
     )
   })
 
+  it('서버 AUTH_002(가입 승인 대기) 응답을 폼 루트 에러로 매핑하고 토스트는 띄우지 않는다', async () => {
+    const { toast } = await import('sonner')
+    const user = userEvent.setup()
+    const onSubmit = vi
+      .fn()
+      .mockRejectedValue(
+        fakeAxiosError(401, 'AUTH_002', '가입 승인 대기 중입니다. 관리자에게 가입 승인을 요청해 주세요.'),
+      )
+    render(<LoginForm onSubmit={onSubmit} />)
+
+    await user.type(screen.getByLabelText('ID *'), 'user01')
+    await user.type(screen.getByLabelText('Password *'), 'pw12345')
+    await user.click(screen.getByRole('button', { name: '로그인' }))
+
+    const rootError = await screen.findByText(
+      '가입 승인 대기 중입니다. 관리자에게 가입 승인을 요청해 주세요.',
+    )
+    expect(rootError).toBeInTheDocument()
+    expect(rootError).toHaveAttribute('role', 'alert')
+    expect(toast.error).not.toHaveBeenCalled()
+  })
+
   it('필드로 특정할 수 없는 서버 에러는 토스트로 폴백한다', async () => {
     const { toast } = await import('sonner')
     const user = userEvent.setup()
