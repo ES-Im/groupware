@@ -2,8 +2,8 @@ import type { ComponentType, ReactNode, SVGProps } from 'react'
 import { AtSign, Hash, IdCard, Phone, User, Users } from 'lucide-react'
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/tabs'
+import { EmpBelongingsPanel } from './EmpBelongingsPanel'
 import { EmpFileManagementPanel } from './EmpFileManagementPanel'
-import { Pill } from './EmployeeSummaryCard'
 import type { EmployeeInfoResponse } from '../model/me'
 
 interface EmployeeProfileTabsProps {
@@ -87,34 +87,7 @@ export function EmployeeProfileTabs({
 
           {showDeptTab && (
             <TabsContent value="dept" className="pt-4">
-              {currentDepts.length === 0 ? (
-                <p className="text-sm text-muted-foreground">소속된 부서가 없습니다.</p>
-              ) : (
-                <ul className="space-y-3">
-                  {currentDepts.map((dept) => (
-                    <li
-                      key={dept.deptId}
-                      className="flex items-center justify-between gap-3 rounded-lg border border-border p-3"
-                    >
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2">
-                          <h5 className="truncate text-sm font-semibold text-foreground">{dept.deptName}</h5>
-                          <Pill tone={dept.isPrimary ? 'primary' : 'muted'}>
-                            {dept.isPrimary ? '주 소속' : '겸직'}
-                          </Pill>
-                        </div>
-                        <p className="mt-1 truncate text-xs text-muted-foreground">
-                          {dept.deptCode} · {dept.positionName}
-                        </p>
-                      </div>
-                      <div className="shrink-0 text-right text-xs text-muted-foreground">
-                        <p>{dept.startAt} 시작</p>
-                        <p>{dept.endAt ?? '현재 재직 중'}</p>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              )}
+              <EmpBelongingsPanel empId={empId} />
             </TabsContent>
           )}
 

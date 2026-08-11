@@ -14,6 +14,7 @@ interface OrgChartExplorerProps {
   onSelect: (deptId: number) => void
   canRegisterDept: boolean
   onOpenRegisterDialog: () => void
+  showActiveOnlyFilter?: boolean
 }
 
 function filterTree(
@@ -138,6 +139,7 @@ export function OrgChartExplorer({
   onSelect,
   canRegisterDept,
   onOpenRegisterDialog,
+  showActiveOnlyFilter = true,
 }: OrgChartExplorerProps) {
   const [searchInput, setSearchInput] = useState('')
   const deferredSearch = useDeferredValue(searchInput.trim())
@@ -190,16 +192,20 @@ export function OrgChartExplorer({
         </div>
 
         <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <Checkbox
-              id="org-chart-active-only"
-              checked={activeOnly}
-              onCheckedChange={() => setActiveOnly((current) => !current)}
-            />
-            <Label htmlFor="org-chart-active-only" className="text-sm font-normal">
-              활성 부서만 보기
-            </Label>
-          </div>
+          {showActiveOnlyFilter ? (
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="org-chart-active-only"
+                checked={activeOnly}
+                onCheckedChange={() => setActiveOnly((current) => !current)}
+              />
+              <Label htmlFor="org-chart-active-only" className="text-sm font-normal">
+                활성 부서만 보기
+              </Label>
+            </div>
+          ) : (
+            <div />
+          )}
           <Badge variant="secondary" className="shrink-0">
             {visibleCount}개 표시
           </Badge>

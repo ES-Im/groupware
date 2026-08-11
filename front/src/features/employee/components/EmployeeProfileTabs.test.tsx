@@ -76,6 +76,7 @@ describe('EmployeeProfileTabs - viewerIsSelf=true', () => {
 
 describe('EmployeeProfileTabs - 상태 메모 미노출', () => {
   it('"상태 메모"는 기본정보/부서이력 어느 탭에도 렌더되지 않는다', async () => {
+    server.use(http.get(`${BASE_URL}/api/employees/1/belongings`, () => HttpResponse.json([])))
     const user = userEvent.setup()
     renderTabs(true)
 
@@ -83,5 +84,26 @@ describe('EmployeeProfileTabs - 상태 메모 미노출', () => {
 
     await user.click(screen.getByRole('tab', { name: '부서이력' }))
     expect(screen.queryByText('상태 메모')).not.toBeInTheDocument()
+  })
+})
+
+describe('EmployeeProfileTabs - 부서이력 탭', () => {
+  it('종료된 부서 이력도 함께 렌더된다', async () => {
+    server.use(
+      http.get(`${BASE_URL}/api/employees/1/belongings`, () =>
+        HttpResponse.json([
+          { deptId: 1, deptCode: 'D1', deptName: '개발팀', positionName: '팀장', isPrimary: true, startAt: '2025-01-01', endAt: null },
+          { deptId: 3, deptCode: 'D3', deptName: '영업팀', positionName: '사원', isPrimary: false, startAt: '2023-01-01', endAt: '2024-12-31' },
+        ]),
+      ),
+    )
+    const user = userEvent.setup()
+    renderTabs(true)
+
+    await user.click(screen.getByRole('tab', { name: '부서이력' }))
+
+    expect(await screen.findByText('개발팀')).toBeInTheDocument()
+    expect(screen.getByText('영업팀')).toBeInTheDocument()
+    expect(screen.getByText('2024-12-31')).toBeInTheDocument()
   })
 })

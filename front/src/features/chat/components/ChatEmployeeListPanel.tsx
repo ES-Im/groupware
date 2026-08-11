@@ -51,7 +51,7 @@ export function ChatEmployeeListPanel() {
   const myPrimaryDeptId = myPrimaryDept?.deptId
   const myPrimaryDeptName = myPrimaryDept?.deptName
 
-  const departmentsQuery = useDepartmentsQuery({ size: ALL_DEPARTMENTS_PAGE_SIZE })
+  const departmentsQuery = useDepartmentsQuery({ isActive: true, size: ALL_DEPARTMENTS_PAGE_SIZE })
   const departments = departmentsQuery.data?.content ?? []
   const deptSearchResults =
     isSearching && !drillDept

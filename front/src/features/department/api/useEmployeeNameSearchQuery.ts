@@ -12,7 +12,10 @@ export function useEmployeeNameSearchQuery(keyword: string) {
   const trimmedKeyword = keyword.trim()
   const enabled = trimmedKeyword.length > 0
 
-  const departmentsQuery = useDepartmentsQuery({ size: ALL_DEPARTMENTS_PAGE_SIZE }, { enabled })
+  const departmentsQuery = useDepartmentsQuery(
+    { isActive: true, size: ALL_DEPARTMENTS_PAGE_SIZE },
+    { enabled },
+  )
   const departments = departmentsQuery.data?.content ?? []
 
   const memberQueries = useQueries({

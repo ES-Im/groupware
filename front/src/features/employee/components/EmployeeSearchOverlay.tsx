@@ -81,7 +81,7 @@ function EmployeeSearchOverlayContent() {
 
   const searchResultsQuery = useEmployeeNameSearchQuery(debouncedKeyword)
 
-  const departmentsQuery = useDepartmentsQuery({ size: ALL_DEPARTMENTS_PAGE_SIZE })
+  const departmentsQuery = useDepartmentsQuery({ isActive: true, size: ALL_DEPARTMENTS_PAGE_SIZE })
   const departments = departmentsQuery.data?.content ?? []
   const deptIds = departments.map((dept) => dept.deptInfoResponse.deptId)
   const memberCountsQuery = useDepartmentMemberCountsQuery(deptIds)
@@ -215,6 +215,7 @@ function EmployeeSearchOverlayContent() {
                 onSelect={handleSelectDept}
                 canRegisterDept={false}
                 onOpenRegisterDialog={() => {}}
+                showActiveOnlyFilter={false}
               />
             )}
           </aside>

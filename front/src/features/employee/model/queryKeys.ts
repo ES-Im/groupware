@@ -2,6 +2,7 @@ export const employeeKeys = {
   all: ['employee'] as const,
   me: () => [...employeeKeys.all, 'me'] as const,
   detail: (empId: number | undefined) => [...employeeKeys.all, 'detail', empId] as const,
+  belongings: (empId: number | undefined) => [...employeeKeys.all, 'belongings', empId] as const,
   filesInfos: () => [...employeeKeys.all, 'filesInfos'] as const,
   empsForManagement: (params?: {
     deptId?: number
