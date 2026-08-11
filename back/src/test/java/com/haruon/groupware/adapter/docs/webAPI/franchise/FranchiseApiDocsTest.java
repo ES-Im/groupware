@@ -735,6 +735,7 @@ public class FranchiseApiDocsTest extends RestDocsSupport {
                 30L,
                 20L,
                 true,
+                1L,
                 null
         );
     }
@@ -836,6 +837,7 @@ public class FranchiseApiDocsTest extends RestDocsSupport {
                 fieldWithPath("appliedCount").type(JsonFieldType.NUMBER).description("신청 인원"),
                 fieldWithPath("capacity").type(JsonFieldType.NUMBER).description("정원"),
                 fieldWithPath("remainingCapacity").type(JsonFieldType.NUMBER).description("잔여 정원"),
+                fieldWithPath("registerId").type(JsonFieldType.NUMBER).description("등록자 식별 번호"),
                 fieldWithPath("isActive").type(JsonFieldType.BOOLEAN).description("활성화 여부"),
                 fieldWithPath("fileListInfoList").type(JsonFieldType.NULL).description("첨부 파일 목록")
         };
