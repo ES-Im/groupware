@@ -101,7 +101,7 @@ public enum ApplicationErrorCode {
     INACTIVATED_MEETING_ROOM_EXCEPTION(HttpStatus.FORBIDDEN, "meeting_003", "비활성화된 회의실입니다"),
     RESERVED_MEETING_EXIST_EXCEPTION(HttpStatus.FORBIDDEN, "meeting_004", "예약된 회의가 있어 수정이 불가능한 회의실입니다"),
     MEETING_PARTICIPANT_REQUIRED_EXCEPTION(HttpStatus.BAD_REQUEST, "meeting_005", "참여자를 지정해주세요."),
-    DATE_VALUE_REQUIRED_EXCEPTION(HttpStatus.BAD_REQUEST, "meeting_006", "시간 조회시, 날짜 지정이 필요합니다."),
+    DATE_VALUE_REQUIRED_EXCEPTION(HttpStatus.BAD_REQUEST, "meeting_006", "날짜, 시작 시각, 종료 시각은 모두 함께 지정해야 합니다."),
 
     // message
     MESSAGE_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND, "message_001", "조회된 쪽지가 없습니다"),

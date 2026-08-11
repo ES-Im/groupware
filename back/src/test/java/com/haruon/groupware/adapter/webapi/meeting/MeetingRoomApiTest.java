@@ -123,6 +123,23 @@ class MeetingRoomApiTest extends IntegrationTestSupport {
                 .andExpect(status().isBadRequest());
 
         mockMvc.perform(get("/api/meeting-rooms/available")
+                        .header("Authorization", BEARER + accessToken)
+                        .param("date", meetingDate.toString()))
+                .andExpect(status().isBadRequest());
+
+        mockMvc.perform(get("/api/meeting-rooms/available")
+                        .header("Authorization", BEARER + accessToken)
+                        .param("date", meetingDate.toString())
+                        .param("startAt", "10:00"))
+                .andExpect(status().isBadRequest());
+
+        mockMvc.perform(get("/api/meeting-rooms/available")
+                        .header("Authorization", BEARER + accessToken)
+                        .param("date", meetingDate.toString())
+                        .param("endAt", "11:00"))
+                .andExpect(status().isBadRequest());
+
+        mockMvc.perform(get("/api/meeting-rooms/available")
                         .header("Authorization", BEARER + accessToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.length()").value(2))

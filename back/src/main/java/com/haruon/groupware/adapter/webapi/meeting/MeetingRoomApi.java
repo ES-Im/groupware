@@ -48,7 +48,10 @@ public class MeetingRoomApi {
             @RequestParam(required = false) Integer capacity,
             @PageableDefault(size = 10, page = 0) Pageable pageable
     ) {
-        if((startAt != null || endAt != null) && date == null) throw new DateValueRequiredException();
+        boolean anyDateTimeProvided = date != null || startAt != null || endAt != null;
+        boolean allDateTimeProvided = date != null && startAt != null && endAt != null;
+        if(anyDateTimeProvided && !allDateTimeProvided) throw new DateValueRequiredException();
+
         if(startAt != null && endAt != null && !endAt.isAfter(startAt)) throw new EndTimeBeforeStartTimeException();
         if(capacity != null && capacity <= 0) throw new PositiveValueRequiredException();
 
