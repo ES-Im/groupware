@@ -5,14 +5,19 @@ import com.haruon.groupware.adapter.webapi.employee.account.EmpApi;
 import com.haruon.groupware.application.employee.account.provided.forCommand.EmpAccountManager;
 import com.haruon.groupware.application.employee.account.provided.forRetriever.EmpAccountRetriever;
 import com.haruon.groupware.application.employee.account.service.command.dto.EmpRegisterRequest;
+import com.haruon.groupware.application.employee.account.service.query.dto.BelongingInfo;
 import com.haruon.groupware.application.employee.account.service.query.dto.EmpInfoResponse;
 import com.haruon.groupware.application.exception.employee.emp.DuplicateEmpNoException;
 import com.haruon.groupware.application.exception.employee.emp.DuplicateLoginIdException;
+import com.haruon.groupware.domain.employee.enums.PositionCode;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.payload.JsonFieldType;
+
+import java.time.LocalDate;
+import java.util.List;
 
 import static com.haruon.groupware.adapter.docs.webapi.employee.empApiSupport.getEmpInfoResponse;
 import static org.mockito.ArgumentMatchers.any;
@@ -194,6 +199,46 @@ public class EmpApiDocsTest extends RestDocsSupport {
 
                         )
 
+                ));
+    }
+
+    @Test
+    @DisplayName("특정 사원 소속 이력 조회")
+    void getEmpBelongings_success() throws Exception {
+        List<BelongingInfo> belongingInfoList = List.of(
+                new BelongingInfo(1L, "DEPT1", "부서1", PositionCode.STAFF, true, LocalDate.of(2026, 1, 1), null),
+                new BelongingInfo(2L, "DEPT2", "부서2", PositionCode.STAFF, false, LocalDate.of(2026, 1, 1), null)
+        );
+
+        Mockito.when(empAccountRetriever.retrieveEmpBelongingsInfo(eq(1L)))
+                .thenReturn(belongingInfoList);
+
+        mockMvc.perform(
+                        get("/api/employees/{empId}/belongings", 1L)
+                                .with(employeeAuthentication())
+                                .header("Authorization", "accessToken")
+                ).andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andDo(document("RETRIEVE_EMP_BELONGINGS_INFOS",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+
+                        pathParameters(
+                                parameterWithName("empId").description("사원 식별 번호")
+                        ),
+
+                        requestHeaders(
+                                headerWithName("Authorization").description("Bearer Access Token")
+                        ),
+                        responseFields(
+                                fieldWithPath("[].deptId").type(JsonFieldType.NUMBER).description("부서 식별 번호"),
+                                fieldWithPath("[].deptCode").type(JsonFieldType.STRING).description("부서 코드"),
+                                fieldWithPath("[].deptName").type(JsonFieldType.STRING).description("부서명"),
+                                fieldWithPath("[].positionName").type(JsonFieldType.STRING).description("직급"),
+                                fieldWithPath("[].isPrimary").type(JsonFieldType.BOOLEAN).description("주요부서여부"),
+                                fieldWithPath("[].startAt").type(JsonFieldType.STRING).description("발령 시작일"),
+                                fieldWithPath("[].endAt").type(JsonFieldType.NULL).description("종료일")
+                        )
                 ));
     }
 }
