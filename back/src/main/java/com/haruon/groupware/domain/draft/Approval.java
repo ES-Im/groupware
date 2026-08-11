@@ -98,8 +98,9 @@ public class Approval extends AbstractEntity {
         requireNonNull(approver, "승인자가 없음");
         requireNonNull(approvedAt, "승인시각이 없음");
 
-        state(this.status != ApprovalStatus.REJECTED, "반려된 결재건은 승인할 수 없음");
-        state(this.status != ApprovalStatus.APPROVED, "이미 완료된 결재건은 승인할 수 없음");
+        state(this.status == ApprovalStatus.WAITING ||
+                this.status == ApprovalStatus.IN_PROGRESS,
+                "결재대기 또는 결재 진행중인 상태일때만 승인 가능");
         state(!this.approvers.isEmpty(), "처리할 결재자가 없음");
 
         Approver current = getCurrentPendingMember();
