@@ -1,6 +1,8 @@
 package com.haruon.groupware.application.franchise.service.command;
 
 import com.haruon.groupware.application.employee.account.required.EmpRepository;
+import com.haruon.groupware.application.file.required.FileStorage;
+import com.haruon.groupware.application.file.service.command.dto.FilePathInfo;
 import com.haruon.groupware.application.franchise.provided.forCommand.EducationManagement;
 import com.haruon.groupware.application.franchise.required.EducationRepository;
 import com.haruon.groupware.application.franchise.service.command.dto.EducationCreateRequest;
@@ -12,6 +14,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 import static com.haruon.groupware.application.franchise.service.support.FranchiseUtils.*;
 
 @Service
@@ -22,6 +26,7 @@ public class EducationService implements EducationManagement {
     private final EmpRepository empRepository;
     private final EducationRepository educationRepository;
     private final AuthorizationQueryRepository authorizationQueryRepository;
+    private final FileStorage fileStorage;
 
     @Override
     public long createEducation(long managerId, EducationCreateRequest request) {
@@ -80,7 +85,18 @@ public class EducationService implements EducationManagement {
         education.deactivate();
     }
 
+    @Override
+    public void delete(Long educationId, Long empId) {
+        Education education = findEducation(educationRepository, educationId);
+        validateRegister(empRepository, authorizationQueryRepository, education, empId);
 
+        List<FilePathInfo> files = education.getEducationFiles().stream()
+                .map(file -> new FilePathInfo(file.getStoredPath(), file.getStoredName()))
+                .toList();
 
+        educationRepository.delete(education);
+
+        files.forEach(file -> fileStorage.delete(file.storedPath(), file.storedName()));
+    }
 
 }

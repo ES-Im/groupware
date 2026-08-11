@@ -129,4 +129,14 @@ public class FranchiseEducationApi {
         return ResponseEntity.status(204).build();
     }
 
+    @DeleteMapping("/{educationId}")
+    public ResponseEntity<Void> delete(
+            @AuthenticationPrincipal EmpDetails details,
+            @PathVariable Long educationId
+    ) {
+        educationManagement.delete(educationId, details.getEmpId());
+
+        return ResponseEntity.status(204).build();
+    }
+
 }

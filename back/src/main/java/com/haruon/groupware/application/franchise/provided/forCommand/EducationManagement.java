@@ -16,4 +16,5 @@ public interface EducationManagement {
 
     void deactivate(long educationId, long managerId);
 
+    void delete(Long educationId, Long empId);
 }

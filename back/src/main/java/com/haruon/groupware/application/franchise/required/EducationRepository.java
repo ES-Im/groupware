@@ -14,4 +14,6 @@ public interface EducationRepository extends Repository<Education, Long> {
     void deleteAll();
 
     Optional<Education> findByEducationCode(String educationCode);
+
+    void delete(Education education);
 }
