@@ -66,13 +66,14 @@ public class FranchiseEducationQueryRepositoryAdapter implements FranchiseEducat
                         EducationDetailResponse.EducationDetailInfo.class,
                         education.id, education.educationDate, education.educationDate,
                         education.place, education.title, education.content, appliedCount,
-                        education.capacity, education.capacity.subtract(appliedCount), education.isActive
+                        education.capacity, education.capacity.subtract(appliedCount), education.isActive,
+                        education.emp.id
                 )).from(education)
                 .leftJoin(education.educationApplications, application)
                 .where(education.id.eq(educationId))
                 .groupBy(
                         education.id, education.educationDate, education.place, education.title,
-                        education.content, education.capacity, education.isActive
+                        education.content, education.capacity, education.isActive, education.emp.id
                 )
                 .fetchOne();
 

@@ -19,6 +19,7 @@ public record EducationDetailResponse(
         Long capacity,
         Long remainingCapacity,
         Boolean isActive,
+        Long registerId,
         @Nullable List<FileListInfo> fileListInfoList
 ) {
     public EducationDetailResponse(
@@ -27,7 +28,7 @@ public record EducationDetailResponse(
     ) {
         this(
                 info.id, info.date, info.startAt, info.place, info.title, info.content,
-                info.appliedCount, info.capacity, info.remainingCapacity, info.isActive,
+                info.appliedCount, info.capacity, info.remainingCapacity, info.isActive, info.registerId,
                 files
         );
     }
@@ -42,7 +43,8 @@ public record EducationDetailResponse(
             Long appliedCount,
             Long capacity,
             Long remainingCapacity,
-            Boolean isActive
+            Boolean isActive,
+            Long registerId
     ) {
         public EducationDetailInfo(
                 Long id,
@@ -54,11 +56,12 @@ public record EducationDetailResponse(
                 Long appliedCount,
                 Long capacity,
                 Long remainingCapacity,
-                Boolean isActive
+                Boolean isActive,
+                Long registerId
         ) {
             this(
                     id, educationDate.toLocalDate(), educationStartAt.toLocalTime(), place, title, content,
-                    appliedCount, capacity, remainingCapacity, isActive
+                    appliedCount, capacity, remainingCapacity, isActive, registerId
             );
         }
     }
