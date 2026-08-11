@@ -3,6 +3,7 @@ package com.haruon.groupware.application.meeting.service.command;
 import com.haruon.groupware.application.employee.account.required.EmpRepository;
 import com.haruon.groupware.application.exception.meeting.MeetingNotFoundException;
 import com.haruon.groupware.application.exception.meeting.MeetingRoomNotFoundException;
+import com.haruon.groupware.application.exception.meeting.ReservedMeetingExistException;
 import com.haruon.groupware.application.meeting.provided.forCommand.MeetingManagement;
 import com.haruon.groupware.application.meeting.required.MeetingRepository;
 import com.haruon.groupware.application.meeting.required.MeetingRoomRepository;
@@ -17,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.Set;
@@ -44,6 +46,7 @@ public class MeetingService implements MeetingManagement {
         MeetingRoom room = findActiveMeetingRoom(meetingRoomRepository, request.meetingRoomId());
         Emp reserver = findActiveEmpById(empRepository, request.reserverId());
         List<Emp> participants = findEmpListById(empRepository, request.participantIds());
+        validateNoOverlappingReservation(room, request.meetingDate(), request.startAt(), request.endAt());
 
         Meeting reservedMeeting = Meeting.reserve(
                 room, reserver, request.title(), request.meetingDate(), request.startAt(), request.endAt(), participants
@@ -90,17 +93,31 @@ public class MeetingService implements MeetingManagement {
     @Override
     public void changeReservationInfo(Long meetingId, Long reserverId, MeetingUpdateRequest request) {
         Meeting meeting = findMeetingByIdAndReserverId(meetingId, reserverId);
-        MeetingRoom meetingRoom = null;
+        MeetingRoom changedMeetingRoom = null;
 
         if(request.meetingRoomId() != null) {
-            meetingRoom = findActiveMeetingRoom(meetingRoomRepository, request.meetingRoomId());
+            changedMeetingRoom = findActiveMeetingRoom(meetingRoomRepository, request.meetingRoomId());
+        }
+
+        if (request.meetingDate() != null ||
+                request.startAt() != null ||
+                request.endAt() != null ||
+                changedMeetingRoom != null
+        ) {
+            validateNoOverlappingReservationExcludingMeeting(
+                    meeting.getId(),
+                    changedMeetingRoom != null ? changedMeetingRoom : meeting.getMeetingRoom(),
+                    request.meetingDate() != null ? request.meetingDate() : meeting.getMeetingDate(),
+                    request.startAt() != null ? request.startAt() : meeting.getStartAt(),
+                    request.endAt() != null ? request.endAt() : meeting.getEndAt()
+            );
         }
 
         meeting.changeReservationInfo(
                 request.meetingDate(),
                 request.startAt(),
                 request.endAt(),
-                meetingRoom,
+                changedMeetingRoom,
                 request.title()
         );
     }
@@ -121,6 +138,46 @@ public class MeetingService implements MeetingManagement {
     private Meeting findMeetingByIdAndReserverId(long meetingId, long reserverId) {
         return meetingRepository.findByIdAndEmpId(meetingId, reserverId)
                 .orElseThrow(MeetingNotFoundException::new);
+    }
+
+    private void validateNoOverlappingReservation(
+            MeetingRoom room,
+            LocalDate meetingDate,
+            LocalTime startAt,
+            LocalTime endAt
+    ) {
+        boolean hasOverlappingMeeting =
+                meetingRepository.existsOverlappingReservation(
+                        room,
+                        meetingDate,
+                        startAt,
+                        endAt
+                );
+
+        if (hasOverlappingMeeting) {
+            throw new ReservedMeetingExistException();
+        }
+    }
+
+    private void validateNoOverlappingReservationExcludingMeeting(
+            Long meetingId,
+            MeetingRoom room,
+            LocalDate meetingDate,
+            LocalTime startAt,
+            LocalTime endAt
+    ) {
+        boolean hasOverlappingMeeting =
+                meetingRepository.existsOverlappingReservationExcludingMeeting(
+                        meetingId,
+                        room,
+                        meetingDate,
+                        startAt,
+                        endAt
+                );
+
+        if (hasOverlappingMeeting) {
+            throw new ReservedMeetingExistException();
+        }
     }
 
 
