@@ -8,6 +8,7 @@ import com.haruon.groupware.domain.employee.QEmp;
 import com.haruon.groupware.domain.franchise.*;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -143,7 +144,10 @@ public class FranchiseInquiryQueryRepositoryAdapter implements FranchiseInquiryQ
     }
 
     private BooleanExpression isDeleted() {
-        return inquiryPath.getEnum("inquiryStatus", InquiryType.class).eq(InquiryType.DELETION);
+        return Expressions.booleanTemplate(
+                "{0} = " + InquiryType.class.getName() + ".DELETION",
+                inquiry.inquiryStatus
+        );
     }
 
     private BooleanExpression eqAssignedEmpId(@Nullable Long assignedManagerId) {
