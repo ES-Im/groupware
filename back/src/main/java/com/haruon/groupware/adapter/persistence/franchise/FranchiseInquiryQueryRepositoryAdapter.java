@@ -86,7 +86,7 @@ public class FranchiseInquiryQueryRepositoryAdapter implements FranchiseInquiryQ
                         isAfter(to),
                         eqFranchiseId(franchiseId)
                 )
-                .orderBy(inquiry.id.desc())
+                .orderBy(inquiry.inquiryAt.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
