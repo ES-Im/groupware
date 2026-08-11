@@ -133,15 +133,13 @@ npm run build       # 빌드 성공 확인
 ## **10. 테스트 계정**
 
 
-| 역할               | 아이디             | 비밀번호      |
-| ---------------- | --------------- | --------- |
-| ADMIN            | admin1234       | test!1234 |
-| DEPT-MANAGER(IT) | deptmanager1234 | test!2345 |
-| EMPLOYEE         | emp1234         | test!3456 |
-| HR               | hrmember1234    | test!1234 |
-| franchise        | franchise1234   | test!1234 |
-| facility         | facility1234    | test!1234 |
-
-
+| 역할               | 아이디          | 비밀번호       |
+| ---------------- | ------------ | ---------- |
+| ADMIN            | admin001     | !Q2w3e4r5t |
+| DEPT-MANAGER(IT) | deptmgr01    | !Q2w3e4r5t |
+| EMPLOYEE         | staff0003    | !Q2w3e4r5t |
+| HR               | hrstaff001   | !Q2w3e4r5t |
+| franchise        | franstaff01  | !Q2w3e4r5t |
+| facility         | facstaff0001 | !Q2w3e4r5t |
 
 

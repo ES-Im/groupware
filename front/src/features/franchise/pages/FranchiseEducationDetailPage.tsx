@@ -351,7 +351,11 @@ export function FranchiseEducationDetailPage() {
 
           <Card>
             <CardContent>
-              <FranchiseEducationAttachmentSection educationId={education.id} files={files} />
+              <FranchiseEducationAttachmentSection
+                educationId={education.id}
+                files={files}
+                isOwner={isOwner}
+              />
             </CardContent>
           </Card>
         </div>

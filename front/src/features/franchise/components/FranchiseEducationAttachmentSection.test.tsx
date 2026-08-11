@@ -24,13 +24,21 @@ function docFile(overrides: Partial<FranchiseEducationFileInfo> = {}): Franchise
   return { fileId: 2, originalName: 'guide.pdf', extension: 'pdf', fileSize: 2048, ...overrides }
 }
 
-function renderSection(files: FranchiseEducationFileInfo[] | null, educationId = 1) {
+function renderSection(
+  files: FranchiseEducationFileInfo[] | null,
+  educationId = 1,
+  isOwner = true,
+) {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
   })
   const utils = render(
     <QueryClientProvider client={queryClient}>
-      <FranchiseEducationAttachmentSection educationId={educationId} files={files} />
+      <FranchiseEducationAttachmentSection
+        educationId={educationId}
+        files={files}
+        isOwner={isOwner}
+      />
     </QueryClientProvider>,
   )
   return { ...utils, queryClient }
@@ -68,6 +76,15 @@ describe('FranchiseEducationAttachmentSection - 렌더 분기', () => {
     expect(screen.getByRole('button', { name: '파일 추가' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'photo.jpg 삭제' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'guide.pdf 삭제' })).toBeInTheDocument()
+  })
+})
+
+describe('FranchiseEducationAttachmentSection - 등록자 권한', () => {
+  it('등록자 본인이 아니면 파일 추가/삭제 버튼이 비활성화된다', () => {
+    renderSection([docFile()], 1, false)
+
+    expect(screen.getByRole('button', { name: '파일 추가' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'guide.pdf 삭제' })).toBeDisabled()
   })
 })
 

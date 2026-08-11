@@ -52,9 +52,11 @@ function EducationImagePreview({
 export function FranchiseEducationAttachmentSection({
   educationId,
   files,
+  isOwner,
 }: {
   educationId: number
   files: FranchiseEducationFileInfo[] | null
+  isOwner: boolean
 }) {
   const fileList = files ?? []
 
@@ -122,7 +124,7 @@ export function FranchiseEducationAttachmentSection({
           type="file"
           multiple
           className="hidden"
-          disabled={uploadMutation.isPending}
+          disabled={uploadMutation.isPending || !isOwner}
           onChange={handleFileInputChange}
         />
         <Button
@@ -130,7 +132,8 @@ export function FranchiseEducationAttachmentSection({
           variant="outline"
           size="sm"
           className="shrink-0"
-          disabled={uploadMutation.isPending}
+          disabled={uploadMutation.isPending || !isOwner}
+          title={isOwner ? undefined : '등록자 본인만 첨부파일을 추가할 수 있습니다'}
           onClick={() => fileInputRef.current?.click()}
         >
           {uploadMutation.isPending ? <Loader2 className="animate-spin" /> : <Plus />}
@@ -177,7 +180,8 @@ export function FranchiseEducationAttachmentSection({
                     variant="destructive"
                     size="icon-sm"
                     className="shrink-0"
-                    disabled={isDeleting}
+                    disabled={isDeleting || !isOwner}
+                    title={isOwner ? undefined : '등록자 본인만 첨부파일을 삭제할 수 있습니다'}
                     onClick={() => handleDelete(file.fileId)}
                     aria-label={`${file.originalName} 삭제`}
                   >
