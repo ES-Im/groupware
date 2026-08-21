@@ -11,7 +11,7 @@ import com.haruon.groupware.application.exception.common.RequiredValueMissingExc
 import com.haruon.groupware.application.exception.meeting.InactivatedMeetingRoomException;
 import com.haruon.groupware.application.exception.meeting.MeetingNotFoundException;
 import com.haruon.groupware.application.exception.meeting.MeetingParticipantRequiredException;
-import com.haruon.groupware.application.exception.meeting.ReservedMeetingExistException;
+import com.haruon.groupware.application.exception.meeting.RoomAlreadyBookedException;
 import com.haruon.groupware.application.meeting.provided.forCommand.MeetingManagement;
 import com.haruon.groupware.application.meeting.provided.forCommand.MeetingRoomManagement;
 import com.haruon.groupware.application.meeting.required.MeetingRepository;
@@ -401,7 +401,7 @@ record MeetingManagementTest(
                                 .endAt(LocalTime.of(13, 30))
                                 .build()
                 )
-        ).isInstanceOf(ReservedMeetingExistException.class);
+        ).isInstanceOf(RoomAlreadyBookedException.class);
     }
 
     private long getSavedTomorrowReservation(Emp reserverEmp, MeetingRoom room) {
