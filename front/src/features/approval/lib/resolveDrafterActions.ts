@@ -1,5 +1,7 @@
 import type { DraftDetailResponse } from '../model/draftDetail'
 import { resolveApprovalStatus } from './approvalStatusBadge'
+import { isBusinessTripDraft } from './isBusinessTripDraft'
+import { isLeaveDraft } from './isLeaveDraft'
 
 export interface DrafterActionAvailability {
   isDrafter: boolean
@@ -36,7 +38,12 @@ export function resolveDrafterActions(
     case 'IN_PROGRESS':
       return { ...base, canWithdraw: true }
     case 'APPROVED':
-      return { ...base, canCancel: draft.cancellationDraftId == null }
+      // 취소기안은 연가/출장 기안만 대상(백엔드 DraftServiceResolver.createCancelDraft 정책)
+      return {
+        ...base,
+        canCancel:
+          (isLeaveDraft(draft) || isBusinessTripDraft(draft)) && draft.cancellationDraftId == null,
+      }
     case 'REJECTED':
       // 반려 상태는 삭제 불가(백엔드 정책: 미상신 상태에서만 삭제 가능)
       return base
