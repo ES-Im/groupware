@@ -10,16 +10,37 @@
 ### **라이브 데모**
 - https://h4ruon.com
 
+### 이전 구현
+- 이 프로젝트는 팀 프로젝트에서 MVC로 구현한 도메인을, 개인으로 포트-어댑터로 리팩토링한 결과물입니다.
+- [SkillUp86/haruon](https://github.com/SkillUp86/haruon) — 동일 도메인, Spring MVC · MyBatis · JSP (2024.12 ~ 2025.02, 팀 프로젝트)
+
+> 이전에는 패키지를 도메인 기준으로 나눴지만 계층 구분이 이름에만 있어,
+> 
+> Service 하나에 도메인 규칙 · 트랜잭션 · 외부 호출 · DTO 변환이 함께 쌓였습니다. 도메인 간 연동도 Service가 다른 Service를 직접
+> 호출하면서 의존 방향이 양방향으로 얽혔고, Mapper가 곧 영속성이라 도메인 로직이 SQL과 테이블 구조에
+> 묶여 있었습니다.
+>
+> 그래서 이번에는 경계를 이름이 아니라 **의존 방향**으로 강제했습니다. 
+> 
+> `domain`은 어떤 계층도 참조하지 않고,
+> `application`이 유스케이스를 provided port로 노출하고 필요한 외부 의존은 required port로 선언합니다.
+> `adapter`는 그 포트의 양쪽 끝을 구현합니다 — webapi · websocket · batch는 인바운드,
+> persistence · redis · file · mockapi는 아웃바운드입니다.
+>
+> 그 결과 도메인 간 연동은 직접 호출 대신 도메인 이벤트로 처리하고, 외부 가맹점 API도 required port
+> 뒤에 있어 Mockoon 어댑터를 실제 가맹점 서버 어댑터로 교체해도 application과 domain은 바뀌지 않습니다.
+
 ---
 
 ## 🖥 주요 시나리오
 
 ### 전자결재 — 기안부터 결재 완료까지
 > 결재선 다중 지정과 결재 상태 전이 설계 · 메인 홈에서 결재 대기/상신 건수 집계
+
 <details>
-    <summary><b>시나리오 살펴보기</b></summary>
-    ![결재 흐름](docs/screenshots/approval-flow.gif)
-    기안 작성 → 결재선(결재자·협조자·공람) 지정 → 첨부파일 → 상신 → 부서장 승인 → 상신함 확인
+<summary><b>시나리오 살펴보기</b></summary>
+
+![결재 흐름](readme/screenshots/approval-flow.png)
 </details>
 
 
@@ -27,8 +48,9 @@
 > WebSocket(STOMP)으로 연결된 두 세션 간 메시지 즉시 전파
 <details>
     <summary><b>시나리오 살펴보기</b></summary>
-    ![채팅](docs/screenshots/chat.gif)
-    창 두 개 동시 전파
+
+![채팅](readme/screenshots/chat-flow.png)
+
 </details>
 
 ### 일정 - Domain Event 발행을 이용한 도메인 간 연동
