@@ -2,11 +2,6 @@
 
 ### **HARUON은 프랜차이즈 본사를 가정해, 사내 업무와 가맹점 관리를 한 시스템으로 묶은 그룹웨어입니다.**
 
-> HARUON 그룹웨어는 조직 내 소통과 협업에 필요한 기능을 하나의 플랫폼에서 제공하는 소프트웨어입니다.
-> 전자결재 · 메신저 · 일정관리 · 채팅 등 사내 커뮤니케이션과 결재 흐름을 갖추었습니다.
-> 또한 Mockoon을 이용하여 외부 가맹점 서버를 가정하였고, 
-> 외부 가맹점의 매출 · 교육신청 ·문의를 배치로 동기화 하도록 구성하였습니다.
-
 ### **라이브 데모**
 - https://h4ruon.com
 
@@ -165,9 +160,8 @@
 ![JAVA REST DOCS](https://img.shields.io/badge/JAVA_REST_DOCS-E40046?style=for-the-badge&logo=asciidoctor&logoColor=white)
 
 ### 프론트
+- API 계약 문서화, 에이전트 컨텍스트 설계를 진행한 뒤, Claude Code 에이전트에게 화면 구현을 위임했습니다.
 ![Claude Code](https://img.shields.io/badge/Claude%20Code-%23D97757.svg?style=for-the-badge&logo=claudecode&logoColor=white)
-- API 계약 문서화, 에이전트 컨텍스트 설계는 직접 진행하고,
-- 화면 구현은 Claude Code 에이전트에 위임했습니다.
 
 ---
 ## 🛠 아키텍처
