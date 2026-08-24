@@ -10,8 +10,20 @@
 ### **라이브 데모**
 - https://h4ruon.com
 
+#### 체험 계정
+> 역할에 따라 접근 가능한 메뉴와 API가 다릅니다. 확인하려는 기능에 맞는 계정으로 로그인해 주세요.
+
+| 역할                 |       아이디        |      비밀번호      | 확인 가능한 주요 기능                |
+|--------------------|:----------------:|:--------------:|-----------------------------|
+| 관리자 (ADMIN)        |    `admin001`    |  `!Q2w3e4r5t`  | 회사 · 부서 관리, 사원 관리, 전체 메뉴 접근 |
+| 부서장 (DEPT_MANAGER) |   `deptmgr01`    |  `!Q2w3e4r5t`  | 부서 근태 승인, 부서 휴가 현황          |
+| 사원 (EMPLOYEE)      |   `staff0003`    |  `!Q2w3e4r5t`  | 모든 사원의 공통 기능 접근             |
+| 인사 (HR)            |   `hrstaff001`   |  `!Q2w3e4r5t`  | 신규 사원 승인, 연차 관리             |
+| 가맹점 (FRANCHISE)    |  `franstaff01`   |  `!Q2w3e4r5t`  | 가맹점 목록 · 상세, 매출 · 교육 · 문의   |
+| 시설 (FACILITY)      |  `facstaff0001`  |  `!Q2w3e4r5t`  | 회의실 등록 · 관리                 |
+
 ### 이전 구현
-- 이 프로젝트는 팀 프로젝트에서 MVC로 구현한 도메인을, 개인 프로젝트로 포트-어댑터로 리팩토링한 결과물입니다.
+- 이 프로젝트는 팀 프로젝트에서 3 tier 구조로 구현한 도메인을, 개인 프로젝트로 포트-어댑터로 리팩토링한 결과물입니다.
 - [SkillUp86/haruon](https://github.com/SkillUp86/haruon) — 동일 도메인, Spring MVC · MyBatis · JSP (2024.12 ~ 2025.02, 팀 프로젝트)
 
 | 구분       | 이전 (팀 프로젝트)                   | 현재 (개인 프로젝트)                             |
@@ -100,7 +112,7 @@
 | 기능        | 설명                                                                                         |
 |-----------|--------------------------------------------------------------------------------------------|
 | 인증 · 권한   | JWT 로그인 및 토큰 재발급, 회원가입 후 인사팀 승인, 역할(사원 · 부서장 · 인사 · 시설 · 가맹점 · 관리자) 기반 메뉴 · API 접근 제어      |
-| 조직 관리     | 회사 정보 관리, 부서 등록 · 수정, 부서장 지정, 탐색형 조직도                                                      |
+| 조직 관리     | 회사 정보 관리, 부서 등록 · 수정, 부서장 지정                                                               |
 | 사원 관리     | 신규 사원 승인, 사원 목록 · 상세 조회, 정보 수정, 근무 상태 변경, 부서 이동                                            |
 | 전자결재      | 일반 · 연가 · 출장 · 매출 기안 작성, 결재선(결재자 · 협조자 · 공람) 지정, 결재함(상신 · 수신 · 완료 · 반려), 임시저장, 취소기안, 문서 출력 |
 | 근태 관리     | 출퇴근 기록, 개인 근태 조회, 부서 근태 승인, 야간 마감 배치                                                       |
@@ -166,8 +178,8 @@
 
 ### 프론트
 ![Claude Code](https://img.shields.io/badge/Claude%20Code-%23D97757.svg?style=for-the-badge&logo=claudecode&logoColor=white)
-- API 계약 문서화, 에이전트 컨텍스트 설계는 직접 진행하고,
-- 화면 구현은 Claude Code 에이전트에 위임했습니다.
+- API 계약 문서화, 에이전트 컨텍스트 설계를 먼저 진행하고,
+- Claude Code 에이전트에 화면 구현을 위임했습니다.
 
 ---
 ## 🛠 아키텍처
@@ -195,23 +207,31 @@
 ```
 groupware
 ├── back/                       # 백엔드 (Spring Boot · Hexagonal architecture 구조)
-│   └── src/main/java/com/haruon/groupware
-│       ├── domain/             # 엔티티 · 도메인 규칙
-│       ├── application/        # provided port · required port
-│       └── adapter/            # webapi · persistence · security · websocket · batch · redis · file · mockapi
+│   ├── src/docs/asciidoc/      # REST Docs 문서 소스
+│   │   ├── api/                # 도메인별 API 문서(auth · webapi)
+│   │   └── index.adoc          # 단일 HTML로 include한 문서
+│   ├── src/main/java/com/haruon/groupware
+│   │   ├── domain/             # 엔티티 · 도메인 규칙
+│   │   ├── application/        # provided port · required port
+│   │   └── adapter/            # webapi · persistence · security · websocket · batch · redis · file · mockapi
 │   └── src/main/resources
 │       ├── db/migration/       # Flyway 스크립트
 │       └── Dockerfile-server   # 백엔드 컨테이너 이미지 정의
-├── front/                      # 프론트엔드 (React · TypeScript · Vite)
-│   ├── src/app/                # 라우터 및 전역 설정
-│   ├── src/features/           # 도메인별 api · components · lib · model · pages
-│   ├── src/shared/             # 공통 UI · API 클라이언트 · 유틸
-│   └── e2e/                    # Playwright E2E 시나리오
+│  
+├── front/.claude/              # 프론트 위임 기준 — 에이전트 · 메모리 설정
+│   ├── CLAUDE.md               # 메모리 — 기술 규약 · 백엔드 계약 문서 참조 경로 · 테스트 계정
+│   ├── agents/                 
+│   │   ├── docs/               # 기획 3 — PRD 생성 · PRD 검증 · 개발 계획 수립
+│   │   └── dev/
+│   │       ├── task/           # 구현 4 — 태스크 실행 · 라우팅 · UI 스타일링 · 로드맵 분해
+│   │       ├── reviewer/       # 검증 2 — 코드 · 백엔드 계약 정합성 리뷰
+│   │       ├── data/           # 데이터 2 — DB 데이터 seeding
+│   │       └── test/           # 테스트 1 — 테스트 작성 및 실행
+│   └── commands/               # 반복되는 워크플로우를 명령어로 취합 5 — 도메인 구현 · UI 이식 · 로드맵 갱신
+│  
 ├── ci/                         # Jenkins 파이프라인 
-├── vars/                       # ECS 배치 잡 실행 스텝
 ├── docs/                       # 초기 설계 문서
-├── mockoon/                    # 가맹점 외부 API Mock 서버 정의
-└── compose.yaml                # 로컬 개발용 MySQL · Redis · Mockoon
+└── mockoon/                    # 가맹점 외부 API Mock 서버 정의
 ```
 
 ---
