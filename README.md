@@ -57,20 +57,18 @@
 > 전자결재 완료 · 회의등록 시 발행되는 도메인 이벤트를 일정 도메인이 구독해 처리
 <details>
     <summary><b>시나리오 살펴보기</b></summary>
-    ![캘린더 연동](docs/screenshots/calendar-sync.gif)
-    출장 기안 결재 완료 → 개인·부서 일정 캘린더에 자동 반영 (사원 계정)
+
+![캘린더 연동](readme/screenshots/schedule-event-flow.png)
 </details>
 
-### 배치 - Jenkins 야간 배치를 통한 데이터 정리
-> 야간 배치로 일일 매출 동기화 · 근태 확정
+### 배치 - Jenkins를 통한 데이터 정리 및 동기화
+> 근태상태 확정 · 오래된 채팅창 정리 · 게시글 반응(좋아요, 조회수, 댓글수) · 가맹점 데이터 동기화
+
 <details>
     <summary><b>시나리오 살펴보기</b></summary>
 
-| Jenkins 실행 | 반영 결과 |
-|---|---|
-| ![jenkins](docs/screenshots/batch-jenkins.png) | ![result](docs/screenshots/batch-result.png) |
+![배치](readme/screenshots/jenkins-flow.png)
 
-야간 배치로 일일 매출 동기화 · 근태 확정 → 부서장 계정에서 사원 근태 캘린더와 가맹점 매출 그래프에 반영
 </details>
 
 ## 🗂️ 주요 기능
